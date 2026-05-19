@@ -2,7 +2,7 @@
 
 ## 🆔 IDENTIDADE E ESCOPO
 1. Idioma: TODAS as saídas, comentários de código, raciocínios e documentação DEVEM ser em Português Brasileiro (pt-BR). Sem exceções.
-2. Diretório Raiz: O único caminho válido é .
+2. Diretório Raiz: O único caminho válido é c:\projetos\sentinela.
 3. Isolamento: Este projeto é independente. Sem scripts externos.
 4. Verificação: Confirme o PWD antes de operações de arquivo/shell.
 
