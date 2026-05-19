@@ -1,8 +1,9 @@
+import time
 import os
 import re
 import json
 import asyncio
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import List, Optional, Dict, Any
 from dotenv import load_dotenv
 from supabase import create_client
@@ -84,50 +85,114 @@ class InstagramHeadlessScraper:
         self.im = IdentityManager()
         self.active_account: Optional[Dict] = None
 
+    def _log_kpi(self, tier_used: int, target: str, count: int, duration_ms: int, error: str = None):
+        data = {
+            'tier_used': tier_used,
+            'alvo': target,
+            'comentarios_coletados': count,
+            'duracao_ms': duration_ms,
+            'erro': error
+        }
+        try:
+            supabase.table('kpi_runs').insert(data).execute()
+        except Exception as e:
+            logger.error(f"Erro ao registrar KPI: {e}")
+
+    async def _check_cooldown(self, username: str) -> bool:
+        """Verifica se o alvo está em cooldown."""
+        res = supabase.table('alvo_backoff').select('next_allowed_at').eq('candidato_id', username).execute()
+        if res.data:
+            next_allowed = datetime.fromisoformat(res.data[0]['next_allowed_at'].replace('Z', '+00:00'))
+            if datetime.now(timezone.utc) < next_allowed:
+                return True
+        return False
+
+    async def _apply_backoff(self, username: str):
+        """Aplica backoff exponencial com jitter."""
+        res = supabase.table('alvo_backoff').select('strikes').eq('candidato_id', username).execute()
+        strikes = res.data[0]['strikes'] + 1 if res.data else 1
+
+        # Backoff: 5m, 15m, 45m, 3h... até 12h max
+        base_minutes = [5, 15, 45, 180, 720]
+        idx = min(strikes - 1, len(base_minutes) - 1)
+        minutes = base_minutes[idx]
+
+        # Jitter +/- 20%
+        jitter = minutes * 0.2
+        wait_minutes = minutes + random.uniform(-jitter, jitter)
+
+        next_allowed = datetime.now(timezone.utc) + timedelta(minutes=wait_minutes)
+
+        supabase.table('alvo_backoff').upsert({
+            'candidato_id': username,
+            'strikes': strikes,
+            'next_allowed_at': next_allowed.isoformat()
+        }).execute()
+        logger.warning(f"⏳ Alvo {username} em cooldown até {next_allowed} (strike {strikes})")
+
+async def _is_profile_not_found(self):
+
     async def run(self, limit: int = 15, targets: List[Dict] = None, test_username: str = None):
-        print("🧠 [Headless] Iniciando Instagram Headless Scraper (Rotation Mode)...")
+        start_time = time.perf_counter()
+        total_comments = 0
+        error = None
         
-        self.active_account = await self.im.get_next_available_account()
-        if not self.active_account:
-            print("❌ [Headless] Nenhuma identidade disponível.")
-            return
-
-        print(f"👤 [Headless] Usando conta: @{self.active_account['username']}")
-
-        async with async_playwright() as pw:
-            self.playwright = pw
-            self.browser = await pw.chromium.launch(
-                headless=PLAYWRIGHT_HEADLESS,
-                args=["--disable-blink-features=AutomationControlled", "--no-sandbox", "--disable-dev-shm-usage"],
-            )
-            context = await self.browser.new_context(
-                viewport={"width": 1280, "height": 800},
-                locale="pt-BR",
-                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            )
-
-            if self.active_account.get('session_id'):
-                await context.add_cookies([{'name': 'sessionid', 'value': self.active_account['session_id'], 'domain': '.instagram.com', 'path': '/'}])
-
-            self.page = await context.new_page()
-            self.page.set_default_timeout(60000)
+        try:
+            print("🧠 [Headless] Iniciando Instagram Headless Scraper (Rotation Mode)...")
             
-            if await self._ensure_logged_in():
-                if not targets:
-                    if test_username:
-                        targets = [{'id': 1, 'username': test_username}]
-                    else:
-                        targets = self._load_pending_targets(limit)
-                
-                for candidate in targets:
-                    success = await self._scrape_candidate(candidate)
-                    if not success:
-                        print(f"⚠️ [Headless] Possível Shadowban ou Bloqueio na conta @{self.active_account['username']}")
-                        await self.im.mark_shadowbanned(self.active_account['id'])
-                        break
+            self.active_account = await self.im.get_next_available_account()
+            if not self.active_account:
+                error = "Nenhuma identidade disponível."
+                print(f"❌ [Headless] {error}")
+                return
 
-            await self.im.update_usage(self.active_account['id'])
-            await self.browser.close()
+            print(f"👤 [Headless] Usando conta: @{self.active_account['username']}")
+
+            async with async_playwright() as pw:
+                self.playwright = pw
+                self.browser = await pw.chromium.launch(
+                    headless=PLAYWRIGHT_HEADLESS,
+                    args=["--disable-blink-features=AutomationControlled", "--no-sandbox", "--disable-dev-shm-usage"],
+                )
+                context = await self.browser.new_context(
+                    viewport={"width": 1280, "height": 800},
+                    locale="pt-BR",
+                    user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                )
+
+                if self.active_account.get('session_id'):
+                    await context.add_cookies([{'name': 'sessionid', 'value': self.active_account['session_id'], 'domain': '.instagram.com', 'path': '/'}])
+
+                self.page = await context.new_page()
+                self.page.set_default_timeout(60000)
+                
+                if await self._ensure_logged_in():
+                    if not targets:
+                        if test_username:
+                            targets = [{'id': 1, 'username': test_username}]
+                        else:
+                            targets = self._load_pending_targets(limit)
+                    
+                    for candidate in targets:
+                        success = await self._scrape_candidate(candidate)
+                        if not success:
+                            error = f"Possível Shadowban ou Bloqueio na conta @{self.active_account['username']}"
+                            print(f"⚠️ [Headless] {error}")
+                            await self.im.mark_shadowbanned(self.active_account['id'])
+                            break
+                        # Supondo que _scrape_candidate retorna número de comentários ou podemos buscar
+                        # Ajustar conforme implementação real de _scrape_candidate
+                
+                await self.im.update_usage(self.active_account['id'])
+                await self.browser.close()
+                
+        except Exception as e:
+            error = str(e)
+            print(f"💥 [Headless] Erro no run: {error}")
+        finally:
+            duration_ms = int((time.perf_counter() - start_time) * 1000)
+            target_str = ",".join([t['username'] for t in targets]) if targets else "N/A"
+            self._log_kpi(4, target_str, total_comments, duration_ms, error)
 
     async def _ensure_logged_in(self) -> bool:
         try:
@@ -342,18 +407,40 @@ class InstagramHeadlessScraper:
                 self._save_comment(username, shortcode, cmd)
         except: pass
 
-    def _save_comment(self, username: str, shortcode: str, text: str):
-        valid_text = clean_comment(text, username)
+    def to_utc_iso(self, dt):
+        if isinstance(dt, (int, float)):  # epoch
+            return datetime.fromtimestamp(dt, tz=timezone.utc).isoformat()
+        if isinstance(dt, str):
+            return datetime.fromisoformat(dt.replace('Z', '+00:00')).astimezone(timezone.utc).isoformat()
+        if isinstance(dt, datetime):
+            return (dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)).astimezone(timezone.utc).isoformat()
+        return datetime.now(timezone.utc).isoformat()
+
+    def _save_comment(self, username: str, shortcode: str, comment_data: Dict):
+        valid_text = clean_comment(comment_data.get('text', ''), username)
         if not valid_text: return
 
         data = {
-            'candidato_id': username, 'post_id': shortcode,
-            'texto_bruto': valid_text, 'plataforma': 'INSTAGRAM',
-            'data_coleta': datetime.now(timezone.utc).isoformat(),
+            'candidato_id': username, 
+            'post_shortcode': shortcode,
+            'id_externo': comment_data.get('id', 'unknown'),
+            'autor_username': comment_data.get('ownerUsername', 'unknown'),
+            'texto_bruto': valid_text, 
+            'tier_used': 4, # Headless
+            'like_count': 0, 
+            'data_publicacao': self.to_utc_iso(comment_data.get('timestamp')),
+            'data_coleta': self.to_utc_iso(None),
             'processado_ia': False
         }
-        try: supabase.table('comentarios').insert(data).execute()
-        except: pass
+        try: 
+            # Upsert utilizando a restrição única definida no SQL
+            supabase.table('comentarios')\
+                .upsert(data, on_conflict='candidato_id,post_shortcode,id_externo')\
+                .header('Prefer', 'return=representation, resolution=merge-duplicates')\
+                .header('Content-Profile', 'public')\
+                .execute()
+        except Exception as e:
+            logger.error(f"Erro na persistência (Upsert): {e}")
 
 if __name__ == '__main__':
     asyncio.run(InstagramHeadlessScraper().run())
