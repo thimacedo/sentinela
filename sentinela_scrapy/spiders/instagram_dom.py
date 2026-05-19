@@ -28,9 +28,9 @@ class InstagramDOMSpider(scrapy.Spider):
             ]
         },
         'ITEM_PIPELINES': {
-           'sentinela_scrapy.pipelines.QualityGatePipeline': 300,
-           'sentinela_scrapy.pipelines.JsonWriterPipeline': 400,
-        }
+            'sentinela_scrapy.pipelines.QualityGatePipeline': 300,
+        },
+
     }
     
     def __init__(self, username='', max_posts=5, max_comments=50, *args, **kwargs):

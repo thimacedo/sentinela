@@ -17,8 +17,8 @@ class InstagramAPISpider(scrapy.Spider):
         'COOKIES_ENABLED': True,
         'ITEM_PIPELINES': {
             'sentinela_scrapy.pipelines.QualityGatePipeline': 300,
-            'sentinela_scrapy.pipelines.JsonWriterPipeline': 400,
-        }
+        },
+
     }
     
     def __init__(self, username='', sessionid='', max_posts=5, *args, **kwargs):

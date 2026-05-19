@@ -25,7 +25,6 @@ DOWNLOADER_MIDDLEWARES = {
 # Pipelines
 ITEM_PIPELINES = {
     'sentinela_scrapy.pipelines.QualityGatePipeline': 300,
-    'sentinela_scrapy.pipelines.JsonWriterPipeline': 400,
 }
 
 # Cookies
