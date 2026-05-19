@@ -8,7 +8,7 @@ from datetime import datetime, UTC
 import logging
 
 class BaseWorker(ABC):
-    def __init__(self, name: str):
+    def __init__(self, name: str, **kwargs):
         self.name = name
         self.logger = logging.getLogger(name)
 

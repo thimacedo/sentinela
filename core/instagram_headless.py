@@ -84,50 +84,51 @@ class InstagramHeadlessScraper:
         self.page: Optional[Page] = None
         self.im = IdentityManager()
         self.active_account: Optional[Dict] = None
-def _log_kpi(self, tier_used: int, target: str, count: int, duration_ms: int, error: str = None):
-    data = {
-        'tier_used': tier_used,
-        'alvo': target,
-        'comentarios_coletados': count,
-        'duracao_ms': duration_ms,
-        'erro': error
-    }
-    try:
-        supabase.table('kpi_runs').insert(data).execute()
-    except Exception as e:
-        logger.error(f"Erro ao registrar KPI: {e}")
 
-async def _check_cooldown(self, username: str) -> bool:
-    """Verifica se o alvo está em cooldown."""
-    res = supabase.table('alvo_backoff').select('next_allowed_at').eq('candidato_id', username).execute()
-    if res.data:
-        next_allowed = datetime.fromisoformat(res.data[0]['next_allowed_at'].replace('Z', '+00:00'))
-        if datetime.now(timezone.utc) < next_allowed:
-            return True
-    return False
+    def _log_kpi(self, tier_used: int, target: str, count: int, duration_ms: int, error: str = None):
+        data = {
+            'tier_used': tier_used,
+            'alvo': target,
+            'comentarios_coletados': count,
+            'duracao_ms': duration_ms,
+            'erro': error
+        }
+        try:
+            supabase.table('kpi_runs').insert(data).execute()
+        except Exception as e:
+            logger.error(f"Erro ao registrar KPI: {e}")
 
-async def _apply_backoff(self, username: str):
-    """Aplica backoff exponencial com jitter."""
-    res = supabase.table('alvo_backoff').select('strikes').eq('candidato_id', username).execute()
-    strikes = res.data[0]['strikes'] + 1 if res.data else 1
+    async def _check_cooldown(self, username: str) -> bool:
+        """Verifica se o alvo está em cooldown."""
+        res = supabase.table('alvo_backoff').select('next_allowed_at').eq('candidato_id', username).execute()
+        if res.data:
+            next_allowed = datetime.fromisoformat(res.data[0]['next_allowed_at'].replace('Z', '+00:00'))
+            if datetime.now(timezone.utc) < next_allowed:
+                return True
+        return False
 
-    # Backoff: 5m, 15m, 45m, 3h... até 12h max
-    base_minutes = [5, 15, 45, 180, 720]
-    idx = min(strikes - 1, len(base_minutes) - 1)
-    minutes = base_minutes[idx]
+    async def _apply_backoff(self, username: str):
+        """Aplica backoff exponencial com jitter."""
+        res = supabase.table('alvo_backoff').select('strikes').eq('candidato_id', username).execute()
+        strikes = res.data[0]['strikes'] + 1 if res.data else 1
 
-    # Jitter +/- 20%
-    jitter = minutes * 0.2
-    wait_minutes = minutes + random.uniform(-jitter, jitter)
+        # Backoff: 5m, 15m, 45m, 3h... até 12h max
+        base_minutes = [5, 15, 45, 180, 720]
+        idx = min(strikes - 1, len(base_minutes) - 1)
+        minutes = base_minutes[idx]
 
-    next_allowed = datetime.now(timezone.utc) + timedelta(minutes=wait_minutes)
+        # Jitter +/- 20%
+        jitter = minutes * 0.2
+        wait_minutes = minutes + random.uniform(-jitter, jitter)
 
-    supabase.table('alvo_backoff').upsert({
-        'candidato_id': username,
-        'strikes': strikes,
-        'next_allowed_at': next_allowed.isoformat()
-    }).execute()
-    logger.warning(f"⏳ Alvo {username} em cooldown até {next_allowed} (strike {strikes})")
+        next_allowed = datetime.now(timezone.utc) + timedelta(minutes=wait_minutes)
+
+        supabase.table('alvo_backoff').upsert({
+            'candidato_id': username,
+            'strikes': strikes,
+            'next_allowed_at': next_allowed.isoformat()
+        }).execute()
+        logger.warning(f"⏳ Alvo {username} em cooldown até {next_allowed} (strike {strikes})")
 
 async def _is_profile_not_found(self):
 
