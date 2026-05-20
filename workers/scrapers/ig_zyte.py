@@ -36,25 +36,28 @@ class IGZyteWorker(BaseWorker):
         if manual_target:
             return Target(username=manual_target.strip().lstrip("@"), source="manual_test")
 
-        # 2. Fila Coleta (Apenas leitura)
+        # 2. Fila Coleta (Leitura)
         pending = self.db.table("fila_coleta").select("*").eq("status", "PENDENTE").limit(1).execute()
         if pending.data:
             item = pending.data[0]
-            username = item["candidato_id"]
+            # Seleção robusta do username
+            username = item.get("username") or item.get("candidato_id") or item.get("target_username")
             
-            # Não fazemos update no status da fila para evitar erro de constraint.
-            # Em vez disso, marcamos o candidato como processado.
-            self.db.table("candidatos").update({"last_scraped_at": datetime.now(timezone.utc).isoformat()}).eq("username", username).execute()
+            # Se for UUID, resolve na tabela candidatos
+            if username and len(username) > 30: # Heurística para UUID
+                cand = self.db.table("candidatos").select("username").eq("id", username).limit(1).execute()
+                if cand.data:
+                    username = cand.data[0]["username"]
             
             return Target(
-                username=username, 
-                candidato_id=username, 
+                username=str(username).strip().lstrip("@"), 
+                candidato_id=str(username), # Simplificação mantida
                 queue_id=item["id"], 
                 source="fila_coleta"
             )
 
         # 3. Fallback: Candidatos Ativos
-        candidatos = self.db.table("candidatos").select("id,username").eq("status_monitoramento", "Ativo").limit(5).execute()
+        candidatos = self.db.table("candidatos").select("id,username,last_scraped_at").eq("status_monitoramento", "Ativo").order("last_scraped_at", desc=False).limit(5).execute()
         for cand in candidatos.data or []:
             return Target(username=cand["username"], candidato_id=cand["id"], source="candidatos_fallback")
         
@@ -76,10 +79,10 @@ class IGZyteWorker(BaseWorker):
         self.logger.info(f"Alvo selecionado: @{target.username} | origem={target.source}")
         
         # ... (lógica de scraping real aqui)
-        # Ao final do ciclo, marcar como processado (ou data de raspagem)
-        self.db.table("candidatos").update({
-            "last_scraped_at": datetime.now(timezone.utc).isoformat()
-        }).eq("username", target.username).execute()
+        # TODO: Implementar lógica de persistência real e só então atualizar:
+        # self.db.table("candidatos").update({
+        #     "last_scraped_at": datetime.now(timezone.utc).isoformat()
+        # }).eq("username", target.username).execute()
 
         return CycleResult(
             worker_id=self.worker_id,
