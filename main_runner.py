@@ -33,7 +33,7 @@ def build_orchestrator() -> SentinelaOrchestrator:
     store   = MemoryStore()
     engine  = RewardEngine(store)
     fetcher = DocFetcher()
-    advisor = AIAdvisor(store, fetcher)
+    advisor = AIAdvisor(memory=store, fetcher=fetcher)
     orch = SentinelaOrchestrator(engine, advisor)
 
     # orch.register(IGHeadlessWorker(
