@@ -40,6 +40,12 @@ class IGZyteWorker(BaseWorker):
     def describe(self) -> str:
         return "Instagram Scraper via Zyte API"
 
+    async def setup(self) -> None:
+        self.logger.info("Motor Zyte configurado.")
+
+    async def teardown(self) -> None:
+        self.logger.info("Motor Zyte encerrado.")
+
     async def fetch_comments_via_zyte(self, target: Target) -> list[dict]:
         """Extração real via Zyte. Pendente de implementação."""
         raise NotImplementedError("zyte_fetch_not_implemented")
@@ -98,36 +104,109 @@ class IGZyteWorker(BaseWorker):
 
     async def run_cycle(self) -> CycleResult:
         self.cycle += 1
-        target = self.claim_next_target()
-        if not target:
-            if self.cycle == 1: self.logger.warning("Nenhum alvo disponível.")
-            return CycleResult(worker_id=self.worker_id, cycle=self.cycle, source="target_claim", error="no_target_available")
 
-        self.logger.info(f"Alvo selecionado: @{target.username} | origem={target.source}")
-        
+        target = self.claim_next_target()
+
+        if not target:
+            return CycleResult(
+                worker_id=self.worker_id,
+                cycle=self.cycle,
+                source="target_claim",
+                simulated=False,
+                error="no_target_available",
+            )
+
+        self.logger.info(
+            "Alvo selecionado: @%s | origem=%s",
+            target.username,
+            target.source,
+        )
+
         try:
             comments = await self.fetch_comments_via_zyte(target)
+
             if not comments:
-                result = CycleResult(worker_id=self.worker_id, cycle=self.cycle, target=target.username, target_id=target.candidato_id, source=target.source, simulated=True, error="zyte_fetch_not_implemented_or_empty")
-                self.rotate_target(target); return result
+                result = CycleResult(
+                    worker_id=self.worker_id,
+                    cycle=self.cycle,
+                    target=target.username,
+                    target_id=target.candidato_id,
+                    source=target.source,
+                    extracted=0,
+                    inserted=0,
+                    duplicated=0,
+                    classified=0,
+                    failed=0,
+                    db_success=False,
+                    classifier_success=False,
+                    simulated=True,
+                    error="zyte_fetch_not_implemented_or_empty",
+                )
+                self.rotate_target(target)
+                return result
 
             persist = self.persist_comments(target, comments)
+
             classify = await self.classify_comments(persist.inserted_ids)
 
             result = CycleResult(
-                worker_id=self.worker_id, cycle=self.cycle, target=target.username, target_id=target.candidato_id, source=target.source,
-                extracted=len(comments), inserted=persist.inserted, duplicated=persist.duplicated, classified=classify.classified,
-                failed=persist.failed + classify.failed, db_success=persist.success, classifier_success=classify.success,
-                simulated=not (persist.success and len(comments) > 0)
+                worker_id=self.worker_id,
+                cycle=self.cycle,
+                target=target.username,
+                target_id=target.candidato_id,
+                source=target.source,
+                extracted=len(comments),
+                inserted=persist.inserted,
+                duplicated=persist.duplicated,
+                classified=classify.classified,
+                failed=persist.failed + classify.failed,
+                db_success=persist.success,
+                classifier_success=classify.success,
+                simulated=not (persist.success and len(comments) > 0),
             )
 
-            if result.db_success and not result.simulated: self.mark_candidate_scraped(target)
+            if result.db_success and not result.simulated:
+                self.mark_candidate_scraped(target)
+
             self.rotate_target(target)
             return result
 
         except NotImplementedError as exc:
+            result = CycleResult(
+                worker_id=self.worker_id,
+                cycle=self.cycle,
+                target=target.username,
+                target_id=target.candidato_id,
+                source=target.source,
+                extracted=0,
+                inserted=0,
+                duplicated=0,
+                classified=0,
+                failed=0,
+                db_success=False,
+                classifier_success=False,
+                simulated=True,
+                error=str(exc),
+            )
             self.rotate_target(target)
-            return CycleResult(worker_id=self.worker_id, cycle=self.cycle, target=target.username, target_id=target.candidato_id, source=target.source, simulated=True, error=str(exc))
+            return result
+
         except Exception as exc:
+            result = CycleResult(
+                worker_id=self.worker_id,
+                cycle=self.cycle,
+                target=target.username,
+                target_id=target.candidato_id,
+                source=target.source,
+                extracted=0,
+                inserted=0,
+                duplicated=0,
+                classified=0,
+                failed=1,
+                db_success=False,
+                classifier_success=False,
+                simulated=False,
+                error=str(exc)[:200],
+            )
             self.rotate_target(target)
-            return CycleResult(worker_id=self.worker_id, cycle=self.cycle, target=target.username, target_id=target.candidato_id, source=target.source, failed=1, db_success=False, simulated=False, error=str(exc)[:200])
+            return result

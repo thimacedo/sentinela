@@ -37,9 +37,12 @@ class SentinelaOrchestrator:
                 error="worker_returned_invalid_result",
             )
             
+        db_status = "n/a" if result.simulated else ("ok" if result.db_success else "falhou")
+        ia_status = "n/a" if result.simulated else ("ok" if result.classifier_success else "nao")
+            
         logger.info(
             "[%s] ciclo #%s | target=%s | origem=%s | extraidos=%s | inseridos=%s | "
-            "duplicados=%s | classificados=%s | falhas=%s | db=%s | ia=%s | simulado=%s",
+            "duplicados=%s | classificados=%s | falhas=%s | db=%s | ia=%s | simulado=%s | erro=%s",
             result.worker_id,
             result.cycle,
             result.target or "N/A",
@@ -49,14 +52,19 @@ class SentinelaOrchestrator:
             result.duplicated,
             result.classified,
             result.failed,
-            "ok" if result.db_success else "falhou",
-            "ok" if result.classifier_success else "nao",
+            db_status,
+            ia_status,
             result.simulated,
+            result.error or "nenhum",
         )
         
         # O RewardEngine agora processa o contrato CycleResult
         await self.reward_engine.process_result(result)
-        await self.ai_advisor.analyze_and_suggest(worker, result)
+        
+        if not result.simulated:
+            await self.ai_advisor.analyze_and_suggest(worker, result)
+        else:
+            logger.debug("[%s] AIAdvisor ignorado (ciclo simulado)", worker.worker_id)
 
     async def run_all(self) -> None:
         if not self._workers:
