@@ -1,1 +1,0 @@
-SELECT pg_get_function_identity_arguments('realtime.broadcast_changes()');
