@@ -29,7 +29,7 @@ from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 # --- Configurações ---
-SERVER_SCRIPT = "local_server.py"
+SERVER_SCRIPT = "main_runner.py"
 RESTART_DELAY = 30
 ZYTE_CHECK_INTERVAL = 1800
 REQUIREMENTS_FILE = "requirements.txt"
@@ -329,7 +329,7 @@ def guard():
 
         # 3. Executar Servidor
         state.update_metrics(status="OPERACIONAL")
-        state.add_log("info", "[Watchdog] Iniciando local_server.py...")
+        state.add_log("info", "[Watchdog] Iniciando main_runner.py...")
         try:
             ENV_WITH_WATCHDOG = CHILD_ENV.copy()
             ENV_WITH_WATCHDOG["WATCHDOG_ACTIVE"] = "true"
