@@ -75,7 +75,12 @@ class IGZyteWorker(BaseWorker):
 
         self.logger.info(f"Alvo selecionado: @{target.username} | origem={target.source}")
         
-        # Simulação de scraping real
+        # ... (lógica de scraping real aqui)
+        # Ao final do ciclo, marcar como processado (ou data de raspagem)
+        self.db.table("candidatos").update({
+            "last_scraped_at": datetime.now(timezone.utc).isoformat()
+        }).eq("username", target.username).execute()
+
         return CycleResult(
             worker_id=self.worker_id,
             cycle=self.cycle,
