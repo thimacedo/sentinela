@@ -1,13 +1,18 @@
 # 📊 STATE.md - Sentinela Democrática
 
 **Última Atualização:** 2026-05-18
-**Versão Core:** PASA v49.8 (Diamond Real Data)
+**Versão Core:** PASA v50.0 (Diamond Real Data)
 **Status do Sistema:** Operação Real Ativada (Zero Mocks)
 
 ## 1. Estado Atual do Ecossistema
 O Sentinela Democrática concluiu a transição para o pipeline de dados 100% reais. O Nó Local (War Room) agora opera com coleta ativa via Playwright, processamento de IA em massa (Gemini/Groq) e auditoria anti-alucinação. Todas as simulações e dados fictícios foram removidos do repositório.
 
-## 2. Componentes Principais (v49.8)
+## 2. Componentes Principais (v50.0)
+
+### Frontend (Modernização)
+- **War Room Dashboard:** 100% funcional com Next.js 16 e Tailwind v4.
+- **Integração Supabase:** Componentes `DashboardStats`, `TargetsTab` e `ForensicTab` consumindo dados reais via `@supabase/supabase-js`.
+- **Zero Mocks:** Remoção total de placeholders estáticos; o frontend agora reflete fielmente o estado das tabelas `candidatos` e `comentarios`.
 
 ### Nó Local & Coleta (Real)
 - **InstagramWorker:** Ativado com motor Playwright (`scraper_headless.py`). Realiza raspagem via navegação por modal e extração de comentários autênticos.
