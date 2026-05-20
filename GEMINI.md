@@ -1,4 +1,5 @@
-# PROTOCOLO DE ENGENHARIA - SENTINELA DEMOCRÁTICA (v50.0)
+# PROTOCOLO DE ENGENHARIA - SENTINELA (v50.1)
+_last_updated: 2026-05-20_
 
 ## 🆔 IDENTIDADE E ESCOPO
 1. Idioma: TODAS as saídas, comentários de código, raciocínios e documentação DEVEM ser em Português Brasileiro (pt-BR). Sem exceções.
@@ -13,7 +14,7 @@
 4. Commits Obsessivos: Commits detalhados (Conventional Commits) após cada tarefa validada. OBRIGATÓRIO (Git push imediato).
 5. Estados Finitos: Divida tarefas em passos mínimos e valide cada um.
 
-## 🛠 DIRETRIZES TÉCNICAS (PASA v50.0)
+## 🛠 DIRETRIZES TÉCNICAS (PASA v50.1)
 - **Integridade de Dados**: Proibido uso de mocks ou dados simulados em produção. Falhe honestamente.
 - **Arquitetura Real**:
   - Frontend: Next.js 16 (App Router) + Tailwind v4 + Supabase Client (SSR/SSG).
@@ -35,4 +36,4 @@
 ## 🤖 INTEGRAÇÃO DE IA
 - **Classificação Primária**: Gemini 1.5 Flash.
 - **Auditoria Cruzada**: Groq (Llama 3).
-- **Metodologia**: MSAL (Metodologia Sentinela de Análise Léxica) + Framework CCF.
+- **Metodologia**: MSAL (Metodologia de Análise Léxica) + Framework CCF.

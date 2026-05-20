@@ -1,6 +1,7 @@
-# 🗺️ ROADMAP.md - Sentinela Democrática
+# 🗺️ ROADMAP.md - Sentinela
+_last_updated: 2026-05-20_
 
-## ✅ Concluído (PASA v17 - v47.10)
+## ✅ Concluído
 
 ### Fundação e Core (v17 - v24)
 - [x] Arquitetura BaseWorker com Event Bus e Gamificação (XP/Level).
@@ -29,26 +30,32 @@
 - [x] Backend refatorado para compatibilidade total com Vercel Serverless.
 - [x] Rotação automática de contas de scraping configurável via UI.
 
+### Modernização Frontend e Coleta Real (v48 - v50.1)
+- [x] Migração para Next.js 16 (App Router) + Tailwind v4 + Shadcn.
+- [x] Camada de dados com React Query + Zustand (auto-refresh 10s–60s).
+- [x] War Room Dashboard com abas: Geral, Alvos, Dossiês, Alertas, Rede, Fila.
+- [x] Gráficos de série temporal via Recharts.
+- [x] Expurgo do Vanilla JS legado (`app.js`, `index.html`).
+- [x] Deploy Vercel unificado.
+- [x] InstagramWorker ativado com Playwright.
+- [x] Dashboard de Auditoria (War Room Terminal) refinado.
+- [x] Hardened Proxy (`mcp-proxy`): SQL estático por `action`.
+- [x] API Keys movidas para Supabase Edge Secrets.
+
 ---
 
-## 🚀 Próximos Passos (Backlog)
+## 🚀 Pendente
 
-### Migração Frontend: O Salto para Bleeding Edge (Prioridade Máxima)
-- [ ] **Fase 1: Setup Híbrido** - Next.js (App Router), Tailwind v4, Shadcn na raiz, roteando `/api` para o FastAPI via Vercel.
-- [ ] **Fase 2: The God Mode Data Layer** - Conexão nativa SSR via `@supabase/supabase-js` com React Query e Zustand. Sem ORMs lixo.
-- [ ] **Fase 3: UI & Dashboards** - Componentização profissional ("War Room"), migrando gráficos para Recharts.
-- [ ] **Fase 4: Expurgo do Legado** - Deleção do Vanilla JS antigo (`app.js`, `index.html`) e finalização do deploy Vercel unificado.
-
-### Maestria Instagram (v48+)
-- [x] Expansão de escopo: Coleta real via Playwright com extração de comentários via Modal.
-- [ ] Mapeamento de shadowbans: Detectar quando o alvo esconde comentários automaticamente. (Lógica base implementada).
-- [ ] Análise de engajamento: Correlacionar número de likes com a severidade do discurso.
+### Maestria Instagram
+- [ ] Definir critério de ativação do `InstagramScrapyWorker`.
+- [ ] Mapeamento de shadowbans: detectar quando o alvo oculta comentários automaticamente.
+- [ ] Análise de engajamento: correlacionar número de likes com severidade do discurso.
 
 ### Refinamento de Dados
-- [x] Dashboard de Auditoria (War Room Terminal) refinado para visualização Diamond.
-- [ ] Exportação de Relatórios em PDF (Indícios de Risco) para stakeholders.
+- [ ] Exportação de relatórios em PDF (Indícios de Risco) para stakeholders.
 - [ ] Mapeamento de redes coordenadas com grafos interativos no frontend.
 
 ### Refinamento de IA
 - [ ] Few-shot dinâmico baseado no `audit_gold_standards` (Padrão Ouro).
 - [ ] Fine-tuning de modelo leve local (Ollama) para reduzir dependência de API.
+

@@ -1,35 +1,80 @@
-# 📊 STATE.md - Sentinela Democrática
+# 📊 STATE.md — Sentinela
+_last_updated: 2026-05-20_
+_Versão Core: PASA v50.1 (God Mode Data Layer)_
+_Status: Operação Real Ativa_
 
-**Última Atualização:** 2026-05-18
-**Versão Core:** PASA v50.1 (God Mode Data Layer)
-**Status do Sistema:** Operação Real Ativada (Full React Query)
+---
 
 ## 1. Estado Atual do Ecossistema
-O Sentinela Democrática concluiu a modernização completa do frontend. O War Room agora é uma Single Page Application (SPA) robusta em Next.js 16, com sincronização em tempo real via React Query e visualização analítica via Recharts. A camada de dados ("God Mode") elimina latências e garante a integridade da informação forense.
+O Sentinela concluiu a modernização completa do frontend e da camada de segurança. O War Room é uma SPA em Next.js 16 com sincronização em tempo real via React Query e visualização analítica via Recharts. O backend foi migrado para arquitetura Hardened Proxy, eliminando exposição de SQL e credenciais no cliente.
+
+---
 
 ## 2. Componentes Principais (v50.1)
 
-### Frontend (Modernização Completa)
-- **War Room Dashboard:** Interface unificada com abas funcionais para Geral, Forense, Alvos, Dossiês, Alertas, Rede e Fila.
-- **God Mode Data Layer:** Implementação total de React Query para cache, pre-fetching e auto-refresh (10s-60s).
-- **Análise Visual:** Gráficos de série temporal integrados para detecção de picos de atividade hostil.
-- **Telemetria de Workers:** Monitoramento em tempo real da saúde e vazão dos motores de coleta.
+### Frontend
+| Componente | Status | Descrição |
+|------------|--------|-----------|
+| War Room Dashboard | ✅ Ativo | Abas: Geral, Alvos, Dossiês, Alertas, Rede, Fila |
+| React Query Data Layer | ✅ Ativo | Cache, pre-fetching e auto-refresh (10s–60s) |
+| Gráficos Recharts | ✅ Ativo | Série temporal para detecção de picos de atividade |
+| Telemetria de Workers | ✅ Ativo | Monitoramento em tempo real de saúde e vazão |
+| Legado Vanilla JS | ✅ Removido | `app.js` e `index.html` expurgados |
 
+### Backend e Segurança
+| Componente | Status | Descrição |
+|------------|--------|-----------|
+| Hardened Proxy (`mcp-proxy`) | ✅ Ativo | SQL estático por `action`; sem SQL bruto no frontend |
+| API Keys | ✅ Migrado | Movidas para Supabase Edge Secrets |
+| RLS Supabase | ✅ Ativo | Row Level Security configurada em todas as tabelas |
 
-### Nó Local & Coleta (Real)
-- **InstagramWorker:** Ativado com motor Playwright (`scraper_headless.py`). Realiza raspagem via navegação por modal e extração de comentários autênticos.
-- **Scrapy Standby:** Motor Scrapy disponível em `InstagramScrapyWorker` para volumes massivos (mantido OFF).
-- **Integridade:** Monitor de API (`api/monitor.py`) blindado contra dados fake; reporta erro ou zero em falhas no Supabase.
+### Coleta
+| Componente | Status | Descrição |
+|------------|--------|-----------|
+| InstagramWorker (Playwright) | ✅ Ativo | Extração de comentários via navegação por Modal |
+| InstagramScrapyWorker | ⏸️ Stand-by | Motor para volumes massivos — aguarda critério de ativação |
+| Monitor de Integridade (`api/monitor.py`) | ✅ Ativo | Blindado contra dados simulados; reporta zero em falhas |
 
 ### Inteligência Analítica
-- **Classificação IA:** Motor real ativado via `AIService` (Gemini 1.5 Flash + Groq Cascading).
-- **CCF Framework:** Classificação baseada em Densidade, Sincronia e Performatividade.
-- **Auditoria:** `AuditWorker` ativo para verificação cruzada e detecção de deriva (Drift Check).
+| Componente | Status | Descrição |
+|------------|--------|-----------|
+| AIService (Gemini 1.5 Flash) | ✅ Ativo | Classificação primária de risco e padrões de discurso |
+| Auditoria Cruzada (Groq/Llama 3) | ✅ Ativo | Validação anti-alucinação e detecção de deriva |
+| CCF Framework | ✅ Ativo | Classificação por Densidade, Sincronia e Performatividade |
+| MCA v2.2 | ✅ Vigente | Manual de Classificação Analítica — referência obrigatória |
 
-### Governança e Interface
-- **War Room UI:** Redesenhada para visual sutil e moderno com cores ANSI e logs em tempo real.
-- **Watchdog:** Guardião ativo com auto-cura de dependências e alertas via WhatsApp (CallMeBot).
+---
 
 ## 3. Proteções Jurídicas e Acadêmicas
-- **MCA v2.2:** Manual de Classificação Analítica consolidado.
-- **Terminologia:** Uso estrito de "Indícios Analíticos" e "Informação Situacional" para evitar conflitos forenses.
+- **MCA v2.2** vigente como referência de classificação.
+- **Terminologia obrigatória**: "Indícios Analíticos", "Informação Situacional", "análise analítica".
+- **Termos proibidos em todo o projeto**: "forense", "prova", "evidência".
+
+---
+
+## 4. Abordagens Descartadas (Anti-Regressão)
+> Proibido retomar qualquer item desta lista.
+
+| Abordagem | Motivo |
+|-----------|--------|
+| SQL bruto enviado pelo frontend | Vetor de injeção — substituído por Hardened Proxy |
+| `ANON_KEY` com acesso de escrita | Risco de bypass de RLS |
+| ORM no frontend | Overhead de bundle + acoplamento ao schema |
+| Rotação forçada de `sessionid` | Aumenta risco de ban — usar backoff exponencial |
+| Mocks/dados simulados em produção | Viola integridade analítica |
+| Supabase/Docker local | Banco é sempre remoto |
+
+---
+
+## 5. Variáveis de Ambiente Obrigatórias
+
+| Variável | Escopo | Descrição |
+|----------|--------|-----------|
+| `SUPABASE_URL` | Backend + Frontend | URL do projeto Supabase |
+| `SUPABASE_ANON_KEY` | Frontend (leitura) | Chave pública — RLS deve estar ativa |
+| `SUPABASE_SERVICE_KEY` | Backend apenas | Chave irrestrita — nunca expor no cliente |
+| `INSTAGRAM_SESSIONID` | Backend | Cookie de sessão da conta focalizadora |
+| `ZYTE_API_KEY` | Backend | Chave de autenticação Zyte |
+| `GEMINI_API_KEY` | Backend | Chave Google AI (Gemini 1.5 Flash) |
+| `GROQ_API_KEY` | Backend | Chave Groq (Llama 3) |
+| `CALLMEBOT_KEY` | Backend | Chave WhatsApp para alertas do Watchdog |

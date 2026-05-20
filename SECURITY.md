@@ -1,4 +1,4 @@
-# Política de Segurança da Sentinela Democrática
+# Política de Segurança da Sentinela
 
 A segurança deste projeto é dividida entre a proteção da infraestrutura de coleta e a privacidade dos dados processados.
 
@@ -6,12 +6,13 @@ A segurança deste projeto é dividida entre a proteção da infraestrutura de c
 
 ### Vazamento de Chaves (Frontend)
 - **Risco**: O `ui.js` atual contém chaves `anon` do Supabase expostas no cliente.
-- **Status**: *Aceite (Design)*. As chaves `anon` do Supabase são projetadas para serem públicas, desde que as **Row Level Security (RLS)** estejam configuradas no banco.
-- **Mitigação Futura**: Implementar um Proxy API backend para evitar exposição da URL do banco.
+- **Status**: *Mitigado (Arquitetura Hardened Proxy)*.
+- **Revisão**: 2026-08-20
 
 ### Coleta de Dados (Instagram Session)
 - **Risco**: O scraper depende do cookie `sessionid` de uma conta real. Se o Instagram detectar automação, a conta pode ser banida.
 - **Status**: *Mitigado*. O Scrapy está configurado com `DOWNLOAD_DELAY`, `RANDOMIZE_DOWNLOAD_DELAY` e User-Agent rotativo para simular comportamento humano. Limitado a 2 execuções diárias.
+- **Revisão**: 2026-08-20
 - **Ação**: NUNCA use a conta pessoal principal do projeto para extração. Crie contas "focalizadoras" (burner accounts).
 
 ## 2. Tratamento de Dados Sensíveis

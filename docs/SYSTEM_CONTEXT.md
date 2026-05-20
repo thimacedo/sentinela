@@ -1,7 +1,7 @@
-# Sentinela Democrática - Referência Arquitetural de Engenharia (PASA v49.9+)
+# Sentinela - Referência Arquitetural de Engenharia (PASA v50.1)
 
 ## 1. Visão de Sistema & Missão
-O Sentinela Democrática é um ecossistema de perícia linguística forense e monitoramento eleitoral em larga escala. Sua missão é a **extração, normalização, classificação semântica e auditoria** de discursos em plataformas Meta, operando sob requisitos rigorosos de resiliência anti-bot, integridade de dados e conformidade legal.
+O Sentinela é um ecossistema de análise linguística automatizada e monitoramento em larga escala. Sua missão é a **extração, normalização, classificação semântica e auditoria** de discursos em plataformas Meta, operando sob requisitos rigorosos de resiliência anti-bot, integridade de dados e conformidade legal.
 
 ## 2. Topologia de Infraestrutura (Asynchronous-Hybrid)
 * **Node Local (Orquestrador):** `local_server.py` executado via `watchdog.py`. Gerencia filas, cooldowns, orquestração de workers e persistência local.
@@ -11,12 +11,12 @@ O Sentinela Democrática é um ecossistema de perícia linguística forense e mo
 * **Front-end:** SPA React, desacoplada, servida via Vercel, consumindo snapshots JSON/CSV gerados pelo pipeline de backend para evitar query load excessivo no Supabase.
 
 ## 3. Protocolo PASA (Metodologia de Análise Léxica)
-O núcleo de inteligência é o **PASA v49**. Todo dado coletado passa por este pipeline de transformação:
+O núcleo de inteligência é o **PASA v50.1**. Todo dado coletado passa por este pipeline de transformação:
 1. **Sanitização (InstagramWorker):** Remoção de ruído, normalização de caracteres e limpeza de URLs (Regex + Hash-mapping para ID_EXTERNO).
 2. **Normalização (core.normalizer):** Ajuste léxico para entrada nos modelos de IA.
 3. **Classificação (IA Gateway):** Utiliza motor `Gemini 1.5 Flash` para classificação de risco e detecção de padrões de ódio.
 4. **Auditoria (PASA Auditor):** Cross-check via `Groq/Llama 3` para validação de falsos positivos.
-5. **Persistência Forense:** Registro com data/hora UTC e rastreabilidade total da origem.
+5. **Persistência de Dados:** Registro com data/hora UTC e rastreabilidade total da origem. Termos proibidos: "forense", "prova", "evidência" — usar "indício", "informação", "análise analítica".
 
 ## 4. Resiliência Operacional (The Guardian Logic)
 O sistema possui mecanismos de auto-cura:
@@ -36,7 +36,8 @@ O sistema evita o gasto predatório de créditos Zyte através de:
 ## 6. Governança e Compliance
 * **Filtros Jurídicos:** Perfis marcados como `status_monitoramento = 'Pausado'` são saltados pelo orquestrador.
 * **Audit Trail:** Logs de divergência de username em `divergent_usernames.log` para recalibragem humana.
-* **Credenciais:** Uso de `.env` para gestão de segredos. Proibição absoluta de hardcoding.
+* **Credenciais:** Uso de `.env` para gestão de segredos. Proibição absoluta de hardcoding. `SERVICE_KEY` exclusiva para backend — nunca exposta no frontend.
+* **Terminologia:** Seguir estritamente as restrições de `GEMINI.md` — seção Proteção Jurídica.
 
 ## 7. SOP de Troubleshooting (Procedimento Padrão)
 | Sintoma | Ação Técnica |
