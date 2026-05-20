@@ -95,5 +95,17 @@ O Sentinela concluiu a modernização completa do frontend e da camada de segura
 [✅] Fase 5 — Orquestração Massiva e Integração final
 [✅] Fase 6 — Deploy e Monitoramento em Produção
 ---
-_Status: SISTEMA BLINDADO E OPERACIONAL_
+## Frontend Oficial
+
+O frontend oficial do Sentinela PASA v50.1 está em:
+
+`proposta_frontend/`
+
+A Vercel deve usar:
+
+`Root Directory = proposta_frontend`
+
+O backend Python permanece fora do deploy Vercel e roda localmente via:
+
+`watchdog.py -> main_runner.py`
 ```
