@@ -6,6 +6,7 @@ from workers.base.worker_base import BaseWorker
 from workers.base.reward_engine import RewardEngine
 from workers.base.memory_store import MemoryStore
 from workers.ai.ai_advisor import AIAdvisor
+from workers.base.cycle_result import CycleResult
 
 logger = logging.getLogger("orchestrator")
 
@@ -20,23 +21,52 @@ class SentinelaOrchestrator:
         self._workers.append(worker)
         logger.info(f"[orchestrator] registrado: {worker.worker_id}")
 
+    async def run_cycle_with_validation(self, worker: BaseWorker) -> None:
+        # Executa um único ciclo do worker
+        result = await worker.run_cycle()
+        
+        if not isinstance(result, CycleResult):
+            logger.warning(
+                "[orchestrator] %s retornou resultado inválido. Marcando como simulado.",
+                worker.worker_id,
+            )
+            result = CycleResult(
+                worker_id=worker.worker_id,
+                cycle=getattr(worker, "cycle", 0),
+                simulated=True,
+                error="worker_returned_invalid_result",
+            )
+            
+        logger.info(
+            "[%s] ciclo #%s | target=%s | origem=%s | extraidos=%s | inseridos=%s | "
+            "duplicados=%s | classificados=%s | falhas=%s | db=%s | ia=%s | simulado=%s",
+            result.worker_id,
+            result.cycle,
+            result.target or "N/A",
+            result.source or "N/A",
+            result.extracted,
+            result.inserted,
+            result.duplicated,
+            result.classified,
+            result.failed,
+            "ok" if result.db_success else "falhou",
+            "ok" if result.classifier_success else "nao",
+            result.simulated,
+        )
+        
+        # O RewardEngine agora processa o contrato CycleResult
+        await self.reward_engine.process_result(result)
+        await self.ai_advisor.analyze_and_suggest(worker, result)
+
     async def run_all(self) -> None:
         if not self._workers:
             logger.warning("[orchestrator] Nenhum worker registrado.")
             return
         logger.info(f"[orchestrator] Iniciando {len(self._workers)} worker(s)...")
-        tasks = [
-            asyncio.create_task(
-                worker.start(self.reward_engine, self.ai_advisor),
-                name=worker.worker_id,
-            )
-            for worker in self._workers
-        ]
-        try:
-            await asyncio.gather(*tasks)
-        except asyncio.CancelledError:
-            self.stop_all()
-            raise
+        # Ciclo orquestrado
+        while True:
+            await asyncio.gather(*(self.run_cycle_with_validation(w) for w in self._workers))
+            await asyncio.sleep(60)
 
     def stop_all(self) -> None:
         for w in self._workers:
