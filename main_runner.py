@@ -33,10 +33,7 @@ def build_orchestrator() -> SentinelaOrchestrator:
     store   = MemoryStore()
     engine  = RewardEngine(store)
     fetcher = DocFetcher()
-    advisor = AIAdvisor(
-        groq_api_key=os.environ["GROQ_API_KEY"],
-        doc_fetcher=fetcher,
-    )
+    advisor = AIAdvisor(store, fetcher)
     orch = SentinelaOrchestrator(engine, advisor)
 
     # orch.register(IGHeadlessWorker(
