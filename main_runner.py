@@ -30,8 +30,8 @@ from workers.ai.ai_advisor import AIAdvisor
 from workers.orchestrator.orchestrator import SentinelaOrchestrator
 
 # Workers disponíveis — ativar conforme validação:
-# from workers.scrapers.ig_headless import IGHeadlessWorker
-# from workers.scrapers.ig_zyte import IGZyteWorker
+from workers.scrapers.ig_headless import IGHeadlessWorker
+from workers.scrapers.ig_zyte import IGZyteWorker
 
 
 def build_orchestrator() -> SentinelaOrchestrator:
@@ -42,12 +42,23 @@ def build_orchestrator() -> SentinelaOrchestrator:
 
     orch = SentinelaOrchestrator(engine, advisor)
 
-    # Exemplo de ativação segura:
-    # zyte_key = os.getenv("ZYTE_API_KEY")
-    # if zyte_key:
-    #     orch.register(IGZyteWorker(worker_id="ig-zyte-01", config={"api_key": zyte_key}))
-    # else:
-    #     logger.warning("[main_runner] ZYTE_API_KEY ausente.")
+    zyte_key = os.getenv("ZYTE_API_KEY")
+    if zyte_key:
+        orch.register(IGZyteWorker(
+            worker_id="ig-zyte-01",
+            config={"api_key": zyte_key},
+        ))
+    else:
+        logger.warning("[main_runner] ZYTE_API_KEY ausente; IGZyteWorker não registrado.")
+
+    session_id = os.getenv("INSTAGRAM_SESSIONID")
+    if session_id:
+        orch.register(IGHeadlessWorker(
+            worker_id="ig-headless-01",
+            config={"session_id": session_id},
+        ))
+    else:
+        logger.warning("[main_runner] INSTAGRAM_SESSIONID ausente; IGHeadlessWorker não registrado.")
 
     logger.info(f"[main_runner] Workers: {orch.worker_ids or ['(nenhum)']}")
     return orch
