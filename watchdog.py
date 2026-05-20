@@ -343,9 +343,12 @@ def guard():
             )
             
             def pipe_reader(pipe, level):
+                NOISY_PATTERNS = ["HTTP Request:", "HTTP/2 200 OK", "HTTP/2 201 Created"]
                 for line in iter(pipe.readline, ''):
                     clean_line = line.strip()
                     if clean_line:
+                        if any(pattern in clean_line for pattern in NOISY_PATTERNS):
+                            continue
                         log_level = level
                         upper_line = clean_line.upper()
                         if "ERROR" in upper_line or "❌" in clean_line: log_level = "error"

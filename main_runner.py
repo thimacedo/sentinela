@@ -12,14 +12,30 @@ load_dotenv()
 
 os.makedirs("logs", exist_ok=True)
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-    handlers=[
-        logging.StreamHandler(sys.stdout),
-        logging.FileHandler("logs/main_runner.log", encoding="utf-8"),
-    ],
-)
+# Configuração de Logging v50.1-final
+os.makedirs("logs", exist_ok=True)
+WATCHDOG_ACTIVE = os.getenv("WATCHDOG_ACTIVE") == "true"
+
+root_logger = logging.getLogger()
+root_logger.setLevel(logging.INFO)
+root_logger.handlers.clear()
+
+console_handler = logging.StreamHandler(sys.stdout)
+if WATCHDOG_ACTIVE:
+    console_format = "%(levelname)s %(name)s: %(message)s"
+else:
+    console_format = "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+console_handler.setFormatter(logging.Formatter(console_format))
+
+file_handler = logging.FileHandler("logs/main_runner.log", encoding="utf-8")
+file_handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
+
+root_logger.addHandler(console_handler)
+root_logger.addHandler(file_handler)
+
+# Silenciar bibliotecas barulhentas
+for noisy_logger in ["httpx", "httpcore", "supabase", "postgrest", "urllib3"]:
+    logging.getLogger(noisy_logger).setLevel(logging.WARNING)
 
 logger = logging.getLogger("main_runner")
 
