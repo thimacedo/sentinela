@@ -78,7 +78,7 @@ class IGZyteWorker(BaseWorker):
         html = data.get("browserHtml")
         
         # Fallback para httpResponseBody se browserHtml não estiver disponível
-        if not html and data.get("httpResponseBody")
+        if not html and data.get("httpResponseBody"):
             html = base64.b64decode(data["httpResponseBody"]).decode(
                 "utf-8",
                 errors="ignore",
