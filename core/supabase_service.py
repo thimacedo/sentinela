@@ -31,10 +31,10 @@ class SupabaseService:
             key = os.getenv("SUPABASE_SERVICE_KEY") or os.getenv("SUPABASE_KEY") or os.getenv("SUPABASE_ANON_KEY")
 
             if not url or not key:
-                raise ValueError("❌ SUPABASE_URL ou SUPABASE_KEY não encontradas no .env")
+                raise ValueError("[ERROR] SUPABASE_URL ou SUPABASE_KEY não encontradas no .env")
 
             self._client = create_client(url, key)
-            print("✅ Conexão com Supabase estabelecida (PASA v48.2 REST).")
+            print("[OK] Conexão com Supabase estabelecida (PASA v48.2 REST).")
         return self._client
 
 # Função de conveniência para não precisar instanciar a classe em todo lugar

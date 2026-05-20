@@ -432,6 +432,6 @@ if __name__ == "__main__":
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     web_thread = Thread(target=run_web_server, daemon=True)
     web_thread.start()
-    print("🚀 Dashboard disponível em: http://localhost:8000")
-    print("🛡️ SENTINELA DEMOCRÁTICA - WATCHDOG v50.0")
+    print("[START] Dashboard disponível em: http://localhost:8000")
+    print("[SHIELD] SENTINELA DEMOCRÁTICA - WATCHDOG v50.0")
     guard()
