@@ -25,49 +25,30 @@ const fmt = (n) => (n ?? 0).toLocaleString("pt-BR");
 const pct = (a, b) => b ? ((a / b) * 100).toFixed(1) + "%" : "0%";
 
 async function callMCP(projectId, sql) {
-  // NOTA: Em produção, mover para um Proxy Backend (Supabase Edge Function)
-  const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY; 
+  // NOVA ARQUITETURA: Browser -> Edge Function (Proxy) -> Anthropic
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
   
-  if (!apiKey) {
-    throw new Error("VITE_ANTHROPIC_API_KEY não configurada.");
+  if (!supabaseUrl || !anonKey) {
+    throw new Error("Configurações do Supabase ausentes no frontend.");
   }
 
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
+  const res = await fetch(`${supabaseUrl}/functions/v1/mcp-proxy`, {
     method: "POST",
     headers: { 
       "Content-Type": "application/json",
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-      "anthropic-beta": "mcp-client-2025-04-04"
+      "Authorization": `Bearer ${anonKey}`
     },
-    body: JSON.stringify({
-      model: "claude-3-5-sonnet-20241022",
-      max_tokens: 8000,
-      mcp_servers: [{ type: "url", url: "https://mcp.supabase.com/mcp", name: "supabase" }],
-      messages: [{
-        role: "user",
-        content: `Use the Supabase MCP tool to execute this SQL on project ${projectId} and return ONLY the raw JSON array result, no explanation, no markdown fences:\n\n${sql}`
-      }]
-    }),
+    body: JSON.stringify({ projectId, sql }),
   });
 
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));
-    throw new Error(`Erro na API Anthropic (${res.status}): ${errorData.error?.message || res.statusText}`);
+    throw new Error(`Erro no Proxy (${res.status}): ${errorData.error || res.statusText}`);
   }
 
-  const data = await res.json();
-  const text = data.content?.filter(b => b.type === "text").map(b => b.text).join("") || "[]";
-  
-  // Parser Robusto: Procura o primeiro bloco de array ou objeto JSON
-  try {
-    const match = text.match(/\[[\s\S]*\]|\{[\s\S]*\}/);
-    if (!match) throw new Error("O Claude não retornou um formato JSON válido.");
-    return JSON.parse(match[0]);
-  } catch (err) {
-    console.error("Falha no parse do Claude:", text);
-    throw new Error("Erro ao interpretar dados do banco.");
-  }
+  const { result } = await res.json();
+  return result;
 }
 
 // Sub-componentes UI
@@ -171,10 +152,18 @@ export default function Dashboard({ projectId, onLogout }) {
     try {
       setLoadingMsg("Sincronizando Inteligência...");
 
-      // FIX #2 & #3: Paralelização e Agregação SQL
-      const [kpis, timeline, categorias, candidatos, fila, dossies, recentes] = await Promise.all([
-        // KPI Principal
-        callMCP(projectId, `
+      // FIX #2: Tratamento de erro individual para que um fail não derrube tudo
+      const safeCall = async (sql, fallback = []) => {
+        try {
+          return await callMCP(projectId, sql);
+        } catch (e) {
+          console.error("Erro na query MCP:", e);
+          return fallback;
+        }
+      };
+
+      const [kpisRes, timeline, categorias, candidatos, fila, dossies, recentes] = await Promise.all([
+        safeCall(`
           SELECT 
             count(*) as total,
             count(*) FILTER (WHERE is_hate) as hate,
@@ -182,9 +171,8 @@ export default function Dashboard({ projectId, onLogout }) {
             count(*) FILTER (WHERE needs_review) as needs_review,
             count(*) FILTER (WHERE audit_discrepancy) as discrepancy
           FROM comentarios;
-        `),
-        // Evolução 14 dias
-        callMCP(projectId, `
+        `, [{ total: 0, hate: 0, avg_ccf: 0, needs_review: 0, discrepancy: 0 }]),
+        safeCall(`
           SELECT 
             data_coleta::date as date,
             count(*) as total,
@@ -193,34 +181,29 @@ export default function Dashboard({ projectId, onLogout }) {
           WHERE data_coleta >= now() - interval '14 days'
           GROUP BY 1 ORDER BY 1;
         `),
-        // Categorias de Hostilidade
-        callMCP(projectId, `
+        safeCall(`
           SELECT categoria_ia as name, count(*) as value
           FROM comentarios WHERE is_hate = true AND categoria_ia IS NOT NULL
           GROUP BY 1 ORDER BY 2 DESC;
         `),
-        // Candidatos Top
-        callMCP(projectId, `
+        safeCall(`
           SELECT id, username, nome_completo, cargo, estado, 
                  comentarios_totais_count, comentarios_odio_count, shadowban_suspect
           FROM candidatos ORDER BY comentarios_odio_count DESC NULLS LAST LIMIT 10;
         `),
-        // Fila Status
-        callMCP(projectId, `SELECT status, count(*) as count FROM fila_coleta GROUP BY 1;`),
-        // Dossiês
-        callMCP(projectId, `
+        safeCall(`SELECT status, count(*) as count FROM fila_coleta GROUP BY 1;`),
+        safeCall(`
           SELECT id, candidato_id, data_geracao, total_comentarios, total_hate, versao_pasa
           FROM dossies ORDER BY data_geracao DESC LIMIT 5;
         `),
-        // Amostra Recente para Alertas
-        callMCP(projectId, `
+        safeCall(`
           SELECT id, autor_username, texto_bruto, categoria_ia, confianca_ia, direcao_odio, needs_review, audit_discrepancy
           FROM comentarios WHERE is_hate = true ORDER BY data_coleta DESC LIMIT 30;
         `)
       ]);
 
       setData({ 
-        kpis: kpis[0], 
+        kpis: kpisRes[0] || { total: 0, hate: 0, avg_ccf: 0, needs_review: 0, discrepancy: 0 }, 
         timeline, 
         categorias, 
         candidatos, 
