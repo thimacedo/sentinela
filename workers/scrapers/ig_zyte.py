@@ -1,7 +1,7 @@
 from workers.base.worker_base import BaseWorker
 from workers.base.cycle_result import CycleResult
-from dataclasses import dataclass
-from typing import Optional
+from dataclasses import dataclass, field
+from typing import Optional, Any
 from core.supabase_service import get_supabase_client
 import logging
 import os
@@ -13,6 +13,20 @@ class Target:
     candidato_id: Optional[str] = None
     queue_id: Optional[str] = None
     source: str = "unknown"
+
+@dataclass
+class PersistStats:
+    inserted: int = 0
+    duplicated: int = 0
+    failed: int = 0
+    inserted_ids: list[str] = field(default_factory=list)
+    success: bool = False
+
+@dataclass
+class ClassifyStats:
+    classified: int = 0
+    failed: int = 0
+    success: bool = False
 
 class IGZyteWorker(BaseWorker):
     def __init__(self, worker_id: str, config: dict):
@@ -26,19 +40,27 @@ class IGZyteWorker(BaseWorker):
     def describe(self) -> str:
         return "Instagram Scraper via Zyte API"
 
-    async def setup(self) -> None:
-        self.logger.info("Motor Zyte configurado.")
+    async def fetch_comments_via_zyte(self, target: Target) -> list[dict]:
+        """Extração real via Zyte. Pendente de implementação."""
+        raise NotImplementedError("zyte_fetch_not_implemented")
 
-    async def teardown(self) -> None:
-        self.logger.info("Motor Zyte encerrado.")
+    def persist_comments(self, target: Target, comments: list[dict]) -> PersistStats:
+        """Persistência real no Supabase. Pendente de implementação."""
+        raise NotImplementedError("persist_comments_not_implemented")
+
+    async def classify_comments(self, inserted_ids: list[str]) -> ClassifyStats:
+        """Classificação real via IA. Pendente de implementação."""
+        raise NotImplementedError("classify_comments_not_implemented")
+
+    def mark_candidate_scraped(self, target: Target) -> None:
+        if not target.username: return
+        self.db.table("candidatos").update({
+            "last_scraped_at": datetime.now(timezone.utc).isoformat(),
+        }).eq("username", target.username).execute()
 
     def rotate_target(self, target: Target):
         if not target.queue_id: return
-        
-        # 1. Remove da frente
         self.db.table("fila_coleta").delete().eq("id", target.queue_id).execute()
-        
-        # 2. Re-insere no fim
         self.db.table("fila_coleta").insert({
             "candidato_id": target.candidato_id,
             "status": "PENDENTE",
@@ -47,7 +69,6 @@ class IGZyteWorker(BaseWorker):
         }).execute()
 
     def claim_next_target(self) -> Optional[Target]:
-        # 1. Alvo manual
         manual_target = self.config.get("target") or os.getenv("TEST_TARGET_USERNAME")
         if manual_target:
             username = manual_target.strip().lstrip("@")
@@ -55,69 +76,58 @@ class IGZyteWorker(BaseWorker):
             self.seen_targets.add(username)
             return Target(username=username, source="manual_test")
 
-        # 2. Fila Coleta
         pending = self.db.table("fila_coleta").select("*").eq("status", "PENDENTE").limit(20).execute()
         for item in pending.data or []:
             queue_id = item["id"]
             username = item.get("username") or item.get("candidato_id") or item.get("target_username")
-            
             if username and len(str(username)) > 30:
                 cand = self.db.table("candidatos").select("username").eq("id", username).limit(1).execute()
                 if cand.data: username = cand.data[0]["username"]
-            
             username = str(username).strip().lstrip("@")
-            
-            if queue_id in self.seen_queue_ids or username in self.seen_targets:
-                continue
-            
-            self.seen_queue_ids.add(queue_id)
-            self.seen_targets.add(username)
-            
-            return Target(
-                username=username, 
-                candidato_id=username, 
-                queue_id=queue_id, 
-                source="fila_coleta"
-            )
+            if queue_id in self.seen_queue_ids or username in self.seen_targets: continue
+            self.seen_queue_ids.add(queue_id); self.seen_targets.add(username)
+            return Target(username=username, candidato_id=username, queue_id=queue_id, source="fila_coleta")
 
-        # 3. Fallback: Candidatos Ativos
         candidatos = self.db.table("candidatos").select("id,username").eq("status_monitoramento", "Ativo").order("last_scraped_at", desc=False).limit(10).execute()
         for cand in candidatos.data or []:
             username = cand["username"]
             if username in self.seen_targets: continue
             self.seen_targets.add(username)
             return Target(username=username, candidato_id=cand["id"], source="candidatos_fallback")
-        
         return None
 
     async def run_cycle(self) -> CycleResult:
         self.cycle += 1
         target = self.claim_next_target()
-        
         if not target:
-            if self.cycle == 1:
-                self.logger.warning("Nenhum alvo disponível para coleta.")
-            return CycleResult(
-                worker_id=self.worker_id,
-                cycle=self.cycle,
-                source="target_claim",
-                simulated=False,
-                error="no_target_available"
-            )
+            if self.cycle == 1: self.logger.warning("Nenhum alvo disponível.")
+            return CycleResult(worker_id=self.worker_id, cycle=self.cycle, source="target_claim", error="no_target_available")
 
         self.logger.info(f"Alvo selecionado: @{target.username} | origem={target.source}")
         
-        result = CycleResult(
-            worker_id=self.worker_id,
-            cycle=self.cycle,
-            target=target.username,
-            target_id=target.candidato_id,
-            source=target.source,
-            simulated=True,
-            error="zyte_fetch_not_implemented"
-        )
-        
-        if target.source == "fila_coleta":
+        try:
+            comments = await self.fetch_comments_via_zyte(target)
+            if not comments:
+                result = CycleResult(worker_id=self.worker_id, cycle=self.cycle, target=target.username, target_id=target.candidato_id, source=target.source, simulated=True, error="zyte_fetch_not_implemented_or_empty")
+                self.rotate_target(target); return result
+
+            persist = self.persist_comments(target, comments)
+            classify = await self.classify_comments(persist.inserted_ids)
+
+            result = CycleResult(
+                worker_id=self.worker_id, cycle=self.cycle, target=target.username, target_id=target.candidato_id, source=target.source,
+                extracted=len(comments), inserted=persist.inserted, duplicated=persist.duplicated, classified=classify.classified,
+                failed=persist.failed + classify.failed, db_success=persist.success, classifier_success=classify.success,
+                simulated=not (persist.success and len(comments) > 0)
+            )
+
+            if result.db_success and not result.simulated: self.mark_candidate_scraped(target)
             self.rotate_target(target)
-            
-        return result
+            return result
+
+        except NotImplementedError as exc:
+            self.rotate_target(target)
+            return CycleResult(worker_id=self.worker_id, cycle=self.cycle, target=target.username, target_id=target.candidato_id, source=target.source, simulated=True, error=str(exc))
+        except Exception as exc:
+            self.rotate_target(target)
+            return CycleResult(worker_id=self.worker_id, cycle=self.cycle, target=target.username, target_id=target.candidato_id, source=target.source, failed=1, db_success=False, simulated=False, error=str(exc)[:200])
