@@ -77,21 +77,9 @@ class IGZyteWorker(BaseWorker):
         data = response.json()
         html = data.get("browserHtml")
         
-        # Fallback para httpResponseBody se browserHtml não estiver disponível
-        if not html and data.get("httpResponseBody")
-            html = base64.b64decode(data["httpResponseBody"]).decode(
-                "utf-8",
-                errors="ignore",
-            )
-
-        if not html:
-            raise RuntimeError("zyte_empty_html")
-
-        # Log do sucesso da conexão e tamanho da resposta
-        self.logger.info("Zyte fetch concluído | target=@%s | html_len=%s", target.username, len(html))
-
-        # Armazenar status para uso no run_cycle
-        self.last_fetch_status = "zyte_fetch_ok_parser_pending"
+        # Simulação de processamento de comentários para validar o fluxo
+        # Fase 1: apenas logar o sucesso da conexão e tamanho da resposta
+        self.logger.info("Zyte fetch concluído | target=@%s | html_len=%s", target.username, len(html) if html else 0)
 
         # Retorno de lista vazia proposital para manter simulado=True até a lógica de extração ser validada
         return []
@@ -186,7 +174,7 @@ class IGZyteWorker(BaseWorker):
                     db_success=False,
                     classifier_success=False,
                     simulated=True,
-                    error="zyte_fetch_ok_parser_pending",
+                    error="zyte_fetch_not_implemented_or_empty",
                 )
                 self.rotate_target(target)
                 return result
@@ -256,5 +244,3 @@ class IGZyteWorker(BaseWorker):
             )
             self.rotate_target(target)
             return result
-
-
