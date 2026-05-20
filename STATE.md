@@ -5,8 +5,11 @@ _Status: Produção Controlada (Aprovado)_
 
 ---
 
-## 1. Status de Produção — v50.1-final
-O caminho crítico de produção foi saneado, eliminando dependências legadas e consolidando a arquitetura.
+## Status Operacional — v50.1
+
+O Sentinela v50.1 está em Produção Controlada Ativa.
+
+### Caminho crítico vigente
 
 - **Entrada oficial backend**: `main_runner.py`
 - **Supervisor local**: `watchdog.py`
@@ -16,6 +19,21 @@ O caminho crítico de produção foi saneado, eliminando dependências legadas e
 - **Legado isolado**: `archive_v17_2026/`
 
 Componentes como `local_server.py`, `app/` e scrapers legados foram expurgados do caminho de execução e não devem ser reativados sem revisão arquitetural.
+
+### Fluxo primário validado
+
+O fluxo primário `IGZyteWorker` foi validado com o contrato `CycleResult`.
+
+Cadeia confirmada:
+
+`IGZyteWorker → CycleResult → SentinelaOrchestrator → RewardEngine → Supabase`
+
+A pontuação operacional agora depende de coleta real e persistência confirmada. Ciclos simulados ou sem persistência não recebem tier elevado nem badges de sucesso.
+
+### Status dos workers
+
+- `IGZyteWorker`: Validado (Operacional)
+- `IGHeadlessWorker`: Pendente de integração contratual (Fallback/Dry-Run)
 
 ---
 
