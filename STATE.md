@@ -33,7 +33,11 @@ O Sentinela concluiu a modernização completa do frontend e da camada de segura
 |------------|--------|-----------|
 | InstagramWorker (Playwright) | ✅ Ativo | Extração de comentários via navegação por Modal |
 | InstagramScrapyWorker | ⏸️ Stand-by | Motor para volumes massivos — aguarda critério de ativação |
-| Monitor de Integridade (`api/monitor.py`) | ✅ Ativo | Blindado contra dados simulados; reporta zero em falhas |
+### Orquestração de Fluxo (Dual-Engine)
+| Componente | Status | Descrição |
+|------------|--------|-----------|
+| `main_runner.py` | ✅ Ativo | Consumidor de filas (pg_queue). Roda `AlertWorker`, `CleanupWorker`. |
+| `orchestrator.py`| ✅ Ativo | Iniciador de scrapers (`IGZyteWorker`). Roda ciclo de coleta. |
 
 ### Inteligência Analítica
 | Componente | Status | Descrição |
