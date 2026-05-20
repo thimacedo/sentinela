@@ -78,3 +78,16 @@ O Sentinela concluiu a modernização completa do frontend e da camada de segura
 | `GEMINI_API_KEY` | Backend | Chave Google AI (Gemini 1.5 Flash) |
 | `GROQ_API_KEY` | Backend | Chave Groq (Llama 3) |
 | `CALLMEBOT_KEY` | Backend | Chave WhatsApp para alertas do Watchdog |
+
+---
+
+## 6. Snapshot de Progresso
+
+```
+[✅] Fase 1 — Definição de arquitetura e schema do banco
+[✅] Fase 2 — Migrations e tabelas criadas
+[✅] Fase 3 — Estrutura base (memory, reward, base)
+[✅] Fase 4 — DocFetcher, AIAdvisor e Workers (IGHeadless+IGZyte)
+[✅] Fase 5 — Orquestração Massiva e Integração final
+[🔜] Fase 6 — Deploy e Monitoramento em Produção
+```

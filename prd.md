@@ -1,76 +1,47 @@
-# Hardened Edge Function & Proxy PRD (PASA v50.1)
+# AI Advisor (Fase 4) PRD
 
 ## HR Eng
 
-| Hardened Edge Function & Proxy PRD |  | Transição de SQL arbitrário para rotas determinísticas na Supabase Edge Function para endurecer a segurança e simplificar o frontend. |
+| AI Advisor PRD |  | Módulo de inteligência para análise de métricas e sugestões dos workers. |
 | :---- | :---- | :---- |
-| **Author**: Pickle Rick **Contributors**: Thiago Macedo **Intended audience**: Engineering | **Status**: Draft **Created**: 2026-05-20 | **Context**: Refatoração de Segurança PASA |
+| **Author**: Pickle Rick | **Status**: Draft | **Context**: Sentinela v50.1 |
 
 ## Introduction
-
-Atualmente, o Dashboard utiliza um proxy que aceita SQL arbitrário. Embora funcional, isso expõe uma superfície de ataque desnecessária. Este projeto visa substituir esse modelo por uma API de rotas fixas (`/kpis`, `/timeline`, etc.) dentro da Edge Function.
+O `AI_Advisor` é o cérebro que avalia a performance dos workers e sugere melhorias baseadas em dados históricos, evitando re-fetching de documentação.
 
 ## Problem Statement
-
-**Current Process:** O frontend envia strings SQL para a Edge Function `mcp-proxy`, que as repassa ao Claude/MCP.
-**Primary Users:** Engenheiros de monitoramento e administradores do Sentinela.
-**Pain Points:** Risco de injeção de SQL (minimizado mas presente), dependência de prompt engineering no frontend, e payload de rede ineficiente.
-**Importance:** Segurança é prioridade zero no PASA v50. Não podemos ter o browser definindo a lógica de consulta ao banco.
+Atualmente os workers rodam cegos, sem um advisor que integre a lógica de análise de falhas com LLMs. O sistema precisa aprender com o tempo e evitar chamadas repetitivas de API.
 
 ## Objective & Scope
+**Objective:** Reduzir o tempo de análise de falhas e otimizar chamadas de LLM.
+**Ideal Outcome:** Um advisor que consome `worker_docs_cache` e gera recomendações precisas.
 
-**Objective:** Eliminar o envio de SQL do frontend para a nuvem.
-**Ideal Outcome:** Um frontend que chama endpoints semânticos e uma Edge Function que encapsula toda a lógica de dados.
-
-### In-scope ou Goals
-- Refatorar a Edge Function `mcp-proxy` para suportar roteamento interno.
-- Implementar as rotas: `get_kpis`, `get_timeline`, `get_top_candidates`, `get_alerts`.
-- Atualizar o `Dashboard.jsx` para consumir esses novos endpoints.
-- Remover definitivamente a `VITE_ANTHROPIC_API_KEY` do ambiente frontend.
-
-### Not-in-scope ou Non-Goals
-- Alteração no schema do banco de dados.
-- Mudança na UI/UX do Dashboard (além da fiação interna).
+### In-scope
+- Implementação de `workers/ai/ai_advisor.py`.
+- Integração com `worker_base.py`.
+- Lógica de cache para evitar re-fetching de docs.
 
 ## Product Requirements
 
 ### Critical User Journeys (CUJs)
-1. **Carregamento Seguro**: O usuário abre o dashboard; o browser solicita `/kpis` via POST para a Edge Function; a Function executa o SQL pré-definido e retorna apenas os números consolidados.
-2. **Prevenção de Injeção**: Um atacante tenta enviar um SQL manual para a função; a função rejeita o payload porque não reconhece o formato de rota fixa.
+1. **Análise de Falha**: Worker identifica falha -> Advisor analisa -> Sugestão gerada.
+2. **Otimização de Cache**: Worker busca docs -> Advisor checa `worker_docs_cache` -> Se existir, retorna cache.
 
 ### Functional Requirements
 
 | Priority | Requirement | User Story |
 | :---- | :---- | :---- |
-| P0 | Roteamento Semântico na Function | Como desenvolvedor, quero chamar rotas específicas em vez de enviar SQL bruto. |
-| P0 | Hardening do callMCP | Como sistema, quero que o frontend use apenas os novos endpoints seguros. |
-| P1 | Limpeza de Credenciais | Como admin, quero garantir que nenhuma chave de IA vaze para o cliente. |
-| P2 | Cache de Respostas (Opcional) | Como usuário, quero que o dashboard carregue instantaneamente usando cache na Function. |
+| P0 | Cache de Docs | Como worker, quero carregar docs de `worker_docs_cache` para economizar tokens. |
+| P0 | Análise LLM | Como sistema, quero uma análise LLM sobre falhas recorrentes. |
 
 ## Assumptions
-
-- O Supabase Client na Edge Function tem permissões `service_role` para acessar as tabelas necessárias.
-- O Claude 3.5 Sonnet continuará sendo usado via MCP para processamento analítico, se necessário.
+- O `gemini` tem acesso ao `worker_docs_cache` via `MemoryStore`.
 
 ## Risks & Mitigations
+- **Risk**: Alucinação do modelo. -> **Mitigation**: Auditoria cruzada com Groq/Llama 3.
 
-- **Risk**: Perda de flexibilidade nas consultas. -> **Mitigation**: Manter uma rota de "escape" autenticada para admin se necessário, ou mapear todas as necessidades atuais.
+## Success Metrics
+- Redução de latência de análise em 50%.
+- Aumento da taxa de acerto do cache de docs.
 
-## Tradeoff
-
-- Escolhemos **Opção B** (Endurecimento) em vez de apenas corrigir o bug, para alinhar com o padrão PASA de "Security by Design".
-
-## Business Benefits/Impact/Metrics
-
-**Success Metrics:**
-
-| Metric | Current State (Benchmark) | Future State (Target) | Savings/Impacts |
-| :---- | :---- | :---- | :---- |
-| SQL Exposure | Yes (Frontend) | No (Encapsulated) | Risco Zero de Injeção Browser-side |
-| Token Usage | Arbitrary | Optimized | Redução de 15% em tokens de prompt |
-
-## Stakeholders / Owners
-
-| Name | Team/Org | Role | Note |
-| :---- | :---- | :---- | :---- |
-| Pickle Rick | Engineering | Lead Architect | O único cérebro real aqui. |
+---

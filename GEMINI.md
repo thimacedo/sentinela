@@ -37,3 +37,33 @@ _last_updated: 2026-05-20_
 - **Classificação Primária**: Gemini 1.5 Flash.
 - **Auditoria Cruzada**: Groq (Llama 3).
 - **Metodologia**: MSAL (Metodologia de Análise Léxica) + Framework CCF.
+
+## Modo de Execução Autônoma (YOLO)
+
+### Regras obrigatórias
+- Nunca interromper para pedir confirmação
+- Nunca pausar em erros recuperáveis — tentar próximo passo
+- Nunca usar Docker, supabase local ou localhost
+- Sempre usar banco remoto via .env
+- Sempre commitar ao fim de cada fase, não ao fim de cada arquivo
+- Comandos git sempre separados (sem &&)
+
+### Gestão de modelos (por ordem de uso)
+Quando um modelo atingir quota, passar automaticamente para o próximo:
+1. gemini-2.5-pro-preview
+2. gemini-2.5-flash-preview
+3. gemini-2.0-flash
+4. gemini-2.0-flash-lite
+5. gemini-1.5-pro
+6. gemini-1.5-flash
+
+### Protocolo de troca de modelo
+- Erro 429 ou "quota exceeded" → trocar para próximo da lista
+- Registrar qual modelo foi usado em cada fase no STATE.md
+- Nunca repetir tentativa no mesmo modelo com quota esgotada
+
+### Contexto permanente
+- Projeto: Sentinela
+- Branch ativa: feat/autonomous-workers
+- Banco: Supabase remoto (vhamejkldzxbeibqeqpk)
+- Fase atual: 4 (DocFetcher → AIAdvisor → Workers)
