@@ -1,7 +1,7 @@
 import asyncio
 from workers.base.memory_store import MemoryStore
 from workers.ai.doc_fetcher import DocFetcher
-from workers.ai.advisor import AIAdvisor
+from workers.ai.ai_advisor import AIAdvisor
 
 class FakeWorker:
     worker_id = "instagram-worker-01"
