@@ -1,82 +1,64 @@
-# Enhance Data Ingestion and Analysis Capabilities PRD
+# Hardened Edge Function & Proxy PRD (PASA v50.1)
 
 ## HR Eng
 
-| Enhance Data Ingestion and Analysis Capabilities PRD |  | This PRD outlines the strategy to improve the Sentinela Democrática project's data handling capabilities, focusing on faster ingestion, broader source compatibility, and more robust analysis, ultimately enabling more timely and comprehensive insights into digital discourse. |
+| Hardened Edge Function & Proxy PRD |  | Transição de SQL arbitrário para rotas determinísticas na Supabase Edge Function para endurecer a segurança e simplificar o frontend. |
 | :---- | :---- | :---- |
-| **Author**: Pickle Rick **Contributors**: [User] **Intended audience**: Engineering, PM, Design | **Status**: Draft **Created**: Quinta-feira, 7 de maio de 2026 | **Self Link**: [Link] **Context**: [Link] 
+| **Author**: Pickle Rick **Contributors**: Thiago Macedo **Intended audience**: Engineering | **Status**: Draft **Created**: 2026-05-20 | **Context**: Refatoração de Segurança PASA |
 
 ## Introduction
 
-This document details the requirements for enhancing the Sentinela Democrática's data ingestion and analysis infrastructure. The goal is to streamline the process of acquiring, processing, and analyzing various data sources relevant to forensic discourse analysis, ensuring the platform remains cutting-edge and efficient.
+Atualmente, o Dashboard utiliza um proxy que aceita SQL arbitrário. Embora funcional, isso expõe uma superfície de ataque desnecessária. Este projeto visa substituir esse modelo por uma API de rotas fixas (`/kpis`, `/timeline`, etc.) dentro da Edge Function.
 
 ## Problem Statement
 
-**Current Process:** The existing data ingestion and analysis pipeline may be encountering bottlenecks, potentially leading to delays in processing new information and limiting the types of data that can be effectively analyzed. Manual intervention might be required for certain data sources or analysis steps, reducing overall efficiency.
-**Primary Users:** Data analysts, forensic investigators, and project managers who rely on timely and accurate analysis of digital discourse.
-**Pain Points:** Slow processing times, limited support for emerging data sources, potential for manual errors, and challenges in scaling analysis efforts.
-**Importance:** To maintain Sentinela Democrática's effectiveness in monitoring and analyzing digital discourse, especially in critical periods like elections, it is crucial to have a robust, scalable, and efficient data pipeline. This upgrade is needed now to stay ahead of evolving digital communication methods and to ensure comprehensive coverage.
+**Current Process:** O frontend envia strings SQL para a Edge Function `mcp-proxy`, que as repassa ao Claude/MCP.
+**Primary Users:** Engenheiros de monitoramento e administradores do Sentinela.
+**Pain Points:** Risco de injeção de SQL (minimizado mas presente), dependência de prompt engineering no frontend, e payload de rede ineficiente.
+**Importance:** Segurança é prioridade zero no PASA v50. Não podemos ter o browser definindo a lógica de consulta ao banco.
 
 ## Objective & Scope
 
-**Objective:** To significantly improve the efficiency, scalability, and scope of data ingestion and analysis capabilities.
-**Ideal Outcome:** A near real-time, comprehensive data analysis platform capable of ingesting diverse data sources with minimal manual intervention, providing deeper and faster insights.
+**Objective:** Eliminar o envio de SQL do frontend para a nuvem.
+**Ideal Outcome:** Um frontend que chama endpoints semânticos e uma Edge Function que encapsula toda a lógica de dados.
 
-### In-scope or Goals
--   Implement support for new, identified data sources (e.g., emerging social media platforms, specific forum types).
--   Optimize existing ingestion processes for performance and reliability.
--   Enhance the data normalization and cleaning stages to handle a wider variety of data formats.
--   Improve the scalability of analytical processing to handle larger data volumes.
--   Develop or integrate tools for more advanced forensic discourse analysis (e.g., sentiment analysis, hate speech detection refinement).
+### In-scope ou Goals
+- Refatorar a Edge Function `mcp-proxy` para suportar roteamento interno.
+- Implementar as rotas: `get_kpis`, `get_timeline`, `get_top_candidates`, `get_alerts`.
+- Atualizar o `Dashboard.jsx` para consumir esses novos endpoints.
+- Remover definitivamente a `VITE_ANTHROPIC_API_KEY` do ambiente frontend.
 
-### Not-in-scope or Non-Goals
--   Development of entirely new machine learning models for novel forms of analysis (focus is on enhancing existing or integrating known techniques).
--   Retroactive reprocessing of all historical data unless specifically required for a new analysis feature.
--   User interface redesign for the analysis results presentation (focus is on backend processing).
+### Not-in-scope ou Non-Goals
+- Alteração no schema do banco de dados.
+- Mudança na UI/UX do Dashboard (além da fiação interna).
 
 ## Product Requirements
 
-[Detailed requirements. Include Clear CUJs here.]
-
 ### Critical User Journeys (CUJs)
-1.  **Ingest New Social Media Feed:**
-    1.  A new data source (e.g., a niche social media platform) is identified as relevant.
-    2.  The system is configured to ingest data from this new source.
-    3.  The data is successfully ingested, normalized, and stored.
-    4.  The ingested data is available for analysis within a specified timeframe (e.g., < 1 hour).
-2.  **Perform Enhanced Hate Speech Analysis:**
-    1.  A dataset (new or existing) is selected for analysis.
-    2.  The enhanced hate speech detection module is applied.
-    3.  A detailed report, including confidence scores and evidence, is generated.
-    4.  The report is accessible to authorized users within a timely manner (e.g., < 30 minutes for a standard dataset).
+1. **Carregamento Seguro**: O usuário abre o dashboard; o browser solicita `/kpis` via POST para a Edge Function; a Function executa o SQL pré-definido e retorna apenas os números consolidados.
+2. **Prevenção de Injeção**: Um atacante tenta enviar um SQL manual para a função; a função rejeita o payload porque não reconhece o formato de rota fixa.
 
 ### Functional Requirements
 
 | Priority | Requirement | User Story |
 | :---- | :---- | :---- |
-| P0 | Support ingestion of X new data sources identified in Q2. | As a data analyst, I want to easily configure and ingest data from new platforms so that our analysis is comprehensive and up-to-date. |
-| P0 | Optimize existing scraping and ingestion scripts for a 25% reduction in processing time. | As a system operator, I want ingestion processes to be faster and more efficient so that data is available for analysis sooner. |
-| P1 | Implement improved data validation and cleaning to reduce data quality issues by 15%. | As a data analyst, I want cleaner data so that my analysis is more accurate and reliable. |
-| P1 | Enhance the hate speech detection module with refined algorithms and confidence scoring. | As a forensic investigator, I want more accurate hate speech detection with clear confidence levels so that I can trust the findings. |
-| P2 | Develop a mechanism for monitoring and alerting on ingestion failures. | As a system operator, I want to be notified immediately of ingestion failures so that I can resolve them quickly. |
+| P0 | Roteamento Semântico na Function | Como desenvolvedor, quero chamar rotas específicas em vez de enviar SQL bruto. |
+| P0 | Hardening do callMCP | Como sistema, quero que o frontend use apenas os novos endpoints seguros. |
+| P1 | Limpeza de Credenciais | Como admin, quero garantir que nenhuma chave de IA vaze para o cliente. |
+| P2 | Cache de Respostas (Opcional) | Como usuário, quero que o dashboard carregue instantaneamente usando cache na Function. |
 
 ## Assumptions
 
--   The project has access to the necessary APIs or data extraction methods for new data sources.
--   Sufficient compute resources are available to handle increased data volumes and processing demands.
--   Existing infrastructure (database, APIs) can accommodate potential increases in data storage and query load.
+- O Supabase Client na Edge Function tem permissões `service_role` para acessar as tabelas necessárias.
+- O Claude 3.5 Sonnet continuará sendo usado via MCP para processamento analítico, se necessário.
 
 ## Risks & Mitigations
 
--   **Risk**: Difficulty in obtaining API access or reliable data extraction methods for new sources. -> **Mitigation**: Prioritize sources with well-documented APIs or publicly accessible data; develop alternative scraping strategies as a fallback.
--   **Risk**: Performance degradation due to increased data volume or complexity. -> **Mitigation**: Implement robust monitoring, optimize database queries, and consider caching strategies or more powerful compute instances.
--   **Risk**: Incompatibility issues with existing analysis modules. -> **Mitigation**: Thoroughly test new data formats and ingestion pipelines against current analysis tools; refactor analysis modules if necessary.
+- **Risk**: Perda de flexibilidade nas consultas. -> **Mitigation**: Manter uma rota de "escape" autenticada para admin se necessário, ou mapear todas as necessidades atuais.
 
 ## Tradeoff
 
--   **Option 1**: Focus solely on optimizing existing ingestion for current sources. (Pro: Faster implementation. Con: Missed opportunity to expand coverage.)
--   **Option 2**: Broadly expand to new sources and optimize existing ones. (Pro: Comprehensive improvement. Con: Higher complexity and longer development time.)
--   **Chosen**: Option 2, as comprehensive coverage is critical for Sentinela Democrática's mission. We will prioritize key new sources while optimizing existing ones.
+- Escolhemos **Opção B** (Endurecimento) em vez de apenas corrigir o bug, para alinhar com o padrão PASA de "Security by Design".
 
 ## Business Benefits/Impact/Metrics
 
@@ -84,15 +66,11 @@ This document details the requirements for enhancing the Sentinela Democrática'
 
 | Metric | Current State (Benchmark) | Future State (Target) | Savings/Impacts |
 | :---- | :---- | :---- | :---- |
-| Average data ingestion time per source | TBD (Requires measurement) | Reduce by 50% for key sources | Faster access to critical data |
-| Number of supported data sources | TBD (Requires audit) | Increase by 25% | Broader analysis coverage |
-| Hate speech detection accuracy (F1-score) | TBD (Requires testing) | Improve by 10% | More reliable identification of harmful content |
-| System uptime for ingestion pipeline | TBD (Requires measurement) | Maintain >99.9% uptime | Continuous data flow |
+| SQL Exposure | Yes (Frontend) | No (Encapsulated) | Risco Zero de Injeção Browser-side |
+| Token Usage | Arbitrary | Optimized | Redução de 15% em tokens de prompt |
 
 ## Stakeholders / Owners
 
 | Name | Team/Org | Role | Note |
 | :---- | :---- | :---- | :---- |
-| [User] | Sentinela Team | Project Lead | Approves final PRD and requirements. |
-| Data Analysts | Sentinela Team | Users of the system | Provide feedback on data quality and analysis needs. |
-| DevOps/Infra Team | Sentinela Team | Infrastructure Support | Ensure adequate resources and deployment. |
+| Pickle Rick | Engineering | Lead Architect | O único cérebro real aqui. |

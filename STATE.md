@@ -1,18 +1,20 @@
 # 📊 STATE.md - Sentinela Democrática
 
 **Última Atualização:** 2026-05-18
-**Versão Core:** PASA v50.0 (Diamond Real Data)
-**Status do Sistema:** Operação Real Ativada (Zero Mocks)
+**Versão Core:** PASA v50.1 (God Mode Data Layer)
+**Status do Sistema:** Operação Real Ativada (Full React Query)
 
 ## 1. Estado Atual do Ecossistema
-O Sentinela Democrática concluiu a transição para o pipeline de dados 100% reais. O Nó Local (War Room) agora opera com coleta ativa via Playwright, processamento de IA em massa (Gemini/Groq) e auditoria anti-alucinação. Todas as simulações e dados fictícios foram removidos do repositório.
+O Sentinela Democrática concluiu a modernização completa do frontend. O War Room agora é uma Single Page Application (SPA) robusta em Next.js 16, com sincronização em tempo real via React Query e visualização analítica via Recharts. A camada de dados ("God Mode") elimina latências e garante a integridade da informação forense.
 
-## 2. Componentes Principais (v50.0)
+## 2. Componentes Principais (v50.1)
 
-### Frontend (Modernização)
-- **War Room Dashboard:** 100% funcional com Next.js 16 e Tailwind v4.
-- **Integração Supabase:** Componentes `DashboardStats`, `TargetsTab` e `ForensicTab` consumindo dados reais via `@supabase/supabase-js`.
-- **Zero Mocks:** Remoção total de placeholders estáticos; o frontend agora reflete fielmente o estado das tabelas `candidatos` e `comentarios`.
+### Frontend (Modernização Completa)
+- **War Room Dashboard:** Interface unificada com abas funcionais para Geral, Forense, Alvos, Dossiês, Alertas, Rede e Fila.
+- **God Mode Data Layer:** Implementação total de React Query para cache, pre-fetching e auto-refresh (10s-60s).
+- **Análise Visual:** Gráficos de série temporal integrados para detecção de picos de atividade hostil.
+- **Telemetria de Workers:** Monitoramento em tempo real da saúde e vazão dos motores de coleta.
+
 
 ### Nó Local & Coleta (Real)
 - **InstagramWorker:** Ativado com motor Playwright (`scraper_headless.py`). Realiza raspagem via navegação por modal e extração de comentários autênticos.

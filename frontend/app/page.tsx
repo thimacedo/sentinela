@@ -1,11 +1,15 @@
-import DashboardStats from "@/components/warroom/DashboardStats";
+import WarRoomOverview from "@/components/warroom/WarRoomOverview";
 
 export default function WarRoom() {
   return (
     <div className="p-8">
-      <h1 className="text-3xl font-bold text-tactical-accent mb-6">WAR ROOM</h1>
-      <DashboardStats />
-      {/* Aqui podem entrar outros componentes do dashboard principal no futuro */}
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-tactical-accent">WAR ROOM</h1>
+        <div className="text-[10px] font-mono text-tactical-accent/40">
+          SISTEMA SENTINELA // PASA v50.0
+        </div>
+      </div>
+      <WarRoomOverview />
     </div>
   );
 }

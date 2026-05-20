@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import Providers from "@/components/Providers";
 
 export const metadata: Metadata = {
   title: "Sentinela Democrática",
@@ -15,7 +16,9 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body className="antialiased">
         <div className="scanline" />
-        {children}
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );

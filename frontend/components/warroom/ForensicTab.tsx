@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -15,37 +15,25 @@ interface Comment {
 }
 
 export default function ForensicTab() {
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: comments = [], isLoading } = useQuery<Comment[]>({
+    queryKey: ['forensic-comments'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('comentarios')
+        .select('id, texto_bruto, pasa_classificacao, risco_score, created_at, candidatos(username)')
+        .not('pasa_classificacao', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(50);
 
-  useEffect(() => {
-    async function fetchComments() {
-      try {
-        const { data, error } = await supabase
-          .from('comentarios')
-          .select('id, texto_bruto, pasa_classificacao, risco_score, created_at, candidatos(username)')
-          .not('pasa_classificacao', 'is', null)
-          .order('created_at', { ascending: false })
-          .limit(50);
-
-        if (error) throw error;
-        
-        // Flattening the join for simplicity
-        const formattedData = (data || []).map((c: any) => ({
-          ...c,
-          username_alvo: c.candidatos?.username || 'N/A'
-        }));
-
-        setComments(formattedData);
-      } catch (error) {
-        console.error("Erro ao buscar comentários:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchComments();
-  }, []);
+      if (error) throw error;
+      
+      return (data || []).map((c: any) => ({
+        ...c,
+        username_alvo: c.candidatos?.username || 'N/A'
+      }));
+    },
+    refetchInterval: 15000, // Atualiza a cada 15 segundos para monitoramento em tempo real
+  });
 
   const getRiskVariant = (risk: string) => {
     switch (risk?.toUpperCase()) {
@@ -72,7 +60,7 @@ export default function ForensicTab() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {loading ? (
+          {isLoading ? (
             <TableRow>
               <TableCell colSpan={4} className="text-center py-8 text-gray-500 animate-pulse font-mono">
                 Descriptografando pacotes de dados...
