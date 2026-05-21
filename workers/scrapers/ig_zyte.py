@@ -276,22 +276,25 @@ class IGZyteWorker(BaseWorker):
         if not comments:
             return stats
 
+        sent_ids = {c["id_externo"] for c in comments if c.get("id_externo")}
         try:
             res = self.db.table('comentarios').upsert(
                 comments,
-                on_conflict="id_externo"
+                on_conflict="id_externo",
+                ignore_duplicates=True
             ).execute()
-            
+
             stats.inserted = len(res.data)
+            stats.duplicated = len(sent_ids) - stats.inserted
             stats.inserted_ids = [str(item['id']) for item in res.data]
             stats.success = True
-            self.logger.info("✅ Persistência concluída | @%s | inseridos=%s", target.username, stats.inserted)
-            
+            self.logger.info("✅ Persistência concluída | @%s | inseridos=%s | duplicados=%s", target.username, stats.inserted, stats.duplicated)
+
         except Exception as e:
             self.logger.error("❌ Falha na persistência: %s", e)
             stats.failed = len(comments)
             stats.success = False
-            
+
         return stats
 
     async def classify_comments(self, inserted_ids: list[str]) -> ClassifyStats:
@@ -330,6 +333,10 @@ class IGZyteWorker(BaseWorker):
 
     async def run_cycle(self) -> CycleResult:
         self.cycle += 1
+        # Limpa seen_targets a cada ciclo para permitir re-visita de alvos
+        self.seen_targets.clear()
+        self.seen_queue_ids.clear()
+
         target = self.claim_next_target()
 
         if not target:
@@ -344,10 +351,13 @@ class IGZyteWorker(BaseWorker):
             source_used = "zyte"
             if not comments:
                 self.logger.info("⚠️ [Zyte] Extração falhou ou retornou vazia. Tentando fallback Playwright...")
-                from core.instagram_headless import InstagramHeadlessScraper
-                headless = InstagramHeadlessScraper()
-                comments = await headless.run(targets=[target.username])
-                source_used = "fallback_headless"
+                try:
+                    from core.instagram_headless import InstagramHeadlessScraper
+                    headless = InstagramHeadlessScraper()
+                    comments = await headless.run(targets=[{"username": target.username}])
+                    source_used = "fallback_headless"
+                except Exception as fallback_err:
+                    self.logger.warning("⚠️ [Zyte] Fallback headless indisponível: %s", fallback_err)
 
             if not comments:
                 self.queue.rotate_target(target)

@@ -61,10 +61,10 @@ class BaseWorker(ABC):
         ...
 
     @abstractmethod
-    async def run_cycle(self) -> WorkerMetrics:
+    async def run_cycle(self) -> "CycleResult":
         """
         Um ciclo completo de coleta.
-        Deve retornar WorkerMetrics mesmo em caso de falha parcial.
+        Deve retornar CycleResult mesmo em caso de falha parcial.
         """
         ...
 

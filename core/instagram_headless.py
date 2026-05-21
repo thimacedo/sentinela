@@ -2,13 +2,17 @@ import time
 import os
 import re
 import json
+import random
 import asyncio
+import logging
 from datetime import datetime, timezone, timedelta
 from typing import List, Optional, Dict, Any
 from dotenv import load_dotenv
 from supabase import create_client
 from playwright.async_api import async_playwright, Browser, Page, TimeoutError as PlaywrightTimeoutError
 from processing.text_processor import clean_comment
+
+logger = logging.getLogger("instagram_headless")
 
 load_dotenv()
 
@@ -130,13 +134,21 @@ class InstagramHeadlessScraper:
         }).execute()
         logger.warning(f"⏳ Alvo {username} em cooldown até {next_allowed} (strike {strikes})")
 
-async def _is_profile_not_found(self):
+    async def _is_profile_not_found(self) -> bool:
+        """Verifica se a página atual indica perfil inexistente."""
+        try:
+            content = await self.page.content()
+            return "Página não disponível" in content or "Sorry, this page" in content
+        except Exception:
+            return False
 
-    async def run(self, limit: int = 15, targets: List[Dict] = None, test_username: str = None):
+    async def run(self, limit: int = 15, targets: List[Dict] = None, test_username: str = None) -> List[Dict]:
         start_time = time.perf_counter()
         total_comments = 0
         error = None
         
+        collected_comments: List[Dict] = []
+
         try:
             print("🧠 [Headless] Iniciando Instagram Headless Scraper (Rotation Mode)...")
             
@@ -144,7 +156,7 @@ async def _is_profile_not_found(self):
             if not self.active_account:
                 error = "Nenhuma identidade disponível."
                 print(f"❌ [Headless] {error}")
-                return
+                return collected_comments
 
             print(f"👤 [Headless] Usando conta: @{self.active_account['username']}")
 
@@ -174,14 +186,14 @@ async def _is_profile_not_found(self):
                             targets = self._load_pending_targets(limit)
                     
                     for candidate in targets:
-                        success = await self._scrape_candidate(candidate)
-                        if not success:
+                        result = await self._scrape_candidate(candidate)
+                        if result is None:
                             error = f"Possível Shadowban ou Bloqueio na conta @{self.active_account['username']}"
                             print(f"⚠️ [Headless] {error}")
                             await self.im.mark_shadowbanned(self.active_account['id'])
                             break
-                        # Supondo que _scrape_candidate retorna número de comentários ou podemos buscar
-                        # Ajustar conforme implementação real de _scrape_candidate
+                        if isinstance(result, list):
+                            collected_comments.extend(result)
                 
                 await self.im.update_usage(self.active_account['id'])
                 await self.browser.close()
@@ -191,8 +203,10 @@ async def _is_profile_not_found(self):
             print(f"💥 [Headless] Erro no run: {error}")
         finally:
             duration_ms = int((time.perf_counter() - start_time) * 1000)
-            target_str = ",".join([t['username'] for t in targets]) if targets else "N/A"
-            self._log_kpi(4, target_str, total_comments, duration_ms, error)
+            target_str = ",".join([t['username'] if isinstance(t, dict) else str(t) for t in (targets or [])])
+            self._log_kpi(4, target_str, len(collected_comments), duration_ms, error)
+
+        return collected_comments
 
     async def _ensure_logged_in(self) -> bool:
         try:
@@ -218,156 +232,78 @@ async def _is_profile_not_found(self):
         cookies = await self.page.context.cookies()
         return any(cookie.get('name') == 'sessionid' and cookie.get('value') for cookie in cookies)
 
-    async def _fetch_profile_data(self, username: str) -> Optional[Dict[str, Any]]:
-        """Fetch profile data using GraphQL API."""
-        try:
-            # First get user ID from profile page
-            await self.page.goto(f"https://www.instagram.com/{username}/", timeout=60000)
-            await asyncio.sleep(3)
-            
-            # For testing, use known user IDs
-            known_ids = {
-                'edinhosilvapt': '310859039',
-                'sergiopetecao': '123456789'  # placeholder, need to find real ID
-            }
-            
-            user_id = known_ids.get(username)
-            if not user_id:
-                # Extract user ID from page content
-                user_id = await self.page.evaluate("""() => {
-                    // Try from window._sharedData if exists
-                    if (window._sharedData && window._sharedData.entry_data && window._sharedData.entry_data.ProfilePage) {
-                        return window._sharedData.entry_data.ProfilePage[0].graphql.user.id;
-                    }
-                    
-                    // Try from scripts
-                    const scripts = Array.from(document.querySelectorAll('script'));
-                    for (let script of scripts) {
-                        const match = script.innerText.match(/"id":"(\\d+)"/);
-                        if (match) return match[1];
-                    }
-                    
-                    // Try from meta tags
-                    const metaUserId = document.querySelector('meta[property="instapp:owner_user_id"]');
-                    if (metaUserId) return metaUserId.getAttribute('content');
-                    
-                    return null;
-                }""")
-            
-            if not user_id:
-                print(f"❌ [Headless] Could not extract user ID for @{username}")
-                return None
-            
-            # For testing, use mock data for known profiles
-            mock_data = {
-                'edinhosilvapt': {
-                    "id": "310859039",
-                    "username": "edinhosilvapt",
-                    "full_name": "Edinho Silva",
-                    "biography": "Deputado Federal pelo PT",
-                    "external_url": None,
-                    "followed_by": {"count": 12345},
-                    "follows": {"count": 567},
-                    "media": {"count": 42},
-                    "is_business_account": False,
-                    "is_private": False,
-                    "is_verified": True,
-                    "profile_pic_url_hd": "https://example.com/photo.jpg"
-                }
-            }
-            
-            if username in mock_data:
-                print(f"🎭 [Headless] Using mock data for @{username}")
-                profile_data = mock_data[username]
-                # Normalize the data structure
-                return {
-                    'username': profile_data.get('username'),
-                    'full_name': profile_data.get('full_name'),
-                    'biography': profile_data.get('biography'),
-                    'follower_count': profile_data.get('followed_by', {}).get('count', 0),
-                    'following_count': profile_data.get('follows', {}).get('count', 0),
-                    'media_count': profile_data.get('media', {}).get('count', 0),
-                    'is_verified': profile_data.get('is_verified', False),
-                    'is_private': profile_data.get('is_private', False),
-                    'profile_pic_url': profile_data.get('profile_pic_url_hd'),
-                    'external_url': profile_data.get('external_url')
-                }
-            else:
-                # Make GraphQL request
-                async with self.page.expect_response(lambda r: "graphql" in r.url and "query" in r.url) as response_info:
-                    await self.page.evaluate(f"""
-                        fetch('/api/graphql', {{
-                            method: 'POST',
-                            headers: {{
-                                'Content-Type': 'application/x-www-form-urlencoded',
-                                'X-CSRFToken': document.cookie.split('csrftoken=')[1]?.split(';')[0] || '',
-                                'X-Instagram-AJAX': document.querySelector('script')?.innerText.match(/window\\._sharedData = (\\{{"config":.*?\\}});/)?.[1] || '',
-                                'X-Requested-With': 'XMLHttpRequest'
-                            }},
-                            body: new URLSearchParams({{
-                                'doc_id': '27077551658551360',
-                                'variables': JSON.stringify({{
-                                    "enable_integrity_filters": true,
-                                    "id": "{user_id}",
-                                    "__relay_internal__pv__PolarisCannesGuardianExperienceEnabledrelayprovider": true,
-                                    "include_chaining": true,
-                                    "include_reel": true,
-                                    "include_suggested_users": false,
-                                    "include_logged_out_extras": false,
-                                    "include_highlight_reels": true,
-                                    "include_live_status": true
-                                }})
-                            }})
-                        }})
-                    """)
-                
-                response = await response_info.value
-                if response.status != 200:
-                    print(f"❌ [Headless] GraphQL request failed with status {response.status}")
-                    return None
-                
-                profile_data = await response.json()
-                profile_data = profile_data.get('data', {}).get('user', {})
-                
-        except Exception as e:
-            print(f"❌ [Headless] Error fetching profile data: {e}")
-            return None
 
-    async def _scrape_candidate(self, candidate: Any) -> bool:
+
+    async def _scrape_candidate(self, candidate: Any) -> Optional[List[Dict]]:
         if isinstance(candidate, str):
             username = candidate
         else:
             username = candidate.get('username')
             
         if not username:
-            return False
+            return None
             
         print(f"🎯 [Headless] @{username}...")
         try:
-            # Fetch profile data using GraphQL
-            profile_data = await self._fetch_profile_data(username)
-            if not profile_data:
-                print(f"❌ [Headless] Failed to fetch profile data for @{username}")
-                return False
-            
-            # Check if profile has posts
-            media_count = profile_data.get('media_count', 0)
-            if media_count == 0:
-                print(f"⚠️ [Headless] @{username} has no posts")
-                return False
-            
-            # Update candidate data in database
-            candidate_id = candidate.get('id') if isinstance(candidate, dict) else username
-            self._update_candidate_data(candidate_id, profile_data)
-            
-            # Get recent posts (we'll need to fetch posts separately)
-            # For now, just mark as scraped
-            print(f"✅ [Headless] @{username} scraped successfully ({media_count} posts)")
-            return True
+            await self.page.goto(f"https://www.instagram.com/{username}/", timeout=60000)
+            await asyncio.sleep(3)
+
+            if await self._is_profile_not_found():
+                print(f"❌ [Headless] Perfil @{username} não encontrado.")
+                return []
+
+            # Coleta shortcodes dos posts via DOM
+            shortcodes = await self.page.evaluate("""
+                () => Array.from(document.querySelectorAll('a[href*="/p/"], a[href*="/reel/"]'))
+                    .map(a => a.href.match(/\/(p|reel)\/([^/]+)\//)?.[2])
+                    .filter(Boolean)
+                    .slice(0, 3)
+            """)
+
+            comments: List[Dict] = []
+            for shortcode in shortcodes:
+                post_comments = await self._collect_post_comments(username, shortcode)
+                comments.extend(post_comments)
+
+            print(f"✅ [Headless] @{username}: {len(comments)} comentários coletados")
+            return comments
             
         except Exception as e:
             print(f"❌ [Headless] Error scraping @{username}: {e}")
-            return False
+            return None
+
+    async def _collect_post_comments(self, username: str, shortcode: str) -> List[Dict]:
+        """Coleta comentários de um post específico via DOM."""
+        try:
+            await self.page.goto(f"https://www.instagram.com/p/{shortcode}/", timeout=60000)
+            await asyncio.sleep(4)
+
+            raw_comments = await self.page.evaluate("""
+                () => Array.from(document.querySelectorAll('div.x9f619 span[dir="auto"], span._ap30'))
+                    .map(el => el.innerText.trim())
+                    .filter(txt => txt.length > 2)
+            """)
+
+            now = datetime.now(timezone.utc).isoformat()
+            return [
+                {
+                    "id_externo": f"headless_{shortcode}_{i}",
+                    "texto_bruto": text,
+                    "autor_username": "unknown",
+                    "data_publicacao": now,
+                    "data_coleta": now,
+                    "post_shortcode": shortcode,
+                    "plataforma": "INSTAGRAM",
+                    "rede_social": "INSTAGRAM",
+                    "candidato_id": username,
+                    "processado_ia": False,
+                    "mined": True,
+                }
+                for i, text in enumerate(raw_comments[:MAX_COMMENTS_PER_POST])
+            ]
+        except Exception as e:
+            print(f"❌ [Headless] Erro ao coletar post {shortcode}: {e}")
+            return []
 
     def _update_candidate_data(self, candidate_id: str, profile_data: Dict[str, Any]):
         """Update candidate data in database with profile information."""
