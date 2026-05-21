@@ -1,48 +1,89 @@
-# Sentinela - Referência Arquitetural de Engenharia (PASA v50.1)
+# Sentinela — Referencia Arquitetural (PASA v50.1)
+_last_updated: 2026-05-21_
 
-## 1. Visão de Sistema & Missão
-O Sentinela é um ecossistema de análise linguística automatizada e monitoramento em larga escala. Sua missão é a **extração, normalização, classificação semântica e auditoria** de discursos em plataformas Meta, operando sob requisitos rigorosos de resiliência anti-bot, integridade de dados e conformidade legal.
+## 1. Missao
 
-## 2. Topologia de Infraestrutura (Asynchronous-Hybrid)
-* **Node Local (Orquestrador):** `local_server.py` executado via `watchdog.py`. Gerencia filas, cooldowns, orquestração de workers e persistência local.
-* **Workers (Processos Assíncronos):** `InstagramWorker` (e outros) processam alvos em paralelo, utilizando `asyncio` para I/O-bound tasks.
-* **Motor de Ingestão (Zyte Integration):** Sistema híbrido `Zyte API` (Primário) + `Playwright` (Fallback). O motor decide dinamicamente a estratégia de extração (API JSON -> Renderização DOM -> Regex/Scraping).
-* **Camada de Persistência (Supabase):** PostgreSQL configurado com Row Level Security (RLS). Estrutura relacional densa (`candidatos`, `comentarios`, `anuncios_pasa`, `fila_coleta`, `worker_sessions`).
-* **Front-end:** SPA React, desacoplada, servida via Vercel, consumindo snapshots JSON/CSV gerados pelo pipeline de backend para evitar query load excessivo no Supabase.
+Plataforma de inteligencia politica para deteccao automatizada de discurso de odio, desinformacao e atividade de milicia digital no Instagram brasileiro. Foco nas eleicoes de 2026.
 
-## 3. Protocolo PASA (Metodologia de Análise Léxica)
-O núcleo de inteligência é o **PASA v50.1**. Todo dado coletado passa por este pipeline de transformação:
-1. **Sanitização (InstagramWorker):** Remoção de ruído, normalização de caracteres e limpeza de URLs (Regex + Hash-mapping para ID_EXTERNO).
-2. **Normalização (core.normalizer):** Ajuste léxico para entrada nos modelos de IA.
-3. **Classificação (IA Gateway):** Utiliza motor `Gemini 1.5 Flash` para classificação de risco e detecção de padrões de ódio.
-4. **Auditoria (PASA Auditor):** Cross-check via `Groq/Llama 3` para validação de falsos positivos.
-5. **Persistência de Dados:** Registro com data/hora UTC e rastreabilidade total da origem. Termos proibidos: "forense", "prova", "evidência" — usar "indício", "informação", "análise analítica".
+## 2. Topologia de Infraestrutura
 
-## 4. Resiliência Operacional (The Guardian Logic)
-O sistema possui mecanismos de auto-cura:
-* **Circuit Breaker:** `InstagramWorker` verifica limites de requisições e falhas consecutivas antes de prosseguir.
-* **Watchdog Guardião:** `watchdog.py` monitora o ciclo de vida do servidor. Se `local_server.py` travar, o watchdog realiza:
-    1. Reinicialização do processo.
-    2. Validação de dependências (`pip install -r requirements.txt`).
-    3. Alerta crítico via WhatsApp (CallMeBot).
-* **Zyte Health Check:** Rotina de ping (`zyte_checker.py`) a cada 30 min para garantir que o motor de scraping não está bloqueado.
+```
+[Local / Render]
+  watchdog.py
+    └── main_runner.py
+          └── SentinelaOrchestrator
+                ├── IGZyteWorker      (Zyte API — Tier 3)
+                └── IGHeadlessWorker  (Playwright — Tier 2)
 
-## 5. Estratégia de Coleta Equalitária
-O sistema evita o gasto predatório de créditos Zyte através de:
-* **Priority-Based Batching:** Apenas alvos com `prioridade_coleta = 10` (Elite) são processados intensivamente.
-* **Temporal Sharding:** Cooldown fixo de 12 horas entre raspagens do mesmo alvo.
-* **Batch Limiting:** Máximo de 3 perfis por ciclo, com pausa de 60 segundos entre cada, suavizando a carga no Instagram e evitando detecção.
+[Vercel]
+  proposta_frontend/   →  /api/*  →  api/index.py (FastAPI)
+  supabase/functions/mcp-proxy/  (Edge Function — SQL semantico)
 
-## 6. Governança e Compliance
-* **Filtros Jurídicos:** Perfis marcados como `status_monitoramento = 'Pausado'` são saltados pelo orquestrador.
-* **Audit Trail:** Logs de divergência de username em `divergent_usernames.log` para recalibragem humana.
-* **Credenciais:** Uso de `.env` para gestão de segredos. Proibição absoluta de hardcoding. `SERVICE_KEY` exclusiva para backend — nunca exposta no frontend.
-* **Terminologia:** Seguir estritamente as restrições de `GEMINI.md` — seção Proteção Jurídica.
+[Supabase]
+  PostgreSQL + RLS
+  Tables: candidatos, comentarios, fila_coleta, worker_rewards,
+          worker_suggestions, worker_sessions, dossies, threat_alerts
+```
 
-## 7. SOP de Troubleshooting (Procedimento Padrão)
-| Sintoma | Ação Técnica |
-| :--- | :--- |
-| `[ALERTA USERNAME]` | Verificar username em `divergent_usernames.log` e atualizar banco. |
-| `Supabase 🔴 OFFLINE` | Verificar RLS Policies e conexão em `core/supabase_service.py`. |
-| `Falha Zyte API` | Verificar `ZYTE_API_KEY` no `.env` e rodar `core/zyte_checker.py`. |
-| Drift de KPIs | Executar `scripts/check_drift.py` e forçar `scripts/update_kpis.py`. |
+## 3. Protocolo PASA v50.1
+
+Todo comentario coletado passa pelo pipeline:
+
+1. **Coleta** — Zyte API (JSON) → Browser Rendering → DOM fallback → Playwright
+2. **Normalizacao** — `core/normalizer.py`
+3. **Persistencia** — upsert `id_externo` (idempotente)
+4. **Classificacao** — `AIService.classify_text()` cascade Groq → Mistral → OpenRouter
+5. **Auditoria** — `pasa_auditor.py` + `AIAdvisor` (condicional, score<40)
+6. **Alertas** — `AlertManager` → WhatsApp / Firebase
+
+Categorias PASA: `NEUTRO`, `XENOFOBIA_REGIONAL`, `RACISMO_RELIGIOSO`, `VIOLENCIA_GENERO`, `MILICIA_DIGITAL`, `RACISMO_ESTRUTURAL`, `MISOGINIA_POLITICA`
+
+## 4. Resiliencia Operacional
+
+- **Circuit Breaker** — por provider de IA e por Zyte API (falhas fatais abrem por 1h, rate limit por 5min)
+- **Watchdog** — monitora main_runner.py, reinicia em caso de crash
+- **rotate_target idempotente** — upsert com on_conflict, nunca derruba por 23505
+- **Blacklist de slots** — slots com login wall bloqueados no ciclo atual
+- **Fallback em cascata** — Zyte JSON → Zyte Browser → Playwright headless
+- **active_targets** — workers paralelos nunca processam o mesmo alvo
+
+## 5. Estrategia de Coleta
+
+- **Fila primaria**: `fila_coleta` (status=PENDENTE)
+- **Fallback**: `candidatos` (order by last_scraped_at ASC)
+- **Cooldown**: `last_scraped_at` atualizado apos coleta bem-sucedida
+- **Paginacao**: `next_min_id` ate `max_comments_per_post=100` por post
+- **Limite IA**: 10 classificacoes por ciclo para preservar circuit breakers
+
+## 6. Seguranca
+
+- SQL arbitrario bloqueado na Edge Function — apenas `{ action }` aceito
+- `SUPABASE_SERVICE_KEY` exclusivo do backend
+- `configs/instagram_storage_state.json` no .gitignore e .vercelignore
+- AIAdvisor: apenas sugestoes com `status=pending_review` — nunca auto-aplica
+- Sem hardcoding de credenciais — tudo via variaveis de ambiente
+
+## 7. Frontend
+
+- **Oficial**: `proposta_frontend/` — Next.js 16, React 19, Tailwind v4, shadcn/ui
+- **Deploy**: Vercel (`Root Directory=proposta_frontend`)
+- **Comunicacao**: `/api/*` FastAPI — sem SQL direto, sem chaves expostas
+- **Tabs**: War Room, Analise Forense, Alvos, Dossies, Alertas, Rede, Fila de Coleta
+
+## 8. SOP de Troubleshooting
+
+| Sintoma | Acao |
+|---|---|
+| Login Wall Zyte slot=X | Renovar INSTAGRAM_SESSIONID_X |
+| circuit_open zyte_api | Aguardar 10min ou verificar ZYTE_API_KEY |
+| no_target_available | Normal — seen_targets limpo a cada ciclo |
+| duplicate key fila_coleta | Corrigido — rotate_target em finally |
+| IA classificados=0 | Verificar GROQ/MISTRAL/OPENROUTER API keys |
+| score=0 tier=dry_run | Worker sem sessao valida ou sem target |
+| Supabase offline | Verificar RLS policies e SUPABASE_URL/KEY |
+
+## 9. Legado
+
+- `archive_v17_2026/` — nao importar
+- `.legacy_frontend/` — nao usar
+- `src/` (Dashboard.jsx vanilla) — nao deployado, substituido por proposta_frontend

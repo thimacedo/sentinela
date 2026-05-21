@@ -1,39 +1,104 @@
-# Sistema de Recompensas e Quality Gate de Workers (Worker Ledger)
+# Worker Ledger System — Sentinela v50.1
+_last_updated: 2026-05-21_
 
-Este sistema atua como uma camada de auditoria e garantia de qualidade (Quality Gate) para todos os dados coletados pelos workers do Sentinela Democrática.
+## Visao Geral
 
-## 🎯 Objetivos
-- Garantir a integridade dos dados antes da persistência no Supabase.
-- Atribuir pontuações (recompensas/penalidades) aos workers com base na qualidade da extração.
-- Identificar proativamente falhas de stealth, shadowbans ou problemas de infraestrutura.
+O sistema de recompensas avalia a performance de cada worker por ciclo, atribui score/tier/badges e persiste no Supabase (`worker_rewards`). Intervalos entre ciclos sao dinamicos baseados no tier.
 
-## ⚖️ Regras de Pontuação
-O `WorkerValidator` avalia cada payload e aplica as seguintes pontuações:
+## Calculo de Score (0-100)
 
-| Cenário | Pontuação | Ação |
-| :--- | :---: | :--- |
-| **Extração Limpa** | +15 | Dado persistido no Supabase. |
-| **Timeout / Erro de Stealth** | -10 | Dado descartado. |
-| **Dados Inválidos / Nulos / Erros** | -20 | Dado descartado. Registro imediato no log. |
+```
+Base: 40 pontos (ciclo real com target e db_success)
 
-### Critérios de Invalidação:
-- Conteúdo contendo strings de erro padrão (ex: `[Conteúdo do comentário não pôde ser recuperado]`).
-- Payloads nulos ou vazios.
-- Datas de coleta zeradas (`00:00:00`).
+Bonus:
+  + min(extracted * 1.0, 15)    # volume coletado
+  + min(inserted  * 2.0, 25)    # persistencia nova
+  + min(classified * 1.5, 15)   # classificacao IA
+  + min(duplicated * 0.3, 5)    # upsert saudavel
+  + 10 (se success_rate >= 95% e failed == 0)
 
-## 📊 Auditoria do Ledger
-O estado atual das notas dos workers pode ser consultado no arquivo:
-`metrics/performance_ledger.json`
+Penalidade:
+  - min(failed * 5.0, 35)       # falhas
 
-### Estrutura do Arquivo:
-- `workers`: Contém o score acumulado, total de tarefas, tarefas válidas e inválidas por worker.
-- `history`: Um log cronológico das últimas 1000 avaliações, incluindo o motivo do descarte ou aceitação.
+Casos especiais:
+  0.0  — simulated=True
+  5.0  — sem target
+  10.0 — erro ou db_success=False
+  15.0 — extracted=0
+  20.0 — inserted+duplicated=0
+```
 
-## 🛠️ Como Auditar
-Para auditar o sistema manualmente:
-1. Abra o arquivo `metrics/performance_ledger.json`.
-2. Verifique o campo `score`. Workers com score negativo constante devem ser revisados (atualização de seletores ou rotação de proxies).
-3. Verifique o `history` para entender os motivos frequentes de falha (`reason`).
+## Tiers e Intervalos
 
-## 🚀 Integração Técnica
-O validador é instanciado pelo `Orchestrator` e injetado nos scrapers ativos. Nenhum dado deve chegar ao banco de dados sem passar pelo método `evaluate_payload()`.
+| Tier | Score | Intervalo | Significado |
+|---|---|---|---|
+| platinum | >= 85 | 120s | Performance maxima |
+| gold | >= 70 | 180s | Alta performance |
+| silver | >= 50 | 300s | Performance normal |
+| bronze | >= 25 | 480s | Performance baixa |
+| critical | < 25 | 600s | Degradado |
+| db_failed | — | 600s | Falha de persistencia |
+| idle | — | 300s | Sem target disponivel |
+| dry_run | — | 300s | Ciclo simulado |
+
+## Badges
+
+| Badge | Criterio |
+|---|---|
+| Persistencia OK | failed=0 e inserted>0 |
+| IA OK | classifier_success=True e classified>=inserted |
+| Alta performance | score>=85 |
+| Upsert saudavel | duplicated>0 e inserted>0 |
+
+## AIAdvisor
+
+Acionado apenas quando `score < 40` ou `tier in (critical, db_failed)`.
+Salva sugestao em `worker_suggestions` com `status=pending_review`.
+**Nunca aplica patches automaticamente.**
+
+## Tabelas Supabase
+
+### worker_rewards
+```sql
+worker_id    text
+cycle        integer
+score        float
+tier         text
+delta        float
+badges       jsonb
+recommendation text
+timestamp    timestamptz
+```
+
+### worker_suggestions
+```sql
+worker_id    text
+cycle        integer
+suggestion   text
+status       text  -- pending_review | approved | rejected
+timestamp    timestamptz
+```
+
+### worker_metrics
+```sql
+worker_id        text
+cycle            integer
+items_collected  integer
+items_failed     integer
+duration_seconds float
+errors           jsonb
+timestamp        timestamptz
+```
+
+## Auditoria
+
+```bash
+# Ver rewards recentes
+# Supabase: SELECT * FROM worker_rewards ORDER BY timestamp DESC LIMIT 20;
+
+# Ver sugestoes pendentes
+# Supabase: SELECT * FROM worker_suggestions WHERE status = 'pending_review';
+
+# Ledger local
+cat metrics/performance_ledger.json
+```
