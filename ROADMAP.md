@@ -59,3 +59,20 @@ _last_updated: 2026-05-20_
 - [ ] Few-shot dinâmico baseado no `audit_gold_standards` (Padrão Ouro).
 - [ ] Fine-tuning de modelo leve local (Ollama) para reduzir dependência de API.
 
+---
+
+## 🎯 Próximo Ciclo (v50.1) - Foco: Estabilização de Extração
+
+### Status Atual
+- **Infraestrutura:** v50.1 Operacional.
+- **Extração Real:** Integrada no `IGZyteWorker`.
+- **Persistência:** Validada com schema real do Supabase (`data_coleta`, `data_publicacao`, `post_shortcode`).
+- **IA/MCA:** Validada com Mistral (Groq em 400).
+- **Sessões:** Rotação por slots funcional (Slot 1: Original, Slot 2: Fornecido pelo usuário).
+- **Bloqueio:** Instagram detectou Login Wall em testes recentes.
+
+### Pendências Imediatas
+1.  **Depuração de Sessão:** Verificar integridade dos cookies de sessão e necessidade de tokens complementares (`csrftoken`).
+2.  **Expansão de Fallbacks:** Integrar `InstagramWorker` (Playwright) como fallback automático para falhas de Zyte Browser.
+3.  **Estabilização:** Ativar `main_runner.py` em modo persistente com monitoramento de `RewardEngine`.
+
