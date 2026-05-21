@@ -19,19 +19,24 @@ class QueueManager:
         config: dict,
         seen_queue_ids: set,
         seen_targets: set,
+        active_targets: Optional[set] = None,
     ) -> Optional[Target]:
         """
-        Implements the same logic as the original IGZyteWorker.claim_next_target,
-        but receives seen sets as parameters to avoid internal state.
-        Returns a Target or None.
+        Retorna o proximo alvo disponivel.
+        active_targets: set compartilhado entre workers para evitar alvos duplicados no mesmo ciclo.
         """
+        # Unifica seen_targets com active_targets para o check
+        blocked = seen_targets | (active_targets or set())
+
         # Manual target from config or env
         manual_target = config.get("target") or os.getenv("TEST_TARGET_USERNAME")
         if manual_target:
             username = manual_target.strip().lstrip("@")
-            if username in seen_targets:
+            if username in blocked:
                 return None
             seen_targets.add(username)
+            if active_targets is not None:
+                active_targets.add(username)
             return Target(username=username, source="manual_test")
 
         # Pending fila
@@ -44,10 +49,12 @@ class QueueManager:
                 if cand.data:
                     username = cand.data[0]["username"]
             username = str(username).strip().lstrip("@")
-            if queue_id in seen_queue_ids or username in seen_targets:
+            if queue_id in seen_queue_ids or username in blocked:
                 continue
             seen_queue_ids.add(queue_id)
             seen_targets.add(username)
+            if active_targets is not None:
+                active_targets.add(username)
             return Target(
                 username=username,
                 candidato_id=username,
@@ -59,9 +66,11 @@ class QueueManager:
         candidatos = self.db.table("candidatos").select("id,username").eq("status_monitoramento", "Ativo").order("last_scraped_at", desc=False).limit(10).execute()
         for cand in candidatos.data or []:
             username = cand["username"]
-            if username in seen_targets:
+            if username in blocked:
                 continue
             seen_targets.add(username)
+            if active_targets is not None:
+                active_targets.add(username)
             return Target(
                 username=username,
                 candidato_id=cand["id"],

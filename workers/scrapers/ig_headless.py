@@ -31,7 +31,10 @@ class IGHeadlessWorker(BaseWorker):
         self.seen_targets.clear()
         self.seen_queue_ids.clear()
 
-        target = self.queue.claim_next_target(self.config, self.seen_queue_ids, self.seen_targets)
+        target = self.queue.claim_next_target(
+            self.config, self.seen_queue_ids, self.seen_targets,
+            active_targets=getattr(self, "active_targets", None),
+        )
         if not target:
             return CycleResult(
                 worker_id=self.worker_id, cycle=self.cycle,
