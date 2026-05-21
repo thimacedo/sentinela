@@ -298,37 +298,33 @@ class IGZyteWorker(BaseWorker):
         return stats
 
     async def classify_comments(self, inserted_ids: list[str]) -> ClassifyStats:
-        """Classificação real via AIService."""
+        """Classificacao real via AIService. Limitado a 10 por ciclo."""
         stats = ClassifyStats()
         if not inserted_ids:
             return stats
 
-        self.logger.info("🧠 Iniciando classificação MCA v2.2 para %s comentários...", len(inserted_ids))
-        
-        success_count = 0
-        for comment_id in inserted_ids:
+        batch = inserted_ids[:10]
+        self.logger.info("[Zyte] Classificando %s/%s comentarios (limite=10)...", len(batch), len(inserted_ids))
+
+        for comment_id in batch:
             try:
                 res = self.db.table("comentarios").select("texto_bruto").eq("id", comment_id).single().execute()
-                if not res.data: continue
-                
+                if not res.data:
+                    continue
                 result = await ai_service.classify_text(res.data["texto_bruto"])
-                
-                # 3. Atualiza o banco (Usando colunas confirmadas no schema)
                 self.db.table("comentarios").update({
                     "processado_ia": True,
                     "is_hate": result["is_hate"],
                     "categoria_ia": result["categoria_ia"],
                     "confianca_ia": result["confianca_ia"],
-                    "evidence_extracted": result["evidencia_lexical"] # Mapeado para schema real
+                    "evidence_extracted": result["evidencia_lexical"],
                 }).eq("id", comment_id).execute()
-                
-                success_count += 1
+                stats.classified += 1
             except Exception as e:
-                self.logger.error("❌ Falha ao classificar comentário %s: %s", comment_id, e)
+                self.logger.error("[Zyte] Falha ao classificar %s: %s", comment_id, e)
                 stats.failed += 1
-        
-        stats.classified = success_count
-        stats.success = success_count > 0
+
+        stats.success = stats.classified > 0
         return stats
 
     async def run_cycle(self) -> CycleResult:
@@ -345,33 +341,30 @@ class IGZyteWorker(BaseWorker):
         self.logger.info("🎯 Ciclo %s | Alvo: @%s", self.cycle, target.username)
 
         try:
-            # 1. EXTRAÇÃO REAL
+            # 1. EXTRACAO REAL
             comments = await self.fetch_comments_via_zyte(target)
 
             source_used = "zyte"
             if not comments:
-                self.logger.info("⚠️ [Zyte] Extração falhou ou retornou vazia. Tentando fallback Playwright...")
+                self.logger.info("[Zyte] Extracao vazia. Tentando fallback Playwright...")
                 try:
                     from core.instagram_headless import InstagramHeadlessScraper
                     headless = InstagramHeadlessScraper()
                     comments = await headless.run(targets=[{"username": target.username}])
                     source_used = "fallback_headless"
                 except Exception as fallback_err:
-                    self.logger.warning("⚠️ [Zyte] Fallback headless indisponível: %s", fallback_err)
+                    self.logger.warning("[Zyte] Fallback headless indisponivel: %s", fallback_err)
 
             if not comments:
-                self.queue.rotate_target(target)
                 return CycleResult(
-                    worker_id=self.worker_id, cycle=self.cycle, target=target.username, 
+                    worker_id=self.worker_id, cycle=self.cycle, target=target.username,
                     target_id=target.candidato_id, source=source_used, extracted=0,
-                    simulated=False, 
-                    error="no_comments_found")
+                    simulated=False, error="no_comments_found")
 
-
-            # 2. PERSISTÊNCIA REAL
+            # 2. PERSISTENCIA REAL
             persist = self.persist_comments(target, comments)
 
-            # 3. CLASSIFICAÇÃO REAL
+            # 3. CLASSIFICACAO REAL
             classify = await self.classify_comments(persist.inserted_ids)
 
             result = CycleResult(
@@ -379,7 +372,7 @@ class IGZyteWorker(BaseWorker):
                 cycle=self.cycle,
                 target=target.username,
                 target_id=target.candidato_id,
-                source=target.source,
+                source=source_used,
                 extracted=len(comments),
                 inserted=persist.inserted,
                 duplicated=persist.duplicated,
@@ -387,21 +380,21 @@ class IGZyteWorker(BaseWorker):
                 failed=persist.failed + classify.failed,
                 db_success=persist.success,
                 classifier_success=classify.success,
-                simulated=False # AGORA É REAL!
+                simulated=False,
             )
 
-            # Só marca como "scraped" se realmente extraiu e persistiu algo
             if result.db_success and (result.inserted + result.duplicated > 0):
                 self.queue.mark_candidate_scraped(target)
 
-            self.queue.rotate_target(target)
             return result
 
         except Exception as exc:
-            self.logger.error("💥 Erro crítico no ciclo: %s", exc)
-            self.queue.rotate_target(target)
+            self.logger.error("[Zyte] Erro critico no ciclo: %s", exc)
             return CycleResult(
                 worker_id=self.worker_id, cycle=self.cycle, target=target.username,
                 target_id=target.candidato_id, source=target.source,
                 failed=1, error=str(exc)[:200], simulated=False
             )
+
+        finally:
+            self.queue.rotate_target(target)
