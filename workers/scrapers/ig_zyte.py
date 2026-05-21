@@ -69,19 +69,24 @@ class IGZyteWorker(BaseWorker):
         if not zyte_circuit_breaker.can_execute("zyte_api"):
             return {"error": "circuit_open", "status_code": 999}
 
-        # 🔄 Rotação de Sessão Controlada
-        session_keys = sorted([k for k in os.environ.keys() if k.startswith("INSTAGRAM_SESSIONID")])
-        current_slot = -1
-        if session_keys:
-            import random
-            idx = random.randint(0, len(session_keys) - 1)
-            session_key = session_keys[idx]
-            session_id = os.getenv(session_key)
-            current_slot = idx + 1
-            if session_id:
-                cookies = f"sessionid={session_id}; {cookies}" if cookies else f"sessionid={session_id}"
-                # Log seguro do slot
-                self.logger.debug(f"[Zyte] Usando session_slot={current_slot}")
+        # 🔄 Rotação de Sessão ou Cookie Full
+        cookie_full = os.getenv("INSTAGRAM_COOKIE_FULL")
+        current_slot = "zyte_session"
+        if cookie_full:
+            cookies = cookie_full
+            current_slot = "full_cookie"
+            self.logger.debug(f"[Zyte] Usando cookie_full=presente")
+        else:
+            session_keys = sorted([k for k in os.environ.keys() if k.startswith("INSTAGRAM_SESSIONID")])
+            if session_keys:
+                import random
+                idx = random.randint(0, len(session_keys) - 1)
+                session_key = session_keys[idx]
+                session_id = os.getenv(session_key)
+                current_slot = idx + 1
+                if session_id:
+                    cookies = f"sessionid={session_id}; {cookies}" if cookies else f"sessionid={session_id}"
+                    self.logger.debug(f"[Zyte] Usando session_slot={current_slot}")
 
         payload = {"url": url}
         custom_headers = []
@@ -336,14 +341,22 @@ class IGZyteWorker(BaseWorker):
             # 1. EXTRAÇÃO REAL
             comments = await self.fetch_comments_via_zyte(target)
 
+            source_used = "zyte"
+            if not comments:
+                self.logger.info("⚠️ [Zyte] Extração falhou ou retornou vazia. Tentando fallback Playwright...")
+                from core.instagram_headless import InstagramHeadlessScraper
+                headless = InstagramHeadlessScraper()
+                comments = await headless.run(targets=[target.username])
+                source_used = "fallback_headless"
+
             if not comments:
                 self.queue.rotate_target(target)
                 return CycleResult(
                     worker_id=self.worker_id, cycle=self.cycle, target=target.username, 
-                    target_id=target.candidato_id, source=target.source, extracted=0,
-                    simulated=False, # É REAL, apenas não encontrou comentários
-                    error="no_comments_found"
-                )
+                    target_id=target.candidato_id, source=source_used, extracted=0,
+                    simulated=False, 
+                    error="no_comments_found")
+
 
             # 2. PERSISTÊNCIA REAL
             persist = self.persist_comments(target, comments)
