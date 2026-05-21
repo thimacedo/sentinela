@@ -1,0 +1,15 @@
+{
+  "system_directives": {
+    "pasa_version": "19",
+    "mode": "YOLO",
+    "inegotiable_rules": [
+      {
+        "id": "RULE_001",
+        "description": "Sugerir mensagem de commit ao final de cada ciclo de alterações em arquivos",
+        "enforcement": "CRITICAL",
+        "status": "ACTIVE"
+      }
+    ],
+    "commit_format": "type(scope): subject (PASA vX)"
+  }
+}

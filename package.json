@@ -1,0 +1,39 @@
+{
+  "name": "sentinela-democratica",
+  "version": "20.1.0",
+  "description": "Pipeline profissional para coleta, análise e visualização de discurso de ódio e tendências políticas, baseado no **Protocolo PASA** (Proprietário).",
+  "main": "index.js",
+  "directories": {
+    "test": "tests",
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "playwright test tests/",
+    "api": "uvicorn api.index:app --reload --host 0.0.0.0 --port 8000",
+    "dev": "concurrently \"npm run api\" \"http-server . -p 3000\" --names \"Backend,Frontend\" --prefix-colors \"blue,green\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thimacedo/analise.discurso.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/thimacedo/analise.discurso/issues"
+  },
+  "homepage": "https://github.com/thimacedo/analise.discurso#readme",
+  "dependencies": {
+    "axios": "^1.15.2",
+    "better-sqlite3": "^12.9.0",
+    "dotenv": "^17.4.2",
+    "firebase": "^11.3.1",
+    "firebase-admin": "^13.2.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "concurrently": "^9.2.1",
+    "http-server": "^14.1.1"
+  }
+}

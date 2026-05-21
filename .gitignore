@@ -49,6 +49,30 @@ api_zyte.txt
 *.key
 *.pem
 
+# Artefato corrompido
+...
+
+# Dados de runtime e snapshots
+data/collection_state.json
+data/false_positives.json
+data/kpi_snapshot*.json
+data/lista_alvos_prioridade10.json
+data/training_examples.json
+metrics/
+scraper_weights.json
+sentinela_novo/output_test.json
+
+# Relatorios e auditorias geradas
+audit_report.json
+deep_audit_report.json
+final_prod_test_report.json
+output_final.json
+docs/kpis.json
+docs/profiler_stream.json
+
+# Supabase temp
+supabase/.temp/
+
 # Sessoes e storage do Playwright/Instagram
 configs/instagram_storage_state.json
 configs/*.json
