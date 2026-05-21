@@ -1,11 +1,37 @@
 from __future__ import annotations
+from dataclasses import dataclass
 from workers.base.cycle_result import CycleResult
+
+# Intervalos em segundos por tier
+_TIER_INTERVALS = {
+    "platinum": 120,
+    "gold":     180,
+    "silver":   300,
+    "bronze":   480,
+    "critical": 600,
+    "db_failed":600,
+    "idle":     300,
+    "dry_run":  300,
+}
+
+@dataclass
+class RewardSummary:
+    worker_id: str
+    cycle: int
+    score: float
+    tier: str
+    badges: list[str]
+
 
 class RewardEngine:
     def __init__(self, memory):
         self.memory = memory
 
-    async def process_result(self, result: CycleResult) -> None:
+    def get_interval(self, tier: str) -> int:
+        """Retorna intervalo em segundos para o proximo ciclo baseado no tier."""
+        return _TIER_INTERVALS.get(tier, 300)
+
+    async def process_result(self, result: CycleResult) -> RewardSummary:
         """Avalia e persiste o resultado do ciclo usando contrato CycleResult."""
         score = self.calculate_score(result)
         tier = self.resolve_tier(score, result)
@@ -37,6 +63,14 @@ class RewardEngine:
                 "error": result.error,
                 **(result.metadata or {}),
             },
+        )
+
+        return RewardSummary(
+            worker_id=result.worker_id,
+            cycle=result.cycle,
+            score=score,
+            tier=tier,
+            badges=badges,
         )
 
     def calculate_score(self, result: CycleResult) -> float:

@@ -43,33 +43,33 @@ class SentinelaOrchestrator:
                 error="worker_returned_invalid_result",
             )
 
+        reward = await self.reward_engine.process_result(result)
+
         db_status = "n/a" if result.simulated else ("ok" if result.db_success else "falhou")
         ia_status = "n/a" if result.simulated else ("ok" if result.classifier_success else "nao")
 
         logger.info(
             "[%s] ciclo #%s | target=%s | origem=%s | extraidos=%s | inseridos=%s | "
-            "duplicados=%s | classificados=%s | falhas=%s | db=%s | ia=%s | simulado=%s | erro=%s",
-            result.worker_id,
-            result.cycle,
-            result.target or "N/A",
-            result.source or "N/A",
-            result.extracted,
-            result.inserted,
-            result.duplicated,
-            result.classified,
-            result.failed,
-            db_status,
-            ia_status,
-            result.simulated,
-            result.error or "nenhum",
+            "duplicados=%s | classificados=%s | falhas=%s | db=%s | ia=%s | "
+            "score=%.1f | tier=%s | simulado=%s | erro=%s",
+            result.worker_id, result.cycle,
+            result.target or "N/A", result.source or "N/A",
+            result.extracted, result.inserted, result.duplicated,
+            result.classified, result.failed,
+            db_status, ia_status,
+            reward.score, reward.tier,
+            result.simulated, result.error or "nenhum",
         )
 
-        await self.reward_engine.process_result(result)
+        if reward.badges:
+            logger.info("[%s] badges: %s", result.worker_id, reward.badges)
 
-        if not result.simulated:
+        # AIAdvisor apenas quando degradado (score < 40 ou tier critical/db_failed)
+        degraded = reward.score < 40 or reward.tier in ("critical", "db_failed")
+        if not result.simulated and degraded:
             await self.ai_advisor.analyze_and_suggest(worker, result)
-        else:
-            logger.debug("[%s] AIAdvisor ignorado (ciclo simulado)", worker.worker_id)
+        elif not result.simulated:
+            logger.debug("[%s] AIAdvisor ignorado (tier=%s score=%.1f)", result.worker_id, reward.tier, reward.score)
 
     async def run_all(self) -> None:
         if not self._workers:

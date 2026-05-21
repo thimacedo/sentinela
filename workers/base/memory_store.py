@@ -84,17 +84,17 @@ class MemoryStore:
 
     # ── Rewards ───────────────────────────────────────────────────────────────
 
-    async def save_reward(self, worker_id: str, cycle: int, score: float, tier: str, collected: int, 
+    async def save_reward(self, worker_id: str, cycle: int, score: float, tier: str, collected: int,
                           success_rate: float, badges: list[str], metadata: dict) -> None:
-        """Persiste resultado usando 'gold' fixo para contornar constraint."""
+        """Persiste resultado do ciclo com tier e score reais."""
         payload = {
             "worker_id":      worker_id,
             "cycle":          cycle,
             "score":          round(score, 2),
-            "tier":           "gold", # Fixado temporariamente
+            "tier":           tier,
             "delta":          0.0,
             "badges":         badges,
-            "recommendation": f"Score: {score}, Tier: {tier}",
+            "recommendation": f"score={score} tier={tier} collected={collected} success_rate={round(success_rate, 2)}",
             "timestamp":      datetime.utcnow().isoformat(),
         }
 
