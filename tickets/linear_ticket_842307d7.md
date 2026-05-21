@@ -1,25 +1,19 @@
 ---
 id: 842307d7
 title: "Refactor Edge Function for Semantic Routing"
-status: "Todo"
-priority: "High"
+status: Done
+priority: High
 order: 10
 created: 2026-05-20
-updated: 2026-05-20
+updated: 2026-05-21
 links:
   - url: linear_ticket_parent.md
     title: Parent Ticket
 ---
 
-# Description
-
-## Problem to solve
-O proxy atual aceita SQL arbitrário do browser.
-
-## Solution
-Modificar `supabase/functions/mcp-proxy/index.ts` para aceitar um `action` no body (ex: `get_kpis`) e executar o SQL correspondente no servidor.
-
-## Implementation Details
-- Mapear rotas: `get_kpis`, `get_timeline`, `get_top_candidates`, `get_alerts`.
-- Validar payload.
-- Bloquear qualquer entrada que não seja uma rota pré-definida.
+## Resultado
+supabase/functions/mcp-proxy/index.ts ja implementado com:
+- ROUTES: allowlist de actions (get_kpis, get_timeline, get_top_candidates, get_alerts, get_queue, get_dossiers)
+- SQL arbitrario bloqueado: body.sql retorna 403
+- Allowlist de projectId via ALLOWED_PROJECT_IDS env
+- Frontend oficial (proposta_frontend) nao usa mcp-proxy, usa /api/* FastAPI
