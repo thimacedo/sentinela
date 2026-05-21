@@ -51,12 +51,13 @@ class IGZyteWorker(BaseWorker):
         self.queue = QueueManager(self.db)
         self.seen_queue_ids: set = set()
         self.seen_targets: set = set()
-        self._blocked_slots: set = set()  # slots com login wall confirmado
+        self._blocked_slots: set = set()
 
         self.zyte_key = os.getenv("ZYTE_API_KEY")
         self.zyte_api_url = "https://api.zyte.com/v1/extract"
         self.app_id = "936619743392459"
         self.max_posts = config.get("max_posts", 3)
+        self.max_comments_per_post = config.get("max_comments_per_post", 100)
         self.storage_state_path = "configs/instagram_storage_state.json"
 
     def describe(self) -> str:
@@ -91,7 +92,6 @@ class IGZyteWorker(BaseWorker):
                 self.logger.debug("[Zyte] Usando slot=%s", key)
                 return f"sessionid={session_id}", key
 
-        # Fallback: extrai sessionid do storage_state do Playwright
         if os.path.exists(self.storage_state_path):
             try:
                 with open(self.storage_state_path, encoding="utf-8") as f:
@@ -222,8 +222,53 @@ class IGZyteWorker(BaseWorker):
                     break
         return posts
 
+    async def _fetch_comments_paginated(self, media_id: str, shortcode: str, headers: Dict[str, str], candidato_id: str) -> list[dict]:
+        """Coleta comentarios com paginacao via next_min_id. Respeita max_comments_per_post."""
+        comments: list[dict] = []
+        min_id: Optional[str] = None
+
+        while len(comments) < self.max_comments_per_post:
+            url = f"https://www.instagram.com/api/v1/media/{media_id}/comments/"
+            if min_id:
+                url += f"?min_id={min_id}"
+
+            data = await self._zyte_request(url, headers)
+            if data.get("error"):
+                self.logger.warning("[Zyte] Paginacao interrompida em %s: %s", shortcode, data["error"])
+                break
+
+            raw = data.get("comments", [])
+            if not raw:
+                break
+
+            for c in raw:
+                if len(comments) >= self.max_comments_per_post:
+                    break
+                comments.append({
+                    "id_externo": f"ig_{c.get('pk')}",
+                    "texto_bruto": c.get("text"),
+                    "autor_username": c.get("user", {}).get("username"),
+                    "data_publicacao": datetime.fromtimestamp(c["created_at"], tz=timezone.utc).isoformat() if c.get("created_at") else datetime.now(timezone.utc).isoformat(),
+                    "data_coleta": datetime.now(timezone.utc).isoformat(),
+                    "post_shortcode": shortcode,
+                    "plataforma": "INSTAGRAM",
+                    "rede_social": "INSTAGRAM",
+                    "candidato_id": candidato_id,
+                    "processado_ia": False,
+                    "mined": True,
+                })
+
+            next_min_id = data.get("next_min_id")
+            if not next_min_id or next_min_id == min_id:
+                break
+            min_id = next_min_id
+            self.logger.debug("[Zyte] Paginando %s -> next_min_id=%s (%s coletados)", shortcode, min_id, len(comments))
+
+        self.logger.info("[Zyte] Post %s: %s comentarios coletados", shortcode, len(comments))
+        return comments
+
     async def fetch_comments_via_zyte(self, target: Target) -> list[dict]:
-        self.logger.info("[Zyte] Coletando perfil real: @%s", target.username)
+        self.logger.info("[Zyte] Coletando perfil: @%s | max_posts=%s max_comments=%s", target.username, self.max_posts, self.max_comments_per_post)
 
         profile_url = f"https://www.instagram.com/api/v1/users/web_profile_info/?username={target.username}"
         headers = {
@@ -263,33 +308,16 @@ class IGZyteWorker(BaseWorker):
             self.logger.warning("[Zyte] Falha ao obter posts do perfil @%s", target.username)
             return []
 
-        all_comments = []
+        all_comments: list[dict] = []
         for item in shortcodes_to_fetch:
             shortcode = item["shortcode"]
             media_id = item["media_id"]
             if not media_id:
                 self.logger.info("[Zyte] Post %s sem media_id, pulando.", shortcode)
                 continue
+            post_comments = await self._fetch_comments_paginated(media_id, shortcode, headers, target.candidato_id)
+            all_comments.extend(post_comments)
 
-            self.logger.info("[Zyte] Coletando comentarios do post %s...", shortcode)
-            comments_url = f"https://www.instagram.com/api/v1/media/{media_id}/comments/"
-            comments_data = await self._zyte_request(comments_url, headers)
-
-            if not comments_data.get("error"):
-                for c in comments_data.get("comments", [])[:20]:
-                    all_comments.append({
-                        "id_externo": f"ig_{c.get('pk')}",
-                        "texto_bruto": c.get("text"),
-                        "autor_username": c.get("user", {}).get("username"),
-                        "data_publicacao": datetime.fromtimestamp(c["created_at"], tz=timezone.utc).isoformat() if c.get("created_at") else datetime.now(timezone.utc).isoformat(),
-                        "data_coleta": datetime.now(timezone.utc).isoformat(),
-                        "post_shortcode": shortcode,
-                        "plataforma": "INSTAGRAM",
-                        "rede_social": "INSTAGRAM",
-                        "candidato_id": target.candidato_id,
-                        "processado_ia": False,
-                        "mined": True,
-                    })
         return all_comments
 
     def persist_comments(self, target: Target, comments: list[dict]) -> PersistStats:

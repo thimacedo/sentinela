@@ -1,8 +1,8 @@
 ---
 id: 713e2c22
 title: "[T3] Implementar extração perfil → posts → comentários"
-status: "Backlog"
-priority: "High"
+status: Done
+priority: High
 order: 30
 created: 2026-05-21
 updated: 2026-05-21
@@ -11,14 +11,8 @@ links:
     title: Parent Ticket
 ---
 
-# Description
-
-## Problem to solve
-Extração incompleta: precisa percorrer a hierarquia correta perfil -> posts -> comentários.
-
-## Solution
-Criar worker que orquestra a navegação sequencial no Instagram usando Zyte.
-
-## Implementation Details
-- Navegação em cascata.
-- Tratamento de paginação de comentários.
+## Resultado
+- _fetch_comments_paginated(): paginacao via next_min_id ate max_comments_per_post (default 100)
+- Loop interrompe quando next_min_id ausente ou repetido
+- max_comments_per_post configuravel via config dict do worker
+- Hierarquia completa: perfil -> posts (max_posts) -> comentarios paginados
