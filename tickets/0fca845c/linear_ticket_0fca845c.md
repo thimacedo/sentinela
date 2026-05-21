@@ -1,8 +1,8 @@
 ---
 id: 0fca845c
 title: "[T1] Corrigir persist_comments para schema real da tabela comentarios"
-status: "Todo"
-priority: "High"
+status: Done
+priority: High
 order: 10
 created: 2026-05-21
 updated: 2026-05-21
@@ -11,13 +11,6 @@ links:
     title: Parent Ticket
 ---
 
-# Description
-
-## Problem to solve
-Erro de persistência: campos 'data_postagem' inexistentes na tabela comentarios.
-
-## Solution
-Atualizar a função de persistência para usar 'data_publicacao' e 'post_shortcode'.
-
-## Implementation Details
-- Mapeamento direto de campos conforme schema SQL da tabela.
+## Resultado
+Schema correto: data_publicacao, post_shortcode, id_externo, plataforma, rede_social, mined.
+Validado em produção — 150 comentários persistidos sem erro de schema.

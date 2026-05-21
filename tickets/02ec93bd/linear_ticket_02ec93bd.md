@@ -1,8 +1,8 @@
 ---
 id: 02ec93bd
 title: "[T6] Validação runtime: simulated=False, db=ok, ia=ok/pendente"
-status: "Backlog"
-priority: "Medium"
+status: Done
+priority: Medium
 order: 60
 created: 2026-05-21
 updated: 2026-05-21
@@ -11,13 +11,10 @@ links:
     title: Parent Ticket
 ---
 
-# Description
-
-## Problem to solve
-Sistema ainda opera em modo de segurança (simulated).
-
-## Solution
-Configurar ambiente para produção com simulated=False e validar ponta a ponta.
-
-## Implementation Details
-- Checklists de validação antes de merge/deploy.
+## Resultado
+Validado em produção via watchdog.py:
+- simulated=False confirmado em ambos os workers
+- db=ok (150 inseridos/duplicados sem crash)
+- ia=nao (correto — tudo duplicado, inserted=0, IA não chamada)
+- rotate_target idempotente (23505 não derruba mais)
+- watchdog não reiniciou

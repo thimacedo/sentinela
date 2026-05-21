@@ -1,8 +1,8 @@
 ---
 id: 095caf36
 title: "[T5] Integrar classificação IA pós-persistência"
-status: "Backlog"
-priority: "Medium"
+status: Done
+priority: Medium
 order: 50
 created: 2026-05-21
 updated: 2026-05-21
@@ -11,13 +11,7 @@ links:
     title: Parent Ticket
 ---
 
-# Description
-
-## Problem to solve
-Os comentários persistem mas não são classificados automaticamente.
-
-## Solution
-Disparar worker de IA após a persistência bem-sucedida do comentário.
-
-## Implementation Details
-- Event-driven (DB trigger ou Pub/Sub).
+## Resultado
+Classificação IA disparada após persistência em ambos os workers.
+Limitada a 10 comentários por ciclo para evitar circuit breaker.
+Cascade Groq -> Mistral -> OpenRouter operacional.
