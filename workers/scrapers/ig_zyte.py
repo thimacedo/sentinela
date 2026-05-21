@@ -226,9 +226,6 @@ class IGZyteWorker(BaseWorker):
             self.logger.info("🔄 [Zyte] JSON não encontrado no HTML. Tentando extração via DOM...")
             dom_posts = self._extract_from_dom(html)
             for p in dom_posts:
-                # No DOM não temos media_id, mas podemos tentar buscar via shortcode se necessário
-                # Por enquanto, sem media_id não conseguimos buscar comentários via API v1 media/{id}/comments/
-                # Precisaríamos de um fetcher de comentários por shortcode.
                 shortcodes_to_fetch.append({"shortcode": p["shortcode"], "media_id": None})
 
         if not shortcodes_to_fetch:
@@ -239,8 +236,6 @@ class IGZyteWorker(BaseWorker):
             shortcode = item["shortcode"]
             media_id = item["media_id"]
 
-            # Se não temos media_id (vêm do DOM), tentamos obter via o_o JSON do post ou similar
-            # Por simplicidade na v50.1, focamos em posts com media_id.
             if not media_id:
                 self.logger.info("⏭️ Post %s sem media_id (DOM only), pulando comentários.", shortcode)
                 continue
@@ -265,68 +260,69 @@ class IGZyteWorker(BaseWorker):
                         "processado_ia": False,
                         "mined": True
                     })
-                return all_comments
+        return all_comments
 
-                def claim_next_target(self) -> Optional[Target]:
-                return self.queue.claim_next_target(self.config, self.seen_queue_ids, self.seen_targets)
+    def claim_next_target(self) -> Optional[Target]:
+        return self.queue.claim_next_target(self.config, self.seen_queue_ids, self.seen_targets)
 
-                def persist_comments(self, target: Target, comments: list[dict]) -> PersistStats:
-                """Persistência real no Supabase."""
-                stats = PersistStats()
-                if not comments:
-                return stats
+    def persist_comments(self, target: Target, comments: list[dict]) -> PersistStats:
+        """Persistência real no Supabase."""
+        stats = PersistStats()
+        if not comments:
+            return stats
 
-                try:
-                res = self.db.table('comentarios').upsert(
+        try:
+            res = self.db.table('comentarios').upsert(
                 comments,
                 on_conflict="id_externo"
-                ).execute()
+            ).execute()
+            
+            stats.inserted = len(res.data)
+            stats.inserted_ids = [str(item['id']) for item in res.data]
+            stats.success = True
+            self.logger.info("✅ Persistência concluída | @%s | inseridos=%s", target.username, stats.inserted)
+            
+        except Exception as e:
+            self.logger.error("❌ Falha na persistência: %s", e)
+            stats.failed = len(comments)
+            stats.success = False
+            
+        return stats
 
-                stats.inserted = len(res.data)
-                stats.inserted_ids = [str(item['id']) for item in res.data]
-                stats.success = True
-                self.logger.info("✅ Persistência concluída | @%s | inseridos=%s", target.username, stats.inserted)
+    async def classify_comments(self, inserted_ids: list[str]) -> ClassifyStats:
+        """Classificação real via AIService."""
+        stats = ClassifyStats()
+        if not inserted_ids:
+            return stats
 
-                except Exception as e:
-                self.logger.error("❌ Falha na persistência: %s", e)
-                stats.failed = len(comments)
-                stats.success = False
-
-                return stats
-
-                async def classify_comments(self, inserted_ids: list[str]) -> ClassifyStats:
-                """Classificação real via AIService."""
-                stats = ClassifyStats()
-                if not inserted_ids:
-                return stats
-
-                self.logger.info("🧠 Iniciando classificação MCA v2.2 para %s comentários...", len(inserted_ids))
-
-                success_count = 0
-                for comment_id in inserted_ids:
-                try:
+        self.logger.info("🧠 Iniciando classificação MCA v2.2 para %s comentários...", len(inserted_ids))
+        
+        success_count = 0
+        for comment_id in inserted_ids:
+            try:
                 res = self.db.table("comentarios").select("texto_bruto").eq("id", comment_id).single().execute()
                 if not res.data: continue
-
+                
                 result = await ai_service.classify_text(res.data["texto_bruto"])
-
+                
                 # 3. Atualiza o banco (Usando colunas confirmadas no schema)
                 self.db.table("comentarios").update({
-                "processado_ia": True,
-                "is_hate": result["is_hate"],
-                "categoria_ia": result["categoria_ia"],
-                "confianca_ia": result["confianca_ia"],
-                "evidence_extracted": result["evidencia_lexical"] # Mapeado para schema real
+                    "processado_ia": True,
+                    "is_hate": result["is_hate"],
+                    "categoria_ia": result["categoria_ia"],
+                    "confianca_ia": result["confianca_ia"],
+                    "evidence_extracted": result["evidencia_lexical"] # Mapeado para schema real
                 }).eq("id", comment_id).execute()
-
+                
                 success_count += 1
-                except Exception as e:
+            except Exception as e:
                 self.logger.error("❌ Falha ao classificar comentário %s: %s", comment_id, e)
                 stats.failed += 1
+        
+        stats.classified = success_count
+        stats.success = success_count > 0
+        return stats
 
-                stats.classified = success_count
-                stats.success = success_count > 0
-                return stats
     async def run_cycle(self) -> CycleResult:
         self.cycle += 1
         target = self.claim_next_target()
