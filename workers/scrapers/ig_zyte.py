@@ -14,6 +14,7 @@ import json
 import asyncio
 import base64
 import httpx
+from core.session_manager import session_manager
 import re
 from datetime import datetime, timezone
 
