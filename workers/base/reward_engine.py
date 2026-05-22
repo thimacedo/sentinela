@@ -4,8 +4,7 @@ from workers.base.cycle_result import CycleResult
 
 # Intervalos em segundos por tier
 _TIER_INTERVALS = {
-    "platinum": 120,
-    "gold":     180,
+    "gold":     120,
     "silver":   300,
     "bronze":   480,
     "critical": 600,
@@ -102,7 +101,6 @@ class RewardEngine:
         if result.simulated: return "dry_run"
         if not result.target: return "idle"
         if not result.db_success: return "db_failed"
-        if score >= 85: return "platinum"
         if score >= 70: return "gold"
         if score >= 50: return "silver"
         if score >= 25: return "bronze"
