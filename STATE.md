@@ -1,5 +1,5 @@
 # STATE.md — Sentinela Democratica (Fonte de Verdade)
-_last_updated: 2026-05-21 | branch: feat/autonomous-workers_
+_last_updated: 2026-05-22 | branch: feat/autonomous-workers_
 
 ## Status Operacional
 
@@ -53,7 +53,7 @@ Instagram
 ## Sessoes e Autenticacao
 
 - `INSTAGRAM_SESSIONID*` — slots sequenciais, slots com login wall adicionados a `_blocked_slots`
-- `INSTAGRAM_COOKIE_FULL` — prioridade maxima se presente
+- `INSTAGRAM_COOKIE_FULL` — prioridade maxima se presente, atualizado automaticamente pelo script `scripts/export_playwright_cookies.py`
 - `configs/instagram_storage_state.json` — fallback Playwright (validado via `scripts/probe_t3_2_storage.py`)
 - Validacao do storage_state: abre perfil real do Supabase, checa URL + HTML (sem seletores frageis)
 

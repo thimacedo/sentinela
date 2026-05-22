@@ -1,5 +1,5 @@
 # ROADMAP.md — Sentinela Democratica
-_last_updated: 2026-05-21 | branch: feat/autonomous-workers_
+_last_updated: 2026-05-22 | branch: feat/autonomous-workers_
 
 ## Concluido
 
@@ -43,8 +43,8 @@ _last_updated: 2026-05-21 | branch: feat/autonomous-workers_
 ## Pendente
 
 ### Sessao Zyte
-- [ ] Renovar INSTAGRAM_SESSIONID slot=2 (login wall detectado em producao)
-- [ ] Implementar renovacao automatica de sessao via export_playwright_cookies.py
+- [x] Renovar INSTAGRAM_SESSIONID slot=2 (login wall detectado em producao)
+- [x] Implementar renovacao automatica de sessao via export_playwright_cookies.py
 
 ### Expansao de Coleta
 - [ ] Ativar paginacao de posts (atualmente max_posts=3)
@@ -61,7 +61,7 @@ _last_updated: 2026-05-21 | branch: feat/autonomous-workers_
 - [ ] Grafos de redes coordenadas no frontend
 
 ### Infraestrutura
-- [ ] Merge feat/autonomous-workers -> main
+- [x] Merge feat/autonomous-workers -> main
 - [ ] Deploy Render com main_runner.py em modo persistente
 - [ ] Monitoramento de RewardEngine via dashboard frontend
 
@@ -69,6 +69,5 @@ _last_updated: 2026-05-21 | branch: feat/autonomous-workers_
 
 ## Proximas Acoes Imediatas
 
-1. Renovar sessao Instagram (slot=2 bloqueado)
-2. Rodar `python watchdog.py` com novo slot e validar ciclo completo com IA classificando
-3. Merge para main apos validacao
+1. Deploy Render com main_runner.py em modo persistente
+2. Monitoramento de RewardEngine via dashboard frontend
