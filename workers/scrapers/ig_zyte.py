@@ -106,6 +106,30 @@ class IGZyteWorker(BaseWorker):
 
         return "", "no_session"
 
+    def _build_request_cookies(self) -> List[Dict[str, str]]:
+        """Converte cookies do .env para o formato requestCookies do Zyte (usado em browser mode)."""
+        cookie_full = os.getenv("INSTAGRAM_COOKIE_FULL", "")
+        if not cookie_full:
+            # Fallback para sessionid simples
+            session_keys = sorted(k for k in os.environ if k.startswith("INSTAGRAM_SESSIONID"))
+            for key in session_keys:
+                val = os.getenv(key)
+                if val:
+                    return [{"name": "sessionid", "value": val, "domain": ".instagram.com"}]
+            return []
+
+        cookies = []
+        for pair in cookie_full.split(";"):
+            pair = pair.strip()
+            if "=" in pair:
+                name, value = pair.split("=", 1)
+                cookies.append({
+                    "name": name.strip(),
+                    "value": value.strip(),
+                    "domain": ".instagram.com",
+                })
+        return cookies
+
     async def _zyte_request(self, url: str, headers: Dict[str, str] = None, cookies: str = None, use_browser: bool = False) -> Dict[str, Any]:
         """Requisicao via Zyte API com circuit breaker, retentativas e rotacao de sessao."""
         if not zyte_circuit_breaker.can_execute("zyte_api"):
@@ -126,6 +150,10 @@ class IGZyteWorker(BaseWorker):
         if use_browser:
             payload["browserHtml"] = True
             payload["javascript"] = True
+            # Injeta cookies no browser para autenticacao
+            request_cookies = self._build_request_cookies()
+            if request_cookies:
+                payload["requestCookies"] = request_cookies
         else:
             payload["httpResponseBody"] = True
             if custom_headers:
@@ -223,6 +251,16 @@ class IGZyteWorker(BaseWorker):
                     break
         return posts
 
+    @staticmethod
+    def _shortcode_to_media_id(shortcode: str) -> str:
+        """Converte shortcode do Instagram para media_id numerico.
+        Algoritmo padrao base64url do Instagram."""
+        alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_'
+        media_id = 0
+        for char in shortcode:
+            media_id = media_id * 64 + alphabet.index(char)
+        return str(media_id)
+
     async def _fetch_comments_paginated(self, media_id: str, shortcode: str, headers: Dict[str, str], candidato_id: str) -> list[dict]:
         """Coleta comentarios com paginacao via next_min_id. Respeita max_comments_per_post."""
         comments: list[dict] = []
@@ -236,6 +274,11 @@ class IGZyteWorker(BaseWorker):
             data = await self._zyte_request(url, headers)
             if data.get("error"):
                 self.logger.warning("[Zyte] Paginacao interrompida em %s: %s", shortcode, data["error"])
+                break
+
+            # Detecta se retornou HTML ao inves de JSON (problema de autenticacao)
+            if data.get("raw_body", "").strip().startswith("<!DOCTYPE") or data.get("raw_body", "").strip().startswith("<html"):
+                self.logger.warning("[Zyte] API de comentarios retornou HTML para %s. Sessao invalida.", shortcode)
                 break
 
             raw = data.get("comments", [])
@@ -265,8 +308,150 @@ class IGZyteWorker(BaseWorker):
             min_id = next_min_id
             self.logger.debug("[Zyte] Paginando %s -> next_min_id=%s (%s coletados)", shortcode, min_id, len(comments))
 
-        self.logger.info("[Zyte] Post %s: %s comentarios coletados", shortcode, len(comments))
+        self.logger.info("[Zyte] Post %s: %s comentarios via API", shortcode, len(comments))
         return comments
+
+    def _parse_comments_from_html(self, html: str, shortcode: str, candidato_id: str) -> list[dict]:
+        """Extrai comentarios do HTML renderizado da pagina do post.
+        Estrategia em 3 camadas: JSON GraphQL > JSON pares > DOM regex."""
+        comments: list[dict] = []
+        if not html:
+            return comments
+
+        # === Camada 1: JSON GraphQL embutido (edge_media_to_parent_comment) ===
+        json_patterns = [
+            r'"edge_media_to_parent_comment"\s*:\s*(\{.*?"edges"\s*:\s*\[.*?\]\s*\})',
+            r'"edge_media_to_comment"\s*:\s*(\{.*?"edges"\s*:\s*\[.*?\]\s*\})',
+        ]
+        for pattern in json_patterns:
+            match = re.search(pattern, html, re.DOTALL)
+            if match:
+                try:
+                    comment_data = json.loads(match.group(1))
+                    edges = comment_data.get("edges", [])
+                    for edge in edges[:self.max_comments_per_post]:
+                        node = edge.get("node", {})
+                        text = node.get("text", "")
+                        owner = node.get("owner", {})
+                        ts = node.get("created_at")
+                        if text:
+                            comments.append({
+                                "id_externo": f"ig_{node.get('id', '')}",
+                                "texto_bruto": text,
+                                "autor_username": owner.get("username", "desconhecido"),
+                                "data_publicacao": datetime.fromtimestamp(int(ts), tz=timezone.utc).isoformat() if ts else datetime.now(timezone.utc).isoformat(),
+                                "data_coleta": datetime.now(timezone.utc).isoformat(),
+                                "post_shortcode": shortcode,
+                                "plataforma": "INSTAGRAM",
+                                "rede_social": "INSTAGRAM",
+                                "candidato_id": candidato_id,
+                                "processado_ia": False,
+                                "mined": True,
+                            })
+                    if comments:
+                        self.logger.info("[Zyte] %s comentarios via JSON GraphQL embutido", len(comments))
+                        return comments
+                except (json.JSONDecodeError, ValueError) as e:
+                    self.logger.debug("[Zyte] Falha ao parsear JSON GraphQL: %s", e)
+
+        # === Camada 2: Pares username+text em JSON serializado no HTML ===
+        # Instagram moderno embute dados como JSON no HTML (React hydration)
+        # Padrao: {"user":{"username":"xxx"},... "text":"yyy"}
+        pair_patterns = [
+            # Padrao: username antes de text no mesmo bloco
+            r'"user"\s*:\s*\{[^}]*"username"\s*:\s*"([^"]+)"[^}]*\}[^"]*"text"\s*:\s*"([^"]+)"',
+            # Padrao: text antes de username
+            r'"text"\s*:\s*"([^"]{5,})"[^}]*"user"\s*:\s*\{[^}]*"username"\s*:\s*"([^"]+)"',
+        ]
+        seen_texts: set = set()
+        for pattern in pair_patterns:
+            matches = re.findall(pattern, html)
+            for match_tuple in matches:
+                if pattern.startswith('"text"'):
+                    text, username = match_tuple
+                else:
+                    username, text = match_tuple
+                text = text.strip()
+                # Decodifica unicode escapes (\u00e3 -> ã)
+                try:
+                    text = text.encode('utf-8').decode('unicode_escape').encode('latin-1').decode('utf-8')
+                except (UnicodeDecodeError, UnicodeEncodeError):
+                    pass
+                if text and text not in seen_texts and len(text) >= 2:
+                    seen_texts.add(text)
+                    comments.append({
+                        "id_externo": f"ig_br_{hash(text) & 0xFFFFFFFF}",
+                        "texto_bruto": text,
+                        "autor_username": username,
+                        "data_publicacao": datetime.now(timezone.utc).isoformat(),
+                        "data_coleta": datetime.now(timezone.utc).isoformat(),
+                        "post_shortcode": shortcode,
+                        "plataforma": "INSTAGRAM",
+                        "rede_social": "INSTAGRAM",
+                        "candidato_id": candidato_id,
+                        "processado_ia": False,
+                        "mined": True,
+                    })
+                    if len(comments) >= self.max_comments_per_post:
+                        break
+            if comments:
+                self.logger.info("[Zyte] %s comentarios via JSON pares no HTML", len(comments))
+                return comments
+
+        # === Camada 3: Fallback generico - qualquer par text que nao seja caption ===
+        all_texts = re.findall(r'"text"\s*:\s*"([^"]{5,})"', html)
+        # Remove duplicatas e legendas do post (geralmente os primeiros textos)
+        unique_texts = []
+        for t in all_texts:
+            try:
+                t = t.encode('utf-8').decode('unicode_escape').encode('latin-1').decode('utf-8')
+            except (UnicodeDecodeError, UnicodeEncodeError):
+                pass
+            if t not in seen_texts and len(t) >= 2:
+                seen_texts.add(t)
+                unique_texts.append(t)
+
+        # Pula os primeiros textos (legendas do post) se houver varios
+        skip_count = min(2, len(unique_texts) // 3) if len(unique_texts) > 3 else 0
+        for text in unique_texts[skip_count:self.max_comments_per_post + skip_count]:
+            comments.append({
+                "id_externo": f"ig_dom_{hash(text) & 0xFFFFFFFF}",
+                "texto_bruto": text,
+                "autor_username": "desconhecido",
+                "data_publicacao": datetime.now(timezone.utc).isoformat(),
+                "data_coleta": datetime.now(timezone.utc).isoformat(),
+                "post_shortcode": shortcode,
+                "plataforma": "INSTAGRAM",
+                "rede_social": "INSTAGRAM",
+                "candidato_id": candidato_id,
+                "processado_ia": False,
+                "mined": True,
+            })
+
+        self.logger.info("[Zyte] %s comentarios via fallback DOM do post %s", len(comments), shortcode)
+        return comments
+
+    async def _fetch_comments_browser(self, shortcode: str, candidato_id: str) -> list[dict]:
+        """Coleta comentarios renderizando a pagina do post via Zyte Browser."""
+        post_url = f"https://www.instagram.com/p/{shortcode}/"
+        self.logger.info("[Zyte] Browser rendering para post %s", shortcode)
+
+        res = await self._zyte_request(
+            post_url,
+            {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"},
+            use_browser=True
+        )
+
+        html = res.get("browserHtml", "")
+        if not html:
+            self.logger.warning("[Zyte] Browser rendering vazio para post %s", shortcode)
+            return []
+
+        if res.get("error"):
+            self.logger.warning("[Zyte] Erro no browser rendering para %s: %s", shortcode, res["error"])
+            return []
+
+        return self._parse_comments_from_html(html, shortcode, candidato_id)
 
     async def fetch_comments_via_zyte(self, target: Target) -> list[dict]:
         self.logger.info("[Zyte] Coletando perfil: @%s | max_posts=%s max_comments=%s", target.username, self.max_posts, self.max_comments_per_post)
@@ -314,9 +499,17 @@ class IGZyteWorker(BaseWorker):
             shortcode = item["shortcode"]
             media_id = item["media_id"]
             if not media_id:
-                self.logger.info("[Zyte] Post %s sem media_id, pulando.", shortcode)
-                continue
+                media_id = self._shortcode_to_media_id(shortcode)
+                self.logger.info("[Zyte] Post %s: media_id convertido via shortcode -> %s", shortcode, media_id)
+
+            # Tier 1: Tenta API JSON paginada
             post_comments = await self._fetch_comments_paginated(media_id, shortcode, headers, target.candidato_id)
+
+            # Tier 2: Se API falhou, usa browser rendering na pagina do post
+            if not post_comments:
+                self.logger.info("[Zyte] API sem resultados para %s. Tentando browser rendering...", shortcode)
+                post_comments = await self._fetch_comments_browser(shortcode, target.candidato_id)
+
             all_comments.extend(post_comments)
 
         return all_comments

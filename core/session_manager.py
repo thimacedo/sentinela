@@ -18,3 +18,5 @@ class SessionManager:
         return None
 
     def get_proxy_config(self): return None # Adicione seu proxy aqui se necessário
+
+session_manager = SessionManager()

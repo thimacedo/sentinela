@@ -127,3 +127,10 @@ cd proposta_frontend && bun run build
 # Migrations
 python scripts/apply_migration.py
 ```
+
+## Ultimas Atualizacoes (Refatoracao Raspagem e Classificacao)
+- Corrigidos wrappers de modulos: `InstagramWorker` agindo como proxy para `IGZyteWorker`.
+- Adicionada injecao de cookies (`requestCookies`) no `IGZyteWorker` permitindo fallback de Browser Rendering via Zyte com sessoes autenticadas.
+- Resolvido conversao de shortcode para `media_id` para lidar com DOM scraping.
+- Corrigida referencia da ForeignKey na tabela `comentarios`, usando `candidato_id` mapeado para o `username` do alvo.
+- Teste completo end-to-end rodando com sucesso no alvo `lulaoficial`, incluindo extracao, persistencia e classificacao por IA (fallback Mistral ativado devido a limite Groq).
