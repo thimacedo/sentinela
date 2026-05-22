@@ -77,8 +77,14 @@ class WatchdogState:
         self.fast_crashes = 0
         
     def add_log(self, level: str, message: str):
-        # Print no console para facilitar depuração via terminal
-        print(f"[{time.strftime('%H:%M:%S')}] {level.upper()}: {message}")
+        # Print no console para facilitar depuração via terminal tratando UnicodeEncodeError no Windows
+        try:
+            print(f"[{time.strftime('%H:%M:%S')}] {level.upper()}: {message}")
+        except UnicodeEncodeError:
+            try:
+                print(f"[{time.strftime('%H:%M:%S')}] {level.upper()}: {message.encode('ascii', 'replace').decode('ascii')}")
+            except Exception:
+                pass
         with self.lock:
             log_entry = {"time": time.strftime("%H:%M:%S"), "level": level, "message": message}
             self.logs.append(log_entry)

@@ -10,20 +10,27 @@ async def export_cookies():
     ig_user = os.getenv('IG_USER')
     ig_pass = os.getenv('IG_PASS')
     if not ig_user or not ig_pass:
-        raise RuntimeError('Variáveis IG_USER e IG_PASS devem estar definidas')
+        raise RuntimeError('Variáveis IG_USER e IG_PASS devem estar definidas no .env')
+
+    headless_mode = os.getenv('PLAYWRIGHT_HEADLESS', '1') == '1'
+    print(f"Iniciando Playwright (headless={headless_mode})...")
 
     async with async_playwright() as pw:
-        # Executar em modo não headless para evitar bloqueios de detecção
-        browser = await pw.chromium.launch(headless=False)
+        browser = await pw.chromium.launch(headless=headless_mode)
         context = await browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
         )
         page = await context.new_page()
 
-        # Verificar se já temos um SESSIONID no .env
+        # Configurar timeout padrão
+        page.set_default_timeout(45000)
+
+        # 1. Tentar login usando o SESSIONID atual do .env
         sessionid = os.getenv('INSTAGRAM_SESSIONID')
+        logged_in = False
+
         if sessionid:
-            # Injetar cookie de sessão no contexto
+            print("Tentando autenticar usando INSTAGRAM_SESSIONID do .env...")
             cookie = {
                 'name': 'sessionid',
                 'value': sessionid,
@@ -35,79 +42,111 @@ async def export_cookies():
                 'sameSite': 'Lax'
             }
             await context.add_cookies([cookie])
-            # Navegar para a página principal com timeout maior e tratamento de falha
             try:
-                await page.goto('https://www.instagram.com/', wait_until='networkidle', timeout=60000)
-            except Exception as e:
-                print(f"Aviso: falha ao acessar Instagram com SESSIONID ({e}). Tentando login manual.")
-                # Fallback para fluxo antigo de login
-                await page.goto('https://www.instagram.com/accounts/login/', wait_until='networkidle')
-                if os.getenv('MANUAL_LOGIN') == '1':
-                    print('Faça login manualmente no Instagram. Aguardando 10 segundos para concluir...')
-                    await asyncio.sleep(10)
+                await page.goto('https://www.instagram.com/', wait_until='domcontentloaded')
+                # Esperar um pouco para ver se redireciona
+                await page.wait_for_timeout(5000)
+                current_url = page.url
+                
+                # Se não fomos para a tela de login, consideramos logado
+                if 'accounts/login' not in current_url and not (await page.query_selector('input[name="username"]')):
+                    print('Login por SESSIONID inicial parece bem-sucedido')
+                    logged_in = True
                 else:
-                    # (Reusar código de login automatizado existente após este bloco)
-                    pass
-            else:
-                print('Login por SESSIONID bem-sucedido')
-            # Garantir que a página carregou completamente
+                    print('SESSIONID expirado ou inválido (redirecionado para login).')
+            except Exception as e:
+                print(f"Erro ao testar SESSIONID: {e}. Tentando fluxo de login.")
+
+        # 2. Se não logou via sessionid, fazer login por formulário
+        if not logged_in:
+            print("Iniciando fluxo de login com usuário e senha...")
             try:
-                await page.wait_for_load_state('networkidle', timeout=30000)
+                await page.goto('https://www.instagram.com/accounts/login/', wait_until='networkidle')
+            except Exception:
+                await page.goto('https://www.instagram.com/accounts/login/', wait_until='domcontentloaded')
+
+            # Banner de consentimento / cookies
+            try:
+                accept_btn = await page.query_selector('button:has-text("Accept"), button:has-text("Aceitar"), button:has-text("Allow all cookies")')
+                if accept_btn:
+                    await accept_btn.click()
+                    print("Banner de cookies aceito")
             except Exception:
                 pass
-        else:
-            # Fluxo antigo (login manual ou automatizado)
-            await page.goto('https://www.instagram.com/accounts/login/', wait_until='networkidle')
-            if os.getenv('MANUAL_LOGIN') == '1':
-                print('Faça login manualmente no Instagram. Aguardando 10 segundos para concluir...')
-                await asyncio.sleep(10)
-            else:
-                # Tentar localizar o campo de usuário; se falhar, clicar no botão "Log in" da página inicial
-                try:
-                    await page.wait_for_selector('input[name="username"]', timeout=15000)
-                except Exception:
-                    login_btn = await page.query_selector('a:has-text("Log in")')
-                    if login_btn:
-                        await login_btn.click()
-                        await page.wait_for_selector('input[name="username"]', timeout=30000)
-                # Possível banner de consentimento
-                try:
-                    accept_btn = await page.query_selector('button:has-text("Accept")')
-                    if accept_btn:
-                        await accept_btn.click()
-                except Exception:
-                    pass
-                # Preencher credenciais
-                await page.wait_for_selector('input[name="username"]', timeout=60000)
+
+            # Preencher formulário de login
+            try:
+                await page.wait_for_selector('input[name="username"]', timeout=20000)
                 await page.fill('input[name="username"]', ig_user)
                 await page.fill('input[name="password"]', ig_pass)
-                await page.click('button[type="submit"]')
-                await page.wait_for_load_state('networkidle', timeout=60000)
-                await asyncio.sleep(5)  # garantir que cookies estejam definidos
+                
+                # Clicar em entrar e esperar navegação
+                await asyncio.gather(
+                    page.wait_for_navigation(wait_until='networkidle', timeout=60000),
+                    page.click('button[type="submit"]')
+                )
+                print("Formulário de login submetido com sucesso")
+                logged_in = True
+            except Exception as e:
+                print(f"Erro ao preencher formulário ou submeter login: {e}")
+                # Forçar clique caso wait_for_navigation tenha falhado mas o login tenha ocorrido
+                try:
+                    if 'accounts/login' not in page.url:
+                        logged_in = True
+                except Exception:
+                    pass
 
-        # Capturar cookies com tratamento de falha caso a página tenha sido fechada
-        try:
-            cookies = await context.cookies()
-        except Exception as e:
-            # Se a página foi fechada inesperadamente, esperar um pouco e tentar novamente
-            print(f"Aviso: falha ao obter cookies ({e}), aguardando e tentando novamente...")
-            await asyncio.sleep(5)
-            cookies = await context.cookies()
-        cookie_string = "; ".join([f"{c['name']}={c['value']}" for c in cookies])
-        print('--- COOKIES ---')
-        print(cookie_string)
+        # 3. Lidar com telas intermediárias (ex: Salvar informações de login, Notificações)
+        if logged_in:
+            await page.wait_for_timeout(5000)
+            
+            # Tentar fechar "Salvar informações de login" ("Agora não" / "Not Now")
+            try:
+                save_info_btn = await page.query_selector('button:has-text("Agora não"), button:has-text("Not Now"), button:has-text("Agora No"), div[role="button"]:has-text("Agora não")')
+                if save_info_btn:
+                    await save_info_btn.click()
+                    print('Modal "Salvar informações de login" fechado')
+                    await page.wait_for_timeout(3000)
+            except Exception as e:
+                print(f"Aviso ao tentar fechar 'Salvar informações': {e}")
 
-        # Persistir no .env
-        env_path = Path('C:/Projetos/sentinela/.env')
-        if env_path.exists():
-            lines = env_path.read_text(encoding='utf-8').splitlines()
-            # remover linhas antigas de INSTAGRAM_COOKIE_FULL
-            lines = [ln for ln in lines if not ln.startswith('INSTAGRAM_COOKIE_FULL')]
-            lines.append(f'INSTAGRAM_COOKIE_FULL={cookie_string}')
-            env_path.write_text('\n'.join(lines) + '\n', encoding='utf-8')
-            print('INSTAGRAM_COOKIE_FULL atualizado no .env')
+            # Tentar fechar modal de "Ativar notificações"
+            try:
+                not_now_btn = await page.query_selector('button:has-text("Agora não"), button:has-text("Not Now"), button:has-text("Agora No")')
+                if not_now_btn:
+                    await not_now_btn.click()
+                    print('Modal de "Ativar notificações" fechado')
+                    await page.wait_for_timeout(2000)
+            except Exception as e:
+                print(f"Aviso ao tentar fechar 'Ativar notificações': {e}")
+
+            # 4. Capturar cookies e salvar no .env
+            cookies = await context.cookies()
+            cookie_string = "; ".join([f"{c['name']}={c['value']}" for c in cookies])
+            
+            print('--- COOKIES FORMATADOS ---')
+            print(cookie_string)
+
+            # Salvar no .env
+            env_path = Path('C:/Projetos/sentinela/.env')
+            if env_path.exists():
+                lines = env_path.read_text(encoding='utf-8').splitlines()
+                lines = [ln for ln in lines if not ln.startswith('INSTAGRAM_COOKIE_FULL')]
+                
+                # Também atualizar o INSTAGRAM_SESSIONID se um novo foi gerado
+                new_sessionid = next((c['value'] for c in cookies if c['name'] == 'sessionid'), None)
+                if new_sessionid:
+                    lines = [ln for ln in lines if not ln.startswith('INSTAGRAM_SESSIONID=')]
+                    lines.append(f'INSTAGRAM_SESSIONID={new_sessionid}')
+                    print(f"Novo INSTAGRAM_SESSIONID extraído e configurado no .env")
+
+                lines.append(f'INSTAGRAM_COOKIE_FULL={cookie_string}')
+                env_path.write_text('\n'.join(lines) + '\n', encoding='utf-8')
+                print('INSTAGRAM_COOKIE_FULL atualizado com sucesso no .env')
+            else:
+                print('.env não encontrado no caminho padrão')
         else:
-            print('.env não encontrado, cookie salvo apenas no log')
+            print("Não foi possível concluir o login no Instagram. Cookies não exportados.")
 
         await browser.close()
 

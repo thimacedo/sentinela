@@ -37,12 +37,15 @@ def get_supabase() -> Client:
     global _supabase_client
 
     if _supabase_client is None:
+        from dotenv import load_dotenv
+        load_dotenv(override=True)
+
         url = os.environ.get("SUPABASE_URL")
-        key = os.environ.get("SUPABASE_KEY")
+        key = os.environ.get("SUPABASE_SERVICE_KEY") or os.environ.get("SUPABASE_KEY")
 
         if not url or not key:
             raise EnvironmentError(
-                "SUPABASE_URL e SUPABASE_KEY devem estar definidos no ambiente."
+                "SUPABASE_URL e SUPABASE_KEY ou SUPABASE_SERVICE_KEY devem estar definidos no ambiente."
             )
 
         _supabase_client = create_client(url, key)
