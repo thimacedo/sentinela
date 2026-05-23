@@ -13,7 +13,7 @@ _last_updated: 2026-05-23 | branch: feat/autonomous-workers_
 | RewardEngine | Operacional | score/tier/badges persistidos, get_interval() por tier |
 | AIAdvisor | Condicional | Acionado apenas score<40 ou tier critical/db_failed |
 | Watchdog | Operacional | Sem restarts em producao |
-| Frontend (proposta_frontend) | Deployado | Vercel, Next.js 16, /api/* FastAPI |
+| Frontend (nextjs) | Deployado | Vercel, Next.js 16 (Estático na raiz), /api/* FastAPI |
 | Edge Function (mcp-proxy) | Operacional | SQL arbitrario bloqueado, ROUTES semanticas |
 
 ## Arquitetura Atual (v50.1)
@@ -161,7 +161,7 @@ _last_updated: 2026-05-23 | branch: feat/autonomous-workers_
 | RewardEngine | Operacional | score/tier/badges persistidos, get_interval() por tier |
 | AIAdvisor | Condicional | Acionado apenas score<40 ou tier critical/db_failed |
 | Watchdog | Operacional | Sem restarts em producao |
-| Frontend (proposta_frontend) | Deployado | Vercel, Next.js 16, /api/* FastAPI |
+| Frontend (nextjs) | Deployado | Vercel, Next.js 16 (Estático na raiz), /api/* FastAPI |
 | Edge Function (mcp-proxy) | Operacional | SQL arbitrario bloqueado, ROUTES semanticas |
 
 ## Arquitetura Atual (v50.1)
@@ -278,8 +278,10 @@ python watchdog.py             # supervisor com auto-restart
 python scripts/probe_t3_2_storage.py
 
 # Frontend
-cd proposta_frontend && bun run dev
-cd proposta_frontend && bun run build
+npm run dev                            # Desenvolve localmente (Next.js + API uvicorn via concurrently)
+npm run build --prefix frontend       # Compila o Next.js localmente gerando a pasta frontend/out/
+# Para deploy na Vercel (que serve a raiz com skip build):
+# PowerShell: Remove-Item -Recurse -Force _next, index.html, dashboard.html, 404.html, _not-found.html, _not-found, dashboard; Copy-Item -Recurse -Force frontend/out/* .
 
 # Migrations
 python scripts/apply_migration.py
