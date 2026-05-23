@@ -26,6 +26,9 @@ _last_updated: 2026-05-22 | branch: feat/autonomous-workers_
 ### Coleta Real e Workers Autonomos (v48 - v50.1)
 - [x] IGZyteWorker: extracao real com paginacao next_min_id (max 100 comentarios/post)
 - [x] IGZyteWorker: rotacao sequencial de slots, blacklist login wall, fallback storage_state
+- [x] IGZyteWorker refatorado: fallback de extração via DOM (Browser Rendering)
+- [x] IGZyteWorker: injecao de cookies (`requestCookies`) no browser e parser do DOM/GraphQL (React Hydration)
+- [x] Correcao da ForeignKey na persistencia: mapeamento de `candidato_id` para o nome de usuario na tabela `comentarios`
 - [x] IGHeadlessWorker: implementado com scraping real (150 comentarios/ciclo validados)
 - [x] active_targets compartilhado: workers pegam alvos diferentes no mesmo ciclo
 - [x] CycleResult: contrato completo com inserted/duplicated/classified/failed
