@@ -73,7 +73,7 @@ class QueueManager:
                 active_targets.add(username)
             return Target(
                 username=username,
-                candidato_id=cand["id"],
+                candidato_id=username, # Foreign key mapeia para username
                 source="candidatos_fallback",
             )
         return None
