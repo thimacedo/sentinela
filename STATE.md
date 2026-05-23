@@ -5,7 +5,7 @@ _last_updated: 2026-05-23 | branch: feat/autonomous-workers_
 
 | Subsistema | Status | Observacao |
 |---|---|---|
-| Coleta Zyte (IGZyteWorker) | Operacional | Login wall em slot=2; fallback headless ativo |
+| Coleta Zyte (IGZyteWorker) | Desativado | Desativado via ENABLE_ZYTE=false no .env |
 | Coleta Headless (IGHeadlessWorker) | Operacional | 150 comentarios/ciclo validados em producao |
 | Persistencia Supabase | OK | upsert id_externo, ignore_duplicates, duplicados contados corretamente |
 | Classificacao IA | OK | 10/ciclo normal, batch de 50 no cooldown, cascade Mistral->Groq |
@@ -148,3 +148,5 @@ python scripts/apply_migration.py
 - Corrigidas as falhas de falso-positivo de reputação: coletas vazias legítimas (no_comments_found) deixam de sofrer penalidade de -15 de XP, e suspensões por reputação zero nos orquestradores foram limitadas apenas a ciclos com perda real de pontuação (delta < 0), eliminando loops de suspensão indevida (Fase 4 - executado por gemini-2.5-pro-preview).
 - Elevado o nível de log de sucesso da classificação de IA individual para INFO no core/ai_service.py, incluindo o texto do comentário formatado, decodificado de escapes unicode e truncado a 60 caracteres no log do terminal para auditoria direta e clara (Fase 4 - executado por gemini-2.5-pro-preview).
 - Retomado o daemon de sincronização automática e classificação de comentários neutros (`scripts/auto_sync_daemon.py` e `scripts/reclassify_csv.py`) após interrupção. Corrigida a detecção de inatividade de processos instalando a biblioteca `psutil` no `.venv` do projeto, eliminando o fallback com `wmic` no Windows 11 e garantindo monitoramento e sincronização periódicos do progresso local (executado por Gemini 3.5 Flash).
+- Implementada rotação de logs rotativos de 5MB (max 3 backups) para `logs/main_runner.log` e adicionada flag `ENABLE_ZYTE` no orquestrador `main_runner.py` permitindo desativar o worker da Zyte em favor de coleta 100% headless local (Playwright). Suavizados logs repetitivos em `core/instagram_headless.py` e `workers/scrapers/ig_zyte.py` de INFO para DEBUG (Fase 4 - executado por Claude Sonnet 4.6 (Thinking)).
+
