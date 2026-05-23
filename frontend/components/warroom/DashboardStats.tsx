@@ -22,9 +22,10 @@ export default function DashboardStats() {
     queryFn: async () => {
       try {
         const response = await fetch('/api/v1/summary');
-        if (response.ok) {
-          return await response.json();
+        if (!response.ok) {
+          throw new Error(`API respondeu com status ${response.status}`);
         }
+        return await response.json();
       } catch (error) {
         console.warn("API Summary falhou, tentando fallback Supabase:", error);
       }
@@ -32,16 +33,16 @@ export default function DashboardStats() {
       // Fallback Supabase
       const { count: monitorados } = await supabase
         .from('candidatos')
-        .select('*', { count: 'exact', head: true })
+        .select('id', { count: 'exact', head: true })
         .eq('status_monitoramento', 'Ativo');
 
       const { count: total_amostra } = await supabase
         .from('comentarios')
-        .select('*', { count: 'exact', head: true });
+        .select('id', { count: 'exact', head: true });
 
       const { count: total_alertas } = await supabase
         .from('comentarios')
-        .select('*', { count: 'exact', head: true })
+        .select('id', { count: 'exact', head: true })
         .eq('is_hate', true);
 
       const resiliencia = (total_amostra && total_amostra > 0)
