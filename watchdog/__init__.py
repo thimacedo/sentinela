@@ -24,6 +24,14 @@ from typing import Tuple, Dict, Any, Optional
 WATCHDOG_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(WATCHDOG_DIR)
 sys.path.insert(0, WATCHDOG_DIR)
+sys.path.insert(0, PROJECT_ROOT)
+
+# Carrega variáveis do arquivo .env local do projeto
+try:
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(PROJECT_ROOT, ".env"))
+except ImportError:
+    pass
 
 try:
     from core.auto_updater import check_for_updates
@@ -44,8 +52,12 @@ RESTART_DELAY = 30
 ZYTE_CHECK_INTERVAL = 1800
 REQUIREMENTS_FILE = "requirements.txt"
 
-CACHE_DIR = r"E:\sentinela_temp\pip_cache"
-TEMP_DIR = r"E:\sentinela_temp\tmp"
+import tempfile
+CACHE_DIR = os.path.join(tempfile.gettempdir(), "sentinela_pip_cache")
+TEMP_DIR = os.path.join(tempfile.gettempdir(), "sentinela_tmp")
+
+os.makedirs(CACHE_DIR, exist_ok=True)
+os.makedirs(TEMP_DIR, exist_ok=True)
 
 CHILD_ENV = os.environ.copy()
 CHILD_ENV["PIP_CACHE_DIR"] = CACHE_DIR
@@ -54,8 +66,8 @@ CHILD_ENV["TEMP"] = TEMP_DIR
 CHILD_ENV["PYTHONIOENCODING"] = "utf-8"
 CHILD_ENV["PYTHONUTF8"] = "1"
 
-CALLMEBOT_PHONE = "558496066876"
-CALLMEBOT_APIKEY = "8552672"
+CALLMEBOT_PHONE = os.getenv("CALLMEBOT_PHONE", "558496066876")
+CALLMEBOT_APIKEY = os.getenv("CALLMEBOT_APIKEY", "8552672")
 CALLMEBOT_URL = "https://api.callmebot.com/whatsapp.php"
 
 CODE_ERRORS = [
@@ -309,10 +321,10 @@ def heal_runtime_error(reason: str) -> str:
         state.add_log("warn", "[Watchdog] 🧹 Playwright detectado nos logs de erro. Limpando processos órfãos...")
         try:
             if os.name == 'nt':
-                subprocess.run(["taskkill", "/F", "/IM", "chrome.exe"], capture_output=True)
+                # Removemos a matança do chrome.exe pessoal para evitar queda de sessões do usuário
                 subprocess.run(["taskkill", "/F", "/IM", "chromium.exe"], capture_output=True)
             else:
-                subprocess.run(["pkill", "-f", "chrome"], capture_output=True)
+                subprocess.run(["pkill", "-f", "chromium"], capture_output=True)
         except Exception:
             pass
         return "restart"
