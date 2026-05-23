@@ -6,6 +6,14 @@ import os
 import signal
 import sys
 
+if sys.platform.startswith("win"):
+    try:
+        sys.stdout.reconfigure(encoding='utf-8', errors='backslashreplace')
+        sys.stderr.reconfigure(encoding='utf-8', errors='backslashreplace')
+    except AttributeError:
+        pass
+
+
 from dotenv import load_dotenv
 
 load_dotenv()

@@ -6,6 +6,14 @@ e transmite tudo via SSE para o Dashboard.
 import time
 import subprocess
 import sys
+
+if sys.platform.startswith("win"):
+    try:
+        sys.stdout.reconfigure(encoding='utf-8', errors='backslashreplace')
+        sys.stderr.reconfigure(encoding='utf-8', errors='backslashreplace')
+    except AttributeError:
+        pass
+
 import os
 import requests
 import json
