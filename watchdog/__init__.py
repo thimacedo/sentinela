@@ -13,7 +13,9 @@ import asyncio
 from threading import Thread, Lock
 from typing import Tuple, Dict, Any, Optional
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+WATCHDOG_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(WATCHDOG_DIR)
+sys.path.insert(0, WATCHDOG_DIR)
 
 try:
     from core.auto_updater import check_for_updates
@@ -121,7 +123,7 @@ app.add_middleware(
 @app.get("/", response_class=HTMLResponse)
 async def read_root():
     """Serve o dashboard HTML."""
-    html_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "local_dashboard.html")
+    html_path = os.path.join(PROJECT_ROOT, "local_dashboard.html")
     if os.path.exists(html_path):
         with open(html_path, "r", encoding="utf-8") as f:
             return f.read()
