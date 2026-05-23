@@ -245,20 +245,60 @@ class InstagramHeadlessScraper:
             
         logger.info(f"🎯 [Headless] @{username}...")
         try:
+            captured_shortcodes = []
+            
+            async def handle_response(response):
+                url = response.url
+                if "web_profile_info" in url:
+                    try:
+                        data = await response.json()
+                        user_data = data.get("data", {}).get("user", {})
+                        if user_data:
+                            edges = user_data.get("edge_owner_to_timeline_media", {}).get("edges", [])
+                            for edge in edges:
+                                node = edge.get("node", {})
+                                if node.get("shortcode"):
+                                    captured_shortcodes.append(node["shortcode"])
+                            
+                            if not isinstance(candidate, str):
+                                self._update_candidate_data(candidate.get("id"), {
+                                    "username": user_data.get("username"),
+                                    "full_name": user_data.get("full_name"),
+                                    "biography": user_data.get("biography"),
+                                    "follower_count": user_data.get("edge_followed_by", {}).get("count"),
+                                    "following_count": user_data.get("edge_follow", {}).get("count"),
+                                    "media_count": user_data.get("edge_owner_to_timeline_media", {}).get("count"),
+                                    "is_verified": user_data.get("is_verified", False),
+                                    "is_private": user_data.get("is_private", False),
+                                    "profile_pic_url": user_data.get("profile_pic_url_hd"),
+                                    "external_url": user_data.get("external_url"),
+                                })
+                    except Exception as e:
+                        logger.debug(f"Erro ao parsear dados do perfil via rede: {e}")
+
+            # Registra listener de rede
+            self.page.on("response", lambda r: asyncio.create_task(handle_response(r)))
+
             await self.page.goto(f"https://www.instagram.com/{username}/", timeout=60000)
-            await asyncio.sleep(3)
+            await asyncio.sleep(4)
 
             if await self._is_profile_not_found():
                 logger.warning(f"❌ [Headless] Perfil @{username} não encontrado.")
                 return []
 
-            # Coleta shortcodes dos posts via DOM
-            shortcodes = await self.page.evaluate("""
-                () => Array.from(document.querySelectorAll('a[href*="/p/"], a[href*="/reel/"]'))
-                    .map(a => a.href.match(/\/(p|reel)\/([^/]+)\//)?.[2])
-                    .filter(Boolean)
-                    .slice(0, 3)
-            """)
+            if captured_shortcodes:
+                logger.info(f"🕸️ [Headless] Encontrados {len(captured_shortcodes)} posts de @{username} via API/Rede")
+                shortcodes = list(dict.fromkeys(captured_shortcodes))[:3]
+            else:
+                logger.warning(f"⚠️ [Headless] Falha ao interceptar API de perfil. Recorrendo ao scraping do DOM para posts de @{username}")
+                # Coleta shortcodes dos posts via DOM
+                shortcodes = await self.page.evaluate("""
+                    () => Array.from(document.querySelectorAll('a[href*="/p/"], a[href*="/reel/"]'))
+                        .map(a => a.href.match(/\/(p|reel)\/([^/]+)\//)?.[2])
+                        .filter(Boolean)
+                        .slice(0, 3)
+                """)
+                shortcodes = list(dict.fromkeys(shortcodes))
 
             comments: List[Dict] = []
             for shortcode in shortcodes:
@@ -273,11 +313,86 @@ class InstagramHeadlessScraper:
             return None
 
     async def _collect_post_comments(self, username: str, shortcode: str) -> List[Dict]:
-        """Coleta comentários de um post específico via DOM."""
+        """Coleta comentários de um post específico via interceptação de rede e fallback DOM."""
         try:
-            await self.page.goto(f"https://www.instagram.com/p/{shortcode}/", timeout=60000)
-            await asyncio.sleep(4)
+            captured_comments = []
 
+            async def handle_response(response):
+                url = response.url
+                # 1. API REST (/comments/)
+                if "api/v1/media" in url and "comments" in url:
+                    try:
+                        data = await response.json()
+                        raw = data.get("comments", [])
+                        for c in raw:
+                            text = c.get("text") or ""
+                            if len(text) > 2:
+                                ts = c.get("created_at")
+                                dt_pub = datetime.fromtimestamp(ts, tz=timezone.utc).isoformat() if ts else datetime.now(timezone.utc).isoformat()
+                                captured_comments.append({
+                                    "id_externo": f"ig_{c.get('pk')}",
+                                    "texto_bruto": text,
+                                    "autor_username": c.get("user", {}).get("username") or "desconhecido",
+                                    "data_publicacao": dt_pub,
+                                    "data_coleta": datetime.now(timezone.utc).isoformat(),
+                                    "post_shortcode": shortcode,
+                                    "plataforma": "INSTAGRAM",
+                                    "rede_social": "INSTAGRAM",
+                                    "candidato_id": username,
+                                    "processado_ia": False,
+                                    "mined": True,
+                                })
+                    except Exception as e:
+                        logger.debug(f"Erro ao obter JSON de comentários da API REST: {e}")
+                # 2. GraphQL (/graphql/query)
+                elif "graphql/query" in url or "/api/graphql" in url:
+                    try:
+                        data = await response.json()
+                        media_data = data.get("data", {}).get("xdt_shortcode_media", {}) or data.get("data", {}).get("shortcode_media", {})
+                        if media_data:
+                            comment_conn = media_data.get("edge_media_to_parent_comment", {}) or media_data.get("edge_media_to_comment", {})
+                            edges = comment_conn.get("edges", [])
+                            for edge in edges:
+                                node = edge.get("node", {})
+                                text = node.get("text", "")
+                                owner = node.get("owner", {})
+                                ts = node.get("created_at")
+                                if text and len(text) > 2:
+                                    dt_pub = datetime.fromtimestamp(int(ts), tz=timezone.utc).isoformat() if ts else datetime.now(timezone.utc).isoformat()
+                                    captured_comments.append({
+                                        "id_externo": f"ig_{node.get('id', '')}",
+                                        "texto_bruto": text,
+                                        "autor_username": owner.get("username") or "desconhecido",
+                                        "data_publicacao": dt_pub,
+                                        "data_coleta": datetime.now(timezone.utc).isoformat(),
+                                        "post_shortcode": shortcode,
+                                        "plataforma": "INSTAGRAM",
+                                        "rede_social": "INSTAGRAM",
+                                        "candidato_id": username,
+                                        "processado_ia": False,
+                                        "mined": True,
+                                    })
+                    except Exception as e:
+                        logger.debug(f"Erro ao obter JSON de comentários da API GraphQL: {e}")
+
+            # Registra listener de rede
+            self.page.on("response", lambda r: asyncio.create_task(handle_response(r)))
+
+            await self.page.goto(f"https://www.instagram.com/p/{shortcode}/", timeout=60000)
+            await asyncio.sleep(5)
+
+            if captured_comments:
+                seen = set()
+                unique_comments = []
+                for c in captured_comments:
+                    if c["id_externo"] not in seen:
+                        seen.add(c["id_externo"])
+                        unique_comments.append(c)
+                logger.info(f"🕸️ [Headless] Interceptados {len(unique_comments)} comentários reais via rede para o post {shortcode}")
+                return unique_comments[:MAX_COMMENTS_PER_POST]
+
+            logger.warning(f"⚠️ [Headless] Nenhuma requisição de API de comentários interceptada. Recorrendo ao DOM para o post {shortcode}")
+            # Fallback DOM
             raw_comments = await self.page.evaluate("""
                 () => Array.from(document.querySelectorAll('div.x9f619 span[dir="auto"], span._ap30'))
                     .map(el => el.innerText.trim())
@@ -304,6 +419,7 @@ class InstagramHeadlessScraper:
         except Exception as e:
             logger.error(f"❌ [Headless] Erro ao coletar post {shortcode}: {e}")
             return []
+
 
     def _update_candidate_data(self, candidate_id: str, profile_data: Dict[str, Any]):
         """Update candidate data in database with profile information."""
