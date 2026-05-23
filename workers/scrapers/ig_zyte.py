@@ -666,6 +666,9 @@ class IGZyteWorker(BaseWorker):
             )
 
         self.logger.info("[Zyte] Ciclo %s | Alvo: @%s", self.cycle, target.username)
+        
+        # Atualiza last_scraped_at preventivamente para evitar que o alvo se repita na fila de prioridade
+        self.queue.mark_candidate_scraped(target)
 
         try:
             comments = await self.fetch_comments_via_zyte(target)
@@ -703,9 +706,6 @@ class IGZyteWorker(BaseWorker):
                 classifier_success=classify.success,
                 simulated=False,
             )
-
-            if result.db_success and (result.inserted + result.duplicated > 0):
-                self.queue.mark_candidate_scraped(target)
 
             return result
 

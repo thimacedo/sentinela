@@ -42,6 +42,9 @@ class IGHeadlessWorker(BaseWorker):
             )
 
         self.logger.info("[Headless] Ciclo %s | Alvo: @%s", self.cycle, target.username)
+        
+        # Atualiza last_scraped_at preventivamente para evitar que o alvo se repita na fila de prioridade
+        self.queue.mark_candidate_scraped(target)
 
         extracted = 0
         inserted = 0
@@ -87,8 +90,6 @@ class IGHeadlessWorker(BaseWorker):
                     except Exception as e:
                         self.logger.error("[Headless] Falha ao classificar %s: %s", comment_id, e)
 
-                if inserted > 0:
-                    self.queue.mark_candidate_scraped(target)
             else:
                 error_msg = "no_comments_found"
 
