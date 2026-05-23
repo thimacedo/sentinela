@@ -1,6 +1,6 @@
-# Walkthrough — Correções, Refatoração, Limpeza, Carga e Sincronização de Fila (v50.15)
+# Walkthrough — Correções, Refatoração, Limpeza, Carga de Fila e Higienização Cadastral (v50.16)
 
-Foram implementadas correções críticas para restabelecer a estabilidade e a integridade da classificação forense de comentários no sistema Sentinela, seguidas por melhorias de compatibilidade Unicode, refatoração de blindagem do supervisor do Watchdog, higienização de arquivos legados, setup da fila de coleta e sincronização em lote de novos alvos.
+Foram implementadas correções críticas para restabelecer a estabilidade e a integridade da classificação forense de comentários no sistema Sentinela, seguidas por melhorias de compatibilidade Unicode, refatoração de blindagem do supervisor do Watchdog, higienização de arquivos legados, setup da fila de coleta e higienização cadastral de candidatos.
 
 ## Alterações Realizadas
 
@@ -47,16 +47,20 @@ Foram implementadas correções críticas para restabelecer a estabilidade e a i
   - Geração local do arquivo `prioridade_alvos.csv` na pasta raiz do workspace.
   - Classificação e gravação no banco remoto de todas as prioridades baseadas na matriz de regras fornecida pelo usuário.
 
-### Sincronização e Inserção de Novos Alvos (v50.15) [NOVO]
+### Sincronização e Inserção de Novos Alvos (v50.15)
 - **Sincronização Bidirecional**:
-  - O script leu o arquivo `prioridade_alvos.csv` alterado pelo operador e identificou **128 novos candidatos** ausentes no banco.
-  - **Carga na Tabela Candidatos**: Efetuada a inserção automatizada dos 128 novos alvos na tabela `candidatos` do Supabase com o status de monitoramento `"Ativo"` e cargo padrão `"Pré-candidato"`.
-  - **Atualização da Fila**: Efetuada a sincronização completa das prioridades de todos os **467 alvos** (338 anteriores + 128 novos) na tabela `fila_coleta` com o status `"PENDENTE"`.
+  - O script leu o arquivo `prioridade_alvos.csv` alterado pelo operador e identificou **128 novos candidatos** ausentes.
+  - Efetuada a inserção automatizada dos 128 novos alvos na tabela `candidatos` do Supabase e o enfileiramento de todos os **467 alvos ativos** na tabela `fila_coleta` com status `"PENDENTE"`.
+
+### Higienização Cadastral de Candidatos (v50.16) [NOVO]
+- **Exportação de Dados Faltantes**:
+  - Script python temporário desenvolvido para analisar a integridade cadastral de todos os 466 candidatos ativos.
+  - Identificados **430 candidatos** que possuem pelo menos um campo de cadastro nulo (`None`) ou vazio (`""`) nas colunas fundamentais: `nome_completo`, `cargo`, `estado`, `partido`, `sexo`, `raca` ou `ideologia`.
+  - Gerado o arquivo local `candidatos_dados_faltantes.csv` na raiz do projeto com a listagem detalhada de todos os registros pendentes e uma coluna indicando exatamente quais campos estão vazios (`campos_faltantes`).
 
 ---
 
 ## Verificação e Resultados
 
-1. **Novos Alvos Cadastrados**: Os 128 novos candidatos já constam como ativos no banco e foram devidamente enfileirados.
-2. **Prioridades Sincronizadas**: A fila está em sincronia estrita com as prioridades informadas no CSV.
-3. **Repositório Limpo**: A árvore de trabalho do Git está completamente limpa (`nothing to commit, working tree clean`).
+1. **Arquivo CSV de Dados Faltantes Gerado**: O arquivo local `candidatos_dados_faltantes.csv` foi gerado com sucesso na raiz do projeto.
+2. **Repositório Higienizado**: A árvore de trabalho do Git está completamente limpa (`nothing to commit, working tree clean`).
