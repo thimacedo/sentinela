@@ -24,6 +24,20 @@ Responda APENAS com JSON válido contendo:
   "analise_pericial": "Breve justificativa em pt-BR"
 }"""
 
+def decode_escapes(match):
+    try:
+        import codecs
+        return codecs.decode(match.group(0), 'unicode-escape')
+    except Exception:
+        return match.group(0)
+
+def safe_decode_unicode(s: str) -> str:
+    try:
+        import re
+        return re.sub(r'\\u[0-9a-fA-F]{4}', decode_escapes, s)
+    except Exception:
+        return s
+
 def clean_null_chars(data: Any) -> Any:
     """
     Remove recursivamente caracteres nulos (\u0000 e \x00) de strings,
@@ -92,8 +106,11 @@ class AIService:
                 result = clean_null_chars(result)
                 ai_circuit_breaker.record_success(name)
                 
+                # Decodifica escapes unicode para exibir acentos e emojis reais
+                decoded_text = safe_decode_unicode(text)
+                
                 # Trunca e limpa quebras de linha para exibição compacta no log
-                clean_text = text.replace("\n", " ").replace("\r", " ").strip()
+                clean_text = decoded_text.replace("\n", " ").replace("\r", " ").strip()
                 truncated_text = clean_text if len(clean_text) <= 60 else clean_text[:57] + "..."
                 
                 logger.info(f"📊 [AI] {name.upper()} | {result.get('categoria_ia', 'NEUTRO')} | {result.get('confianca_ia', 0):.2f} | \"{truncated_text}\"")
