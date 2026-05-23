@@ -51,12 +51,13 @@ _last_updated: 2026-05-20_
 
 ### Gestão de modelos (por ordem de uso)
 Quando um modelo atingir quota, passar automaticamente para o próximo:
-1. gemini-2.5-pro-preview
-2. gemini-2.5-flash-preview
-3. gemini-2.0-flash
-4. gemini-2.0-flash-lite
-5. gemini-1.5-pro
-6. gemini-1.5-flash
+1. Claude Sonnet 4.6 (Thinking)
+2. Claude Opus 4.6 (Thinking)
+3. Gemini 3.1 Pro (High)
+4. Gemini 3.1 Pro (Low)
+5. Gemini 3.5 Flash (High)
+6. Gemini 3.5 Flash (Medium)
+7. GPT-OSS 120B (Medium)
 
 ### Protocolo de troca de modelo
 - Erro 429 ou "quota exceeded" → trocar para próximo da lista
