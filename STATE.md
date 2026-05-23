@@ -189,13 +189,22 @@ CycleResult → RewardEngine.process_result() → RewardSummary (score, tier, ba
 ## Fluxo de Dados
 
 ```
-Instagram
-  └── Zyte API / Playwright
-        └── comentarios (Supabase)
-              └── AIService.classify_text()  [Mistral → Groq → OpenRouter]
-                    └── comentarios.processado_ia = True
-                          └── AlertManager → WhatsApp / Firebase
-                          └── DossierWorker → PDF
+[Coleta Headless/Zyte] 
+  └── Instagram (Posts / AJAX / GraphQL)
+        └── comentarios (Tabela Supabase)
+              └── AIService (IA Cascade: Mistral → Groq → OpenRouter)
+                    ├── comentarios.processado_ia = True
+                    ├── comentarios.is_hate = True/False
+                    └── comentarios.categoria_ia = [Categoria PASA]
+
+[Notificações & Telemetria (Workers)]
+  └── Worker Cycle Errors (Timeout / Auth Fail)
+        └── AlertManager → WhatsApp (CallMeBot) / Firebase
+
+[Relatórios Estratégicos (Sob Demanda)]
+  └── Painel (Geração Solicitada)
+        └── Tabela 'dossies' (status = Pendente)
+              └── DossierWorker (Background PDF Generation) → PDF em 'reports/'
 ```
 
 ## Sessoes e Autenticacao
