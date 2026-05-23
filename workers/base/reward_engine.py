@@ -98,13 +98,9 @@ class RewardEngine:
         return round(max(0.0, min(score, 100.0)), 2)
 
     def resolve_tier(self, score: float, result: CycleResult) -> str:
-        if result.simulated: return "dry_run"
-        if not result.target: return "idle"
-        if not result.db_success: return "db_failed"
         if score >= 70: return "gold"
         if score >= 50: return "silver"
-        if score >= 25: return "bronze"
-        return "critical"
+        return "bronze"
 
     def resolve_badges(self, result: CycleResult, score: float) -> list[str]:
         badges = []
