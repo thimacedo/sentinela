@@ -44,6 +44,17 @@ class ClassifyStats:
 
 
 class IGZyteWorker(BaseWorker):
+    """
+    Worker especializado na extração de dados do Instagram utilizando a API de extração da Zyte.
+    
+    Estratégias de Extração Implementadas:
+    1. Tier 1 (API JSON): Tenta consumir os endpoints nativos GraphQL/API do Instagram.
+    2. Tier 2 (DOM Browser): Se a API bloqueia a requisição (retornando HTML ao invés de JSON), 
+       utiliza a renderização de navegador (BrowserHtml) da Zyte injetando cookies de autenticação
+       para ler o DOM e o React Hydration JSON para extrair os comentários visualmente.
+       
+    Trata rate-limits, aplica circuit-breakers e alterna sessões caso disponíveis.
+    """
     def __init__(self, worker_id: str, config: dict):
         super().__init__(worker_id, config)
         self.logger = logging.getLogger(f"worker.{worker_id}")
@@ -221,6 +232,16 @@ class IGZyteWorker(BaseWorker):
         return {"error": "service_unavailable", "status_code": 503}
 
     def _extract_json_from_html(self, html: str) -> Dict[str, Any]:
+        """
+        Extrai objetos JSON embutidos nas variáveis de janela do Instagram (React Hydration).
+        Geralmente, o Instagram embute dados na variável `window.__additionalData`.
+        
+        Args:
+            html (str): Código HTML bruto renderizado pelo Zyte.
+            
+        Returns:
+            Dict[str, Any]: O dicionário contendo os dados do perfil ou vazio caso falhe.
+        """
         if not html:
             return {}
         match = re.search(r'window\.__additionalData\["xdt_api__v1__users__web_profile_info"\s*\]\s*=\s*({.*?});', html, re.DOTALL)
@@ -238,6 +259,16 @@ class IGZyteWorker(BaseWorker):
         return {}
 
     def _extract_from_dom(self, html: str) -> List[Dict[str, Any]]:
+        """
+        Extrai shortcodes de posts diretamente dos elementos `<a>` no HTML renderizado.
+        Usado como fallback total (Tier 3) quando nenhum JSON é encontrado.
+        
+        Args:
+            html (str): Código HTML renderizado da página do perfil.
+            
+        Returns:
+            List[Dict[str, Any]]: Lista contendo dicionários com a chave `shortcode`.
+        """
         if not html:
             return []
         posts = []
@@ -454,6 +485,23 @@ class IGZyteWorker(BaseWorker):
         return self._parse_comments_from_html(html, shortcode, candidato_id)
 
     async def fetch_comments_via_zyte(self, target: Target) -> list[dict]:
+        """
+        Fluxo principal de orquestração para coletar os comentários de um alvo.
+        
+        Funcionamento:
+        1. Consulta o perfil do alvo (`target.username`) para obter os posts recentes.
+        2. Resolve os shortcodes dos posts mais recentes até o limite `max_posts`.
+        3. Se não houver `media_id` nativo, faz a conversão do shortcode para o ID numérico.
+        4. Itera sobre cada post tentando coletar via API paginada de comentários.
+        5. Se a API falhar ou não retornar dados por causa de restrições de sessão,
+           aplica o fallback disparando renderização de browser na página de cada post individual.
+           
+        Args:
+            target (Target): Objeto contendo `username` e o ID referencial do alvo.
+            
+        Returns:
+            list[dict]: Lista de dicionários representando os comentários coletados e padronizados.
+        """
         self.logger.info("[Zyte] Coletando perfil: @%s | max_posts=%s max_comments=%s", target.username, self.max_posts, self.max_comments_per_post)
 
         profile_url = f"https://www.instagram.com/api/v1/users/web_profile_info/?username={target.username}"
@@ -515,6 +563,17 @@ class IGZyteWorker(BaseWorker):
         return all_comments
 
     def persist_comments(self, target: Target, comments: list[dict]) -> PersistStats:
+        """
+        Persiste os comentários extraídos no banco de dados Supabase utilizando operação `upsert`.
+        O conflito é resolvido pela chave `id_externo` para evitar duplicatas em ciclos repetidos.
+        
+        Args:
+            target (Target): Objeto do alvo cuja coleta foi realizada.
+            comments (list[dict]): Comentários extraídos (já estruturados com id_externo e chaves correspondentes).
+            
+        Returns:
+            PersistStats: Estatísticas da operação contendo total inserido, duplicado e com falhas.
+        """
         stats = PersistStats()
         if not comments:
             return stats
