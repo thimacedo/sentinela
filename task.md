@@ -1,6 +1,6 @@
-# Tarefas — Geração de Fila de Coleta e CSV de Prioridades (v50.13)
+# Tarefas — Importação de Prioridades Customizadas do CSV (v50.14)
 
-- [x] Criar o script `scratch/prepare_priority_csv.py`
-- [x] Executar o script no interpretador Python e gerar `prioridade_alvos.csv`
-- [x] Limpar o script scratch de desenvolvimento da pasta de rascunhos
-- [x] Validar e commitar as alterações com Conventional Commits (Comitado localmente e CSV gerado no workspace)
+- [ ] Criar o script `scratch/update_priorities_from_csv.py`
+- [ ] Executar o script no interpretador Python e atualizar `fila_coleta` no Supabase
+- [ ] Limpar o script scratch de desenvolvimento da pasta de rascunhos
+- [ ] Validar e commitar as alterações com Conventional Commits

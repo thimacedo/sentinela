@@ -1,19 +1,19 @@
-# Plano de Implementação — Geração de Fila de Coleta e CSV de Prioridades (v50.13)
+# Plano de Implementação — Importação de Prioridades Customizadas do CSV (v50.14)
 
 ## Descrição do Objetivo
-Colocar todos os 338 candidatos atualmente cadastrados como "Ativo" com o status "PENDENTE" na tabela de fila do banco remoto (`fila_coleta`), e gerar um arquivo local `prioridade_alvos.csv` na raiz do projeto para que o operador possa editar as prioridades dos alvos de forma manual e devolvê-lo.
+Atualizar a prioridade dos alvos na tabela `fila_coleta` do banco de dados remoto Supabase com base nos valores numéricos definidos pelo operador no arquivo `prioridade_alvos.csv`, forçando o status `"PENDENTE"` em todos os registros para reativar o ciclo completo de raspagem.
 
 ## Alterações Propostas
 
 ### Scratch
 
-#### [NEW] [prepare_priority_csv.py](file:///c:/projetos/sentinela/scratch/prepare_priority_csv.py)
-- Script Python temporário para buscar candidatos monitorados no Supabase, inseri-los na tabela `fila_coleta` com prioridade padrão `1` e exportar o CSV contendo os dados do candidato e o status.
+#### [NEW] [update_priorities_from_csv.py](file:///c:/projetos/sentinela/scratch/update_priorities_from_csv.py)
+- Script Python temporário para ler o CSV editado pelo operador, extrair a prioridade numérica por `candidato_id` e efetuar o upsert em lote na tabela `fila_coleta` forçando o status `"PENDENTE"`.
 
 ---
 
 ## Plano de Verificação
 
 ### Verificação Estática e Banco
-- Rodar o script e confirmar que o arquivo `prioridade_alvos.csv` foi gerado e preenchido na pasta raiz `c:\projetos\sentinela\`.
-- Validar se a fila do banco possui todos os novos registros em status pendente.
+- Executar o script no interpretador Python e verificar o sucesso do carregamento no terminal.
+- Validar se a prioridade foi alterada para os candidatos editados (ex: `gabrielcesarrn` prioridade `3`, `baleia.rossi` prioridade `4`, etc.).
