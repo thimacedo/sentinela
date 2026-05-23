@@ -1,0 +1,723 @@
+ 
+ 
+CONSERVAÇÃO DA MEMÓRIA POLÍTICA NO TWITTER: 
+A TRANSMISSÃO DA NARRATIVA CHAVISTA NO MICROBLOG 
+ 
+GT3: Comunicação Política e Mídia 
+ 
+Mariana Rezende dos Passos 
+Doutoranda pelo Programa de Pós-Graduação em Comunicação Social da 
+Universidade de São Paulo (USP)/Brasil.  
+Membro do "Grupo de Estudos de Novas Narrativas" (GENN)/ 
+maryrpassos@gmail.com 
+ 
+Resumo 
+ 
+O Twitter se apresentou como importante meio de comunicação para Hugo 
+Chávez, ex-presidente da Venezuela, nos últimos anos de seu mandato. O 
+presente artigo tem como objetivo compreender como a narrativa chavista foi 
+conservada no Twitter – através do conceito de transmissão da memória – após a 
+morte de Chávez. Importante salientar que este trabalho é parte de uma ampla 
+pesquisa de doutorado ainda em andamento e para alcançar os objetivos deste 
+artigo específico foi necessário um recorte menor do período estudado e optou-se 
+por delimitar a análise ao dia 27 de fevereiro de 2014, marco dos 25 anos dos 
+protestos populares que ficaram conhecidos como “Caracazo”. Para a consecução 
+da análise empírica da presente pesquisa foi utilizado o software gratuito e online, 
+BuzzMonitor para coleta de mensagens. Foram coletados os tweets que 
+continham a palavra “chavismo” e que foram postados por perfis localizados no 
+território da Venezuela, no dia 27 de fevereiro de 2014. Após a coleta, as 
+mensagens foram categorizadas e analisadas pelo método de análise de 
+conteúdo. 
+
+ 
+ 
+Palavras-chave: Chavismo; Twitter; Memória; Narrativa política; Venezuela. 
+ 
+Introdução 
+ 
+O chavismo, como ficou conhecido o plano de governo liderado pelo ex-presidente 
+da Venezuela, Hugo Chávez, é uma das grandes narrativas políticas 
+contemporâneas. O chavismo pode ser considerado um produto de outra 
+narrativa, o bolivarianismo – movimento que seguiu os ideais de luta, liberdade e 
+revolução de Símon Bolíviar na América Latina. Chávez, ao assumir a presidência 
+da Venezuela em 1999, deu força a seus ideais ao se ancorar ao mito de Bolívar. 
+O bolivarianismo se tornou, portanto, um quadro de referência do plano de 
+governo de Chávez, contribuindo para a concretização posterior do próprio 
+chavismo.  
+ 
+Importante destacar que Bolívar (assim como Ezequiel Zamora e Simón 
+Rodríguez) não é a única base de ideias do chavismo, o ideal de um 
+socialismo revisado que é definido como o "socialismo do século XXI" também é 
+um dos grandes pilares desta narrativa. Há, também, outros pontos importantes, 
+tais como os projetos econômicos adotados pelo governo e o grande apoio das 
+camadas mais populares do país ao projeto de Chávez. O chavismo completa 15 
+anos no poder da Venezuela e se faz necessário entender como esta narrativa se 
+mantém nos dias atuais.   
+ 
+Desde a primeira postagem no perfil @chavezcandanga em abril de 2010, o 
+Twitter de Hugo Chávez configurou-se como importante instrumento de 
+comunicação do mandatário venezuelano com seu país e com o exterior. Chávez 
+chegou a ser o segundo presidente mais seguido no Twitter (com 4 milhões de 
+seguidores), atrás apenas de Barack Obama. A circulação de informações 
+
+ 
+proporcionada por seu perfil no microblog é característica da importância dada ao 
+seu discurso nessa plataforma.  
+ 
+Chávez declarou em notícia intitulada “Chavez neutraliza críticas à Internet”, 
+publicada em 22 de março pela CNN, que percebia a Internet como uma trincheira 
+de luta1. Em fevereiro de 2010, pouco antes de Chávez abrir sua conta no Twitter, 
+o ex-presidente da Venezuela se disse incomodado com as atitudes oposicionistas 
+na internet, principalmente no microblog. Nesse período de fevereiro de 2010, a 
+oposição chavista conseguiu emplacar a hashtag #freevenezuela (Venezuela livre) 
+como o quarto lugar entre os trending topics mundiais2. Para revidar as ações da 
+oposição, o canal de televisão estatal passou a recrutar, em um programa de 4 
+minutos e 22 segundos de duração intitulado “Twitter, a outra guerra midiática pela 
+internet”, militâncias e apoiadores de Chávez para lutar no que diziam ser uma 
+“batalha de ideias”.  
+ 
+Hugo Chávez faleceu em março de 20133 e com a ausência do discurso do ex-
+presidente no Twitter, a questão que se cria é: como a memória da narrativa 
+chavista será conservada no microblog? Como se trava essa “guerra midiática 
+pela internet” sem a presença de seu principal porta-voz? O que se pretende 
+averiguar aqui, portanto, são os fluxos informativos que fazem com que a narrativa 
+chavista sobreviva, no âmbito online, após a “morte” do discurso oficial de Chávez. 
+ 
+Ao tratar das mídias digitais, a pesquisa tem grande importância para a área de 
+comunicação por apresentar uma nova perspectiva tanto para os estudos da 
+                                                           
+1 Notícia disponível em <http://www.youtube.com/watch?v=uY_Nt9uJqOk&feature=related> Acesso 
+em Jan 2011. 
+2 O símbolo “#” antes de alguma palavra define uma hashtag ou um determinado assunto. Caso 
+uma determinada hashtag passe a ser utilizada repetidas vezes pelos usuários do facebook ele 
+passa a ser um dos assuntos mais comentados no microblog e pode vir a se tornar parte da lista 
+dos trending topics – lista que compõe as hashtags mais utilizadas no mundo ou em um 
+determinado país.  
+3 Nicolás Maduro, também chavista, assumiu a presidência da Venezuela após novas eleições. 
+
+ 
+própria comunicação, bem como para o campo da memória e da transmissão de 
+informação pelo viés midiático. 
+ 
+Redes sociais na Internet e a conversação em rede 
+ 
+Muitos autores que se esforçam para entender as relações entre as redes sociais 
+na Internet e a política visam compreender se ou como a Internet pode vir a 
+apresentar um poder democratizante (Chadwick, 2006; Dahlgren, 2005; Gomes, 
+2008; Maia, 2008; entre outros). Deste modo, tais autores se valem das teorias 
+deliberacionistas 
+ou 
+participacionistas 
+para 
+compreender 
+o 
+modo 
+de 
+funcionamento da conversação online para a democracia de um modo geral.  
+ 
+Winner (1986) determina dois tipos de tecnologias: as que têm consequências 
+políticas – que dependem fortemente do contexto social, econômico e político em 
+que estão inseridas – e as inerentemente políticas. A essas ultimas cabe às 
+autoridades, governos e afins a decisão de adotá-las ou não, pois têm em si 
+mesmas o poder de mudar drasticamente uma determinada forma particular de 
+vida política.  
+ 
+Para Morozov (2011), a repercussão sobre o poder do Twitter nos protestos no Irã 
+em 2009, caracteriza a ideia equivocada de países ocidentais, principalmente os 
+Estados Unidos e União Europeia, de analisar a Internet e suas redes sociais 
+como tecnologias inerentemente políticas. O mito da revolução online iraniana faz 
+parte de algo maior: o mito de que a Internet pode derrubar ditadores. Para 
+Morozov (2011) essa crença no poder libertador valida apenas a ideia de que 
+regimes autoritários censuram a Internet por temê-la, mas ignora o fato de que a 
+mesma está mudando a cultura de resistência e oposição, e que governos 
+ditatoriais podem encontrar uma forma de transformar a Internet em uma poderosa 
+arma de opressão.  
+
+ 
+ 
+Na visão de Morozov (2011), longe de ser um aparato inerentemente político, a 
+Internet deve ser, antes de tudo, compreendida no contexto em que estiver 
+inserida. Sabe-se que a Internet importa, mas ainda não está claro para qual 
+finalidade, sua lógica nunca poderá ser entendida se descontextualizada. É 
+equivocado perceber a Internet como determinista de apenas uma força, 
+libertadora ou opressora. As ideias de Benkler (2006), porém, traçam um 
+interessante paralelo, de acordo com os padrões de Winner (1986): a Internet não 
+é em si política, mas possui consequências políticas. 
+ 
+Segundo Benkler (2006), o que surge com a Internet e os novos aparatos 
+tecnológicos é uma nova economia em rede, que substitui a antiga economia 
+industrial das mídias de massa (predominante da segunda metade do século XIX 
+até o final do século XX). O autor alerta para o fato de que as comparações da 
+nova esfera pública em rede devem ser feitas com a antiga esfera pública 
+industrial, e não com uma utopia que foi criada para a Internet no início dos anos 
+1990, que vislumbrava um poder inerente para a Internet que não é palpável. 
+ 
+A questão da esfera pública contemporânea é chave no entendimento da 
+utilização da Internet para a democracia, Gomes (2008), ao problematizar as 
+ideias de Habermas sobre a esfera pública, desmembra esta em duas vertentes: a 
+esfera de visibilidade pública (cena pública) e a esfera de discussão pública 
+(esfera pública). O autor reforça que se há perda de qualquer um dos dois 
+sentidos na esfera pública – a visibilidade ou a argumentação – isso constitui uma 
+perda da qualidade da democracia. 
+  
+A esfera de visibilidade pública, neste sentido proposto, é essencial para a 
+existência da esfera pública em uma democracia de massa por dois motivos: 1) a 
+discussão necessita da exposição proporcionada pela cena pública; 2) a cena 
+
+ 
+pública torna disponíveis – mesmo que não os produza – os temas de interesse 
+público que vão ser discutidos na esfera pública.  
+ 
+O foco do presente trabalho é compreender como se dá a transmissão do discurso 
+por meio da conversação online, sendo assim, o estudo sobre a deliberação ou 
+discussão participativa que se dá no espaço dos sites de redes sociais na Internet 
+não faz parte desta pesquisa em questão. Mas é válido ressaltar que a ideia de 
+esfera de visibilidade pública, proposta por Gomes (2003), é o conceito que mais 
+se aplica ao sentido aqui proposto.  
+ 
+Outro conceito que também se aplica nesta análise é o de Maia (2003) sobre a 
+conversação política cotidiana. Segundo Maia (2008), a conversação cotidiana, 
+que se dá na esfera de visibilidade pública proposta por Gomes (2003), é tão 
+importante quanto os debates que efetivamente geram efeitos sob a política.  
+ 
+(...) o engajamento dos indivíduos em conversações políticas 
+é importante para o processamento de informação, no 
+sentido de ampliar o entendimento eu os participantes têm 
+sobre determinado assunto. (...) pessoas que discutem 
+política com outras são mais aptas a adquirir uma 
+compreensão mais aprofundada sobre fatos políticos e sobre 
+as informações que recebem por meio dos media do que 
+aquelas que não o fazem (MAIA, 2008, p. 205). 
+ 
+Gomes (2003) salienta que a conversação civil não pode ser uma mera conversa 
+fiada caso queiramos admiti-la com valor político. Mas reforça a ideia de que é 
+inegável que a discussão deve se estender ao público como um todo e não se 
+limitar a apenas discussões entre especialistas. Caso isso não ocorra, perde-se 
+todo o sentido da esfera pública como domínio social da formação da opinião e da 
+
+ 
+vontade coletivas. “É a visibilidade que ancora a discutibilidade na democracia.” 
+(GOMES, 2008, p. 162). A conversação cotidiana da qual tratamos aqui, portanto, 
+é de suma importância para os estudos das redes sociais na Internet e seus 
+impactos na sociedade como um todo. 
+ 
+Como bem aponta Recuero (2012), a conversação em rede na Internet permite 
+que dar maior visibilidade e publicidade ao que é dito. A circulação de informação 
+se amplia para além das fronteiras da rede criada já que outros atores têm acesso 
+ao que é dito mesmo não fazendo parte daquelas conexões onde a conversa se 
+dá.  
+ 
+As conversações em rede “são conversações que permeiam diversas redes 
+sociais, recebendo interferências e participações de indivíduos que, muitas vezes, 
+não estão sequer conectados aos participantes iniciais o diálogo.”. (RECUERO, 
+2012, p. 123).  
+ 
+Um exemplo dessa amplitude da conversação são as hashtags do Twitter, alvo de 
+análise neste artigo. As hashtags fazem com que a conversação se torne 
+“buscável” (Recuero, 2012), ou seja, pública. Qualquer um que tenha acesso ao 
+Twitter, mesmo que não esteja participando da conversa sobre determinado 
+assunto, tem a capacidade de coletar informações sobre determinada 
+conversação e assim pode, por sua vez, transmitir o que está sendo dito naquela 
+conversa para a rede social a qual efetivamente pertence.  
+ 
+É a partir da ampliação e da capacidade de atingir outros públicos e outras redes 
+que a conversação cotidiana na Internet se torna muito propícia à conservação da 
+memória e das grandes narrativas contemporâneas4.  
+                                                           
+4 Necessário pontuar que ainda há uma vasta exclusão digital na Venezuela (e em todo o mundo), 
+portanto, o que se pretende analisar nesta pesquisa é o que se conserva da memória e narrativa 
+
+ 
+ 
+ 
+Memória e narrativa  
+ 
+De acordo com Candau (2011), “a memória é, acima de tudo, uma reconstrução 
+continuamente atualizada do passado, mais do que uma reconstituição fiel do 
+mesmo. (...) Ela é mais um enquadramento do que um conteúdo, vale menos pelo 
+que é do que pelo que fazemos dela” (CANDAU, 2011, p. 9).  
+ 
+A memória resulta da transmissão de um capital de lembranças e esquecimentos, 
+sendo assim, a transmissão é essencial para o compartilhamento e é capaz de 
+fundar as representações de uma identidade coletiva. Transmitir é mobilizar a 
+memória e sem essa transmissão não há nem socialização nem educação. 
+ 
+Caudau (2011) cita Louis-Jean Calvet para formular algumas questões em relação 
+à transmissão da memória: 1) o que conservar? 2) como conservar? 3) quem 
+conservar? 4) como transmitir? 5) por que transmitir?; Tais questões vão 
+perpassar todo o conceito da memória, da construção da identidade e da 
+narrativa.  
+ 
+Outro aspecto importante em relação à memória citado por Candau (2011) é a 
+exteriorização da memória – e é nesse aspecto que é possível falar das mídias 
+digitais como artifícios que exteriorizam a memória contemporânea. Segundo o 
+autor, a memória não mais se encontra apenas na capacidade cerebral, o homem 
+inventou outras formas exteriores de estocagem das lembranças, ou seja, o 
+homem passou a “fazer memória”. A escrita, de acordo com o autor, é a forma 
+mais evidente dessa exteriorização. Candau (2011) cita o exemplo de Heródoto 
+                                                                                                                                                                                     
+chavista nas redes sociais na Internet, sendo assim é levado em conta apenas o contexto e os 
+grupos sociais que participam desta conservação.   
+
+ 
+que escrevia para impedir que desaparecesse o que faziam os homens, e para 
+não se tornarem anônimos, ou sem identidade.  
+ 
+A escrita passa a facilitar o trabalho dos portadores, guardiões e difusores da 
+memória. Os grandes textos se tornam possíveis não só para os que sabiam ler, 
+mas também para os que escutavam as palavras por meio dos sermões, 
+pregações e grandes narrações.  
+ 
+Por um lado a escrita pode ter facilitado a transmissão da memória, mas por outro 
+dificultou a seleção do que deve ser transmitido. É mais difícil selecionar o que 
+será transmitido em sociedades de tradição escrita do que nas de tradição oral. A 
+possibilidade de estocagem e armazenamento de informação nas sociedades de 
+tradição escrita são tão abundantes que a finalidade de conservação não está 
+mais garantida: de um lado as capacidades de aquisição de um ser humano são 
+limitadas e, de outro, o acesso às fontes de informação se tornou complexo e 
+abundante, é preciso escolher, selecionar, esquecer e esse processo é 
+complicado.  
+ 
+O que aponta Candau (2011) é que nas sociedades tradicionais a transmissão era 
+feita no contato face-a-face, já nas sociedades modernas essa transmissão é 
+midiatizada, como é o caso do Twitter. O risco que as sociedade modernas 
+correm, ainda de acordo com o autor, é o da abundância na capacidade de 
+transmissão resultar em uma dispersão de recursos narrativos necessários para a 
+reprodução e manutenção da tradição. 
+ 
+Em contraposição, Mayer-Schönberger (2009) atenta para o fato de que a Internet 
+e, consequentemente, as mídias digitais, proporcionaram uma “memória perfeita”, 
+na qual nunca somos esquecidos a partir do momento em que publicamos algo. 
+Esse é um conceito bem conhecido entre os especialistas em computação e que 
+
+ 
+diz respeito ao “dispositivo de armazenamento do computador” (computer storage 
+divice). Ainda segundo o autor, ainda não sabemos lidar com a não possibilidade 
+de esquecimento das várias narrativas do mundo, bem como do esquecimento de 
+nós mesmos. Mesmo após nossa morte continuaremos “online”, já que os dados 
+ficarão estocados e armazenados em dados computadorizados.  
+ 
+A transmissão da memória chavista pela conversação no Twitter 
+ 
+Em 27 de fevereiro de 2014, o governo chavista – agora liderado por Nicolás 
+Maduro – comemorou os 25 anos do Caracazo e do início da trajetória do governo 
+chavista na Venezuela. O Caracazo, ocorrido em 1989, ainda é considerada a 
+maior rebelião popular da Venezuela e representou o ponto principal da 
+insatisfação popular em relação a políticas econômicas que o governo de Carlos 
+Andrés Pérez (AD) e o Pacto de Ponto Fixo.  
+ 
+Hugo Chávez e seus companheiros do Movimento Revolucionário Bolivariano 200 
+(MBR-200) lideraram, após o Caracazo, duas tentativas de golpe em 1992 contra 
+o então governo da época e passaram a representar a população em relação à 
+insatisfação que tomou conta do país. Chávez se tornou grande ícone das revoltas 
+populares e o Caracazo se transformou em peça importante na narrativa chavista. 
+  
+Apesar da comemoração pelas lutas populares em 1989, o governo de Maduro 
+tem sido alvo de manifestações por todo o país desde o início de Fevereiro do ano 
+presente. As manifestações tiveram inicio por estudantes em San Cristóbal, no 
+estado de Táchira, após uma jovem universitária ter sofrido uma tentativa de 
+estupro dentro do campus da Universidade.  
+ 
+Enquanto os estudantes manifestavam por melhores condições de segurança nas 
+universidades, os protestos passaram a incorporar novas demandas a partir do 
+
+ 
+momento em que ultrapassaram as fronteiras de San Cristóbal. Apesar de ainda 
+ser difícil delimitar um grupo específico que lidera as atuais manifestações contra 
+o governo de Maduro, a maioria dos manifestantes passou a reivindicar pontos 
+importantes da economia e das políticas públicas do governo chavista. 
+ 
+Uma ala mais radical da coalizão Mesa da Unidade Democrática (MUD) também 
+se incorporou às manifestações. Leopoldo López – um dos principais líderes desta 
+ala mais radical – chegou a ser preso pelo governo de Maduro por ser acusado de 
+comandar manifestações violentas.  
+ 
+Dado esse contexto, no próximo tópico será analisada a conversação no Twitter 
+no dia 27 de fevereiro de 2014 para que seja possível entender como a narrativa 
+chavista foi transmitida nesta mídia social nesta data específica.  
+ 
+Análise empírica da conversação no Twitter 
+ 
+Para a consecução da análise empírica da presente pesquisa foi utilizado o 
+software gratuito e online BuzzMonitor5 para coleta de mensagens postadas no 
+Twitter. Foram coletados os tweets que continham a palavra “chavismo” e que 
+foram postados no dia 27 de fevereiro de 2014, dia em que se completou 25 anos 
+do Caracazo. Importante salientar que a captura também tinha como filtro o local 
+específico de onde as mensagens eram postadas, ou seja, só foram coletadas 
+mensagens localizadas no território venezuelano. 
+   
+Para feitura da análise e posterior classificação das mensagens foi aplicada a 
+análise de conteúdo que, segundo Bauer (2008), reduz a complexidade de textos 
+abrangentes e os descreve em características curtas. A análise de conteúdo para 
+                                                           
+5 BuzzMonitor é um software web-based low cost para coletar e classificar dados em mídias sociais 
+e interagir com utilizadores. Disponível em: www.buzzmonitor.com.br 
+ 
+
+ 
+o autor, portanto, é “uma técnica para produzir inferências de um texto focal para 
+seu conteúdo social de maneira objetiva” (BAUER, 2008, p. 191).  
+ 
+Para Bardin (1994, p. 18), “a análise de conteúdo é uma técnica de investigação 
+que tem por finalidade a descrição objetiva, sistemática e quantitativa do conteúdo 
+manifesto da comunicação.” Essa análise consistirá de três etapas principais: 1) 
+pré-análise que consiste em organizar e coletar os dados necessários; 2) a 
+descrição analítica que consiste no aprofundamento do material coletado; 3) a 
+interpretação referencial que consiste na reflexão e a intuição qualitativa e 
+quantitativa, com embasamento em materiais empíricos, do material coletado para 
+que seja possível aprofundar as ideias inicialmente propostas pela pesquisa. 
+ 
+Após a coleta das mensagens as mesmas foram classificadas, portanto, em três 
+categorias diferentes: mensagens positivas, mensagens negativas e mensagens 
+neutras. A classificação e categorização partiram da necessidade de se entender 
+o embate entre a negação e a aceitação ao governo chavista. É válido lembrar 
+que o propósito de Chávez ao ingressar no Twitter, como dito no início do artigo, 
+era “debater as ideias” no que ele chamava de uma nova “trincheira de luta”. 
+Portanto, as mensagens positivas assim classificadas são consideradas pró-
+ideiais chavistas, já as mensagens ditas negativas são as que criticam a postura 
+do chavismo. As mensagens neutras foram assim classificadas por não 
+apresentarem posições explícitas contra ou a favor do chavismo.  
+ 
+Foram classificados, também, os perfis que se auto-afirmavam como opositores 
+ou chavistas. Essa classificação se tornou de suma importância para se entender 
+como se dá o embate das ideias e a conservação da narrativa chavista no âmbito 
+do Twitter.  
+ 
+
+ 
+Foi coletado um total de 3.635 tweets no dia 27 de fevereiro de 2014, localizados 
+na Venezuela e que continham a palavra “chavismo”. Pela incapacidade de 
+analisar tamanho corpus em pouco espaço de um artigo, foi selecionado apenas o 
+escopo de postagens localizadas na capital venezuelana, Caracas. Caracas, de 
+acordo com a coleta de mensagens, é cidade com maior número de postagens na 
+data específica, com um total de 4296 mensagens que continham a palavra 
+“chavismo”. 
+ 
+As 429 mensagens foram, então, separadas de acordo com a classificação acima 
+mencionada. Os resultados obtidos a partir dessa classificação podem ser 
+visualizados na tabela abaixo: 
+ 
+Gráfico 1. Total de mensagens coletadas 
+ 
+ 
+Fonte: Elaboração própria 
+ 
+                                                           
+6 Nem todos os tweets são rastreáveis. Portanto, o número de postagens em Caracas pode ter sido 
+maior, mas o software identificou apenas as 429 que obtinham a localização específica em 
+Caracas definida pelo usuário do Twitter.  
+
+ 
+Das 429 mensagens coletadas, 319 foram classificadas como negativas, ou seja, 
+em seu conteúdo há mensagens de cunho crítico ao governo chavista. Dos 319 
+tweets negativos, 47 foram postadas por perfis de usuários que se auto-declaram 
+anti-chavistas ou oposicionistas. 
+ 
+Foram classificadas 45 mensagens neutras e aproximadamente 33% dessas 
+mensagens são de portais que disponibilizavam notícias sobre os recentes 
+acontecimentos na Venezuela.  
+ 
+Já 65 tweets foram classificados como positivos, um número consideravelmente 
+menor do que os de mensagens negativas. Essa discrepância entre mensagens 
+positivas e negativas pode ser explicada também por dados obtidos pela pesquisa 
+realizada em 2011 pelo Latinobarometro7. Tal pesquisa divulgou que 18,6% das 
+pessoas que declararam pertencer ao partido de oposição ao chavismo afirmaram 
+utilizar o Twitter e apenas 9,8% que declararam estar aliados ao partido político do 
+governo chavista afirmaram utilizar o microblog.  
+ 
+Dos tweets classificados como positivos, 49 são de perfis de usuários que se auto-
+declaram chavistas ou a favor do governo. Fica visível, na comparação entre as 
+mensagens positivas e negativas, que, neste caso específico, a militância chavista 
+está mais presente e há um peso relevante desta militância entre as mensagens 
+positivas: 75,4% dos tweets positivos são de perfis que se auto-declaram 
+chavistas e apenas 14,7% das mensagens negativas foram postadas por perfis 
+declaradamente oposicionistas.  
+ 
+Portanto, é possível verificar que há um número maior de postagens espontâneas 
+(85,3%) contra o chavismo. As mensagens a favor do chavismo são, em sua 
+                                                           
+7 Disponível em: <http://www.latinobarometro.org/> Acesso em 03 de março 2014.  A pesquisa foi 
+realizada em 2011 e entrevistou 1.194 venezuelanos. 
+
+ 
+grande maioria, postadas por simpatizantes ou pessoas ligadas ao partido do 
+governo.  
+ 
+É possível perceber também que, no Twitter, a narrativa chavista e, portanto, a 
+sua memória, é construída positivamente por pessoas já ligadas ao contexto 
+chavista. Ao mesmo tempo, essa narrativa é desconstruída por um número maior 
+de pessoas não necessariamente ligadas a assuntos políticos ou a partidos 
+específicos.  
+ 
+Outro aspecto importante em relação a esse ponto é que as mensagens postadas 
+pela militância chavista são, em sua vasta maioria (86%), repostagens de outros 
+usuários. Não há muitas mensagens diferentes, apenas as mesmas mensagens 
+que são retwitadas variadas vezes. Dentre as 65 mensagens classificadas como 
+positivas, 56 são tweets repetidos, sendo que a mensagem mais repetida recebeu 
+27 retweets. Segue a mensagem abaixo: 
+ 
+27 Fev 2014 Jorgellanda @ChavistaGanador 
+TENDENCIA 
+IRREVERSÍVEL... 
+“O 
+CHAVISMO 
+CONQUISTA OUTRA VITÓRIA”... Boa noite, camaradas... 
+#MaduroHomemDePaz8 
+ 
+Já em relação às mensagens negativas a variação de mensagens é maior, mas 
+ainda assim há um grande índice de retweets (54%). O post mais compartilhado, 
+transcrito abaixo, obteve 44 repostagens: 
+ 
+ 
+                                                           
+8 27 Fev 2014 Jorgellanda @ChavistaGanador 
+TENDENCIA IRREVERSIBLE... "EL CHAVISMO LOGRA OTRA VICTORIA"... Buenas Noches 
+Camaradas... #MaduroHombreDePaz 
+ 
+
+ 
+27 Fev 2014 Nelson Bocaranda @NelsonBocaranda 
+PRIMEIRA MENTIRA GLOBAL: Maduro disse que no 
+chavismo é proibido ter armas... ALGUÉM ACREDITA 
+NELE?9 
+ 
+Ao analisar qualitativamente as mensagens postadas é notável que há, sim, como 
+Hugo Chávez pretendeu, uma trincheira de luta midiática entre os que se 
+simpatizam pelo chavismo e os que o atacam. Nesta batalha de ideias online as 
+mensagens negativas têm como finalidade diminuir, questionar e difamar a 
+narrativa chavista. Ou seja, há uma contra-narrativa que, no caso específico 
+analisado, é mais forte do que a própria narrativa chavista em si. Isso pode ser 
+percebido nos exemplos de tweets negativos abaixo: 
+ 
+27 Fev 2014 Victor Alejandro @victoralejo 
+Eu lamento, mas o chavismo não é uma ideologia política. É 
+uma desculpa para roubar10. 
+ 
+27 Fev 2014 Kathy Vieira  @kvieira 
+Nazismo, Facismo, Socialismo, Comunismo, chavismo, 
+madurismo, terrorismo, a mesma miséria com diferentes 
+nomes!11 
+ 
+                                                           
+9 27 Fev 2014 Nelson Bocaranda @NelsonBocaranda 
+PRIMERA MENTIRA GLOBAL:Maduro dice que en el chavismo esta prohibido tener armas...¿SE 
+LO CREERÁ ALGUIEN? 
+10 27 Fev 2014 Victor Alejandro @victoralejo 
+Lo lamento pero el chavismo no es una ideología política. Es una excusa para el pillaje. 
+11 27 Fev 2014 Kathy Vieira  @kvieira 
+Nacismo, Facismo, Socialismo, Comunismo chavismo, madurismo, terrorismo, la misma miseria 
+con diferente nombre! 
+ 
+
+ 
+As mensagens negativas acima exemplificadas correlacionam o chavismo a 
+pontos negativos, tais como roubo e miséria. Além disso, ela é comparada a 
+outras narrativas já estruturadas que, de acordo com o narrador em questão 
+(@kvieira), são também, negativas: o nazismo, o facismo, o socialismo, o 
+comunismo e o madurismo (que seria a narrativa do governo do então presidente 
+venezuelana, Nicolás Maduro).  
+ 
+As mensagens neutras, apesar de não apresentarem pontos importantes em 
+relação à batalha de ideias, também contribuem para a conservação da memória 
+chavista ao noticiarem fatos ocorridos no cotidiano da Venezuela. Em um dos 
+exemplos de postagens neutras o portal Noticias24 divulga fotos e notícias sobre a 
+comemoração do dia 27 de fevereiro pelos chavistas:  
+ 
+27 Fev 2014 Noticias24 @noticias24 
+Em imagens: chavismo comemorado em El Calvario a 
+"rebelião 
+popular" 
+de 
+27 
+de 
+Fevereiro 
+http://t.co/9q9g0mvbG212 
+ 
+Os meios de comunicação e portais de notícia são peças-chave na conservação 
+da memória chavista, portanto. Mesmo que não participem do embate ou não 
+demonstrem opiniões tão claras contra ou a favor do governo em questão – no 
+caso aqui analisado –, a memória está conservada pelas fotos e relatos que 
+divulgam.  
+ 
+                                                           
+12 27 Fev 2014 Noticias24 @noticias24 
+En 
+fotos: 
+chavismo 
+conmemoró 
+en 
+El 
+Calvario 
+la 
+"rebelión 
+popular" 
+del 
+27-F- 
+http://t.co/9q9g0mvbG2 
+ 
+
+ 
+Já em relação às mensagens positivas, há uma nítida tentativa de sustentar a 
+memória chavista pelo enaltecimento a pontos importantes do governo e suas 
+conquistas. Abaixo seguem dois exemplos de mensagens positivas: 
+ 
+27 Fev 2014 Rem205 @rem205 
+RT @piedadcordoba Se os que estão manifestando hoje 
+tivessem superado a miséria em que vivia a Venezuela há 20 
+anos, certamente valorizariam muito mais as conquistas do 
+chavismo13. 
+ 
+27 Fev 2014 Giancarlo Vargas @MinistroVargas 
+#ConferênciaDePaz 
+muito 
+bom 
+esse 
+comentário 
+@NicolasMaduro “já somos grandes, ninguém duvida do 
+poder que tem o Chavismo, são 15 anos”14 
+ 
+Fica claro que as conquistas do chavismo e o “engrandecimento” desta narrativa 
+ao longo dos 15 anos é a chave principal das mensagens positivas. Tais 
+mensagens enfatizam constantemente que há que se aceitar que pelo chavismo a 
+Venezuela obteve muitas conquistas.  
+ 
+É válido destacar que, de acordo com pesquisa disponibilizada pela Conatel15, 
+42,17% da população venezuelana possui acesso à Internet, ou seja, 12.555.010 
+milhões de pessoas utilizaram os serviços de web. O maior índice de acesso à 
+                                                           
+13 27 Fev 2014 Rem205 @rem205 
+RT @piedadcordoba Si quienes hoy marchan supieran la miseria en la que vivía Venezuela hace 
+20 años seguramente valorarían mucho más los logros del chavismo. 
+14 27 Fev 2014 Giancarlo Vargas @MinistroVargas 
+#ConferenciaDePaz muy buenoo ese comentario .@NicolasMaduro "ya estamos grandecitos, 
+nadie duda del poder q tiene el Chavismo, son 15 años" 
+15 Disponível em: <http://www.conatel.gob.ve/> Acesso em 09 de março 2014 
+
+ 
+Internet no país se concentra na capital Caracas que apresentou índices de 
+92,63% de acesso16.  
+ 
+Os dados de acesso à internet no contexto de análise são de suma importância, 
+pois retratam a exclusão digital que ainda existe na Venezuela. Ao analisar 
+ambientes digitais não se pode deixar de ressaltar que a conversação está restrita 
+àqueles que possuem acesso à tecnologia, portanto, tal conversação pode sim 
+estar limitada a uma fração específica da sociedade e isto pode ser considerado 
+como ponto importante na análise empírica.  
+ 
+A pesquisa realizada pelo Latinobarometro17 na Venezuela divulgou que a maioria 
+das pessoas entrevistadas que utilizam redes sociais na internet (32,4%) possuem 
+ensino médio, técnico ou superior completo. E a maioria dos usuários que 
+declararam utilizar o Twitter (16,2%) também possui ensino médio, técnico ou 
+superior completo. Além disso, a maior parte (24,9%) dos usuários do Twitter na 
+Venezuela possui entre 16-25 anos e 16,6% são do sexo masculino. A partir 
+desses dados é possível verificar o perfil do usuário de internet e, principalmente o 
+Twitter, na Venezuela: o jovem, do sexo masculino e com nível de escolaridade 
+alto. Ao ser considerado o contexto atual de manifestações estudantis na 
+Venezuela, relatadas anteriormente, a amplitude de mensagens negativas em 
+relação ao chavismo pode ser justificadas pela utilização do Twitter pelo perfil 
+especificado. 
+ 
+ 
+ 
+                                                           
+16 Os dados da Conatel são de 2012, considera-se neste trabalho que em 2014 os números 
+continuam próximos à essa realidade com um aumento razoável de acordo com a comparação 
+entre anos anteriores (entre 2011 e 2012 houve um aumento de 1,74% de usuários). 
+17 Disponível em: <http://www.latinobarometro.org/> Acesso em 03 de março 2014.  A pesquisa foi 
+realizada em 2011 e foram entrevistados 1.194 venezuelanos. 
+ 
+
+ 
+Considerações finais 
+ 
+As redes sociais na Internet e a conversação que se dá nesses ambientes são 
+grande fonte de informação para entender como as grandes narrativas são 
+mantidas nos dias atuais. A sociedade em rede já é foco de estudo em sociologia 
+há décadas. De acordo com Recuero (2009), o século XX é permeado por estudos 
+sobre as redes sociais, tais estudos passaram a ter como foco não o entendimento 
+das partes da sociedade separadamente, mas sim o entendimento da interação 
+dessas partes. Analisar as redes sociais significa, portanto, compreender os 
+padrões de conexão expressos por essas redes.  
+ 
+Ainda de acordo com a autora, com a ampliação da utilização da Internet a 
+sociedade passa a se comunicar por meio de computadores e surge uma nova 
+referência para os estudos sobre a sociedade: a comunicação mediada pelo 
+computador. A interação proporcionada pela tecnologia computacional fez com 
+que surgissem as redes sociais online e ampliasse a necessidade de se entender 
+tal fenômeno. A partir daí, a rede social na Internet passou a ser um conceito 
+constantemente explorado por pesquisadores de diversas áreas. 
+ 
+Não se pode deixar de reforçar que a exclusão digital ainda se faz muito presente 
+em todas as partes do mundo e, portanto, a conversação online pode ser 
+padronizada pelo perfil de usuário que utiliza o meio digital. Porém, não se deve 
+minimizar a importância dos diálogos travados no meio online para a construção, 
+ampliação ou negação de determinada narrativa.  
+ 
+O período político atual da Venezuela de constantes manifestações contra e a 
+favor do governo chavista condiciona uma ampliação da conversação e diálogo 
+político no âmbito online. Foi possível inferir dois pontos-chave na conservação da 
+memória chavista a partir da presente pesquisa: 1) a narrativa chavista se vê 
+
+ 
+contra-atacada constantemente no Twitter, mas não por opositores ligados a 
+partidos políticos, mas sim, e em sua grande maioria, por mensagens 
+espontâneas postadas por usuários que se dizem neutros no embate ideológico e 
+político; 2) A conservação positiva da narrativa chavista é mantida, por sua vez, 
+pelos próprios chavistas ou aliados ao governo. Não há uma espontaneidade nas 
+mensagens 
+favoráveis 
+à 
+memória 
+chavista, 
+ao 
+invés 
+disso 
+há 
+uma 
+institucionalização da narrativa chavista, ou seja, tal memória é conservada pelos 
+mesmos indivíduos que fazem parte da estrutura institucionalizada do partido e/ou 
+do chavismo.  
+ 
+É válido ressaltar que a presente pesquisa e a metodologia aplicada podem servir 
+para que outras narrativas políticas ou imagens públicas de líderes políticos 
+possam ser compreendidas no contexto contemporâneo midiatizado. 
+
+ 
+ 
+REFERÊNCIAS BIBLIOGRÁFICAS 
+ 
+Bauer, M. W. (2008). Análise de conteúdo clássica: uma revisão. In: Bauer, M., W.; 
+Gaskell, G. Pesquisa qualitativa com texto, imagem e som: um manual 
+prático. (7ª ed.) Petrópolis: Vozes. Bardin, I. Análise de conteúdo. Lisboa: 
+Edições Setenta, 1994.  
+Benkler, Y. (2006).The wealth of networks: how social production transforms 
+markets and freedom. Acesso em: 20 fev 2012. Disponível em: 
+<http://www.benkler.org/Benkler_Wealth_Of_Networks.pdf>  
+Candau, J. (2011). Memória e identidade. Ferreira, M. L. (trad.)  São Paulo: 
+Contexto, Chadwick, Andrew. Internet Politics: states, citizens, and new 
+communication technologies. Oxford University Press, 2006. Cap. 2, p. 17-
+32. 
+Dahlgren, P. (2005). The internet, public spheres, and political communication: 
+dispersion and deliberation. In. Political Communication, 22, 147-162. 
+Gomes, W. (2008). Da Discussão à Visibilidade. In: Gomes, W., & MAIA, R. C. M. 
+Comunicação e Democracia: problemas & perspectivas. (pp. 117-162). São 
+Paulo: Paulos. 
+ Maia, R. C. M. (2008). Conversação cotidiana e deliberação. In: Gomes, W.,  
+Maia, R. C. M. Comunicação e Democracia: problemas & perspectivas. (pp. 
+195-219). São Paulo: Paulos. 
+ 
+
+ 
+Mayer-Schönberger, V. (2009). Delete. The Virtue of Forgetting in the Digital Age. 
+Princeton University Press. Princeton, New Jersey.  
+Mendes, F. da S. (2012). Hugo Chávez em seu labirinto: o movimento bolivariano 
+e a política na Venezuela. São Paulo: Alameda. 
+Morozov, E., (2011), Hugo Chavez Would Like to Welcome You to the Spinternet. 
+In. Morozov, Evgeny. The Net Delusion: The Dark Side of Internet Freedom. 
+cap. 5. New York, NY: PublicAffairs,.  
+Recuero, R. (2012). A conversação em rede: comunicação mediada pelo 
+computador e redes sociais na internet. Porto Alegre: Sulina.  
+Recuero, R. (2011). Redes Sociais na Internet. (2ª ed.) – Porto Alegre: Sulina.  
+Winner, L. (1986). Artefatos têm política? Acesso em: 25 mar. 2012. Disponível 
+em: <http://www.necso.ufrj.br/Trads/Artefatos%20tem%20Politica.htm>  
+ 

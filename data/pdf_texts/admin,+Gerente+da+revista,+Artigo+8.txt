@@ -1,0 +1,601 @@
+..........
+Ponto-e-Vírgula ISSN 1982-4807 - PUC-SP - No 26 - Segundo Semestre de 2019 - p. 109-122
+109
+Ação política na internet na 
+era das redes sociais
+Political action on the internet in the era of 
+social networks
+Claudio Luis de Camargo Penteado1 
+Brauner Geraldo Cruz Junior2
+Resumo: A popularização e o uso das redes sociais em mobilizações políticas, como as 
+Jornadas de Junho de 2013, os protestos pelo impeachment de Dilma Rousseff e, mais re-
+centemente, as campanhas eleitorais que elegeram Jair Bolsonaro, têm despertado a aten-
+ção da sociedade e dos pesquisadores para o uso das redes sociais em práticas políticas 
+contemporâneas. Com o objetivo de estudar esse uso político das redes sociais de internet, 
+o artigo identificou seis tipos de ação política: (a) produção, circulação e transmissão de 
+informações políticas, (b) como dispositivo interativo de governo eletrônico, (c) forma-
+ção de uma esfera pública interconectada, (d) (ciber)ativismo de grupos políticos, (e) 
+comunicação política, e (f) tecnopolítica. Essa identificação dos diferentes tipos de ação 
+política nas redes sociais de internet, ao mapear trabalhos relevantes em cada um deles 
+e descrever suas características, busca auxiliar no desenvolvimento de uma agenda de 
+pesquisa na área de estudos em Internet e política, além de contribuir para a compreensão 
+das disputas políticas da prática democrática contemporânea.
+Palavras-chave: Ação política; Redes sociais; Esfera pública; Ciberativismo; 
+Comunicação política.
+Abstract: The popularization and use of social networks in political mobilizations, such as 
+the June 2013 Days, the protests for the impeachment of Dilma Rousseff and, more recently, 
+the election campaigns that elected Jair Bolsonaro, have attracted the attention of society and 
+researchers to the use of social networks in contemporary political practices. In order to study 
+this political use of social internet networks, the article identified six types of political action: 
+(a) production, circulation and transmission of political information, (b) as an interactive 
+1 Doutor em Ciência Política e professor associado da Universidade Federal do ABC. Pesquisador LabLivre/
+UFABC e Neamp (PUC/SP). São Paulo - SP/ Brasil. E-mail: claudio.penteado@ufabc.edu.br.
+2 Mestre em Ciências Humanas e Sociais pela UFABC. Bacharel em Administração Pública pela FGV/SP. 
+São Paulo – SP / Brasil. E-mail: brauner.cruz_jr@hotmail.com.
+
+..........
+Ponto-e-Vírgula ISSN 1982-4807 - PUC-SP - No 26 - Segundo Semestre de 2019 - p. 109-122
+110
+CLAUDIO L. DE CAMARGO PENTEADO E BRAUNER G. CRUZ JR     AÇÃO POLÍTICA NA INTERNET(...)
+;
+electronic government device, (c) formation of an interconnected public sphere, (d) (cyber) 
+political group activism, (e) political communication, and (f) technopolitics. This identifica-
+tion of the different types of political action on social internet networks, by mapping relevant 
+works in each of them and describing their characteristics, seeks to assist in the development 
+of a research agenda in the area of ​studies in Internet and politics, in addition to contribute to 
+the understanding of the political disputes of contemporary democratic practice.
+Keywords: Political action; Social Networks; Public Sphere; Cyberactivism; Political 
+communication.
+INTRODUÇÃO
+Em junho de 2013 o Brasil viveu um ciclo de protestos intenso que mobilizou mi-
+lhões de pessoas em diferentes regiões do país, caracterizado principalmente pelo uso das 
+redes sociais de internet na convocação para as manifestações. Os protestos conhecidos 
+como “Jornadas de Junho” até hoje representam um enigma que estudiosos de diferen-
+tes áreas procuram explicar, além de terem produzido profundas transformações na ação 
+política no Brasil. Não à toa, podemos considerá-los um marco para a compreensão das 
+transformações na cena política introduzidas pelo uso massivo de mídias sociais. 
+As Jornadas nasceram das manifestações contra o aumento da tarifa de ônibus na 
+cidade de São Paulo em janeiro de 2013. Elas conseguiram despertar uma onda de protes-
+tos sobre as mais variadas pautas sociais por todo o país, impulsionada pela mobilização 
+de jovens por meio de plataformas de redes sociais de internet.
+Este acontecimento integrou um ciclo de protestos globais que teve início em 2011 
+com a chamada Primavera Árabe, e que abarcou os Indignados, na Espanha, os movimen-
+tos Occupy Wall Street, nos Estados Unidos, além de outras importantes localidades, como 
+Chile, México e Turquia. Em comum, havia a importância estratégica das redes sociais de 
+internet na mobilização, organização e divulgação de informações alternativas, sem a parti-
+cipação de organizações políticas tradicionais (sindicatos, partidos, movimentos etc.), e que 
+conseguiram impulsionar uma rede de indignação e esperança, como cunhou Castells (2017).
+As redes sociais já haviam mostrado sua relevância no campo político desde a cam-
+panha eleitoral de Obama em 2008 (Bimber, 2014). Com o passar dos anos, adquiriram 
+maior centralidade e abrangência, atuando na mobilização política e na produção de nar-
+rativas e discursos políticos, expressando as disputas ideológicas da política contemporâ-
+nea e mobilizando cidadãos menos ativos (Anduiza et al., 2014). 
+A ação pelas redes sociais também esteve presente nas mobilizações políticas a favor 
+e contra o impeachment de Dilma Rousseff em 2015 e 2016 (Penteado & Guerbali, 2016). 
+Outro exemplo foram as campanhas presidenciais de Donald Trump em 2016 e de Jair 
+Bolsonaro em 2018, nas quais a comunicação nas redes sociais tiveram centralidade no re-
+sultado, além da proliferação de desinformação e fake news como estratégia eleitoral para 
+comunidades ideológicas nas mídias sociais na campanha de Trump (Allcott & Gentzkow, 
+2017; Iasulaitis & Vieira, 2019) e do uso eficiente do impulsionamento de desinformações, 
+sobretudo através do WhatsApp, na campanha brasileira de 2018 (Dos Santos et al., 2019). 
+
+..........
+Ponto-e-Vírgula ISSN 1982-4807 - PUC-SP - No 26 - Segundo Semestre de 2019 - p. 109-122
+111
+CLAUDIO L. DE CAMARGO PENTEADO E BRAUNER G. CRUZ JR     AÇÃO POLÍTICA NA INTERNET(...)
+;
+Em paralelo, a rápida popularização das redes sociais de internet no Brasil e no mun-
+do transformou estas plataformas em espaços privilegiados de sociabilidade, difusão e pro-
+dução de informações que passam a ser utilizados não somente por usuários comuns, mas 
+também por órgãos governamentais (nas esferas nacionais, regionais e municipais), empre-
+sas privadas, ONGs, empresas de comunicação, partidos políticos, ativistas, entre outros.
+Dado esse panorama, este artigo tem por objetivo identificar as diferentes formas (ti-
+pos) de atuação política por meio do uso das redes sociais para a construção de uma agenda 
+de pesquisa no campo de estudos em Internet e Política. Assim, buscamos responder às 
+seguintes perguntas: quais as alterações que as plataformas de redes sociais inserem na 
+ação política na internet brasileira? Quais seus efeitos para a prática democrática no Brasil 
+com a popularização do uso das redes sociais pelo uso de aplicativos em smartphones3?
+A discussão que se segue começa por meio de revisão bibliográfica de estudos do 
+campo, para identificar as diferentes formas de ação política que emergiram do uso dessas 
+plataformas, sugerindo uma tipologia que permita um estudo sistematizado dessas ações. 
+E, por último, apresenta-se uma síntese com as considerações finais.
+POR UMA TIPOLOGIA DA AÇÃO POLÍTICA NAS REDES SOCIAIS DE INTERNET
+O uso das redes sociais de internet não está restrito à mobilização, organização e 
+difusão de protestos e movimentos políticos no campo da ação política. As mídias sociais 
+se tornaram importantes ferramentas das práticas políticas no atual estágio de digitaliza-
+ção da sociedade. Com o objetivo de incorporar as novas possibilidades de ação política 
+na internet, ofertadas pelo uso de plataformas de mídias sociais, abaixo apresentamos 
+as transformações apresentadas pelo emprego das mídias sociais, em especial as redes 
+sociais de internet, para o estudo das práticas políticas que acontecem na e pela internet.
+As tipologias são importantes modelos conceituais que possibilitam a compreensão 
+de fenômenos sociais, como a ação política pelo uso de perfis em plataformas de redes 
+sociais. A tipologia é composta por diferentes tipos ideais weberianos que permitem ao 
+pesquisador tecer leituras (análise) sobre a realidade social. Como Weber argumenta, a re-
+alidade social é complexa e nenhum conceito teórico consegue dar conta de sua totalidade; 
+nesse sentido, o tipo ideal possibilita criar categorias que identifiquem padrões concretos 
+dos fenômenos observados (Weber, 2012). Esse recurso conceitual favorece a observação 
+empírica, que no caso deste artigo é voltada para o uso das redes sociais nos processos 
+políticos contemporâneos, e ajuda no mapeamento de uma agenda de pesquisa emergente.
+	 Como apontam Gomes e Maia (2008), os estudos de Internet e Política se constitu-
+íram a partir de 3 grandes matrizes teóricas: a matriz liberal, a republicana e a deliberativa. 
+3 O acesso por aparelhos celular é a principal forma de conexão à internet no Brasil (98% da população acessa por 
+esse dispositivo), segundo Pesquisa Nacional por Amostra de Domicílios Contínua - Tecnologia da Informação 
+e Comunicação (PNAD Contínua TIC) 2018 (Agência Brasil). Disponível em: https://agenciabrasil.ebc.com.br/
+economia/noticia/2020-04/celular-e-o-principal-meio-de-acesso-internet-no-pais. Consultado em 30/09/2020.
+
+..........
+Ponto-e-Vírgula ISSN 1982-4807 - PUC-SP - No 26 - Segundo Semestre de 2019 - p. 109-122
+112
+CLAUDIO L. DE CAMARGO PENTEADO E BRAUNER G. CRUZ JR     AÇÃO POLÍTICA NA INTERNET(...)
+;
+A abordagem liberal privilegia o uso das tecnologias da informação na defesa dos direitos 
+e liberdades dos indivíduos. Na tradição republicana, os estudos são voltados para o em-
+prego das TICs como forma de ampliar a participação cidadã no debate político. A linha 
+deliberacionista, influenciada pela leitura habermasiana, argumenta que os canais da inter-
+net são pensados como espaços para a constituição de uma esfera pública, na qual os usu-
+ários podem usar as ferramentas de interação para promover a deliberação. Entendemos, 
+todavia, que para a incorporação da análise das plataformas de redes sociais é necessário 
+inserir uma quarta matriz teórica, a sociotécnica. A abordagem sociotécnica, com grande 
+influência dentro do campo dos estudos sociais da ciência, está associada aos aspectos da 
+influência dos algoritmos e das configurações técnicas das plataformas que podem levar à 
+formação de filtros bolhas (Pariser, 2011) e processos de modulação algorítmica (Silveira, 
+2019). Também pode-se destacar na abordagem sociotécnica o uso de algoritmos e inte-
+ligência artificial em processos de vigilância por meio de técnicas de Big Data (O’Neil, 
+2016) e o desenvolvimento de uma governamentalidade algorítmica (Rouvroy, 2015).
+	 Em outro estudo (Penteado et al., 2011), foi possível identificar uma tipologia 
+com cinco tipos de ação política: a) informações políticas; b) governo eletrônico; c) esfera 
+pública; d) (ciber)ativismo; e e) comunicação política.
+Em todos esses cinco tipos de ação política é possível identificar a influência das 
+redes sociais de internet. Contudo, é importante incorporar um sexto tipo, associado à 
+abordagem sociotécnica (mas com interfaces com outras matrizes): a tecnopolítica. Esse 
+tipo de ação política está associado às características tecnológicas do funcionamento das 
+plataformas de redes sociais, onde há um ambiente de abundância de informações pro-
+duzido por redes distribuídas (Benkler, 2006), assim como o processo de modulação e 
+mediação dos algoritmos das plataformas, que podem restringir ou impulsionar o fluxo 
+de informação, que influencia (direta ou indiretamente) processos políticos que vão desde 
+o ativismo de multidões, às próprias campanhas eleitorais.
+A participação em redes sociais (online e offline) potencializa a capacidade para 
+mobilizar recursos e construir oportunidades e restrições para seus participantes. Contudo, 
+a participação nessas redes também condiciona as práticas de seus membros. Ao participar 
+de uma rede, o usuário tem acesso aos recursos disponíveis (visibilidade e capital social), 
+ao mesmo tempo que tem seu comportamento regulado pelos mecanismos de interação 
+existentes da rede (Portugal, 2007). Nesse sentido, podemos dizer que as redes sociais de 
+internet operam dentro de uma lógica do poder de redes. A participação em uma rede social 
+está associada aos benefícios que os seus membros esperam obter. Por exemplo, uma or-
+ganização social pode criar perfis em redes sociais para interagir com uma grande parcela 
+da população que acessa diariamente os conteúdos das redes sociais para se informar sobre 
+diferentes assuntos. Contudo, apesar de ampliar a sua capacidade de relacionar com outros 
+usuários da plataforma, a mediação é controlada por empresas privadas, que utilizam seus 
+algoritmos de acordo com seu modelo de negócios, que além de controlarem o fluxo das 
+informações, limitam a circulação das informações de uma instituição pública e se apro-
+priam dos conteúdos produzidos para capitalizar dentro de seus produtos.
+
+..........
+Ponto-e-Vírgula ISSN 1982-4807 - PUC-SP - No 26 - Segundo Semestre de 2019 - p. 109-122
+113
+CLAUDIO L. DE CAMARGO PENTEADO E BRAUNER G. CRUZ JR     AÇÃO POLÍTICA NA INTERNET(...)
+;
+Estar presente nas redes sociais de internet representa uma forma dos usuários inte-
+ragirem diretamente com seus interlocutores sem a necessidade de intermediários, como 
+no sistema de broadcasting da mídia tradicional, e de criarem canais de comunicação 
+personalizados de acordo com seu perfil e preferências. A emergência desse novo modelo 
+de comunicação sinaliza a formação de processos comunicacionais mais fragmentados 
+que afetam as práticas políticas tradicionais, como veremos na seção a seguir. 
+CARACTERIZANDO AS TIPOLOGIAS DE AÇÃO POLÍTICA NAS REDES 
+Com a popularização das redes sociais de internet, as empresas de mídia adaptaram 
+seu conteúdo para serem divulgados nesses espaços de forma a poderem ampliar sua visibi-
+lidade, ao mesmo tempo que têm a possibilidade de interagir com os usuários, assim como 
+de contar com a “ajuda” desses usuários para a difusão de suas publicações. Muitos deles 
+escolhem seguir (like ou follow) algumas páginas ou perfis, de modo que os conteúdos pu-
+blicados por esses perfis selecionados apareçam em suas timelines, permitindo que sejam 
+customizadas as fontes de informação de acordo com seu posicionamento político. Abaixo, 
+discutiremos as tipologias pensadas para a ação política nas redes sociais de internet a partir 
+das matrizes teóricas que abordam cada um desses tipos, mostrando as transformações e 
+disputas em suas análises e as estratégias de ação adotadas em cada um dos casos.
+ 
+Informações políticas
+A produção, circulação e transmissão de informação política por meio de redes sociais 
+dialogam com as matrizes teóricas liberal, republicana, deliberativa e sociotécnica. Se ini-
+cialmente há um otimismo quanto à entrada de novos atores no fluxo da informação, ao criar 
+um espaço com maior liberdade de informação e engajamento dos usuários, por outro lado as 
+dinâmicas algorítmicas e as formas de apropriação das redes digitais (indeterminação da cul-
+tura digital) - que podem ser analisadas pelo viés da matriz sociotécnica - também possibilita-
+ram o crescimento de processos de desinformação e fake news, que tensionam os paradigmas 
+da democracia liberal, sustentados no pilar da racionalidade comunicativa (Chadwick, 2019).
+Nesta tipologia estamos nos referindo à divulgação de informações sobre a polí-
+tica institucional e não-institucional, tratando, assim, da livre expressão de informações 
+políticas por meio de perfis em plataformas de redes sociais, com maior aproximação da 
+matriz liberal, associada ao ideal de uma “imprensa livre”. Assim, muitas empresas de 
+jornalismo utilizam seus perfis nas plataformas para divulgarem suas reportagens, contu-
+do algumas dessas plataformas criam limitações para a circulação das informações para 
+todos seus seguidores, como por exemplo o Facebook. As empresas de mídia digital e 
+alternativa também migram seus conteúdos para as redes sociais, assim como jornalistas 
+e blogueiros. Mesmo com as restrições das plataformas, ainda assim participar da rede 
+acaba sendo uma forma de alcançar maior visibilidade. Contudo, a produção, transmissão 
+e compartilhamento de informações não ficam restritas ao jornalismo (em suas diferentes 
+formas), há também a participação ativa dos usuários, que, por meio de suas redes de 
+relações, expressam suas opiniões e posicionamento político.
+
+..........
+Ponto-e-Vírgula ISSN 1982-4807 - PUC-SP - No 26 - Segundo Semestre de 2019 - p. 109-122
+114
+CLAUDIO L. DE CAMARGO PENTEADO E BRAUNER G. CRUZ JR     AÇÃO POLÍTICA NA INTERNET(...)
+;
+Essa integração do jornalismo tradicional com novos atores informacionais gera 
+um complexo ecossistema de informação política, no qual a velha lógica do jornalismo 
+tradicional convive com a lógica da comunicação em redes distribuídas, revelando novas 
+relações de poder (Chadwick, 2014). 
+A proliferação de polos emissores de informação política, ao mesmo tempo que 
+amplia as informações, também criou espaço para a polarização e radicalização políti-
+ca (Santos Jr, 2014). Neste contexto, também surge a preocupação com o aumento da 
+difusão de desinformação e fake news, abrindo espaço para a atuação de grupos de fact 
+checkers (que podem atuar ou não em redes sociais), que buscam checar as informações 
+divulgadas principalmente nas plataformas de redes sociais (Silva, 2017). 
+ 
+Governo Eletrônico
+O uso de redes sociais por órgãos de governo desenvolve funções que atendem às 
+matrizes teóricas liberal, republicana e deliberativa de interpretação. Apesar das ações 
+do governo eletrônico serem influenciadas por aspectos sociotécnicos, é muito difícil 
+encontrar estudos associados à matriz sociotécnica. O que se pode identificar é o debate 
+em torno da regulação dos algoritmos e a criação de legislação de proteção dos dados 
+pessoais (Lima & Valente, 2020).
+Com o objetivo de ampliar a comunicação e o engajamento com os cidadãos, os go-
+vernos e suas instituições estão criando perfis nas redes sociais. Do ponto de vista liberal, 
+os perfis de órgãos públicos permitem a divulgação de informações, prestação de serviços 
+online e transparência dos dados governamentais. Na abordagem republicana, as redes 
+sociais permitem que os cidadãos possam participar por meio dos canais de interação, 
+principalmente através de consultas online. Já na matriz deliberacionista, as plataformas 
+de redes sociais, por sua própria dinâmica de interação, possibilitam a formação de es-
+paços para debate público e deliberação. Os três níveis de governo (Federal, Estadual e 
+Municipal) atuam dentro das redes sociais, bem como os diferentes poderes (executivo, 
+legislativo e judiciário) e organizações relacionadas ao governo, como empresas públicas 
+e agências reguladoras, compondo o que os pesquisadores do campo denominaram de 
+Democracia Digital (Gomes, 2018). 
+Nesse aspecto, são relevantes os estudos do chamado meio e-legislativo4, que ana-
+lisam as estratégias de parlamentos de se aproximarem de seus representados por meio 
+da internet e das redes sociais, como mostra o estudo de Silva (2019a) sobre a página do 
+Senado Federal no Facebook e a pesquisa de Martino e Aleixo (2017) sobre a comunica-
+ção inovadora da página da Prefeitura de Curitiba na mesma plataforma.
+ 
+4 O periódico E-Legis Revista Eletrônica do Programa de Pós-Graduação da Câmara dos Deputados é um 
+dos principais repositórios de estudos sobre o tema.
+
+..........
+Ponto-e-Vírgula ISSN 1982-4807 - PUC-SP - No 26 - Segundo Semestre de 2019 - p. 109-122
+115
+CLAUDIO L. DE CAMARGO PENTEADO E BRAUNER G. CRUZ JR     AÇÃO POLÍTICA NA INTERNET(...)
+;
+Esfera Pública
+Esse tipo de ação política está diretamente relacionado à visão deliberacionista. Con-
+tudo, com o processo de desorganização da informação e a influência da propaganda com-
+putacional, impulsionada pelos modelos de negócios das plataformas de rede social (Benkler 
+& Roberts, 2018), essa ação política tem incentivado trabalhos calcados também na linha so-
+ciotécnica. Como apontado anteriormente, as redes sociais são caracterizadas pela constante 
+interação entre seus membros que conversam e discutem sobre os mais diferentes temas, 
+inclusive sobre temas políticos, principalmente nas eleições (Penteado et al., 2016; Rossini et 
+al. 2016). Com a recente polarização política, as redes sociais se transformaram em espaços 
+de debate político entre diferentes grupos políticos, que utilizam os espaços de comunicação 
+para defender suas ideias e posicionamentos (Ruediger et al. 2014; Santos Jr., 2016). Contu-
+do, esses embates não seguem os princípios da esfera pública habermasiana e, muitas vezes, 
+os debates são caracterizados por posicionamentos de ódio, no qual o debate político deslo-
+ca-se para um enfrentamento e a atuação de “haters” políticos (Santos Jr., 2014).
+Outro problema é a formação de clusters e a ação dos algoritmos de recomendação, 
+que acabam por gerar o efeito de homofilia de interação entre perfis semelhantes que 
+ajudam a reforçar posições já existentes (Carvalho et al. 2016). Isso impede a ocorrência 
+de um amplo debate de posicionamentos políticos diferentes. O fechamento em comu-
+nidades (clusters) com pensamentos e visões de mundo semelhantes leva a um processo 
+de polarização do mundo, no qual os usuários, apesar de terem uma ampla pluralidade 
+de fontes de informações, ficam restritos a fontes e perfis alinhados com perspectivas e 
+vieses específicos, que tensionam o funcionamento da democracia e promovem a frag-
+mentação social (Sunstein, 2018), ao invés de construir uma esfera pública plural. 
+ 
+Ciberativismo
+As ações de ciberativismo operam nas quatro matrizes apontadas neste artigo. Pela 
+perspectiva liberal, as redes sociais permitem que os próprios grupos de ativistas produzam 
+seus conteúdos e desenvolvam suas estratégias de comunicação, além de serem uma impor-
+tante ferramenta de divulgação de informações sem filtros institucionais. As plataformas de 
+redes sociais também operam, dentro de um viés republicano, como espaço para a mobiliza-
+ção e organização de atos de protestos (Castells, 2017) ou para divulgarem suas mensagens, 
+interagirem e mobilizarem simpatizantes de suas causas (Lycarião & Sampaio, 2010). 
+O uso amigável e a popularidade dos canais de redes sociais fazem deles uma exce-
+lente plataforma para que os diferentes grupos e coletivos ativistas divulguem suas causas 
+e realizem suas campanhas (Carreiro, 2014) e contraponham o discurso de marginaliza-
+ção dos movimentos pela mídia tradicional (Machado e Pérsigo, 2015). Há também ações 
+combinadas entre perfis de associações cívicas, movimentos sociais e perfis ativistas, 
+promovendo grandes mobilizações nas redes (Oliveira et al., 2020). 
+Atualmente, as redes sociais são os principais espaços nos quais os ativistas divulgam suas 
+ideias e organizam suas ações, o que os permite participar do debate dentro de uma esfera públi-
+ca interconectada (Benkler, 2006), dentro da visão tripartite (Estado, Mercado e Sociedade) de 
+
+..........
+Ponto-e-Vírgula ISSN 1982-4807 - PUC-SP - No 26 - Segundo Semestre de 2019 - p. 109-122
+116
+CLAUDIO L. DE CAMARGO PENTEADO E BRAUNER G. CRUZ JR     AÇÃO POLÍTICA NA INTERNET(...)
+;
+Cohen & Arato (1994) de pressão sobre o sistema político, associada à matriz deliberacionista. 
+Organizações e coletivos sociais também utilizam as redes sociais para influenciar o processo de 
+políticas públicas, como mostram os estudos de Penteado et al. (2014).
+As redes sociais de internet ainda possibilitam que cada usuário seja um potencial 
+ativista (Ugarte, 2008), pois um usuário comum, com poucos seguidores, pode ter seu 
+conteúdo compartilhado por milhares de outros usuários, alcançando alto grau de centra-
+lidade em determinados contextos políticos.
+Por outro lado, estudos recentes localizados na matriz sociotécnica mostram que 
+o ativismo em redes sociais de internet enfrenta problemas relacionados à existência de 
+hierarquias dentro das redes que influenciam as práticas ativistas (Bülow & Dias, 2019), 
+ou mesmo o viés racista dos algoritmos das plataformas (Silva, 2019b). Os aspectos so-
+ciotécnicos surgem, então, como um desafio para a atuação dos ativistas nas redes sociais 
+de internet (D’Andrea, 2020). 
+ 
+Comunicação Política
+A comunicação política pelas redes sociais oferece um importante meio de intera-
+ção (sem a mediação dos partidos, instituições e mídia) entre os políticos, partidos e até 
+entre os usuários, associada à matriz republicana. O grande número de usuários transfor-
+ma as redes sociais de internet em um importante espaço para a comunicação política dos 
+candidatos e dos partidos políticos durante campanhas eleitorais. A característica de inte-
+ratividade dessas plataformas permite também que os políticos e os partidos mantenham 
+uma interação mesmo fora de campanha para a divulgação de suas mensagens e posicio-
+namentos políticos dentro do debate público. Esses novos canais também possibilitam 
+o desenvolvimento de algumas inovações no campo das campanhas políticas (Penteado 
+et al., 2016; Rossini et. al. 2016). As redes sociais ainda são importantes espaços para 
+o desenvolvimento de campanhas personalizadas, nas quais algumas empresas já estão 
+desenvolvendo conteúdos neste sentido seguindo técnicas de psicometria (Lebre, 2018).
+Dentro das diferentes formas de interação política nas redes sociais, temos os perfis 
+de partidos políticos, que utilizam as redes como espaço de divulgação de suas campa-
+nhas, uma vez que as ferramentas de interatividade das plataformas permitem novas for-
+mas de se fazer campanha (Massuchin e Tavares, 2015; Da Silva, 2014; Penteado et al., 
+2014). Fora do período eleitoral, também são relevantes os perfis de políticos eleitos ou 
+que ocuparam algum cargo de relevância.
+As redes podem ser utilizadas para a mobilização política e arrecadação de recur-
+sos, como as vitoriosas campanhas de Obama nas eleições nos EUA 2008 (Gomes et al., 
+2009), e para a disseminação de fake news e sua utilização como estratégia de campanha 
+nos EUA e Brasil (Allcott & Gentzkow, 2017; Viscardi, 2020). 
+Por fim, a abordagem sociotécnica nos permite compreender como certas formas de 
+comunicação política podem estar mediadas pela configuração das redes, modificando a 
+interação da classe política e a população.
+
+..........
+Ponto-e-Vírgula ISSN 1982-4807 - PUC-SP - No 26 - Segundo Semestre de 2019 - p. 109-122
+117
+CLAUDIO L. DE CAMARGO PENTEADO E BRAUNER G. CRUZ JR     AÇÃO POLÍTICA NA INTERNET(...)
+;
+Tecnopolítica
+O tipo de ação tecnopolítica está vinculado à ideia de que os artefatos têm política 
+(Winner, 1996) e da conexão entre atores humanos e não humanos na formação do social 
+da teoria ator-rede de Latour (2012). Associada à matriz sociotécnica, a ação tecnopolítica 
+perpassa também pelas outras matrizes.
+Os estudos tecnopolíticos mostram que os aspectos sociotécnicos e os modelos de 
+negócios das plataformas limitam o fluxo de informação, o que influencia na autorregulação 
+da economia das redes (Benkler, 2006), impactando na livre circulação de informações (as-
+sociada à matriz liberal) produzidas pelos usuários nessas plataformas (Alves et al., 2019).
+Na matriz republicana, as pesquisas sobre a participação política em redes sociais de internet 
+mostram que essa participação também é influenciada pelos algoritmos das plataformas. As dinâ-
+micas de funcionamento das plataformas constituem um desafio para movimentos sociais e ativis-
+tas contra hegemônicos que precisam desenvolver um “ativismo codificado” (Figueiredo, 2019). 
+A formação de filtro bolhas é um efeito que limita o alcance de deliberação em re-
+des sociais de internet, presente na matriz deliberativa, como mostram os dados empíricos 
+de Recuero et al. (2017) sobre as conversações políticas no Twitter. 
+Contudo, como adiantado, é na matriz sociotécnica que se encontra a maioria dos es-
+tudos sobre a ação tecnopolítica em redes sociais de internet. Silveira (2019) aponta para os 
+riscos à democracia do funcionamento dos dispositivos de modulação algorítmica das redes 
+sociais. A invisibilidade e opacidade dos códigos de operação dos algoritmos por grandes 
+empresas de tecnologia abrem espaço para a manipulação da opinião pública, assim como 
+a difusão de desinformação, constituindo um importante e emergente campo de estudos.
+CONSIDERAÇÕES FINAIS
+O uso massivo das redes sociais de internet na ação política criou uma nova dinâmi-
+ca e incrementou uma série de alterações na prática política contemporânea no Brasil (e no 
+mundo), como foi possível observar na onda de protestos de 2015 e 2016 que resultaram 
+no impeachment da presidente Dilma Rousseff, na eleição de Jair Bolsonaro em 2018 e em 
+outras mobilizações online, que demarcam um processo de polarização política no país. 
+A atual polarização na política brasileira pode ser observada em dados (grafos) 
+extraídos de perfis de redes sociais onde é possível identificar marcações ideológicas 
+de direita e esquerda (Santos Jr., 2016), indicando a formação de grupos políticos que 
+representam o pluralismo agonístico de Mouffe (2015) e que se expressam por redes de 
+públicos afetivos (Papacharissi, 2016). 
+Como aponta Castells (2013), na sociedade em rede, o poder da comunicação é 
+um elemento central na luta política contemporânea. O uso das redes sociais possibilita 
+a participação mais ativa dos usuários da internet dentro do debate político e na própria 
+luta de produção de narrativas entre os grupos políticos, tornando a disputa política mais 
+complexa com a entrada de novos atores dentro dessa disputa.
+
+..........
+Ponto-e-Vírgula ISSN 1982-4807 - PUC-SP - No 26 - Segundo Semestre de 2019 - p. 109-122
+118
+CLAUDIO L. DE CAMARGO PENTEADO E BRAUNER G. CRUZ JR     AÇÃO POLÍTICA NA INTERNET(...)
+;
+Dentro dos diferentes tipos de ação política nas redes sociais apresentados ao longo 
+do artigo, é possível dizer, respondendo às perguntas iniciais propostas sobre as alterações 
+das redes sociais na ação política brasileira e os efeitos disso para a prática democráti-
+ca, que o uso dessas redes nas práticas políticas produz importantes alterações no jogo 
+político contemporâneo. Esse processo origina o que Rasmussen (2013) vai chamar de 
+um “paradoxo democrático”, pois se de um lado torna a estrutura de comunicação mais 
+aberta e democrática para a participação ativa de milhões de usuários conectados por seus 
+aparelhos celulares, por outro lado, dificulta a formação de consensos necessários para o 
+funcionamento da democracia liberal. Assim, ao mesmo tempo em que abre espaços para a 
+participação ativa da sociedade civil nos processos políticos (Shirky, 2011), por outro lado 
+contribui para a fragmentação social, formação de câmaras de eco, disseminação de fake 
+news e desinformação, o que abre espaço para o crescimento de um populismo autoritário 
+que se articula politicamente pelo uso eficiente das redes (Castells, 2018; Gerbaudo 2018). 
+As tipologias apresentadas neste artigo nos permitem verificar que a ação política 
+pelo uso de redes sociais apresenta elementos da matriz republicana, liberal, deliberativa 
+e sociotécnica. Essa característica da ação política na era das redes digitais ilustra que o 
+campo de pesquisas dentro do tema de Internet e Política é interdisciplinar, influenciado 
+por diferentes áreas do conhecimento (Ciência Política, Comunicação Social, Jornalismo, 
+Administração Pública, Sociologia, Antropologia, Direito, Psicologia, Ciência da Com-
+putação, entre outras áreas). Mais recentemente, principalmente sobre influência da ma-
+triz sociotécnica, vai incorporar contribuições dos Estudos Sociais da Ciência e da área 
+emergente das Humanidades Digitais. Nesse sentido, há a necessidade de maior diálogo 
+entre os campos, principalmente na articulação entre referenciais teóricos e estratégias 
+metodológicas para o estudo da ação política nas redes digitais.
+Para concluir, esperamos que a apresentação dos diferentes tipos de ação política 
+nas e pelas redes sociais possa ajudar no desenvolvimento de novas pesquisas sobre for-
+mas de ações políticas na internet. Este é um campo no qual as inovações tecnológicas, 
+suas configurações técnicas e as formas de apropriação política possibilitam reconfigura-
+ções das práticas políticas, elevando o elemento tecnológico a um papel central na disputa 
+política e na compreensão dos desafios das formas democráticas contemporâneas.
+REFERÊNCIAS
+ALLCOTT, Hunt & GENTZKOW, Matthew. (2017). Social media and fake news in the 
+2016 election. In: Journal of Economic Perspectives. V. 31, n.2.
+ALVES, Marcello; TAVARES, Camilla & ALBUQUERQUE, Afonso de. (2019). Datifi-
+cação e redes na comunicação política: mapeamento de redes e fluxos no Facebook. In: 
+Esferas, (14), 37-53.
+ANDUIZA, Eva; CRISTANCHO, Camilo & SABUCEDO, José. (2014). Mobilization 
+through online social networks: the political protest of the indignados in Spain. In: Infor-
+mation, Communication & Society. 17.6: 750-764.
+BENKLER, Yochai. (2006). The wealth of networks: How social production transforms 
+
+..........
+Ponto-e-Vírgula ISSN 1982-4807 - PUC-SP - No 26 - Segundo Semestre de 2019 - p. 109-122
+119
+CLAUDIO L. DE CAMARGO PENTEADO E BRAUNER G. CRUZ JR     AÇÃO POLÍTICA NA INTERNET(...)
+;
+markets and freedom. Yale University Press.
+______; FARIS, Robert, & ROBERTS, Hal. (2018). Network propaganda: Manipulation, 
+disinformation, and radicalization in American politics. Oxford University Press.
+BIMBER, Bruce. (2014). Digital media in the Obama campaigns of 2008 and 2012: adap-
+tation to the personalized political communication environment. In: Journal of informa-
+tion technology & politics. 11.2: 130-150.
+BÜLOW, Marisa Von & Dias, Tayrine. (2019). O ativismo de hashtags contra e a favor 
+do impeachment de Dilma Rousseff. In: Revista Crítica de Ciências Sociais, (120), 5-32.
+CARREIRO, Rodrigo. (2014). Black bloc em ação: reforço de identidade e outras dinâ-
+micas de ativismo no Facebook. In: Liinc em revista, 10.1.
+CARVALHO, Cássia de Souza; FRANÇA, Fabrício Olivetti de; GOYA, Denise Hideko 
+& PENTEADO, Cláudio Luís de Camargo. (2016). Brazilians divided: political protests 
+as told by twitter. In: Transactions on large-scale data-and knowledge-centered systems 
+xxvii (pp. 1-18). Springer Berlin Heidelberg.
+CASTELLS, Manuel. (2013). Communication power. OUP Oxford.
+______. (2017). Redes de indignação e esperança: movimentos sociais na era da inter-
+net. Rio de Janeiro: Zahar.
+______. (2018). Ruptura: a crise da democracia liberal. São Paulo: Editora Schwarcz-
+-Companhia das Letras.
+CHADWICK, Andrew. (2014). The hybrid media system: Politics and power. In: Public 
+Administration, 92(4), p. 1106-1114.
+______. (2019). The new crisis of public communication: Challenges and opportunities 
+for future research on digital media and politics. In: Online Civic Culture Center. Dis-
+ponível em: https://www.lboro.ac.uk/research/online-civic-culture-centre/news-events/
+articles/o3c-2-crisis/ Consultado em 02/10/2020.
+COHEN, Jean & ARATO, Andrew. (1994). Civil society and political theory. MIT press.
+D’ANDREA, Carlos Frederico. (2020) Pesquisando plataformas online: conceitos e mé-
+todos. Salvador: EDUFBA.
+DA SILVA, Roberto Bitencourt. (2014). Mídias sociais e política: os partidos no Face-
+book. In: ALCEU, v. 14, n.28: 202-223.
+DOS SANTOS, João Guilherme; FREITAS, Miguel; ALDÉ, Alessandra; SANTOS, Ka-
+rina & CUNHA, Vanessa. (2019). WhatsApp, política mobile e desinformação: a hidra 
+nas eleições presidenciais de 2018. In: Comunicação & Sociedade, 41.2: 307-334.
+FIGUEIREDO, Carlos. (2019). Ativismo codificado: protestos em rede e movimentos 
+sociais na era das plataformas digitais. In: Chasqui. Revista Latinoamericana de Comu-
+nicación, 1(142), 17-142.
+GERBAUDO, Paolo. (2018). Social media and populism: an elective affinity In: Media, 
+Culture & Society, 40(5), 745-753.
+GOMES, Wilson. (2018). A democracia no mundo digital: História, problemas e temas. 
+São Paulo: Edições Sesc.
+
+..........
+Ponto-e-Vírgula ISSN 1982-4807 - PUC-SP - No 26 - Segundo Semestre de 2019 - p. 109-122
+120
+CLAUDIO L. DE CAMARGO PENTEADO E BRAUNER G. CRUZ JR     AÇÃO POLÍTICA NA INTERNET(...)
+;
+______; FERNANDES, Breno; REIS, Lucas & SILVA, Tarcizio. (2009). Politics 2.0: a cam-
+panha online de Barack Obama em 2008. In: Revista de Sociologia e Política, v. 17, n. 34. 
+______ & MAIA, Rousiley. (2008). Comunicação e Democracia: problemas & perspec-
+tivas. São Paulo: Paulus.
+IASULAITIS, Sylvia & VIEIRA, Aiane. (2019) Quando o ataque é o programa: as estra-
+tégias de campanha de Donald Trump e de Jair Bolsonaro no Twitter. In: VIII Congresso 
+da Associação Brasileira de Pesquisadores em Comunicação e Política (VIII COMPO-
+LÍTICA). Brasília, Universidade de Brasília (UnB). Disponível em: http://ctpol.unb.br/
+compolitica2019/GT4/gt4_Iasulaytis_Vieira.pdf. Consultado em 11/09/2020.
+LATOUR, Bruno. (2012). Reagregando o social: uma introdução à teoria do ator-rede. 
+Salvador: EDUFBA.
+LEBRE, Lúcia Branco. (2018). Big Data no Marketing Político de Eleições. Internet 
+como canal de comunicação política efectiva. In: Psicologia.pt.
+LIMA, Marcos Francisco & VALENTE, Jonas Chaves. (2020). Regulação de plataformas 
+digitais: mapeando o debate internacional. In: Liinc em Revista, 16(1), 5100.
+LYCARIÃO, Diógenes & SAMPAIO, Rafael Cardoso. (2010). Sociedade civil online: diferen-
+tes usos da internet para fomentar a participação política. In: Rev. Estud. Comum., 11.25: 97-106.
+MACHADO, Anelise Lorenzon & PÉRSIGO, Patricia Milano. (2015). As novas mídias: a in-
+ternet e o Facebook como plataforma de divulgação de mobilizações sociais. In: Temática, 11.8.
+MARTINO, Luís Mauro & ALEIXO, Tayra Carolina. (2017). Usos do entretenimento 
+como estratégia de visibilidade política na página da prefeitura de Curitiba no Facebook. 
+In: Rumores, 10.20: 68-89.
+MASSUCHIN, Michele & TAVARES, Camila. (2015). Campanha eleitoral nas redes so-
+ciais: estratégias empregadas pelos candidatos à presidência em 2014 no Facebook. In: 
+Revista Compolítica, 5.2: 75.
+MOUFFE, Chantal. (2015). Sobre o político. São Paulo: Martins Fontes.
+OLIVEIRA, Taís; LIMA, Dulcilei & PENTEADO, Claudio Luis de Camargo. (2020) # 
+QuemMandouMatarMarielle: a mobilização online um ano após o assassinato de Mariel-
+le Franco. In:  LÍBERO. 23.45: 138-157.
+O’NEIL, Cathy. (2016). Weapons of math destruction: how big data increases inequality 
+and threatens democracy. New York: Crown Publishers.
+PAPACHARISSI, Zizi. (2016). Affective publics and structures of storytelling: Senti-
+ment, events and mediality. In: Information, Communication & Society, 19(3), 307-324.
+PARISER, Eli. (2011). The filter bubble: How the new personalized web is changing what 
+we read and how we think. Ed. Penguin.
+PENTEADO, Cláudio Luis de Camargo; SANTOS, Marcelo Burgos Pimentel dos; 
+ARAÚJO, Rafael Aguiar de Paula & SILVA, Sidney Jard da. (2011). Ação política na 
+internet brasileira. In: Perspectivas em Ciência da Informação, 16(1), 111-132.
+______; SANTOS, Marcelo Burgos Pimentel dos & ARAÚJO, Rafael Aguiar de Paula. 
+(2014). Democracia, sociedade civil organizada e internet: estratégias de articulação on-
+line da rede nossa São Paulo. In: Sociologias, 16.36.
+
+..........
+Ponto-e-Vírgula ISSN 1982-4807 - PUC-SP - No 26 - Segundo Semestre de 2019 - p. 109-122
+121
+CLAUDIO L. DE CAMARGO PENTEADO E BRAUNER G. CRUZ JR     AÇÃO POLÍTICA NA INTERNET(...)
+;
+______; BACHINI, Natasha & FIACADORI, Giuliana. (2016). O planalto em disputa no 
+Facebook: um estudo dos perfis de Dilma Rousseff e Aécio Neves nas eleições de 2014. 
+In: Cervi, Massuchin & Carvalho (orgs). Internet e eleições no Brasil. Curitiba: CPOP 
+(grupo de pesquisa em comunicação política e opinião pública), 430 p.
+______ & GUERBALI, João Guilherme. (2016). As manifestações do impeachment no 
+Twitter: uma análise sobre as manifestações de 2015. In: Ponto-e-vírgula. Revista de 
+Ciências Sociais. v.19.
+PORTUGAL, Silvia. (2007). Contributos para uma discussão do conceito de rede na teo-
+ria sociológica. In: Oficina do Centro de Estudos Sociais (CES), n. 271. 
+RASMUSSEN, Terje. (2013) Internet-based media, Europe and the political public sphe-
+re. In: Media, Culture & Society, 35.1: 97-104.
+RECUERO, Raquel; ZAGO, Gabriela & SOARES, Felipe. (2017). Mídia social e filtros-
+-bolha nas conversações políticas no Twitter. In: Associação Nacional de Programas de 
+Pós-Graduação em Comunicação. Encontro Anual (COMPÓS) [Anais].
+ROSSINI, Patrícia; BAPTISTA, Érica; OLIVEIRA, Vanessa & SAMPAIO, Rafael. 
+(2016). O uso do Facebook nas eleições presidenciais brasileiras. In: Cervi, Massuchin 
+& Carvalho (orgs). Internet e eleições no brasil. Curitiba: CPOP (grupo de pesquisa em 
+comunicação política e opinião pública), 430 p.
+ROUVROY, Antoinette. Governamentalidade algorítmica e perspectivas de emancipa-
+ção: o díspar como condição de individuação pela relação? In: Revista Eco Pós. Vol. 18, 
+nº 02, p. 36-56.
+RUEDIGER, Marco Aurélio; MARTINS, Rafael; DA LUZ, Margareth & GRASSI, Ama-
+ro. (2014). Ação coletiva e polarização na sociedade em rede para uma teoria do conflito 
+no brasil contemporâneo. In: Revista brasileira de sociologia-RBS, 2.4: 205-234. 
+SANTOS JR., Marcelo Alves. (2014). A Rede de Oposição Radical no Facebook: cartografia 
+e apontamentos sobre os haters políticos. In: Revista de Estudos da Comunicação, 15(38).
+______. (2016). Coxinhas e Petralhas: o fandom político como chave de análise da audi-
+ência criativa nas mídias sociais. In: Revista Geminis, 1 ano 7: 117-146.
+SHIRKY, Clay. (2011). The political power of social media: Technology, the public sphe-
+re, and political change. In: Foreign affairs, 28-41.
+SILVA, Michel Carvalho da. (2019a). A página do Senado Federal no Facebook: a relação 
+entre comunicação institucional e promoção da cidadania. In: XIII Congresso Brasilei-
+ro Científico de Comunicação Organizacional e de Relações Públicas. Disponível em: 
+http://abrapcorp.org.br/site/manager/arq/(cod2_22686)pagina_do_senado_Federal.pdf 
+Consultado em 01/10/2020.
+SILVA, Nayane Maria Rodrigues. (2017). Fake news: a revitalização do jornal e os efei-
+tos fact-checking e crosscheck no noticiário digital. Temática, 13.8.
+SILVA, Tarcizio. (2019b). Racismo Algorítmico em Plataformas Digitais: microagres-
+sões e discriminação em código. In: Comunidades, algoritmos e ativismos digitais, p.121.
+SILVEIRA, Sérgio Amadeu da (2019). Democracia e os códigos invisíveis: como os algoritmos 
+estão modulando comportamentos e escolhas políticas. São Paulo: Edições Sesc São Paulo.
+
+..........
+Ponto-e-Vírgula ISSN 1982-4807 - PUC-SP - No 26 - Segundo Semestre de 2019 - p. 109-122
+122
+CLAUDIO L. DE CAMARGO PENTEADO E BRAUNER G. CRUZ JR     AÇÃO POLÍTICA NA INTERNET(...)
+;
+SUNSTEIN, Cass. #Republic: Divided democracy in the age of social media. Princeton 
+University Press, 2018.
+UGARTE, David de. (2008). O poder das redes: manual ilustrado para pessoas, organi-
+zações e empresas, chamadas a praticar o ciberativismo. Porto alegre: EDIPUCRS.
+VISCARDI, Janaisa. (2020). Fake news, verdade e mentira sob a ótica de Jair Bolsonaro 
+no Twitter. In: Trabalhos em Linguística Aplicada, v. 59, n. 2, p. 1134-1157.
+WEBER, Max. (2012). Economia e Sociedade: fundamentos da sociologia compreensi-
+va. Brasília: Editora Universidade de Brasília.
+WINNER, Langdon. (1986). Artefatos têm política? In: Analytica. Revista de Filosofia, 
+21(2), p. 195-218.
+Recebido em 20/11/2020 – Aprovado em 21/11/2020

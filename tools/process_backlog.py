@@ -17,7 +17,7 @@ def classify_pasa(text):
         res = json.loads(r.json().get("response", "{}"))
         cat = res.get("categoria", "FALHA_IA")
         conf = float(res.get("confianza", 0.0))
-        return cat, conf, cat not in ["NEUTRO", "FALHA_IA"]
+        # Aplicar limiar de confiança unificado\r\n        confidence_threshold = CONFIDENCE_THRESHOLD\r\n        if conf < confidence_threshold:\r\n            cat = "INDEFINIDO"\r\n        return cat, conf, cat not in ["NEUTRO", "FALHA_IA", "INDEFINIDO"]
     except Exception as e:
         # print(f"Erro: {e}") # Silencioso conforme instrução de alto sinal
         return "FALHA_IA", 0.0, False

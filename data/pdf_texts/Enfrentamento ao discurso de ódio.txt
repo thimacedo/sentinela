@@ -1,0 +1,514 @@
+Enfrentamento ao 
+discurso de ódio 
+ObservaDH - Observatório Nacional dos Direitos 
+Humanos 
+Última atualização: 
+27 de fevereiro de 2024 
+​
+1. O que é discurso de ódio?  
+​
+2. Violência on-line no Brasil 
+​
+3. Crimes de ódio na internet  
+​
+4. Painel 
+​
+Ficha técnica 
+ <<< Voltar para a página inicial  
+1. O que é discurso de ódio?  
+  
+Escute o conteúdo da seção 1. O que é discurso de ódio? 
+Toda forma de expressão que incita, promove ou 
+justifica o ódio, a discriminação ou a violência 
+contra um indivíduo ou um grupo, em razão de 
+sua origem, etnia, raça, cor, religião, gênero, 
+orientação sexual, identidade de gênero, idade, 
+deficiência, condição social ou política” . 
+Fonte: Relatório de recomendações para o enfrentamento ao discurso de ódio e ao 
+extremismo no Brasil, do MDHC (adaptado) 
+
+O discurso de ódio, entendido como uma forma 
+de ataque verbal ou simbólico contra pessoas ou 
+grupos em razão de sua identidade, sexo, 
+origem, orientação sexual, raça ou cor, religião, 
+gênero, entre outras características, é um 
+fenômeno que vem ganhando destaque e 
+preocupação na sociedade brasileira, 
+especialmente nas redes sociais, onde se 
+multiplicam casos de ofensas, ameaças, 
+humilhações e incitações à violência contra 
+determinados segmentos sociais. 
+ 
+2. Violência on-line no Brasil 
+Acesso à internet no Brasil  
+Escute o conteúdo da seção 2. Violência on-line no Brasil, subseção "Acesso à 
+internet no Brasil". 
+A internet é um importante meio de inclusão 
+social, cultural e política, que permite aos 
+brasileiros exercer seus direitos de cidadania, 
+expressar suas opiniões, informar-se sobre os 
+acontecimentos do país e do mundo, divertir-se e 
+se relacionar com outras pessoas. No entanto, a 
+
+internet também é um espaço de conflito, tensão 
+e violência, onde se manifestam diversas formas 
+de discriminação, preconceito e intolerância, 
+sendo um dos principais ambientes de 
+propagação do discurso de ódio no Brasil. O 
+aumento da incidência desses crimes no 
+ambiente virtual está relacionado com a 
+expansão do acesso à internet no país.  
+Segundo dados da Pesquisa Nacional por 
+Amostra de Domicílios Contínua – Pnad 
+Contínua, do Instituto Brasileiro de Geografia 
+e Estatística (IBGE), o número de pessoas de 
+10 anos ou mais de idade que utilizaram a 
+internet nos três meses anteriores à pesquisa 
+aumentou de 116 milhões em 2016 para 161,6 
+milhões em 2022, o que significa que foi de 
+66,1% dos brasileiros para 87,2% nesse período.  
+Fonte: Elaboração CGIE/MDHC, a partir de dados da Pnad Contínua.  
+Esse acesso, contudo, é ainda muito desigual 
+quando consideramos os diferentes estados 
+brasileiros. O estado com o maior percentual de 
+
+pessoas com 10 ou mais anos de idade que 
+informaram ter acessado a internet nos três 
+meses anteriores à pesquisa, em 2022, foi o 
+Distrito Federal (96,6%), seguido de Goiás 
+(91,4%). No extremo oposto, o Acre registrou 
+apenas 77,8% de acesso e o Maranhão 79,1%. 
+Esri | TomTom | Garmin | FAO | NOAA | USGS 
+Powered by Esri 
+1.000 km 
+Percentual de pessoas de 10 anos ou mais de idade que acessaram internet 
+> 93,70 
+85,80 
+< 77,80 
+Percentual de pessoas com 10 anos ou mais de idade que utilizaram internet nos 
+três meses anteriores à pesquisa, por unidade da federação. Brasil, 2022. Fonte: 
+Elaboração CGIE/MDHC, a partir de dados da Pnad Contínua. 
+O acesso à internet ainda é maior nas áreas 
+urbanas (89%). Contudo, nos últimos anos, 
+verificou-se um crescimento maior do acesso nas 
+áreas rurais (foi de 33,8% a 72,7% entre 2016 e 
+2022). 
+Fonte: Elaboração CGIE/MDHC, a partir de dados da Pnad Contínua.  
+O acesso à internet é maior entre pessoas com 
+maior instrução, chegando a 99,4% das pessoas 
+com curso superior incompleto. Mas tem crescido 
+
+muito também entre as pessoas sem instrução, 
+grupo em que subiu de apenas 7% em 2016, 
+para 41,9% em 2022. 
+Nível de 
+instrução 
+2016 
+2017 
+2018 
+2019 
+2021 
+2022 
+Sem 
+instrução 
+7% 
+10,1% 
+12,8% 
+16,8% 
+32,9% 
+41,9% 
+Fundamental 
+incompleto 
+43,5% 
+50,4% 
+57% 
+62,5% 
+72,6% 
+79% 
+Fundamental 
+completo 
+67,7% 
+74,3% 
+80,4% 
+83,3% 
+86,9% 
+91,5% 
+Médio 
+incompleto 
+82,2% 
+85,3% 
+88,8% 
+91% 
+92,6% 
+95,8% 
+Médio 
+completo 
+85,2% 
+88,6% 
+92% 
+93,7% 
+94,5% 
+97,1% 
+Superior 
+incompleto 
+97,3% 
+97,8% 
+98,5% 
+98,8% 
+98,4% 
+99,4% 
+Superior 
+completo 
+96% 
+96,6% 
+97,6% 
+97,9% 
+98% 
+98,9% 
+Percentual de pessoas de 10 anos ou mais de idade que utilizaram internet nos três 
+meses anteriores à pesquisa, por nível de instrução. Brasil, 2016-2022. Fonte: 
+Elaboração CGIE/MDHC, a partir de dados da Pnad Contínua. 
+
+Em relação à faixa etária, o acesso é superior a 
+90% entre pessoas de 14 a 49 anos, sendo 
+menor entre as pessoas com 60 anos ou mais 
+(62,1%). 
+Faixa 
+etária 
+2016 
+2017 
+2018 
+2019 
+2021 
+2022 
+10 a 13 
+anos 
+66% 
+70,9% 
+74,8% 
+77,5% 
+82,2% 
+84,9% 
+14 a 19 
+anos 
+83,3% 
+85,8% 
+88,5% 
+90,1% 
+91,9% 
+94,1% 
+20 a 24 
+anos 
+85% 
+88,2% 
+90,9% 
+92,6% 
+94,2% 
+96,1% 
+25 a 29 
+anos 
+83,7% 
+87,6% 
+90,8% 
+92,6% 
+94,5% 
+96,1% 
+30 a 39 
+anos 
+78,2% 
+83,5% 
+88% 
+90,5% 
+93,4% 
+95,4% 
+40 a 49 
+anos 
+66,6% 
+73,9% 
+80,6% 
+84,7% 
+90,2% 
+92,6% 
+50 a 59 
+anos 
+52,4% 
+59,9% 
+68% 
+74,4% 
+83,3% 
+86,3% 
+60 anos 
+ou mais 
+24,7% 
+31% 
+38,5% 
+44,8% 
+57,5% 
+62,1% 
+
+Percentual de pessoas de 10 anos ou mais de idade que utilizaram internet nos três 
+meses anteriores à pesquisa, por faixa etária. Brasil, 2016-2022. Fonte: Elaboração 
+CGIE/MDHC, a partir de dados da Pnad Contínua. 
+Quem são as vítimas?  
+Escute o conteúdo da seção 2. Violência on-line no Brasil, subseção "Quem são as 
+vítimas?" 
+A violência na internet é um problema grave que 
+afeta milhares de pessoas no Brasil. Segundo a 
+Pesquisa Nacional de Saúde (PNS) de 2019, 
+realizada pelo IBGE em parceria com o Ministério 
+da Saúde, 1.623.333 de pessoas de 18 anos ou 
+mais de idade relataram ter sofrido algum tipo de 
+agressão on-line nos últimos doze meses. O 
+estado que registrou o maior número de 
+agressões on-line, segundo a pesquisa, foi São 
+Paulo, com 400.294 agressões, seguido de 
+Minas Gerais (147.327) e Rio de Janeiro 
+(145.267). 
+Esri | TomTom | Garmin | FAO | NOAA | USGS 
+Powered by Esri 
+1.000 km 
+Quantidade de pessoas com 18 anos ou mais que relatou ter sido ameaçada, ofendida, 
+xingada ou exposta suas imagens sem o seu consentimento 
+> 140.625,00 
+71.435,00 
+< 2.246,00 
+
+Quantidade de pessoas com 18 anos ou mais que relataram ter sido ameaçadas, 
+ofendidas, xingadas ou ter expostas suas imagens sem o seu consentimento, por 
+UF. Brasil, 2019. Fonte: Elaboração CGIE/MDHC, a partir de dados da PNS. 
+A agressão on-line foi definida como o uso de 
+redes sociais ou celular para ameaçar, ofender, 
+xingar ou expor imagens sem o consentimento 
+da vítima. As principais vítimas dessas 
+agressões foram as mulheres, com quase 53% 
+dos relatos de ameaça, ofensa, xingamentos ou 
+exposições de imagens sem o consentimento 
+das pessoas com 18 anos ou mais. 
+Fonte: Elaboração CGIE/MDHC, a partir de dados da PNS. 
+Os dados indicam que as pessoas jovens de 18 
+a 29 anos foram as que receberam o maior 
+número de agressões on-line (31,6%), e esses 
+números diminuem quanto maior a idade. Isso 
+pode indicar que as pessoas mais jovens estão 
+mais expostas e vulneráveis à violência online, 
+seja por usarem mais as redes sociais ou celular, 
+seja por serem mais visadas pelos agressores. 
+Fonte: Elaboração CGIE/MDHC, a partir de dados da PNS. 
+
+Quanto à orientação sexual, mais de 10% das 
+pessoas que se declararam bissexuais relataram 
+ter sido ameaçadas, ofendidas, xingadas ou 
+tiveram imagens suas expostas sem o 
+consentimento. Em seguida vêm as pessoas 
+homossexuais, com 9,2% já tendo sido vítimas 
+de algum desses tipos de agressão on-line. O 
+grupo em que houve menos agressões foi o das 
+pessoas heterossexuais, com 2,2%.  
+Orientação sexual 
+Percentual de pessoas 
+Heterossexual 
+2,2% 
+Bissexual 
+10,4% 
+Homossexual 
+9,2% 
+Outra orientação 
+7,5% 
+Não sabe 
+3,6% 
+
+Recusou-se a responder 
+3,1% 
+Percentual de pessoas de 18 anos ou mais de idade que sofreram ameaças, 
+ofensas, xingamentos ou tiveram suas imagens expostas sem o consentimento, por 
+orientação sexual. Brasil, 2019. Fonte: Elaboração CGIE/MDHC, a partir de dados 
+da PNS. 
+A PNS revelou que esse tipo de violência tem 
+características específicas, relacionadas ao perfil 
+sociodemográfico das vítimas, à localização 
+geográfica, à idade e à orientação sexual. Os 
+dados mostram que a violência on-line é uma 
+realidade que afeta de forma desigual as 
+pessoas no Brasil, sendo mais frequente nas 
+regiões Sudeste e Nordeste, nos estados de São 
+Paulo e Minas Gerais, entre as mulheres e as 
+pessoas que se declaram homossexuais ou 
+bissexuais. 
+ 
+3. Crimes de ódio na internet  
+Escute o conteúdo da seção 3. Crimes de ódio na internet 
+A internet é um espaço de comunicação, 
+informação, entretenimento e participação social, 
+
+mas também pode ser um ambiente de violação 
+de direitos humanos, especialmente quando se 
+trata de crimes de ódio.   
+Os crimes de ódio são aqueles motivados por 
+preconceito ou intolerância contra grupos ou 
+indivíduos por sua identidade ou orientação 
+sexual, gênero, raça, etnia, nacionalidade ou 
+religião.   
+Esses crimes podem assumir diversas formas na 
+Internet, como ofensas, ameaças, injúrias, 
+difamações, incitações à violência, apologias ao 
+crime, divulgação de imagens ou vídeos 
+humilhantes, entre outras.  
+Entre 2017 e 2022, a Central Nacional de 
+Denúncias de Crimes Cibernéticos, da  
+Safernet , recebeu um total de 293.289 denúncias 
+desse tipo de crime. O ano de 2022 foi o que 
+registrou o maior número de casos nesta série.  
+Fonte: Elaboração CGIE/MDHC, a partir de dados da Safernet. 
+Considerando todo o período entre 2017 e 2022, 
+o tipo de crime de ódio mais denunciado na 
+
+Central Nacional de Denúncias de Crimes 
+Cibernéticos foi o de apologia a crimes contra a 
+vida, seguido da misoginia.  
+Fonte: Elaboração CGIE/MDHC, a partir de dados da Safernet. 
+Além disso, a misoginia foi também o tipo de 
+crime de ódio que mais cresceu entre 2017 e 
+2022, passando de 961 denúncias em 2017 para 
+28.679 em 2022, um aumento de quase 30 
+vezes.  
+Fonte: Elaboração CGIE/MDHC, a partir de dados da Safernet. 
+Denúncias de violação de direitos humanos 
+no ambiente virtual: os dados da Ouvidoria 
+Nacional de Direitos Humanos  
+Escute o conteúdo da seção 3. Crimes de ódio na internet, subseção "Denúncias na 
+Ouvidoria Nacional de Direitos Humanos". 
+Outra fonte sobre a ocorrência desse tipo de 
+crime é a Ouvidoria Nacional de Direitos 
+Humanos (ONDH), que recebe denúncias de 
+violações de direitos humanos em todo o 
+território brasileiro, incluindo no ambiente virtual. 
+Entre janeiro de 2021 e setembro de 2023, a 
+
+ONDH registrou um total de 29.297 denúncias de 
+violações de direitos humanos na internet.  
+Fonte: Elaboração CGIE/MDHC, a partir de dados da Ouvidoria Nacional de Direitos 
+Humanos. 
+O grupo vulnerável que mais recebeu denúncias 
+de violações no cenário da internet, nos anos de 
+2021, 2022 e 2023 (até setembro), foi o de 
+violência contra a mulher, com 4.953, 5.669 e 
+4.551 casos, respectivamente. Isso representa 
+cerca da metade do total de denúncias em cada 
+ano, indicando a gravidade e a frequência desse 
+tipo de violência na rede. 
+Fonte: Elaboração CGIE/MDHC, a partir de dados da Ouvidoria Nacional de Direitos 
+Humanos. 
+O segundo grupo vulnerável para o qual mais 
+ocorreram denúncias de violações foi o das 
+crianças e adolescentes, com 2.661, 3.838 e 
+2.409 casos, respectivamente. Esse grupo teve 
+um aumento de 44,2% nas denúncias de 2021 
+para 2022, mas uma queda de 37,2% de 2022 
+para 2023, considerando apenas as denúncias 
+realizadas até setembro.  
+
+Fonte: Elaboração CGIE/MDHC, a partir de dados da Ouvidoria Nacional de Direitos 
+Humanos. 
+Os demais grupos vulneráveis apresentaram 
+números menores de denúncias, mas também 
+revelaram situações preocupantes de violência 
+na internet. Por exemplo, a violência contra 
+pessoa com deficiência teve um aumento de 
+228,3% nas denúncias de 2021 para 2022, e a 
+violência contra população LGBT teve um 
+aumento de 112,2% no mesmo período. Esses 
+dados sugerem que há uma necessidade de 
+fortalecer as políticas públicas de promoção e 
+defesa dos direitos humanos desses grupos na 
+rede.  
+A faixa etária que mais recebeu denúncias na 
+ONDH, no período, foi a de 10 a 19 anos, com 
+1.479 em 2021, 1.640 em 2022 e 2.079 em 2023 
+(até setembro). Isso representa 17,1%, 13,7% e 
+24,1% do total de denúncias, respectivamente. 
+Esse resultado indica que os jovens são os mais 
+vulneráveis à violação de direitos humanos na 
+internet, possivelmente por estarem mais 
+
+expostos às redes sociais e aos riscos de 
+cyberbullying, assédio, discriminação e violência 
+on-line.  
+Fonte: Elaboração CGIE/MDHC, a partir de dados da Ouvidoria Nacional de Direitos 
+Humanos. 
+Quanto à relação entre o suspeito e a vítima, a 
+maioria das denúncias de violações no cenário 
+da internet registradas na ONDH envolvem 
+companheiros/as ou ex-companheiros/as. Isso 
+indica que a violência on-line é um problema 
+grave nas relações afetivas, especialmente 
+quando há rompimento ou conflito. 
+Em segundo lugar, vêm as denúncias contra 
+pessoas desconhecidas. Isso sugere que a 
+internet facilita a ação de pessoas 
+mal-intencionadas que se aproveitam do 
+anonimato ou da falsa identidade para praticar 
+abusos ou crimes contra outras pessoas. 
+Fonte: Elaboração CGIE/MDHC, a partir de dados da Ouvidoria Nacional de Direitos 
+Humanos. 
+As demais categorias têm uma participação 
+menor nas denúncias, mas não devem ser 
+
+ignoradas. Elas revelam que a violência on-line 
+pode envolver diferentes tipos de relações 
+sociais, como amigos, conhecidos, profissionais, 
+educadores, prestadores de serviço, vizinhos, 
+líderes religiosos e até a própria vítima.  
+  
+Relatório de recomendações para o 
+enfrentamento do discurso de ódio e ao 
+extremismo no Brasil 
+Escute o conteúdo da seção 3. Crimes de ódio na internet, subseção "Relatório de 
+recomendações para o enfrentamento do discurso de ódio e ao extremismo no 
+Brasil". 
+O Ministério dos Direitos Humanos e da 
+Cidadania criou, em 2023, um grupo de trabalho 
+para apresentação de estratégias de combate ao 
+discurso de ódio e ao extremismo, e para a 
+proposição de políticas públicas em direitos 
+humanos sobre o tema. Este grupo contou com a 
+participação de especialistas em direitos 
+humanos, comunicação, educação, segurança 
+pública e justiça. O grupo elaborou um relatório, 
+com o objetivo de apresentar um diagnóstico da 
+
+situação atual do discurso de ódio no país e 
+propor medidas para prevenir, combater e 
+reparar os danos causados por esse fenômeno.  
+Capa do Relatório de recomendações para o enfrentamento do discurso de ódio e 
+ao extremismo no Brasil. MDHC, 2023. 
+O Relatório propõe uma série de recomendações 
+para enfrentar o discurso de ódio no Brasil, 
+divididas em quatro eixos: educação, 
+comunicação, segurança pública e justiça. As 
+recomendações incluem, entre outras, a 
+promoção de uma cultura de paz, respeito e 
+diversidade nas escolas e na sociedade; o 
+fortalecimento da mídia pública, comunitária e 
+independente; a capacitação dos agentes de 
+segurança e de justiça para lidar com casos de 
+discurso de ódio; e a criação de mecanismos de 
+monitoramento, denúncia e responsabilização 
+dos autores e das plataformas digitais que 
+veiculam o discurso de ódio.  
+
+Acesse o Relatório de recomendações para o 
+enfrentamento ao discurso de ódio e ao 
+extremismo no Brasil e saiba mais. 
+Link para o Relatório 
+  
+ 
+4. Painel 
+Explore mais informações no painel abaixo. 
+Power BI Report 
+ <<< Voltar para a página inicial  
+Ficha técnica 
+Elaboração e análises:  Ministério dos Direitos Humanos e da Cidadania . 
+Contato:  observadh@mdh.gov.br  
+Fichas de indicadores (em breve) 
+Fontes de dados utilizadas: 
+ 

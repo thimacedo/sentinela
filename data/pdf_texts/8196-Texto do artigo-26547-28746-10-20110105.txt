@@ -1,0 +1,827 @@
+Revista Famecos • Porto Alegre • v. 17 • n. 3 • p. 286-294 • setembro/dezembro • 2010
+286
+CIBERCULTURA
+Ontologia da liberdade na rede: 
+a guerra das narrativas na internet e a 
+luta social na democracia
+RESUMO
+Esse artigo visa, em retrospectiva, analisar os fundamentos políticos que regem os discursos de 
+liberdade que são disseminados pelos atores que constroem a internet de hoje e de ontem. Esta 
+análise visa extrair um modo de compreender a economia do poder em disputa, instaurada pelos 
+diferentes atores em conflito da sociedade em rede. Para tanto vamos avaliar os processos de 
+narração coletiva dos acontecimentos públicos, entendidos como laboratórios dessas disputas. 
+Desta avaliação vai emergir que as novas narrativas multitudinárias vão fazer a passagem do 
+modelo informacional das mídias, que privilegia a acumulação quantitativa proprietária de 
+elementos, para o modelo comunicacional das multimídias, que privilegia a coordenação da 
+ação coletiva nos movimentos.
+PALAVRAS-CHAVE
+Acontecimento
+Biopolítica
+Cibercultura
+ABSTRACT
+This paper aims to analyze in retrospect the political foundations that rule the discourses of 
+freedom spread by the agents who build the Internet yesterday and today. This analyze trace a 
+way to understand the struggle’s power economy made by the different agents in conflict in the 
+network society. We are going to evaluate the processes of collective discourse of public events, 
+understood as laboratories of this struggles. From this evaluation will raise the new multitudi­
+nary discourse as a road doing the passage of informational model, with its privilege of quan­
+titative accumulation of owner elements, to the communicational model of multi-medias that 
+privilege the collective action coordination in the social movements.
+KEYWORDS
+Event
+Biopolitic
+Cyberculture
+Henrique Antoun
+Professor do Programa de Pós-Graduação em Comunicação da UFRJ/RJ/BR.
+henrique.antoun@eco.ufrj.br
+Fábio Malini
+Professor do Departamento de Comunicação da UFES/ES/BR.
+fabiomalini@gmail.com
+
+Ontologia da liberdade na rede
+Revista Famecos • Porto Alegre • v. 17 • n. 3 • p. 286-294 • setembro/dezembro • 2010 287
+Na década de 1990, o uso da internet, asso­
+ciado às dinâmicas de produção e consumo de 
+portais, transformou a rede num enorme labora­
+tório da publicidade. E, de certa forma, a dinâ­
+mica de fragmentação, legitimada pela infinida­
+de de redes de pequenos mundos centralizados, 
+empurrava a web para uma experiência majorita­
+riamente baseada no download de sites, que de­
+veriam – dentro da utopia de felicidade eterna da 
+nova economia – se revelar, antes, como start ups 
+de modelos empresariais do capitalismo de risco. 
+A internet de hoje se transmutou, sem dúvida. 
+A atuação social, a mobilização e o engajamento 
+viraram um valor da rede, se contrapondo àquele 
+pensamento de felicidade eterna da web comer­
+cial, que contaminava a economia e a política. Em 
+grande medida, essa metamorfose está ligada à 
+emergência das dinâmicas ativistas, presentes já 
+no final dos anos 90, que resgataram o sentido 
+originário do peer to peer na internet. Este resga­
+te deu à rede um novo uso ao promover diver­
+sas inovações que vão do Napster ao Pirate Bay, 
+dos blogs aos mashups, dos sistemas de troca de 
+arquivo às mídias sociais colaborativas, do jorna­
+lismo cidadão neozapatista à tuitagem iraniana.
+A internet de hoje se transmutou, sem dúvida. 
+A atuação social, a mobilização e o engajamento 
+viraram um valor da rede, se contrapondo 
+àquele pensamento de felicidade eterna da 
+web comercial, que contaminava a 
+economia e a política.
+A emergência destas inovações gerou todo 
+um conjunto novo de disputas e conflitos sobre a 
+produção e a regulação da liberdade na internet, 
+pois todo o valor no capitalismo cognitivo está 
+radicado em fazer os conectados livres perma­
+necerem dentro dos limites programáveis e das 
+conexões pré-estabelecidas nas interfaces, para re­
+colher da multidão toda a sua produção social. É 
+o paradigma do “tudo é meu” na produção co­
+laborativa (Malini, 2008).  Na contra mão deste 
+movimento de retenção, há outro que visa inflar 
+de liberdade a rede, a partir da disseminação de 
+dispositivos aceleradores da socialização e do 
+compartilhamento de conhecimentos, informa­
+ção e dados, seguindo novos modelos de direito 
+público. Estas ações coletivas de disseminação 
+abrem um conflito com a governança capitalista 
+da liberdade na rede.
+A partir destas transformações da comunica­
+ção em rede vai emergir o choque de poderes en­
+tre as mídias de massa e as interfaces de usuários 
+como um fato inegável. A mídia irradiada cada 
+vez mais ressalta seu poder de atingir uma quan­
+tidade imensa de populações em uma só tacada, 
+para ressaltar a virtude mantenedora de sua sus­
+tentação financeira. Do ponto de vista da forma­
+ção cultural, porém, a produção de subjetividade 
+da mídia massiva esbarra em seu produto mais 
+notório: os fans – esses pequenos fanáticos com 
+momentâneas opiniões compactas disseminados 
+em profusão pelo poder da irradiação (Jenkins, 
+2006). Ela só consegue produzir seus efeitos em 
+prazo curto, gerando estes pequenos fanatismos 
+oscilantes em torno de suas causas. Desde o seu 
+surgimento, a mídia distribuída tem se contrapos­
+to através de seus usuários a estes efeitos acacha­
+pantes de achatamento da diversidade cultural 
+promovida pelos processos de indução e falsea-
+mento de opinião típicos desta comunicação 
+unilateral onde poucos falam para muitíssimos.
+Embora a mídia irradiada de massa seja uma 
+valiosa máquina de construção e destruição ins­
+tantânea de reputação social; as mídias distri-
+buídas de coletivos tem se revelado uma pode­
+rosa máquina de criação e sustentação de repu­
+tação duradoura, funcionando em longo pra­
+zo. Enquanto a mídia massiva extrai seu poder 
+da sensação de “todo mundo esta falando isso” 
+subentendido em seu uníssono; as interfaces de 
+usuários encontram o seu poder ancorado na 
+sensação de “meus amigos recomendam” vincu­
+lado à suposta confiabilidade da fonte da comu­
+nicação.
+Esse artigo visa, em retrospectiva, analisar os 
+fundamentos políticos que regem os discursos 
+de liberdade que são disseminados pelos atores 
+que constroem a internet de hoje e de ontem. 
+Esta análise visa extrair um modo de compreen­
+der a economia do poder em disputa, instaurada 
+pelos diferentes atores em conflito da sociedade 
+em rede. Para tanto vamos avaliar os processos 
+de narração coletiva dos movimentos sociais nos 
+acontecimentos públicos, entendidos como labo­
+ratórios dessas disputas. Desta avaliação vai ser 
+proposto que as novas narrativas multitudinárias 
+vão fazer a passagem do modelo informacional 
+das mídias – que privilegia a acumulação quanti­
+tativa proprietária de elementos narrativos – para 
+o modelo comunicacional das multimídias, que 
+privilegia a coordenação da ação coletiva através 
+da conversação atual durante os movimentos.
+
+Henrique Antoun e Fábio Malini
+Revista Famecos • Porto Alegre • v. 17 • n. 3 • p. 286-294 • setembro/dezembro • 2010
+288
+Biopoder na internet: a liberdade negativa 
+da fábrica social
+A internet é um campo social, como muitos 
+outros, onde a liberdade está em disputa. Na ver­
+dade, quando dizemos “liberdade” entende-se aí 
+os mecanismos e atos autônomos de cooperação 
+social que permitem o exercício do poder (e do 
+contrapoder), a produção social e a ativação de 
+afetos geradores da psicologia. Em certo sentido, 
+essa definição complementa a acepção spinosista 
+do homem livre como sendo aquele que se reali­
+za na sociedade civil, onde se vive de acordo com 
+leis comuns, e não na solidão e no isolamento, 
+onde se obedece apenas a si mesmo.
+A liberdade assim pensada está longe de se 
+esgotar no sentido liberal de “direito de ter pro­
+priedade” (de ideias, de mercado, de terras, etc.), 
+ou de “ter força para suplantar o outro” como 
+quer o sentido hobbesiano. Hoje o cerne do de­
+bate sobre liberdade está no direito de produção 
+autônoma de formas de vida, que não sejam atra­
+vessadas pela força estatal, nem pela mercantili­
+zação do capital, mas por “direitos comuns” que 
+as protejam e as liberem ao mesmo tempo. Não é 
+à toa que o movimento social mais importante da 
+primeira década do século XXI foi a disputa pelo 
+controle dessa produção comum protegida e par­
+tilhada. Disputas endógenas ao capital – como a 
+que contrapõe o Google à Microsoft exprimin­
+do a forte tensão entre a computação em nu­
+vem e a indústria do licenciamento – e exógenas 
+a ele – a disputa entre a cultura da colaboração 
+peer-to-peer e a cultura da permissão proprietária.
+Na internet se percebe um vasto movimento 
+de redução da oferta de liberdade (travestida de 
+inflação), vinculado às medidas de cercamento 
+(enclosures) da liberdade nos sistemas contro­
+lados de informação – o império da liberdade 
+mercantilizada na rede. Neste sentido, tal como 
+analisa Castells (2009, p. 421), os dispositivos da 
+web 2.0 vão se transformar em estupendos ins­
+trumentos de negócios através da estratégia de 
+mercantilização da liberdade para a acumulação 
+de capital. Deste modo vão realizar o “cercamen­
+to” (enclosure) da terra comum da comunicação 
+livre, vendendo às pessoas o acesso aos produtos 
+da comunicação global em rede em troca de sua 
+renúncia à sua privacidade e da sua conversão 
+em arco e alvo da seta publicitária.
+Essa mercantilização da vida – das conversas 
+e quadros da vida contidos na internet -, guarda 
+relação com o debate aberto por Foucault sobre 
+uma nova arte de governar a liberdade dos sujei­
+tos, chamada por ele de biopoder. Ela investiria 
+na vida como um todo, ativando-a e a pondo a 
+atuar. O biopoder operaria com mecanismos que 
+têm por função “produzir, insuflar, ampliar as li­
+berdades, introduzir um 'a mais' de liberdade por 
+meio de um 'a mais' de controle e de intervenção” 
+(Foucault, 2008a, p. 92). Na lógica instaurada por 
+ele, já não se governa somente o corpo das popu­
+lações. Torna-se objeto de governo todo o meio 
+ambiente, a comunicação, os conhecimentos e os 
+afetos das populações.
+Esse governo se exerce através da geração in­
+cessante de riscos tanto para limitar a indepen­
+dência (portanto, a ação livre); quanto para ex­
+pandir o medo. Os riscos e suas vítimas e algozes 
+virtuais fazem aceitáveis os discursos e as práti­
+cas de segurança, geradores das comunidades ou 
+dos guetos. A sociedade dos perfis da internet é 
+um bom exemplo disso, pois a sua configuração 
+dilui o comum, valorizando a personalidade e 
+as egolatrias. Será igualmente sobrevalorizada a 
+segurança informacional, através do discurso da 
+“credibilidade da informação” da grande mídia e 
+seus gatekeepers em oposição à multiplicidade dos 
+pontos de vista tecidos na cobertura informativa 
+dos acontecimentos sociais por milhares de sujei­
+tos na rede através de blogs e redes sociais. Esta 
+multidão de desconhecidos produz uma cober­
+tura dos acontecimentos através de conversações 
+singulares próprias, logo estigmatizadas como 
+produto de amadores, de falsas individualidades 
+ou de anônimos irresponsáveis.
+A liberdade na rede – para aqueles que que­
+rem transformá-la em commoditie 2.0, é uma 
+liberdade negativa, pois concebida como uma 
+liberdade regulada por leis de direito autorais e 
+propriedade intelectual, autorizando a realiza­
+ção do sonho fordista das corporações de mídia: 
+“transformar-se em grande fábrica que monitora 
+as atividades de todos online” (Barbrook, 2003). E 
+com isso são capazes de mobilizar um biopoder 
+produtor de discursos, práticas cotidianas, atitu­
+des e processos de aprendizagem constituídos 
+nas máquinas participativas da internet.
+Essa estratégia das corporações de mídia on­
+line acaba por intensificar a cultura dos fãs, que 
+povoa a internet com a reprodução dos bordões e 
+temas disseminados nos canais da mídia massa, 
+ocupando a rede participativa com assuntos do 
+momento e uma agenda social efêmera e especu­
+lar. A profusão dos sites de fãs de ídolos e progra­
+mas da cultura de massa, as conversas recorren­
+tes sobre os temas das TVs e grandes jornais, e 
+
+Ontologia da liberdade na rede
+Revista Famecos • Porto Alegre • v. 17 • n. 3 • p. 286-294 • setembro/dezembro • 2010 289
+as repetições em cascata de bordões e ritornelos 
+propagandísticos erguem um gigantesco tsuna­
+mi onde se guarda a maior parte do que existe na 
+internet (Jenkins, 2006), em tudo distante da re­
+combinação criadora e da atitude libertária pre­
+conizada em vários mantras (Terranova, 2004).
+Além de mídias de fãs e celebridades, a inter­
+net participativa se vê mergulhada na lógica dos 
+“pequenos Roberto Marinho” – uma classe de 
+(micro) blogueiros e perfís de redes sociais cuja 
+principal tarefa será a de caçar usuários pára-
+quedistas, pautando-se exclusivamente por as­
+suntos do momento e por trocas incestuosas de 
+links com outros blogueiros. Eles criam um cam­
+po restrito de perspectivas e configuram uma 
+ecologia na qual as ideias e as informações são 
+sempre as mesmas através de diferentes blogs.
+Na verdade, trata-se de uma estratégia de ex­
+trair vantagens financeiras, publicitárias e de au­
+diência, que transbordará, depois, na busca por 
+modelos de negócio baseados na reunião desses 
+micro pop stars da irrelevância online. Eles fun­
+cionam como pequenas árvores aproveitando-se 
+de pequenos rizomas, à medida que centralizam 
+uma acumulação (de capital de todo o tipo) que 
+traga para si os dividendos políticos e monetá­
+rios dessa cultura massiva dos fãs online, geran­
+do comunidades virtuais que funcionam através 
+de efeitos especiais e imagens narcisistas.
+O efeito colateral dessa “liberdade negativa”, 
+promovida pelas corporações de mídia online, 
+será a propriedade e a fragmentação dos bens co­
+muns, para além de uma busca incessante pela 
+produção de repetições balbuciantes dos fãs on­
+line. Nessa perspectiva, a cultura se vê ameaça­
+da pelos códigos de copyright estabelecidos pelo 
+capital midiático, ditando os modos pelos quais 
+os bens culturais devem circular e serem usados. 
+Na onda 2.0, dá-se com uma mão para se retirar 
+com a outra.
+“Nunca o copyright protegeu um leque tão 
+amplo de direitos, contra um leque tão amplo de 
+atores, por um tempo tão longo” (Lessig, 2005). 
+Ao ponto dos conteúdos produzidos pelos ci­
+dadãos tornarem-se propriedade intelectual dos 
+proprietários dos sites colaborativos da internet. 
+Exercido por uma multiplicidade de sujeitos, 
+o poder de criar em rede – a colaboração – vai 
+sendo cada vez mais freado pelo poder de co­
+brar para que se crie em rede – a permissão. Essa 
+usurpação praticada pelos oligopólios indus­
+triais da cultura e da mídia instaura uma espécie 
+de feudalismo digital, onde o usuário da inter­
+net torna-se um internauta preso à terra que ele 
+mesmo povoou. Isto corrobora a visão de Negri e 
+Hardt (2005), quando sustentam o poder redutor 
+da capacidade de cooperação e de comunicação 
+promovida pela propriedade privada dos bens 
+informacionais.
+Essas capacidades são as bases da inovação 
+numa economia onde o valor se concentra na 
+qualidade imaterial do trabalho, ou seja, na com­
+petência de incorporar nos processos e nos pro­
+dutos a informação, a cultura e o afeto. A crítica 
+brota da constatação do valor cooperativo do tra­
+balho imaterial, tornando impossível para o seu 
+produto se limitar a ser propriedade um único 
+indivíduo, ao invés de pertencer a uma atividade 
+comum cooperativa. Embora a internet em sua 
+configuração econômica atual veicule uma ideo-
+logia de liberdade desregulada, na prática ela 
+é subsumida por arquiteturas e protocolos que 
+mantém a cultura sobredeterminada por um bio­
+poder estimulador da criação de subjetividades.
+Por isso, embora haja verdade na conversa 
+em torno da Web 2.0 com seus blogs, wikis, folkso­
+nomics, YouTubes e redes sociais; ela dificilmente 
+coincidiria com a opinião veiculada pelos apólo­
+gos da internet sobre o significado da mudança 
+na comunicação e nos negócios. Na nova web, 
+eles anunciam, a publicidade encontraria a nova 
+voz dos grupos da cultura da mídia, um público 
+auto organizado e participativo que a transfor­
+mariam em uma honesta recomendação crítica 
+dos usuários.
+Os usuários se transformariam em sócios das 
+empresas através de sua cooperação interessada 
+e a colaboração e a livre expressão uniria em­
+presários e usuários nesse poderoso ambiente 
+de negócios integrados (Levine; Locke; Searls 
+e Weinberger, 2000). Mesmo o quadro de idílio 
+parecendo atraente, basta que os interesses das 
+empresas se vejam ameaçados por iniciativas dos 
+usuários para o conflito explodir e o confronto 
+aparecer em toda sua violência (Antoun; Lemos 
+e Pecini, 2007).
+A liberdade positiva, ou a biopolítica na rede
+A existência de um biopoder midiático na 
+internet, que controla a vida e se apropria da 
+riqueza produzida em comum nas redes mais 
+avançadas de computação em nuvem, não sig­
+nifica entoar um refrão apocalíptico que expres­
+se somente a subsunção da vida no capital. Isso 
+porque o trabalho imaterial da multidão não se 
+esgota numa relação de comando ao biopoder. 
+
+Henrique Antoun e Fábio Malini
+Revista Famecos • Porto Alegre • v. 17 • n. 3 • p. 286-294 • setembro/dezembro • 2010
+290
+Todo processo de dominação encontra um limi­
+te, que pode se transformar em resistência. Nes­
+se sentido, a biopolítica é a potência de a vida 
+governar-se nos espaços onde se desenvolvem 
+lutas, relações e produções de poder; enquanto 
+o biopoder é um poder contra a autonomia da 
+vida, procurando fazê-la submeter-se aos centros 
+transcendentes de governo.
+A biopolítica é o conjunto de atos de resis­
+tência e de contra insurgência de vidas que não 
+aceitam a captura do controle e reivindicam uma 
+economia da cooperação mantenedora dos bens 
+comuns dentro de um direito e de um espaço pú­
+blico, para além da noção de que este deva ser 
+regulado e garantido por um estado, portanto, 
+por um agente de força exterior às singularida­
+des anárquicas da multidão. Longe de ser uma 
+experiência de anarquia, trata-se de uma experi­
+ência democrática constituída por direitos sem­
+pre abertos e potencializadores da liberdade.
+Na prática, num momento em que o biopoder 
+cria e programa redes de captura do comum, não 
+é de se estranhar o surgimento das redes de con­
+trapoder funcionando da mesma forma, ou seja, 
+criando e programando redes autônomas, anteci­
+pando novos direitos e desejando a democracia. 
+Em sua teorização, Antonio Negri (2003) associa 
+a biopolítica “como a representação material da 
+capacidade do trabalho vivo (imaterial) de apre­
+sentar-se como excedente”. Isso significa que, 
+mesmo em regime de comando pós-moderno de
+destruição do comum e expropriação da coope­
+ração, o trabalho imaterial excede o biopoder, 
+porque pode ser realizado fora de uma relação 
+de comando empresarial.
+O trabalho imaterial produz resultados, no 
+campo da inovação e da linguagem, por exem­
+plo, que não ficam encarnados exclusivamente 
+na empresa, mas diluídos em cada uma das sin­
+gularidades que cooperaram para produzi-los. 
+Daí muitos autores problematizarem a dimensão 
+biopolítica da cópia, para além da fobia autoral 
+capitalista, pois ela é ao mesmo tempo a condi­
+ção para constituição de novos valores de uso, e 
+também de novos valores de troca.
+O capitalismo das redes se vê jogado desta 
+maneira para uma infindável contradição, pois 
+sem socialização das cópias não há novos usos 
+criativos, e sem novos usos criativos não há gera­
+ção de valor de troca. Talvez o fenômeno biopo­
+lítico mais intenso seja o movimento de compar­
+tilhamento de arquivos peer to peer na internet, 
+pois ele foi capaz de fazer arquiteturas de uso à 
+prova do controle do biopoder, numa espécie de 
+darwinismo tecnológico do bem.
+A guerra das narrativas e a luta social 
+na democracia
+Podemos pensar que o poder da mídia de 
+massa deixou de ser um poder moderno, sob a 
+forma de uma ação sobre a ação presente, para se 
+tornar um poder de controle, investindo a ação 
+sobre a ação futura (Deleuze, 1992; Foucault,
+2008). Mais do que um lugar disciplinar de ir­
+radiação e circulação de palavras de ordem 
+(Deleuze; Guattari, 1980; Foucault, 1977), ele se 
+revela como um poder de atualização da memó­
+ria nas comunicações.
+No caso da mídia massiva trata-se de um mo­
+nopólio sobre a atualização das informações; um 
+poder de mobilizar, processar e narrar o passa­
+do, tornando-o atual. A massa só pode acessar o 
+passado comum através das atualizações feitas 
+pela grande mídia corporativa. Isto configura um 
+imenso poder sobre os mecanismos de lembran­
+ça e esquecimento social das populações. Através 
+dele eu relaciono um passado qualquer com um 
+acontecimento da atualidade para balizar a deci­
+são de agir do sujeito social.
+Este passado vai ser apresentado sob a forma 
+de grafos e diagramas, dando foros de previsibi­
+lidade às imagens estratigráficas do que já foi que 
+se transforma desta maneira em um será. Este 
+passado é atualizado para mobilizar as esferas 
+de decisão e ação social sendo preferencialmente 
+investido para endossar ou inibir os programas 
+eleitorais de candidatos a cargos executivos, as 
+imagens públicas de candidatos majoritários em 
+épocas de eleição e às discussões legais acopla­
+das a decisões parlamentares para criação ou 
+transformação de leis existentes.
+A entrada em cena da internet veio quebrar 
+esse monopólio da narração. Através de suas 
+interfaces qualquer usuário podia tornar atuali­
+zável qualquer informação, liberando sua comu­
+nicação. O investimento comunicacional dos mo­
+vimentos sociais e coletivos passava a responder 
+pelo alcance ou frequência de uma informação 
+qualquer, conectando entre si diferentes inter­
+faces e promovendo sua disseminação (Antoun, 
+2004). Não só os usuários podem conectar qual­
+quer informação antiga que esteja na rede com 
+uma atual; como eles podem determinar o al­
+cance de uma informação atual, replicando-a por 
+diferentes interfaces. A comunicação partilhada 
+nas interfaces coletivas de parceria (peer to peer) 
+
+Ontologia da liberdade na rede
+Revista Famecos • Porto Alegre • v. 17 • n. 3 • p. 286-294 • setembro/dezembro • 2010 291
+reposiciona o tipo de passado que importa na de­
+cisão de ação. 
+A estatística preditiva das imagens estrati­
+gráficas cede lugar aos projetos comuns dos co­
+letivos comunicacionais. A questão deixa de ser 
+a eliminação do que nos ameaça para se tornar 
+a construção ou invenção do que nos interessa 
+(Antoun, Lemos e Pecini, 2007). É, nesse sentido, 
+que essa biopolítica da rede se ativa como uma 
+liberdade positiva, no sentido que essa atividade 
+dos usuários, de construírem de forma singular, 
+e nem por isso disputado, conflitivo e contraditó­
+rio, um campo mais extenso dos significados dos 
+acontecimentos sociais, em que entrelaçam nar­
+rativas que esmiúçam fatos, ideias dados, ima­
+gens, que ampliam a capacidade da rede de re­
+velar sentidos que até então se reprimia na lógica 
+gatekeeper dos mídias online tradicionais, com a 
+sua política para internet baseada na lógica do 
+olhe, mas não toque, em que desacreditar e des­
+credenciar as mídias participativa dos usuários. 
+Importante assinalar a perda do monopólio 
+da edição e reprodução das falas e imagens pe­
+las TVs e demais mídias massivas. O poder de 
+atualização das imagens dos blogs, do YouTube 
+e do Twitter proporcionado a seus usuários deu 
+um diferente alcance às suas narrativas. Podendo 
+escolher o que atualizar das imagens disponíveis 
+para narrar o acontecimento e conversar, a mídia 
+livre pôde decidir a quem imputar a responsabi­
+lidade pelo conflito. As imagens e os discursos 
+feitos pelas mídias de massa uma vez reprodu­
+zidos e analisados e reutilizados se revelavam 
+apropriadas para sustentar narrativas diferentes 
+da história contada pelas mídias corporativas. 
+Deste modo, blogueiros, tuiteiros e tubeiros fize­
+ram frente aos discursos dos veículos massivos 
+através das imagens e falas produzidas por estas 
+próprias mídias, na medida em que tinham o po­
+der de atualizá-las de modo diferente, mesclan­
+do-as com suas próprias falas e imagens.
+Temos neste debate dois pólos importantes. 
+De um lado está em jogo a relação dos meios com 
+as populações enquanto constituem um público; 
+onde vai sobressair a questão do lugar que este 
+público ocupa nesta relação. Trata-se de saber 
+se ele é um consumidor relativamente passivo 
+formado pelos produtos oferecidos pelo meio – 
+produtos estes que participam ativamente de sua 
+formação cultural conformando sua subjetivida­
+de –; ou se o público participa como um usuário, 
+determinando ativamente os produtos de sua 
+própria formação.
+Nasce daí a noção de que um amplo monito­
+ramento e uma incessante vigilância devem fazer 
+parte desta relação, pois aí estaria em jogo a for­
+mação dos sujeitos sociais e o comando da ação 
+coletiva. Caberia às mídias cuidarem para os su­
+jeitos fazerem parte da renovação da demanda 
+social; seja preenchendo os papéis necessários à 
+continuação da sociedade, seja querendo os pro­
+dutos e serviços oferecidos pelas empresas. Ca­
+beria ao público não abdicar de seu lugar ativo 
+em sua própria formação, rejeitando tudo o que 
+pudesse subjugá-lo ou submetê-lo aos ditames 
+da soberania social em detrimento da formação 
+de sua subjetividade. São questões do saber cul­
+tural e do poder governamental envoltas na co­
+municação social (Antoun, 2009).
+Mas no outro pólo está a relação do sujeito 
+com a verdade contida ou ausente no meio aon­
+de ele vai se formar. Trata-se de pensar quais 
+chances ele tem de desenvolver uma subjetivi­
+dade própria, de pôr em questão as escolhas que 
+o meio lhe oferece ou interdita em função de 
+tornar-se este ou aquele sujeito (Foucault, 2004, 
+p. 253-280). Um meio perverso recusaria ao su­
+jeito qualquer chance de se furtar a um destino 
+social tornado provável que o aguardasse e lhe 
+acenasse antes mesmo de seu nascimento.
+A questão reconsiderada nesta perspectiva 
+nos faz perceber o envolvimento da questão da 
+justiça neste jogo do sujeito com a verdade de 
+sua própria formação. Um meio de formação que 
+predeterminasse completamente o sujeito seria 
+totalmente injusto; o destino do sujeito teria sido 
+escrito muito antes dele vir a existir e as narra­
+tivas de sua história sempre desembocariam em 
+um certo grupo de resultados pré existentes ao 
+seu surgimento (Deleuze, 1991, p. 93-116).
+Multimídias: dos meios de informação aos 
+meios de coordenação
+Assim, a narrativa noticiosa, que sempre es­
+teve atrelada àqueles que detinham a capacidade 
+de irradiar informação (a imprensa), hoje está em 
+todos os lugares virtuais, que se comportam cada 
+vez mais como mídias de multidão (multimídias), 
+ou seja, mídias cujas produções se dão de forma 
+articulada e cooperativa, cujo produto final é exi­
+bido de forma pública e livre, para públicos es­
+pecíficos, que ao mesmo tempo, são mídias para 
+outros públicos.
+A natureza das multimídias é de portar uma 
+linguagem desencarnada da mediação da mídia 
+irradiada, desorganizando o modo tradicional da 
+
+Henrique Antoun e Fábio Malini
+Revista Famecos • Porto Alegre • v. 17 • n. 3 • p. 286-294 • setembro/dezembro • 2010
+292
+notícia, ao mesmo tempo em que elas organizam 
+uma linguagem cooperativa, dialógica, múltipla 
+e comum. Esta linguagem vai criar uma onda 
+integrada, revelando as perspectivas indepen­
+dentes de opinião. Talvez o exemplo atual mais 
+amadurecido seja o do que aconteceu nos con­
+flitos iranianos ocorridos após a reeleição de 
+Ahmadinejad. O exemplo ilustra como a biopo­
+lítica das multi-mídias sofre tentativas de blo­
+queios do poder soberano, do poder disciplinar, 
+do biopoder, ao mesmo tempo em que excede 
+todos eles através da potência coordenadora da 
+comunicação.
+O caso é por demais conhecido. Em 12 de ju­
+nho, após derrota nas urnas, Hossein Mousavi 
+reinvindica a vitória, acusando governo de frau­
+dar as eleições, beneficiando assim o candidato 
+da situação, Ahmadinejad. Um dia depois do 
+resultado, ao mesmo tempo, nas ruas de Teerã, 
+enquanto os apoiadores de Ahmadinejad come­
+moram a vitória, os de Mousavi, convocados via 
+sms, entram em choque com a polícia.
+O resultado dos conflitos, no outro dia, foi a 
+suspensão da rede de internet e de telefonia mó­
+vel, numa tentativa de desacelera o processo de 
+socialização e mobilização dos militantes. No 
+contra ataque, hackers passam a oferecer endereço 
+de proxy via direct message no Twitter, reconectan­
+do a cibercultura iraniana, que estava sem acesso 
+aos serviços de telefonia local. A partir daí a in­
+ternet torna-se o locus da informação e do com­
+partilhamento de opinião sobre a insurgência 
+iraniana. E o caso virará paradigma na história 
+da comunicação por demonstrar que a narração 
+dos acontecimentos públicos na web não prescin­
+de de um encadeamento com a mídia irradiada, 
+mas somente um entrelaçamento com a esfera de 
+publicação dos próprios públicos das redes e mí­
+dias sociais online.
+Essa invenção biopolítica criou um novo uso 
+para a web, a cobertura jornalística p2p das mul­
+timídias, em tempo real, baseada na hashtag, que 
+será massificada através de seus para descre­
+ver micro acontecimentos cotidianos e grandes 
+eventos internacionais. Não se tratava de parti­
+cipação, senão da construção de mídia livres e 
+autônomas.
+No Twitter a multidão coopera adotando a 
+hashtag1 #iranelection. São 220 mil tweets/dia usan­
+do a palavra-chave, distribuindo fotos, vídeos, 
+textos, áudios, enfim, toda uma gama de regis­
+tros históricos que nenhum grupo de mídia deti-
+nha. 
+Em pouco tempo, o movimento era tão gran­
+de que, revoltados contra a pouca informação 
+sobre os acontecimentos veiculada pela CNN, os 
+usuários começaram a usar uma hashtag adicio­
+nal: a #cnnfail, empurrando a rede de televisão 
+americana para dentro da agenda midiática da 
+multidão.
+“Tiger Woods não é a história mais importan­
+te no mundo hoje #CNNfail”2, afirmava o tuiteiro 
+@lilobri, que criticava a insistência do canal de 
+tevê em valorizar escândalos sexuais nos EUA 
+no lugar de uma cobertura ampla sobre os assun­
+tos globais. O #cnnfail foi subproduto de um dos 
+maiores temores do biopoder online, o comen-
+tário.
+Este geralmente tem a função de revelar não 
+somente omissões, mas as posições políticas, his­
+tóricas e de classe do poder em rede. Não é à toa 
+que os mídias tradicionais só liberam comentá­
+rios naquelas reportagens que agitam os fascistas 
+ou acalmam os ingênuos. A partir do momento 
+que o comentário ganha mais audiência do que a 
+própria agenda midiática, as mídias são forçadas 
+a mencioná-los, quando não investigá-los.
+Na prática, a narrativa noticiosa baseada 
+em hashtags foi utilizada para troca de 
+informação mútua, organização tática dos 
+protestos, globalização dos fatos, localização 
+de testemunhas/fontes, relatos multimídia de 
+registros do cotidiano, promoção de ideologias, 
+conversação social e agendamento da mídia.
+No caso da eleição iraniana, como em ou­
+tros casos, a multidão conectada executa um pa-
+nóptico às avessas, em que as celas não param de 
+monitorar a torre, disputando com a mídia cor­
+porativa a primazia da comunicação. Esse mo­
+nitoramento vigilante contínuo das celas, numa 
+cobertura multi-mídias, serve como um depura­
+dor da construção social dos acontecimentos na 
+grande imprensa, em proveito próprio, por fazer 
+esta martelar as idéias comuns que a multidão 
+defende.
+Considerações finais
+A experiência iraniana, que depois se re­
+petirá, em outros casos, como o de #honduras, 
+#michaeljackson, #forasarney, #haiti, provocou 
+uma nova linguagem jornalística, a “hashtag 
+storytelling”, uma espécie de Napster da narrati­
+
+Ontologia da liberdade na rede
+Revista Famecos • Porto Alegre • v. 17 • n. 3 • p. 286-294 • setembro/dezembro • 2010 293
+va noticiosa, em que os internautas têm acesso a 
+tudo o que se publica na rede, de forma direta, 
+ponto a ponto, de baixo pra cima, criando e parti­
+cipando um grande mural conversacional e uma 
+comunidade virtual de notícia.
+Na prática, a narrativa noticiosa baseada em 
+hashtags foi utilizada para troca de informação 
+mútua, organização tática dos protestos, globa­
+lização dos fatos, localização de testemunhas/
+fontes, relatos multimídia de registros do cotidia­
+no, promoção de ideologias, conversação social e 
+agendamento da mídia.
+Os protestos no Irã foram derrotados. E não 
+houve nenhuma revolução tão euforicamente 
+alastrada pelo mundo ocidental. Mas o saldo bio­
+político foi o de colaborar com a paisagem das 
+multimídias que excedem a “infracensura” dos 
+controles e bloqueios da rede. E diferente dos ve­
+ículos tradicionais de imprensa, que são meios de 
+informação, o que a biopolítica da multidão onli­
+ne tem empregado é a transformação das mídias 
+sociais em mídias de coordenação.
+E mais do que isso, a “narrativa dos muitos”, 
+com uso de hashtag, ultrapassa e reinventa a no­
+ção breaking news. Ela traz a autonomia para o 
+modelo da mídia online, porque faz da vida e da 
+história as condutoras do tempo real, ao não pa­
+ralisar o tempo, mas apropriar-se dele e reterrito­
+rializá-lo com a narrativa coordenadora da ação 
+coletiva.
+REFERÊNCIAS
+ANDERSON, Chris. A cauda longa: do mercado de massa 
+para o mercado de nicho. Rio de Janeiro: Campus, 2006.
+ANTOUN, Henrique. Web 2.0 e o Futuro da Sociedade 
+Cibercultural. Lugar Comum – Estudos de Mídia, Cultura e 
+Democracia, v. 14, n. 27, 2009. p. 235-245.
+______. De Uma Teia à Outra: A explosão do comum e o sur­
+gimento da vigilância participativa. In: ANTOUN, Henrique 
+(Org.). Web 2.0: Participação e vigilância na era da comuni­
+cação distribuída. Rio de Janeiro: Mauad, 2008. p. 11-28.
+______. O Poder da Comunicação e o Jogo das Parcerias na 
+Cibercultura. Revista Fronteira. São Leopoldo/RS, v. VI, n. 2, 
+2004. p. 67-86.
+ANTOUN, Henrique; LEMOS, Ana Carla; PECINI, André 
+Custódio. Código e luta por autonomia na comunicação 
+em rede. In: FREIRE FILHO, João; HERSCHMANN, Micael 
+(Orgs.), Novos rumos da cultura da mídia: indústrias, produ­
+tos, audiências. Rio de janeiro: Mauad, 2007. p. 263-290.
+ARQUILLA, John; RONFELDT, David. Networks, Netwars 
+and the Fight for the Future. First Monday, v. 6, n. 10, out. 2001.
+BARBROOK, Richard. A regulamentação da liberdade: li­
+berdade de expressão, liberdade de comércio e liberdade de 
+dádiva na rede. In: COCCO, Giuseppe et al. Capitalismo cog­
+nitivo. Rio de Janeiro: DP&A, 2003.
+BAUWENS, Michel. The Political Economy of peer 
+production. 1000 Days of Theory, n. 26, 2005. Disponível em: 
+<http://www.ctheory.net/articles.aspx?id=499>. Acesso em: 
+01 ago. 2008.
+BENKLER, Yochai. The wealth of networks: how social 
+production transforms markets and freedom. Nova Iorque: 
+Yale University Press, 2006.
+CASTELLS, Manuel. Communication Power. Nova Iorque: 
+Oxford University Press, 2009
+CLEAVER, Harry. Computer-linked social movements and global 
+threat to capitalism. Texas: Texas University, 1999. Disponível 
+em: 
+<http://www.eco.utexas.edu/~hmcleave/polnet.html>. 
+Acesso em: 04 ago. 2008.
+DELEUZE, Gilles. Conversações. Rio de Janeiro: 34 Letras, 1992.
+______. A Dobra: Leibniz e o barroco. São Paulo: Papirus, 
+1991.
+______. Foucault. São Paulo: Brasiliense, 1988.
+DELEUZE, Gilles; GUATTARI, Felix. Mille Plateaux. Paris: 
+Minuit, 1980.
+FOUCAULT, Michel.  Le Courage de la Vérité. �������������
+Paris: Galli­
+mard, 2009.
+______. Le Gouvernement de Soi et des Autres. Paris: Galli­
+mard, 2008b.
+______. A Hermenêutica do Sujeito. São Paulo: Martins Fontes, 
+2004.
+______. O Nascimento da Biopolítica. São Paulo: Martins Fon­
+tes, 2008a.
+______. Vigiar e Punir. Rio de Janeiro: Vozes, 1977.
+GALLOWAY, Alex. Protocol: how control exists after decen­
+tralization. Cambridge: MIT Press, 2004.
+GALVÃO, Alexander Patez; SILVA, Gerardo; COCCO, Giu­
+seppe. Capitalismo Cognitivo: trabalho, redes e inovação. Rio 
+de Janeiro: DP&A, 2003.
+JENKINS, Henry. Fans, Bloggers, and Gamers: Media Con­
+sumers in a Digital Age. Nova Iorque: New York University 
+Press, 2006.
+JOHNSON, Steven. Cultura da interface: como o computador 
+transforma nossa maneira de criar e comunicar. ����������
+Rio de Ja­
+neiro: J. Zahar, 2001.
+KOLLOCK, Peter. Social Dilemmas: The Anatomy of 
+Cooperation. Annual Review of Sociology, n. 24, 1998, p. 183-
+214.
+LAZZARATO, Maurizio; NEGRI, Antonio. Trabalho Ima­
+terial: formas de vida e produção de subjetividade. Rio de 
+Janeiro: DP&A, 2001.
+LESSIG, Lawrence. Code and other laws of cyberspace. Nova 
+Iorque: Basic Books, 1999.
+______. Free Culture. New York: The Penguin Press, 2004.
+LEVINE, Rick; LOCKE, Christopher; SEARLS, Doc; WEIN­
+BERGER, David. The Cluetrain Manifesto: the end of business 
+as usual. Cambridge: Perseus, 2000.
+MALINI, Fábio. Modelos de colaboração nos meios sociais 
+da internet: uma análise a partir dos portais de jornalismo 
+participativo. In: ANTOUN, Henrique (Org.). Web 2.0: parti­
+cipação e vigilância na era da comunicação distribuída. Rio 
+de Janeiro: Mauad X, 2008.
+
+Henrique Antoun e Fábio Malini
+Revista Famecos • Porto Alegre • v. 17 • n. 3 • p. 286-294 • setembro/dezembro • 2010
+294
+NEGRI, Antonio; HARDT, Michael. Commonwealth. Cam­
+bridge, MA: The Belknap Press, 2009.
+______. Multidão: Guerra e democracia na era do Império. 
+Rio de Janeiro: Record, 2005.
+______. Império. Rio de Janeiro: Record. 2001.
+PRETTO, Nelson de Luca; SILVEIRA, Sérgio Amadeu da. 
+Além das Redes de Colaboração: internet, diversidade cultural 
+e tecnologias do poder. Salvador: EDUFBA, 2008.
+RHEINGOLD, Howard. Smart Mobs: the next social revo-
+lution. Cambridge: Perseus, 2002.
+RUSHKOFF, Douglas. Coercion: why we listen to what 
+“they” say. Nova Iorque: Riverhead Books, 1999.
+TERRANOVA, Tiziana. Network Culture: Politics for the
+Information Age. Londres: Pluto Press, 2004.
+NOTAS
+1	 Palavra chave que funciona como metadados, estimulan­
+do a agregação de upgrades pelos agentes de busca. Para 
+o usuário, mostra as atualizações em tempo real sobre de­
+terminada temática, o que facilita a leitura de tendências 
+de opinião na rede.
+2	 Tradução nossa para “Tiger Woods is NOT the most 
+important story in the world today #CNNfail” Sobre o 
+#cnnfail, acesse http://cnnfail.com/.

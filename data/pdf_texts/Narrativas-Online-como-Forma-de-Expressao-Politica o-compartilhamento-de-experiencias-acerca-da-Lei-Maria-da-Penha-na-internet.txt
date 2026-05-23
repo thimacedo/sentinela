@@ -1,0 +1,1254 @@
+Narrativas Online como Forma de Expressão Política: 
+o compartilhamento de experiências acerca da 
+Lei Maria da Penha na internet
+Online Narratives as a Form of Political Expression: sharing 
+experiences on Maria da Penha Law via the internet
+Narrativas Online como Forma de Expresión Política: compartir 
+experiencias acerca de la Ley María de la Peña en internet
+Rayza Sarmento
+Resumo: este trabalho propôs-se a observar a interação comunicativa entre mulheres de 
+uma rede social na internet construída para discussões sobre a lei brasileira de combate 
+à violência doméstica contra a mulher (Lei Maria da Penha), entendendo tal interação 
+como forma de expressão política sobre um problema coletivo. Utilizou-se a noção de 
+“narrativa” de Iris Young aplicada ao ambiente online e conseguiu-se perceber que, ao 
+narrar suas experiências, essas mulheres conseguem expressar-se politicamente acerca 
+daquilo que as afeta e estabelecer pontes críticas sobre legislação. 
+Palavras-chave: narrativas, internet, mulheres, legislação
+Abstract: the present study aimed at observing the communicative interactions a 
+group of women exchanged in an online social network on the Maria da Penha Law – 
+a Brazilian law geared towards combating domestic violence against women in Brazil. 
+Those interactions were herein considered as a form of political expression on a 
+collective problem. Iris Young’s concept of “narrative” was employed to study this online 
+environment. Data analysis revealed that those interactions allowed the participants to 
+express themselves politically on an issue that affects them and to critically establish 
+connections concerning the legislation on it.
+Keywords: narratives, internet, women, legislation. 
+Resumen: este trabajo se propuso a observar la interacción comunicativa entre mujeres 
+de una red social en internet, construida para discusiones sobre la ley brasileña de 
+combate a la violencia doméstica contra la mujer (Ley María de la Peña), entendiendo 
+tal interacción como forma de expresión política sobre un problema colectivo. Se utilizó 
+la noción de “narrativa” de Iris Young aplicada al ambiente online y se percibió que, 
+al narrar sus experiencias, esas mujeres consiguen expresarse políticamente acerca de 
+aquello que las afecta y establecer puentes críticos sobre legislación. 
+Palabras Clave: narrativas, internet, mujeres, legislación.
+Rayza Sarmento é Mestranda em Ciência Política pela Universidade Federal de Minas 
+Gerais (UFMG). Graduada em Comunicação Social pela Universidade da Amazônia 
+(UNAMA). Bolsista CAPES. 
+E-mail: yzasarmento@gmail.com  
+Dossiê / Dossier
+
+52
+Gênero na Amazônia, Belém, n. 2, jul./dez., 2012
+Dossiê / Dossier
+INTRODUÇÃO
+Pousa a tua cabeça dolorida
+Tão cheia de quimeras, de ideal,
+Sobre o regaço brando e maternal
+Da tua doce Irmã compadecida. 
+Hás-de contar-me nessa voz tão qu’rida
+A tua dor que julgas sem igual,
+E eu, pra te consolar, direi o mal
+Que à minha alma profunda fez a Vida. 
+(Florbela Espanca)
+Com a premissa de que o voto não é o único, nem o mais o inclusivo, 
+mecanismo de participação política e que a legitimidade das decisões 
+da esfera política deve estar assentada na discussão pública racional, a 
+teoria deliberativa provocou um giro nas então teorias que pensavam a 
+democracia. Para os deliberativos, a vida democrática não pode ser apenas 
+uma delegação de poder dos representados para os representantes, com 
+uma cisão entre as duas esferas e apenas um encontro pontual de ambas 
+em épocas eleitorais; mas uma constante relação por meio de espaços 
+públicos de discussão acerca dos temas comuns. 
+Contudo, não são poucas, e nem desconhecidas, as críticas sobre 
+as excessivas exigências normativas para a ocorrência da deliberação 
+nos moldes habermasianos. Desde a década de 1990, vários autores têm 
+procurado tornar o ideal deliberativo mais operacionalizável, provocando 
+o que Faria (2010) chama de o giro do giro na teoria democrática. Os 
+estudos mais recentes tentam construir formas para que esse ideal seja 
+aplicável à realidade, centrando-se nos resultados da deliberação e nos 
+espaços institucionais de sua ocorrência. Ônus e bônus cercam essas 
+tentativas na crescente literatura sobre deliberação. Bachtiger et al (2010) 
+chegam a questionar o que seria, afinal, a deliberação, afirmando que não 
+há um consenso de como a prática é melhor conceituada. Os autores 
+classificaram os vários estudos dentro da teoria deliberativa a partir de 
+duas tipologias. 
+
+Narrativas Online como Forma de Expressão Política:o compartilhamento...	
+    	
+                         Rayza Sarmento
+53
+Dossiê / Dossier
+A primeira é notadamente centrada na ação comunicativa 
+de Habermas e sua distinção com ação instrumental. O objetivo 
+da deliberação do tipo 1 é chegar ao consenso, por meio da 
+força do melhor argumento, diante dos 
+procedimentos ideais, que Habermas tomou 
+emprestado de Cohen1. O segundo tipo, 
+de acordo com Bachtiger et al (2010), seria 
+mais realista e flexível e reuniria autores 
+que buscam incorporar à deliberação outras 
+formas de comunicação para além do 
+argumento racional, bem como enfatizam 
+os resultados dos processos deliberativos. 
+Os autores alertam que o tipo 2 não 
+possui um programa teórico coerente, mas 
+iniciativas que independem uma das outras, 
+contudo são distinguíveis das primeiras 
+formulações da teoria deliberativa. A forma 
+de comunicação exigida pela deliberação do tipo 1 foi alvo de 
+intensas críticas, principalmente das chamadas democratas da 
+diferença, que acusam a formulação de Habermas de ser pouco 
+inclusiva e ainda complacente à opressão. 
+Ainda que não constituam, de acordo com Dryzek (2000, p. 58), 
+uma escola teórica unificada, os autores da democracia da diferença 
+têm em comum um esforço de se opor às práticas comunicativas de 
+pretensa racionalidade neutra que, sob a perspectiva da diferença, 
+excluem ou silenciam sujeitos oprimidos. A pretensão de uma 
+identidade universal e que comporte um tipo específico de interação 
+comunicativa impedem, segundo esses autores, uma variedade de 
+vozes de efetiva participação na política democrática (DRYZEK, 
+2000). 
+Relativamente ao artigo Narrativas Online como Forma 
+de Expressão Política: o compartilhamento de experiências 
+1 A deliberação deve ocorrer, 
+segundo Cohen: a) por meio 
+de 
+troca 
+argumentativa; 
+b) deve ser inclusiva e 
+pública; c) livre de coerções 
+externas; 
+d) 
+livre 
+de 
+coerções internas; e) busca 
+um acordo “racionalmente 
+motivado”; 
+f) 
+abrange 
+todos os assuntos passíveis 
+de regulação, bem como 
+pode 
+tematizar 
+assuntos 
+da vida privada; g)pode 
+levar a transformações de 
+preferências (HABERMAS, 
+2003, p. 29-30).
+
+54
+Gênero na Amazônia, Belém, n. 2, jul./dez., 2012
+Dossiê / Dossier
+acerca da Lei Maria da Penha na internet2, nos deteremos 
+especialmente nas críticas formuladas por Iris Marion Young, a qual 
+dedica um capítulo do livro “Inclusion and Democracy” (2000) para 
+formular outras formas de comunicação política mais inclusivas. 
+Young (2000) reconhece que o argumento, forma de interação 
+privilegiada pela democracia deliberativa, é um 
+elemento necessário para discussão pública na 
+busca por decisões justas. No entanto, afirma 
+que argumentos requerem premissas comuns, 
+que nem sempre estão presentes em uma 
+situação de conflito. 
+Considerando essa tensão entre as 
+variadas formas de comunicação para a 
+política democrática, abordaremos as trocas 
+comunicativas no ambiente virtual sobre 
+um problema que durante muito tempo 
+esteve inscrustado no mundo privado. Desse 
+modo, avaliaremos como se dá a interação 
+comunicativa entre mulheres em situação de 
+violência doméstica, que interagem em uma rede social na internet 
+construída para a discussão sobre a lei de combate à violência 
+doméstica e familiar contra a mulher no Brasil – Lei 11.340/06, 
+conhecida como Lei Maria da Penha.
+Acreditamos que a forma de comunicação entendida como 
+‘narrativa’, uma das três formulações de Young (2000), junto com a 
+saudação e a retórica, pode ser útil para entender as trocas discursivas 
+que se dão no objeto para o qual lançamos o olhar. Para isso, 
+discutiremos sucintamente as potencialidades e limites da internet 
+sob a perspectiva da inclusão política,  apresentaremos o processo 
+de emergência da Lei Maria da Penha e algumas das contradições 
+que vem suscitando, para em seguida analisar como mulheres em 
+2 Uma versão preliminar 
+deste texto foi apresentada 
+no GT 5 – Comunicação, 
+mídia e ciberpolítica do 
+III Seminário Nacional de 
+Sociologia e Política, em 
+Curitiba/setembro de 2011. 
+Sou grata ao professor Ricardo 
+Fabrino Mendonça (DCP/
+UFMG) pelos pertinentes 
+comentários a este trabalho 
+e à professora Cláudia Feres 
+Faria (DCP/UFMG) pelo 
+curso instigante sobre inclusão 
+política e democracia, que 
+motivou este breve estudo. 
+
+Narrativas Online como Forma de Expressão Política:o compartilhamento...	
+    	
+                         Rayza Sarmento
+55
+Dossiê / Dossier
+situação de violência utilizam a internet para o compartilhamento de 
+experiências. 
+1. Internet, Narrativas e Inclusão Política
+Há uma crescente literatura sobre os potenciais da internet para o 
+arrefecimento da apatia política e a possibilidade de maior participação e 
+engajamento dos cidadãos. As esperanças repousam, entre outros fatores, 
+na maior interação que essa tecnologia permite, de modo que as discussões 
+entre cidadãos e o sistema político possam ocorrer de forma direta, sem 
+mediações. 
+Gomes (2008, p. 307) sistematiza características pelas quais 
+seria possível entender a contribuição da internet para as democracias 
+contemporâneas: a) a superação dos limites de tempo e espaço para a 
+participação política; b) extensão e qualidade de informações online 
+(maior disponibilidade de insumos informacionais para que os cidadãos 
+tenham conhecimento de questões políticas); c) comodidade, conforto, 
+conveniência e custo – “a possibilidade de intervir desde o conforto 
+da própria estação de trabalho” (p. 309); d) facilidade e extensão de 
+acesso; e) ausência de filtros e controles; f) interatividade e interação – a 
+ausência de intermediários entre a esfera civil e a esfera política, bem 
+como a produção de um fluxo de comunicação bidirecional e não apenas 
+com a esfera civil como receptora da informação da esfera política e g) 
+oportunidade para vozes minoritárias e excluídas.
+O otimismo que guiou os primeiros estudos sobre internet e política, 
+cuja extensão não seria possível de ser contemplada neste trabalho, foi 
+sendo posto à prova a partir de pesquisas mais empíricas. Marques (2009, p. 
+230) afirma que os argumentos contrários aos benefícios da internet para a 
+democracia suscitam deficiências como a falta de capacidade dos usuários 
+em orientar-se diante do fluxo contínuo e crescente de informações gerado 
+pelas redes digitais, bem como o consumo de informações prioritário para 
+fins individuais. O autor lembra ainda que dentre as perspectivas críticas 
+
+56
+Gênero na Amazônia, Belém, n. 2, jul./dez., 2012
+Dossiê / Dossier
+estão aquelas que afirmam que o “interesse prioritário dos usuá­rios se 
+dá por atividades que não se relacionam ao mundo da política”. Nesse 
+sentido, Maia (2008a) sustenta que não é possível confundir acesso à 
+tecnologia com participação.
+Na outra ponta do processo, estariam as deficiências do 
+próprio sistema político em viabilizar ferramentas de participação 
+via internet. Ao analisar os sites do executivo brasileiro, Marques 
+(2009) constatou que o Portal da Presidência da República do Brasil 
+não oferece mecanismos sofisticados de debate e participação, como 
+fóruns de discussão pública ou salas de bate-papo, disponibilizando 
+apenas endereços de e-mails e formulários. Ainda que o diagnóstico 
+não seja dos melhores, Marques (2009) afirma que ele pode servir para 
+que as instituições redesenhem os mecanismos que oferecem para 
+a participação, a partir da identificação de quais são seus entraves. 
+“Tais embaraços devem ser vistos não enquanto desestimulantes à 
+promoção de um design institucional participativo, mas como cuidados 
+a constituírem um programa de atividades voltado ao envolvimento da 
+esfera civil” (MARQUES, 2009, p. 235). 
+Gomes (2008, p.323), ao enumerar também os limites da 
+internet (desigualdade de acesso; sistema político fechado; dúvidas 
+quanto à qualidade da informação política disponível; predominâncias 
+dos meios de massa tradicionais; e as ciber-ameaças, sistemas de 
+espionagens, por exemplo), afirma que os estudos mais atuais 
+sinalizam uma crise da concepção que entendia a internet “como 
+um instrumento para o progresso e para a democracia”. Contudo, 
+o autor lembra que o problema não é da internet, mas sim de como 
+motivar os indivíduos a utilizarem os recursos tecnológicos para se 
+envolverem na política.
+Para além da participação direta por meio de canais oferecidos pelo 
+sistema político, outra corrente de estudos sobre internet e política tem 
+dado atenção especial para o uso que movimentos sociais e associações 
+cívicas vêm fazendo do ambiente online. 
+
+Narrativas Online como Forma de Expressão Política:o compartilhamento...	
+    	
+                         Rayza Sarmento
+57
+Dossiê / Dossier
+Os movimentos sociais e as associações voluntárias com metas 
+potencialmente democráticas têm diversas oportunidades para 
+explorar os recursos da internet, a fim de informar as pessoas, 
+fortalecer virtudes cívicas, desenvolver habilidades críticas e 
+políticas dos cidadãos, mobilizar a ação coletiva, promover a 
+exigência de prestação de contas, de maneira rápida e pouco 
+dispendiosa. (MAIA, 2008b, p. 334)3
+Maia (2008b) apresenta quatro tipos de 
+redes criadas por associações, a fim de fornecer 
+chaves analíticas para enquadrar as variadas 
+experiências associativistas na internet. As 
+primeiras são redes para produção de conhecimento 
+técnico-competente, cujo propósito é produzir e 
+organizar conhecimentos e informações para 
+o uso dos movimentos sociais, fomentando a 
+qualificação. As segundas são redes de memória 
+ativa que objetivam, por meio da internet, armazenar dados 
+estatísticos e reconstruir histórias e memórias dos movimentos. 
+O terceiro tipo é chamado de redes para produção de recursos 
+comunicativos, que fomentam a inclusão digital e prestam assistência 
+a grupos marginalizados, a fim de que estes sejam produtores de 
+materiais informativos sobre suas vivências. O quarto tipo, que 
+particularmente interessa a este trabalho, são as redes de vigilância 
+e solidariedade à distância. Maia (2008b) conceitua essas redes como 
+espaços em que se expõem violações de direitos, busca-se por 
+apoio a determinadas causas e se exerce vigilância aos atos dos 
+dirigentes políticos. 
+Além da tipologia das redes, a autora oferece ainda um quadro 
+de potencialidades permitidas pela interação online nesses espaços. 
+De acordo com ela, a internet proporcionaria a grupos marginalizados 
+a vocalização de suas demandas e a partilha de experiências, o que 
+Maia (2008b) chama de ‘interpretação de interesses e construção da 
+identidade coletiva’.  
+3 Vale ressaltar que Maia (2008) 
+não ignora os diferentes tipos 
+de associativismo, afirmando 
+que nem todos têm fins 
+democráticos, 
+tais 
+como 
+grupos racistas ou xenófobos. 
+Portanto, ao analisar a forma 
+como as associações utilizam 
+a internet é preciso levar em 
+conta o contexto em que estão 
+inseridas.
+
+58
+Gênero na Amazônia, Belém, n. 2, jul./dez., 2012
+Dossiê / Dossier
+Determinadas redes cívicas, apesar de serem consideradas pré-políticas do 
+ponto de vista institucional, podem captar a dimensão das experiências e 
+revalorizar habilidades e propriedades de grupos previamente excluídos, 
+agindo como ativos interlocutores para tematizar problemas de forma 
+publicamente convincente (MAIA, 2008b, p. 340)
+É com tal noção – de que determinados espaços online, a partir 
+das discussões que abrigam, fomentam o debate de assuntos que afetam a 
+vida pública e podem permitir ampliação de sua compreensão por aqueles 
+que estão engajados na troca comunicativa, bem como daqueles que por 
+alguma razão tem contato com tal troca – que se pretende observar como 
+se dá a interação na Rede Social Lei Maria da Penha (www.leimariadapenha.
+com). 
+Antes da descrição da estrutura desse objeto de estudo, vale 
+ressaltar que a agenda deliberativa tem sido mobilizada para entender as 
+trocas comunicativas na internet, em função da possibilidade de qualquer 
+pessoa poder iniciar uma discussão, independente de classe, raça ou 
+gênero, de responder aos interlocutores sem que ninguém encerre o 
+debate arbitrariamente, além da condição mais paritária permitida pelo 
+anonimato (MAIA, 2008a). “A percepção de que a internet permite a 
+instauração de múltiplas interações diferidas no tempo e distendidas no 
+espaço levou muitos pesquisadores a indagar sobre seu potencial para a 
+renovação da esfera pública” (MENDONÇA E PEREIRA, 2011, p.2). 
+Maia (2008a) faz uma ponderação importante a esses estudos: ainda que 
+haja condições favoráveis, elas não determinam per se a ocorrência do 
+debate. 
+No ambiente da rede, não é incomum que o público fique inundado 
+por palavras sem edição, filtros ou outros dispositivos que facilitem a 
+apreensão. Se todos falam e ninguém ouve, temos o resultado semelhante 
+a uma torre de Babel (...) As tecnologias da informação e da comunicação 
+facilitam o armazenamento e a circulação dos estoques informativos, 
+agilizam as buscas, tornam a vida mais veloz. Contudo não determinam o 
+procedimento da interação comunicativa nem garantem a reflexão crítico 
+racional (MAIA, 2008a, p. 288)
+
+Narrativas Online como Forma de Expressão Política:o compartilhamento...	
+    	
+                         Rayza Sarmento
+59
+Dossiê / Dossier
+Se não atendem às condições ideais de deliberação, certas trocas 
+comunicativas ocorridas no ambiente virtual devem ser descartadas 
+ou não teriam relevância para a política democrática? Acreditamos, 
+junto com Young (2000), que outras formas de comunicação política, 
+para além do argumento e do discurso racional podem contribuir 
+para que indivíduos, e até o próprio sistema político, conheça melhor 
+suas necessidades acerca de um determinado problema, bem como 
+suscite reflexões sobre suas possíveis soluções. É nesse sentido que 
+utilizamos o conceito de narrativa de Young (2000) para discutir as 
+trocas comunicativas analisadas4. 
+1.1 – O narrar da experiência
+Para teorizar sobre outras formas de 
+comunicação mais inclusivas, Young (2000) 
+afirma que frequentemente as democracias 
+violam as normas de inclusão. A forma mais 
+óbvia de exclusão seria a ausência de grupos e indivíduos dos 
+processos de tomada de decisão, controlados por outros indivíduos 
+ou grupos dominantes – chamada pela autora de exclusão externa. 
+O outro tipo de exclusão ocorre quando indivíduos ou grupos são 
+incluídos nominalmente nos processos de tomada de decisão, mas 
+não compartilham os termos dos discursos acerca de determinado 
+assunto, por haver privilégio de um estilo específico de interação 
+– denominada então de exclusão interna – “contribuições podem 
+ser excluídas não pelo que dizem, mas como são ditas” (YOUNG, 
+2000, p. 56).
+Young sistematiza então três formas de comunicação 
+política: a saudação, a retórica e a narrativa. A autora ressalva que 
+sua teorização sobre essas formas tem o objetivo de adicionar, 
+ao invés de substitituir, o papel do argumento, enfatizando que 
+as três categorias já aparecem na discussão pública. Essa divisão 
+4 Para esta discussão, as 
+citações extraídas do livro 
+Inclusion 
+and 
+Democracy 
+(YOUNG, 
+2000) 
+foram 
+traduzidas pela autora do 
+artigo.
+
+60
+Gênero na Amazônia, Belém, n. 2, jul./dez., 2012
+Dossiê / Dossier
+analítica sobre as diferentes formas de interação comunicativa, diz Young 
+(2000, p. 56),  pode descrever como se produz “respeito e confiança, 
+torna possível o entendimento entre a diferença estrutural e cultural,
+e motiva a aceitação e ação”.
+Para essa abordagem, destacamos o que Young (2000) formula como 
+“narrativa”. Ela afirma que é comum faltarem termos para expressar uma 
+reinvindicação de injustiça dentro do discurso normativo prevalecente. A 
+autora então questiona como é possível um grupo que sofre determinado 
+dano sair de uma situação de total silenciamento para a expressão pública 
+da opressão. Uma das alternativas, para ela, é contar histórias. Young 
+afirma que ‘contar histórias’ é muitas vezes uma ponte importante entre a 
+experiência muda da injustiça e os argumentos políticos sobre a justiça 
+(YOUNG, 2000, p. 72).
+Esse tipo de narrativa, de caráter político, é diferente de outras 
+formas de narrativa, em função de sua intenção e contexto público. Nessa 
+acepção, a contação de história não objetiva  entreter, “mas demonstrar, 
+descrever, explicar ou justificar algo para os outros em um debate político 
+em curso” (YOUNG, 2000, p. 72). Neste sentido, a autora cita um 
+exemplo muito próximo ao objeto analisado. Ela conta que a narrativa 
+de mulheres nos Estados Unidos possibilitou, nas décadas de 1970 e 80, 
+elucidar o assédio sexual como um problema. Segundo Young, mulheres 
+há muito tempo sofriam humilhação, medo e dor no local de trabalho, 
+mas não sabiam nomear o ‘mal específico’ pelo qual passavam. “Como 
+resultado de mulheres contando histórias (...) um problema que não 
+tinha nenhum nome foi gradualmente identificado e nomeado, e uma 
+moral social e teoria legal sobre o problema desenvolvida” (YOUNG, 
+2000, p. 72-73).
+As narrativas, diz Young (2000), permitem ainda a construção de locais 
+públicos e afinidades coletivas, os grupos podem iniciar uma troca reflexiva, 
+politizando a situação pela qual estão passando e refletindo, à medida 
+em que vivenciam problemas semelhantes, que remédio político podem 
+propor. Essa forma de comunicação também possiblita, de acordo 
+
+Narrativas Online como Forma de Expressão Política:o compartilhamento...	
+    	
+                         Rayza Sarmento
+61
+Dossiê / Dossier
+com Young (2000), a compreensão da experiência do outro, especialmente 
+daqueles que necessitam ser ouvidos pelos responsáveis pela mudança 
+na condição de opressão. Testemunhar sobre a experiência vivida pode 
+fornecer respostas para aqueles que duvidam da legitimidade de uma 
+reivindicação. Para a autora, ouvir o narrar do outro pode ajudar a 
+descontruir preconceitos. 
+Young (2000) diz que as narrativas podem ser úteis ainda na revelação 
+dos valores e significados culturais das experiências vividas.  A autora assinala 
+que os sistemas políticos pluralistas enfrentam muitas divergências nas 
+premissas culturais e seus significados, o que pode gerar conflitos e mal 
+entendidos em um processo de troca argumentativa.  Neste sentido, as 
+narrativas contribuíriam para explicar ao estranho-outro o valor de símbolos, 
+práticas e lugares que os indivíduos cultivam. “Valores, ao contrário de 
+normas, muitas vezes não podem ser justificada através de argumentos. 
+Mas também não são arbitrários. Sua base muitas vezes surge a partir da 
+narrativa situada de pessoas ou grupos”(YOUNG, 2000, p. 75).
+As narrativas revelariam ainda o que Young (2000) chama de 
+‘conhecimento social’, isto é, não são apenas experiências, exposições e valores, 
+mas uma forma de interpretação da relação com o outro e o estar no 
+mundo. “Cada pessoa conta não só de sua própria vida e história, mas 
+de todas as outras posições que afeta a sua experiência” (YOUNG, 2000, 
+p.76-77). Logo, as narrativas permitem a localização de um conhecimento 
+intercambiado por diferentes perspectivas, produzindo um coletivo de 
+‘sabedoria social’ que não está disponível em narrativas isoladas, mas em 
+seu conjunto.
+Dryzek (2000, p. 67-68) se preocupou em mostrar os problemas 
+apresentados pelas  formas alternativas de comunicação, afirmando que 
+vários autores são ‘cegos para os perigos’ que podem estar presentes nesses 
+tipos. Focando sua argumentação especialmente na obra de Young (2000), 
+o autor afirma que tais formas só devem ser admitidas se atenderem a 
+duas condições: estarem livre de coerções e conectarem o particular com 
+o geral. O autor discorre sobre como a narrativa pode não atender a essas 
+
+62
+Gênero na Amazônia, Belém, n. 2, jul./dez., 2012
+Dossiê / Dossier
+condições. Segundo Dryzek (2000, p. 68), a narrativa pode ser coercitiva 
+quando se restringe  o “leque de histórias aceitáveis”, sendo vítima de 
+um “olhar normalizador” do grupo. É como se as narrativas, por vezes, 
+não fossem aceitas se não se enquadrarem no modelo ou na expectativa 
+do grupo em questão; quando o indivíduo não compartilha os termos 
+desejados ou ‘corretos’, pode sentir-se coagido ao contar sua experiência 
+da forma e então tentar se adequar ao que é esperado. 
+Quanto à segunda condição, Dryzek (2000, p. 69) sustenta a ideia 
+de que a história narrada não pode ser exclusivamente individual; caso 
+seja não tem valor político, deve então estar conectada com um problema 
+maior, com a situação geral de um grupo – “uma história verdadeiramente 
+eficaz também envolverá apelo implícito a normas mais universais”. 
+Young não ignora as críticas dirigidas às formas de comunicação 
+que propõe, afirmando que muitas vezes podem ser falsas, superficiais e 
+manipuladas  “para ganhar o parecer favorável do outros, simplesmente 
+por bajulação ou fantasia” (YOUNG, 2000, p. 77). Ela afirma que são 
+necessárias a crítica e a vigilância permanentes para distinguir quais formas 
+de comunicação são de fato úteis para a política. Nas palavras da autora:
+ 
+The only remedy for false or invalid arguments is criticism. Similarly, 
+listeners to greetings, rhetoric, and narrative should be critically vigilant, 
+and should apply standards of evaluation to them as well as to argument. 
+Is this discourse respectful, publicly assertable, and does it stand up to 
+public challenge? The only cure for false, manipulative, or inappropriate 
+talk is more talk that exposes or corrects it, whether as a string of reasons, 
+a mode of recognition, a way of making points, or a narrative. (YOUNG, 
+2000, p. 79)
+Em suma, o que Young (2000) propõe é que nenhuma forma de 
+comunicação política deve ser entendida como melhor que outra e todas 
+elas carregam virtudes e incompletudes; estas últimas não devem fazer com 
+que os vários modos de expressão sejam descartados, ainda que sejam mais 
+fluidos e carreguem consigo emoções e valores, principalmente quando 
+visam a cooperar e chegar a uma solução para os problemas coletivos.
+
+Narrativas Online como Forma de Expressão Política:o compartilhamento...	
+    	
+                         Rayza Sarmento
+63
+Dossiê / Dossier
+É a partir das potencialidades das narrativas em desvelar problemas, 
+compartilhar experiências, construir um universo comum ainda que não 
+haja busca por um consenso racional, que analisaremos as postagens 
+presentes na Rede Social Lei Maria da Penha. O que dizem as mulheres 
+sobre a Lei? Como a compreendem? Quais ressalvas fazem? Considerando 
+as narrativas de experiências, entendemos que os discursos sobre a Lei, 
+bem como a opinião e a compreensão de mulheres sobre sua natureza e 
+aplicação, ficam mais visíveis para elas mesmas e, possivelmente,  para os 
+agentes do sistema político que atuam na sua implementação. 
+2. Rede Social Lei Maria da Penha 
+Abrigada no endereço www.leimariadapenha.com, a Rede Social Lei 
+Maria da Penha foi criada em março de 2009 e seu objetivo explícito na 
+homepage é de “reunir pessoas interessadas em compartilhar informações 
+sobre a Lei Maria da Penha e sua aplicação”. Também de acordo com o 
+tópico “Proposta da rede social”, a iniciativa não parte de um movimento 
+organizado, visto que  as moderadoras do site afirmam ser “um grupo de 
+mulheres do lar, empresárias, jornalistas, advogadas, contadoras, cineastas, 
+professoras e estudantes conscientes desta triste situação de violência 
+contra à mulher” que” acreditam no poder mobilizador de uma rede ativa 
+e com propósitos”. Antes de falarmos da estrutura da Rede, convém 
+apresentar sucintamente como se deu a promulgação da referida lei. 
+A violência doméstica contra a mulher é pauta de lutas feministas 
+brasileiras desde a década de 1970, quando assassinatos de mulheres por 
+seus companheiros e a absolvição destes, ou redução da pena sob a alegação 
+da legítima defesa da honra, provocou uma série de protestos, sob o slogan 
+“quem ama não mata” (CONRADO, 2001; IZUMINO; SANTOS, 2005; 
+GREGORI, 1993; PINTO, 2003). Em 1985, foram criadas as primeiras 
+delegacias da mulher – política considerada de extrema relevância para 
+tornar o problema da violência doméstica público e digno de atendimento 
+diferenciado. 
+
+64
+Gênero na Amazônia, Belém, n. 2, jul./dez., 2012
+Dossiê / Dossier
+Contudo, na década de 1980 não havia legislação específica para 
+os crimes que ocorriam nos âmbitos doméstico e familiar, bem como 
+sua submissão era aos Juizados Especiais Criminais (Jecrims), criados 
+pela Lei 9.099/95. Tal lei tratava a violência doméstica como crime de 
+menor potencial ofensivo, cuja pena máxima não era superior a um ano. 
+Grinvover (2005) afirma que a Lei 9.099/95 tinha o intuito de afastar 
+o Judiciário de causas complexas. Segundo a autora, à época “a quase 
+totalidade dos casos de infrações de menor potencial ofensivo era 
+resolvida mediante acordo entre autor do fato e vítima (...) com rápida 
+solução de causa, pronta atuação da justiça e diminuição do volume de 
+processos” (GRINOVER, p. 2005, p.68). Mas, essa não foi a realidade 
+encontrada pelas mulheres que denunciavam as agressões. A pena era 
+considerada branda (de três meses a no máximo um ano de reclusão) e 
+as penas mais comuns, como pagamento de cestas básicas e prestação 
+de serviços, favoreciam a reincidência da agressão e o sentimento de 
+impunidade (SAFIOTTI, 1999).
+Em 2001, um consórcio de organizações feministas começou a 
+atuar na discussão e avaliação das legislações vigentes sobre violência 
+doméstica contra a mulher. Em 2004, a Secretaria Especial de Políticas 
+para Mulheres da Presidência da República, instituiu um grupo de 
+trabalho interinstitucional para a formulação de um projeto de lei e de 
+outros mecanismos de combate à violência doméstica (BARSTED, 
+2007). Ressalte-se que em 2001 a Organização dos Estados Americanos 
+(OEA) expediu um relatório atribuindo culpa ao estado brasileiro pelas 
+violações de direitos sofridas pela farmacêutica cearense Maria da Penha 
+Fernandes (vítima por duas vezes de tentativa de homicídio pelo seu então 
+marido) e fez diversas recomendações ao governo para que melhorasse o 
+atendimento jurídico e psicossocial às vítimas de violência.  
+Depois da formulação do pré-projeto de lei, em 07 de agosto de 
+2006, foi finalmente promulgada a Lei 11.340, sancionada com 46 artigos, 
+divididos em sete títulos, os quais dispõem sobre a conceituação de 
+violência doméstica, a assistência à mulher e os procedimentos legais a 
+
+Narrativas Online como Forma de Expressão Política:o compartilhamento...	
+    	
+                         Rayza Sarmento
+65
+Dossiê / Dossier
+serem adotados a partir da denúncia. O Brasil 
+passou então a ser o 18º país da América 
+Latina e Caribe com legislação específica 
+para a punição de crimes domésticos e 
+familiares contra a mulher. De acordo 
+com o capítulo I da Lei “Maria da Penha”, 
+violência doméstica e familiar é “qualquer ação 
+ou omissão baseada no gênero que lhe cause morte, 
+lesão, sofrimento físico, sexual ou psicológico e dano 
+moral ou patrimonial” 5. Críticas não faltam 
+sobre a constitucionalidade, aplicabilidade 
+e implementação da Lei. A Presidência da 
+República precisou pedir em 2007, por meio 
+de uma Ação Direta de Constitucionalidade 
+(nº 19), que o Supremo Tribunal Federal (STF) 
+declarasse a lei constitucional, em função de 
+diversas dúvidas que vinha suscitando nos 
+tribunais estaduais. Na esfera legislativa, 
+há em tornos de vinte e quatro projetos de 
+lei que buscam alterar de alguma forma a 
+legislação (CFEMEA, 2010). 
+Em quais espaços mulheres e homens 
+afetados por esta legislação podem falar sobre 
+suas experiências, a não ser nos cerca de trinta 
+minutos que têm em audiências nas delegacias 
+e nos juizados? Para quem dirigem suas dúvidas 
+sobre a Lei? Como compartilhar experiências 
+sobre um assunto como a violência doméstica 
+que ainda, quando tornado público, ao acionar 
+o Estado para garantir o que prevê a legislação, 
+é imbricado por situações de constrangimento, 
+dor, revolta? As narrativas presentes na 
+5 A conceituação da violên­
+cia sofrida pelas mulheres, ao 
+menos no Brasil, foi desen­
+volvida quase que simultanea­
+mente com a desnaturalização 
+e emergência pública dos ca­
+sos (DEBERT E GREGORI, 
+2008; IZUMINO; SANTOS 
+2005). “Violência contra a mul­
+her”, com ênfase no sujeito 
+contra quem a prática violenta 
+é dirigida, foi como o problema 
+tornou-se público. Com a iden­
+tificação de que a violência con­
+tra as mulheres era perpetrada, 
+na maioria dos casos, por mari­
+dos ou companheiros, “violên­
+cia conjugal” passou a ser um 
+termo também utilizado para 
+designá-la. Mas logo se notou 
+que a categoria não dava conta 
+de explicar outras dinâmicas 
+violentas, ocorridas não apenas 
+em relações conjugais. Saffioti 
+(2002) passou a discutir o con­
+ceito de “violência doméstica”, 
+procurando demarcar sua espe­
+cificidade e não utilizá-lo como 
+sinônimo de “violência fami-
+liar ou intrafamilar”. “O grupo 
+domiciliar inclui, com frequên­
+cia, pessoas não vinculadas con­
+sanguineamente à família dele 
+fundadora” (SAFFIOTI, 2002, 
+p. 60). Nesse rol de definições, 
+nos apoiamos na conceituação 
+presente na Lei Maria da Penha 
+por entender que contempla 
+dois propósitos: de estudar a 
+violência contra um sujeito 
+específico (a mulher), em âm­
+bitos também determinados. 
+É preciso esclarecer também 
+que a lei está preocupada com 
+a violência doméstica ocor­
+rida “em qualquer relação íntima 
+de afeto, na qual o agressor conviva 
+ou tenha convivido com a ofendida, 
+independentemente de coabitação”, 
+afastando assim sua aplicabili­
+dade das relações profissionais, 
+tais como aquelas exercidas por 
+empregadas domésticas.
+
+66
+Gênero na Amazônia, Belém, n. 2, jul./dez., 2012
+Dossiê / Dossier
+Rede Social Lei Maria da Penha podem sinalizar algumas dessas 
+compreensões.
+2.1. Estrutura da rede
+A Rede Social Lei Maria da Penha tem estrutura similar ao 
+site de relacionamentos Orkut. É necessário cadastrar-se para 
+acessar suas páginas e criar um perfil. A partir de então, é possível 
+convidar pessoas, fazer amigos que já estão na Rede, postar tópicos 
+em um fórum de debates, participar de comunidades, bem como 
+publicar fotos e vídeos. Além disso, a plataforma também traz 
+notícias sobre violência doméstica, links com endereços de centros 
+de atendimento, delegacias, núcleos de pesquisa sobre o tema, bem 
+como referências bibliográficas. Há ainda um espaço denominado 
+de “Fórum”, no qual os/as participantes da Rede postam tópicos 
+para discussão, já que a plataforma permite respostas aos assuntos 
+iniciados. Recentemente contabilizava 6.475 
+usuários cadastrados6. 
+Contudo, observamos que a maior parte 
+das discussões se dá nos “Grupos”, espécies 
+de comunidades virtuais dos quais os usuários 
+podem fazer parte. A saber, nomeadamente: a) Processos e Decisões 
+Judiciais; b) Campanhas e Divulgações; c) Bibliografias sobre a 
+Lei; d) Sites, Portais, Grupos, Orkut; e) Casos e Testemunhos; f) 
+Clippings sobre Lei; g) Grupos de Apoio; h) Artigos e Pesquisas; i) 
+Apoio Psicossocial; j) Delegacias da Mulher. Nos grupos também 
+é possível iniciar debate em um ‘fórum de discussão’, no qual 
+também são possíveis respostas de outros membros. Observamos 
+que os usuários utilizam com mais frequência a ‘caixa de recados’, 
+localizada abaixo do ‘fórum’, de forma que, ao exporem seu relato, 
+não se vinculam a um tópico específico, mas geralmente a um recado 
+anterior. 
+6 Última visualização do 
+número de usuários feita 
+no dia 27.07.2011: http://
+www.leimariadapenha.com/
+profiles/members/
+
+Narrativas Online como Forma de Expressão Política:o compartilhamento...	
+    	
+                         Rayza Sarmento
+67
+Dossiê / Dossier
+Para a finalidade desse estudo, a abordagem se concentrará 
+nos relatos inseridos no grupo “Casos e Testemunhos” (com 114 
+membros) em função de as atualizações serem 
+recentes e do número de membros7. Neste 
+sentido, no tópico seguinte, analisaremos 
+o conteúdo dos relatos, considerando  as 
+potencialidades das narrativas propostas por 
+Young (2000)e categorizando-as de acordo 
+com o que problematizam.
+3.   Narrativas Online
+A partir da leitura exploratória dos relatos presentes no grupo 
+“Casos e Testemunhos”, propomos a categorização das narrativas 
+em dois tipos: a) relato da violência, pedido e prestação de ajuda; b) 
+problematização da Lei e de sua aplicabilidade. Nesta perspectiva, 
+o objetivo não é perceber se as narrativas mobilizam outros atores 
+a responder ou se chegam a um entendimento comum sobre 
+um determinado assunto, mas verificar de que forma sinalizam 
+compreensões acerca da Lei e da situação de violência doméstica. 
+Como relato da violência, pedido ou prestação 
+de ajuda agrupamos as mensagens de mulheres8 
+que narravam as situações vividas, solicitavam 
+ou ofereciam auxílio, conselho ou informação 
+sobre as situações de violência. Os relatos estão 
+transcritos de forma fidedigna conforme expostos 
+no ambiente online, apenas identificamos numericamente os sujeitos a 
+fim de preservar suas identidades.
+Mulher 1/ Grupo Casos e Testemunhos/ 25.05.2011
+Olá estou com meu marido desde outubro de 2008 e me casei dia 
+4 de dezembro de 2009, estou casada com ele até hoje, nunca o trai 
+nem o desrespeitei, mas ele não evita usar palavroes contra mim 
+(...) me chamou de piranha em frente minha casa enquanto nao 
+7 Vale ressaltar que na 
+descrição do grupo não 
+consta que ele tenha sido 
+pensado 
+para 
+fomentar 
+os relatos, pois é descrito 
+um espaço para reunião 
+de “clipping das principais 
+notícias na mídia sobre casos 
+e testemunhos”.
+8 Ainda que não seja 
+restrita a participação do 
+sexo masculino, não há 
+manifestação 
+de 
+pessoas 
+identificadas como sendo do 
+sexo masculino neste grupo.
+
+68
+Gênero na Amazônia, Belém, n. 2, jul./dez., 2012
+Dossiê / Dossier
+moravamos juntos, e esse ano depois de casados neste carnaval discutimos 
+sobre uma peça de roupa que eu vesti (...) Ele é um cara calmo e carinhoso 
+comigo, só de vez enquando que da umas vaciladas mas enfim confesso 
+que a uns dias atras tive a sensação que ele iria me bater novamente, então 
+percebi que não tinha superado, ele não fez nada mas o medo talvez exista 
+para sempre! 
+Nesta narrativa,  observamos o relato de uma agressão verbal e 
+psicológica da Mulher 1, incluindo  a linguagem desrespeitosa utilizada 
+pelo homem ao se referir à companheira, bem como a opinião emitida 
+sobre a utilização de uma peça de roupa. Ao finalizar o relato da situação, 
+a mulher externa uma sensação de insegurança, ainda que descreva o 
+companheiro como “calmo e carinhoso”. Na mensagem abaixo, uma 
+participante do grupo alerta a Mulher 1 e presta informação sobre um 
+número de telefone disponibilizado pelo Governo Federal para a denúncia 
+da violência doméstica. 
+Mulher 2 em resposta a mulher1/ Grupo Casos Testemunhos/ 
+25.05.2011
+ligue para o 180 e busque informações sobre estas situações. A falta de 
+informação é  pior do que não ter visão. Talvez um dia ouças: “Não diga 
+que não foste avisada, pois os avisos estão sendo bem claros!” ABÇ e boa 
+sorte!
+	 Percebemos que estas narrativas  estão de acordo com as 
+características propostas por Young (2000) em relação ao poder do contar 
+histórias para a vida política. Percebemos nelas o que a autora chama 
+de ‘conhecimento social’, quando as narrativas visibilizam não apenas a 
+experiência isolada do sujeito, mas sua compreensão na relação com o 
+outro e com o ambiente em que está inserido. A Mulher 12, ao fazer seu 
+alerta, expressa não apenas a sua visão – de que é necessária informação 
+– mas oferece um número de telefone para que a outra mulher busque 
+conhecimento acerca do problema. O que tais narrativas nos revelam é o 
+entendimento de que é necessário procurar ajuda aliada ao conhecimento 
+de que ela existe e pode ser acionada. 
+
+Narrativas Online como Forma de Expressão Política:o compartilhamento...	
+    	
+                         Rayza Sarmento
+69
+Dossiê / Dossier
+Nas narrativas a seguir, outra mulher relata a denúncia que fez 
+contra o marido e o fato dele ter voltado a procurá-la, situação também 
+comum nos casos de violência doméstica. Além disso, ainda que o marido 
+tenha demonstrado arrependimento, a mulher narra que não acredita 
+na mudança. O relato das mulheres 4 e 5 são claramente pedidos de 
+ajuda para as situações que estão passando. A Mulher 4 cita as atitudes 
+do ex-companheiro e afirma que procurou ajuda em organizações não 
+governamentais, mas não obteve resposta. A Mulher 5 narra outra situação 
+também comum: a crença de que a violência  cessasse. Em resposta à 
+Mulher 5, a 6 enfatiza que esta tem direitos e deve procurar a delegacia 
+especializada. 
+Mulher 3/ Grupo Casos e Testemunhos/10.02 2010
+oi ,hoje faz dois dias que denunciei meu marido. hoje ele me procurou na 
+parada de onibus e disse que está muito abalado,parece outra pessoa...mais 
+sei que vai ser sempre o mesmo,tenho medo de morrer,cada dia que passa 
+é uma vitória.
+*Mulher 4/ Grupo Casos e Testemunhos/11.06.2010
+Pelo amor de DEUS, alguem me ajude. Meu ex-companheiro ja ingressou 
+com um novo processo (hoje 11/06/10) ja não aguento mais pagar 
+honorários, minha saúde já esta comprometida, a saude de meus filhos 
+idem. Por favor, alguem me ajude. Ja enviei diversos e-mails p diversas 
+ONGs que se dizem protetora da mulher e até hoje não obtive nem 
+mesmo resposta. Por favor se alguem poder me ajudar, envie para meu 
+e-mail.Obrigada.
+Mulher 5/ Grupo Casos e Testemunhos/31.01.2010
+Tenho sofrido violência domestica e meu psicológico está muito abalado... 
+meu coração acelera quando meu companheiro chega do trabalho... mas 
+tenho receio de colocá-lo na justiça pois tenho uma filha que nasceu 
+prematura, tive muitas complicações no parto, tenho medo de sair de casa 
+pois ele disse que se sair vai na delegacia alegando abandono de lar... não 
+deixa eu sair nem levar minha filha, atualmente com 5 meses... estou presa 
+aqui pois não posso e nem quero perder minha filha!!!Sou Pedagoga e 
+tenho 37anos e meu companheiro 33, eu nunca imaginei que isso pudesse 
+acontecer comigo!!! Essa violência já acontecia quando estava grávida mas 
+imaginei que fosse melhorar!!!! Não sei mais o que fazer!!!
+
+70
+Gênero na Amazônia, Belém, n. 2, jul./dez., 2012
+Dossiê / Dossier
+Mulher 6 em resposta a Mulher 5/ Grupo Casos e Testemunhos/ 
+31.01.2010
+Você parece bastante sensibilizada e ele se aproveita disso. Não vejo outra 
+saída, esse tipo de situação tende a piorar. Procure a Delegacia da Mulher 
+e também um advogado, vc tem direitos e ele não pode praticar toda essa 
+violência moral e psicológica que vem praticando.
+	
+Nos pedidos e oferecimento de auxílio, é possível identificar 
+o que Young (2000) define como ‘construção de locais públicos e 
+afinidades coletivas’, a partir do compartilhamento de experiências 
+semelhantes, quer sejam já vivenciadas pelas próximas mulheres ou por 
+alguém próximo. A internet, desta forma, se mostra como um espaço 
+importante para que esse encontro de afinidades sobre um problema tão 
+grave se dê de forma mais natural e as narrativas conseguem expor as 
+experiências de forma a permitir o que Young (2000) denomina como a 
+‘compreensão da experiência do outro’. A ideia de um espaço livre, sem 
+coerções, que permite uma interação direta, sugere que mulheres em 
+situação de violência ficam mais a vontade para narrar o que vivenciam. 
+Com o conhecimento de outras situações semelhantes e informações 
+obtidas nessa troca de narrativas, é possível que os sujeitos consigam 
+refletir criticamente sobre suas experiências ao observarem que não 
+são casos isolados, mostrando assim que essas narrativas conseguem 
+conectar, conforme propõe Dryzek (2000), um contar aparentemente 
+singular a uma experiência política coletiva de expor e enfrentar a 
+violência doméstica. 
+Na categoria problematização da Lei e de sua aplicabilidade estão 
+postagens nas quais as mulheres narram experiências acerca da Lei Maria 
+da Penha, bem como suas dúvidas sobre a aplicabilidade. Também são 
+encontrados relatos sobre morosidade da justiça ou deficiências na rede de 
+atendimento à mulher vítima de violência, ainda que vários deles elogiem a 
+promulgação da legislação, conforme a narrativa da Mulher 7.
+Mulher 7/ Grupo Casos e Testemunhos/ 30.03.2009
+Na teoria a Lei é excelente e brinda a nós mulheres, porém, na prática 
+
+Narrativas Online como Forma de Expressão Política:o compartilhamento...	
+    	
+                         Rayza Sarmento
+71
+Dossiê / Dossier
+temos que ter uma imensa dose de paciência + confiança + esperança + 
+otimismo + perseverança, e tudo isso somado é = a uma longa e desgastante 
+espera ... só não podemos desistir... temos dias mais ensolarados ... dias 
+mais nublados ... mas o importante é que estamos vivas e nos foi possível 
+dar o primeiro passo, meu processo corre na justiça, pela Lei Maria da 
+Penha a exatamente 2 anos e 5 meses... mas um dia ele será julgado... falta 
+apenas o fundamental... a decisão do Juiz... enquanto isso não acontece 
+continuo minha luta diária contra o medo e a insegurança que se tornou a 
+minha vida. bjs para todos...
+	
+A Mulher 8 relata uma tentativa de alerta para o que ela chama de 
+outras ‘maneiras’ dos ‘agressores’ continuarem agindo, a partir de uma 
+ordem de despejo impetrada pelo  ex-marido. Na narrativa da Mulher 9, 
+há o relato de uma dúvida acerca da competência dos juizados especiais 
+para a tramitação de um processo de violência doméstica. Nesse caso, 
+vale lembrar que nem todos os estados brasileiros possuem varas judiciais 
+especializadas na área da violência doméstica e familiar, conforme prevê 
+a legislação. Contudo, ainda que tramite em outra vara, a lei que deve ser 
+utilizada é a Lei Maria da Penha.
+  
+Mulher 8/ Grupo Casos e Testemunhos/ 21.11.2009
+Acreditamos que a Lei Maria da Penha é uma conquista. Porém precisamos 
+nos atentar a outras formas de violência. No meu caso, sofri todos os 
+tipos de violência pelo meu ex-marido (física, psicológica,patrimonial e 
+moral) (...) Após afastarmos essas “formas” de violência, meu ex-marido 
+encontrou no Judiciário respaldo para agir violentamente através de 
+decisões judiciais arbitrárias. A mais recente é a seguinte: O mandado 
+de despejo ordena que eu ou qualquer outra pessoa que esteja na casa 
+(portanto meu filho de 14 anos) sejamos tirados coercitivamente através 
+de Força Policial. OU SEJA, A VIOLÊNCIA DOMÉSTICA E ÍNTIMA 
+TRANSFORMOU-SE EM VIOLÊNCIA INTRUMENTALIZADA 
+PELO JUDICIÁRIO.
+Mulher 9/ Grupo Casos e Testemunhos/ 14.03.2010
+Por que Queixa Crime, ação criminal, no caso de se tratar de violência 
+doméstica tem que ser analisado em Juizado Especial, mesmo que especial 
+criminal? Até nisso a aplicação da Lei Maria da Penha é mais branda com 
+os homens?
+
+72
+Gênero na Amazônia, Belém, n. 2, jul./dez., 2012
+Dossiê / Dossier
+A Mulher 10  registra em sua narrativa a experiência de seu 
+companheiro e da ex-mulher dele que, segundo a narradora, teria usado 
+a Lei de forma inversa, para atacar o ex-companheiro. Inicia a narrativa 
+afirmando que espera não ser expulsa da Rede por expor uma opinião 
+contrária. Conta que entende a importância da lei, mas questiona quando 
+começarão as ser discutidos e ‘difundidos’ os casos em que mulheres usam 
+a Lei com o objetivo de ‘vingança’, afirmando que já ouviu ‘meia dúzia 
+de histórias parecidas’. A Mulher 11 corrobora com essa ideia, ainda que 
+esteja vivendo a situação oposta, e diz que a Lei também está sendo usada 
+para desfavorecê-la. Alerta que é necessário os juízes olharem com mais 
+cuidado para os processos. 
+Mulher 10/ Grupo Casos e Testemunhos/ 13.07.2010
+(a narrativa desta mulher esta dividida em quatro  postagens/ apresentaremos alguns 
+trechos)
+Ola, sou nova por aqui e espero não ser expulsa, como tenho sido em 
+algumas correntes defensoras da Lei. Sou uma defensora da Lei, da 
+mulher, entendo a lei como um grande avanço para esse crime monstruoso 
+de agressão à mulher. Quero contar o meu caso, aliás o do meu marido.
+Ele foi acusado pela mãe do seu filho de lesão corporal. No dia primeiro de 
+maio, após ela ter se mudado de seu endereço sem dar maiores satisfações 
+ao pai da criança, meu marido foi até seu novo endereço (...)Ela continuou 
+a gritar até que agrediu meu marido, temos fotos, BO e testemunhas de 
+que meu marido foi agredido e não revidou. Mas ela apoiada na Lei Maria 
+da Penha fez um BO contra ele, alegando lesão corporal (...) Com essa 
+denúncia, ela conseguiu um mandado de proteção contra ele, ele não pode 
+chegar perto dela, nem manter contato telefônico, ele não vê o filho a 
+um mês(...) Minha pergunta ao fórum, pois sei que existem pessoas aqui 
+mais conhecedoras da lei que eu, é, como uma mulher consegue tamanha 
+manobra sem ter um corpo delito para comprovar as agressões? Pq a Lei 
+não prevê medidas mais duras de comprovação das agressões? Pois esse 
+tipo de acontecimento, que é muito comum, pois participo de outro fórum 
+onde ja ouvi pelo menos uma dúzia de histórias parecidas, só prejudica a 
+atuação da Lei sobre os casos verdadeiros de agressão. Como a Lei, é 
+relativamente nova, esses casos de vingança de mulheres contra seus ex 
+maridos,usando a Lei Maria da Penha ainda não devem ser tão difundidos, 
+mas acho que uma hora isso vai ser discutido e me pergunto quanto tempo 
+levará (...) 
+
+Narrativas Online como Forma de Expressão Política:o compartilhamento...	
+    	
+                         Rayza Sarmento
+73
+Dossiê / Dossier
+(...) Pq na nossa sociedade é mais plausível acreditar numa denúnica de 
+um homem batendo numa mulher do que uma mulher agredindo um 
+homem?? Vamos debater, falar! Essa rede tem poder pra nos ajudar, e só a 
+gente se mover!!! Espero mais comentários sobre meu caso!!!
+Mulher 11/ Grupo Casos e Testemunhos/ 13.07.2010
+Boa noite, (cita nome da Mulher 10). Infelizmente existem pessoas que 
+utilizam a Lei de forma incorreta com o objetivo de prejudicar uma outra 
+pessoa. No meu caso meu ex ja esta no 6º processo, ele move contra 
+mim, todos com mentiras. Eu entro com a defesa mostro a verdade até 
+mesmo assinada por ele, tenho tudo documentado e mesmo assim, não 
+tenho solução(...) No seu caso, não vai ser diferente, até que um desses 
+juizes acorde tranquilo, de bem com a vida e que esteja de ler na integra o 
+conteudo do processo, o seu marido vai ter que enfrentar essa mentira sem 
+dar um pio, caso contrario, vai ficar pior p ele.
+A Mulher 12 problematiza a narrativa da mulher 10 e tenta esclarecer 
+que as medidas protetivas que a ex-mulher solicitou devem ser entendidas 
+de uma maneira, e de outra o direito de o marido da mulher 10 ver o filho.. 
+A Mulher 13 afirma explicitamente que reprova a forma ‘machista’ como 
+a mulher 10 tratou a questão. 
+Mulher 12/ Grupo Casos e Testemunhos/ 10.08.2010
+Prezada (cita nome da Mulher 10). uma coisa é o direito do seu marido ver 
+o filho e outra é a medida protetiva: se ela a medida) existe é pq seu atual 
+marido deve ter feito algo que tenha causado isso. O caminho para ver 
+o filho tb não é ir mportuná-la no trabalho dela falando com superiores, 
+mas ele pode conversr com promotor da infância e juventude e fazer valer 
+seru direito. Enfim, desculpe-me, mas seu marido realmente está agindo 
+de forma bastante equivocada.
+Mulher 13/ Grupo Casos e Testemunhos/ 10.08.2010
+Realmente as mulheres brasileiras precisam ter mais DIGNIDADE 
+e pararem de defender companheiros agressores. ´R por causa do 
+MACHISMO DE MULHERES CONTRA MULHERES que estamos 
+no pé que estamos. A Mudança precisa ser cultural. Mulher 10, snto mito, 
+mas reprovo totalmente sua abordagem machista e sexista que parece 
+vingança contra a ex do seu marido. Vc não vai resolver o problema dele. 
+Ele não é santo.
+Cerca de um mês depois das primeiras postagens, a Mulher 10 
+voltou  à Rede para dizer que tinha ‘vitórias’ para contar sobre o caso de 
+
+74
+Gênero na Amazônia, Belém, n. 2, jul./dez., 2012
+Dossiê / Dossier
+seu ex-marido e apresentou relatos de um juiz e delegada que disseram a 
+ela estarem atentos a ‘casos falsos’. 
+Mulher 10/ Grupo Casos e Testemunhos/ 11.08.2010
+Eu disse que voltaria pra contar as vitórias, e já tenho uma.
+Meu marido foi até o juiz que assinaria sua prisão preventiva e contou 
+tudo que aconteceu, apresentou provas de várias mentiras da ex (..) O 
+próprio juiz disse que está atento a esses casos que estão sendo cada vez 
+mais frequentes, e que hj ainda não causam mal, mas em pouco tempo 
+trará consequências ruins para as pessoas que realmente necessitam da 
+lei. (...)A própria delegada que o atendeu disse que esta atenta a todos os 
+casos falsos de lesão corporal. Disse que esta listando essas ocorrências 
+pra averiguá-las melhor. Enfim, não sou eu, é uma pessoa que lida com 
+isso todo dia que esta dizendo como as mulheres se utilizam da lei!
+Quanto às narrativas que problematizam a lei, é possível identificar 
+essa conexão de experiências particulares com uma norma jurídica mais 
+geral e perceber a forma como a legislação se apresenta nas experiências 
+narradas. Os relatos expõem as perspectivas de atores concernidos 
+diretamente pela legislação; ora compartilhando semelhanças (quando 
+afirmam que a legislação foi importante), ora expondo suas críticas quanto 
+à demora ou dúvidas de sua aplicabilidade. 
+Neste ponto, retornamos à literatura inicial do trabalho para 
+justificar a opção teórica pelas formulações de Young (2000). Entendemos 
+que as trocas discursivas que se dão na Rede Social Lei Maria da Penha, 
+e especificamente na categoria que criamos sobre a problematização 
+da lei, não se configuram de fato como um processo deliberativo nos 
+moldes habermasianos, mas que podem alimentá-lo. Nesse sentido, 
+compartilhamos com Mendonça (2009; 2010) a ideia de que um processo 
+deliberativo deve ser constituído pela articulação entre várias arenas 
+comunicativas. Segundo o autor, tal articulação não está dada, mas precisa 
+ser costurada. Dessa maneira, um debate público sobre a Lei Maria da 
+Penha que envolvesse perspectivas tais quais expostas nas narrativas 
+que analisamos seria oportuno para  que o sistema político percebesse 
+como os sujeitos que estão sob a proteção da Lei a enxergam e a 
+
+Narrativas Online como Forma de Expressão Política:o compartilhamento...	
+    	
+                         Rayza Sarmento
+75
+Dossiê / Dossier
+vivenciam. Morosidade, aplicação considerada indevida, críticas ao 
+Poder Judiciário não dizem apenas de um problema privado; são 
+reveladoras da implementação de uma norma pública e expostas 
+pelos sujeitos que estão diretamente concernidos por ela. Ao dizer 
+que as narrativas ajudam a desconstruir conceitos pré-concebidos, 
+Young (2000) nos ajuda a pensar como os testemunhos de mulheres 
+são importantes de serem ouvidos e o quanto as narrativas podem 
+tornar mais legítimas a reivindicação por determinadas melhorias. 
+3.1 O narrar como expressão política
+Ainda que não sejam quantitativamente representativas do 
+grande universo de mulheres em situação de violência doméstica no 
+Brasil9, as que utilizam a Rede Social Lei Maria da Penha, para exporem 
+as próprias narrativas, conseguem relatar, ao 
+seu modo, como se dá a vivência da violência 
+doméstica, bem como os entraves e dúvidas que 
+possuem para combatê-la. A internet parece ser 
+então um espaço profícuo para o desvelar das 
+especificidades dos casos e um indicador  de 
+que muitas mulheres já reconhecem a violência 
+doméstica como um problema público e não 
+mais circunscrito à esfera na qual ocorre. Vir 
+a público, em um meio que qualquer pessoa 
+pode acessar, tende a conformar a suposição 
+de que há um entendimento, nas palavras de 
+Carol Hainisch (apud MANSBRIDGE, 1999) 
+de “que o pessoal é político”. 
+Nas ‘prestações de ajuda’, identificadas 
+entre as narrativas, é  perceptível  que acompanhada da 
+compreensão da violência como um problema, vem a de que as 
+mulheres têm direitos e precisam se valer deles para combatê-la. 
+9 De acordo com o Anuário 
+da Mulher Brasileira, de 2007 
+a 2010, o Ligue 180, “serviço 
+ofertado pela SPM com o 
+objetivo de receber denúncias 
+ou relatos de violência, 
+reclamações sobre serviços 
+da rede e orientar as mulheres 
+sobre seus direitos e a legislação 
+vigente” já recebeu cerca de 
+420. 313 ligações, com o relato 
+de 108.546 crimes. Disponível 
+em: http://www.sepm.gov.
+br/noticias/documentos-1/
+anuario_das_mulheres_2011.
+pdf. Acesso em 15.07.2011.
+
+76
+Gênero na Amazônia, Belém, n. 2, jul./dez., 2012
+Dossiê / Dossier
+Consideramos tal compreensão acerca da necessidade de acionar os 
+mecanismos de proteção como um ganho importante, tanto para as 
+mulheres que já a possuem quanto para as que têm contato com essas 
+opiniões, afinal uma das grandes dificuldades, apontadas nas pesquisas 
+acadêmicas, é de nomear e reconhecer a violência doméstica.
+Via de regra, violência parece ser um tema reservado à criminalidade e 
+usado para expressar o que ocorre no espaço público como, por exemplo, 
+a violência geral das grandes cidades, cometidas por desconhecidos, 
+enquanto os problemas com vizinhos colegas de trabalho e escola não 
+são reconhecidos como violência. O termo também indica situação grave, 
+o que culturalmente, parece significar que a violência doméstica, embora 
+concretamente severa não é representada como tal (SCHRAIBER; et al, 
+2003, p.51).
+Outro ganho político que podemos depreender das narrativas 
+analisadas é o reconhecimento das mulheres sobre a exigência da 
+legislação, aliada a uma capacidade crítica de perceber suas deficiências 
+e incompletudes na aplicabilidade, a partir das experiências vividas. 
+“Especialmente na sociedade de massas, na qual o conhecimento dos 
+outros pode ser em grande parte mediada por generalidades estatísticas, 
+pode haver pouca compreensão de necessidade ou interesse entre os 
+grupos” (YOUNG, 2002, p.77).
+ Com base no que Dryzek (2000) propõe para a idoneidade e 
+valor político das narrativas (estarem livres de coerções e conectarem o 
+particular com o geral), entendemos que as narrativas analisadas atendem 
+às duas condições. Supomos que justamente pelas características 
+otimistas acerca da internet, segundo as formulaçãoes de Gomes 
+(2008), as mulheres em situação de violência sentem-se mais livres 
+para narrar, ajudar e até criticar umas às outras, ainda que discordem 
+entre si (este também um ganho para a discussão da violência enquanto 
+problema público), ou seja, neste espaço estão livres de qualquer tipo 
+de coerção. 
+
+Narrativas Online como Forma de Expressão Política:o compartilhamento...	
+    	
+                         Rayza Sarmento
+77
+Dossiê / Dossier
+Sobre a outra condição, talvez não seja exagero afirmar que as 
+histórias ali narradas conectam particularidades a uma questão de extrema 
+importância para a vida social, como a violência doméstica e o contar de 
+histórias, principalmente quando problematizam a Lei Maria da Penha, 
+sinalizam o grau de entendimento e de dúvidas que a norma jurídica 
+suscita, bem como a dinâmica de sua aplicabilidade. Entendemos que 
+evocando a experiência vivida, por meio da narrativa via internet, as 
+mulheres conseguem se expressar politicamente acerca daquilo que as 
+afeta, exercem um tipo de comunicação extremamente democrática, muito 
+próxima do que propõe Young (2000):
+A comunicação democrática inclusiva assume que todos os 
+participantes têm algo a ensinar ao público sobre a sociedade em que 
+eles moram e sobre seus problemas. Assume  também que todos os 
+participantes são ignorantes de alguns aspectos do mundo social ou 
+natural, e que todo mundo vem para um conflito político com alguns 
+vícios, preconceitos, pontos cegos ou estereótipos (...) (YOUNG, 
+2002, p.77).
+É para esse tipo de comunicação que também devem, a nosso 
+ver, estarem abertos os canais do sistema político e da própria teoria 
+democrática. 
+REFERÊNCIAS
+BACHTIGER, André et al. Symposium: Toward more realistic models of 
+deliberative democracy. Disentangling diversity in deliberative democracy: 
+competing theories, their blind spots and complementarities. The Journal of  
+Political Philosophy, vol. 18, n.1, 2010, p. 32-63.
+BARSTED, Leila. A resposta legislativa à violência contra as mulheres no 
+Brasil. In: ALMEIDA, Suely (orgs.). Violência de gênero e políticas públicas. Rio 
+de Janeiro: Editora UERJ, 2007, p. 119-137.
+BRASIL. Lei n.11.340, de 07 ago. 2006. Cria mecanismos para coibir a 
+violência doméstica e familiar contra a mulher, nos termos do § 8o do 
+
+78
+Gênero na Amazônia, Belém, n. 2, jul./dez., 2012
+Dossiê / Dossier
+art. 226 da Constituição Federal, da Convenção sobre a Eliminação de 
+Todas as Formas de Discriminação contra as Mulheres e da Convenção 
+Interamericana para Prevenir, Punir e Erradicar a Violência contra a 
+Mulher.
+CFEMEA. Nota técnica: Proposições Legislativas que alteram a Lei Maria 
+da Penha em tramitação no Congresso Nacional. Brasília, 2010. Disponível 
+em: 
+http://www.observatoriodegenero.gov.br/eixo/legislacao/
+monitoramento-de-proposicoes-legislativas/notas-tecnicas/nota-
+tecnica-proposicoes-legislativas-que-alteram-a-lei-maria-da-penha-em-
+tramitacao-no-congresso-nacional. Acesso em: 02/03/11
+CONRADO, Monica Prates. A fala dos envolvidos sob a ótica da lei: um 
+balanço da violência a partir da narrativa de vítimas e indiciados em 
+uma delegacia da mulher. Tese de Doutorado em Sociologia. São Paulo: 
+USP/Faculdade de Filosofia, Letras e Ciências Humanas, São Paulo, 
+2001, 170f.
+DEBERT, Guita; GREGORI, Maria Filomena. Violência e gênero: novas 
+propostas, velhos dilemas. Revista Brasileira de Ciências Sociais,  vol. 23, n. 66, 
+fevereiro/2008, p. 165-211.
+DRYZEK, John S. Deliberative democracy and beyond: liberals, critics, 
+contestations. New York: Oxford University Press, 2000.
+FARIA, Claudia. Do ideal ao real: as conseqüências das mudanças 
+conceituais na teoria da democracia deliberativa. In: 7º Encontro da ABCP. 
+04-07/08/2008.
+GARCES, R. L.; MAIA, R. C. M.. Lutas por reconhecimento dos surdos 
+na internet: efeitos políticos do testemunho. Revista de Sociologia e Política, v. 
+17, 2009, p. 131-144. 
+GOMES, Wilson. Internet e participação política. In: GOMES, W; MAIA, 
+R. C. M. Comunicação e democracia. In: GOMES, W.; MAIA, R. C. M. 
+Comunicação e democracia. São Paulo: Paulus, 2008, p. 293-326.
+GRINOVER, Ada Pelegrini.et.al. Juizados Especiais Criminais – comentários 
+à lei 9.099, de 26.09.1995. São Paulo: Editora Revista dos Tribunais, 2005.
+
+Narrativas Online como Forma de Expressão Política:o compartilhamento...	
+    	
+                         Rayza Sarmento
+79
+Dossiê / Dossier
+HABERMAS, J. Direito e democracia: entre a facticidade e a validade(vol. II). 
+Rio de Janeiro: Tempo Brasileiro, 2003.
+IZUMINO, Wânia Pasinato; SANTOS, Cecília MacDowell. Violência 
+contra as mulheres e violência de gênero: notas sobre estudos feministas 
+no Brasil. Revista Estudios Interdisciplinários de America Latina y El Caribe. 
+Israel: Universidade de Tel Aviv, vol. 16, n. 1, 2005, p. 147-164.
+MAIA, Rousiley. Democracia e internet como esfera pública virtual: 
+aproximação às condições da deliberação. In: GOMES, W.; MAIA, R. C. 
+M. Comunicação e democracia. São Paulo: Paulus,2008a,  p. 277-292
+_________. Redes cívicas e internet: efeitos democráticos do 
+associativismo. In: GOMES, W.; MAIA, R. C. M. Comunicação e democracia. 
+São Paulo: Paulus, 2008b, p. 327-348.
+MANSBRIDGE, J. Everyday Talk in Deliberative System. In: MACEDO, 
+Stephen (ed.).
+Deliberative Politics. NY: Oxford University Press, 1999. p. 211-239.
+MARQUES, Francisco Paulo Jamil Almeida. Internet e Participação 
+Política no Caso do Estado Brasileiro: um relato de pesquisa.  Em Questão. 
+Porto Alegre, v. 15, n. 2, p. 219-247, jul./dez. 2009.
+MENDONÇA, Ricardo Fabrino; PEREIRA, Marcus Abílio. Democracia 
+digital e deliberação online: um estudo de caso sobre o Votenaweb. In: IV 
+Congresso Latino Americano de Opinião Pública/WAPOR. Belo 
+Horizonte, 2011.
+_______. Reconhecimento e deliberação: a luta das pessoas atingidas pela 
+hanseníase em diferentes âmbitos interacionais. Belo Horizonte, Minas 
+Gerais. Tese de doutorado. Fafich/UMFG, 2009.
+_________. Reconhecimento e (qual) deliberação?. XIX Encontro da Compós, 
+na PUC-RIO, Rio de Janeiro, junho de 2010. 
+PINTO, Céli Regina Jardim. Uma história do feminismo no Brasil. São Paulo: 
+Fundação Perseu Abramo, 2003. 
+
+80
+Gênero na Amazônia, Belém, n. 2, jul./dez., 2012
+Dossiê / Dossier
+SAFFIOTI, Heleieth I. B. Já se mete a colher em briga de marido e mulher. 
+In: São Paulo em perspectiva. 13(4)/out.-dez. 1999, p. 82-91. Disponível em: 
+<http://www.scielo.br/pdf/spp/v13n4/v13n4a08.pdf>. 
+Acesso 
+em: 
+14/02/09.
+________. Violência Doméstica: questão de policia e da sociedade.  In: 
+CORREA, M. (ed.).  Gênero e Cidadania, Campinas: PAGU - Núcleo de 
+Estudos de Gênero da UNICAMP, 2002, p. 59-69.
+SCHRAIBER, L. et al. Violência vivida: a dor que não tem nome, Interface 
+- Comunic, Saúde, Educ, v.7, n.12, p.41-54, 2003. Disponível em: <http://
+www.interface.org.br/revista12/ensaio3.pdf>. Acesso em: 09/02/09.
+YOUNG, Iris. Inclusion and Democracy. Oxford: Oxford University Press, 
+2000.

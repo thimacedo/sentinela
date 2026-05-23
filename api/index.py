@@ -19,8 +19,10 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 try:
     from stripe_service import payment_manager
 except ImportError:
-    # Fallback se rodar da raiz
-    from api.stripe_service import payment_manager
+    try:
+        from api.stripe_service import payment_manager
+    except ImportError:
+        from .stripe_service import payment_manager
 
 # Import Workers Metrics
 try:
@@ -53,6 +55,21 @@ app.add_middleware(
     allow_methods=["*"], 
     allow_headers=["*"]
 )
+
+@app.get("/")
+def read_root():
+    return {
+        "status": "operational",
+        "service": "Sentinela API Backend",
+        "version": "50.1",
+        "documentation": "/docs",
+        "endpoints": {
+            "health": "/api/health",
+            "summary": "/api/v1/summary",
+            "targets": "/api/v1/targets"
+        }
+    }
+
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")

@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const PRODUCTION_URL = 'https://sentinela-democratica-ruby.vercel.app';
+const PRODUCTION_URL = 'https://asentinela.vercel.app';
 
 test('debug production site', async ({ page }) => {
     page.on('console', msg => console.log(`BROWSER CONSOLE: ${msg.text()}`));

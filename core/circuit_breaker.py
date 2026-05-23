@@ -41,20 +41,20 @@ class CircuitBreaker:
 
         # Falhas fatais (Auth) abrem o circuito por 1 hora
         if status_code in [401, 403]:
-            logger.error(f"🔴 [CB] Falha FATAL ({status_code}) em {service_name}. Circuito ABERTO por 1 hora.")
+            logger.error(f"[CB] Falha FATAL ({status_code}) em {service_name}. Circuito ABERTO por 1 hora.")
             self.open_until[service_name] = time.time() + 3600
             return
 
         # Falhas de Rate Limit ou indisponibilidade temporária abrem por 5 minutos
         if status_code in [429, 503]:
             cooldown = 300
-            logger.warning(f"🟡 [CB] {service_name} indisponível ({status_code}). Circuito ABERTO por {cooldown}s.")
+            logger.warning(f"[CB] {service_name} indisponível ({status_code}). Circuito ABERTO por {cooldown}s.")
             self.open_until[service_name] = time.time() + cooldown
             return
 
         # Outras falhas acumulam
         if count >= self.failure_threshold:
-            logger.warning(f"🟠 [CB] {service_name} falhou {count}x seguidas. Circuito ABERTO por {self.cooldown_seconds}s.")
+            logger.warning(f"[CB] {service_name} falhou {count}x seguidas. Circuito ABERTO por {self.cooldown_seconds}s.")
             self.open_until[service_name] = time.time() + self.cooldown_seconds
 
 # --- Instâncias Globais dos Circuit Breakers ---

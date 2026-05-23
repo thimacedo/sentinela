@@ -1,0 +1,1510 @@
+Narrativas digifeministas: arte, ativismo e posicionamentos políticos na internet
+Revista Brasileira de Pesquisa (Auto)Biográfica, Salvador, v. 02, n. 04, p. 134-152, jan./abr. 2017
+134
+NARRATIVAS DIGIFEMINISTAS: ARTE, ATIVISMO E 
+POSICIONAMENTOS POLÍTICOS NA INTERNET
+Carla de Abreu
+Universidade Federal de Goiás
+A forte incorporação das tecnologias nas práticas cotidianas reali-
+mentou as relações de poder e os discursos hegemônicos nos am-
+bientes digitais, no entanto, também favoreceu a visibilização de 
+correntes feministas críticas e questionadoras dos discursos domi-
+nantes e sexistas. Neste artigo, reviso o contexto do ciberfeminismo, 
+um movimento que surgiu na década de 1990 e influenciou uma nova 
+geração que hoje se empenha na construção de uma internet femi-
+nista e combativa. Os subsídios partem de uma pesquisa na qual 
+analiso as práticas de subjetividade das identidades nas redes so-
+ciais, em que as ações feministas formam parte das reflexões e do 
+marco teórico. A abordagem metodológica é a netnografia e a análise 
+de conteúdo. O termo digifeminista é usado para pensar as ações 
+políticas e as produções artísticas de jovens mulheres que, de ma-
+neira similar às ciberfeministas do passado, usam as ferramentas 
+digitais para expressar opiniões e executar estratégias de oposição 
+às hegemonias e opressões nos ambientes digitais. Apresento tam-
+bém algumas artistas digifeministas que exploram novos significa-
+dos do corpo feminino, expressando feminilidades alternativas que 
+escapam, interpelam e testam os limites das políticas da sexuali-
+dade contemporânea, com o objetivo de apontar o que as normas 
+excluem, inviabilizam ou silenciam.
+Palavras-chave: Digifeministas. Internet. Ativismo. Arte digital.
+DIGIFEMINIST NARRATIVES: ART, ACTIVISM AND 
+POLITICAL POSITIONING IN THE INTERNET
+The strong incorporation of technologies in the daily practices has 
+renourished the relation of power and the hegemonic discourses in 
+the digital environment; however, it has also favored the visibility of 
+critical and questioning feminist currents of the dominant and sex-
+ist discourses. In this paper I revise the context of Cyberfeminism, a 
+movement that emerged in the 1990´s and has influenced a genera-
+tion that nowadays endeavors in the construction of a feminist and 
+resumo
+abstract
+
+Carla de Abreu
+Revista Brasileira de Pesquisa (Auto)Biográfica, Salvador, v. 02, n. 04, p. 134-152, jan./abr. 2017
+135
+combative internet. The subsides come from a research in which I 
+analyze the subjective practices of the identities in social medias, 
+where the feminist actions form a part of the reflection and of the 
+theoretical framework. The methodological approach is the netnog-
+raphy and the analysis of content. The term digifeminist is used to 
+think the political actions and artistic productions of young women 
+who, in a similar way to the digifeminists of the past, use the digital 
+tools to express opinions and to execute strategies of opposition to 
+the hegemonies and oppressions of the digital environment. I also 
+present some digifeminist artists that explore new meanings of the 
+female body, expressing alternative femininities that escape, inter-
+pellate and test the limits of the contemporary politics of sexuality, 
+with the objective of pointing towards what the norms exclude, derail 
+or mute. 
+Keywords: Digifeminists. Internet. Activism. Digital art.
+NARRATIVAS DIGIFEMINISTAS: ARTE, ACTIVISMO Y 
+POSICIONAMIENTOS POLÍTICOS EN INTERNET
+La fuerte incorporación de la tecnología en las prácticas cotidianas 
+realimentó las relaciones de poder y los discursos hegemónicos en 
+los entornos digitales, sin embargo, también favoreció la visibili-
+zación de corrientes feministas críticas y cuestionadoras de los dis-
+cursos dominantes y sexistas. En este artículo revisé el contexto del 
+ciberfeminismo, un movimiento que surgió en los años 90 e influyó 
+una nueva generación que hoy en día se dedica a la construcción de 
+un internet feminista y combativo. Los subsidios se basan en una en-
+cuesta en la que analizo las prácticas de subjetividades de las iden-
+tidades en las redes sociales, donde las acciones feministas forman 
+parte de las reflexiones y del marco teórico. El enfoque metodológico 
+es la netnografía y el análisis de contenido. El término digifemini-
+sta se utiliza para pensar las acciones políticas y las producciones 
+artísticas de jóvenes mujeres que, de manera similar a las ciberfem-
+inistas del pasado, utilizan las herramientas digitales para expre-
+sar opiniones y ejecutar estrategias de oposición a las hegemonías 
+y opresiones en los entornos digitales. También presento algunas 
+artistas digifeministas que exploran nuevos significados del cuerpo 
+femenino, expresando feminidades alternativas que escapan, inter-
+pelan y prueban los límites de las políticas de la sexualidad contem-
+poránea, con el fin de señalar lo que las reglas excluyen, inviabilizan 
+o silencian.
+Palabras clave: Digifeministas. Internet. Activismo. Arte digital.
+Resumen
+
+Narrativas digifeministas: arte, ativismo e posicionamentos políticos na internet
+Revista Brasileira de Pesquisa (Auto)Biográfica, Salvador, v. 02, n. 04, p. 134-152, jan./abr. 2017
+136
+Grande parte dos estudos acadêmicos sobre as 
+ciberculturas ou a influência das tecnologias 
+nas sociedades contemporâneas introduz os 
+textos argumentando, não sem razão, sobre as 
+transformações nas formas como compreen-
+demos o mundo após o surgimento da inter-
+net. Sem querer ser redundante, o fato é que, 
+em menos de duas décadas, vivenciamos uma 
+série de mudanças, após a forte incorporação 
+dos artefatos digitais nas práticas cotidianas, 
+colaborando, inclusive, para a hibridização dos 
+contextos on-line e off-line, não sendo mais 
+possível uma separação ontológica dessas 
+duas dimensões.
+Essas mudanças podem ser observadas 
+nas formas como alteramos a compreensão de 
+alguns conceitos importantes como tempo e 
+lugar, exibição e intimidade, público e privado. 
+Apesar de ser um artefato cultural recente, a 
+internet é a grande responsável pelas trans-
+formações nas formas como organizamos as 
+estruturas sociais e o instrumento pelo qual 
+estamos experimentando novas formas de 
+narrar nossas biografias, criando outras ma-
+neiras de expressar subjetividades e de esta-
+belecer relacionamentos. Mudaram também 
+as formas tradicionais de trabalho e diverti-
+mento, incluindo nossa relação com o acúmulo 
+de conhecimento social e científico e a intro-
+dução de novos processos poéticos às criações 
+artísticas.
+Talvez, há vinte e cinco anos, quando Don-
+na Haraway (1991) escreveu o profético Mani-
+festo Ciborg, nem a autora poderia imaginar 
+como as tecnologias transformariam o coti-
+diano das pessoas, tampouco, como suas pro-
+postas continuariam a despertar inquietações 
+e novas provocações. Nesse ensaio, Haraway, 
+com a intenção de desestabilizar as catego-
+rias tradicionais de identidade, gênero e se-
+xualidade, apresentou a metáfora do ciborg, 
+um representante de uma subjetividade não 
+baseada em identificações tradicionais, um 
+híbrido questionador da identidade estática, 
+que autorrevela um corpo que não é dado ape-
+nas biologicamente, mas se configura como 
+um recipiente de códigos sociosimbólicos que 
+ajudam a entender as novas relações de saber 
+e poder, produzindo, também, novos sujeitos. 
+O ciborg de Haraway (1991) almejava ser o 
+representante de uma nova trama social, um 
+sujeito que, ao se apropriar das tecnologias, 
+poderia ampliar o campo das ações subver-
+sivas e romper definitivamente com o siste-
+ma patriarcal. Passados poucos anos desde 
+a popularização das mídias digitais, as expe-
+riências demonstraram que os ciberespaços 
+reproduzem as mesmas estruturas sociais e os 
+mesmos repertórios culturais do mundo off-
+line. Assim, nossas atividades nos ciberespa-
+ços também refletem parte do que somos e as 
+tecnologias, por si só, não foram capazes de 
+transformar as relações desiguais de poder.
+No entanto, apesar das imensas brechas, 
+a internet se tornou uma ferramenta inques-
+tionável e imprescindível em quase todas as 
+atividades humanas. Com o passar do tempo, 
+a metáfora do ciborg foi se configurando no 
+interior dos imaginários sociais não como um 
+ser dotado de implantes ou próteses ciber-
+néticas, em sujeitos conectados a uma “placa 
+mãe” universal e acolhedora de todas as sub-
+jetividades. O ciborg, hoje, são todas as pes-
+soas que transitam em mundos digitais e cuja 
+familiaridade com as tecnologias provocou 
+deslocamentos nas formas de pensar o sujeito 
+e seus processos de subjetivação. Para algu-
+mas pessoas e grupos sociais, esses espaços 
+se transformaram também em lugares para a 
+agência política da identidade e um território 
+favorável a explorações de narrativas alterna-
+tivas e trocas de experiências.
+Entendo que todas as ações mediadas pe-
+las tecnologias, para subverter e confrontar as 
+questões derivadas do patriarcado, são prá-
+ticas feministas. Em outras palavras, quando 
+
+Carla de Abreu
+Revista Brasileira de Pesquisa (Auto)Biográfica, Salvador, v. 02, n. 04, p. 134-152, jan./abr. 2017
+137
+uma mulher cria um meme para ironizar o ma-
+chismo, isso é digifeminismo. Quando outras 
+mulheres usam seus perfis nas redes sociais 
+para expressar opiniões ou denunciar compor-
+tamentos sexistas, isso é digifeminismo. Quan-
+do as mulheres se interessam em aprender 
+técnicas para se proteger, como a criptografia 
+e o desenvolvimento de aplicativos e lingua-
+gens de programação, por exemplo, isso é digi-
+feminismo. Quando criam blogs e páginas pes-
+soais, para discutir sobre o empoderamento 
+da mulher, isso é digifeminismo.
+Meu interesse pelas culturas digitais nas-
+ceu no desenvolvimento de meu projeto de 
+pós-graduação, no qual estudei as formas 
+como as identidades não heteronormativas 
+habitam os espaços mediados para narrar 
+fragmentos de suas vidas e percepções do 
+mundo (ABREU, 2014). A partir de então, usan-
+do abordagens metodológicas híbridas, como 
+a netnografia e a análise de conteúdo, pes-
+quiso as práticas de subjetividades usadas 
+pelos sujeitos nos espaços digitais, entre elas 
+as ações políticas, teóricas e artísticas das fe-
+ministas na internet.
+O ciberfeminismo, revisitado neste artigo, 
+surgiu no final do século XX, a partir do reco-
+nhecimento das novas possibilidades ofereci-
+das pelas tecnologias ao ativismo, ao pensa-
+mento político e à criação feminista. Era forma-
+do por mulheres envolvidas com a informática 
+e a produção artística, engenhosas, agressivas 
+e irreverentes com o politicamente correto. 
+Para as ciberfeministas, as tecnologias impli-
+cavam a subversão das identidades essencia-
+listas e dos padrões convencionais dos papéis 
+de gênero, concentrando-se nas relações hie-
+rárquicas de poder que excluíam as mulheres 
+das áreas de desenvolvimento tecnológico. In-
+vestigaram como as ferramentas tecnológicas 
+as afetavam e defendiam a criação de espaços 
+a partir de novas formas de participação ati-
+vista na internet.
+Para entender melhor essa história, es-
+boço uma breve trajetória sobre as primeiras 
+investigações feministas nos ambientes digi-
+tais, que influenciaram e colaboraram para o 
+surgimento do ciberfeminismo. Em seguida, 
+discuto algumas estratégias feministas atuais 
+e apresento um pequeno recorte de algumas 
+artistas digifeministas que se destacam no ce-
+nário artístico contemporâneo. A intenção é 
+discutir como os ciberespaços continuam de-
+sempenhando o papel de plataforma para a 
+atuação de uma frente formada por mulheres 
+que invadem os ambientes tecnologicamente 
+mediados com questionamentos e sarcasmo 
+aos códigos patriarcais, e, apesar de agirem 
+de forma diferente da idealizada pelas primei-
+ras ciberfeministas, essas jovens continuam 
+construindo novas formas de agência política, 
+buscando narrativas de enfrentamento aos 
+códigos normativos, por meio das ferramentas 
+tecnológicas. 
+Hoje, dificilmente podemos falar de fe-
+minismos sem considerar a atuação dos mo-
+vimentos nas redes digitais. Muitas vezes, os 
+coletivos feministas representam grupos que 
+se encontram presencialmente, cujas ativida-
+des se expandem para a web, conectando mili-
+tantes ou simpatizantes, em diferentes pontos 
+geográficos; outras vezes, os grupos existem 
+apenas on-line e, em muitas ocasiões, as digi-
+feministas contemporâneas não formam parte 
+de coletivos e suas ações são iniciativas indi-
+viduais. De qualquer forma, definitivamente, 
+as ferramentas tecnológicas possibilitaram a 
+globalização das agendas ativistas feministas 
+e potencializaram as discussões sobre as re-
+lações sexistas desiguais, além de colaborar 
+para a visibilização de uma nova geração que 
+parece não mais pertencer à noção de “sexo 
+frágil”.
+Desde o início de nossas experimentações 
+com as tecnologias, o ativismo feminista si-
+tuou-se como um elemento ruidoso na inter-
+
+Narrativas digifeministas: arte, ativismo e posicionamentos políticos na internet
+Revista Brasileira de Pesquisa (Auto)Biográfica, Salvador, v. 02, n. 04, p. 134-152, jan./abr. 2017
+138
+net, organizando espaços de participação em 
+muitas frentes: ativismo social, hackativismo1 
+e artivismo,2 movimentos interseccionados 
+que multiplicaram as esferas de atuação femi-
+nista. Todas as ações compartilhavam o dese-
+jo de justiça social, maior empoderamento e 
+envolvimento das mulheres nas lutas políticas, 
+para combater o modelo heteropatriarcal.
+Do final do século XX aos dias atuais, mui-
+tas coisas mudaram. A internet transformou-
+se em um enorme rizoma de muitas arenas 
+sociais, políticas e econômicas, em um espa-
+ço privilegiado para o reconhecimento e a vi-
+sibilidade de grupos sociais que tiveram seus 
+direitos cassados, punidos ou silenciados ao 
+longo da história. Mas esse contexto não foi 
+construído da noite para o dia. Foram necessá-
+rias muitas experimentações, pesquisas e es-
+tudos teóricos, para começarmos a entender a 
+influência das tecnologias em nossas vidas. A 
+seguir, um pouco dessa história. 
+Antecedentes teóricos do 
+ciberfeminismo
+No final do século XX, a internet era consi-
+derada um espaço libertador e emancipador, 
+um lugar onde qualquer um poderia assumir 
+a representação que desejasse. A propos-
+ta ousada e inovadora de Haraway (1991) de 
+pensar a relação entre os sujeitos e as tecno-
+logias foi acompanhada pelas feministas da 
+época com uma euforia marcada pela inge-
+nuidade de quem apenas iniciava as primei-
+ras experiências nas recém-lançadas redes 
+informáticas. 
+É importante recordar que a década de 
+1990 foi um momento de muitas rupturas epis-
+1	
+Hacktivismo é o acrônimo de hacker e ativismo. É a 
+utilização de ferramentas digitais com fins políticos, 
+utilizando, para tanto, alterações nos códigos das pá-
+ginas web, bem como o desenvolvimento de softwa-
+res que potencializem ações ou estratégias de deso-
+bediência civil.
+2	 Artivismo é a junção das palavras Arte e Ativismo.
+temológicas e também palco para o surgimen-
+to de novas contribuições teóricas. Foi nessa 
+época que estudiosos como Butler (1990), Se-
+dgwick (1990), Fuss (1991), de Lauretis (1991), 
+Warner (1993) e Halperin (1995), por exemplo, 
+começaram a desenvolver suas críticas à hete-
+rossexualidade como norma compulsória, so-
+mando-se aos teóricos e teóricas que questio-
+navam a noção tradicional de pensar as iden-
+tidades como fixas e estáveis. 
+Nesse contexto de efervescências teóri-
+cas, as contribuições de Haraway (1991) foram 
+particularmente relevantes para compreender 
+uma sociedade que perdeu a ilusão na estabi-
+lidade da identidade e começou a aprender a 
+viver em contextos de fluxos e fragmentações. 
+O ciborg, segundo Ana Martínez-Collado (2005, 
+p. 289) foi, provavelmente, o último grande 
+mito moderno. Haraway (1991), naquela época 
+e de forma profética, previu mudanças subs-
+tanciais em nossas formas de pensar e cons-
+truir as identidades e, com elas, as formas de 
+representações identitárias. 
+Foi nesse contexto que apareceram as pri-
+meiras manifestações feministas na internet, 
+tanto no âmbito teórico, como no campo cria-
+tivo. Um grupo significativo de mulheres come-
+çou a realizar uma produção significativa, em 
+blogs, listas de e-mails e grupos de discussões 
+on-line, onde pensavam a produção do desejo, 
+os significados do corpo da mulher, os discur-
+sos de poder e a produção de afetos e novas 
+representações sociais vinculadas ao digital e 
+à construção da subjetividade feminina. 
+Embora os primeiros estudos indiquem 
+uma convergência com os ideais romantizados 
+que acompanharam nossas primeiras explora-
+ções com as ferramentas digitais, é importante 
+ressaltar que foram as estudiosas acadêmicas 
+as primeiras a escrever e se interessar pelas 
+práticas dos sujeitos no ambientes on-line. 
+Nesse ponto, é inevitável citar o clássico Life 
+on the Screen de Sherry Turkle (1995), no qual 
+
+Carla de Abreu
+Revista Brasileira de Pesquisa (Auto)Biográfica, Salvador, v. 02, n. 04, p. 134-152, jan./abr. 2017
+139
+a autora exalta a possibilidade de criar múl-
+tiplas identidades e experimentar papéis dis-
+tanciados dos “eus” reais. Ainda apoiada na 
+natureza predominantemente textual da inter-
+net na década de 1990, esse estudo de Turkle 
+(1995) colaborou para formar um imaginário 
+romantizado das ciberculturas, lugares onde 
+tudo era possível, inclusive a descorporifica-
+ção do gênero e da sexualidade. 
+Além de Haraway (1991), as teóricas femi-
+nistas que mais receberam projeção no uni-
+verso das investigações das influências das 
+tecnologias no final do século XX foram Sadie 
+Plant e Sandy Stone, pesquisadoras considera-
+das precursoras do ciberfeminismo. 
+A britânica Sadie Plant lecionou Estudos 
+Culturais na Universidade de Warwick e foi di-
+retora fundadora do Centro de Investigação de 
+Cultura Cibernética, na Inglaterra. Ela deixou a 
+academia em 1997, para escrever e pesquisar 
+em tempo integral. Plant (1998) defende a ideia 
+da internet como um território essencialmente 
+feminino, onde sua própria estrutura permi-
+tiria a potencialização de uma comunicação 
+mais homogênea entre homens e mulheres. 
+Em seu célebre livro Zeros + Ones: Digital Wo-
+men + the New Technoculture, lançado em 1997, 
+a autora, a partir da história de Ada Lovelace, a 
+primeira programadora do mundo, explorou a 
+relação entre as tecnologias e as mulheres, ar-
+gumentando que a mulher, representada pelo 
+zero, corresponde ao vazio, à ausência dos sis-
+temas de representações e, o homem, indica-
+do pelo número 1, é o todo ou o conjunto da 
+totalidade (PLANT, 1998, p. 41).
+Passados dez anos, essa obra de Plant 
+(1998) é analisada atualmente com olhos mais 
+críticos que questionam a linguagem binária 
+do computador (0 e 1) adotada pela autora 
+para abordar as relações entre homens, mu-
+lheres e tecnologias. Os argumentos apontam 
+que essa perspectiva vai na contramão das re-
+flexões feministas atuais, cujas ações buscam 
+a desconstrução do alinhamento entre sexo, 
+gênero e orientação sexual.
+Já a teórica Sandy Stone, uma das respon-
+sáveis em introduzir os estudos transgêneros 
+na academia, é fundadora do ACTLab, um la-
+boratório experimental, surgido em 1993, for-
+mado por artistas, pesquisadoras, professoras 
+e hackers. Também é professora no departa-
+mento de Rádio-TV-Filme, da Universidade 
+do Texas, em Austin. Stone (1991) investiga as 
+questões relacionadas à interface, interação e 
+agência, desde uma perspectiva feminista. Em 
+seu conhecido ensaio Will the Real Body Plea-
+se Stand Up? (1991), a pesquisadora analisou 
+a construção do corpo e do desejo nas comu-
+nidades on-line e defendeu a ideia de que as 
+diferenças e desigualdades entre os gêneros 
+também são evidentes nos espaços mediados, 
+pois nesses ambientes prevalecem os mesmos 
+repertórios culturais vivenciados no mundo 
+off-line. Para a teórica, o corpo digital tende 
+a receber os mesmos códigos de gênero e de 
+sexualidade previstos no sistema presencial e, 
+embora na internet existam mais possibilida-
+des de subverter as normas sociais, persiste a 
+estrutura heteronormativa. 
+Lori Kendall (2002), professora na Universi-
+dade de Illinois, desenvolveu uma etnografia 
+representativa para os estudos das cibercultu-
+ras a partir de suas experiências em um fórum 
+de discussão on-line, no qual examinou como 
+as pessoas construíam suas representações e 
+negociavam os padrões de gênero nesse am-
+biente. Kendall (2002) percebeu que a maioria 
+das pessoas prefere construir suas representa-
+ções similares às suas identidades off-line. Se-
+gundo a autora, esse comportamento reproduz 
+as construções sociais que reforçam o gênero e 
+a sexualidade normativa também na Web.
+Na mesma linha de pensamento, a holan-
+desa e teórica feminista Liesbet van Zoonen 
+(2002) considera as tecnologias como algo pre-
+dominantemente masculino, pois os desenvol-
+
+Narrativas digifeministas: arte, ativismo e posicionamentos políticos na internet
+Revista Brasileira de Pesquisa (Auto)Biográfica, Salvador, v. 02, n. 04, p. 134-152, jan./abr. 2017
+140
+vedores de programas, aplicativos e interfaces 
+dos meios de comunicação são, na maioria, do 
+sexo masculino. No entanto, a pesquisadora 
+aponta as potencialidades da internet para a 
+criação de novas oportunidades políticas às 
+mulheres, ao oferecer um espaço de expressão 
+particularmente relevante para a formação de 
+redes e coletivos. 
+Jenny Sundén, professora na Escola de Gê-
+nero, Cultura e História da Universidade de 
+Södertörn, na Suécia, em seu livro Material 
+Virtualities (2003), trouxe novas problemáticas 
+para o campo dos estudos das ciberculturas. 
+Nesse trabalho, Sundén (2003) se concentrou 
+em desconstruir algumas ideias iniciais das 
+investigações relacionadas aos ciberespaços, 
+quando prevaleceu uma perspectiva demasia-
+damente otimista e ingênua. No livro, a pes-
+quisadora discute a importância da constru-
+ção do corpo nas experiências das identidades 
+mediadas pelas tecnologias e questiona a vi-
+são utópica de desmaterialização do corpo nas 
+plataformas digitais. Sundén (2003) propõe 
+uma interpretação feminista do ciborg que 
+destaque as experiências reais dos sujeitos e 
+sugere uma abordagem sensível das constru-
+ções de identidades digitais, cujas corporeida-
+des continuam sendo o foco das relações esta-
+belecidas nos ambientes mediados. 
+Na Espanha, Remedios Zafra (2005), escri-
+tora e professora na Universidade de Sevilla, 
+no livro Netianas. N(h)acer mujer en Internet 
+ressaltou a importância do corpo na configura-
+ção da identidade digital e propõe o conceito 
+netiana, para descrever diferentes possibilida-
+des e devires de “existir” como sujeito femini-
+no nas plataformas digitais. Para Zafra (2005), 
+a netiana é consciente das cargas simbólicas 
+que reproduzem os comportamentos, valores, 
+as discriminações e os estereótipos nos espa-
+ços mediados, inclusive, em muitas ocasiões, 
+reforçando-os. No entanto, nesses ambientes, 
+as formas de resistência e articulação política 
+são representadas de maneira dispersa, por 
+meio da ação de pequenas células de poder 
+móveis que favorecem a construção de identi-
+dades mais flexíveis, onde os sujeitos dispõem 
+de um conjunto de ferramentas que podem ser 
+usadas criativamente para elaborar a presença 
+on-line (2005, p. 28). 
+Judy Wajcman, professora de Sociologia na 
+Escola de Economia e Ciência Política de Lon-
+dres, autora do livro Tecnofeminismo (2006), 
+elaborou uma crítica contundente à ideia da 
+internet como um meio homogeneizador das 
+diferenças. Segundo Wajcman (2006), essa 
+perspectiva induz uma visão essencialista da 
+categoria “mulher” e a autora questiona a 
+relação simplista onde as tecnologias são si-
+nônimos de liberdade ou neutralidade iden-
+titária, argumentando que o desenvolvimento 
+das tecnologias sempre foi um território mas-
+culino. Wajcman (2006) defende o “tecnofemi-
+nismo” como forma política de resistência às 
+características patriarcais das redes informáti-
+cas e faz um convite às mulheres para romper 
+com o controle das tecnologias, passando a 
+integrar, desde dentro, as mudanças propor-
+cionadas pela indústria cultural e tecnológica.
+Após 2007, com a explosão das redes so-
+ciais e a popularização dos artefatos eletrôni-
+cos, sobretudo dos telefones móveis, as redes 
+digitais despertaram o interesse de muitas 
+investigadoras feministas que perceberam o 
+impacto proporcionado por essas ferramentas 
+e sua relevância nas práticas cotidianas. Hoje, 
+temos um vasto repertório bibliográfico, com 
+abordagens feministas nos estudos das cultu-
+ras digitais.
+Revisitando o ciberfeminismo 
+O ciberfeminismo surgiu no contexto das teo-
+rias pós-estruturalistas e das tendências da 
+chamada terceira onda dos feminismos. Ape-
+sar de não ter definido nenhuma postura po-
+lítica, o ciberfeminismo converteu-se em um 
+
+Carla de Abreu
+Revista Brasileira de Pesquisa (Auto)Biográfica, Salvador, v. 02, n. 04, p. 134-152, jan./abr. 2017
+141
+campo de atuação política e artística impor-
+tante para o movimento, cujas ações buscaram 
+o confronto contra os discursos da normati-
+vidade essencialista instituída pelo sistema 
+heteropatriarcal. O ciberfeminismo adicionou 
+às demandas feministas a análise das ciber-
+culturas e a construção do gênero nos ciberes-
+paços, além de lutar contra as características 
+sexistas que excluem as mulheres da cultura 
+e do desenvolvimento tecnológico, cenário no 
+qual, ontem e hoje, permanece sob o domínio 
+e o controle masculino.
+O ciberfeminismo nasceu com grandes 
+expectativas utópicas e adotou muitas estra-
+tégias no início da internet, como listas de 
+discussão via e-mails, fóruns on-line, grupos 
+de autoajuda e redes de apoio, além de in-
+centivar as mulheres não só a participar des-
+sas iniciativas, mas compartilhar saberes e 
+construir conhecimento no desenvolvimento 
+de softwares, plataformas digitais, lingua-
+gens de programação e o uso das tecnologias 
+como suporte e expressão artística. A ideia 
+era transformar as desigualdades, combater 
+a centralização dos poderes hierarquizados 
+a favor de trocas mais horizontais, outorgan-
+do às mulheres um espaço público acessível 
+para planos de ação e envolvimento político 
+por meio das tecnologias.
+Ileana Stofenmacher (2002), pesquisadora 
+argentina, explica o surgimento do ciberfemi-
+nismo a partir de duas vertentes distintas que 
+ocorreram de forma simultânea. A primeira, 
+comentada anteriormente, surge com Sadie 
+Plant, na Inglaterra, que passou a usar o termo 
+para descrever o relacionamento e o envolvi-
+mento das mulheres com as tecnologias. A se-
+gunda vertente surgiu na cidade de Adelaide, 
+Austrália, precisamente no verão de 1991, a 
+partir da união de quatro artistas: Francesca 
+da Rimini, Julianne Pierce, Josephine Starrs e 
+Virginia Barratt. Elas se autointitulavam ciber-
+feministas e formaram o provocativo grupo: 
+VNS Matrix3 (VeNuS Matrix), cuja produção as 
+artistas denominavam cunt art. Francesca da 
+Rimini, também conhecida como Gashgirl e 
+Doll Yoko, conta como nasceu o Grupo:
+Como toda boa história de coagulação, começa 
+com fluidos viscosos e talvez terminará em san-
+gue. [...] Rotulamos o vírus da nova desordem 
+mundial impulsionadas pelo vinho tinto e as 
+babas vaginais (que só podiam se recompor se 
+nos dedicávamos com frequência às distrações 
+prazerosas). (MARTÍNEZ-COLLADO, 2001, p. 220, 
+tradução nossa)4
+Segundo Remedios Zafra (2004), as pro-
+duções teóricas de Sadie Plant e as artísticas 
+de VNS Matrix apresentavam semelhanças em 
+relação à necessidade de uma “feminização” 
+do desenvolvimento e uso das ferramentas 
+tecnológicas, mas possuíam formas diferentes 
+de aproximação do ciberfeminismo. Para Plant 
+(1998), a identificação entre mulher e tecnolo-
+gias era algo natural e automático, enquanto 
+que para as integrantes de VNS Matrix, a in-
+tervenção política e a agência feminina eram 
+elementos imprescindíveis. Plant (1998), teori-
+camente, foi criticada por ser excessivamente 
+otimista, enquanto VNS Matriz partiu de uma 
+perspectiva de enfrentamento artístico e, 
+como Zafra (2004) identifica, introduziram na 
+internet um viés inovador para desafiar os có-
+digos normativos.
+A estratégia usada por VNS Matrix era a uti-
+lização da ironia e da subversão dos códigos 
+simbólicos do sistema patriarcal. Não é casua-
+lidade que o ano de formação do Grupo, em 
+1991, seja o mesmo do lançamento do livro 
+Gender Trouble (2007), um clássico de Judith 
+Butler, no qual a autora defende a ideia que 
+o feminismo deveria estabelecer uma “política 
+3	 Disponível em: <http://vnsmatrix.net/>.
+4	 Tradução livre de: “Como toda buena historia de coa-
+gulación, empieza con fluidos viscosos y quizás ter-
+minará en sangre. [...] Etiquetamos el virus del nuevo 
+desorden mundial impulsadas por el vino tinto y las 
+babas vaginales (que sólo podían reponerse si nos 
+dedicábamos con frecuencia a actividades placente-
+ras)”.
+
+Narrativas digifeministas: arte, ativismo e posicionamentos políticos na internet
+Revista Brasileira de Pesquisa (Auto)Biográfica, Salvador, v. 02, n. 04, p. 134-152, jan./abr. 2017
+142
+paródica da mascarada”, justamente para con-
+verter a repetição das práticas em potência de 
+transformação das agências políticas das sub-
+jetividades. 
+As artistas de VNS Matrix, inspiradas nos 
+estudos teóricos das feministas da época, 
+adotaram as ferramentas tecnológicas para 
+executar suas ideias e desenvolver uma série 
+de trabalhos que abordavam as problemáticas 
+da relação entre a mulher e as tecnologias, uti-
+lizando como estratégia a provocação, a inver-
+são de estereótipos culturais e uma política de 
+confronto sem recalques ou melindres. Uma 
+de suas primeiras intervenções foi a criação do 
+bombástico e despudorado Manifesto Ciberfe-
+minista para o Século XXI (1991), uma home-
+nagem a Haraway, cuja frase “o clitóris é uma 
+linha direta à matriz”, tornou famoso o grupo e 
+virou uma espécie de lema do ciberfeminismo, 
+uma vez que ressalta a estreita relação entre 
+as mulheres e as tecnologias, o corpo feminino 
+e a máquina: 
+Nós somos a buceta moderna; positivo anti-ra-
+zão; sem amarras desenfreadas, sem perdão; 
+vemos arte com nossa buceta, fazemos arte 
+com nossa buceta; acreditamos no gozo loucu-
+ra o sagrado e poesia; somos o vírus da nova 
+desordem mundial; rompendo o simbólico de 
+dentro para fora; sabotadoras do sistema do 
+big daddy; o clítoris é uma linha direta para a 
+matriz. VNS MATRIX. Exterminadoras do código 
+moral; mercenárias do lodo; caímos do altar 
+da abjeção; cutucando o templo visceral nós 
+falamos em línguas; infiltrando interrompendo 
+disseminando; corrompendo o discurso; somos 
+a buceta do futuro. (Manifesto Ciberfeminista, 
+VNS Matrix, 1991, tradução nossa)5
+5	 Tradução livre de: “We are the modern cunt; posi-
+tive anti reason; unbounded unleashed unforgiving 
+we see art with our cunt we make art with our cunt; 
+we believe in jouissance madness holiness and poetry 
+we are the virus of the new world disorder; ruptur-
+ing the symbolic from within saboteurs of big dad-
+dy mainframe; the clitoris is a direct line to the ma-
+trix. VNS MATRIX. terminators of the moral codes 
+mercenaries of slime; go down on the altar of abjec-
+tion; probing the visceral temple we speak in tongues; 
+infiltrating disrupting disseminating corrupting the 
+discourse; we are the future cunt”. Disponível em: 
+As criações de VNS Matrix questionavam 
+o patriarcado e suas atividades artísticas ex-
+ploraram outras formas de representação do 
+corpo, da sexualidade e da subjetividade femi-
+nina, posicionando-se contra os discursos ma-
+chistas, o controle e a dominação masculina 
+no desenvolvimento das tecnologias. O Grupo 
+ganhou projeção na Austrália, EUA e em alguns 
+países da Europa, expandindo-se rapidamente 
+pela internet, incorporando novas formas de 
+atuação e estratégias de oposição às políticas 
+sexistas, em várias partes do mundo.
+Outro momento marcante da história do ci-
+berfeminismo aconteceu em setembro de 1997, 
+na I Conferência Internacional Ciberfeminis-
+ta, em Kassel, Alemanha, por ocasião do Do-
+cumenta X, uma mostra internacional de arte 
+contemporânea. O Encontro foi organizado 
+pelo grupo europeu Old Boys Network (OBN),6 
+formado por Faith Wilding, Cornellia Solfrank, 
+Yvonne Volkart e Helene von Oldenburg. Nos 
+debates acalorados, as participantes do En-
+contro optaram por não conceituar o ciber-
+feminismo e, no lugar de respostas categóri-
+cas, elaboraram uma lista de 100 antíteses ou 
+definições sobre o que o ciberfeminismo não 
+era, evocando a indefinição como arma de in-
+tervenção política. Essa decisão teve a inten-
+ção de atrair mulheres de diversas áreas de 
+atuação e tendências, especialmente as mais 
+jovens, que demonstravam pouco interesse 
+pelas histórias e teorias feministas, ainda que 
+se definissem como ciberfeministas. Alguns 
+trechos do Manifesto:
+1.	
+O ciberfeminismo não é uma fragrância 
+4.	 O ciberfeminismo não é uma ideologia
+10.	 O ciberfeminismo não é uma práxis
+18.	 O ciberfeminismo não é um ismo 
+19.	 O ciberfeminismo não é anti-masculino
+24.	 O ciberfeminismo não é apolítico
+83.	 O ciberfeminismo não tem a ver com brin-
+quedos chatos para garotos chatos
+<http://www.sterneck.net/cyber/vns-matrix/index.
+php>. Acesso em: 16 nov. 2016. 
+6	 Disponível em: <http://www.obn.org/>.
+
+Carla de Abreu
+Revista Brasileira de Pesquisa (Auto)Biográfica, Salvador, v. 02, n. 04, p. 134-152, jan./abr. 2017
+143
+99.	 Ciberfeminismo não é estável 
+100.	Ciberfeminismo não tem somente uma lin-
+guagem.7
+A falta de uma definição política clara para 
+explicar o ciberfeminismo incomodou algumas 
+feministas acadêmicas e de alguns movimen-
+tos organizados que cobraram estratégias de 
+ações políticas mais diretivas contra o status 
+quo do patriarcalismo. Essa crítica, provavel-
+mente, está relacionada com certa euforia 
+diante das potencialidades tecnológicas, uma 
+característica marcante de nossas primeiras 
+explorações nas interfaces digitais. Com o pas-
+sar do tempo, a ideia da internet como um es-
+paço libertador e unificador foi sendo paulati-
+namente diluída, conforme fomos acumulando 
+experiências com os artefatos tecnológicos.
+Atualmente, as redes digitais configuram 
+um enorme rizoma, um contexto impossível de 
+ser imaginado há 25 anos atrás. As expectati-
+vas do ciberfeminismo em relação à ordenação 
+e à organização coletiva do movimento, para 
+criar uma identidade política e uma unidade 
+aglutinadora em torno do uso das tecnologias 
+se mostraram pouco efetivas diante do rápi-
+do crescimento e da fragmentação da internet. 
+Em realidade, o ciberfeminismo configurou-se 
+como um conjunto híbrido de trabalhos, ações 
+e investigações que não esboçaram um projeto 
+único. Suas atividades multidisciplinares ca-
+minharam mais em direção ao intercâmbio de 
+experiências e à heterogeneidade dos discur-
+sos, produções e posicionamentos políticos. 
+Quando a internet apenas engatinhava, as 
+ciberfeministas abriram muitos espaços no 
+disputado território (masculino) das redes di-
+gitais. Criaram essas aberturas para se infor-
+mar e organizar em coletivos, criticar os com-
+portamentos sexistas, estabelecer alianças e 
+ampliar o alcance para a experimentação de 
+novas formas de expressão artística. 
+7	
+As 100 antíteses estão disponíveis em: <http://www.
+obn.org/cfundef/100antitheses.html>. Acesso em: 22 
+nov. 2016.
+A provocação e o deboche foram as armas 
+mais utilizadas pelo ciberfeminismo e seguiram 
+os passos deixados pelas artistas feministas da 
+década de 1980, como Judy Chicago, Cindy Sher-
+man e Barbara Kruger, a diferença era o alcance 
+dos e das espectadoras e o suporte utilizado. 
+Faith Wilding é outra referência importante para 
+o ciberfeminismo. Artista multidisciplinar, nasci-
+da no Paraguai, Wilding emigrou para os Estados 
+Unidos da América do Norte, em 1961, e ficou co-
+nhecida ao performar o monólogo Waiting, no 
+projeto de arte feminista Womanhouse, ideali-
+zado por Judy Chicago, em Los Angeles, no início 
+de 1970. Essa performance virou uma espécie de 
+ícone da performance feminista e fonte de ins-
+piração para as ciberfeministas.
+Coincidentemente, o ciberfeminismo nas-
+ceu no mesmo momento da Net-Art e, prova-
+velmente, as ciberfeministas reconheceram na 
+internet um contexto favorável e privilegiado 
+para a produção artística, pois funcionava in-
+dependente dos sistemas fechados das ga-
+lerias e dos museus, nos quais a inserção de 
+mulheres sempre foi estatisticamente minori-
+tária. Remedios Zafra acrescenta que:
+As novas possibilidades de trabalho (tanto de 
+produção como distribuição) fornecidas pela 
+Internet permitiu às artistas a criação de re-
+des autônomas independentes das estruturas 
+hierárquicas próprias da instituição-Arte. Além 
+disso, a crítica às lógicas lineares e excludentes 
+características dos discursos essencialistas tem 
+nas novas linguagens da rede (com base em es-
+truturas horizontais e uma linguagem fragmen-
+tada e hipertextualizada) uma possibilidade de 
+ação subversiva sem precedentes. (ZAFRA, 2004, 
+s/n, tradução nossa)8
+8	 Tradução livre de: “Las nuevas posibilidades de tra-
+bajo (tanto producción como distribución) brindadas 
+por Internet permiten a las artistas la creación de re-
+des autónomas independientes de las estructuras je-
+rárquicas propias de la institución-Arte. Por otra par-
+te, la crítica a las lógicas lineales y excluyentes carac-
+terísticas de los discursos esencialistas tiene en los 
+nuevos lenguajes de la red (basados en estructuras 
+horizontales y en un lenguaje fragmentado e hiper-
+textualizado) una posibilidad de acción subversiva sin 
+precedentes”.
+
+Narrativas digifeministas: arte, ativismo e posicionamentos políticos na internet
+Revista Brasileira de Pesquisa (Auto)Biográfica, Salvador, v. 02, n. 04, p. 134-152, jan./abr. 2017
+144
+Os ambientes digitais tornaram-se um uni-
+verso sedutor para as ciberfeministas e excep-
+cionalmente produtivo para suas experiências 
+criativas.9 Um exemplo conhecido é a artista 
+estadunidense Kathy Rae Huffman que, em 
+conjunto com a alemã Eva Wohlgemuth, de-
+senvolveu muitas obras usando as ferramen-
+tas tecnológicas, se destacando Face Settings 
+(1996-1998), cuja reverberação originou um 
+mailling list apenas de mulheres do âmbito do 
+ciberfeminismo e da arte ciberfeminista. Outro 
+exemplo é o da artista Linda Dement, com a 
+obra digital Cyberflesh Girlmonster (1995), una 
+justaposição de imagens de partes de corpos 
+femininos, em que a artista acrescentou textos 
+e sons que formam seres híbridos e curiosos, 
+capazes de se multiplicarem com a ação/inte-
+ração dos(as) usuários(as).
+Imagem do projeto Cyberflesh Girlmonster, de Linda 
+Dement.10
+A primeira década do século XXI serviu 
+para dissipar definitivamente as expectativas 
+utópicas do início do ciberfeminismo. As mu-
+lheres envolvidas nesse movimento deram-se 
+conta de que as almejadas transformações so-
+ciais não se realizariam baseadas apenas nas 
+tecnologias. Os problemas e as desigualdades 
+9	 Uma lista ampla de artistas ciberfeministas pode ser 
+encontrada neste link: <http://www.estudiosonline.
+net/art/index.htm>.
+10	 Disponível em: <http://www.lindadement.com/cyber-
+flesh-girlmonster.htm>. Acesso em: 20 nov. 2016.
+originadas das construções sociais são ques-
+tões que assumem formas complexas e inter-
+seccionais, portanto, globalizadas, e, ao mes-
+mo tempo, ajustadas a contextos específicos.
+A fantasia criada de pensar as redes digi-
+tais como espaços não hierárquicos de poder 
+sugeriu a muitas ciberfeministas a ideia de 
+uma unidade universal. O movimento criou 
+uma espécie de ilha ou bolha utópica, com-
+portamento que se explica quando retoma-
+mos o início dessa história, período em que 
+era comum pensar que a ausência do corpo e 
+o anonimato nos ciberespaços faziam desapa-
+recer as diferenças de gênero e de sexualidade 
+(TURKLE, 1995).
+O anonimato, defendido pelas ciberfemi-
+nistas como a chave para as ações subversivas, 
+fazia parte da ilusão de que para a identidade 
+digital, tudo era possível, porque não podiam 
+ser vigiadas ou descobertas. Hoje, o contexto é 
+bastante diferente. A internet transformou-se 
+em inúmeras células e desenvolvemos outras 
+formas para mover-nos por esses espaços. O 
+anonimato continua a ser usado, especialmen-
+te para atacar e denegrir de forma covarde nas 
+mídias interativas, mas, caso haja intervenção 
+jurídica e investigação policial, a pessoa pode 
+ser localizada.
+Os espaços mediados já produziram mui-
+tos casos que exemplificam a falta de sensi-
+bilidade por parte da sociedade em relação 
+às questões de gênero, sexualidade e raça, 
+reproduzindo e difundindo comportamentos 
+abusivos, exclusões, violências, tratamentos 
+degradantes e intolerâncias. Por outro lado, 
+a expansão das redes digitais também sig-
+nificou uma ampliação sem precedentes das 
+possibilidades de colaboração, participação e 
+ações coletivas de grupos que historicamen-
+te tiveram seus direitos cassados, diminuídos 
+ou dificultados. Além disso, a intensa pene-
+tração das tecnologias nas práticas cotidia-
+nas favoreceu a multiplicação do pensamen-
+
+Carla de Abreu
+Revista Brasileira de Pesquisa (Auto)Biográfica, Salvador, v. 02, n. 04, p. 134-152, jan./abr. 2017
+145
+to feminista e de suas atividades de combate 
+às discriminações e opressões, não mais se 
+restringindo a contextos geograficamente lo-
+calizados.
+De qualquer forma, as estratégias ciberfe-
+ministas do final do século passado abriram 
+portas e janelas para as ações de uma legião 
+de jovens que se identificam com suas propos-
+tas. Hoje, os digifeminismos se mantêm ativos, 
+contestatários e estão presentes em muitos 
+espaços on-line para se manifestarem contra 
+os discursos da supremacia masculina, marcar 
+presença ativa e representatividade. 
+As meninas boas vão para o céu, 
+as más viram digifeministas
+O termo digifeminista é usado neste artigo 
+para pensar a geração de jovens mulheres 
+que atualmente habitam os ambientes me-
+diados e de maneira similar às ciberfeminis-
+tas do passado, se empenham na construção 
+de uma internet feminista e usam as ferra-
+mentas digitais para expressar opiniões, or-
+ganizar campanhas e exibir suas produções 
+textuais e artísticas. 
+Ainda que a expansão e a popularização 
+da internet nos últimos anos também tenha 
+aumentado as possibilidades de ataques ma-
+chistas, racistas e homo/transfóbicos, as digi-
+feministas esforçam-se na criação de espaços 
+de visibilidade para a formação de comunida-
+des de apoio, afinidades e resistências. Assim, 
+discussões importantes sobre gênero, raça, 
+poder e tecnologias estão acontecendo por 
+toda a Rede e essas jovens já não aceitam que 
+antigos tabus definam o que elas podem fazer, 
+dizer ou ser.
+A atuação da nova geração é bem diferente 
+do cenário imaginado pelas ciberfeministas do 
+passado, talvez porque as tecnologias de aces-
+so e de interação também tenham mudado 
+radicalmente. Os manifestos desvergonhados 
+e os ataques cibernéticos foram substituídos 
+por tweets, blogs, formação de grupos e pro-
+dução de vídeos e imagens desafiadoras. Essas 
+meninas se juntam para produzir fanzines, ela-
+borar e executar protestos, fabricam memes e 
+usam hashtags para organizar blocos de dis-
+cussão temática. Essas estratégias podem não 
+ser tão transgressoras como as usadas pelas 
+ciberfeministas, mas, hoje, possuem um alcan-
+ce inimaginável e cada vez mais incentivam as 
+mulheres rumo aos feminismos. 
+As redes sociais, especialmente, têm ali-
+mentando o florescimento de feminismos 
+plurais, diversos, participativos e contracul-
+turais. Têm a cara da geração do século XXI, 
+portanto, a dispersão e a fragmentação tam-
+bém fazem parte desses contextos. A partir 
+de seus artefatos eletrônicos, essas mulheres 
+se conectam desde muitos lugares para rei-
+vindicar a legalização do aborto, lutar con-
+tra o feminicídio, a violência de gênero, o 
+acosso público e naturalizado nas ruas e os 
+machismos cotidianos. Invadem as timelines 
+dos perfis digitais, blogs, revistas digitais e 
+qualquer lugar onde seja possível expressar 
+o repúdio aos comportamentos que as afe-
+tam e as diminuem em seus direitos e reivin-
+dicações.
+Há muitos feminismos sendo alimentados 
+on-line. Suas ações estão, pouco a pouco, 
+transformando a compreensão sobre o que 
+vem a ser “mulher” no século XXI. Por meio 
+das ferramentas digitais, as lutas feministas, 
+antes localizadas em seus territórios e con-
+textos específicos, tornaram-se, rapidamen-
+te, a luta de milhares de mulheres que se so-
+lidarizam e se juntam em redes de apoio e de 
+visibilidade. 
+Um exemplo recente foi o movimento #NiU-
+naMenos, ressurgido na Argentina, por ocasião 
+do brutal estupro e assassinato de Lucía Pé-
+rez, de apenas 16 anos, ocorrido em outubro 
+de 2016. A hashtag NiUnaMenos foi inspirada 
+
+Narrativas digifeministas: arte, ativismo e posicionamentos políticos na internet
+Revista Brasileira de Pesquisa (Auto)Biográfica, Salvador, v. 02, n. 04, p. 134-152, jan./abr. 2017
+146
+no poema da mexicana Susana Chávez, escrito 
+em 1995, para protestar contra o feminicídio na 
+cidade de Juárez. A poetisa foi assassinada em 
+2011.
+A mobilização #NiUnaMenos nasceu nas re-
+des sociais, convocou milhares de pessoas na 
+América Latina e em distintos pontos do mun-
+do e foi um movimento massivo e comovedor. 
+Mas não foi a única hashtag a reunir multidões 
+em torno de questões pontuais e ao mesmo 
+tempo universais. Por exemplo, a hashtag 
+#BringBackOurGirls foi utilizada para denun-
+ciar o sequestro de centenas de meninas na 
+Nigéria e replicou-se rapidamente por todo o 
+mundo. #HeForShe, contra a desigualdade de 
+gênero, foi criada pela ONU Mulheres e impul-
+sionada pela atriz Emma Watson. Tornou-se, 
+também, viral e se multiplicou em muitas ver-
+sões traduzidas para outros contextos. 
+No Brasil, mais ou menos a partir de 2013, a 
+internet foi invadida por uma legião de jovens 
+que aderiram às práticas feministas de resis-
+tência aos poderes hierárquicos. As teorias 
+feministas, antes encerradas em alguns circui-
+tos, grupos e eventos organizados geralmente 
+por intelectuais universitárias, parecem final-
+mente pular os muros da academia e começam 
+a fazer parte das ações cotidianas de muitas 
+mulheres que atuam massivamente nas redes 
+digitais.
+Especificadamente nesse ano, em 2013, o 
+coletivo feminista Think Olga lançou a campa-
+nha Chega de Fiu, contra o assédio sexual em 
+espaços públicos. Inicialmente, a campanha 
+deu-se por meio de uma série de ilustrações 
+com mensagens de repúdio às cantadas bara-
+tas, atitudes grosseiras e comentários desele-
+gantes que muitas mulheres recebem no dia a 
+dia, mas, logo depois, se ampliou, gerando um 
+movimento nacional contra o assédio público. 
+Parte da campanha foi o lançamento de um 
+aplicativo colaborativo,11 usado para mapear e 
+11	 Disponível em: <http://chegadefiufiu.com.br/>.
+registrar o assédio sexual e comportamentos 
+machistas ofensivos.
+No contexto brasileiro também é o comum 
+o uso da hashtag como arma política de en-
+frentamento e coalização. Algumas tornaram-
+se bastante populares, como foi o caso de 
+#primeiroAssédio, lançado em 2015, também 
+uma iniciativa do coletivo Think Olga, depois 
+que uma menina de 12 anos, participante do 
+programa MasterChef Júnior, foi vítima de co-
+mentários de teor sexual nas redes sociais. A 
+hashtag incentivou o depoimento de milhares 
+de histórias de abusos e agressões sofridas 
+por mulheres em todo o Brasil. 
+Por sua vez, #MeuAmigoSecreto, criada 
+em novembro de 2015, pelo coletivo feminista 
+Não Me Kahlo, foi usada massivamente para 
+relatar casos de assédio e comportamentos 
+machistas por parte de amigos, colegas ou 
+familiares, no ambiente de trabalho, nas uni-
+versidades ou em qualquer ambiente público 
+ou privado, sem revelar a identidade do acu-
+sado. Essa campanha expôs a naturalização 
+do machismo no Brasil e também gerou um 
+livro: #MeuAmigoSecreto: feminismo além das 
+redes (LARA; RANGEL et al., 2016), que reúne 
+cinco artigos das integrantes do coletivo Não 
+Me Kahlo,12 expandindo o debate sobre a des-
+construção do machismo e a reverberação 
+das mobilizações feministas em torno de te-
+máticas comuns.
+Há vários outros exemplos, como #vamos-
+FazerUmEscândalo, hashtag proposta pela vlo-
+gger Julia Tolezano,13 a Jout Jout, incentivando 
+as mulheres a não se calarem diante de situa-
+ções de assédio e abuso sexual. #vaiTerShorti-
+nhoSim foi uma campanha lançada pelas estu-
+dantes do Colégio Anchieta, no Rio Grande do 
+Sul, em protesto contra a proibição do uso de 
+shorts nas dependências da escola. O proje-
+12	 Bruna de Lara, Bruna Rangel, Gabriela Moura, Paola 
+Barioni e Thaysa Malaquias.
+13	 Disponível em: <https://www.youtube.com/user/jout-
+joutprazer>.
+
+Carla de Abreu
+Revista Brasileira de Pesquisa (Auto)Biográfica, Salvador, v. 02, n. 04, p. 134-152, jan./abr. 2017
+147
+to #vamosjuntas foi idealizado pela jornalista 
+Babi Souza, para incentivar a união entre as 
+mulheres contra a insegurança das ruas e no 
+transporte público.
+Em Goiás, uma página no Facebook chama-
+da Indique uma mana!,14 um grupo composto 
+exclusivamente por mulheres (cis e trans), pre-
+tende ajudá-las a se inserirem no mercado de 
+trabalho e já conta, no momento em que es-
+crevo essas linhas, com mais de 19 mil inscritas 
+e centenas de posts oferecendo ou buscando 
+oportunidades de trabalho. 
+As jovens feministas não ficam restritas às 
+táticas de enfrentamento público, mas tam-
+bém se organizam em grupos fechados para 
+aprender e ensinar linguagens e técnicas de 
+programação, como o MariaLab,15 RodAda Ha-
+cker,16 Django Girls,17 PrograMaria,18 Luluzinha 
+camp,19 entre outros grupos que se encontram 
+com frequência, on-line e off-line, e têm cum-
+prido um papel importante na formação de 
+novas programadoras.
+Existem muitas páginas on-line que se po-
+sicionam abertamente contra os estereótipos 
+e estigmas de gênero, de sexualidade e raça. 
+São grupos, coletivos e iniciativas individuais 
+que trazem uma brisa fresca aos moralismos 
+sociais. Essas mulheres têm mudado a cara 
+dos ambientes digitais e trazem pluralidade 
+aos discursos feministas. Apesar da internet 
+continuar sendo um espaço misógino e sexis-
+ta, onde os ataques e abusos são comuns, con-
+tinua sendo, como foi desde o seu surgimento, 
+uma plataforma de atuação política e transfor-
+mação social feminista.
+Artistas Digifeministas 
+contemporâneas 
+14	 Disponível 
+em: 
+<https://www.facebook.com/
+groups/1762806147309719/?fref=ts>.
+15	 Disponível em: <http://marialab.org/>.
+16	 Disponível em: <http://rodadahacker.org/>.
+17	 Disponível em: <https://djangogirls.org/saopaulo/>.
+18	 Disponível em: <https://www.programaria.org/>.
+19	 Disponível em: <http://luluzinhacamp.com/>.
+As manifestações artísticas feministas alas-
+traram-se na internet e há de tudo, um pou-
+co: vídeos, performances, poesias, contos, 
+ilustrações, fotos e muitas páginas em redes 
+sociais e websites, que ajudam na visibiliza-
+ção desses trabalhos. Essas artistas transi-
+tam pela Web como se estivessem em seus 
+próprios quartos; algumas sabem programar 
+e construir páginas interativas, outras pro-
+duzem textos, imagens, vídeos, memes e gifs 
+animados. Suas produções dão sinais claros 
+que, para essa geração, o formato “bela, reca-
+tada e do lar” não representa mais a mulher 
+contemporânea. 
+As artistas digifeministas normalmente são 
+muito jovens, a maioria tem menos de 30 anos, 
+portanto, cresceram familiarizadas com o digi-
+tal. Suas estratégias nas redes digitais são pa-
+recidas com as usadas pelas ciberfeministas 
+do passado, para desconstruir os estereótipos 
+de gênero e questionar a cultura estabelecida, 
+assim, a paródia e a provocação, sem a preo-
+cupação com o politicamente correto, são táti-
+cas frequentes.
+A identidade, o corpo e a sexualidade 
+são temas centrais em seus trabalhos e elas 
+não se sentem intimidadas em se apropria-
+rem de suas imagens corporais para expor 
+e romper tabus. Como é o caso de Petra 
+Collins,20 artista canadense nascida em 1992. 
+É uma das grandes vozes da nova geração 
+de fotógrafas e ficou conhecida, em 2014, 
+quando o Instagram suspendeu sua conta 
+após ela postar uma foto de biquíni em que 
+apareciam alguns pelos pubianos. Após o in-
+cidente, a artista foi convidada pela marca 
+American Apparel para desenhar a coleção 
+de camisetas Period Power T-shirt, na qual 
+tratou de explorar o tabu em torno da temá-
+tica da menstruação.
+20	 Disponível em: <http://www.petracollins.com/>.
+
+Narrativas digifeministas: arte, ativismo e posicionamentos políticos na internet
+Revista Brasileira de Pesquisa (Auto)Biográfica, Salvador, v. 02, n. 04, p. 134-152, jan./abr. 2017
+148
+Outra artista bastante conhecida no meio 
+das digifeministas é Molly Soda, nascida em 
+San Juan, Puerto Rico, em 1989. Molly Soda 
+cresceu em Bloomington, Indiana, EUA, e pas-
+sou a ser conhecida a partir de sua conta na 
+rede social Tumblr.22 Hoje, a artista tem per-
+fis em várias redes para exibir seus projetos 
+artísticos que trazem reflexões sobre os sen-
+timentos de autoestima, inadequação e ques-
+tionamentos sobre os padrões de feminilidade 
+socialmente impostos. 
+Molly é da geração das selfies e muitas de 
+suas fotos são autorretratos sem filtros ou 
+efeitos especiais. Seu projeto mais conhecido 
+é Deveria enviar essa? [Should I send this?],23 
+um fanzine digital com textos autorais e fotos 
+de seu corpo que, segundo a artista, estavam 
+guardadas em seu celular. O fanzine parece 
+uma espécie de diário visual digital, registros 
+da memória, um exercício de reflexão sobre 
+o que deve ou não ser compartilhado na in-
+ternet. Em uma das imagens, Molly mostra um 
+fragmento de seu corpo, a barriga e o umbigo. 
+Na imagem, claramente se vê que ela não está 
+depilada. Essa foto se tornou viral, causou re-
+Foto de Petra Collins censurada no Instagram.21
+pulsão em algumas e adoração por parte de 
+muitas outras mulheres que se identificaram 
+com a artista.
+Captura de tela do projeto “Should I send this?”, de 
+Molly Soda.
+ 
+Petra Collins e Molly Soda usam as ferra-
+mentas digitais para desafiar as representa-
+ções estetizadas do corpo feminino e, nos seus 
+trabalhos, axilas com pelos, fluidos corporais 
+e roupas íntimas despretensiosas em relação 
+ao olhar masculino, são orgulhosamente mos-
+21	 Disponível 
+em: 
+<http://www.huffingtonpost.com/
+petra-collins/why-instagram-censored-my-bo-
+dy_b_4118416.html>. Acesso em: 25 nov. 2016.
+22	 Disponível em: <http://mollysoda.tumblr.com/>.
+23	 Disponível 
+em: 
+<https://newhive.com/mollysoda/
+sendthis?q=%40mollysoda%20%23sent>.
+
+Carla de Abreu
+Revista Brasileira de Pesquisa (Auto)Biográfica, Salvador, v. 02, n. 04, p. 134-152, jan./abr. 2017
+149
+tradas em seus perfis nas redes sociais e blo-
+gs pessoais. As artistas questionam os ideais 
+de beleza e as fotos mostram corpos plurais, 
+sem sutilidades e nem disfarces. Suas produ-
+ções são atividades reflexivas sobre a constru-
+ção da identidade mediada, dos significados de 
+ser mulher, sobre intimidade e exibicionismo, e 
+de como podemos construir nossas presenças 
+on-line. A partir dessas ideias, elas indicam o 
+caminho para uma sexualidade mais fluida, me-
+nos preocupada com os padrões de beleza cria-
+dos por olhares e subjetividades masculinas. 
+A sueca Arvida Byström,24 nascida em 1991, 
+também é outra artista conhecida no meio das 
+digifeministas. Usa a internet como ferramen-
+ta e plataforma para a exibição de suas foto-
+grafias e vídeos, presentes em vários canais 
+e redes sociais, especialmente o Instagram,25 
+onde possui mais de 160 mil seguidores. Ape-
+sar de muito jovem, suas imagens provocado-
+ras chamaram a atenção de várias publicações 
+e Arvida já fotografou para a revista de moda 
+VICE, Wonderland Magazine, Mag Rookie, Gara-
+ge, Dazed, entre muitas outras. A artista, pare-
+ce não estar preocupada com a aprovação dos 
+discursos que limitam suas narrativas visuais e 
+suas fotografias revelam as intersecções entre 
+sexualidade e gênero, imagens que desafiam 
+as normas limitantes das expressões corporais 
+femininas.
+25	 Disponível 
+em: 
+<https://www.instagram.com/arvi-
+dabystrom/>.
+Capturas de tela do perfil de Arvida Byström no Instagram.
+A lista de artistas digifeministas é grande e 
+seria impossível citar todas neste artigo. São 
+mulheres produtoras de imagens e vídeos que 
+rompem com a monotonia normativa presen-
+te nas visualidades digitais e provocam ruídos 
+nas hegemonias construídas por olhares mas-
+culinos. Os fluxos de suas produções poéticas 
+fazem intersecções entre arte, ativismo e os 
+feminismos, elementos que se interpelam e 
+se multiplicam na Web, provocando desloca-
+mentos e desajustes nas amarras sociais que 
+subjugam as subjetividades das mulheres. De-
+sobediência aos padrões sociais estabelecidos 
+de feminilidade são características comuns e 
+usuais entre as digifeministas e, justamente 
+por isso, as artistas citadas já tiveram suas 
+contas suspensas no Instagram e no Facebook, 
+curiosamente, empresas do mesmo grupo em-
+presarial. 
+As redes sociais são conhecidas por censu-
+rarem imagens interpretadas como não apro-
+priadas para serem vistas em suas plataformas 
+e, frequentemente, surgem notícias de injusti-
+ças nos julgamentos anônimos, revelando ca-
+24	  Disponível em: <http://arvidabystrom.se/>.
+
+Narrativas digifeministas: arte, ativismo e posicionamentos políticos na internet
+Revista Brasileira de Pesquisa (Auto)Biográfica, Salvador, v. 02, n. 04, p. 134-152, jan./abr. 2017
+150
+sos de racismo, sexismo e machismo explícito 
+por parte dos avaliadores, problema que tam-
+bém denuncia a falsa neutralidade das mídias 
+sociais. Em realidade, conforme vamos acumu-
+lando experiências nos ambientes digitais, o 
+jogo das relações de poder também vai fican-
+do mais evidente e as digifeministas sabem 
+que seus conteúdos são avaliados por subje-
+tividades masculinas, detentoras do poder de 
+julgamento, censura e aplicação de sanções 
+punitivas nas mídias interativas.
+Em uma espécie de posicionamento: “não 
+temos nada a perder”, as artistas digifemi-
+nistas subvertem normas e desafiam a linha 
+tênue entre aquilo que é, ou não, publicável. 
+Fazem dos ciberespaços pontes para a des-
+construção das relações de saber e poder nor-
+malizados e lugares para o exercício de uma 
+agência coletiva crítica sobre as construções 
+culturais, questionando silêncios, provocando 
+rupturas, borrando as fronteiras de gênero, do 
+sexo e dos desejos velados, abrindo rotas de 
+fuga e descontinuidades nas narrativas hege-
+mônicas. 
+As digifeministas parecem que ainda não 
+se livraram da pergunta sempre presente nas 
+inquietações feministas: afinal, “o que é ser 
+mulher?” Seguimos com esse questionamento 
+e o mito irônico criado por Haraway (1991) con-
+tinua ativo na internet e cada vez mais mulhe-
+res preferem ser ciborgs a deusas. 
+Desconectando...
+A sociedade hiperconectada gerou uma ilusão 
+de solidariedade e diversidade das represen-
+tações identitárias, mas, como disse Byung-
+Chul Han (2013, p. 12), é o inferno do igual. As 
+digifeministas têm colaborado para romper 
+com esse pacto de monotonia e executam um 
+contínuo contra-ataque às sociedades norma-
+tivas e suas visualidades padronizadas. Ainda 
+que suas atividades se deem no âmbito micro-
+político – ao contrário das previsões das ciber-
+feministas do final do século passado –, o im-
+pacto de suas ações segue sendo um exercício 
+importante para a transformação das relações 
+de poder e a visibilidade de práticas alternati-
+vas da subjetividade feminina.
+Entretanto, os ciberespaços ainda não são 
+lugares acolhedores para as mulheres. Nem 
+para a comunidade negra ou os sujeitos não 
+heteronormativos. Todas essas pessoas en-
+frentam as mesmas dificuldades e discrimina-
+ções, tanto on-line como off-line. A diferença é 
+que, nas plataformas interativas, muitas iden-
+tidades parecem se sentir mais confortáveis 
+pra insultar, agredir e destilar discursos de 
+ódio contra determinados grupos sociais. 
+Assim, como produto de nossas criações, a 
+internet não está imune às relações estabele-
+cidas dentro dos marcos sociais, econômicos, 
+políticos e culturais, que continuam a alimen-
+tar comportamentos sexistas e racistas. Por-
+tanto, as ações das digifeministas encontram 
+resistências, obstáculos e geram reações mui-
+tas vezes pouco amistosas com seus ideais e 
+atos políticos. Todavia, se a internet parece 
+estar atravessada pelas lógicas regulatórias de 
+gestão da identidade, dos corpos e das subjeti-
+vidades, ao mesmo tempo, oferece ferramentas 
+com potencial político e de resistência crítica 
+para desestabilizar os regimes de poder, além 
+de oferecer possibilidades para a ativação de 
+novos processos de subjetivação dissidentes.
+As ações das digifeministas interpelam e 
+testam os limites da política sexual contempo-
+rânea com o objetivo de apontar aquilo que as 
+normas excluem, inviabilizam ou silenciam. As 
+artistas, em especial, exploram os corpos em 
+suas potências e devires, reinventando possi-
+bilidades de criar afetos e prazeres resistentes 
+às classificações normativas, que ensinam em-
+piricamente, e por meio da repetição, como as 
+mulheres devem ser. 
+Desde a década de 1990, as feministas sub-
+vertem usos e constroem novos sentidos por 
+
+Carla de Abreu
+Revista Brasileira de Pesquisa (Auto)Biográfica, Salvador, v. 02, n. 04, p. 134-152, jan./abr. 2017
+151
+meio das ferramentas digitais. Hoje, a nova 
+geração de feministas praticam a crítica polí-
+tica desde a experiência pessoal e suas ações 
+e narrativas repercutem coletivamente por 
+meio das redes sociais. Usam os espaços digi-
+tais para o ativismo e a mobilização feminista; 
+para expor e divulgar trabalhos artísticos; para 
+a visibilização e denúncia de condutas violen-
+tas ou abusivas; para a formação profissional 
+no desenvolvimento de tecnologias e softwa-
+res; para o intercâmbio de conhecimentos e 
+saberes que ultrapassam as fronteiras físicas. 
+Portanto, as ferramentas tecnológicas também 
+têm proporcionado formas de empoderamen-
+to e agência política feminina, através de pro-
+duções artísticas e histórias de resistência e 
+transformação das relações de poder e saber.
+Com as experiências passadas, aprende-
+mos que as tecnologias não facilitarão a eman-
+cipação da mulher e, provavelmente, nem se-
+quer uma nova representação feminina. Para 
+isso ocorrer são necessárias mais ações pro-
+movedoras de olhares críticos diante das desi-
+gualdades e, talvez, um atrevimento maior nas 
+propostas de confronto, para deslumbrarmos 
+possibilidades de mudanças nas maneiras 
+como construímos as representações identitá-
+rias, libertando-nos dos ideais de dominação 
+e coisificação da mulher.
+Há um caminho longo a ser percorrido. Tal-
+vez, as digifeministas precisarão “ver mais” 
+e ver de forma distinta os contextos sociais, 
+para abrir espaços e condições para a trans-
+formação política do “olhar”, facilitando ou-
+tras formas de narrativa e de representações 
+femininas que criem ruídos e desconfortos 
+no marasmo confortavelmente instalado nas 
+mídias interativas. Mas, o mais importante, é 
+continuar o exercício de questionar as pró-
+prias condições de possibilidades do olhar, ou 
+seja, o tipo de olhar que exclui ou limita o sur-
+gimento de práticas alternativas de subjetivi-
+dades não normativas. 
+Nesse questionamento contínuo dos “olha-
+res”, a pergunta já não é somente “o que ve-
+mos”, mas como vemos e por que vemos as-
+sim. Não se trata apenas de ampliar o alcance 
+do olhar, mas, acima de tudo, provocar ruídos, 
+tensões, interferir nas premissas dos discur-
+sos de poder e descobrir as potencialidades 
+dos entre-olhares, gerados pelos encontros, as 
+fricções, a articulação, o conflito, o confronto 
+e, principalmente, as afinidades pelos ideais 
+feministas na internet.
+Referências
+ABREU, C. de. Géneros y sexualidades no heteronor-
+mativas en las redes sociales digitales. 2014. 393 f. 
+Tese (Doutorado em “Artes y Educación”) – Facultad 
+de Bellas Artes, Universitad de Barcelona, Barcelo-
+na, España, 2014.
+BUTLER, J. Gender trouble: feminism and the sub-
+version of identity. New York : Routledge, 1990.
+FUSS, D. Inside/out: lesbian theories, gay theories. 
+New York: Routledge, 1991.
+HALPERIN, D. Saint Foucault: towards a gay hagio-
+graphy. New York: Oxford University Press. 1995.
+HAN, Byung-Chul. La sociedad de la transparencia. 
+Tradução de Raúl Gabás. Barcelona: Herder, 2013.
+HARAWAY, D. A Cyborg Manifesto: Science, Techno-
+logy, and Socialist-Feminism in the Late Twentieth 
+Century. In: HARAWAY, D. Simians, cyborgs and wo-
+men: the reinvention of nature. New York: Routled-
+ge, 1991. p. 149-181.
+KENDALL, L. Hanging out in the virtual pub: masculi-
+nities and relationships online. Berkeley: University 
+of California Press, 2002.
+LARA; RANGEL, et al. #MeuAmigoSecreto: feminismo 
+além das redes. Rio de Janeiro: Edições de Janeiro, 
+2016.
+
+Narrativas digifeministas: arte, ativismo e posicionamentos políticos na internet
+Revista Brasileira de Pesquisa (Auto)Biográfica, Salvador, v. 02, n. 04, p. 134-152, jan./abr. 2017
+152
+de LAURETIS, T. Queer Theory: Lesbian and Gay Se-
+xualities. Differences: a Journal of Feminist Cultural 
+Studies, 3, n. 2, 1991. p. iii-xviii.
+MARTÍNEZ-COLLADO, A. Cyberfeminismo: tecnología, 
+subjetividad y deseo. In: ALIAGA, J. V. Miradas sobre 
+la sexualidad en el arte y la literatura del siglo XX 
+en Francia y España. València: Servei de Publica-
+cions de la Universitat de València, 2001. p. 217-228.
+MARTÍNEZ-COLLADO, A. Tendenci@as. Perspectivas 
+feministas en el arte actual. 2. ed. Murcia: Centro de 
+Estudios de Arte Contemporáneo, 2005.
+PLANT, S. Ceros + Unos, Mujeres digitales + la nueva 
+tecnocultura. Barcelona: Ediciones Destinos, 1998.
+SEDGWICK, E. K. Epistemology of the closet. Berkeley: 
+University of California Press, 1990.
+STOFENMACHER, I. Ciberfeminismo: la feminización 
+de la red. Teknokultura, Puerto Rico, v. 2, ago. 2002.
+STONE, S. Will the Real Body Please Stand Up? In: 
+BENEDIKT, M. Cyberspace. Cambridge: First Steps 
+(MIT Press), 1991. p. 81-118.
+SUNDÉN, J. Material virtualities: approaching online 
+textual embodiment. New York: Peter Lang ed., 2003.
+TURKLE, S. Life on the screen: identity in the age 
+of the Internet. New York: Simon & Schuster, 1995. 
+ISBN: 0684803534.
+VAN ZOONEN, L. Gendering the Internet. Claims, 
+controversies and cultures. European Journal of 
+Communication, v. 17, p. 5-23, 2002.
+WAJCMAN, J. El tecnofeminismo. Madrid: Cátedra, 
+2006. (Colección Feminismos).
+WARNER, M. Fear of a queer planet: queer politics 
+and social theory. Minneapolis: University of Minne-
+sota Press, 1993. ZAFRA, R. Ciberfeminismo. Bases y 
+propuestas en un mundo global. Mujer y Cultura Vi-
+sual, s/n, 2004. Disponível em: <http://hdl.handle.
+net/11441/26536>. Acesso em: 28 nov. 2016.
+ZAFRA, R. Netianas. N(h)acer mujer en Internet. Ma-
+drid: Lengua de Trapo, 2005. (Colección Desórdenes).
+Recebido em: 20.12.2016
+Aprovado em: 03.03.2017
+Carla de Abreu é Professora na Faculdade de Artes Visuais, Universidade Federal de Goiás (FAV/UFG). Doutora em Artes 
+Visuales y Educación (Universidade de Barcelona – UB, Espanha). Membro dos grupos de pesquisa: Cultura Visual e 
+Educação (UFG/CNPq) e Transviações: Educação e Visualidade (UnB/CNPq). e-mail: carlaluzia@gmail.com 
+Universidade Federal de Goiás (UFG). Campus Samambaia. Caixa Postal 131 – 74.001-970 – Goiânia (GO) – Brasil. Secre-
+taria: Telefax (62) 3521-1440, 

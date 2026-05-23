@@ -1,0 +1,800 @@
+Comunicação política 
+da extrema-direita 
+nas eleições de 2022 
+Análise das narrativas 
+de desinformação no 
+Telegram
+Revista da Associação Nacional 
+dos Programas de Pós-Graduação 
+em Comunicação
+Recebido em
+31/10/2023
+Aceito em
+27/11/2023
+ISSN 1808-2599, v. 26, jan–dez, 
+publicação contínua, 2023, p. 1–21. 
+doi.org/10.30962/ec.2960
+ID 2960
+ANNA BENTES
+Fundação Getulio Vargas
+Rio de Janeiro, Rio de Janeiro, Brasil
+
+O objetivo deste artigo é analisar as principais narrativas mobilizadas na comunicação política da extrema-
+direita no Telegram nas eleições brasileiras de 2022. Considerando o papel estratégico da plataforma 
+no ecossistema de desinformação, realizamos a análise de 80 conteúdos em diferentes formatos que 
+circularam em grupos bolsonaristas no aplicativo de mensageria durante o segundo turno coletados na 
+base do Monitor de Telegram do projeto Eleições sem Fake. Identificamos um total 24 temas nos conteúdos 
+com maior engajamento, sendo a narrativa da fraude eleitoral a principal, aparecendo em 18% do total. Sem 
+políticas eficientes, o Telegram facilitou a difusão dessas narrativas no processo eleitoral.
+Palavras-chave: Desinformação. Telegram. Eleições. Comunicação política. Brasil.
+/resumo
+Far-Right Political Communication in the 
+2022 Elections: Analysis of Disinformation 
+Narratives on Telegram
+The objective of this article is to analyze the main 
+narratives mobilized in the political communication 
+of the far-right political communication on Telegram 
+in the 2022 Brazilian elections. Considering the 
+strategic role of the platform in the disinformation 
+ecosystem, we analyzed 80 pieces of content in 
+different formats that circulated in Bolsonaro-
+supporting groups on the messaging app during 
+the second round from the base of the Telegram 
+Monitor of the “Elections Without Fake” Project. 
+We identified 24 themes in the content with the 
+highest engagement, with the electoral fraud 
+narrative being the primary narrative, appearing 
+in 18% of the total. Without effective policies, 
+Telegram facilitated the spread of these narratives 
+in the electoral process.
+Keywords: Disinformation. Telegram. Elections. 
+Political communication. Brazil. 
+El objetivo de este artículo es analizar las principales 
+narrativas movilizadas en la comunicación política 
+de la extrema derecha en las elecciones brasileñas 
+de 2022. Considerando el papel estratégico de las 
+plataformas em el ecossistema de desinformación, 
+recopilamos y analizamos 80 piezas de contenido 
+en diferentes formatos que circularon en grupos de 
+apoyo a Bolsonaro en la aplicación de mensajería 
+durante la segunda vuelta desde la base del Monitor 
+de Telegram del proyecto “Elecciones sin Fake”. 
+Identificamos un total de 24 temas en el contenido 
+con mayor participación, siendo la narrativa de 
+fraude electoral la principal narrativa, presente en 
+el 18% del total. Sin políticas efectivas, Telegram 
+facilitó la difusión de estas narrativas en el proceso 
+electoral.
+Palabras clave: Desinformación. Telegram. 
+Elecciones. Comunicación política. Brasil.
+Comunicación política de extrema derecha 
+en las elecciones de 2022: análisis de 
+narrativas de desinformación en Telegram
+
+/autora
+Anna 
+BENTES
+Doutora e mestre em Comunicação e Cultura pela Universidade 
+Federal do Rio de Janeiro (UFRJ) e graduada em Psicologia pela 
+mesma instituição. Professora e Coordenadora Adjunta de 
+Graduação na Escola de Comunicação, Mídia e Informação da 
+Fundação Getulio Vargas (FGV-ECMI). É membro do conselho da 
+Rede Latino-Americana de Estudos sobre Vigilância, Tecnologia 
+e Sociedade (LAVITS). Atualmente, é Fellow da Derechos Digitales 
+e colunista do Terra Byte, onde fala sobre temas relacionados a 
+tecnologia e comportamento.
+Fundação Getulio Vargas, Rio de Janeiro, Rio de Janeiro, Brasil
+E-mail: annacbentes@gmail.com
+ORCID
+
+Comunicação política da extrema-direita nas eleições de 2022
+Análise das narrativas de desinformação no Telegram
+4
+Introdução 
+	
+Nos últimos anos, observou-se no cenário global o uso progressivo de plataformas e de redes di­
+gitais para mediar a comunicação política durante a gestão de governos e de campanhas eleitorais, o que 
+impactou significativamente as democracias ocidentais (ZUBOFF, 2020). No Brasil, um marco para a instru­
+mentalização da desinformação como estratégia de comunicação política foram as eleições presidenciais 
+em 2018 (DOURADO, 2021; CESARINO, 2022), pegando de surpresa as autoridades e os eleitores. Ainda que 
+em 2022 a desinformação não fosse mais uma novidade, ela seguiu como uma marca na dinâmica comuni­
+cacional do último pleito.
+	
+De acordo com declarações do Tribunal Superior Eleitoral (TSE) a veículos de imprensa (BLANCO, 
+2022), desde o início do período eleitoral, em 16 de agosto de 2022, até um pouco antes do fim do segundo 
+turno houve um aumento de 1.671% no volume de denúncias de desinformação encaminhadas às platafor­
+mas digitais em comparação com as eleições de 2020. Mesmo após o fim do pleito, a desinformação con­
+tinuou circulando em redes sociais e em manifestações de apoiadores de Bolsonaro que questionavam o 
+resultado eleitoral (GUERRA, 2022) até culminar nos graves ataques antidemocráticos ocorridos em Brasília 
+no dia 8 de janeiro de 2023.
+	
+Se as eleições brasileiras de 2018 tiveram o protagonismo do aplicativo de mensagens instantâneas 
+WhatsApp para disparos em massa de desinformação (EVANGELISTA; BRUNO, 2019; MELLO, 2020), em 2022, as 
+eleições foram fortemente marcadas pelos efeitos de um ecossistema de desinformação multiplataforma 
+consolidado ao longo dos últimos anos. Durante o mandato de Bolsonaro, seu governo consolidou uma in­
+fraestrutura de comunicação digital permanente com seus apoiadores ligados à extrema-direita, incluindo 
+redes sociais e aplicativos de mensageria em uma distribuição cross-platform, levando à difusão de fake 
+news, discursos de ódio e incitação à radicalização política (CESARINO, 2022; MELLO, 2020).
+	
+Segundo o High Level Expert Group on Fake News and Online Disinformation (EUROPEAN COMMIS­
+SION, 2018), vinculado à Comissão Europeia, a desinformação envolve informações falsas, imprecisas ou 
+enganosas elaboradas, apresentadas e promovidas para intencionalmente causar dano público ou gerar lu­
+cro. Na dinâmica comunicacional multiplataforma, as informações, inclusive as falsas, circulam simultanea­
+mente em diferentes ambientes e com variações de formato, disseminam-se ao mesmo tempo de maneira 
+espontânea e coordenada, envolvendo um amplo e heterogêneo ecossistema de atores, ambientes, conte­
+údos e consumidores. Por um lado, os circuitos desse ecossistema envolvem uma indústria centralizada e 
+coordenada (MELLO, 2020) que financia, produz e dissemina informações intencionalmente falsas nas diver­
+sas plataformas para causar danos (WARDLE, 2020). Por outro, os fluxos da desinformação também contam 
+com o engajamento espontâneo de usuários que contribuem para viralizar determinados conteúdos.
+	
+À vista disso, é preciso compreender a desinformação1  como um fenômeno sociotécnico e tecnopo­
+lítico complexo e multifacetado, envolvendo a produção e a circulação de conteúdos total ou parcialmente 
+falsos e/ou descontextualizados por diferentes atores e com objetivos diversos, que promovem o caos infor­
+macional. Trata-se de um fenômeno em múltiplos formatos (DOURADO, 2021) que é inseparável das atuais 
+arquitetura e infraestrutura de circulação de informação e de comunicação digital multiplataforma (CESARINO, 
+2022), assim como do modelo de negócios de empresas de tecnologia baseado no engajamento dos usuários 
+em um contexto do capitalismo de vigilância (ZUBOFF, 2020) e da economia da atenção (BENTES, 2021; EMPOLI, 
+2020). Deste modo, a desinformação é instrumentalizada em um ecossistema que se utiliza de técnicas de 
+propaganda participativa (REGATTIERI, 2021) e em rede (BRITO CRUZ, 2020) em plataformas digitais.
+1 Apesar de atentos às importantes diferenças conceituais entre os termos como fake news, desinformação (disinformation), mal-informação 
+(malinformation) e misinformation (COSTA, 2023; TSE, 2022; WARDLE, 2020), no escopo deste trabalho optamos por caracterizar enquanto conteúdo 
+desinformativo independentemente da intencionalidade do agente que o propaga.
+
+Comunicação política da extrema-direita nas eleições de 2022
+Análise das narrativas de desinformação no Telegram
+5
+	
+Apesar do caráter multiplataforma da desinformação no pleito de 2022  (BENTES, 2023), uma plata­
+forma acabou preocupando mais as autoridades e a sociedade civil: o Telegram. O aplicativo de mensageria 
+chegou ao país em 2013, mas começou a se popularizar a partir de 2015, após os bloqueios do WhatsApp 
+pela Justiça ocorridos em 2015 e 2016 (WHATSAPP..., 2022). Outros fatos nos cenários políticos local e global 
+ajudaram a consolidá-lo como uma plataforma relevante para a comunicação política, especialmente da ex­
+trema-direita – como o episódio da invasão do Capitólio no dia 6 de janeiro de 2021 nos Estados Unidos, que 
+desencadeou medidas para um controle maior das grandes plataformas (NASCIMENTO et al., 2022). Assim, 
+iniciou-se um processo de desplataformização (ROGERS, 2020), ou seja, de bloqueio ou suspensão de contas 
+de perfis de políticos como Donald Trump e de usuários por medidas de moderação de conteúdos em grandes 
+plataformas de redes sociais. Como efeito colateral, houve uma migração significativa desses usuários para 
+outras plataformas com menos controle, moderação e fiscalização da opinião pública, como o Telegram.
+	
+No Brasil, a migração do público de extrema-direita acontece de forma mais intensa a partir de 
+janeiro de 2021, quando Bolsonaro cria seu canal oficial no aplicativo e incentiva seus apoiadores a acom­
+panharem seus conteúdos por lá. Ao se consolidar como uma das principais plataformas de comunicação 
+da extrema-direita brasileira, o Telegram foi assumindo um papel cada vez mais relevante na comunicação 
+digital no país e, por sua vez, no ecossistema de desinformação. Diferentemente do WhatsApp, o aplicativo 
+traz uma arquitetura híbrida, que combina características de plataformas de redes sociais com as de men­
+sageria, permitindo tanto uma comunicação privada, em mensagens individuais ou em grupos fechados, 
+quanto uma comunicação mais ampla, em grupos públicos ou em canais de transmissão que não possuem 
+limite máximo de usuários inscritos. Ele funciona também como fonte de informação a partir de mecanis­
+mos de busca, do uso de hashtags, de menções, entre outras funcionalidades (NASCIMENTO et al., 2022).
+	
+Este artigo deriva de um projeto de pesquisa que investigou os desafios e as especificidades do 
+ecossistema de desinformação nas eleições brasileiras de 2022 no Brasil a partir de discussões sobre regu­
+lação, plataformas e direitos digitais na comunicação política. Aqui, apresentamos os resultados de um dos 
+eixos da pesquisa que, ao considerar o papel estratégico do Telegram nesse contexto tecnopolítico, visou 
+identificar quais foram as narrativas de desinformação predominantes nos grupos de extrema-direita no 
+aplicativo nas eleições de 2022. Para tanto, analisamos uma amostra de conteúdos de maior engajamento 
+que circularam no aplicativo em grupos de extrema-direita durante o segundo turno, com o objetivo de 
+compreender os principais temas, alvos e as narrativas mobilizadas.
+	
+Para nossa análise, realizamos uma coleta dos 80 conteúdos que mais circularam no Telegram uti­
+lizando a plataforma Eleições sem Fake, da Universidade Federal de Minas Gerais (UFMG).2 Entendendo que 
+o Telegram teve um papel relevante para a extrema-direita brasileira, nossa análise permitirá aprofundar 
+alguns aspectos acerca dos fatos que aconteceram durante o segundo turno das eleições de 2022 e as 
+narrativas de desinformação na dinâmica comunicacional. Nos próximos tópicos, abordaremos o papel do 
+Telegram no ecossistema multiplataforma brasileiro, bem como apresentaremos a metodologia da coleta e 
+os resultados da análise.
+O papel do Telegram no ecossistema multiplataforma 
+nas eleições brasileiras de 2022
+	
+Segundo a avaliação de mais de 100 entidades da sociedade civil no âmbito da Sala de Articulação 
+Contra a Desinformação (SAD), o Telegram foi apontado como a plataforma mais problemática em termos 
+de políticas e de medidas para o enfrentamento à desinformação e outros ilícitos durante o período eleito­
+2   Disponível em: <https://www.eleicoes-sem-fake.dcc.ufmg.br/>. Acesso em: 12 maio 2023.
+
+Comunicação política da extrema-direita nas eleições de 2022
+Análise das narrativas de desinformação no Telegram
+6
+ral (ABRAJI et al., 2022). Não apenas faltam políticas adequadas à plataforma (BORGES; BRITO CRUZ; CINTRA, 
+2023) como a empresa traçou um caminho errático no diálogo com a Justiça Eleitoral nos últimos anos (CDR, 
+2022), chegando a quase ter seu serviço suspenso no país algumas vezes.
+	
+Enquanto as demais plataformas assinavam memorandos com o TSE voltados para a definição de 
+formas de cooperação interinstitucional no âmbito do Programa Permanente de Enfrentamento à Desinfor­
+mação da Justiça Eleitoral (PPED), o Telegram passou meses sem sequer responder aos ofícios da Justiça Eleitoral, 
+que já vinha tentando a aproximação com a empresa desde dezembro de 2021 (BARROSO..., 2021). Como a pla­
+taforma não possui escritório no Brasil, o então presidente do TSE, o ministro Luís Roberto Barroso, sugeriu um 
+encontro com algum representante da plataforma para que a empresa colaborasse no âmbito do PPED.
+	
+Diante da falta de resposta da empresa após o envio do quinto ofício em março de 2022 (PRESI­
+DENTE..., 2022) e devido ao não atendimento por parte desta a decisões judiciais, em uma decisão inédita e 
+sem precedentes o ministro Alexandre de Moraes determinou o bloqueio da plataforma Brasil3 no dia 17 de 
+março de 2022. Baseado no Marco Civil da Internet (BRASIL, 2014), Moraes argumentou que o ordenamento 
+jurídico brasileiro prevê que as empresas que administram serviços de internet no país atendam a decisões 
+judiciais, fornecendo dados pessoais ou informações que possam contribuir para a identificação do usuário 
+à Justiça, o que não foi feito pela empresa.
+	
+A decisão sobre o bloqueio do aplicativo, entretanto, gerou opiniões controversas entre os espe­
+cialistas. Diante dos riscos para instituições democráticas de uma plataforma que ignora medidas judiciais 
+e não colabora em iniciativas de enfrentamento à desinformação às vésperas das eleições, alguns (como 
+LEFÉVRE, 2022) entendiam que teríamos amparo legal, justificável e legítimo para o bloqueio com base no 
+MCI, ainda que em caráter excepcional, enquanto outros viam a medida como abusiva e desproporcional 
+(como RENÁ, 2022). Contudo, a decisão não durou muito, pois logo após o bloqueio o Chief Executive Officer 
+(CEO) do Telegram, Pavel Durov, se pronunciou dizendo que houvera “falha de comunicação” e que iriam 
+atender às demandas da Justiça (SPAGNUOLO, 2022). Ao atender às solicitações da Justiça, Moraes revogou o 
+bloqueio ao aplicativo,4 e a empresa indicou um representante legal no Brasil. Depois disso, em 25 de março 
+de 2022, o Telegram assinou o termo de adesão ao PPED (TELEGRAM..., 2022) e, no início de maio, assinou o 
+memorando com medidas para colaboração ao enfrentamento à desinformação no período eleitoral.5 
+	
+Segundo Nascimento et al. (2022), a partir de 2019 dois conjuntos acontecimentos históricos com­
+plexos afetaram a percepção e o uso do aplicativo. O primeiro se refere à ascensão de governos de Direita 
+ou Extrema-Direita em escala global, e o segundo trata-se da crise sanitária da pandemia do novo coronaví­
+rus, acompanhada de uma “infodemia” de proporções igualmente graves. De acordo com Júnior et al. (2022), 
+houve um crescimento acelerado do aplicativo tanto em termos de número de usuários quanto de fluxo 
+de mensagens a partir de 2019, o que se intensificando em 2020 e 2021, no período da pandemia. Assim, o 
+Telegram vai assumindo um papel cada vez mais relevante na comunicação digital no país e, por sua vez, no 
+ecossistema de desinformação. Isso se deve não somente pelo aumento da sua popularidade, mas também 
+à sua relevância para a comunicação política de Bolsonaro e seus apoiadores, bem como pelas especifici­
+dades de suas affordances (CESARINO, 2022) em comparação com as outras plataformas com políticas mais 
+estruturadas e formas de moderação mais ativas.
+3 Disponível em: <https://static.poder360.com.br/2022/03/22E9F20A438519D00020813B06D63C96.pdf>. Acesso em: 15 maio 2023.
+4  Disponível em: <https://www.stf.jus.br/arquivo/cms/noticiaNoticiaStf/anexo/DecisaoTelegram20mar.pdf>. Acesso em: 15 maio 2023. 
+5 Disponível em: <https://www.justicaeleitoral.jus.br/desinformacao/arquivos/termos-de-cooperacao-plataformas-digitais/mou-telegram.pdf>. 
+Acesso em: 15 maio 2023.
+
+Comunicação política da extrema-direita nas eleições de 2022
+Análise das narrativas de desinformação no Telegram
+7
+	
+Nascimento et al. (2022, p. 48) propõem entender os usuários do Telegram enquanto públicos refra­
+tados, ou seja, como públicos “formados a partir da mediação estratégica de certos usuários, que aprendem 
+sobre o funcionamento das plataformas para manipular suas affordances no sentido de produzir públicos 
+‘sob o radar’ da Internet de superfície”. À vista disso, por conta da versatilidade de sua arquitetura e fun­
+cionalidades, os autores entendem o Telegram como um espaço profícuo para investimento nesse tipo de 
+público, que não se forma de modo separado de públicos dominantes da internet de superfície, mas sim em 
+relações de contraste e de complementaridade com estes. Eles observam nesse público, ainda, a presença 
+de uma espécie de influenciadores invisíveis que chamam de talkatives, caracterizando “aqueles usuários 
+com volume e frequência de postagem comparativamente altos, e que raramente ficam muitos dias sem 
+publicar” (NASCIMENTO et al., 2022, p. 43). Esse tipo de usuários teria um papel diferenciado no ecossistema 
+de comunicação política e de desinformação, pois parecem usuários comuns, mas que quando têm seu 
+comportamento observado em escala deixam claro o papel que exercem enquanto disseminadores ou cria­
+dores de conteúdos, articulando engajamento em conversa e postagens.
+	
+Para aprofundarmos nossa análise sobre as narrativas de desinformação no Telegram, no próximo 
+tópico apresentaremos a metodologia de coleta de dados e os resultados da nossa análise a partir do Mo­
+nitor de Telegram do projeto Eleições sem Fake.
+Metodologia a partir do Monitor de Telegram do projeto Eleições sem Fake
+	
+Criado por pesquisadores da UFMG em 2018, o Eleições sem Fake é um projeto que desenvolve uma 
+série de soluções tecnológicas através de sistemas web para monitorar centenas de grupos políticos no 
+WhatsApp e no Telegram, a fim de contribuir com a exposição e a mitigação de campanhas de desinformação. 
+Entre as soluções6 apresentadas está o Monitor de Telegram, sistema utilizado no âmbito desta pesquisa.7 
+	
+No momento em que tivemos acesso à interface do Monitor de Telegram, em 31 de janeiro de 2023, o 
+sistema estava monitorando dados de grupos e canais públicos de cerca de 230 grupos de cunho político, a 
+maioria pró-Jair Bolsonaro, entre os quais alguns tinham milhares e até milhões de membros. É importante 
+ressaltar que não sabemos o quanto os dados monitorados são representativos de toda a discussão políti­
+ca que ocorre no Telegram, mas partimos da premissa de que o acesso aos dados do Monitor nos permite 
+observar uma parcela dessa dinâmica comunicacional a partir de um material empírico relevante para a 
+compreensão sobre as narrativas e os fluxos de conteúdo em grupos políticos de apoiadores do ex-presi­
+dente Bolsonaro.
+	
+Através da coleta automatizada com um script que extrai e estrutura todas as mensagens através da 
+API8 do Telegram, a plataforma reúne dados que são agrupados por similaridade, gerando um identificador 
+exclusivo para cada conteúdo e quantificando quantas vezes cada um foi compartilhado pelos usuários. Na 
+interface do Monitor de Telegram, portanto, é possível visualizar os conteúdos mais compartilhados em gru­
+pos políticos e canais públicos na plataforma em formato de texto, imagem, áudio e vídeo em um intervalo 
+de tempo selecionado (JÚNIOR et al., 2022). Assim, o Monitor traz a possibilidade de visualizar conteúdos e 
+informações adicionais como o total de compartilhamentos de cada conteúdo, em quantos e quais grupos 
+ele circulou e quantos usuários o compartilharam.
+6  Além do Monitor de Telegram, o grupo apresenta também o Monitor de WhatsApp e o Monitor de Anúncios no Facebook (projeto Eleições sem Fake). 
+7  Para esta pesquisa, solicitamos o acesso à plataforma, que foi concedido a partir de um login próprio.
+8  API do Telegram está disponível em: <https://core.telegram.org/api>. Acesso em: 3 mar. 2023. 
+
+Comunicação política da extrema-direita nas eleições de 2022
+Análise das narrativas de desinformação no Telegram
+8
+	
+Para a definição do nosso corpus de análise, realizamos a busca no período do segundo turno (3 
+de outubro de 2022 a 30 de outubro de 2022), uma vez que, de acordo com dados da imprensa, foi esse o 
+período no qual houve a intensificação das narrativas de desinformação e uma maior polarização política. 
+Assim, coletamos para esta análise os 20 conteúdos mais relevantes de cada tipo de formato entre aqueles 
+mais compartilhados no período, totalizando 80 conteúdos para o corpus de pesquisa.
+	
+Para filtrar os conteúdos mais relevantes da amostra, aplicamos os seguintes critérios: 1) ser um 
+conteúdo comprovadamente inverídico relacionado às eleições de 2022; 2) fazer menção indireta a alguma 
+narrativa de desinformação no contexto das eleições de 2022 a partir de mapeamento prévio de notícias 
+e das checagens de fato pelo Fato ou Boato9 e pela agência de checagem Lupa10 no mesmo período. Nesse 
+caso, incluímos conteúdos dúbios ou que insinuassem hipóteses ou teorias conspiratórias, mas que não 
+necessariamente explicitem narrativas falsas; 3) ser um conteúdo de propaganda política produzido e/ou 
+enviado pela campanha oficial e apoiadores que estimulasse engajamento e/ou compartilhamento; 4) con­
+teúdos sobre a eleição e/ou fatos relevantes que aconteceram durante as eleições.
+	
+No processo de coleta dos 80 conteúdos relevantes, analisamos um total de 297 conteúdos, sendo: 
+157 mensagens de texto; 80 imagens; 34 vídeos; e 26 áudios. Registramos o corpus de 80 conteúdos, sendo 
+20 de cada formato, eliminando os conteúdos11 que não se encaixavam nos critérios de relevância da pes­
+quisa. É preciso considerar que o escopo de nossa amostra é limitado, mas, levando em conta a relevância 
+do período e da plataforma, ela pode nos dar uma ideia geral e algumas pistas sobre as narrativas e os 
+conteúdos de desinformação circulando neste momento. 
+Análise dos dados e resultados sobre as narrativas 
+de desinformação no Telegram 
+	
+Na primeira etapa da nossa análise, buscamos identificar os alvos centrais dos conteúdos selecio­
+nados, isto é, sobre quem seriam essas narrativas, quais os principais atores mencionados e/ou atacados.12 
+Como vemos no gráfico abaixo (Gráfico 1), cerca de 31% dos 80 conteúdos tinham como alvo direto o Partido 
+dos Trabalhadores (PT), Lula ou a Esquerda em geral, e 5% eram ataques indiretos; 22% atacavam direta­
+mente a Justiça Eleitoral, o TSE e seus ministros, pesquisas eleitorais, as urnas e o processo eleitoral como 
+um todo e 5% eram ataques indiretos ao TSE; 18% tinham como alvo o próprio Bolsonaro, os bolsonaristas 
+e/ou a Extrema-Direita de modo geral. Além disso, identificamos ataques à mídia tradicional, e outros liga­
+dos a teorias conspiratórias direcionadas à nova ordem mundial ou ao globalismo, como veremos em mais 
+detalhes adiante.
+9  Disponível em: <https://www.justicaeleitoral.jus.br/fato-ou-boato/>. Acesso em: 10 maio 2023.
+10  Disponível em: <https://lupa.uol.com.br/>. Acesso em: 10 maio 2023.
+11  Sobre os conteúdos que não entraram no corpus deste trabalho, retiramos mensagens que pareciam spam, mensagens em outros 
+idiomas ou que não tinham nenhuma relação com o tema das eleições ou da desinformação. 
+12 É preciso destacar que, em alguns conteúdos, principalmente no formato de áudio, por vezes identificamos mais de um alvo, o que foi 
+incluído no total de cada um dos atores identificados no gráfico dos alvos (Gráfico 1). 
+
+Comunicação política da extrema-direita nas eleições de 2022
+Análise das narrativas de desinformação no Telegram
+9
+Gráfico 1: Alvos dos conteúdos
+Fonte: Elaborado pela autora a partir 
+dos dados do Monitor de Telegram do 
+projeto Eleições sem Fake.
+	
+A respeito dos conteúdos que tinham como alvo Bolsonaro, bolsonaristas ou a extrema-direita, é 
+preciso destacar que, em sua maioria, eram conteúdos que visavam “desmentir” o que seriam supostas 
+narrativas falsas de outros atores políticos sobre este grupo. Ou seja, em grande parte não eram conteú­
+dos propriamente contra esse grupo, mas que, sim, buscavam dar a versão dele sobre determinados fatos 
+ou narrativas. Nesse sentido, tais conteúdos podem ser caracterizados como contranarrativas do público 
+apoiador de Bolsonaro em relação aos discursos da oposição, da Justiça Eleitoral ou da mídia tradicional. 
+Chama atenção que este tipo de contranarrativa parece ter sido uma resposta à mobilização maior da opo­
+sição à Bolsonaro nas redes (CAMPO..., 2022), obrigando a Extrema-Direita a se articular para desmentir ou 
+mesmo explicar certas pautas aos seus apoiadores. Entre esse tipo de conteúdo, identificamos, por exem­
+plo, 4 vídeos nos quais o ministro da economia de Bolsonaro, Paulo Guedes, respondia a eleitores sobre 
+supostos discursos falsos que seriam temas-chave da campanha do ex-presidente, como o salário-mínimo, 
+a redução de pensões, o Auxílio Brasil e o crescimento econômico do Brasil.
+	
+Dos 14 conteúdos que tinham Bolsonaro e seus apoiadores como principais alvos, apenas um cons­
+titui de fato um ataque a Bolsonaro, sendo uma imagem que o caracteriza como o líder nazista Adolf Hitler. 
+Encontramos também um áudio de ataque ao ex-presidente, mas é possível identificar nele um tom de iro­
+nia, quando uma voz masculina parece falar mal, mas, na verdade, faz elogios às realizações de Bolsonaro. 
+Ainda, entre esses conteúdos, identificamos dois áudios nos quais apoiares de Bolsonaro criticam outros 
+eleitores bolsonaristas por exaltarem o discurso da fraude, sinalizando que isso não ajudaria a virar votos 
+e enfatizando que seu inimigo seria a abstenção.
+	
+Estão sistematizados no Gráfico 2 os 24 principais temas identificados nesses conteúdos. Claro que é 
+importante frisar que, por vezes, mais de um tema é citado por conteúdo, especialmente quando se trata de 
+textos, áudios e vídeos, mas, em uma análise qualitativa, consideramos o tema com mais ênfase no respectivo 
+conteúdo em relação àqueles que mostravam um padrão de repetição. A partir da identificação dos temas, 
+buscaremos, a seguir, aprofundar as principais narrativas presentes nos conteúdos relacionados às temáticas. 
+
+Comunicação política da extrema-direita nas eleições de 2022
+Análise das narrativas de desinformação no Telegram
+10
+Gráfico 2: Temas com mais 
+engajamento no segundo 
+turno no Telegram
+Fonte: Elaborado pela autora a partir 
+dos dados do Monitor de Telegram do 
+projeto Eleições sem Fake.
+Figura 1: Imagem de pesquisa eleitoral mostrando Bolsonaro à frente de Lula
+Fonte: Monitor de Telegram do projeto Eleições sem Fake.
+	
+De imediato, chama atenção como o tema da fraude eleitoral, do ataque às urnas eletrônicas e ao 
+processo eleitoral é, de longe, o que mais aparece nos conteúdos analisados, sendo presente em 18% do 
+total. Entre esse tipo de conteúdo, observamos narrativas defendendo o voto impresso, outras afirmando 
+que mortos votaram em Lula, insinuando uma fraude na contagem, um vídeo alegando fraude no aplicativo 
+Pardal de denúncia do TSE e diversos áudios alegando fraude e incentivando mobilização de apoiadores 
+de Bolsonaro à paralisação e/ou a intervenção militar. Outro exemplo encontrado foi um vídeo da deputa­
+da Carla Zambelli, apoiadora de Bolsonaro, no qual ela afirma que a Rede Globo teria errado na apuração 
+antecipada dos votos a favor da esquerda. Entre as imagens, encontramos pesquisas mostrando Bolsonaro 
+à frente de Lula (Figura 1), ao contrário do que a maioria das pesquisas de intenção de voto mostravam até 
+então (AVRITZER; SANTANA; BRAGATTO, 2023). Vale ressaltar que, por exemplo, o tema sobre o episódio das 
+rádios e o sobre as pesquisas eleitorais falsas, ainda que tenham sido categorizados como temas à parte, 
+também reforçam a narrativa de fraude eleitoral.
+
+Comunicação política da extrema-direita nas eleições de 2022
+Análise das narrativas de desinformação no Telegram
+11
+	
+Identificamos, também, pelo menos 7 conteúdos com cunho conspiratório, abordando teorias sabi­
+damente inverídicas. Para classificar esse tipo de conteúdo, tomamos como base a definição de Paulo Faltay 
+(2021, p. 82) do termo “teoria da conspiração” como aquilo que
+[...] nomeia crenças ou narrativas explicativas que buscam compreender eventos 
+significativos a partir de ações intencionais de grupos de pessoas ou organizações. 
+Com grande poder e capacidade de influência em diversas áreas – Estado, mídia, 
+universidades, mercado –, o complô de conspiradores se organiza secretamente para 
+atingir objetivos determinados. Usualmente, a tarefa dos conspiradores é, além de 
+atingir sua meta, ocultar a natureza do evento, a intencionalidade dos acontecimentos 
+e as potenciais consequências nocivas de seus propósitos.
+	
+Alguns poderiam argumentar que a própria narrativa das urnas consiste em uma teoria conspi­
+ratória, contudo, dada a relevância e a especificidade do tema no pleito de 2022, optamos por mantê-los 
+como temas separados em nossa análise. Assim, classificamos como conspiratórios aqueles conteúdos que 
+expressamente mencionam teorias da conspiração, por exemplo, a respeito do globalismo, a nova ordem 
+mundial, uma ameaça comunista ou outras narrativas falsas. Nos áudios, ficou bem mais evidente o tom 
+e as teorias conspiratórias, sendo 4 dos 7 conteúdos desse tipo nesse formato. A seguir, um trecho de um 
+texto classificado como conspiratório.
+A MAIORIA DAS MULHERES DESSE PAÍS, SÃO INTELIGENTES, RACIONAIS E BOLSONARISTAS, 
+A MULHER RACIONAL, SABE QUE EXISTE UMA AGENDA DA ONU 2030, E BOLSONARO 
+JUNTO COM PUTIN, SÃO OS ÚNICOS CONTRA O GLOBALISMO, POIS BOICOTARAM TRUMP. 
+MULHERES BONITAS DE “DIREITA” PARABÉNS!!! BOLSONARO 2022 VITÓRIA NO 2T 🇧🇷🇧🇷🇧🇷 
+[sic]. (AUTORIA DESCONHECIDA, 2022, [s.p.], grifo nosso).13  
+	
+Outros temas que apareceram refletem acontecimentos durante as eleições e que repercutiram nas 
+mídias sociais, como o episódio da visita do então candidato Lula ao Complexo do Alemão, conjunto de 
+favelas no Rio de Janeiro, no dia 12 de outubro de 2022. Na ocasião, Lula usou um boné com a sigla CPX, que 
+é uma abreviação da palavra “complexo”. Na amostra, identificamos 6 conteúdos sobre esse tema que vi­
+savam reforçar a narrativa falsa de que a sigla estaria associada à criminalidade, defendendo uma suposta 
+aliança de Lula e do PT com bandidos.
+13 Texto coletado no levantamento a partir do Monitor de Telegram do projeto Eleições sem Fake.
+Figura 2: Imagem associando a sigla CPX a facções criminosas 
+Fonte: Monitor de Telegram do projeto Eleições sem Fake.
+
+Comunicação política da extrema-direita nas eleições de 2022
+Análise das narrativas de desinformação no Telegram
+12
+	
+Entre os temas mais citados está, ainda, o episódio das rádios, que aconteceu durante o segundo 
+turno. Segundo o artigo 52 da Resolução n. 23.610/2019 (TSE, 2019), emissoras de rádios e TV devem reservar 
+70 minutos diários para o horário de propaganda eleitoral gratuito. No dia 24 de outubro de 2022, assesso­
+res de Bolsonaro entraram com uma ação no TSE alegando que rádios das regiões Norte e Nordeste teriam 
+deixado de transmitir inserções do candidato, e que isso teria beneficiado Lula (POMBO, 2022). Por falta de 
+indício mínimo de prova, o ministro Alexandre de Moraes arquivou a ação, ressaltando que a fiscalização do 
+cumprimento da veiculação é responsabilidade dos próprios candidatos, partidos, coligações e federações 
+ou do Ministério Público Federal (MPF), e não do TSE. Enfatizou, ainda, que a campanha de Bolsonaro poderia 
+ser responsabilizada por tumultuar o processo eleitoral ao insinuar fraude sem provas (CAMPANHA..., 2022).
+	
+Mesmo após o arquivamento, a campanha de Bolsonaro entrou com uma nova ação, e depois dis­
+so vieram a público notícias de que as inserções em algumas rádios não tinham sido vinculadas porque 
+a própria campanha de Bolsonaro não havia enviado os conteúdos a tempo (NUNES; SOARES, 2022). Nos 
+conteúdos sobre essa temática, identificamos duas principais narrativas: a primeira, reforçando a alegação 
+de fraude eleitoral feita pela campanha de Bolsonaro; a segunda envolvia acusações ao TSE pela demissão 
+de um servidor, que trabalhava no setor de propaganda eleitoral das rádios. Esse fato foi apropriado pela 
+narrativa bolsonarista como uma suposta evidência a fortalecer o discurso de fraude eleitoral a partir do 
+episódio das rádios (BONIN, 2022). Por exemplo, um dos conteúdos sobre o tema afirma: 
+TSE acaba de soltar uma nota e muda a versão sobre o motivo da demissão do servidor 
+responsável pelo pool de mídia das campanhas eleitorais e por denúnciar [sic] a fraude 
+contra a candidatura do Presidente Jair Bolsonaro. A situação se agrava, estão tentando 
+esconder o maior crime eleitoral da história (AUTORIA DESCONHECIDA, 2022, [s.p.]).
+	
+Outros dois temas que apareceram com frequência nos conteúdos são sobre supostos infiltrados 
+de esquerda em grupos de direita, assim como supostas armadilhas da esquerda, como disparos de fake 
+news. “Armadilhas serão lançadas”, mostra a imagem do print de um tuíte. Esses conteúdos nos revelam uma 
+narrativa paranoide (FALTAY, 2021) dos grupos de extrema-direita, reforçando uma lógica entre amigo-inimigo 
+(CESARINO, 2022). A recorrência desse tipo de narrativa nos indica um alto grau de coesão discursivo-compor­
+tamental entre os grupos de extrema-direita. Em outras palavras, todos aqueles que fugirem ao padrão da 
+narrativa podem gerar desconfiança ou ser considerados como inimigos infiltrados. Reforçando as narrativas 
+calcadas na lógica amigo-inimigo e a coesão grupal, identificamos também declarações em texto e em vídeo 
+de Bolsonaro estimulando o engajamento de sua base de apoiadores, angariando apoio de influenciadores 
+digitais e atacando institutos de pesquisa. Outros conteúdos com diferentes temáticas também reforçam a 
+narrativa do engajamento com estímulos a compartilhar conteúdos e a utilizar o Telegram. 
+	
+Mais um tema relevante no ecossistema da desinformação dessas eleições foi o da religião. Como 
+mostrado em investigações jornalísticas (BARCHINI; BRUZZI, 2022), as igrejas – especialmente as evangélicas 
+– se tornaram espaços físicos de difusão de desinformação, reverberando narrativas que circulavam nas re­
+des. Por exemplo, a narrativa de que Lula fecharia as igrejas foi disseminada por bolsonaristas na pauta da 
+religião (LICHOTTI, 2022). Embora esse tema não tenha sido tão expressivo em nossa amostra, identificamos, 
+por exemplo, um vídeo com uma tarja escrito “Atenção, Cristãos! O PT já está nos perseguindo”, no qual um 
+pastor alega que Lula estava perseguindo os cristãos por causa de uma ação de sua campanha contra a 
+colocação de uma bandeira do Brasil gigante no templo central da Assembleia de Deus em Belém, no Pará.
+	
+Relacionada ao tema da religião, a questão da Maçonaria14  também apareceu em três dos conteú­
+dos analisados. Logo depois do primeiro turno, circulou nas redes sociais um vídeo de Bolsonaro fazendo 
+um discurso em um templo maçom (ELEIÇÕES..., 2022). Os conteúdos que reunimos sobre o tema defendiam 
+14  Historicamente, a maçonaria envolve um grupo secreto que discutia temas proibidos e com atividades altamente ritualizadas, mas, na 
+opinião pública, se tornou um tema misterioso e intrigante na política brasileira.
+
+Comunicação política da extrema-direita nas eleições de 2022
+Análise das narrativas de desinformação no Telegram
+13
+a narrativa de que Bolsonaro não possuía qualquer vínculo com a Maçonaria. Identificamos a declaração em 
+vídeo e em texto de José Ricardo, grão-mestre da loja maçônica no Rio de Janeiro, onde teria acontecido a 
+visita de Bolsonaro anos atrás, afirmando que Bolsonaro não era maçom. Outro conteúdo sobre o tema, no 
+entanto, traz a narrativa da oposição, tentando relacionar Bolsonaro à Maçonaria e ao demônio.
+	
+Outro tema recorrente foi sobre um dos episódios mais emblemáticos da eleição de 2022, envol­
+vendo a troca de tiros entre o ex-deputado Roberto Jefferson e a Polícia Federal em meados do segundo 
+turno. Desde agosto de 2022 em prisão domiciliar por causa de ataques aos ministros da Suprema Corte e 
+por estar sob investigações sobre sua participação em milícias digitais, Jefferson violou diversas regras de 
+seu regime prisional (EM VÍDEO..., 2022). Depois disso, o ministro Alexandre de Moraes decretou a prisão em 
+flagrante do ex-deputado, que se converteu em preventiva após ele receber a tiros a Polícia Federal em sua 
+residência (TALENTO; GASPARIAN, 2022). 
+	
+Entre os dados coletados, encontramos 3 conteúdos relacionados a esse episódio, incluindo um 
+texto e um vídeo de uma declaração de Bolsonaro na Record News. A principal narrativa ligada a esse tema 
+foi a de acusação de Jefferson ser bandido e de afirmação de que ele não era aliado de Bolsonaro. “Não 
+existe qualquer ligação minha com Roberto Jefferson”, afirmou Bolsonaro no vídeo, o que foi rapidamente 
+desmentido pela imprensa (APÓS..., 2022). O terceiro conteúdo adiciona a essa narrativa um tom conspirató­
+rio, insinuando que o episódio teria sido “um verdadeiro teatro de tesouras arquitetado pelo sistema para 
+forçar Bolsonaro [a] tomar uma atitude e prejudicar sua campanha que já está ganha”, acusando Alexandre 
+de Moraes de estar por trás dessa suposta manobra.
+	
+Outro tema identificado na amostra foi a declaração de Bolsonaro sobre meninas venezuelanas. Em 
+uma fala para um podcast no segundo turno, ele disse que “pintou um clima” entre ele e meninas venezue­
+lanas menores de idade quando visitava uma comunidade em São Sebastião e se ofereceu para entrar em 
+suas respectivas casas em seguida (PINTOU..., 2022). Ainda na madrugada logo após a declaração, ele fez 
+uma live em suas redes sociais para se explicar e, depois, publicou um vídeo oficial pedindo desculpas aos 
+seus apoiadores.15 Entre os conteúdos analisados, identificamos o vídeo original de Bolsonaro na comunida­
+de com as venezuelanas e também um texto, que parece ser a legenda do vídeo, cuja narrativa era de que o 
+episódio se tratava de uma mentira da Esquerda que pegou uma “fala mal colocada do presidente para lhe 
+imputar uma fake news nojenta”.
+	
+Por fim, outro tema que, apesar de não ter sido tão expressivo em nossa amostra, merece destaque 
+por causa da repercussão durante o pleito foi a Jovem Pan, emissora de TV e rádio apoiadora de Bolsonaro. 
+Sobre o tema, encontramos a narrativa de que a emissora teria sido censurada pelo TSE, relacionada à deci­
+são da Justiça Eleitoral definindo que ela concedesse o direito de resposta a Lula sobre a situação judicial do 
+petista, e, ainda, determinando que os seus comentaristas deveriam se abster de promover manifestações 
+sobre o tema da decisão (NEVES; BARRETO FILHO, 2022). O segundo conteúdo reforçava a narrativa da fraude 
+eleitoral sobre o caso do servidor demitido do TSE no episódio das rádios a partir de supostas evidências 
+acessadas pela Jovem Pan. Esta não foi a única vez durante o período eleitoral que a emissora gerou polê­
+micas sobre divulgação de desinformação. Após o episódio do dia 8 de janeiro de 2023, o papel controverso 
+da emissora na disseminação de conteúdo desinformativo a respeito do funcionamento das instituições 
+brasileiras e com potencial para incitar atos antidemocráticos passou a ser investigado pelo MPF.
+15  Disponível em: <https://www.youtube.com/watch?v=2h3enl7qDEw>. Acesso em: 19 maio 2023. 
+
+Comunicação política da extrema-direita nas eleições de 2022
+Análise das narrativas de desinformação no Telegram
+14
+Conclusões
+	
+A análise dos dados coletados no Monitor de Telegram nos dão um panorama dos principais temas, 
+alvos e narrativas de desinformação com maior engajamento em grupos bolsonaristas no aplicativo de 
+mensageria durante o segundo turno. No contexto tecnopolítico eleitoral de 2022, as narrativas desinforma­
+tivas parecem ter se sofisticado em relação às eleições presidenciais anteriores. Em 2018, tivemos exemplos 
+de narrativas falsas baseadas em grandes mentiras, como o famoso kit gay, a mamadeira de piroca, entre 
+outras (DOURADO, 2021). Em 2022, salvo os conteúdos explicitamente conspiratórios, as narrativas da desinfor­
+mação deixam de ser tão explícitas e caricatas e passam a estar integradas a uma gramática (CESARINO, 2022) 
+continuamente trabalhada em grupos de apoiadores de Bolsonaro ao longo dos anos. Por falta de políticas 
+eficientes para enfrentar a desinformação e pelas características de suas affordances, o Telegram possibilitou 
+um ambiente estratégico para mobilização e difusão de desinformação durante o processo eleitoral. 
+	
+Após o protagonismo do WhastApp na difusão de desinformação nas eleições de 2018, a empresa 
+implementou medidas para conter a viralização de conteúdos ou restringir o número de usuários.16  Já o Te­
+legram, apesar dosalertas de autoridades e especialistas, manteve uma arquitetura que não limita a circula­
+ção de conteúdos e não atualizou as políticas de modo a conter o compartilhamento de conteúdos nocivos. 
+Na dinâmica sociotécnica da comunicação política no aplicativo, usuários não sofrem com qualquer tipo de 
+limitação ou controle. Nesse sentido, a arquitetura da plataforma potencializa, em seus grupos e canais, os 
+efeitos de câmaras de eco desinformativas, mesmo sem contar com as bolhas algorítmicas (PARISER, 2012). 
+Da mesma maneira, sua característica sociotécnica dificulta também a ação de autoridades no combate à 
+desinformação eleitoral, já que é difícil rastrear a origem de um conteúdo desinformativo. Essa dificuldade 
+é ainda mais gravada quando não há uma cooperação efetiva dos representantes da empresa ou de uma 
+regulação que imponha obrigações mais rígidas às plataformas no enfrentamento de conteúdos nocivos ou 
+mais transparência na aplicação de suas políticas.
+	
+Embora tenhamos identificado 24 diferentes temáticas, chama atenção como a narrativa da fraude 
+eleitoral foi intensamente mobilizada, sendo não apenas o principal tema dessa eleição, como também 
+sendo fomentada indiretamente através de outros temas. Além disso, a Justiça Eleitoral se constituiu como 
+um dos principais alvos nessa narrativa, que não é nova, e há evidências de que seja difundida pelo menos 
+desde 2014 no debate público nas redes sociais (RUEDIGER, 2022). Contudo, ela foi ganhando força desde a 
+eleição em 2018, e mais ainda em 2022. A intensificação do discurso de ataque contra o processo eleitoral 
+por parte de Bolsonaro e seus apoiadores não foi apenas um esforço de comunicação em redes sociais, 
+já que isso passou também por questionamentos feitos pelo exército ao TSE e pelo próprio Bolsonaro em 
+diversos fóruns. 
+	
+Portanto, em 2022, a narrativa de ataque ao processo eleitoral não foi uma entre outras, mas a prin­
+cipal delas na comunicação política da extrema-direita brasileira no Telegram. Ela aparece de forma prati­
+camente uníssona e homogênea nas diferentes temáticas presentes nos conteúdos com mais engajamento 
+no aplicativo. A difusão intensa dessa narrativa mostra como ela sustenta uma lógica de interpretação de 
+diferentes fatos ocorridos no pleito, principalmente a derrota nas urnas. Com ela, não há possibilidade de 
+fracasso para a figura do líder Bolsonaro, uma vez que seu insucesso seria responsabilidade de seus inimi­
+gos e daqueles que conspiram contra ele. Desta maneira, essa narrativa serve para mobilizar emocional­
+mente e engajar digitalmente, mantendo seus apoiadores politicamente coesos. 
+16  Disponível em: <https://faq.whatsapp.com/518562649771533/?locale=pt_BR>. Acesso em: 24 nov. 2023.
+
+Comunicação política da extrema-direita nas eleições de 2022
+Análise das narrativas de desinformação no Telegram
+15
+	
+Parte dos conteúdos analisados reverberam narrativas que foram continuamente reforçadas e repe­
+tidas ao longo do governo Bolsonaro. Com a narrativa da fraude eleitoral atravessando outros temas de dis­
+cussão, chama atenção o esforço da extrema-direita em produzir contranarrativas sobre eventos ocorridos 
+durante o período eleitoral divulgados na imprensa, providenciando o que seriam suas próprias versões 
+dos fatos. Em relação à diferença entre os formatos de conteúdo, vale destacar que, em alguns casos, as 
+imagens e os vídeos estão ligados à campanha oficial de Bolsonaro, enquanto os áudios são majoritaria­
+mente de apoiadores e revelam um tom bem mais conspiratório.
+	
+Embora a desinformação não fosse novidade em 2022, tanto a sua difusão quanto o seu combate 
+foram uma marca dessas eleições. Ademais, o seu potencial danoso para os processos sociais e políticos 
+foi escancarado, e seu enfrentamento se tornou uma questão de preservação do regime democrático e 
+do princípio de igualdade de chances eleitorais. A partir da análise do corpus, foi possível aprofundar a 
+compreensão das narrativas de desinformação com maior engajamento no Telegram no segundo turno das 
+eleições de 2022. Ao discutir aspectos da arquitetura, das políticas e da relação da plataforma com a Justiça 
+Eleitoral, aprofundamos também o entendimento sobre o papel do Telegram no ecossistema de desinfor­
+mação multiplataforma.
+
+Comunicação política da extrema-direita nas eleições de 2022
+Análise das narrativas de desinformação no Telegram
+16
+Referências
+ABRAJI – Associação Brasileira de Jornalismo Investigativo et al. O papel das plataformas digitais 
+na proteção da integridade eleitoral em 2022, Balanço 1, set. 2022. Disponível em: <https://
+democraciapedesocorro.com/wp-content/uploads/2022/09/O-PAPEL-DAS-PLATAFORMAS-DIGITAIS-NA-
+PROTECAO-DA-INTEGRIDADE-ELEITORAL-EM-2022-1.pdf>. Acesso em: 7 nov. 2022.
+ALVES, C. Bolsonarista invade festa de aniversário e mata petista no Paraná. UOL, 10 jul. 2022. Disponível 
+em: <https://noticias.uol.com.br/colunas/chico-alves/2022/07/10/bolsonarista-invade-festa-de-
+aniversario-mata-petista-e-tambem-e-morto.htm>. Acesso em: 14 maio 2023.
+APÓS JEFFERSON ATACAR policiais, Bolsonaro diz que não tem nem foto com ex-deputado, apesar de 
+registros no Palácio do Planalto. G1, Brasília, 23 out. 2022. Disponível em: <https://g1.globo.com/politica/
+noticia/2022/10/23/apos-jefferson-atacar-policiais-bolsonaro-diz-que-nao-tem-nem-foto-com-ex-
+deputado-apesar-de-registros-no-palacio-do-planalto.ghtml>. Acesso em: 19 maio 2023. 
+AVRITZER, L.; SANTANA, E.; BRAGATTO, R. C. (Orgs). Eleições 2022 e a reconstrução da democracia no Brasil. 
+Belo Horizonte: Autêntica, 2023. 
+BARCHINI, L.; BRUZZI, P. Religião e desinformação no centro da campanha eleitoral. Revista Piauí, 19 ago. 
+2022. Disponível em: <https://piaui.folha.uol.com.br/eleicoes-2022/religiao-e-desinformacao-no-centro-
+da-campanha-eleitoral/>. Acesso em: 26 out. 2023. 
+BARROSO ENVIA OFÍCIO ao Telegram e pede cooperação no combate à desinformação. Tribunal Superior 
+Eleitoral Notícias, 17 dez. 2021 Disponível em: <https://www.tse.jus.br/comunicacao/noticias/2021/
+Dezembro/barroso-envia-oficio-ao-telegram-e-pede-cooperacao-no-combate-a-desinformacao>. Acesso 
+em: 15 maio 2023.
+BASHYAKARLA, V. et al. Political Persuasion: Inside the Influence Industry. How it Works. Editado por 
+Christy Lange. Berlim: Tactical Tech’s Data and Politics, March 2019. Disponível em: <https://cdn.ttc.io/s/
+ourdataourselves.tacticaltech.org/Personal-Data-Political-Persuasion-How-it-works_print-friendly.pdf>. 
+Acesso em: 23 jun. 2019.
+BENTES, A. Quase um tique: economia da atenção, vigilância e espetáculo em uma rede social. 
+Rio de Janeiro: Editora UFRJ, 2021.
+______. Eleições, direitos digitais e desinformação: desafios e aprendizagens a partir da experiência 
+brasileira em 2022. Derechos Digitales, 2023. Disponível em: <https://www.derechosdigitales.org/wp-
+content/uploads/DD-Desinfo-2023-PT.pdf>. Acesso em: 20 dez. 2023. 
+BONIN, R. TSE demite servidor ligado a setor de distribuição de propaganda a rádios. Veja, 26 out. 2022. 
+Disponível em: <https://veja.abril.com.br/coluna/radar/tse-demite-servidor-ligado-a-pool-de-radios>. 
+Acesso em: 19 maio 2023.  
+
+Comunicação política da extrema-direita nas eleições de 2022
+Análise das narrativas de desinformação no Telegram
+17
+BORGES, E. (Coord.); BRITO CRUZ, F. E.; CINTRA, A. Compromisso com a democracia: integridade eleitoral 
+e o Estado Democrático de Direito nas políticas de plataformas digitais. São Paulo: InternetLab, 2023. 
+(Série Diagnósticos & Recomendações, n. 10).
+BRASIL. Lei n. 12.965, de 23 de abril de 2014: Marco Civil da Internet. Estabelece princípios, garantias, 
+direitos e deveres para o uso da internet no Brasil. Brasília: Presidência da República, 2014. Disponível 
+em: <https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2014/lei/l12965.htm>. Acesso em: 18 dez. 2023.
+BRITO CRUZ, F. C. Novo jogo, velhas regras: democracia e direito na era da nova propaganda política 
+e das fake news. Belo Horizonte: Casa do Direito, 2020. 
+CAMPANHA DE BOLSONARO apresenta ao TSE relatório sobre denúncia envolvendo inserções em rádio. 
+CNN, Brasília, 25 out. 2022. Disponível em:  <https://www.cnnbrasil.com.br/politica/campanha-de-
+bolsonaro-apresenta-ao-tse-relatorio-sobre-denuncia-envolvendo-insercoes-em-radio/>. Acesso em: 
+19 maio 2023. 
+CAMPO DA ESQUERDA cresce e Lula diminui diferença de Bolsonaro em volume de interações nas 
+plataformas. Sala de Democracia Digital, 17 out. 2022. Disponível em: <https://observademocraciadigital.
+org/posts/campo-da-esquerda-cresce-e-lula-diminui-diferenca-de-bolsonaro-em-volume-de-interacoes-
+nas-plataformas/>. Acesso em: 25 out. 2023. 
+CDR – Coalizão Direitos na Rede. Enfrentamento a estratégias de desinformação no 2° turno das eleições 
+2022: parecer técnico da CDR com sugestões de medidas emergenciais às redes sociais e apps de 
+mensageria. 21 out. 2022. Disponível em: <https://direitosnarede.org.br/2022/10/21/enfrentamento-a-
+estrategias-de-desinformacao-no-2-turno/>. Acesso em: 7 nov. 2022.
+CESARINO, L. O mundo do avesso: verdade e política na era digital. São Paulo: Ubu Editora, 2022. 
+COSTA, R. V. Desinformação, regulação das plataformas e direitos digitais. Belo Horizonte: Letramento; 
+Casa do Direito, 2023. 
+DOURADO, T. Fake news: quando mentiras viram fatos políticos. Porto Alegre: Zouk, 2021.
+ELEIÇÕES 2022: O que é a maçonaria e qual sua relação com a política?. Estadão, 5 out. 2022. Disponível 
+em: <https://www.estadao.com.br/politica/eleicoes-2022-o-que-e-a-maconaria-e-qual-sua-relacao-com-
+a-politica/>. Acesso em: 17 maio 2023.
+EM VÍDEO, JEFFERSON xinga Cármen Lúcia e chama TSE de “latrina”. Poder 360, 20 out. 2022. Disponível 
+em: <https://www.poder360.com.br/eleicoes/em-video-jefferson-xinga-carmen-lucia-e-chama-tse-de-
+latrina/>. Acesso em: 19 maio 2023.
+EMPOLI, G. D. Os engenheiros do caos. São Paulo: Vestígio, 2020.
+EUROPEAN COMMISSION. A Multi-Dimensional Approach to Disinformation: Report of the Independent 
+High-level Group on Fake News and Online Disinformation. Luxemburgo: Publications Office of the European 
+Union, 2018. Disponível em: <https://data.europa.eu/doi/10.2759/739290>. Acesso em: 30 out. 2023.
+
+Comunicação política da extrema-direita nas eleições de 2022
+Análise das narrativas de desinformação no Telegram
+18
+EVANGELISTA, R.; BRUNO, F. WhatsApp and Political Instability in Brazil: Targeted Messages and Political 
+Radicalisation. Internet Policy Review, v. 8, n. 4, 2019. DOI: 10.14763/2019.4.1434.
+FALTAY, P. Máquinas paranoides e sujeitos influenciáveis: conspiração, conhecimento e subjetividade 
+em redes algorítmicas. 2020. Tese (Doutorado em Comunicação e Cultura) – Escola de Comunicação, 
+Universidade Federal do Rio de Janeiro (UFRJ), 2020. 
+GUERRA, R. Bolsonaristas comemoram notícia falsa sobre prisão de Alexandre de Moraes. Estadão, 
+2 nov. 2022. Disponível em: <https://www.estadao.com.br/politica/bolsonaristas-comemoram-noticia-
+falsa-sobre-prisao-de-alexandre-de-moraes-veja-o-video/> Acesso em: maio 2023. 
+JÚNIOR, M. et al. Telegram Monitor: Monitoring Brazilian Political Groups and Channels on Telegram. 
+TheWebConf’22, Apr. 25-29 2022. 
+LEFÈVRE, F. A Justiça deve proibir o Telegram no Brasil? SIM. Folha de S.Paulo, São Paulo, 4 mar. 2022. 
+Disponível em: <https://www1.folha.uol.com.br/opiniao/2022/03/a-justica-deve-proibir-o-telegram-no-
+brasil-sim.shtml>. Acesso em: 15 maio 2023. 
+LICHOTTI, C. No império das fake news. Revista Piauí, ed. 195, dez. 2022. Disponível em: <https://piaui.folha.
+uol.com.br/materia/no-imperio-das-fake-news/>. Acesso em: 17 maio 2023.
+LUPION, B. Em reunião com embaixadores, Bolsonaro questiona urnas e TSE. DW, 19 jul. 2022. Disponível 
+em: <https://www.dw.com/pt-br/em-reuni%C3%A3o-com-embaixadores-bolsonaro-questiona-urnas-e-
+tse/a-62518117>. Acesso em: 14 maio 2023.
+MELLO, P. C. A máquina de ódio: notas de uma repórter sobre fake news e violência digital. São Paulo: 
+Companhia das Letras, 2020.
+NASCIMENTO, L. et al. Públicos refratados: grupos de extrema-direita brasileiros na plataforma Telegram. 
+Internet & Sociedade, v. 3, n. 1, ago. 2022.
+NEVES, R.; BARRETO FILHO, H. O que o TSE decidiu sobre a Jovem Pan é censura ou combate a fake news?. 
+UOL, São Paulo, 21 out. 2022. Disponível em: <https://noticias.uol.com.br/eleicoes/2022/10/21/decisao-tse-
+jovem-pan-lula.htm?cmpid=copiaecola>. Acesso em: 27 nov. 2023.
+NUNES, V.; SOARES, G. Rádios dizem que não receberam inserções de Bolsonaro. Poder 360, 26 out. 2022. 
+Disponível em: <https://www.poder360.com.br/eleicoes/radios-dizem-que-nao-receberam-insercoes-de-
+bolsonaro/>. Acesso em: 19 maio 2023.
+OSORIO, A. R. P. et al. Programa permanente de enfrentamento à desinformação no âmbito da justiça 
+eleitoral: plano estratégico eleições 2022. Brasília: TSE, 2022. Disponível em: <https://www.justicaeleitoral.
+jus.br/desinformacao/arquivos/programa-permanente-de-enfrentamento-a-desinformacao-novo.pdf>. 
+Acesso em: 18 dez. 2023.
+PARISER, E. O filtro invisível: O que a internet está escondendo de você. Rio de Janeiro: Zahar, 2012. 
+
+Comunicação política da extrema-direita nas eleições de 2022
+Análise das narrativas de desinformação no Telegram
+19
+“PINTOU UM CLIMA”: fala de Bolsonaro sobre meninas venezuelanas repercute e gera críticas nas redes. 
+G1, Brasília, 15 out. 2022. Disponível em: <https://g1.globo.com/politica/eleicoes/2022/noticia/2022/10/15/
+pintou-um-clima-fala-de-bolsonaro-sobre-meninas-venezuelanas-repercute-e-gera-criticas-nas-redes.
+ghtml>. Acesso em: 19 maio 2023.
+POMBO, B. O que é a inserção de propaganda eleitoral nas rádios? Entenda. Valor Econômico, Brasília, 27 
+out. 2022. Disponível em: <https://valor.globo.com/politica/eleicoes-2022/noticia/2022/10/27/o-que-e-a-
+insercao-de-propaganda-eleitoral-nas-radios-entenda.ghtml>. Acesso em: 19 maio 2023. 
+PRESIDENTE DO TSE envia novo ofício para diretor-executivo do serviço de mensagens Telegram. 
+Tribunal Superior Eleitoral Notícias, 9 mar. 2022. Disponível em: <https://www.tse.jus.br/comunicacao/
+noticias/2022/Marco/presidente-do-tse-envia-novo-oficio-para-diretor-executivo-do-servico-de-
+mensagens-telegram>. Acesso em: 15 maio 2023.
+PURZ, M. WhatsApp no Brasil: números atuais e as oportunidades comerciais do app. Sinch Engage, 30 nov. 2023. 
+Disponível em: <https://www.messengerpeople.com/pt-br/whatsapp-no-brasil/>. Acesso em: 18 dez. 2023.
+REGATTIERI, L. L. Algoritmização da vida: o debate sobre Amazônia e incêndios florestais no Twitter em 
+2020. 2021. 408 f. Tese (Doutorado em Comunicação e Cultura) – Escola de Comunicação, Universidade 
+Federal do Rio de Janeiro, Rio de Janeiro, 2021. 
+RENÁ, P. A Justiça deve proibir o Telegram no Brasil? NÃO. Folha de S.Paulo, São Paulo, 4 mar. 2022. 
+Disponível em: <https://www1.folha.uol.com.br/opiniao/2022/03/a-justica-deve-proibir-o-telegram-no-
+brasil-nao.shtml>. Acesso em: 15 maio 2023.
+ROGERS, R. Deplatforming: Following Extreme Internet Celebrities to Telegram and Alternative Social 
+Media. European Journal of Communication, v. 35, n. 3, p. 213-229, 2020.
+RUEDIGER, M. A. (Coord.). Desinformação on-line e contestação das eleições: quinze meses de postagens 
+sobre fraude nas urnas eletrônicas e voto impresso auditável no Facebook. Rio de Janeiro: FGV DAPP, 2022.
+SPAGNUOLO, S. Ponto a ponto das respostas do Telegram ao STF. Núcleo, 21 mar. 2022. Disponível em: 
+<https://www.nucleo.jor.br/curtas/2022-03-21-pontos-telegram-resposta-stf/>. Acesso em: 15 maio 2023.
+TALENTO, A.; GASPARIAN, L. Moraes manda prender Roberto Jefferson, que resiste com tiros e granadas 
+à prisão; ministro da Justiça negocia rendição. O Globo, 23 out. 2022. Disponível em: <https://oglobo.
+globo.com/politica/eleicoes-2022/noticia/2022/10/roberto-jefferson-diz-ter-trocado-tiros-com-policiais-
+federais-que-foram-prende-lo-em-sua-casa.ghtml>. Acesso em: 26 out. 2023. 
+TELEGRAM ASSINA ADESÃO ao Programa de Enfrentamento à Desinformação do TSE. Tribunal Superior Eleitoral 
+Notícias, 25 mar. 2022. Disponível em: <https://www.tse.jus.br/comunicacao/noticias/2022/Marco/telegram-
+assina-adesao-ao-programa-de-enfrentamento-a-desinformacao-do-tse>. Acesso em: 15 maio 2023.
+TSE – Tribunal Superior Eleitoral. Resolução n. 23.610, de 18 de dezembro de 2019. Dispõe sobre 
+propaganda eleitoral, utilização e geração do horário gratuito e condutas ilícitas em campanha eleitoral. 
+Brasília: TSE, 2019a.
+
+Comunicação política da extrema-direita nas eleições de 2022
+Análise das narrativas de desinformação no Telegram
+20
+TSE – TRIBUNAL SUPERIOR ELEITORAL. Programa permanente de enfrentamento à desinformação 
+no âmbito da justiça eleitoral: plano estratégico eleições 2022. Tribunal Superior Eleitoral, 2022. 
+Disponível em: <https://www.justicaeleitoral.jus.br/desinformacao/arquivos/programa-permanente-de-
+enfrentamento-a-desinformacao-novo.pdf>. Acesso em: 5 maio 2023.
+WARDLE, C. Guia essencial da First Draft para entender a desordem informacional. Editado por Alastair Reid 
+e Victoria Kwan. Tradução de Global Lingo. 2. ed. 19 jan.  2020. Disponível em: <https://firstdraftnews.org/wp-
+content/uploads/2020/07/Information_Disorder_Digital_AW_PTBR.pdf?x75440>. Acesso em: 7 nov. 2022.
+WHATSAPP JÁ FOI bloqueado por decisão judicial em 2015 e 2016 no Brasil. G1, Brasília, 18 mar. 2022. 
+Disponível em: <https://g1.globo.com/tecnologia/noticia/2022/03/18/whatsapp-ja-foi-bloqueado-por-
+decisao-judicial-em-2015-e-2016-no-brasil.ghtml>. Acesso em: 30 out. 2023. 
+ZUBOFF, S. A era do capitalismo de vigilância: a luta por um futuro humano na nova fronteira de poder. 
+Intrínseca: 2020.
+
+Comunicação política da extrema-direita nas eleições de 2022
+Análise das narrativas de desinformação no Telegram
+21
+Informações sobre o artigo
+Resultado de projeto de pesquisa, de dissertação, tese
+O artigo é resultado do projeto de pesquisa “O ecossistema 
+de desinformação nas eleições brasileiras de 2022: 
+tecnopolíticas, comunicação e direitos digitais”.
+Fontes de financiamento
+Esta publicação foi realizada com apoio da Derechos 
+Digitales por meio de seu Programa de Fellowships. A 
+Derechos Digitales é uma organização independente e sem 
+fins lucrativos fundada em 2005, cuja missão é a defesa, a 
+promoção e o desenvolvimento dos direitos fundamentais 
+nos ambientes digitais na América Latina.
+Considerações éticas
+Não se aplica. 
+Declaração de conflito de interesses
+Não se aplica. 
+Apresentação anterior
+Não se aplica.
+Agradecimentos/Contribuições adicionais:
+Agradeço à Derechos Digitales, representada por Jamila 
+Venturini e Michel de Souza, pelo apoio à pesquisa; e ao 
+projeto Eleições sem Fake, coordenado pelo professor 
+Fabrício Benevenuto (UFMG), pelo acesso à plataforma do 
+Monitor de Telegram.

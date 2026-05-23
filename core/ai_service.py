@@ -6,11 +6,13 @@ Sem dependências locais de LLM para preservar a memória do servidor.
 import os
 import json
 import logging
+logger = logging.getLogger("AIService")
 from typing import Dict, Any
 from openai import AsyncOpenAI, APIStatusError
 from core.circuit_breaker import ai_circuit_breaker
 
-logger = logging.getLogger("SentinelaAI")
+CONFIDENCE_THRESHOLD = float(os.getenv('CONFIDENCE_THRESHOLD', '0.5'))  # Limiar de confiança unificado para todas as IAs
+
 
 # Prompt baseado no PADRONIZACAO_LINGUISTICA_FORENSE.md (MCA v2.2)
 SYSTEM_PROMPT = """Você é um analista forense digital do sistema Sentinela Democrática.
@@ -80,8 +82,15 @@ class AIService:
         )
 
         # Ordem de prioridade para classificação (Mistral -> Groq -> OpenRouter)
+        # Verifica se há um modelo fine‑tuned configurado via .env
+        finetuned_model = os.getenv('FINETUNED_MODEL_NAME')
+        if finetuned_model:
+            # Substitui o modelo base do provedor principal (Mistral) pelo fine‑tuned
+            mistral_model = finetuned_model
+        else:
+            mistral_model = "open-mistral-nemo"
         self.providers = [
-            {"name": "mistral", "client": self.mistral_client, "model": "open-mistral-nemo"},
+            {"name": "mistral", "client": self.mistral_client, "model": mistral_model},
             {"name": "groq", "client": self.groq_client, "model": "llama-3.3-70b-versatile"},
             {"name": "openrouter", "client": self.openrouter_client, "model": "openrouter/free"},
         ]
@@ -138,12 +147,20 @@ class AIService:
         """Extrai e valida o JSON retornado pela IA."""
         try:
             data = json.loads(content)
+            # Aplicar limiar de confiança unificado
+            confidence = float(data.get("confianca_ia", 0.0))
+            low_conf = confidence < CONFIDENCE_THRESHOLD
+            categoria = data.get("categoria_ia", "NEUTRO")
+            if low_conf:
+                # Se baixa confiança, marcar como INDEFINIDO para revisão manual
+                categoria = "INDEFINIDO"
             return {
                 "is_hate": bool(data.get("is_hate", False)),
-                "categoria_ia": data.get("categoria_ia", "NEUTRO"),
-                "confianca_ia": float(data.get("confianca_ia", 0.0)),
+                "categoria_ia": categoria,
+                "confianca_ia": confidence,
                 "evidencia_lexical": data.get("evidencia_lexical", []),
-                "analise_pericial": data.get("analise_pericial", "Sem análise")
+                "analise_pericial": data.get("analise_pericial", "Sem análise"),
+                "low_confidence": low_conf
             }
         except json.JSONDecodeError:
             logger.error(f"❌ [AI] Resposta não é JSON válido: {content[:100]}")

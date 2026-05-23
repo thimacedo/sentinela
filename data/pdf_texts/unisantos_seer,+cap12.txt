@@ -1,0 +1,467 @@
+113
+Pesquisa em Pós-Graduação – Série Educação – No 8
+A NARRATIVA DIGITAL COMO FORMA DE 
+ENRIQUECER O CONTEÚDO DE BLOGS 
+JORNALÍSTICOS* 
+Douglas de Araujo Teixeira1
+Resumo
+Este trabalho traz reflexões sobre a utilização da taxonomia para narrativas digi-
+tais, considerando a importância da classificação e avaliação de conteúdos de sites 
+noticiosos. O artigo apresenta, ainda, conceituações de termos pertinentes ao tema 
+da pesquisa, como webjornalismo, blog e narrativa digital, com objetivo de discutir 
+os conceitos, levando em consideração que se trata de uma ferramentas utilizadas 
+em larga escala por jornalistas e necessitam ser analisadas de modo a se pensar 
+formas eficientes de produzir conteúdo para esses veículos.
+Palavras-chave: blogs; jornalismo digital; jornalismo on-line; narrativa digital; 
+webjornalismo.
+Digital Narrative as a Form to Enrich the Content of 
+Journalistic Blogs
+Abstract
+Nowadays, blogs are tools used widely by journalists. Therefore, there is a clear 
+need to think about efficient forms of producing content for these vehicles. Thus, this 
+paper proposes the use of taxonomy for digital narratives, created by researcher 
+Nora Paul in order to classify and evaluate content on news websites. This taxonomy 
+was adapted in order to make it possible to conduct a case study of posts published 
+on the “Lazer Esportes” blog, where it was possible to identify different forms of nar-
+rative in posts called “Lazer Esportes” podcasts, which had the objective of gathe-
+ring the main issues of the week in another form other than the one usually found in 
+content present in this blog. The article also presents the conceptualization of terms 
+relevant to the study, such as web journalism, blog and digital narrative.
+Keywords: blogs; digital journalism; online journalism; digital narrative; 
+web journalism.
+1 Bacharel em Comunica-
+ção Social pela Univer-
+sidade Santa Cecília 
+– Santos. Especiali-
+zação em Jornalismo 
+Digital pelo Centro Uni-
+versitário 
+UNINTER. 
+Mestrando no Progra-
+ma de Pós-Graduação 
+stricto sensu em Edu-
+cação da Universidade 
+Católica de Santos. 
+Editor e produtor de 
+conteúdo – Núcleo de 
+Educação a Distância 
+da Universidade Cató-
+lica de Santos.
+* 
+Trabalho 
+apresenta-
+do no GP Conteúdos 
+Digitais e Convergên-
+cias Tecnológicas do 
+XI Encontro dos Gru-
+pos de Pesquisa em 
+Comunicação, evento 
+componente do XXXIV 
+Congresso 
+Brasileiro 
+de Ciências da Comu-
+nicação.
+
+114
+EDUCAÇÃO
+Pesquisa em Pós-Graduação – Série Educação – No 8
+Introdução
+Com o crescimento do webjornalismo e dos blogs jornalísticos, os profissionais 
+passaram a acumular todos os meios de produção da notícia (MARTINEZ, 2007). 
+Por consequência, surgiu a necessidade de esses profissionais saberem planejar 
+formas eficientes de apresentar o conteúdo ao usuário. Portanto, esta pesquisa 
+propõe a classificação e avaliação do conteúdo do blog Lazer Esportes, a fim de 
+auxiliá-los nesta tarefa.
+No ano de 2010, o autor deste trabalho foi responsável por produzir conteúdo 
+para o blog Lazer Esportes. Por esse motivo, foi possível realizar experiências com 
+a narrativa utilizada na produção de conteúdo do blog. Em especial para um tipo de 
+post que tinha como objetivo levantar os principais assuntos da semana. Partindo 
+deste princípio, o pesquisador viu a necessidade de estabelecer uma análise crítica 
+destes materiais, como forma de contribuir para que os jornalistas explorem no-
+vas possibilidades na produção de conteúdos de blogs jornalísticos. Essa análise é 
+apresentada neste trabalho.
+1. Conceituando o Webjornalismo
+O termo webjornalismo refere-se ao jornalismo desenvolvido para a web: a in-
+terface gráfica da internet e, assim como radiojornalismo (jornalismo de rádio) e 
+telejornalismo (jornalismo de televisão), está relacionado ao suporte técnico para o 
+qual o conteúdo é produzido. É importante destacar que a internet envolve recursos 
+e processos mais amplos que a web (MIELNICZUK, 2003). 
+Por volta dos anos de 1990, quando a internet se tornou comercial e os jornais 
+passaram a disponibilizar conteúdos na rede, esses conteúdos consistiam em uma 
+transposição do modelo impresso para a mídia digital, ou seja, o que se fazia era 
+reproduzir partes daquilo que se via nos jornais impressos; era o chamado modelo 
+transpositivo.
+A segunda fase do webjornalismo foi caracterizada pela utilização do hiperlink. 
+A partir dessa fase, a notícia na internet pôde ser bem mais contextualizada, pois 
+surgiu a possibilidade de explorar as relações com o passado, oferecendo informa-
+ções de fundo ou links com reportagens sobre o mesmo tema (MOHERDAUI, 2007).
+Já na terceira fase – a atual – os sites se tornaram independentes do jornal im-
+presso e passaram a ser pensados exclusivamente para a web, onde os conteúdos 
+passaram a aproveitar todas as potencialidades do novo ambiente (MIELNICZUK, 
+2001). Entre essas potencialidades está o hipertexto, um texto estruturado em nós 
+e elos entre esses nós, posicionado em um conjunto de palavras ou de blocos de 
+texto que, através de links, levam o usuário a documentos em formatos diversos, 
+como áudio, imagens, vídeos, textos etc., colocando em jogo modalidades senso-
+riais como visão, audição, tato e sensações proprioceptivas.  A partir daí, o usuário 
+passou a ter um papel ativo, decidindo como consumir a informação (MOHERDAUI, 
+2007).
+2. Novas Práticas no Webjornalismo
+O avanço do webjornalismo impactou não somente a maneira como os conteú-
+dos são disponibilizados aos usuários, mas, também, a própria prática jornalística. 
+Atualmente, os meios de produção foram parar totalmente na mão do jornalista, que 
+
+115
+A NARRATIVA DIGITAL COMO FORMA DE ENRIQUECER O CONTEÚDO DE BLOGS JORNALÍSTICOS
+Pesquisa em Pós-Graduação – Série Educação – No 8
+passou a coletar, administrar, editar e publicar as notícias, sem filtros ou editores 
+que desempenham o papel de revisão e edição (MARTINEZ, 2007). Neste contexto, 
+como ferramentas de publicação e veiculação de conteúdo jornalístico, destacam-
+-se os blogs, que são mecanismos para produção e veiculação de conteúdos na 
+web que geram um modelo específico de site. 
+Dentre as principais características dos blogs estão: a facilidade e agilidade para 
+publicação de conteúdos, sem a necessidade de ter conhecimentos de linguagens 
+de programação; disposição do conteúdo em ordem cronológica inversa (do mais 
+recente para o mais antigo); e registro automático de data, hora e autor de cada 
+post (texto postado ou publicado em um blog) (CIPRIANI, 2006; ESCOBAR, 2009). 
+Para Primo e Smaniotto (2006), quando se fala em blog há uma imprecisão no 
+termo. Isso porque ele é utilizado tanto para designar o programa utilizado para 
+publicação do conteúdo, quanto o próprio conteúdo e o espaço (endereço na web) 
+onde ele está hospedado. Por isso, os autores propõem as seguintes definições:
+a) blog/texto – o conteúdo produzido pelo blogueiro, tenha ele utilizado 
+unicamente texto ou outros tipos de mídia (áudio, imagem vídeo etc.);
+b) blog/programa – a ferramenta utilizada para publicação do blog/texto;
+c) blog/espaço – a localização do blog/texto, ou seja, seu endereço na web.
+Este trabalho utilizará estas definições quando for necessário diferenciar o blog 
+enquanto ferramenta de publicação, do blog enquanto conteúdo ou endereço na 
+web onde ele é encontrado. No entanto, fará uso do termo blog como sinônimo de 
+blog/texto.
+Graças à facilidade na formatação e publicação de conteúdo, os blogs passaram 
+as ser utilizados em larga escala por jornalistas e se tornaram uma fonte inesgotável 
+de críticas e notícias, onde podemos encontrar textos com pontos de vista pessoal, 
+voz subjetiva e um pensamento ou olhar enviesado, parcial, abordando aspectos 
+que um noticioso jamais teria interesse ou espaço para publicar (BORGES, 2007; 
+MOHERDAUI, 2007; RODRIGUES, 2006). Com o passar do tempo, como destaca 
+Borges (2007, p. 42), os blogs “se tornaram expressões da revolução digital [...], 
+desafiando conceitos profundamente arraigados na indústria jornalística”.
+A maior parte dos blogs jornalísticos tem como atividade principal a repercus-
+são de notícias veiculadas na televisão, no rádio e na internet. A partir daí, o autor 
+tece seus comentários. Mas o conteúdo pode se tornar mais organizado e atraente 
+(BORGES, 2007; MOHERDAUI, 2007).
+Sendo assim, cabe ao jornalista a responsabilidade de planejar formas eficien-
+tes de apresentar o conteúdo aos usuários (MOHERDAUI, 2007), seja através de 
+simples utilização de links, até o emprego de recursos multimídia como áudio, ima-
+gem ou vídeo.
+3. Blog Lazer Esportes
+O que torna um blog, de fato, jornalístico? Segundo Escobar (2009, p. 7), “jor-
+nalismo é a difusão para um grande número de pessoas, geralmente com perio-
+dicidade determinada, de acontecimentos reais dotados de atualidade, novidade, 
+universalidade e interesse”.
+O blog Lazer Esportes faz parte de uma rede chamada Lazer Blogs, onde sete 
+blogs tematizados são reunidos em um único endereço e colaboradores são des-
+tacados para cobrir assuntos que tenham relação com o tema proposto (BORGES, 
+
+116
+EDUCAÇÃO
+Pesquisa em Pós-Graduação – Série Educação – No 8
+2007). Seu objetivo é fornecer ao usuário, diariamente, posts relacionados ao es-
+porte em geral, com conteúdos atuais e em alta na mídia.
+Cada post é formado, obrigatoriamente, por um título, uma imagem de abertura 
+e links que levam a materiais relacionados. Esporadicamente, os posts ganham 
+informação em formato de áudio ou vídeo. Quanto às características, o conteúdo 
+costuma ser informativo, de entretenimento, ou comentário. De acordo com Moher-
+daui (2007), essas são categorias do jornalismo digital. 
+O blog contabilizou, de outubro de 2010 até a primeira semana de janeiro de 
+2011, uma média de mais de 53 mil page views, de acordo com números divulga-
+dos pela coordenação da Rede Lazer Blogs. Essas características tornam o Lazer 
+Esportes, de acordo com as definições apresentadas, um blog jornalístico, o que é 
+confirmado por Escobar (2009, p. 9), ao afirmar que:
+[...] blogs jornalísticos são aqueles cujos endereços são públi-
+cos, estando acessíveis a qualquer pessoa com acesso à inter-
+net; que se destinem, na totalidade ou na maior parte do tempo, 
+a divulgar acontecimentos reais dotados de atualidade, novida-
+de, universalidade e interesse; e, ainda, cujos blogueiros tenham 
+a preocupação e se esforcem para: 
+a) disponibilizar freqüentemente conteúdos novos [...];
+b) e [...] atrair um número expressivo de internautas, ou seja, 
+uma grande audiência (que na internet é expressa por número 
+de page views).
+4. Narrativa Digital
+Entende-se por narrativa a forma de se contar uma história, seja ela ficcional 
+ou jornalística. Convencionalmente, a narrativa se desenvolve passo a passo, de 
+maneira linear e em ordem cronológica. Ela está presente em meios impressos, 
+como jornais e livros; ou audiovisuais, como a televisão e o rádio, e é controlada por 
+quem desenvolve o conteúdo (PAUL, 2007). Conforme destaca Gosciola (2007), a 
+narrativa depende, basicamente, de dois elementos: os personagens e as ações.
+Na web, a forma narrativa ganha o nome de narrativa digital e adquire carac-
+terísticas peculiares: ela conta com a contribuição do usuário para se desenrolar e 
+possui propriedades de expressão próprias: enciclopédica, espacial, processual e 
+participativa (PAUL, 2007).
+Em produtos jornalísticos veiculados na web, pode-se notar a utilização de al-
+gumas formas narrativas. No entanto, a maior parte desses produtos ainda utiliza 
+formatos antigos. Isso porque, conforme analisa Paul (2007), o vocabulário usado 
+para descrever essas convenções é impreciso e aberto a inúmeras interpretações, 
+o que dificulta o planejamento antecipado de uma narrativa adequada a cada caso.
+Algumas tentativas de classificar a produção e a edição jornalística na rede 
+foram feitas. De acordo com Moherdaui (2007), os produtos jornalísticos disponibi-
+lizados na web podem ser divididos em: texto multilinear (acesso hipertextual à in-
+formação), reportagens multiformes (novos formatos narrativos) e pacote multimídia 
+(reúne todos os elementos multimídia em um template em formato flash).
+Como dito anteriormente, a narrativa digital tem como peculiaridade a partici-
+pação do usuário no desenrolar da história. De maneira geral, essa participação é 
+
+117
+A NARRATIVA DIGITAL COMO FORMA DE ENRIQUECER O CONTEÚDO DE BLOGS JORNALÍSTICOS
+Pesquisa em Pós-Graduação – Série Educação – No 8
+chamada pelos pesquisadores de interatividade. Apesar disso, para Paul (2007, p. 
+137), a quantidade de definições apresentadas para o termo o torna impreciso, o 
+que dificulta “entender a interação entre os elementos exclusivos da narrativa digi-
+tal e testar a efetividade de seu uso em várias combinações e para vários tipos de 
+narrativas”. Isso é necessário para que seja possível identificar o tipo de audiência 
+e utilizar com sucesso o ambiente digital.
+Para que se possa avaliar a eficácia dos tipos de narrativas utilizadas e sanar o 
+problema da imprecisão em definir o que é interação, Paul (2007) desenvolveu uma 
+taxonomia para as narrativas digitais. Segunda a autora, essa taxonomia consiste 
+em caracterizar elementos específicos da narrativa digital, a fim de entender a inte-
+ração entre seus elementos exclusivos e testar a efetividade de seu uso em várias 
+combinações e para vários tipos de narrativas. Esses elementos serão descritos 
+mais adiante, uma vez que fazem parte da metodologia adotada neste trabalho.
+5. Taxonomia Para Narrativas Digitais
+Este trabalho utilizou como metodologia a taxonomia para narrativas digitais 
+proposta por Paul (2007). Como dito anteriormente, essa taxonomia utiliza cinco 
+elementos como forma de classificar o tipo de interação do usuário com o conteúdo 
+e avaliar a eficácia da narrativa utilizada. Cada um destes elementos possui as-
+pectos próprios. Alguns deles não serão detalhados, mas servirão de base para a 
+classificação e avaliação dos posts escolhidos.
+É importante salientar que a metodologia utilizada neste trabalho foi criada para 
+avaliar narrativas em sites noticiosos, portanto, alguns elementos serão adaptados 
+para que seja possível classificar e avaliar o conteúdo de um blog.
+São cinco os elementos de classificação da narrativa digital propostos: 
+a) mídia -  diz respeito ao tipo de expressão usada na criação do roteiro e 
+do suporte das narrativas (áudio, imagem, vídeo, texto etc.). Possui quatro 
+aspectos diferentes: configuração, tipo, ritmo e edição e pode ser classificada 
+como conteúdo de mídia individual, múltipla ou narrativa multimídia;
+b) ação – faz referência ao movimento do próprio conteúdo e/ou à ação 
+requerida pelo usuário para interagir com o conteúdo. Pode ser classificado, 
+ainda, como dinâmico ou estático, ativo ou passivo. Em alguns casos, esse 
+elemento pode ter mais de um tipo de classificação;
+c) relacionamento – diz respeito ao relacionamento entre o usuário e o 
+conteúdo e o próprio conteúdo. O conteúdo pode ser classificado, ainda, como 
+aberto ou fechado, customizável ou padrão, calculável ou não-calculável, 
+manipulável ou fixo, expansível ou limitado. Embora Paul (2007) considere 
+que somente conteúdos abertos possam ser classificados quanto a sua 
+linearidade, entendemos que, em conteúdos fechados, também seja possível 
+escolher a ordem e a maneira como a informação é consumida. Isso porque 
+a partir do momento que o usuário pode escolher entre ler um texto inteiro ou 
+clicar em links, o conteúdo torna-se não-linear;
+d) contexto – a possibilidade de apresentar ao usuário, através de links, 
+conteúdo adicional àquele que ele está consumindo. A narrativa utilizada nos 
+conteúdos classificados neste elemento pode ser hipermidiática, com uso de 
+links, ou auto-explicativa. Os links podem ser embutidos ou paralelos, internos 
+ou externos, suplementares e/ou duplicativos, contextuais, relacionados ou 
+
+118
+EDUCAÇÃO
+Pesquisa em Pós-Graduação – Série Educação – No 8
+recomendados. Neste elemento, Paul (2007) destaca que links paralelos são 
+aqueles que ficam ao lado do texto principal. No entanto, no caso específico 
+dos blogs, links que não estejam embutidos em meio ao texto principal estarão 
+no rodapé do conteúdo. Por isso, nesta pesquisa, esse tipo de link também 
+será considerado como paralelo;
+e) comunicação – a possibilidade que o usuário tem de se mover do conteúdo 
+para um espaço de comunicação, como chat, lista de discussão, e-mail etc. A 
+comunicação se dá de Um-a-Um, Um-para-Vários, Vários-para-Um e Muitos-
+para-Muitos. Ainda pode ser classificada quanto ao seu direcionamento 
+(síncrona ou assíncrona), moderação (com ou sem supervisão e/ou edição) e 
+quanto ao seu objetivo (troca de informações, registro e comércio).
+Como objeto de estudo para o trabalho, foram escolhidos três posts intitulados 
+Podcast Lazer Esportes, que tinham como objetivo levar ao usuário, todos os sá-
+bados, os principais assuntos da semana, utilizando-se de uma narrativa diferente 
+da comumente encontrada nos materiais publicados nos outros dias. Estes posts 
+foram produzidos pelo autor deste trabalho entre os meses de setembro e outubro 
+de 2010. Essas formas foram classificadas e avaliadas, com o objetivo de identificar 
+qual delas era a mais adequada para apresentar esse tipo de conteúdo em um blog.
+É importante destacar alguns pontos:
+a) os posts analisados foram considerados, nesta pesquisa, como pacotes 
+de narrativa. Em cada um destes pacotes os elementos presentes foram 
+classificados e avaliados como uma unidade;
+b) as imagens que reproduzem os posts passaram por um processo de edição 
+para remoção de links patrocinados que estavam presentes em meio ao texto, 
+pois eles não tinham relevância para este estudo;
+c) somente o blog/texto foi analisado. Ou seja, toda espécie de link ou recurso 
+gerado automaticamente pelo blog/programa, bem como, seu funcionamento 
+em diversos tipos de navegadores, não foram levados em consideração.
+Todos os posts publicados no Lazer Esportes, incluindo aqueles que não foram 
+analisados neste trabalho, têm as seguintes características: título; uma imagem ou 
+vídeo de abertura contextualizados com o post; repetição do título no início do texto; 
+uso de negrito como forma de proporcionar ao usuário a leitura escaneada do texto.
+Estas características não foram levadas em consideração, pois possuem pa-
+drões definidos pelo guia de estilo da Rede Lazer Blogs, não sendo, portanto, ca-
+racterísticas peculiares à narrativa adotada nos posts analisados neste trabalho.
+A linguagem utilizada no texto também foi excluída da análise, já que a proposta 
+desta pesquisa é avaliar somente a forma como a narrativa se desenvolve.
+6. Apresentação dos Dados
+Os posts analisados tinham como principais características a presença de links 
+(exceção feita ao post 3 – figura 3) que remetiam a posts relacionados aos assuntos 
+abordados, e de um arquivo em áudio contendo uma narração desses assuntos.
+Os links ofereciam a propriedade enciclopédica, já citada aqui no texto, uma 
+vez que possibilitavam ao usuário contextualizar-se acerca dos tópicos abordados. 
+Além disso, acabavam contribuindo com os page views, pois geravam visitas para 
+
+119
+A NARRATIVA DIGITAL COMO FORMA DE ENRIQUECER O CONTEÚDO DE BLOGS JORNALÍSTICOS
+Pesquisa em Pós-Graduação – Série Educação – No 8
+conteúdos antigos. Como também já foi observado, aumentar a audiência deve ser 
+uma preocupação de quem produz conteúdo para um blog jornalístico. Para fins 
+deste trabalho, os posts foram classificados em:
+a) quanto à mídia
+Quanto à configuração, os posts 1 (figura 1) e 2 (figura 2) foram classificados 
+como sendo conteúdos de mídia múltipla, pois oferecem ao usuário dois tipos dife-
+rentes de mídia: áudio e texto. Ambas as mídias fazem parte do contexto, ou seja, 
+levam o usuário a recordar os principais assuntos da semana. Também podem ser 
+classificadas como peças principais, pois podem ser consumidas individualmente, 
+sem comprometer a informação no que diz respeito ao entendimento por parte do 
+usuário. Em se tratando de edição, ou seja, de que maneira os conteúdos são exi-
+bidos e qual o grau de alteração que eles sofrem, constata-se que são assíncronos, 
+pois não são exibidos em tempo real e foram editados a partir de um original antes 
+de serem publicados no blog/programa.
+Já o post 3 (figura 3), quanto à sua configuração, foi classificado como sendo 
+de mídia individual, pois, apesar de também apresentar um texto dentro do pacote 
+da narrativa, esse texto não faz qualquer menção ao conteúdo do áudio e sequer 
+oferece ao usuário links que levem a conteúdos relacionados, como no caso do post 
+1. Quanto ao ritmo e a edição, ele possui as mesmas características que os posts 
+1 e 2.
+b) quanto à ação
+Movimento significa uma série de atividades em prol de um determinado fim. As-
+sim sendo, o fato de os conteúdos em áudio exigirem uma ação do usuário (um cli-
+que) para serem ouvidos, os tornam dinâmicos/ativos em todos os posts analisados.
+c) quanto ao relacionamento
+Quanto ao relacionamento, todos os posts foram classificados como de conteú-
+do fechado, sendo que nos posts 1 e 2 o usuário tinha a opção de ler o texto e/ou ou-
+vir o áudio, na ordem que quisesse, o que aponta uma não-linearidade na narrativa. 
+No post 3, a única possibilidade era ouvir o áudio, portanto, o conteúdo, neste caso, 
+não pôde ser classificado quanto a sua linearidade, uma vez que o áudio presente 
+na narrativa propicia ao usuário a flexibilidade de avançar ou retroceder, mas não 
+escolher em que ordem os fatos são narrados.
+Todos os posts analisados foram classificados como de conteúdo padrão, não-
+-calculável, fixo e limitado, pois:
+• não havia nenhum tipo de mudança na história mediante a ação do usuário. 
+O que quer dizer que, independentemente de o usuário ter que clicar para 
+ouvir os áudios, isso não significava uma mudança no desenrolar da narrativa;
+• nenhuma ação por parte do usuário era registrada;
+• não era possível mover o conteúdo, ou seja, áudio e texto se mostravam 
+sempre na mesma ordem dentro da narrativa;
+• não era possível que o usuário acrescentasse algo ao conteúdo, pois o blog/
+programa não permite que visitantes produzam qualquer tipo de material.
+
+120
+EDUCAÇÃO
+Pesquisa em Pós-Graduação – Série Educação – No 8
+d) quanto ao contexto
+Quanto ao contexto, os posts 1 e 2 foram caracterizados como de narrativa 
+hipermidiática, já que ofereciam ao usuário links que contextualizavam a narrati-
+va apresentada de maneira suplementar, ou seja, visando ao aprofundamento dos 
+assuntos abordados. Entretanto, no post 1, os links eram paralelos, pois se encon-
+travam abaixo do texto principal. Já no post 2, os links eram embutidos, pois se en-
+contravam em meio ao discurso narrativo verbal (texto escrito). Por não apresentar 
+links, o post 3 não pôde ser classificado quanto ao seu contexto.
+e) quanto à comunicação
+Não foram identificadas características deste elemento no blog/texto em ne-
+nhum dos casos, pois o conteúdo não oferecia ao usuário a possibilidade de estabe-
+lecer uma comunicação com outros usuários ou com o responsável pelo conteúdo.
+Considerações
+Não foi possível submeter os posts analisados à aprovação de usuários. Por 
+isso, para efeitos de avaliação, esta pesquisa norteou-se nos resultados obtidos em 
+estudos conduzidos por Paul (2007), onde foi identificado que, independentemente 
+da idade, os usuários preferem a apresentação de conteúdo multimídia à versão de 
+mídia individual. Além de ser preferível, ele se mostra mais efetivo quando o assun-
+to é recordação (propriedade enciclopédica). A pesquisa identificou, também, que 
+quase 90% dos usuários gostam de poder escolher narrativas e a ordem de vê-las, 
+sendo que 15% mostraram preocupação por ter perdido algo importante nas narra-
+tivas que deixaram de ver.
+Assim sendo, como o objetivo principal dos posts analisados no blog Lazer Es-
+portes era fazer o usuário recordar dos principais assuntos da semana, o post 2 
+mostra-se como o mais adequado, uma vez que ele permite ao usuário escolher 
+como (texto e/ou áudio) e em que ordem consumir a informação. No entanto, a 
+maior parte do público prefere narrativas multimídia nesse caso, ou seja, como de-
+fine Paul (2007, p. 124): um conteúdo que apresente dois ou mais tipos de mídia 
+“interligados numa apresentação perfeitamente articulada”. Embora o post 2 tenha 
+se mostrado eficaz na forma narrativa, a maneira como o conteúdo foi disponibiliza-
+do deveria ser repensada, de maneira que integrasse em uma única apresentação 
+o texto e o áudio.
+Como dito anteriormente, esse tipo de conteúdo é entendido como pacote mul-
+timídia e reúne todos os elementos multimídia em um template formato flash (MO-
+HERDAUI, 2007). No entanto, estaria o jornalista preparado produzir algo assim? 
+De acordo com Moherdaui (2007, p. 188):
+o jornalista da web tem que ter habilidades para trabalhar com 
+edição de home page e canais, experiência em produzir repor-
+tagens multiformes e notícias hipertextuais, conhecimento em 
+programas como Photoshop (para tratamento de imagens) e edi-
+tores de áudio, vídeo e Flash, entre outros.
+Portanto, ainda que esteja produzindo conteúdo para blogs, o jornalista que 
+trabalha com web precisa saber manipular determinados programas que possam 
+auxiliá-lo na construção de uma narrativa atraente e eficaz.
+
+121
+A NARRATIVA DIGITAL COMO FORMA DE ENRIQUECER O CONTEÚDO DE BLOGS JORNALÍSTICOS
+Pesquisa em Pós-Graduação – Série Educação – No 8
+Seria interessante que as pesquisas realizadas por Paul (2007) fossem feitas 
+com usuários de blogs, a fim de identificar se a forma narrativa multimídia é, real-
+mente, adequada a este tipo de público e ao próprio blog enquanto meio de produ-
+ção e divulgação de materiais jornalísticos.
+Outro ponto interessante a ser estudado seria não só a forma narrativa em si, 
+mas, também, cada tipo de mídia presente em uma narrativa, de modo que fosse 
+possível identificar a forma mais adequada de produzir cada uma destas mídias.
+Referências
+BORGES, André. Blog: uma ferramenta para o Jornalismo. In: FERRARI, Pollyana 
+(org.). Hipertexto Hipermídia: as novas ferramentas da comunicação digital. São 
+Paulo: Contexto, 2007. p. 41-52.
+CIPRIANI, Fábio. Blog Corporativo. São Paulo: Novatec, 2006.
+ESCOBAR, Juliana Lúcia. Blogs como nova categoria de webjornalismo. In: AMA-
+RAL, Adriana; RECUERO, Raquel; MONTARDO, Sandra (org.). Blogs.com: estudos 
+sobre blogs e comunicação. São Paulo: Momento Editorial, 2009. p. 217-235. Dis-
+ponível em: <http://www.slideshare.net/gestaohipermidia/blogcom-estudos-sobre-
+-blogs-e-comunicao>. Acesso em: 12 jan. 2011.
+GOSCIOLA, Vicente. A linguagem audiovisual do hipertexto. In: FERRARI, Pollyana 
+(org.). Hipertexto Hipermídia: as novas ferramentas da comunicação digital. São 
+Paulo: Contexto, 2007. p. 107-119.
+MARTINEZ, Adriana Garcia. A construção da notícia em tempo real. In: FERRARI, 
+Pollyana (org.). Hipertexto Hipermídia: as novas ferramentas da comunicação digi-
+tal. São Paulo: Contexto, 2007. p. 13-27.
+MIELNICKZUC, Luciana. O link como recurso da narrativa jornalística hipertextual. 
+Disponível em: <http://galaxy.intercom.org.br:8180/dspace/bitstream/ 1904/17358/1/
+R1441-1.pdf>. Acesso em: 16 jan. 2011.
+MIELNICZUC, Luciana. Sistematizando alguns conhecimentos sobre jornalismo na 
+web. Disponível em:
+<http://www.ufrgs.br/gtjornalismocompos/doc2003/mielniczuk2003.doc>. 
+Acesso 
+em: 16 jan. 2011.
+MOHERDAUI, Luciana. Guia de Estilo Web: produção e edição de notícias on-line. 
+3ª ed. rev. e ampl. São Paulo: Editora Senac, 2007.
+PAUL, Nora. Elementos das narrativas digitais. In: FERRARI, Pollyana (org.). Hiper-
+texto Hipermídia: as novas ferramentas da comunicação digital. São Paulo: Contex-
+to, 2007. p. 121-139.
+PRIMO, Alex; SMANIOTTO, Ana Maria Reczek. Comunidades de blogs e espaços 
+conversacionais. PRiSMA.com, v. 3, p. 1-15, 2006. Disponível em:
+<http://www6. ufrgs.br/limc/PDFs/insanus.pdf>. Acesso em: 12 jan. 2011.
+RODRIGUES, Bruno. Webwiriting: redação & Informação na Web. Rio de Janeiro: 
+Brasport, 2006.
+
+122
+EDUCAÇÃO
+Pesquisa em Pós-Graduação – Série Educação – No 8
+  Figura 1: Podcast 1. Fonte: http://www.lazeresportes.com/2010-09-18/podcast-lazeresportes 
+(modificado).
+
+123
+A NARRATIVA DIGITAL COMO FORMA DE ENRIQUECER O CONTEÚDO DE BLOGS JORNALÍSTICOS
+Pesquisa em Pós-Graduação – Série Educação – No 8
+Figura 2: Podcast 2. Fonte: http://www.lazeresportes.com/2010-10-02/podcast-lazeresportes-3 
+(modificado).
+ 
+
+124
+EDUCAÇÃO
+Pesquisa em Pós-Graduação – Série Educação – No 8
+Figura 3: Podcast 3. Fonte: http://www.lazeresportes.com/2010-10-09/podcast-lazer-esportes 
+(modificado).
+ 

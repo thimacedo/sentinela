@@ -1,0 +1,1114 @@
+ 
+ 
+Rev. Bras. de Iniciação Científica (RBIC), IFSP Itapetininga, v.11, e024030, p. 1-28, 2024. 
+ 
+Página1 
+Descrédito no sistema eleitoral brasileiro: as narrativas em 
+disputas no Twitter e os influenciadores digitais nas eleições de 
+2022 
+ 
+Discredit on the Brazilian electoral system: the narratives in 
+disputes on Twitter and the digital influencers in the 2022 
+election.   
+ 
+Descrédito en el sistema electoral brasileño: las narrativas en las 
+disputas de Twitter e los influenciadores digitales en las elecciones 
+de 2022  
+ 
+ 
+ 
+ 
+Mariany Silva Miranda1 
+Claudio Luis de Camargo Penteado2 
+ 
+ 
+ 
+Resumo: A pesquisa visa responder quais são as narrativas em torno do descrédito no sistema eleitoral brasileiro 
+em disputa no Twitter nas eleições de 2022 e quem são os influenciadores que fazem com que essa disputa ganhe 
+alcance nas redes sociais de internet. A partir de dados coletados pela API do Twitter, no período de agosto até 02 
+de novembro de 2022, foi realizada, a partir de uma catalogação, uma análise qualitativa e quantitativa do conteúdo 
+das 100 mensagens mais compartilhadas. Os resultados confirmam que existem narrativas com ataques 
+sistemáticos às instituições, que aumentam a desconfiança na democracia liberal participativa, colocando em xeque 
+o processo democrático e possibilitando a ascensão da extrema direita e discurso de ódio.  
+Palavras-chave: Extrema direita. Twitter. Democracia. Bolsonarismo. Disputa de Narrativas. Eleições 2022. 
+ 
+Abstract: The article investigates which are the narratives surrounding the discredit on the Brazilian electoral 
+system on Twitter during the 2022 elections and who are the digital influencers that make this dispute gain more 
+visibility on social media. Based on data collected through Twitter’s API, from August to November 2nd, the top 
+100 shared massages on the platform were cataloged and analyzed both quantitatively and qualitatively. The results 
+indicate that there were narratives that systematically attacked Brazilian institutions and raised doubts on its liberal 
+participatory democracy, hurting the democratic process and allowing far-right movements and hate speech to rise. 
+Keywords: Right-wing Extremism. Twitter. Democracy. Bolsonarismo. Narratives in Dispute.  2022 Elections. 
+ 
+ 
+ 
+ 
+ 
+                                                          
+1 Graduanda em Ciências e Humanidades. Universidade Federal do ABC. ORCID https://orcid.org/0009-0003-
+0887-9494. E-mail: mariany.m@aluno.ufabc.edu.br  
+2 Doutor em Ciências Sociais. Professor Titular da Universidade Federal do ABC. ORCID https://orcid.org/0000-
+0002-8279-3643. E-mail: claudio.penteado@ufabc.edu.br. 
+
+ 
+ 
+Rev. Bras. de Iniciação Científica (RBIC), IFSP Itapetininga, v.11, e024030, p. 1-28, 2024. 
+ 
+Página2 
+Resumen: La investigación pretende responder cuáles son las narrativas en disputa en Twitter en torno al 
+descrédito del sistema electoral brasileño en las elecciones de 2022 y quiénes son los influenciadores que están 
+haciendo que esta disputa gane alcance en las redes sociales. A partir de los datos recogidos por la API de Twitter 
+entre agosto y el 2 de noviembre de 2022, se realizó un análisis cualitativo y cuantitativo del contenido de los 100 
+mensajes más compartidas, a partir de una catalogación. Los resultados confirman que existe un ataque sistemático 
+a instituciones, así creando una baja confianza en la democracia liberal, poniendo en peligro el proceso 
+democrático y posibilitando el auge de la extrema derecha y el discurso del ódio. 
+Palabras-clave: Extrema derecha. Twitter. Democracia. Bolsonarismo. Disputa Narrativa. Elecciones 2022. 
+ 
+ 
+ 
+ 
+ 
+ 
+Submetido 23/11/2023       
+Aceito 26/06/2024 
+  Publicado 05/08/2024 
+  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+Rev. Bras. de Iniciação Científica (RBIC), IFSP Itapetininga, v.11, e024030, p. 1-28, 2024. 
+ 
+Página3 
+Introdução  
+As redes de comunicação digital se tornaram extensão da sociedade e espaços 
+cibernéticos de disputa de poder, influenciando diversos processos políticos e sociais (Castells, 
+2009). A interatividade proporcionada pelos canais de comunicação das tecnologias de 
+informação e comunicação (TIC) tem impacto direto na esfera pública. As plataformas 
+oferecem aos usuários agendas, enquadramentos (framing) e a construção de significados 
+compartilhados que exercem influência sobre a dinâmica política e empodera os líderes de 
+opinião (influenciadores), que têm papéis importantes na discussão (Casero-Ripollés, 2021). 
+Essa estrutura de comunicação nas redes gera uma nova expressão de poder com o 
+objetivo de formar opiniões e direcionar pensamentos por meio da produção de sentidos 
+(narrativas) dentro das redes sociais (Castells, 2009). Os canais de comunicação da internet 
+assumem um papel político ideológico ao possibilitar a difusão de ações políticas com uma 
+intensa participação dos usuários. Há uma certa positividade, por parte da literatura 
+especializada, ao pressupor que a internet conectaria e democratizaria a sociedade por meio da 
+ampliação e abertura de debates políticos nas plataformas de digitais (Junior Santos, 2021). 
+Todavia, a plataformização da comunicação política concretizou a instabilidade e o 
+enfraquecimento da credibilidade no sistema eleitoral e na democracia. Visto que sua estrutura 
+de concentração do fluxo informacional em poucas plataformas possibilitou a coleta de dados, 
+o direcionamento de algoritmos e a extensão do poder das grandes companhias de tecnologias. 
+Ao mesmo tempo, faz com que as pessoas, por meio dos seus perfis, acreditem ter o domínio 
+da ferramenta e do conhecimento ilimitado. A digitalização crescente da política levou o 
+cidadão a se sentir mais predisposto para dar sua opinião – o que acorda com a ascensão de 
+epistemologias populares em uma época de pós-verdade e crise do sistema peritos (Cesarino, 
+2020), que promove tensões para o funcionamento dos sistemas democráticos. 
+Nessa nova sociedade em rede, Jair Messias Bolsonaro – importante líder da extrema 
+direita que atuou como deputado federal e foi presidente do Brasil (2019-2022) – construiu sua 
+estratégia política populista autoritária por meio da difusão de desinformação (Penteado et al., 
+2022), consolidando-se pelo uso eficiente das plataformas digitais. Na eleição de 2018, ele foi 
+responsável pela incitação de um amplo número de publicações nas redes contra a democracia 
+e os ministros do Tribunal Superior Eleitoral (TSE), ao viralizar narrativas da existência de 
+
+ 
+ 
+Rev. Bras. de Iniciação Científica (RBIC), IFSP Itapetininga, v.11, e024030, p. 1-28, 2024. 
+ 
+Página4 
+fraudes nas urnas (Recuero, 2020) e cultivar narrativas que minaram a credibilidade no sistema, 
+reverberando diretamente no ataque às instituições da democracia. 
+O cenário de crise da democracia liberal, no qual emergiu Bolsonaro, faz parte de um 
+processo maior que se propaga com a difusão sistemática de discursos antissistema que 
+questionam a legitimidade das instituições, favorecendo o surgimento de lideranças autoritárias 
+(Levitsky; Ziblatt, 2018). Cria-se, então, o risco para uma ruptura democrática com o 
+enfraquecimento das instituições da democracia liberal (Castells, 2018). 
+Seguindo essa perspectiva, este artigo apresenta um estudo sobre a discussão pública no 
+Twitter nas eleições de 2022, nas quais Bolsonaro foi candidato à reeleição e continuou com 
+táticas digitais para sua campanha, incentivando narrativas conservadoras, antidemocráticas e 
+que descredibilizavam a democracia.  
+ 
+Comunicação Política 
+Como aponta a literatura em Ciência Política, o poder é relacional e está associado à 
+capacidade de um ator social influenciar as decisões do outro. De acordo com Castells (2009, 
+n.p.), o poder existe como uma relação social em que certos indivíduos ou instituições 
+conseguem influenciar o comportamento do outro, favorecendo seus interesses. Todavia, na 
+sociedade em rede, as relações de poder foram alteradas à medida que os canais de comunicação 
+se expandiram e possibilitaram novas interações e práticas de poderes. Na configuração da 
+sociedade contemporânea, cada vez mais digitalizada, as redes sociais de internet se 
+transformam em importantes espaços de disputa de poder influenciados por diversos processos 
+políticos (Castells, 2009; Recuero, 2020; Loureiro, 2022).  
+Em uma sociedade plataformizada, a capacidade de programar e direcionar as redes de 
+comunicação digital, por meio de algoritmos de interatividade, faz com que o conteúdo que 
+chega aos usuários seja controlado pelas plataformas digitais, por perfis influenciadores e por 
+estratégias de comunicação com capacidade de produzir narrativas (sentidos) que influenciam 
+o comportamento da rede (Castells, 2009). A difusão de diversos mecanismos de comunicação 
+digital, considerados neutros pela opinião pública, corroboram para a prática do poder na 
+sociedade em rede. 
+A nova expressão do poder através da comunicação influencia a sociedade de uma 
+maneira singular: na formação de opiniões e consumo de notícias. A configuração e 
+
+ 
+ 
+Rev. Bras. de Iniciação Científica (RBIC), IFSP Itapetininga, v.11, e024030, p. 1-28, 2024. 
+ 
+Página5 
+programação do conteúdo obtido nas redes sociais de internet, como Facebook e Twitter, entre 
+outras, mostram que essas plataformas desenvolvem uma centralidade no processo de produção, 
+circulação e transmissão de informações que proporciona o debate público. Além do mais, essa 
+produção de conteúdo promove uma disputa de interpretações de significados (cf. Laclau, 
+2005), gerando muitas narrativas concorrentes (significantes flutuantes) sobre expressão de 
+posicionamentos políticos e identidade política, fazendo com que milhares de pessoas interajam 
+e participem desse debate. 
+As redes sociais de internet transpuseram tecnicamente a barreira existente entre a 
+população e as representações políticas, na medida em que tais instrumentos tornaram-se 
+ferramentas de mobilização (Loureiro, 2022). Turkle (apud Hjarvard, 2014, p.123) diz que os 
+laços cibernéticos são falácias, porque não nos conectam realmente, mas conectam as pessoas 
+a uma complexa infraestrutura de comunicação global controlada por empresas privadas e seus 
+modelos de negócios. Ademais, um estudo feito por Andreu Casero-Ripollés (2021, n.p.) 
+mostra que as elites políticas e midiáticas estendem seu poder via digital.  
+Um exemplo do uso político desses dispositivos foi a campanha política do magnata 
+Donald Trump, conhecido por sua visibilidade em programas televisivos, que foi eleito 
+presidente dos Estados Unidos em 2016, pelo partido Republicano, com uma estratégia de 
+comunicação digital com discursos antissistema e com ataques às elites políticas. De acordo 
+com Muhammad e Nirwandy (2021, n.p.), os fatores que fizeram com que Trump tenha tido 
+sucesso em sua campanha foram: influência da agenda política, framing, eficientes estratégias 
+de propaganda e marketing, discurso de ataque às instituições – com exageros que se tornam 
+marcas registradas –, movimentação no campo das emoções por meio de suas falas 
+conservadoras e discurso de ódio. Toda essa sucessão de fatos culminou no ataque ao Capitólio, 
+em 2021, após a derrota em 2020. 
+ Recuero (2020, p.384-385) defende que o uso das redes digitais interfere nas decisões e 
+manipula os debates, criando várias “narrativas”, algumas delas executadas por robôs de 
+difusão, formando o fenômeno da “desordem informativa” e o efeito de falso consenso. As 
+diversas narrativas criadas no online alimentam o imaginário da população e instala-se uma 
+confusão geral (caos) em relação ao debate político (Empoli, 2019). Esse processo, que à 
+primeira vista parece construir um espaço com mecanismo de ampliação de manifestação 
+
+ 
+ 
+Rev. Bras. de Iniciação Científica (RBIC), IFSP Itapetininga, v.11, e024030, p. 1-28, 2024. 
+ 
+Página6 
+democrática e liberdade de expressão, contudo, de forma ambígua, também pode contribuir 
+para o enfraquecimento das instituições democráticas. 
+A comunicação digital, mediada por plataformas, resulta em processos complexos das 
+técnicas, subjetividades e dispositivos que imprimem valor e constroem uma governabilidade 
+difusa, em que os usuários das redes têm a ilusão de estarem contribuindo democraticamente, 
+ao mesmo tempo que são bombardeados com notícias falsas e induções, distanciando-os da 
+experiência democrática, o que dá espaço ao conservadorismo e ao questionamento (Loureiro, 
+2022). 
+ 
+Sistema Eleitoral e capital social: o papel dos influenciadores no debate público 
+No Brasil, desde a instauração da República, em 1889, feita através de um golpe de 
+Estado, houve instabilidade e falta dos princípios republicanos. Os processos políticos eleitorais 
+da Primeira República (1889-1930) foram caracterizados por práticas de corrupção e fraude 
+eleitoral que manipulavam e enfraqueciam o sistema democrático (Jacob; Fonseca, 2021). A 
+Revolução de 30 marcou o fim da “política do café com leite” e promoveu uma tentativa de 
+moralização do processo eleitoral ao criar o primeiro código eleitoral. A Justiça Eleitoral 
+Brasileira foi criada para coibir essas práticas e instaurar um ambiente democrático e seguro, 
+sem violações. Contudo, o golpe de 1964 representou um retrocesso na ampliação da 
+democracia no Brasil3.  
+Com a retomada da democracia em 1985, a Justiça Eleitoral brasileira passa a assumir 
+um maior protagonismo nas campanhas eleitorais e regular o processo por meio legislações 
+específicas pelo Tribunal Superior Eleitoral (TSE), principalmente para acompanhar as 
+propagandas nas rádios e TV, o processo de profissionalização das campanhas e conter o abuso 
+de poder econômico por parte das candidaturas e das estratégias de marketing político, que 
+tiveram grande visibilidade a partir da eleição de Collor em 1989 (Costa; Venancio, 2013). 
+ Em 2002, visando adaptar-se às transformações sociais e tecnológicas, adotaram-se as 
+urnas eletrônicas, o que possibilitou um avanço no processo de votação e apuração dos 
+resultados em um país com dimensões continentais e grandes desigualdades. A digitalização da 
+                                                          
+3 Durante a ditadura militar (1964-1985) as eleições foram controladas por uma regulamentação eleitoral 
+restritiva, um exemplo é a Lei Falcão (Lei 6.339/1976), que limitava a propaganda eleitoral no rádio e 
+na TV à leitura dos nomes das candidaturas.  
+
+ 
+ 
+Rev. Bras. de Iniciação Científica (RBIC), IFSP Itapetininga, v.11, e024030, p. 1-28, 2024. 
+ 
+Página7 
+sociedade introduziu práticas eletrônicas na administração pública, na qual as urnas digitais 
+tiveram um papel de destaque, principalmente para trazer maior confiabilidade no processo 
+eleitoral (Balbe, 2010). As novas leis e tecnologias adotadas pela Justiça Eleitoral coexistem 
+com o objetivo de barrar instituições não formais ou formais de interferir nas eleições e 
+combater fraudes, bem como acompanhar o processo de informatização da sociedade. 
+ As urnas eletrônicas conquistaram a confiança da população depois de muita campanha 
+de propaganda através dos órgãos públicos. Havia uma alta confiança no sistema, o que, na 
+visão de Straub (apud Rodrigues; Silva; Nóbrega, 2021, p.95), promoveu redes de cooperação, 
+fazendo com que os indivíduos se sentissem seguros e respeitassem os resultados. A Justiça 
+Eleitoral, por meio de processos de governança das urnas eletrônicas, possibilitou a construção 
+de um capital social – confiança mútua – que corrobora o sistema eleitoral e preserva a 
+democracia.  
+A alta confiança no sistema eleitoral estabelecida, no Brasil após o histórico de fraudes 
+eleitorais que marcaram o começo da república no país está associada ao conceito de capital 
+social, entendido aqui como a “capacidade de uma sociedade estabelecer laços de confiança 
+interpessoais e redes de cooperação com vistas à produção de bens coletivos” (Araújo, 2003, 
+p.5); em outras palavras, pode ser considerado como uma argamassa que mantém as instituições 
+em contato entre si e as vincula ao cidadão, visando à produção do bem comum. A confiança, 
+no caso representada pelo sistema de Justiça Eleitoral, é um componente básico da vida coletiva 
+e requer normas e cadeias de reciprocidade e sistema de participação cívica.  
+ A credibilidade nas instituições públicas é um dos pilares fundamentais para que as 
+pessoas acreditem na política e no sistema de representação da democracia liberal, que se 
+estrutura no funcionamento do sistema eleitoral e confiabilidade no processo de votação e 
+apuração (democracia processual). Há uma expectativa de que as instituições “funcionem” e 
+que cumpram seus deveres; quando isso não ocorre, a desconfiança instala-se. A princípio, a 
+desconfiança deriva do não cumprimento das funções estabelecidas, instaurando uma crise, que 
+coloca em xeque todas as dinâmicas da organização social (Henriques, 2023). 
+Atualmente, há uma diminuição desse capital social associado às instituições públicas 
+da democracia liberal no Ocidente, e cada vez mais ocorrem ataques antidemocráticos, 
+colocando em risco a ruptura do modelo liberal de democracia. 
+ 
+
+ 
+ 
+Rev. Bras. de Iniciação Científica (RBIC), IFSP Itapetininga, v.11, e024030, p. 1-28, 2024. 
+ 
+Página8 
+Como mostram os dados coletados na pesquisa empírica ‘A Cara de 
+Democracia no Brasil’ 48, realizada pelo Instituto Nacional de Ciência e 
+Tecnologia (INCT), em 2018, constatou-se, no Brasil, uma queda significativa 
+de satisfação dos indivíduos com a democracia nacional. Os dados mostram 
+que, de 2002 a 2010, a tendência era de crescimento e aumento da confiança 
+no regime democrático, com 30,3% dos entrevistados considerados 
+‘satisfeitos’ ou ‘muito satisfeitos’ com a democracia nacional no ano de 2002, 
+para 44,4% no ano de 2010. Já nas eleições de 2014, a tendência foi alterada 
+com 38,9% em 2014, e apenas 19,4% em 2018, simbolizando um decréscimo 
+considerável. (Rodrigues; Silva; Nóbrega, 2022, p.100.) 
+ 
+O descrédito e a crise democrática ganharam maior visibilidade (e tensionamento) no 
+Brasil, em 2013, com as jornadas de junho. Milhares de pessoas foram às ruas e criticaram o 
+funcionamento da democracia. Além de pautarem-se diversas bandeiras hostis ao sistema e suas 
+instituições (Silva, 2018) com ajuda das redes sociais de internet, da imprensa e dos 
+movimentos sociais de direita emergentes, colocou-se em pauta a falência da democracia e o 
+respeito aos processos eleitorais. Seguindo os rumos de um passado repetitivo, a eleição de 
+2018 evidenciou esse distanciamento da população com a democracia. O ressurgimento da 
+extrema direita, com forte discurso antissistema e com ataques às instituições democráticas, e 
+o apoio de membros da própria organização pública a essa vertente contribuíram para que a 
+crise democrática se instaurasse e alcançasse esses espaços (Cavalcante, 2020). 
+ Bolsonaro foi a personificação do indivíduo antidemocrático e conservador, ao 
+promover o discurso de ódio e atacar o sistema eleitoral e o sistema judiciário, apresentando os 
+quatro principais indicadores de comportamento autoritário na política, de acordo com Levitsky 
+e Ziblatt (2018, p. 33-34): rejeição das regras democráticas do jogo; negação da legitimidade 
+dos oponentes políticos; tolerância ou encorajamento à violência; e propensão à restrição 
+liberdades civis de oponentes, inclusive da mídia. 
+As menções sobre a existência de fraude nas urnas nas eleições, difundida por perfis 
+influentes (Recuero, 2020 apud Santos; Penteado et al, 2023), mostram o colapso na 
+credibilidade da ciência e instituições. O paradoxo da via eleitoral para o autoritarismo se 
+consolida, no qual os agentes antidemocráticos utilizam-se das instituições democráticas para 
+derrubar a democracia (Levitsky; Ziblatt, 2018), com forte apoio das redes sociais de internet e 
+apoio de influenciadores digitais para a difusão de seus ideais.  
+Os influenciadores digitais são produtores de conteúdos e informações em espaços 
+cibernéticos. A definição de influenciador, segundo Oliveira e Tezzi (2021, p.365), é “o 
+
+ 
+ 
+Rev. Bras. de Iniciação Científica (RBIC), IFSP Itapetininga, v.11, e024030, p. 1-28, 2024. 
+ 
+Página9 
+indivíduo que possui notável engajamento nas redes sociais, amparado por muitos seguidores 
+que se interessam pelo que ele tem a compartilhar” e seu desempenho é baseado de acordo com 
+a audiência e visibilidade do perfil. Em outras palavras, um influenciador detém a capacidade 
+de impactar a vida, a tomada de decisões, as opiniões políticas e o consumo de outros cidadãos 
+que se espelham nele como uma figura admirável.  
+No que tange ao campo político, é comum a utilização de perfis de influenciadores para 
+a interação e criação de comunidades, oferecendo aos usuários um determinado enquadramento 
+dos assuntos impulsionados por esses perfis (Casero-Ripollés, 2021). Atualmente, o principal 
+meio de divulgação e comunicação política são as redes sociais de internet, uma vez que uma 
+maioria da população está conectada e recebendo informações - conforme lhes é disponibilizada 
+- e emanando opiniões, acreditando em um ambiente de livre expressão e seguro para deliberar 
+sobre seus posicionamentos. Logo, pode-se comparar, no imaginário social, que a internet seria 
+o ápice da democracia, e as redes sociais, a polis grega - espaço livre para debates, de modo 
+direto.  
+A captura de identidades, subjetividades e emoções dos usuários promove uma 
+mobilização de narrativas determinadas, instaurando um neopopulismo, na medida em que os 
+afetos e as paixões influenciam no comportamento político e desempenham uma função 
+estratégica de engajamento digital (Cesarino, 2020, p.100), já que funciona sobre uma lógica 
+binária de inclusão e exclusão, produzindo equivalência entre indivíduos originalmente 
+desconectados entre si. Os próprios usuários, então, reproduzem seus padrões de linguagem 
+digital, instituindo um novo sistema líder-povo, o qual não necessita de mediação e se 
+autoafirma emissário e receptor de dados. 
+ 
+Vai se disseminando, por este meio, uma ilusão de que intermediários como 
+instituições e especialistas são desnecessários, ou mesmo prejudiciais, ao 
+processo democrático (Cesarino, 2019b; Cesarino, no prelo b) – que passaria 
+a se resumir, como o presidente eleito colocou em sua cerimônia de 
+diplomação, a uma relação ‘direta’ entre líder e povo. (Cesarino, 2020, p.106) 
+ 
+ A internet tornou-se, para uma parte dos usuários, um local de liberdade e veracidade, 
+enquanto as instituições, o motivo da corrupção e das manipulações. À vista disso, o sistema 
+democrático entra em crise com o descrédito da população, colapsando o modelo de democracia 
+liberal representativa, sendo o influenciador o principal meio para divulgação dessa 
+
+ 
+ 
+Rev. Bras. de Iniciação Científica (RBIC), IFSP Itapetininga, v.11, e024030, p. 1-28, 2024. 
+ 
+Página10 
+mobilização de sentimentos anti-institucionais, já que a internet seria um espaço de política 
+direta e os cidadãos teriam sua própria representação.  
+O projeto neoliberal de diminuir o poder estatal utiliza dessas ferramentas da internet 
+para que, de fato, ocorra uma onda contra as instituições públicas e consiga, assim, impulsionar 
+o neoliberalismo, não somente como projeto econômico, mas também como uma cosmovisão 
+da nova razão de mundo (Dardot; Laval, 2017), criando um ambiente para a promoção de 
+figuras autoritárias e projetos conservadores que, incorporado pela direita, suscitou a criação de 
+influenciadores e seguidores fiéis dispostos a alavancar conteúdos e mudar o rumo da política 
+e ideologia, utilizando discursos de ódio. 
+Neste contexto, o artigo apresenta um estudo acerca da discussão política no Twitter 
+sobre o sistema eleitoral brasileiro durante o processo de 2022 – marcado pela polarização 
+política e ideológica entre Jair Bolsonaro, candidato à reeleição, e o ex-presidente Luiz Inácio 
+Lula Da Silva –, com o objetivo de verificar a existência de ataques ao sistema eleitoral e os 
+principais influenciadores deste debate. 
+Metodologia 
+Este artigo apresenta um estudo de abordagem quantitativa e qualitativa de natureza 
+aplicada, que combina análise de dados quantitativos, com a análise de conteúdos qualitativos 
+(publicações). Ele tem como objetivo descrever o debate político on-line em torno do 
+funcionamento do sistema eleitoral nas eleições de 2022 e adota procedimentos associados às 
+técnicas de pesquisa acadêmica dos métodos digitais desenvolvida para estudo em ambientes 
+sociotécnicos (plataforma digital) desenvolvido por Rogers (2013). 
+A pesquisa está organizada em quatro etapas: pesquisa bibliográfica com revisão da 
+literatura; coleta de dados por termos no Twitter; processamento dos dados para identificação 
+das mensagens mais influentes (retuitadas); e classificação dos perfis e categorização das 
+mensagens para identificação das principais narrativas, conforme detalhado abaixo. 
+Os dados foram coletados através de uma ação de monitoramento, realizado pelo Projeto 
+Democracia em Xeque, do debate eleitoral e dos ataques à democracia, por meio da API4 da 
+                                                          
+4 “A sigla API deriva da expressão inglesa Application Programming Interface que, traduzida para o 
+português, pode ser compreendida como uma interface de programação de aplicação. Ou seja, API é um 
+conjunto de normas que possibilita a comunicação entre plataformas por meio de uma série de padrões 
+
+ 
+ 
+Rev. Bras. de Iniciação Científica (RBIC), IFSP Itapetininga, v.11, e024030, p. 1-28, 2024. 
+ 
+Página11 
+plataforma e processados por meio de scripts desenvolvidos pelo projeto Observatório de 
+Conflitos na Internet (OBSERVA5), da UFABC. Os termos-chave utilizados relacionados ao 
+sistema eleitoral brasileiro foram: “voto impresso”, “urna”, “TSE”, “STF” e “fraude eleitoral”.  
+ O recorte temporal utilizado foi do período de início ao fim da campanha eleitoral – de 
+agosto até 02 de novembro de 2022. A partir dos dados coletados, foram identificadas as 
+mensagens mais compartilhadas (aquelas com maior alcance). Para esse estudo, foi utilizada 
+uma amostra dos 100 tweets mais compartilhados para averiguação das narrativas e dos 
+influenciadores. Para a classificação das mensagens foi utilizado o método de Análise de 
+Conteúdo (AC), o qual conta com descrições das mensagens e catalogação das informações e 
+traços de discursos (Bardin, 2016, p. 48 apud Aguiar; Lycarião, 2023, p.13), através de uma 
+revisão dupla para garantir sua confiabilidade; quando havia discordâncias, era requisitada uma 
+terceira opinião. O grau de concordância obtido na fase de teste foi de 0,949, utilizando como 
+índice o alpha de Krippendorff (Sampaio; Lycarião, 2021) com a ferramenta ReCal2. 
+ A catalogação foi dividida em: influenciador, classificação do perfil, narrativa principal, 
+narrativa secundária, apoio eleitoral, forma de validação utilizada e exclusão.  
+A separação dos tipos de influenciadores mostra o nível de influência do perfil, sendo 
+avaliado conforme seu número de seguidores, como (Quadro 1): 
+ 
+Quadro 1 - Influenciadores 
+CATEGORIA  
+DESCRIÇÃO  
+Nanoinfluenciador 
+Usuários com 1.000 a 10.000 seguidores 
+Microinfluenciador  
+Usuários com 10 mil a 50 mil seguidores 
+Influenciador  
+Usuários com 50 mil a 500 mil seguidores 
+Macroinfluenciador 
+Usuários com 500 mil a 1 milhão de seguidores 
+Megainfluenciador  
+Usuários com mais de 1 milhão de seguidores 
+Fonte: Elaborada pelos autores (2023). 
+ 
+                                                          
+e protocolos. Por meio de APIs, desenvolvedores podem criar softwares e aplicativos capazes de se 
+comunicar com outras plataformas.” (TECHTUDO, 2020) 
+5 Informações do projeto disponíveis em https://observa.pesquisa.ufabc.edu.br/. Acesso em 22 nov. 
+2023.  
+
+ 
+ 
+Rev. Bras. de Iniciação Científica (RBIC), IFSP Itapetininga, v.11, e024030, p. 1-28, 2024. 
+ 
+Página12 
+Para a identificação do tipo de perfil foi utilizada uma autodenominação destes em sua 
+minibio, podendo ser: jornalista, mídia, mídia alternativa, político influenciador, movimento 
+social ou outro, e, caso não seja influente (com pouco número de seguidores), foi considerado 
+um usuário da plataforma; além disso, os perfis excluídos (pela plataforma ou por decisão 
+judicial) que não puderam ser analisados tiveram sua classificação como indefinida. Já a 
+narrativa principal foi classificada conforme descrito no Quadro 2: 
+ 
+Quadro 2 - Narrativas Centrais  
+CATEGORIAS 
+DESCRIÇÃO 
+ 
+Crime eleitoral 
+Denunciam ações que vão contra a legislação brasileira no 
+período de eleições. 
+Crítica a Bolsonaro 
+Avalia e reprova atitudes do candidato Bolsonaro. 
+Desmentindo fake news 
+Mobiliza a busca pela veracidade das notícias. 
+ 
+ 
+Fraude eleitoral 
+Denunciam a intervenção na eleição com o propósito de 
+anular, impedir ou modificar os resultados, prejudicando 
+ou favorecendo uma candidatura. 
+ 
+Indefinido 
+Tweets que não há formas possíveis de serem classificados 
+por terem sido apagados ou excluídos 
+ 
+Lula corrupto 
+Narrativas que adjetivam o candidato Lula como corrupto, 
+relembrando o caso Lava-Jato. 
+Outros 
+Temas variados que não se encaixam nas demais 
+categorias 
+ 
+ 
+Petição protocolada 
+Posts os quais visam comunicar que uma petição foi 
+protocolada junto ao TSE, afirmando irregularidades nas 
+campanhas políticas. 
+Propaganda Eleitoral 
+Narrativas com intuito de divulgar ou apoiar algum 
+candidato. 
+STF censurador/ditador 
+Denota o Supremo Tribunal Federal como uma instituição 
+autoritária. 
+TSE censurador/ditador 
+Acusa o Tribunal Superior Eleitoral de agir como ditador, 
+privando os cidadãos do direito de se expressar. 
+
+ 
+ 
+Rev. Bras. de Iniciação Científica (RBIC), IFSP Itapetininga, v.11, e024030, p. 1-28, 2024. 
+ 
+Página13 
+ 
+TSE partidário 
+Incita que o TSE estaria defendendo a candidatura do Lula 
+e corroborando para sua propaganda eleitoral 
+ 
+Urnas e pesquisas 
+desqualificadas 
+Conteúdos que denunciam ou incentivam o descrédito na 
+urna e pesquisas. 
+Fonte: Elaborado pelos autores (2023). 
+  
+É importante salientar que, para análise da narrativa mobilizada, foi considerado o 
+sentido e a principal pauta mobilizada pelo tweet. Visto que muitos dos Tweets tinham mais 
+de um sentido mobilizado, foi utilizado o recurso da narrativa secundária para mostrar que, 
+muitas vezes, os mesmos assuntos são discutidos em segundo plano. Desse modo, a divisão 
+feita foi a seguinte (Quadro 3): 
+ 
+Quadro 3 - Narrativas Secundárias  
+CATEGORIA  
+DESCRIÇÃO 
+Ataque ao PT 
+Representa o discurso de ódio ao Partido dos 
+Trabalhadores, o taxando de corrupto, socialista e apoiador 
+de ditaduras socialistas.  
+ 
+Ataque a Jovem 
+Pan 
+Narrativas que culpam o TSE pela onda de 
+demissões e pelos conteúdos fora do ar da emissora Jovem 
+Pan. 
+ 
+Bolsonaro Canibal 
+Mobiliza a falta de empatia do ex-presidente 
+utilizando o vídeo em que fala que comeria índios vivos. 
+ 
+Crime eleitoral 
+Denuncia ações que vão contra a legislação 
+brasileira no período de eleições. 
+COVID-19 
+Coloca em pauta o descaso com a pandemia.  
+ 
+Crítica a 
+Alexandre de Moraes 
+O atual ministro do STF e presidente do TSE ficou 
+como responsável pela ditadura dessas instituições, 
+recebendo várias críticas. 
+ 
+Lula ladrão 
+Construção da imagem negativa do candidato Lula 
+devido aos processos da Lava-Jato. 
+Outros 
+Temas variados que não se encaixam nas demais 
+categorias 
+
+ 
+ 
+Rev. Bras. de Iniciação Científica (RBIC), IFSP Itapetininga, v.11, e024030, p. 1-28, 2024. 
+ 
+Página14 
+ 
+PRF 
+Referente ao ato criminoso da Polícia Rodoviária 
+Federal que barrou alguns eleitores do PT de votar. 
+ 
+Rádios apoiam 
+Lula 
+Abrange a polêmica criada em torno do candidato 
+Lula ter mais tempo eleitoral em rádios do NE, fato que 
+prejudicaria Bolsonaro e constaria como fraude 
+ 
+ 
+STF 
+censurador/ditador 
+Denota o Supremo Tribunal Federal como uma 
+instituição autoritária, que estaria atuando como censor de 
+conteúdos e contra a “liberdade de expressão” 
+ 
+ 
+TSE 
+censurador/ditador 
+Acusa a instituição Tribunal Superior Eleitoral de 
+agir como ditador privando os cidadãos do direito de se 
+expressar, proibindo e retirando conteúdos da Internet 
+ 
+ 
+ 
+7S 
+O TSE estaria barrando as imagens das ruas cheias 
+e as mídias estariam escondendo o sucesso dos 
+movimentos bolsonaristas, no dia Sete de Setembro - 
+aniversário de independência do país. 
+Fonte: Elaborado pelos autores (2023). 
+ 
+Essas classificações secundárias, muitas vezes, repetem a classificação principal, pois 
+são interligadas. Por exemplo, a maioria das publicações em que a narrativa é TSE 
+Censurador/Ditador se liga ao TSE estar defendendo um partido. Dessa maneira, mostra-se que 
+uma postagem propaga mais de uma narrativa. 
+Por se tratar de um contexto de disputa eleitoral, com forte polarização, houve a 
+classificação referente ao apoio, sendo divididos entre pró-Bolsonaro – quem o defende ou 
+critica Lula –, pró-Lula, quem o defende ou faz críticas a Bolsonaro – e indefinido – por não 
+ser explícita a posição política ou por isso não ser compreensível devido à exclusão dos 
+conteúdos. E por último, para compreender a legitimação dos discursos foram utilizadas as 
+mesmas classificações de Raquel Recuero (2020), proposta por Van Leeuwen, que são (Quadro 
+4): 
+ 
+ 
+ 
+ 
+
+ 
+ 
+Rev. Bras. de Iniciação Científica (RBIC), IFSP Itapetininga, v.11, e024030, p. 1-28, 2024. 
+ 
+Página15 
+Quadro 4 - Legitimação 
+CATEGORIA  
+DESCRIÇÃO 
+ 
+ 
+ 
+ 
+Autorização (A) 
+A autorização é uma legitimação pela referência a uma 
+autoridade, seja ela pessoal (um indivíduo com posição 
+ou autoridade institucional) ou impessoal (referente a 
+elementos como tradição, leis, costumes etc.). Esse tipo 
+de autorização está relacionado ao uso da autoridade no 
+discurso para lhe conferir veracidade ou credibilidade. 
+ 
+ 
+Avaliação Moral (AM) 
+A avaliação moral é a legitimação pela referência a um 
+discurso de valor maior, por exemplo, através da de 
+categorias de “bom” (ou moralmente desejável) e 
+“mau” (ou moralmente indesejável).  
+ 
+ 
+ 
+ 
+Racionalização (R) 
+Trata-se do uso de uma validação cognitiva 
+supostamente apoiada pelo conhecimento. Aqui, Van 
+Leeuwen (2007) também distingue dois tipos de 
+racionalização: a instrumental e a teórica. A estratégia 
+da racionalização, assim, apoia-se em um movimento 
+de logicidade da conexão entre dois elementos (mesmo 
+que ancorado em pressupostos falsos). 
+ 
+ 
+ 
+Mythopoesis (M) 
+Esse tipo de legitimação envolve a construção de 
+narrativas ou histórias, sejam de cunho moral (onde o 
+“bem” vence o “mal”, por exemplo) ou que construam 
+algum tipo de alerta (VAN LEEUWEN, 2007). Essas 
+narrativas são usadas para legitimar fatos e seus 
+julgamentos de valor.” 
+Fonte:  Recuero, 2020, p.388-389 
+ 
+ 
+ 
+Essas catalogações colaboram para comprovação da abordagem teórica e para resposta 
+da pergunta de pesquisa, evidenciado quais são as narrativas em disputa, além de dar um 
+detalhamento de todos esses posts e influenciadores analisados.  
+Resultados 
+Os resultados mostram que a extrema-direita tem um domínio sobre as redes. O Gráfico 
+1 possibilita a visualização de que grande parte dos conteúdos são publicados por pessoas com 
+grandes números de seguidores, os classificados como megainfluenciadores (35%), mostrando 
+que o engajamento vem de perfis relevantes na plataforma. Reafirma-se, assim, a ideia de que 
+
+ 
+ 
+Rev. Bras. de Iniciação Científica (RBIC), IFSP Itapetininga, v.11, e024030, p. 1-28, 2024. 
+ 
+Página16 
+esses grandes perfis são responsáveis pela maior parte do conteúdo disseminado, o qual impacta 
+a opinião pública e cria uma cosmovisão do mundo em certos clusters. 
+ 
+Gráfico 1 - Influenciadores  
+ 
+Fonte: Elaborado pelos autores (2023). 
+ 
+ O tipo de profissão autodeclarada dos perfis (Gráfico 2) mostra que a maioria dos que 
+mobilizaram narrativas são de políticos (24%), jornalistas (18%) e usuários – cidadãos comuns 
+– (15%). Há uma grande diversidade dos perfis; entretanto, é predominante o conteúdo 
+publicado por jornalistas, influencers e políticos, totalizando em 57% das publicações feitas. A 
+maioria das mensagens compartilhadas são de perfis com maior capital social, dando-lhes uma 
+maior visibilidade e garantindo a reprodução das opiniões das elites políticas, as quais estavam 
+empenhadas em minar o capital social institucional. 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+Rev. Bras. de Iniciação Científica (RBIC), IFSP Itapetininga, v.11, e024030, p. 1-28, 2024. 
+ 
+Página17 
+Gráfico 2 - Perfis   
+ 
+Fonte: Elaborado pelos autores (2023). 
+ 
+Entre a amostra de tweets mais compartilhados, a maioria é pró-Bolsonaro (64%), 
+conforme ilustra o Gráfico 3. Isso mostra o domínio da extrema direita na discussão sobre o 
+sistema eleitoral, na rede social, e uma hegemonia de suas pautas neoliberais, antidemocráticas 
+e anti-institucionais. Isso estabelece, mais uma vez, a prevalência e a assertividade de 
+mobilização pelas redes como principal tática política, como foi previsto desde 2016. 
+ 
+Gráfico 3 - Posição Política  
+ 
+Fonte: Elaborado pelos autores (2023) 
+
+ 
+ 
+Rev. Bras. de Iniciação Científica (RBIC), IFSP Itapetininga, v.11, e024030, p. 1-28, 2024. 
+ 
+Página18 
+Por conseguinte, as narrativas mobilizadas (Gráfico 4) podem ser consideradas agendas 
+de campanhas políticas – uma seleção de temáticas estabelecidas para serem postas em pauta 
+nas redes – e ideológicas, que são também de interesse dessa rede de poder (político-
+empresarial) estendida para o meio digital, a fim de engajar os assuntos de interesse público-
+privado e definir as opiniões dos usuários. As Narrativas Centrais colocadas em discussão nos 
+posts são de diversas temáticas, em sua grande maioria de cunho político, com sentidos de 
+ataque às instituições e políticos, somando – TSE e STF Censurador/Ditador, TSE Partidário e 
+Fraude Eleitoral – 47% os tweets com esse tipo de ofensa.  
+O assunto mais mobilizado é TSE censurador/ditador (27%) e, em segundo lugar, o TSE 
+Partidário (9%), afirmando que o Tribunal Superior Eleitoral estaria tendo uma preferência 
+partidária; com o mesmo número relevante de posts encontram-se críticas direcionadas ao 
+candidato Lula. É importante destacar também que as narrativas consideradas como “Outros” 
+(13%) são assuntos políticos referentes a memes ou temas diversos sobre acontecimentos da 
+eleição, como o ataque de Roberto Jefferson aos agentes da Polícia Federal, quando do 
+cumprimento de sua ordem de prisão em 2022. 
+Esse conteúdo mostra como a invalidação das instituições são tópicos centrais da 
+comunicação eleitoral, uma evidente tentativa de minar a democracia e desestabilizar as 
+instituições, por meio da proliferação da desconfiança, em que as instituições tornam-se 
+inimigas e o Tweet a pólis pública, consolidando a visão do populismo digital na qual não há a 
+necessidade de intermediários institucionais para democracia. 
+ 
+Gráfico 4 - Narrativas Centrais   
+ 
+Fonte: Elaborado pelos autores (2023). 
+
+ 
+ 
+Rev. Bras. de Iniciação Científica (RBIC), IFSP Itapetininga, v.11, e024030, p. 1-28, 2024. 
+ 
+Página19 
+ A Imagem 1 ilustra uma das narrativas mobilizadas. O Tweet de Van Hattem tem como 
+alvo o TSE, o qual ele julga uma instituição que age de modo autoritário e censurador de 
+publicações pró-Bolsonaro, sendo partidário ao apoiar o candidato Luiz Inácio, que é chamado 
+de ladrão e corrupto. Além dessas três mobilizações citadas, também desvalida o trabalho do 
+STF em relação ao julgamento do ex-presidente Lula e cita o caso da Jovem Pan. Evidencia-se 
+que os posts são feitos com várias camadas de mobilizações. A liberdade de expressão é pautada 
+várias vezes como se uma ditadura pró-Lula estivesse em voga. Ao final, o político ressalta que 
+a democracia está sendo ameaçada pelo próprio TSE e demais instituições, invocando a 
+população a tomar consciência da situação, visto que as instituições são partidárias e ditadoras. 
+ 
+Imagem 1 - TSE Censurador/Ditador  
+ 
+Fonte: Twitter6 
+                                                          
+6 Disponível em: (19) Marcel van Hattem on X: "O Brasil está sob censura! O TSE está atuando como 
+um Tribunal CENSOR Eleitoral, decidindo o que se pode ou não se pode dizer. Lula foi condenado por 
+
+ 
+ 
+Rev. Bras. de Iniciação Científica (RBIC), IFSP Itapetininga, v.11, e024030, p. 1-28, 2024. 
+ 
+Página20 
+ Em consonância, as narrativas secundárias (Gráfico 5) estão diretamente ligadas às 
+centrais. Temas coincidentes são mobilizados no mesmo tweet, por mais que não seja o foco 
+central, para mostrar defesas e mobilizações de mais de uma narrativa ao mesmo tempo. 
+Novamente, pode ser notada a predominância do ataque às instituições e aos juízes da suprema 
+corte. Outro foco significativo é a presença do ato do dia Sete de Setembro, independência do 
+país, visto pelos bolsonaristas como uma manifestação popular e patriótica que estaria sendo 
+invisibilizada pela mídia. Logo, através da imagem e do imaginário, constrói-se uma visão de 
+perseguição política, em que os apoiadores do candidato Bolsonaro seriam mártires em nome 
+da salvação e luta pela liberdade no país. Essas diversas narrativas reconstroem o passado 
+antidemocrático e fraudulento, e suscitam os distantes e recentes golpes, que trazem essa 
+justificativa moralista da política com o objetivo de barrar a democracia e consolidar os 
+interregnos democráticos, ou seja golpes seguidos de democracias e mais golpes.  
+ 
+Gráfico 5 - Narrativas Secundárias  
+ 
+Fonte: Elaborado pelos autores (2023). 
+ 
+                                                          
+corrupção, cumpriu pena por quase dois anos e só foi solto porque o STF anulou de forma vergonhosa 
+seu processo. https://t.co/H6gi0waJxT" / X (twitter.com) 
+
+ 
+ 
+Rev. Bras. de Iniciação Científica (RBIC), IFSP Itapetininga, v.11, e024030, p. 1-28, 2024. 
+ 
+Página21 
+ Após analisados os conteúdos, foi feita uma verificação das contas e publicações 
+excluídas (Gráfico 6), devido ao alto índice de tweets com a reclamação do TSE estar barrando 
+contas e apagando publicações. Dos 100 tweets mais compartilhados, 12 deles foram excluídos 
+e, em relação às contas, a somatória das exclusões é igual a 17. São, ao todo, 29 exclusões feitas, 
+fato que relata um conflito entre o Tribunal Superior Eleitoral e os conteúdos postados, podendo 
+ser esses criminosos e sinalizando a tensão e dificuldade da Justiça em regular o uso das 
+plataformas. É perceptível que contas bolsonaristas têm uma parcela maior dessas suspensões, 
+contando com 6 tweets excluídos e 16 perfis tirados do ar, enquanto há 5 tweets - sendo uma 
+porcentagem maior de exclusão do que pró-Bolsonaro - e 1 conta suspensa do grupo pró-Lula.  
+Em suma, a maioria dos perfis e tweets apagados são de contas Pró-Bolsonaro, e os 
+apoiadores de Lula têm uma quantia considerável de tweets excluídos. Além do mais, com a 
+mudança de dono da rede social, contas antes banidas foram reativadas.  
+ 
+Gráfico 6 - Perfis e Tweets Excluídos  
+ 
+Fonte: Elaborado pelos autores (2023). 
+ 
+ As táticas de validação (Gráfico 7) são intrinsecamente ligadas, diversos tweets têm 
+mais de uma forma de legitimação. A combinação estratégica é ampla, levando a uma maior 
+capacidade de persuasão e legitimação das mensagens. 
+
+ 
+ 
+Rev. Bras. de Iniciação Científica (RBIC), IFSP Itapetininga, v.11, e024030, p. 1-28, 2024. 
+ 
+Página22 
+ Gráfico 7 - Legitimação 
+ 
+Fonte: Elaborado pelos autores 
+ 
+ O Tweet ilustrado na Imagem 3 mostra como as retóricas de legitimação funcionam. 
+Gustavo Gayer, influenciador digital e político, ligado a Bolsonaro, usa a imagem do 
+governador Zema - referência política - para conferir credibilidade na mensagem. Ele também 
+faz uso da Mythopoesis, que ajuda a construir a narrativa para certificar que o TSE estaria 
+proibindo conteúdos. No vídeo, há uma avaliação moral de quem apoia o Partido dos 
+Trabalhadores, a qual ele reafirma ao compartilhar. Em um único post houve o uso de três 
+diferentes formas de validação de uma narrativa. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+Rev. Bras. de Iniciação Científica (RBIC), IFSP Itapetininga, v.11, e024030, p. 1-28, 2024. 
+ 
+Página23 
+Imagem 2 - Formas de Validação 
+ 
+Fonte: Twitter7 
+ 
+ A Mythopoesis (M) foi a mais utilizada, estando presente em 57 dos 100 tweets; isso 
+porque está “relacionada com textos típicos de veículos jornalísticos, impessoais e que focam 
+na informação.” (Recuero, 2020, p.398), podendo ser ou não uma informação falsa, fato que 
+não foi levado em consideração nessa pesquisa. Em segundo lugar está a Avaliação Moral, 
+presente em 50 publicações. A Mythopoesis e a Avaliação Moral comumente estão presentes 
+juntas em uma única publicação, pois a avaliação moral confirma o posicionamento e a visão 
+que se tem da narrativa. A construção da história no imaginário é acompanhada de um 
+julgamento que cria uma visão predominante.  
+                                                          
+7 Disponível em: (19) Gustavo Gayer on X: "TSE acaba de proibir mais esse vídeo Já sabem né? 
+https://t.co/ANlDtPpOPZ" / X (twitter.com) 
+
+ 
+ 
+Rev. Bras. de Iniciação Científica (RBIC), IFSP Itapetininga, v.11, e024030, p. 1-28, 2024. 
+ 
+Página24 
+ A Autorização esteve em 29 tweets, posto que a maioria das publicações já foram feitas 
+por pessoas que são vistas como referências. Todavia, muitos influenciadores usaram uma 
+segunda autoridade, a qual aumenta a credibilidade pessoal ao discurso. Ademais, a 
+Racionalização contou com 20 tweets, a menos utilizada, o que mostra a validação cognitiva – 
+apoiada pelo conhecimento – um dos pilares menos importantes para os conteúdos 
+disseminados. Logo, a informação de qualidade, com bases teóricas e confirmações intelectuais, 
+não interessam, sendo assim a mobilização de sentimentos e identidades, através da moralidade 
+e da construção de narrativas no imaginário social são fatores mais relevantes.  
+ Os casos indefinidos (4 tweets) não foram possíveis de se analisar pela exclusão de 
+conteúdos, e os que não utilizam nenhum tipo (7 tweets) foram memes ou informações e 
+imagens aleatórias.  
+ 
+Considerações Finais  
+ Os dados apresentados mostram que as mensagens mais compartilhadas denotam 
+narrativas que atavam as instituições, principalmente, em relação ao Tribunal Superior Eleitoral 
+e ao Supremo Tribunal Federal. Essas narrativas mais compartilhadas mobilizam o sentido que 
+ambos os tribunais são “inimigos do país” e “ditadores”, que estariam fazendo manobras 
+políticas para prejudicar Bolsonaro e favorecer o candidato Lula. O discurso antidemocrático, 
+com ataques sistemáticos à credibilidade do funcionamento do sistema eleitoral, veio à tona 
+como uma ferramenta da extrema-direita para deslegitimar o processo e garantir a mobilização 
+de sentimentos negativos referentes à política brasileira, articulada com uma estratégia 
+discursiva antissistema que caracteriza a ascensão dos grupos populistas autoritários (Penteado 
+et al., 2022).  
+A arquitetura digital da comunicação nas plataformas digitais corroborou a dissipação 
+de narrativas anti-institucionais, como mostram os dados no caso do Twitter, uma vez que seu 
+sistema funciona em uma lógica binária de exclusão e inclusão, às vezes com mensagens de 
+sentidos vazios (Cesarino, 2020), fator que suscitou a conquista da direita, no ambiente virtual, 
+através do populismo digital. Essa organização on-line desestruturou a política de representação 
+indireta e fez com que os usuários comuns se sentissem participando diretamente da política 
+via Twitter, assim, trazendo a sensação para os usuários de que as instituições como aparato de 
+intermediação atrapalhariam uma relação direta com os políticos, como aponta Cesarino (2020).  
+
+ 
+ 
+Rev. Bras. de Iniciação Científica (RBIC), IFSP Itapetininga, v.11, e024030, p. 1-28, 2024. 
+ 
+Página25 
+Em consonância, há a percepção de que o espaço cibernético é regido por uma disputa 
+de discursos e de fatos - diferentes narrativas e ideologias em conflito – promovido por 
+personalidades digitais. Nesse sentido, é perceptível que os perfis mais relevantes são de 
+pessoas que exercem influência e poder dentro e fora das redes, sendo uma extensão do poder 
+das elites políticas e midiáticas. Eles conseguem alavancar narrativas de desinformação, porque 
+“...há uma grande importância dos chamados líderes de opinião em processos de “lavagem” da 
+desinformação, pois eles passam a ser creditados como as fontes originais do discurso, e dão-
+lhe credibilidade” (Recuero, 2020, p.403). Como consequência, surge toda uma estrutura de 
+legitimação (conforme ilustra o gráfico 7) para que essa retórica seja replicada e aderida pela 
+população.  
+A propagação da desinstitucionalização dos processos e do descrédito do Estado 
+propicia e coopera com a ascensão da extrema direita em seu discurso antissistema. Para 
+validação das opiniões e ideologias é utilizada a avaliação moral e a Mythopoesis, dois 
+instrumentos sem possibilidade de argumentação para que haja a desmistificação dos possíveis 
+fatos que são citados - uma “máscara moral”. A racionalidade e a autorização ficam à margem 
+do campo político, visto que esses recursos são dispensáveis, pois as figuras públicas que atuam 
+na rede são as próprias autoridades e utilizam a comunicação das plataformas digitais para 
+defesa de seus interesses. Assim, os perfis usam a substituição da racionalidade pela moral para 
+consolidar as narrativas e utilizar das emoções e subjetividades, assegurando a repercussão das 
+pautas estabelecidas.   
+A democracia deve ser vista como um processo dinâmico, incompleto e em constante 
+risco de retrocesso democrático – a desdemocratização. Com o baixo capital social das 
+instituições da democracia representativa, como o ataque sistemático ao sistema eleitoral, há 
+uma movimentação para descrédito dessa forma de governo e os sistemas peritos não são 
+eficientes para gerar segurança (Fontes et al, 2022). A redução da confiança nos processos 
+políticos e interpessoais é um dos pilares para a derrocada da democracia liberal, a qual tem o 
+aparato digital para proliferar e reforçar a desdemocratização, através de processos sociais 
+subjetivos.  
+Por fim, o conjunto de todos esses ataques é resultado de uma estratégia de comunicação 
+utilizada pela extrema-direita - em que Bolsonaro é a representação - através de seus artifícios 
+populistas. Essa comunicação mostrou-se eficiente e obteve efeitos para além das eleições, o 
+
+ 
+ 
+Rev. Bras. de Iniciação Científica (RBIC), IFSP Itapetininga, v.11, e024030, p. 1-28, 2024. 
+ 
+Página26 
+cenário de descrédito se estendeu como um movimento antigovernamental, totalitário e 
+intolerante com a pluralidade culminando em uma tentativa de Golpe de Estado, em 8 de janeiro 
+de 2023.  
+ 
+Referências 
+ 
+AGUIAR, L.; BARRETO DE SOUSA, D. L. A figura do influencer: Uma reflexão sobre o 
+bolsonarismo e a campanha do deputado André Fernandes. Revista Brasileira de Estudos da 
+Mídia, Natal, v. 1, n. 1, 2023. Disponível em: 
+https://periodicos.ufrn.br/RevisBraEstudoMidia/article/view/31997. Acesso em: 26 jul. 2024. 
+ 
+ARAÚJO, M. C. Capital Social. 2.ed. Rio de Janeiro: Zahar, 2003. 
+ 
+BALBE, R. O Uso de Tecnologias de Informação e Comunicação na Gestão Pública: 
+Exemplos no Governo Federal. Revista do Serviço Público, Brasília, v. 61, n.2, p. 189 - 209, 
+Abr/Jun, 2010. Disponível em: https://repositorio.enap.gov.br/handle/1/1613.  Acesso em: 08 
+dez. 2023 
+ 
+CASERO-RIPOLLÉS, A. Influencers in the Political Conversation on Twitter: Identifying 
+Digital Authority with Big Data. Sustainability, Basel, v. 13, n. 5, p. 2851, 6 mar. 2021. 
+ 
+CASTELLS, M. Communication Power. 2.ed. New York: Oxford University Press, 2009. 
+ 
+CASTELLS, M. A Ruptura: A crise da democracia liberal. Rio de Janeiro: Zahar, 2018. 
+ 
+CAVALCANTE, S. Classe média e ameaça neofascista no Brasil de Bolsonaro. Crítica 
+Marxista, Campinas, n.50, p.121-130, 2020. Disponível em: 
+<https://repositorio.unicamp.br/Busca/Download?codigoArquivo=536937>. Acesso em: 08 
+dez. 2023 
+ 
+CESARINO, L. Como vencer uma eleição sem sair de casa: a ascensão do populismo digital 
+no Brasil. Internet & Sociedade, São Paulo, v.1, n. 1, fevereiro, p.91-120, 2020. Disponível 
+em: 
+<https://www.academia.edu/download/62205827/numero1_volume1_fev2020_cesarino20200
+226-14293-ugynyh.pdf>. Acesso em:  10 jun. 2023 
+ 
+COSTA, R.; VENANCIO, R. Pluralismo democrático e o horário gratuito de propaganda 
+eleitoral. Aurora, São Paulo, v. 6, n.17, p. 16-31, 2013. Disponível em: 
+<https://revistas.pucsp.br/aurora/article/view/14844>. Acesso em: 08 dez. 2023 
+ 
+DARDOT, P.; LAVAL, C. A nova razão do mundo. São Paulo: Boitempo editorial, 2017. 
+ 
+DIAS DOS SANTOS, P.; LUIS DE CAMARGO PENTEADO, C.; DAMACENO DE 
+ALMEIDA, L.; HIDEKO GOYA, D. Democracia sob ataque: polarização política e produção 
+
+ 
+ 
+Rev. Bras. de Iniciação Científica (RBIC), IFSP Itapetininga, v.11, e024030, p. 1-28, 2024. 
+ 
+Página27 
+de conteúdos hostis no Twitter nas eleições de 2022. Revista Debates, Porto Alegre, v. 17, n. 
+1, p. 41–62, 2023. DOI: 10.22456/1982-5269.129776. Disponível em: 
+https://seer.ufrgs.br/index.php/debates/article/view/129776. Acesso em: 08 dez. 2023. 
+ 
+DOS SANTOS JUNIOR, M. A. Plataformização da comunicação política: governança 
+algorítmica da visibilidade entre 2013 e 2018. E-Compós, Brasília, v. 24. 2021. Disponível 
+em: <https://www.e-compos.org.br/e-compos/article/view/2101>. Acesso em: 30 out. 2023 
+ 
+DOURADO, T.; GOMES, W. O que são, afinal, fake news, enquanto fenômeno de 
+comunicação política?. COMPOLÍTICA, 8. Anais. Brasília, 2018 Disponível em: 
+<http://compolitica.org/novo/anais/2019_gt6_Dourado.pdf>. Acesso em: 24 set. 2023 
+ 
+FABRO, C. O que é API e para que serve? Cinco perguntas e respostas, Techtudo, Rio de 
+Janeiro, 2020. Disponível em: https://www.techtudo.com.br/listas/2020/06/o-que-e-api-e-
+para-que-serve-cinco-perguntas-e-respostas.ghtml. Acesso em: 08 dez. 2023 
+ 
+FONTES, F. L. de L.; MENEZES, M.; LAVOR, L.; LIMA, I. C.; LIMA, L. S.; MOURA, E. 
+G. A.; ARAUJO, M. L. A. de. From participatory democracy to de-democratization in Brazil: 
+institutions of participation in crisis. Research, Society and Development, Vargem Grande 
+Paulista, v. 11, n. 5, p. e48911528534, 2022. DOI: 10.33448/rsd-v11i5.28534. Disponível em: 
+https://rsdjournal.org/index.php/rsd/article/view/28534. Acesso em: 08 dez. 2023 
+ 
+GIDDENS, A. As consequências da modernidade. 5.ed. São Paulo: Editora Unesp, 1991 
+ 
+HENRIQUES, M. (Des)Confiança Institucional e Públicos Vulneráveis em Situação de 
+Emergência. Revista Dispositiva, Belo Horizonte, v.12, n. 21, p. 5-19, 2023. Disponível em: 
+http://periodicos.pucminas.br/index.php/dispositiva/article/view/29420. Acesso em: 25 jul. 
+2023 
+ 
+HJARVARD, S. (2014). Da Mediação à Mediatização: A Institucionalização das Novas 
+Mídias. Parágrafo, São Paulo, v. 3, n. 2, julho-dezembro, 2015. Disponível em: 
+<https://revistaseletronicas.fiamfaam.br/index.php/recicofi/article/view/331>. Acesso em: 19 
+fev. 2023 
+ 
+JACOB, J.; FONSECA, M. Aspectos históricos do processo de criação da Justiça Eleitoral no 
+Brasil: Republicanismo, Tenentismo e Coronelismo. Revista Brasileira de Pesquisas 
+Jurídicas (Brazilian Journal of Law Research), Avaré, v. 2, n. 1, p. 143-173, 2021. 
+Disponível em: <https://www.academia.edu/download/86179972/26.pdf>. Acesso em: 17 abr. 
+2023. 
+ 
+LACLAU, E. On Populist Reason. Londres: Verso, 2005. 
+ 
+LEVITSKY, S.; ZIBLATT, D. Como as democracias morrem. Rio de Janeiro: Zahar, 2018. 
+ 
+LOUREIRO, J. V. Experiência Democrática na Ponta dos Dedos: Digitalização, riscos e 
+desafios contemporâneos. INTERSEÇÕES, Rio de Janeiro, v. 24 n. 2, p.326-345, out, 2022. 
+
+ 
+ 
+Rev. Bras. de Iniciação Científica (RBIC), IFSP Itapetininga, v.11, e024030, p. 1-28, 2024. 
+ 
+Página28 
+Disponível em: https://www.e-publicacoes.uerj.br/index.php/intersecoes/article/view/70831. 
+Acesso em: 08 dez. 2023 
+ 
+MUHAMMAD, M.; NIRWANDY, N. A Study on Donald Trump Twitter Remark: A Case 
+Study on the Attack of Capitol Hill. Centre for Media and Information Warfare Studies, 
+Faculty Communication and Media Studies, Selangor, v. 14, n. 2, p. 75-104, 2021. 
+Disponível em: https://ir.uitm.edu.my/id/eprint/46937/1/46937.pdf. Acesso em: 08 dez. 2023 
+ 
+NÓBREGA, F.; RODRIGUES, A.; SILVA, L. A desconfiança no sistema eleitoral como fator 
+de comprometimento do capital social eleitoral: a descredibilidade que retrocede nos avanços 
+democráticos. REJUR - Revista Jurídica da UFERSA, Mossoró, v. 5, n. 10, jul./dez. 2021, 
+p. 85-106, ISSN 2526-9488, 2020. Disponível em: 
+https://periodicos.ufersa.edu.br/rejur/article/view/11028. Acesso em: 29 maio. 2023 
+ 
+OLIVEIRA, S.; TEZZI, M. O papel dos influenciadores digitais na formação da opinião 
+pública, Revista do Instituto de Ciências Humanas, Belo Horizonte, v.17, n.27, 2021- 
+ISSN:2359-0017, 2021. Disponível em: 
+http://periodicos.pucminas.br/index.php/revistaich/article/view/27809. Acesso em: 08 dez. 
+2023 
+ 
+PENTEADO, C. L. de C.; CRUZ JUNIOR, B. G. Ação política na internet na era das redes 
+sociais. Ponto-e-Vírgula, São Paulo, n. 26, p. 109–122, 2020. DOI: 10.23925/1982-
+4807.2019i26p109-122. Disponível em: 
+https://revistas.pucsp.br/index.php/pontoevirgula/article/view/51518. Acesso em: 31 jul. 
+2024. 
+ 
+PENTEADO, C. L. de C.; GOYA, D. H.; DOS SANTOS, P. D.; JARDIM, L. Populismo, 
+desinformação e Covid-19: comunicação de Jair Bolsonaro no Twitter. Media & Jornalismo, 
+Lisboa, v. 22, n.40, p. 239-260, 2022. Disponível em: https://impactum-
+journals.uc.pt/mj/article/view/10255. Acesso em: 08 dez. 2023 
+ 
+RECUERO, R. #FraudenasUrnas: estratégias discursivas de desinformação no Twitter nas 
+eleições 2018. Rev. Bras. Linguíst. Apl., Belo Horizonte, v. 20, n. 3, p. 383-406, 2020. 
+Disponível em: https://www.scielo.br/j/rbla/a/vKnghPRMJxbypBVRLYN3YTB/?lang=pt. 
+Acesso em: 15 nov. 2022 
+ 
+RECUERO, R; ZAGO, G. Em busca das redes que importam: redes sociais e capital social no 
+twitter. Líbero, São Paulo, v. 12, n. 24, p. 81-94, dez. de 2009. Disponível em: 
+https://seer.casperlibero.edu.br/index.php/libero/article/view/498. Acesso em: 08 dez. 2023 
+ 
+ROGERS, R. Digital methods. Cambridge, Massachusetts: The Mit Press, 2013.  
+ 
+SILVA, D. SILVA, D. P. Junho de 2013: crítica e abertura da crise da democracia 
+representativa brasileira. Revista Maracanan, Rio de Janeiro, n. 18, p. 83–110, 2018. 
+Disponível em: http://periodicos.ufpb.br/ojs2/index.php/tematica, 2017. Acesso em: 08 dez. 
+2023 

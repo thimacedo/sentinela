@@ -1,0 +1,919 @@
+ODISSEIA                                                                                                                 ISSN: 1983-2435 
+Odisseia, Natal, RN, v. 9, n. esp., p. 160-180, jul.~dez. 2024 
+160 
+ANÁLISE DO DISCURSO DE ÓDIO EM COMENTÁRIOS DO INSTAGRAM: 
+DESCRITIVO E DIMENSÃO ARGUMENTATIVA EM INTERFACE 
+ 
+Sueli Cristina Marquesi* 
+suelimarquesi.sm@gmail.com 
+Pontifícia Universidade Católica de São Paulo 
+ 
+Rivaldo Capistrano Júnior∗∗ 
+r.capistrano@uol.com.br 
+Universidade Federal do Espírito Santo 
+ 
+Andréa Pisan Soares Aguiar*** 
+                                                          
+* Doutora em Linguística Aplicada e Professora Titular de Língua Portuguesa da PUC-SP, atuando no 
+Programa de Estudos Pós-graduados em Língua Portuguesa, no Instituto de Pesquisas Linguísticas 
+Sedes Sapientiae para Estudos de Português (IP) e no Departamento de Português da Faculdade de 
+Filosofia, Comunicação, Letras e Artes. É Avaliadora Institucional do INEP/MEC e Professora Emérita 
+pela Universidade Cruzeiro do Sul. Realizou estudos de pós-doutorado em Linguística, na Universidade 
+do Porto (Portugal) e na Universidade de Lausanne (Suíça), estágio profissional em gestão 
+universitária, na Universidade de Montréal (Canadá), e missão de trabalho em projeto de pesquisa na 
+Universidade Sorbonne - Paris V (França), dentro de projeto CAPES-COFECUB. Tem-se dedicado, ao 
+longo de sua carreira, ao ensino superior, tanto na Graduação quanto na Pós-graduação, 
+desenvolvendo pesquisas relacionadas a leitura, escrita, uso da linguagem verbal em ambientes 
+virtuais de aprendizagem, linguagem jurídica e tipologia e gêneros textuais. É líder do Grupo de 
+Pesquisa "Texto, Escrita e Leitura" (PUCSP-CNPq) e foi coordenadora, no biênio 2016-2018, do GT 
+Linguística de Texto e Análise da Conversação, da Associação Nacional de Pesquisa em Letras e 
+Linguística (ANPOLL). Participou, no período de 2010 a 2013, como coordenadora de equipe, do 
+Projeto Análise de Textos e Discursos, liderado pela Universidade do Rio Grande do Norte, dentro do 
+Programa PROCAD - NF da CAPES. Desde 2018, é membro da Rede Internacional de Pesquisa em 
+Argumentação - REDIPAr e, desde 2015, do Grupo de Pesquisa "Análise Textual dos Discursos (UFRN-
+CNPq)". Participa do conselho científico do Projeto NURC/SP - Núcleo USP desde 2020. É autora de 
+livros, capítulos de livros e artigos em periódicos científicos. Em sua atuação profissional, registram-se, 
+ainda, atividades de extensão voltadas para a formação continuada de professores de Língua 
+Portuguesa. Ocupou vários cargos de gestão acadêmica, destacando-se entre eles: na PUC-SP, o de 
+Vice-diretora da Faculdade de Filosofia, Comunicação, Letras e Artes (1991-1996), o de Coordenadora 
+do Programa de Estudos Pós-graduados em Língua Portuguesa (1993-1996) e o de Vice-reitora 
+Acadêmica (1996-2000); na Universidade Cruzeiro do Sul, o de Diretora de Pós-graduação e Pesquisa 
+(1997-2001), o de Pró-reitora Acadêmica (2001) e o de Reitora (2001-2017); no Centro Universitário 
+Módulo, o de Reitora (2010-2017); e, na Faculdade São Sebastião, o de Supervisora Acadêmica (2015-
+2017). Foi Assessora do Ministério para o ENADE na área de Letras. Atualmente, exerce o cargo de 
+Coordenadora do curso de Letras: Língua Portuguesa e Língua Inglesa - Licenciatura, na PUC-SP, 
+biênio 2020-2022.  
+∗∗ Professor do curso de Letras e do Programa de Pós-Graduação em Linguística da Universidade 
+Federal do Espírito Santo. Líder do GELT (CNPq/UFES), vice-líder do THELPO (CNPq/UNIFESP). 
+Vice-coordenador, biênio 2023-2025, do Grupo de Trabalho Linguística de Texto e Análise da 
+Conversação (GT LTAC) da ANPOLL. 
+*** Doutora em Língua Portuguesa pela PUC-SP. Mestre em Língua Portuguesa pela mesma 
+universidade. Possui Especialização em Língua Portuguesa e Literatura pela Universidade São Marcos. 
+Graduada em Letras, com habilitação em Tradução (inglês), pela Universidade Católica de Santos, e 
+licenciada em Letras Português/Inglês pela Unicsul. Experiência como revisora de textos e copidesque 
+em editoras. Presta serviços de revisão para pós-graduandos e profissionais de áreas diversas (artigos, 
+dissertações, teses). Professora convidada de cursos de extensão a distância na Cogeae/PUC-SP. 
+Pesquisadora do Grupo de Pesquisa Texto, Escrita e Leitura (PUC-SP/CNPq - Líder Profa. Dra. Sueli 
+Marquesi), do Grupo de Pesquisa Texto, Hipertexto e Ensino de Língua Portuguesa - THELPO 
+(Unifesp/CNPq - Líder Profa. Dra. Vanda Maria Elias) e do Grupo de Pesquisa em Tecnologias 
+Educacionais (GPTEd/CNPq - Líder Prof. Dr. João Mattar). Pós-doutoranda do Programa de Estudos 
+
+DOI 10.21680/1983-2435.2024v9nEspecialID34895     S.Marquesi, R.Capistrano Júnior, A.Aguiar 
+ 
+http://creativecommons.org/licenses/by-nc-sa/4.0 
+161 
+andreapisan@uol.com.br 
+Pontifícia Universidade Católica de São Paulo 
+_______________________________________ 
+ 
+Resumo: As manifestações odiosas são marcadas pela intolerância, pela hostilidade 
+e pela incitação a atos antidemocráticos e são proferidas com o objetivo de influenciar 
+e intimidar grupos sociais, constituindo-se, assim, um tema importante na agenda da 
+Linguística contemporânea. Seu uso tem sido largamente disseminado em sites de 
+redes sociais, em razão de traços constitutivos desses ambientes, tais como a 
+hiperconexão (conexão em grande escala), o ambiente algorítmico das redes, as 
+estruturas de participação, do livre acesso a conteúdos e o (pseudo)anonimato. Dito 
+isso, define-se, neste artigo, a seguinte pergunta de pesquisa: Como o descritivo 
+constitui o discurso de ódio e evidencia a dimensão argumentativa em comentários 
+publicados no Instagram? Em resposta a esse questionamento, este artigo objetiva 
+estabelecer uma relação, a partir da análise de comentários no Instagram, entre o 
+descritivo e a dimensão argumentativa em manifestações publicadas nessa rede 
+social. Com base na análise do corpus, observa-se que o descritivo não só sinaliza 
+posicionamentos e orientações argumentativas, mas também revela uma motivação 
+a comportamentos odientos e ataques pessoais. 
+Palavras-chave: discurso de ódio; dimensão argumentativa;  descritivo; comentários 
+no Instagram. 
+ 
+1 Introdução 
+ 
+ 
+ As Tecnologias Digitais da Informação e Comunicação (TDICs) possibilitaram 
+uma diversificação dos tipos de interação, das estruturas de participação e da 
+construção de comunidades em mídias sociais digitais. Nesses ambientes, 
+internautas, ao compartilharem crenças, normas e comportamentos sociais, tendem a 
+se agrupar e a captar apoio, criando um senso de pertencimento e identidade. No 
+entanto, essa complexa dinâmica interacional endogrupal muito favorece a construção 
+da visão do “outro” como estranho, diferente, não adequado, criando terreno fértil para 
+o aumento de atitudes hostis e para a disseminação do discurso odiento. 
+Em vista disso, neste artigo, propomos uma discussão sobre a manifestação do 
+discurso de ódio em comentários do site da rede social Instagram, orientada pela 
+seguinte pergunta: Como o descritivo constitui o discurso de ódio e evidencia a 
+dimensão argumentativa em comentários publicados no Instagram?  Para respondê-
+la, propomos, como objetivo deste estudo, estabelecer uma relação, a partir da análise 
+de comentários no Instagram, entre o descritivo e a dimensão argumentativa em 
+                                                          
+Pós-graduados em Língua Portuguesa da PUC-SP, bolsista PNPD/CAPES, com pesquisa nas áreas 
+de linguística textual e de revisão de texto, sob supervisão da Profa. Dra. Sueli Cristina Marquesi. 
+
+ODISSEIA                                                                                                                 ISSN: 1983-2435 
+Odisseia, Natal, RN, v. 9, n. esp., p. 160-180, jul.~dez. 2024 
+162 
+manifestações publicadas nessa rede social. Nessa direção, consideramos, com base 
+em trabalhos de Marquesi (2007a; 2007b; 2017; 2018) e de Marquesi, Elias e Cabral 
+(2017), que o descritivo guarda intrínseca relação com a manifestação de 
+posicionamentos e orientações argumentativas.  
+ Para atingir o objetivo proposto, fundamentamo-nos em princípios teóricos da 
+Linguística Textual e da Análise Textual dos Discursos e trazemos à discussão a 
+análise, a título de exemplificação, de postagens no Instagram, organizando o artigo 
+em quatro seções, além desta introdução e da conclusão. Na seção de número 2, a 
+fim de contextualizarmos o estudo, tratamos da conceituação e caracterização do 
+discurso de ódio. Na seção 3, apresentamos e discutimos as noções de texto e 
+argumentatividade que embasam o trabalho. Na seção 4, discorremos sobre o 
+descritivo, abordado primeiro como tipo textual (Marquesi, 2004) e depois como 
+sequência textual (Adam, 2011; Marquesi, 2017; 2018). Por fim, na seção 5, 
+procedemos à análise e reflexão. 
+ 
+2 Discurso de ódio em comentários de sites de redes sociais 
+ 
+O discurso de ódio, segundo a definição do Comité de Ministros do Conselho da 
+Europa, diz respeito a “todas as formas de expressão que propaguem, incitem, 
+promovam ou justifiquem ódio racial, xenofobia, antissemitismo e outras formas de 
+ódio baseado na intolerância, incluindo: intolerância expressa por nacionalismo ou 
+etnocentrismo agressivo, discriminação e hostilidade contra minorias, migrantes e 
+pessoas de origem migrante” (Lorenzi Bailly; Moïse, 2022). 
+Em termos gerais, podemos entender o termo “discurso de ódio” (DO, daqui em 
+diante) como uma prática de comunicação, em que se utiliza linguagem para incitar, 
+encorajar e propagar o ódio, a violência, o constrangimento e a exclusão contra 
+pessoas ou membros de grupo social, em decorrência de sua raça, etnia, religião, 
+orientação sexual, gênero, aparência física, tamanho corporal, deficiência, idade etc. 
+Essa prática, conforme Lorenzi Bailly e Moïse (2022), é uma ameaça à ordem 
+democrática, às lutas políticas e uma apologia aos crimes de guerra, violência e 
+terrorismo. 
+O DO se constrói e se perpetua por meio de doxa, estereótipos desvalorizantes 
+(Amossy; Pierrot, 2022) e preconceitos, sendo alimentado por uma visão binária do 
+bem versus o mal (Lorenzi Bailly; MOÏSE, 2022), afetos (paixões negativas), tais como 
+
+DOI 10.21680/1983-2435.2024v9nEspecialID34895     S.Marquesi, R.Capistrano Júnior, A.Aguiar 
+ 
+http://creativecommons.org/licenses/by-nc-sa/4.0 
+163 
+raiva, medo, desprezo, indiferença etc., interesses políticos, diversão de provocar 
+conflito, constrangimento. Nesse sentido, para Turpin (2023), o DO se manifesta, com 
+base na dualidade, como um discurso de indignação ou de alarme, que incita o outro 
+a atacar, o que coloca o alvo como odioso, perigoso e ameaçador. Diante dessas 
+considerações, podemos entender que a motivação do DO não é necessariamente o 
+ódio. 
+Essa dinâmica expõe ponto(s) de vista, reforça engajamento e provoca adesões 
+em uma dada situação de interação. Desse modo, todo DO tem uma dimensão 
+argumentativa (Amossy, 2018), que incita o outro a crer, ver e fazer, e faz uso de atos 
+de condenação, por meio de argumentos ad personam (ataque pessoal)1, que visam 
+a qualificar pejorativamente o outro (Grácio, 2013).  
+Seu objetivo, de forma mais ou menos violenta e/ou mais ou menos direta, é 
+provocar, atacar, ameaçar, constranger pessoas, avatares e/ou grupos sociais. Em 
+sua forma direta (revelado), de acordo com Moïse et al. (2021), o discurso de ódio 
+caracteriza-se por i) assentar-se numa dimensão discursiva patêmica (ligada às 
+emoções negativas), ii) mobilizar marcadores de negação da alteridade, iii) recorrer a 
+atos de condenação, ou seja, formas de violência verbal que ofendem a identidade de 
+outrem, desde os insultos a ameaças, entre outros. 
+Na dimensão discursiva patêmica, o ódio é um forte sentimento emocional, que, 
+em sites de redes sociais, pode se mostrar por meio de palavras pejorativas, 
+caluniosas e de recursos imagéticos digitais, tais como emojis, GIFs, emoticons etc., 
+refletindo uma emoção semiotizada, contextualmente interpretável (Moïse et al., 
+2021). Assim, por meio desses elementos linguageiros, sentimentos de ameaça, 
+humilhação, desprezo, exclusão são fortalecidos. 
+Além disso, o discurso de ódio direto, segundo Moïse et al. (2021), é 
+caracterizado pela combinação de um efeito patêmico, uma rejeição de uma 
+alteridade, ou seja, a exclusão do outro e negação de diferenças, o que reforça a 
+exclusão e rejeição. Somam-se a isso atos diretos de condenação, quais sejam, 
+insulto, ameaça, reprovação ou mesmo maldição. Essas três condições de 
+funcionamento do discurso de ódio são responsáveis pela estigmatização, exclusão e 
+                                                          
+1 “A argumentação ad personam consiste em desvalorizar e mesmo desautorizar o discurso do outro 
+através de ataques que incidem sobre a sua pessoa, o seu carácter ou os seus atos. Este tipo de 
+argumentação, procurando descredibilizar o oponente enquanto pessoa, visa desvalorizar a sua 
+iniciativa argumentativa como algo que não merece ser tomado em conta ou ser ouvido” (Grácio, 2013, 
+p. 38). 
+
+ODISSEIA                                                                                                                 ISSN: 1983-2435 
+Odisseia, Natal, RN, v. 9, n. esp., p. 160-180, jul.~dez. 2024 
+164 
+discriminação de grupos minoritários e despertam sentimentos negativos, reações 
+violentas e antidemocráticas. 
+Por sua vez, conforme Moïse et al. (2021), o discurso de ódio em sua forma 
+indireta (dissimulado), sobretudo o que ocorre em interações on-line, nas quais os 
+internautas buscam frequentemente esconder a natureza violenta de suas postagens, 
+por meio de dissimulações retóricas (alusões, insinuações, desprezo, humor vexatório 
+etc.), apoia-se principalmente em estereótipos desvalorizantes e argumentos de 
+autoridade em que se apela a uma doxa (Lorenzi Bailly; Moïse, 2022). 
+Nesse sentido, as Tecnologias Digitais de Informação e Comunicação (TDICs) 
+têm potencial para difundir o DO, uma vez que, de acordo com Capistrano Júnior 
+(2023), a hiperconexão (conexão em grande escala), o ambiente algorítmico das 
+redes, as estruturas de participação, o livre acesso a conteúdos, são propícios à 
+formação de bolhas sociais, o que favorece o surgimento de uma heterogeneidade de 
+opiniões e pontos de vista, fomentando o surgimento de interações conflituosas e 
+ameaçadoras, em que a linguagem depreciativa e pejorativa ocorrem. Além disso, o 
+(pseudo)anonimato favorece a autoexpressão e a manifestação de opiniões, 
+permitindo que os internautas se sintam mais desinibidos para incitar a discriminação, 
+a hostilidade e a violência. 
+Nos espaços de comentários, locus de ação participativa e interação, os 
+internautas (re)produzem e consomem conteúdos, reagem a temas focalizados em 
+uma postagem iniciadora e/ou em comentários de outro participante, emitem suas 
+opiniões, crenças, julgamentos, a fim de atuarem nesse espaço de convergência 
+social. Nos comentários, o DO promove um confronto entre o “odiador” e a vítima. 
+Para tanto, recorre-se frequentemente não só a expressões ou qualificações 
+insultuosas, mas também a elementos imagéticos (emojis, GIFs etc.) com valor 
+pejorativo. 
+O emprego desses elementos verbais e imagéticos remete à desqualificação do 
+indivíduo, por meio de argumentos ad personam que visam à “condenação do ser” (de 
+suas próprias características) e à “condenação do fazer” (de suas ações), como 
+observam Bernard Barbeau e Moïse (2023). Essa estratégia pode ser representada 
+pelo seguinte esquema implícito:  
+ 
+ 
+
+DOI 10.21680/1983-2435.2024v9nEspecialID34895     S.Marquesi, R.Capistrano Júnior, A.Aguiar 
+ 
+http://creativecommons.org/licenses/by-nc-sa/4.0 
+165 
+ Ser/fazer (x) é desqualificar 
+A é/fazer (x) 
+Portanto A é [tratado como] (y desqualificação ) 
+(Bernard Barbeau; Moïse (2023, n. p.).  
+Esse esquema para a desqualificação presente no discurso de ódio nos permite   
+estabelecer uma inter-relação com o descritivo e sua interface com a dimensão 
+argumentativa do texto, como tratamos nas seções 4 e 5 do presente estudo.  
+Antes, porém, consideramos importante explicitarmos as noções de texto e de 
+argumentatividade aqui adotadas, passando, então à seção 3. 
+ 
+3 As noções de texto e de argumentatividade  
+ 
+ Conforme Capistrano Júnior (2023), chegar a uma conceituação de texto que 
+leve em consideração a sua complexidade constitutiva, a diversidade e 
+heterogeneidade textuais, a sua produção, circulação e recepção em tradicionais e 
+novas mídias, é um grande desafio. E toda definição deverá ser cautelosa e será 
+sempre provisória, considerando-se a evolução do conhecimento nos estudos do 
+texto. 
+ Neste trabalho, entendemos texto como enunciado singular, que compõe uma 
+unidade conclusa de comunicação e de coerência em contexto (Cavalcante et al., 
+2019). Além disso, assumimos que todo texto é constitutivamente argumentativo, pois 
+é “[...] produzido com a intenção/função de fazer crer, fazer alguma coisa ao outro” 
+(Cabral, 2017, p. 244). O entendimento do conceito pressupõe levarmos em conta os 
+seguintes princípios teóricos da Linguística Textual (LT): 
+ 
+● o texto é um evento comunicativo, ou seja, um acontecimento 
+irrepetível, em que ‘convergem as ações linguísticas, cognitivas e 
+sociais’ (Beaugrande, 1997, p. 10). Considerando-se que a 
+textualização não ocorre apenas pelo uso da linguagem verbal, deve-
+se acrescentar a expressão ‘sistemas semióticos verbais e não 
+verbais’ à definição de Beaugrande, conforme defendem Cavalcante 
+e Custódio Filho (2010); 
+ 
+● se o texto é um evento comunicativo, então, a ação de textualizar 
+ocorre em situações específicas de interação imediata, inseridas em 
+contextos históricos e sociais, e pressupõe a mobilização de 
+conhecimentos acessíveis e atualizáveis de sujeitos sociais (Koch, 
+2002, 2004; Marcuschi, 2007). Isso nos leva depreender que a 
+interação, modos de agir, e cognição, modos de conhecer, são 
+subjacentes e indissociáveis das ações textuais;  
+
+ODISSEIA                                                                                                                 ISSN: 1983-2435 
+Odisseia, Natal, RN, v. 9, n. esp., p. 160-180, jul.~dez. 2024 
+166 
+ 
+● o texto é toda e qualquer produção linguageira ‘[...] que envolve 
+sujeitos, seus objetivos e conhecimentos com propósito interacional’ 
+(Koch; Elias, 2016, p. 32). 
+ 
+ Em LT, a noção de propósito interacional está atrelada à intencionalidade. Este 
+termo não só diz respeito ao que os sujeitos tencionam (Beaugrande, 1997), aos 
+meios e às estratégias de que lançam mão para realizar textualmente suas intenções, 
+mas também, em sentido lato, abrange as funções sociais dos textos (Sandig, 2009).  
+ O interesse pelo estudo da argumentação na LT se dá em trabalho pioneiro de 
+Koch (1983). Para a autora, “[...] o ato de argumentar, isto é, de orientar o discurso no 
+sentido de determinadas conclusões, constitui o ato linguístico fundamental [...]” 
+(Koch, 1983, p. 19). 
+ No entendimento de Capistrano Júnior (2023), esse posicionamento é 
+repensado por Fávero e Koch (1985), ao sustentarem que a argumentação “[...] não 
+é, apenas, um dos fatores de textualidade: é, isso sim, o integrador de todos os 
+demais” (Fávero; Koch, 1985, p. 34). Essa visão evidencia uma ampliação da visão 
+de argumentação linguística, em que as orientações argumentativas estão previstas, 
+de certa forma, na estrutura e no léxico da língua, e entrevê indícios da discussão 
+atual que considera a argumentação, entendida como forma de influenciar o outro no 
+seu modo de ver, pensar, agir e sentir (Amossy, 2018). 
+Nessa perspectiva, Cabral (2016; 2017) defende que o eixo orientador da 
+construção textual se encontra nas intenções do produtor, o que permite evidenciar 
+ser a construção textual um arranjo singular, fruto de um projeto enunciativo 
+argumentativamente orientado. Com base em Cabral (2016; 2017) e em Amossy 
+(2018), assumimos que a argumentação é constitutiva dos textos e se manifesta sob 
+a forma de uma dimensão argumentativa (aponta maneiras de ver, de sentir etc.), ou 
+sob a forma de uma visada argumentativa (tem finalidade de persuasão).  
+Conforme acrescenta Amossy (2020), a dimensão argumentativa (ou 
+argumentação indireta) é ampla e inclusiva e “se deixa apreender fora da formulação 
+explícita de uma questão, de uma tese e dos argumentos que a sustentam” (Amossy, 
+2020, p. 75-76). Essa concepção, portanto, não apresenta, no nível textual, uma 
+sequência argumentativa; não objetiva defender uma tese; não traz o confronto 
+explícito de posições antagônicas; não é da ordem de um raciocínio lógico formal; mas 
+busca compartilhar opiniões, pontos de vista, questionamentos, suscitar reflexão, por 
+meio de procedimentos textuais-discursivos que não são argumentos formais. 
+
+DOI 10.21680/1983-2435.2024v9nEspecialID34895     S.Marquesi, R.Capistrano Júnior, A.Aguiar 
+ 
+http://creativecommons.org/licenses/by-nc-sa/4.0 
+167 
+ Dito isso, passamos, a seguir, à discussão do descritivo, abordando estudos 
+teóricos realizados em dois períodos da Linguística Textual – o período das 
+Gramáticas de Texto e o das Teorias do Texto, considerando, respectivamente, o 
+descritivo como tipo textual (Marquesi, 2004 [1990]2) e, posteriormente, como 
+sequência textual (Adam, 2011; Marquesi, 2013; 2017; 2018), por essas duas 
+abordagens, em diálogo, terem constituído as bases para a definição de categorias 
+analíticas (Marquesi, 2017; 2018) que  permitiram a verificação, em diferentes corpora, 
+da sequência descritiva como constitutiva da dimensão argumentativa de um texto, já 
+que revela escolhas em função de um projeto de dizer de seu produtor. 
+ 
+4 O descritivo  
+ 
+Para a  abordagem inicial do descritivo considerado como um tipo textual, 
+revisitamos Marquesi (2004 [1990]), que,  em estudo pioneiro no Brasil, estabeleceu 
+suas categorias e superestrutura, realizando, para tanto, uma detalhada revisão das 
+proposições de teóricos anteriores, como Adam (1987), que abordou a tipologia do 
+descritivo; Genette (1973 [1966]), que discorreu sobre as fronteiras da narrativa para 
+explicitar que o descritivo tem organização autônoma; Hamon (1972; 1981), que 
+trouxe o primeiro estudo formal do descritivo e propôs a noção de descrição como 
+unidade específica; Hass e Lorrot (1987), que desenvolveram uma proposta 
+pedagógica do descritivo; Petitjean (1987), que apresentou trabalho de cunho analítico 
+focado na função do descritivo na Literatura. 
+Esses e outros trabalhos abordados pela autora na mesma obra, permitiram-lhe 
+desenvolver uma organização para o descritivo, com base na análise de textos 
+enciclopédicos, publicitários e literários, da perspectiva da tipologia de textos, dada 
+por três categorias, representadas no esquema a seguir (Figura 1). Com base em van 
+Dijk (1980), Marquesi (2004 [1990]) considerou essas categorias como funções 
+textuais esquemáticas que permitem organizar e classificar as diferentes frases 
+presentes em um texto, o que foi posteriormente corroborado em estudo desenvolvido 
+por Marquesi e Elias (2011). 
+ 
+ 
+                                                          
+2 O estudo de Marquesi datado de 1990 refere-se a sua tese de doutorado, que originou a obra intitulada 
+A organização do texto descritivo em Língua Portuguesa, publicada em sua 1ª edição em 1996 e em 
+sua 2ª edição em 2004. 
+
+ODISSEIA                                                                                                                 ISSN: 1983-2435 
+Odisseia, Natal, RN, v. 9, n. esp., p. 160-180, jul.~dez. 2024 
+168 
+    Figura 1 – Categorias do descritivo 
+ 
+ 
+    Fonte: Marquesi (2004 [1990], p. 103). 
+ 
+Segundo a autora, no estudo em foco, a categoria da designação compreende 
+nomear, indicar, dar a conhecer, para se determinar e qualificar certas marcas do 
+objeto designado, em uma estruturação caracterizada pela fórmula x é y, em que x 
+está para a designação e y para a expansão; trata-se de um processo de 
+condensação. Já a categoria da definição compreende determinar a extensão ou os 
+limites de, enunciar os atributos essenciais do que é descrito, de forma que o objeto 
+da descrição não seja confundido com outro; trata-se de um processo de expansão, 
+ou ampliação; ainda, dentro do processo de expansão, Marquesi (2004 [1990]) 
+acrescentou a categoria da individuação, que, por sua vez, compreende especificar, 
+distinguir, particularizar, indicando o que faz um ser possuir não apenas um tipo 
+específico, mas também uma existência singular, determinada no tempo e no espaço; 
+como a categoria anterior, refere-se a um processo de expansão.  
+Em sua abordagem do descritivo como tipo textual, Marquesi (2004 [1990]) 
+também especificou as regras do descritivo: equivalência e hierarquização, a primeira, 
+referindo-se à organização das relações categoriais e predicativas nos variados níveis 
+seguindo uma linha horizontal, e a segunda, referindo-se à organização das relações 
+seguindo uma linha vertical. Segundo a autora, essa “regra é responsável pela 
+organização de um dos níveis da coerência do texto que, segundo Charolles (1978), 
+exige a manutenção e progressão da referência na expansão textual” (Marquesi, 2004 
+[1990], p. 112). 
+Vale destacar que a estudiosa distingue tematização de topicalização. Esta é 
+empregada como hierarquização, relacionada à sintaxe das categorias esquemáticas 
+do texto como forma; já a tematização é empregada como seleção, relacionada ao 
+conteúdo semântico de um texto, decorrente de recortes que o sujeito descritor realiza 
+no contínuo sêmico referencial. A fim de indicar a manutenção temática na expansão 
+dos blocos descritivos e a relação entre eles, a autora utiliza a expressão “fio condutor 
+do texto”, que permite manter a coerência e orienta o produtor nas suas escolhas 
+linguístico-textuais para proceder à progressão textual e, como consequência, para o 
+
+DOI 10.21680/1983-2435.2024v9nEspecialID34895     S.Marquesi, R.Capistrano Júnior, A.Aguiar 
+ 
+http://creativecommons.org/licenses/by-nc-sa/4.0 
+169 
+processo de referenciação (Marquesi, 2018). Na Figura 2, ilustramos as categorias 
+que organizam o descritivo, conforme postulado por Marquesi (2004 [1990]). 
+ 
+  Figura 2 – Organização do descritivo segundo suas categorias 
+ 
+  Fonte: Marquesi (2004 [1990], p. 114). 
+ 
+  
+Quanto à abordagem do descritivo considerado como uma sequência textual, 
+revisitamos, primeiro, Adam (2011 [2008]), que vem se dedicando à construção teórica 
+referente a planos de texto e sequências textuais, tornando-se a referência em que 
+muitos pesquisadores têm se fundamentado; segundo, Marquesi (2013; 2017; 2018), 
+estudiosa que vem tratando, especificamente, da sequência textual descritiva, por 
+meio de categorias analíticas aplicadas a diferentes corpora. 
+Começando por Adam, então, destacamos que o insigne teórico, em seu 
+trabalho de 2011 [2005], aprofunda a abordagem sobre a sequência descritiva, 
+concebendo-a como “inerente ao exercício da fala” e “identificável no nível dos 
+enunciados mínimos” (p. 217), além de pôr em relevo que a atribuição mínima de um 
+predicado a um sujeito constitui a base de um conteúdo proposicional, revelando essa 
+atribuição, sempre, a posição do sujeito enunciador e, nesse caso, qualquer conteúdo 
+descritivo revela a atitude subjetiva de seu enunciador.  
+Na visão de Adam, qualquer procedimento descritivo é, pois, inseparável de uma 
+visada do discurso, o que decorre da indissociabilidade entre um conteúdo descritivo 
+e uma posição enunciativa que orienta argumentativamente todo enunciado. 
+Especificamente, sobre a composição textual da sequência descritiva, o autor 
+propõe para ela a aplicação de quatro operações de base: 
+- 
+Operações 
+de 
+tematização: 
+pré-tematização; 
+pós-tematização; 
+retematização; 
+
+ODISSEIA                                                                                                                 ISSN: 1983-2435 
+Odisseia, Natal, RN, v. 9, n. esp., p. 160-180, jul.~dez. 2024 
+170 
+- Operações de aspectualização: fragmentação; qualificação;  
+- Operações de relação: relação de contiguidade – situação temporal e 
+espacial; relação de analogia – forma de assimilação comparativa ou 
+metafórica;  
+- Operações de expansão por subtematização. 
+ 
+Foi essa teorização de Adam (2011 [2008]) sobre a sequência textual descritiva 
+que tornou possível a reflexão de Marquesi (2017; 2018), em que a autora estabeleceu 
+uma relação entre as operações por ele então propostas e as categorias por ela 
+estabelecidas anteriormente (Marquesi, 2004 [1990]), o que resultou nas seguintes 
+categorias analíticas para o descritivo: 
+- Designação/nomeação, por tematização; 
+- Definição e individuação, por aspectualização ou por relação. 
+A nomeação e o escopo das referidas categorias analíticas foram justificadas 
+pela autora, tanto no trabalho de 2017 quanto no de 2018, por considerar que: (i) a 
+operação de tematização consiste em nomear e pôr em evidência um todo; (ii) a 
+operação de aspectualização serve para expor as partes do todo por meio de uma 
+fragmentação que ressalta as qualidades do objeto descrito; (iii) a operação de relação 
+é dada por contiguidade (recorte temporal ou espacial) e por analogia (dada pela 
+comparação ou metáfora); e, por fim, (iv) a operação de expansão é desenvolvida por 
+meio da subtematização, que evidencia a extensão da descrição e ocorre pela adição 
+de qualquer operação a uma anterior. 
+Ainda como fruto da relação estabelecida entre seus estudos iniciais e os 
+posteriores, a estudiosa tem ressaltado que o fio condutor, conforme Figura 1, 
+apresentada anteriormente, permite manter a coerência e orienta o produtor nas suas 
+escolhas linguístico-textuais para fazer progredir o texto, o que influencia no processo 
+de referenciação em cada categoria. Além disso, como observa, conforme o gênero 
+em que se dá o descritivo, pode ocorrer uma expansão maior ou menor em cada 
+categoria: por exemplo, no texto enciclopédico, a categoria mais expandida é a 
+definição, já no texto técnico é a individuação (Marquesi, 2018). A estudiosa tem 
+reiterado, também, que é no tópico superior que ocorre a tematização do objeto 
+descrito – um recorte subjetivo dado pela seleção de algumas unidades sêmicas que 
+expressam uma visão de mundo particular daquele que descreve. Essa subjetividade 
+indica pontos de vista, sinalizando uma dimensão argumentativa. 
+
+DOI 10.21680/1983-2435.2024v9nEspecialID34895     S.Marquesi, R.Capistrano Júnior, A.Aguiar 
+ 
+http://creativecommons.org/licenses/by-nc-sa/4.0 
+171 
+Pela relação que estabelece entre o estudo de Adam (2011 [2008]) com o que 
+propõe, Marquesi ressalta que o produtor, ao tematizar determinado ser ou objeto, já 
+aponta a orientação argumentativa do texto, ou seja, a argumentatividade, 
+manifestada por suas escolhas lexicais e sintáticas para designar/nomear, qualificar, 
+localizar, situar o ser ou o objeto tematizado, segundo sua intenção comunicativa 
+(Marquesi, 2013; 2017; 2018). Destacamos que o linguista, ao explicitar o papel 
+fundamental do descritivo na construção de um ponto de vista, assim se posiciona: 
+“do caráter indissociável de um conteúdo descritivo e de uma posição enunciativa que 
+orienta argumentativamente todo o enunciado, decorre o fato de que um procedimento 
+descritivo é inseparável da expressão de um ponto de vista, de uma visada do 
+discurso” (Adam, 2011 [2008], p. 217). 
+Nesse sentido, as categorias que servem ao descritivo revelam uma “[...] 
+orientação argumentativa ao retratar o objeto descrito de uma determinada maneira 
+dentre tantas possibilidades” (Marquesi, 2007a, p. 57), perspectiva implicada no modo 
+de constituição de expressões referenciais no processo de(re)construção dos objetos 
+de discurso, com importância tanto na progressão textual, quanto na orientação 
+argumentativa e na construção do sentido dos textos (Marquesi, 2007a). 
+ 
+5 Análise 
+ 
+Para a análise do discurso de ódio em comentários do Instagram, recorremos à 
+metodologia de amostragem e selecionamos os três primeiros comentários públicos, 
+em que se evidenciam manifestações odientas à postagem iniciadora, publicada no 
+feed da influenciadora digital Thaís Carla, no dia 22 de outubro de 2023. Em outras 
+palavras, foram selecionados os comentários com a manifestação explícita de 
+estigmatização, discriminação, aversão e preconceito baseados no peso corporal 
+(gordofobia). 
+Na postagem, há um vídeo3, cuja duração aproximada é de 19 segundos, em 
+que a influenciadora dança à beira do mar, ao som de Bloco de Sentimento, do 
+fanqueiro Oh Major. No vídeo, constam os dizeres “Se for pra sofrer vai ser de 
+biquininho enfiado na praia bem gostosa”.  
+                                                          
+3 O vídeo da postagem motivadora pode ser acessado por meio do seguinte link: 
+https://tinyurl.com/mr43ewdv. 
+
+ODISSEIA                                                                                                                 ISSN: 1983-2435 
+Odisseia, Natal, RN, v. 9, n. esp., p. 160-180, jul.~dez. 2024 
+172 
+Para a coleta e constituição de nossos dados, utilizamos a versão gratuita da 
+plataforma Export Comments4, https://pt.exportcomments.com/, que automatiza a 
+extração de até cem comentários. Os dados extraídos são viabilizados em planilha 
+Excel e organizados por nome/apelido do internauta, sua identidade (o ID) nos 
+dispositivos e aparelhos eletrônicos, dia e horários da publicação do comentário, 
+quantidade de curtidas e conteúdo da mensagem. De modo a garantirmos o 
+anonimato dos usuários, transcrevemos data e hora, número de likes e comentário, 
+apenas.   
+Os comentários podem ser entendidos como complexos conglomerados de texto 
+(Capistrano Júnior; Elias, 2018), que se assemelham “[...] a um conjunto de conversas 
+múltiplas, um polílogo (Kerbrat-Orecchioni, 2004; Marcoccia, 2004), marcado pelo 
+envolvimento de vários usuários em um mesmo local e pelas múltiplas focalizações, 
+evidenciadas em comentários que reagem a um prompt motivador [...]” (Fávero et al., 
+2021, p. 155). São, portanto, textos poligeridos, organizados à semelhança de turnos 
+de fala.  
+Na sequência, apresentamos um primeiro exemplo de manifestação à postagem 
+iniciadora de Thaís Carla. 
+ 
+Exemplo 1 
+Data e hora 
+Likes 
+Comentário 
+27/10/2023 – 19:56:50 
+0 
+@thaiscarla por que a 
+Thais se apaixonou no 
+negão? Porque pensou 
+que era Nutella 
+ 
+O comentário transcrito nesse exemplo tem configuração textual de uma 
+pergunta retórica e é direcionado à influenciadora Thaís Carla (@thaiscarla), alvo do 
+ataque. Nele, o DO ocorre por meio de um ato indireto de desvalorização e 
+estigmatização do corpo gordo. Essa atitude de aversão e rejeição é motivada por 
+preconceitos e estereótipos desvalorizantes e por emoções negativas de preconceito 
+e intolerância, pela negação do outro e de sua dignidade (ausência de alteridade).  
+O internauta ataca indiretamente a condição física da influenciadora digital, 
+usando o humor irônico, pois insinua que ela deve comer mais que o necessário e não 
+                                                          
+4 Em versão gratuita, a plataforma não realiza a extração de comentários a comentários. 
+
+DOI 10.21680/1983-2435.2024v9nEspecialID34895     S.Marquesi, R.Capistrano Júnior, A.Aguiar 
+ 
+http://creativecommons.org/licenses/by-nc-sa/4.0 
+173 
+deve comer nada saudável, pois a nutella, creme de avelã, cacau e leite, é um 
+alimento muito calórico. 
+Além disso, o internauta categoriza o esposo da influenciadora de “negão”, 
+palavra indicadora de racismo e usada com a intenção de ofender. Nesse sentido, o 
+uso do termo “nutella”, numa relação de comparação entre o produto e o tom de pele, 
+também visa a desdenhar o marido, constituindo-se em violência simbólica. 
+No comentário em análise, Thaís Carla e esposo tornam-se alvo de ataque, o 
+que contribui para a incitação, promoção e propagação da gordofobia e do racismo. 
+No que se refere ao descritivo, a categoria da designação, que se refere à ação 
+de nomear, portanto, condensar num recorte lexical um conjunto sêmico, “negão”, é 
+indicativa de racialização da cor preta. A categoria da individuação, por sua vez, 
+evidencia um conjunto de predicações que especifica a designação, como na 
+predicação “...era nutella”, que ajusta por meio da comparação individualizada o ser 
+descrito, ou seja, sua identificação racial. A análise segundo ambas as categorias 
+permite identificar pistas textuais indicativas de preconceito e discriminação.  
+Na sequência, um segundo exemplo de comentário em reação à postagem 
+iniciadora de Thaís Carla.  
+ 
+Exemplo 2 
+Data e hora 
+Likes 
+Comentário 
+27/10/2023 – 20:02:27 
+0 
+Parece uma mortadela 
+amarrada. 
+ 
+No comentário, o discurso de ódio se manifesta verbalmente por meio de uma 
+comparação ofensiva “Parece uma mortadela amarrada...”, caracterizando um ato de 
+desumanização. Essa estratégia comparativa evidencia ter o alvo, a influenciadora 
+Thaís Carla, atributos físicos indesejáveis, numa degradação de sua aparência física, 
+que, por si só, é motivo de piada hostil. 
+O comentário desdenhoso apoia-se em estereótipos desvalorizantes de que 
+corpos gordos são feios. Nessa representação, nega-se a alteridade, precisamente 
+na desconsideração das diferenças e peculiaridades físicas, e se reforça a visão de 
+que pessoas gordas são feias, desengonçadas e repulsivas. 
+Em relação ao descritivo, o objeto da descrição Thaís Carla é evocado por meio 
+da predicação qualificativa “parece uma mortadela amarrada...”, que lhe atribui uma 
+
+ODISSEIA                                                                                                                 ISSN: 1983-2435 
+Odisseia, Natal, RN, v. 9, n. esp., p. 160-180, jul.~dez. 2024 
+174 
+caracterização negativa. Quanto à análise orientada pelas categorias do descritivo, 
+podemos constatar que a designação é inferida contextualmente; já a categoria da 
+individuação evidencia, por meio da associação por semelhança, um atributo como 
+sendo equivalente ao do objeto descrito. A não explicitação da designação, ou seja, a 
+não nomeação do objeto descrito, põe o foco sobre a comparação ofensiva, incitando 
+a discriminação.  
+A organização descritiva põe, assim, em relevo o modo como o internauta julga 
+o ser descrito. 
+Como terceiro exemplo de manifestação de internautas à postagem da Thaís 
+Carla, apresentamos o comentário que segue.  
+Exemplo 3 
+Data e hora 
+Likes 
+Comentário 
+27/10/2023 – 20:07:41 
+0 
+@o_leomiranda 
+😂😂😂😂😂😂😂😂 
+ 
+Esse comentário assume a configuração textual de uma sequência de quatro 
+emojis, ícones gráficos pequenos e coloridos, que representam expressões faciais, 
+objetos, ações e símbolos (Dainas; Herring, 2021). O emoji rosto com lágrimas de 
+alegria, frequentemente utilizado para representar o riso (Oliveira, 2019), é importante 
+pista contextualizadora (Gumperz, 1998), cujo significado é situacionalmente 
+delineado. Nesse sentido, indica algo muito engraçado que causa lágrimas nos olhos, 
+e o riso representado cumpre diversas funções: mitigar a seriedade do conteúdo de 
+uma mensagem, amenizando solicitações, correções, reclamações; manter uma 
+atitude positiva; evidenciar alegria, depreciação etc. 
+Se considerarmos o contexto dos ataques, podemos dizer que os emojis 
+comunicam, por meio da repetição, a intensidade da emoção negativa de sarcasmo, 
+orientando o significado do ato ilocucionário, e desqualificam o conteúdo proposicional 
+da mensagem da postagem iniciadora. Busca-se insultar, desmerecer a 
+influenciadora, por meio do riso de zombaria, o que fomenta o discurso de ódio, 
+alimentado, como expusemos na seção teórica, por uma visão binária do corpo padrão 
+versus corpo não padrão e por paixões negativas, pela intolerância, pela falta de 
+empatia. 
+Conforme defende Capistrano Júnior (2023), um emoji pode desempenhar a 
+função textual-discursiva de subsumir as categorias do descritivo: a designação por 
+
+DOI 10.21680/1983-2435.2024v9nEspecialID34895     S.Marquesi, R.Capistrano Júnior, A.Aguiar 
+ 
+http://creativecommons.org/licenses/by-nc-sa/4.0 
+175 
+tematização, na retomada do conteúdo proposicional, e a individuação por 
+qualificação e por comparação, na evidência de um atributo, sinalizando um 
+sentimento de sarcasmo e consequentemente um ponto de vista. Isso pode ser mais 
+bem compreendido por meio do seguinte esquema de enunciado “x é y”, em que X é 
+a designação do objeto descrito, cuja função textual-discursiva é expressar instruções 
+sobre aquilo que foi focalizado na postagem da influenciadora; Y, por sua vez, pode 
+ser preenchido por um predicado qualificativo, que individualiza o descrito, ao mesmo 
+tempo em que categoriza X, ao veicular um estado emocional. 
+ 
+6 Conclusão  
+ 
+Neste trabalho, o DO é entendido como uma prática de comunicação complexa 
+que envolve relações multifacetadas entre internautas e suas redes, textos, 
+tecnologias digitais e é caracterizado pela linguagem depreciativa, discriminatória e 
+agressiva.  
+De acordo com Moïse et al. (2021), no cerne do DO, em suas manifestações 
+direta ou dissimulada, estão as paixões negativas (antipatia, ódio, intolerância etc.); a 
+negação da alteridade; os atos de exclusão, invalidação, condenação e aniquilação 
+do outro, sinalizados pelo uso de léxico pejorativo/injurioso ou de dissimulações 
+retóricas (humor irônico, comparações insinuativas etc.). 
+Os comentários analisados configuram-se por meio de elementos verbais 
+(exemplos 1 e 2) e imagético (exemplo 3), refletem a aversão/rejeição a pessoas 
+gordas e, consequentemente, repetem e propagam preconceitos e estereótipos. Além 
+disso, constituem indiretamente uma violência psicológica, numa ameaça à 
+integridade moral e à democracia. A influenciadora digital Thaís Carla é atacada pelo 
+peso corporal. Com base em Grácio (2013), podemos entender que esse tipo de 
+ataque fere a dignidade humana, o que constitui um ato antidemocrático. 
+A principal contribuição deste trabalho é pôr em relevo o papel das categorias do 
+descritivo, na análise da incitação ao discurso de ódio, uma vez que elas possibilitam 
+compreender como um ser é designado e como é particularizado pela visão de seu(s) 
+produtor(es), desempenhando, pois, importante função na construção da dimensão 
+argumentativa do texto. Os dados analisados evidenciam que a discriminação 
+ofensiva é construída, sobretudo, por comparações pejorativas, o que põe em 
+
+ODISSEIA                                                                                                                 ISSN: 1983-2435 
+Odisseia, Natal, RN, v. 9, n. esp., p. 160-180, jul.~dez. 2024 
+176 
+destaque a categoria da individuação por relação de comparação, conforme tratado 
+na seção 4, sobre o descritivo.  
+Especificamente, em relação à dimensão argumentativa, que se vale da doxa 
+compartilhada, estereótipos desvalorizantes e preconceitos, é possível verificar que 
+ela se dá com base no uso de escárnio, zombaria e insultos, o que configura ataques 
+pessoais.  
+Diante do que aqui expusemos, consideramos não ser o DO uma mera opinião, 
+um ato impolido, mas, sim, uma exortação a comportamentos odientos. Quando isto 
+se torna frequente, a democracia está sob ameaça.  Nesse sentido, é preciso que na 
+pesquisa e no ensino sejam discutidas as estruturas de participação de internautas na 
+rede, para a inclusão e manutenção do respeito e da empatia nesse ambiente, 
+recorrendo-se, para tanto, à análise orientada por dispositivos textuais-discursivos, 
+entre eles, aqueles que envolvem categorias analíticas do descritivo em sua interface 
+com a dimensão argumentativa, como aqui tratado.  
+Ao finalizar este estudo, acreditamos ter respondido à pergunta inicialmente 
+proposta e cumprido o objetivo estabelecido. O trabalho cumpre mais uma etapa 
+investigativa e se abre a outras em direção à consolidação de critérios teórico-
+analíticos que nos permitam entender a construção da argumentatividade em suas 
+diversas possibilidades, e, no caso do DO, à contribuição dos estudos linguísticos para 
+o enfrentamento deste grande desafio da sociedade contemporânea. 
+ 
+ANALYSIS OF HATE SPEECH IN INSTAGRAM COMMENTS: DESCRIPTIVE AND 
+ARGUMENTATIVE DIMENSION IN INTERFACE 
+ 
+Abstract: Hateful manifestations are marked by intolerance, hostility, and incitement 
+to antidemocratic acts. They are uttered as a means to influence and intimidate social 
+groups. For these reasons, they constitute an important theme on the agenda of 
+contemporary linguistics. Their use has been largely disseminated on social networks, 
+because of constitutive features of those environments such as hyper connection 
+(large scale connection), the networks’ algorithmic environment, participation 
+structures, free access to content and (pseudo)anonymity. This being said, we 
+establish the following research question for this article: how does the descriptive 
+substantiate hate speech and how does it reveal the argumentative dimension in 
+commentaries published on Instagram? Proceeding from the analysis of Instagram 
+commentaries, we aim to establish an association between the descriptive and the 
+argumentative dimension in public manifestations on this social network in order to 
+answer this question. Based on the corpus analysis, we observe that the descriptive 
+
+DOI 10.21680/1983-2435.2024v9nEspecialID34895     S.Marquesi, R.Capistrano Júnior, A.Aguiar 
+ 
+http://creativecommons.org/licenses/by-nc-sa/4.0 
+177 
+not only shows us stances and argumentative orientations, but also that it reveals 
+motivation for hateful behavior and personal attacks. 
+Keywords: Hate speech; argumentative dimension; descriptive; Instagram 
+commentaries.  
+ 
+ 
+Referências 
+ 
+ADAM, Jean-Michel. A Linguística Textual – Introdução à Análise Textual dos 
+Discursos. Tradução: Maria das Graças Soares Rodrigues et al. São Paulo: Cortez, 
+2011 [2008]. 
+ 
+ADAM, Jean-Michel. Approche linguistique de la séquence descriptive. Pratiques, 
+Metz, n. 55, p. 3-26. 
+ 
+AMOSSY, Ruth. A dimensão argumentativa do discurso: questões teóricas e 
+práticas. In: CAVALCANTE, Mônica Magalhães; BRITO, Mariza Angélica Paiva 
+(org.). Texto, discurso e argumentação: traduções. Campinas, SP: Pontes Editores, 
+2020. p. 71-96. 
+ 
+AMOSSY, Ruth. A argumentação no discurso. Coordenação da tradução: Eduardo 
+Lopes Piris e Moisés Olímpio-Ferreira. São Paulo: Contexto, 2018. 
+ 
+AMOSSY, Ruth; PIERROT, Anne Herschberg. Estereótipos e clichês. Coordenação 
+da tradução: Mônica Magalhães Cavalcante. São Paulo: Contexto, 2022. 
+ 
+BEAUGRANDE, Robert A. New foundations for a science of text and discourse: 
+Cognition, communication and freedom of access to knowledge and society. 
+Norwood, New Jersey: Ablex Publishing Corporation, 1997. 
+ 
+BERNARD BARBEAU, Geneviève; MOÏSE, Claudine. Disqualification. In: Discours 
+de haine et redicalisation: les notion clés [en ligne]. Lyon: ENS Éditions, 2023. p. 
+217-222. Disponível em: https://books.openedition.org/enseditions/44015. Acesso 
+em: 28 out. 2023. 
+ 
+CABRAL, Ana Lúcia Tinoco. Linguística Textual e Teoria da Argumentação na 
+Língua. In: CAPISTRANO JÚNIOR, Rivaldo; LINS, Maria da Penha Pereira; ELIAS, 
+Vanda Maria. Linguística Textual: diálogos interdisciplinares. São Paulo: Labrador, 
+2017. p. 239-262. 
+ 
+CABRAL, Ana Lúcia Tinoco. Argumentação na língua e argumentação no 
+texto.  Intersecções Revista de Estudos sobre Práticas Discursivas e Textuais, ano 
+9, n. 1, p. 26-40, 2016. Disponível em: https://tinyurl.com/3a492428. Acesso em: 22 
+nov. 2023. 
+ 
+CAPISTRANO JÚNIOR, Rivaldo. A violência linguageira e emoções em comentários 
+do Instagram: uma análise textual-discursiva. In: ELIAS, Vanda Maria; CABRAL, Ana 
+Lúcia Tinoco; AGUIAR, Andréa Pisan Soares (org.). O descritivo e outros temas: 
+
+ODISSEIA                                                                                                                 ISSN: 1983-2435 
+Odisseia, Natal, RN, v. 9, n. esp., p. 160-180, jul.~dez. 2024 
+178 
+uma homenagem a Sueli Cristina Marquesi. Campinas, SP: Pontes Editores, 2023, 
+p. 103-117. 
+ 
+CAPISTRANO JÚNIOR, Rivaldo; ELIAS, Vanda Maria. Práticas de escrita no 
+contexto digital: elementos multimodais e coerência textual. In: GUALBERTO, 
+Clarice Lage; PIMENTA, Sônia Maria de Oliveira; SANTOS, Záira Bomfante (org.). 
+Multimodalidade e ensino: múltiplas perspectivas. São Paulo: Pimenta Cultural, 
+2018. p. 145-169. 
+ 
+CAVALCANTE, Mônica Magalhães; CUSTÓDIO FILHO, Valdinar. Revisitando o 
+estatuto do texto. Revista do GELNE, Piauí, v. 12, n. 2, p. 56-71, 2010. Disponível 
+em: https://repositorio.ufc.br/handle/riufc/26452. Acesso em: 29 out. 2024. 
+ 
+CAVALCANTE, Mônica Magalhães et al. O texto e suas propriedades: definindo 
+perspectivas para análise. (Con)Textos Linguísticos – Linguística Textual e Análise 
+da Conversação: conceitos e critérios de análise, Espírito Santo, v. 13, n. 25, p. 25-
+39, set. 2019. Disponível em: 
+https://periodicos.ufes.br/contextoslinguisticos/article/view/27884. Acesso em: 29 out. 
+2024. 
+ 
+DAINAS, Ashley R.; HERRING, Susan C. Interpreting emoji pragmatics. In: XIE, 
+Chaoqun; YUS, Francisco; HABERLAND, Hartmut (eds.). Approaches to Internet 
+pragmatics: theory and practice. Amsterdam: John Benjamins, 2021. p. 107-144. 
+ 
+FÁVERO, Leonor Lopes et al. Topicalidade em comentários on-line do Instagram. 
+Revista (Con)Textos Linguísticos – Linguística de Texto e Análise da Conversação: 
+abordagens metodológicas, v. 15, n. 31, p. 146-169, 2021. Disponível em 
+https://periodicos.ufes.br/contextoslinguisticos/article/view/35667. Acesso em: 24 
+nov. 2023. 
+ 
+FÁVERO, Leonor Lopes; KOCH, Ingedore G. Villaça. Critérios de textualidade. 
+Veredas. Revista da PUCSP, n. 104, p. 17-34, 1985. 
+ 
+GENETTE, Gérard. Fronteiras da narrativa. In: BARTHES, Roland et al. Análise 
+estrutural da narrativa. Petrópolis: Vozes, 1973. p. 255- 274. 
+ 
+GRÁCIO, Rui Alexandre. Vocabulário crítico de argumentação. Coimbra, Portugal: 
+Grácio Editor, 2013. 
+ 
+GUMPERZ, John. Convenções de contextualização. In: RIBEIRO, Branca Telles; 
+GARCEZ, Pedro M. (org.) Sociolingüística interacional: antropologia, lingüística e 
+sociologia em análise do discurso. Porto Alegre: AGE, 1998. p. 98-119. 
+ 
+HAAS, Ghislaine; LORROT, Danielle. Pédagogie du texte descriptif. Pratique, Metz, 
+n. 55, p. 28-46, 1987. 
+ 
+HAMON, Philippe. O que é uma descrição. In: HAMON, Philippe; HOSSUM-GUYON, 
+François Van; SALLENAVE, Daniele. Categorias da narrativa. Tradução: Cabral 
+Martins. Lisboa: Vega, 1972. p. 56-75. 
+ 
+
+DOI 10.21680/1983-2435.2024v9nEspecialID34895     S.Marquesi, R.Capistrano Júnior, A.Aguiar 
+ 
+http://creativecommons.org/licenses/by-nc-sa/4.0 
+179 
+HAMON, Philippe. Introduction a l’anlyse du descriptif. Paris: Hachette, 1981. 
+ 
+KOCH, Ingedore G. Villaça. Introdução à Linguística Textual: trajetória e grandes 
+temas. São Paulo: Martins Fontes, 2004. 
+ 
+KOCH, Ingedore G. Villaça. Desvendando os segredos do texto. São Paulo: Cortez, 
+2002. 
+ 
+KOCH, Ingedore G. Villaça. Argumentação e linguagem. São Paulo: Cortez, 1983. 
+ 
+KOCH, Ingedore G. Villaça; ELIAS, Vanda Maria. O texto na Linguística Textual. In: 
+BATISTA, Ronaldo de Oliveira (org.). O texto e seus conceitos. São Paulo: Parábola 
+Editorial, 2016. p. 31-44. 
+ 
+LORENZI BAILLY, Nolwenn; MOÏSE, Claudinne. Du discours de radicalisation au 
+discours de haine. Repères DoRiF, n. 26 – Les discours de haine dans le médias: 
+des discours radicaux à extrémisation des discours publics, DoRif Università, Roma, 
+novembre 2022. Disponível em: https://www.dorif.it/reperes/nolwenn-lorenzi-bailly-
+claudine-moise-du-discours-de-radicalisation-au-discours-de-haine/. Acesso em: 28 
+out. 2023. 
+ 
+MARCUSCHI, Luiz Antônio. Cognição, linguagem e práticas interacionais. Rio de 
+Janeiro: Lucerna, 2007. 
+ 
+MARQUESI, Sueli Cristina. Procedimentos analíticos da ATD e produção escrita: 
+estrutura composicional e sequências textuais descritivas em relatórios técnicos. In: 
+GOMES, Alexandro Teixeira; PASSEGGI, Luis; RODRIGUES, Maria das Graças 
+Soares. Análise Textual dos Discursos: perspectivas teóricas e metodológicas. 
+Coimbra: Grácio Editor, 2018. 
+ 
+MARQUESI, Sueli Cristina. Linguística Textual e Análise Textual dos Discursos. In: 
+CAPISTRANO JÚNIOR; Rivaldo; LINS, Maria da Penha Pereira; ELIAS, Vanda 
+Maria (org.) Linguística Textual: diálogos interdisciplinares. São Paulo: Labrador, 
+2017.  
+ 
+MARQUESI, Sueli Cristina. Contribuições da análise textual dos discursos para o 
+ensino em ambientes virtuais. Revista Linha D’Água, v. 26, p. 185, 2013. 
+ 
+MARQUESI, Sueli Cristina. Referenciação no texto descritivo. Revista Investigações, 
+v. 20, p. 47-59, 2007a. 
+ 
+MARQUESI, Sueli Cristina. Suassuna: um autor muito atento a seus leitores. In: 
+MICHELETTI, Guaraciaba (org.). Discurso e memória em Ariano Suassuna. São 
+Paulo: Paulistana, 2007b. p. 13-30. 
+ 
+MARQUESI, Sueli Cristina. A organização do texto descritivo em língua portuguesa. 
+2. ed. Rio de Janeiro: Lucerna, 2004 [1990]. 
+ 
+
+ODISSEIA                                                                                                                 ISSN: 1983-2435 
+Odisseia, Natal, RN, v. 9, n. esp., p. 160-180, jul.~dez. 2024 
+180 
+MARQUESI, Sueli Cristina; ELIAS, Vanda Maria da Silva. O descritivo em diferentes 
+gêneros textuais: perspectivas para o ensino da leitura e da escrita. Revista Linha 
+D’Água, v. 2, n. 24, p. 189-203, 2011. 
+ 
+MARQUESI, Sueli Cristina; ELIAS, Vanda Maria da Silva; CABRAL, Ana Lúcia 
+Tinoco. Planos de texto, sequências textuais e orientação argumentativa. In: 
+MARQUESI, Sueli Cristina; PAULIUKONIS, Aparecida Lino; ELIAS, Vanda Maria da 
+Silva. (org.) Linguística Textual e ensino. São Paulo: Contexto, 2017. p. 13-32. 
+ 
+MOÏSE, Claudine et al. Circonscrire le discours de haine numérique. Processus 
+argumentatifs, idéologies et mémoires discursives. Travaux neuchâtelois de 
+Linguistique, n. 75, p. 41-60, 2021. Disponível em: https://www.revue-
+tranel.ch/article/view/3004. Acesso em: 14 dez. 2023. 
+ 
+OLIVEIRA, Mônica Lopes Smiderle de. Construção tópica e mecanismos de 
+(im)polidez em interações do Facebook: uma análise pragmática dos recursos 
+imagéticos digitais. 2019. Tese. (Doutorado em Estudos Linguísticos) – Centro de 
+Ciências Humanas e Naturais, Universidade Federal do Espírito Santo, Vitória, 2019. 
+Disponível em: https://linguistica.ufes.br/pt-br/pos-graduacao/PPGEL/detalhes-da-
+tese?id=13200. Acesso em: 21 nov. 2023. 
+ 
+PETITJEAN, André. Fonctions et fonctionnements de la description représentative: 
+l’exemple des paysages. Pratiques, Metz, n. 55, p. 61-88, 1987. 
+ 
+SANDIG, Barbara. O texto como conceito prototípico. In: WIESER, Hans Peter; 
+KOCH, Ingedore G. Villaça. Linguística Textual: perspectivas alemãs. Rio de 
+Janeiro: Nova Fronteira, 2009. 
+ 
+TURPIN, Béatrice. Haine (discours de). In: BAILLY, Nolwenn Lorenzi; MOÏSE, 
+Claudine. Discours de haine et redicalisation: les notion clés [en ligne]. Lyon: ENS 
+Éditions, 2023. p. 155-163. Disponível em: 
+https://books.openedition.org/enseditions/43955. Acesso em: 14 nov. 2023. 
+ 
+VAN DIJK, Teun A. Études du discours et enseignement. In: VAN DIJK, Teun A. et 
+al. Linguistique et enseignement des langues. Lyon: Presses Universitaires de Lyon 
+(Linguistique et sémiologie), 1980. p. 11-81. 
+ 
+ 
+Recebido em 18/12/2023 
+ 
+ 
+Aceito em 07/03/2024 
+ 
+ 
+Publicado em 25/11/2024 
+ 
+ 
+ 

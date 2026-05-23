@@ -1,0 +1,606 @@
+número 26 | volume 13 | julho - dezembro 2019
+78
+DOI:10.11606/issn.1982-677X.rum.2019.159788
+Crítica de mídia, sucesso de escândalo  
+e narrativa política no Brasil hoje
+Media criticism, succès de scandale  
+and political narrative in Brazil today
+Lígia Lana1
+1	
+Pesquisadora de Pós-Doutorado (bolsa PAPDRJ/Capes-Faperj) no Programa de Pós-Graduação em Comunicação Social 
+da Pontifícia Universidade Católica do Rio de Janeiro. Doutora e mestre em Comunicação Social pela Universidade 
+Federal de Minas Gerais. E-mail: ligialana@gmail.com.
+
+79
+número 26 | volume 13 | julho - dezembro 2019
+Resumo
+Este trabalho reconstrói, pela ótica da crítica de mídia, narrativas 
+políticas no Brasil, entre o final de 2018 e meados de 2019. Trata-se de 
+uma revisão de textos publicados por articulistas e críticos de televisão 
+na mídia brasileira. O quadro teórico é orientado pelos conceitos de 
+sucesso de escândalo e entretenimento político, e a metodologia 
+estabelece três operadores analíticos – celebridades, redes sociais e 
+metacrítica. As conclusões do trabalho discutem as semelhanças entre 
+a cultura da celebridade e a narrativa política; as transformações, 
+trazidas pela internet, nas narrativas políticas; e o papel social da mídia 
+na crítica dos processos políticos hoje.
+Palavras-chave
+Sucesso de escândalo, entretenimento político, crítica de mídia.
+Abstract
+From the perspective of media criticism, this article reconstructs 
+political narratives between the end of 2018 and the middle of 2019. 
+The research is a review of texts published by journalists and television 
+criticism in the Brazilian media. The theoretical framework is guided 
+by the concepts succès de scandale and political entertainment, 
+and the methodology establishes three analytical operators – celebrities, 
+social media and metacritical. The conclusions discuss the similarities 
+between celebrity culture and political narrative; the transformations, 
+brought by the Internet, in political narratives; the social role of the 
+media to criticize political processes today.
+Keywords
+Succès de scandale, political entertainment, media criticism.
+
+80
+Crítica de mídia, sucesso de escândalo e narrativa política no Brasil hoje
+Lígia Lana 
+Em 2016, Donald Trump se elegeu presidente dos Estados Unidos com 
+o Príncipe da Escuridão – como adversários apelidaram Roger Stone – sendo um 
+dos maiores articuladores da vitória republicana. O documentário Get Me Roger 
+Stone (2017), produzido pela Netflix, traz questões interessantes para pensar 
+a relação entre a mídia popular e a política hoje. O filme elucida, em entrevistas 
+com jornalistas, políticos e com o próprio personagem, as estratégias de Stone: 
+associação de política e entretenimento e criação de narrativas que buscam 
+a visibilidade a qualquer preço. Apresentando-se como um agent provocateur, 
+Roger Stone explica: “É melhor ser infame do que nunca ser famoso”, em alusão 
+a conhecidos processos de formação de celebridades, em que a desmoralização 
+se converte em moeda de troca na conquista do capital de visibilidade2. 
+Roger Stone se orgulha de ter criado histórias falsas – como a de Barack Obama não 
+ter nascido nos Estados Unidos – porque, para ele, “política é show business para 
+pessoas feias. […] você acha que os eleitores não sofisticados sabem diferenciar 
+entretenimento de política?” (GET…, 2017).
+Mais do que o registro de um personagem da história norte-americana, 
+Get Me Roger Stone expõe um retrato desconcertante de nosso tempo. As narrativas 
+políticas tornaram-se reféns de formas midiáticas construídas pela exacerbação 
+da indignação, do ressentimento, do racismo, da xenofobia, da conspiração e da 
+mentira3. O sensacionalismo, antes restrito a determinados produtos e espaços 
+da mídia, parece ter se convertido em modalidade corriqueira da narrativa política, 
+que hoje é produzida facilmente pelas pessoas comuns na internet através de 
+memes, correntes e vídeos virais.
+Esse cenário pode ser observado hoje também no Brasil. A consensual 
+ideia da polarização, caracterizada por hostilidade, tendências antidemocráticas 
+e irresponsabilidade, enraizadas na cultura brasileira, sugere a necessidade de 
+2	
+Subscreve-se um pacto de visibilidade, em que candidatos à fama se dispõem a qualquer tipo de atuação para 
+receberem, em troca, espaço na mídia (FREIRE FILHO; LANA, 2014).
+3	
+Aspectos ressaltados por João Lira Neto (2017).
+
+81
+número 26 | volume 13 | julho - dezembro 2019
+aprofundar a reflexão em torno das narrativas políticas hoje4. A crítica de mídia tem 
+sido um lugar privilegiado para isso. Articulistas, críticos de televisão e colunistas 
+sociais vêm registrando, em jornais impressos e em blogs com grande visibilidade, 
+observações a respeito do assunto. Especialmente durante as eleições de 2018, em 
+que a campanha suscitou o aumento da auto-observação (com os candidatos fazendo 
+uso da mídia), a crítica produzida cotidianamente vem trazendo um material precioso 
+para pensar a relação entre entretenimento, celebridade, escândalo e política.
+Antes de mais nada, é preciso lembrar que os candidatos que disputaram 
+o segundo turno das eleições presidenciais em 2018, Jair Bolsonaro e Fernando 
+Haddad, não se enfrentaram em nenhum debate televisivo – mesmo sendo 
+realizado um número recorde de debates nesta eleição, sete no total, superando 
+apenas 1989, quando ocorreram seis (STYCER, 2018d). A três dias do primeiro 
+turno, enquanto a Globo realizava, ao vivo, o último debate com os candidatos, 
+a Record exibia uma entrevista gravada com o futuro presidente, que recebera alta 
+médica depois do atentado em Juiz de Fora, onde, durante um ato de campanha, 
+sofreu uma facada. A data das eleições se aproximava – e seria natural para a 
+democracia que a população se informasse, através dos debates, para decidir 
+em quem confiar seu voto. Na Rede Record, o mais importante, contudo, era a 
+curiosidade pela recuperação de Bolsonaro, em um tipo de entretenimento político 
+conhecido pelos telespectadores, que já haviam acompanhado as participações 
+do então deputado no Superpop, CQC e Pânico (STYCER, 2018b).
+A decisão da Record foi comercialmente acertada: segundo dados do Ibope, 
+o Jornal da Record “registrou números superiores à sua média habitual e deixou 
+a emissora em segundo lugar, à frente do SBT, o que não costuma ocorrer neste 
+horário” (STYCER, 2018e). Assim, apesar de Patrícia Kogut (2018) anunciar o 
+aumento da audiência da Globo durante a cobertura eleitoral, parece que a Record 
+foi a emissora que mais capitalizou naquele período.
+4	
+O conceito de polarização foi examinado em seminário anterior do Grupo de Pesquisa Mídia e Narrativa, da Pontifícia 
+Universidade Católica de Minas Gerais, conforme Márcio Serelle (2016).
+
+82
+Crítica de mídia, sucesso de escândalo e narrativa política no Brasil hoje
+Lígia Lana 
+O expressivo número de debates no primeiro turno contrastou com a 
+inexistência de debates no segundo, algo inédito. A crítica de TV registrou, dia a 
+dia, seu estranhamento com a não realização do debate final da Rede Globo. Como 
+discute Jessé Souza (2017, p. 272), “sem a concorrência de televisões públicas como 
+no contexto europeu”, a Globo cumpre, há décadas, o papel de articulador de uma 
+suposta esfera pública, “produzida e maquiada artificialmente”. Isso sugere, segundo 
+Serelle e Soares (2019), uma quebra na arraigada tradição do debate da Globo, que, 
+diante das mídias digitais, mostrou-se dispensável na decisão sobre o voto.
+Nas eleições de 2018, a contribuição da Rede Globo para o debate público 
+com os candidatos resumiu-se a cinco entrevistas, que foram descritas pela crítica 
+de mídia como “interrogatórios”, com “enorme repercussão negativa”.
+Os encontros lembraram mais debates, duelos ou interrogatórios, com a 
+dupla de telejornal adotando postura agressiva e inquisidora. Em algumas, 
+como diante de Ciro, a dupla do JN ocupou mais de 40% do tempo. 
+As entrevistas foram muito pouco esclarecedoras, incômodas e, no limite, 
+inúteis mesmo. (STYCER, 2018d)
+As emissoras paulistas, normalmente as lanterninhas no Ibope – 
+SBT, Record, Band e Rede TV! – e suas principais faces públicas – Sílvio Santos, 
+Ana Hickmann, Luciana Gimenez, José Luís Datena e Amaury Jr. – alinharam-
+se, desde o período eleitoral, ao bolsonarismo. Maurício Stycer registrou, 
+em 1 de novembro de 2018, a entrevista exclusiva do novo presidente da República 
+à Record e, dois meses depois, sumarizou o favoritismo da emissora na preferência 
+do chefe do executivo. No primeiro dia do novo governo, a Record já havia exibido 
+cinco entrevistas exclusivas, seguida pela Band, que transmitiu três – duas delas 
+com a estrela da casa, José Luís Datena, que teve acesso à intimidade do leito 
+hospitalar do candidato. A Rede TV! estava em terceiro lugar, com duas entrevistas.
+A Record teve ainda o privilégio de ser a única emissora a exibir uma 
+entrevista com a futura primeira-dama, Michelle Bolsonaro, exibida no 
+dia seguinte à vitória eleitoral. E, em mais de uma ocasião, teve acesso 
+a imagens de Bolsonaro na intimidade, seja em sua casa, seja no hospital, 
+fazendo exames. (STYCER, 2019)
+
+83
+número 26 | volume 13 | julho - dezembro 2019
+Como insistiu bastante Maurício Stycer (2018e), a Record contribuiu com 
+uma “ajuda para Bolsonaro”, prejudicando “o interesse público”, que, para retomar 
+a definição de Jessé Souza, antes era produzida de maneira maquiada e artificial 
+pela Globo, mas que, pelo menos, era feito. No dia seguinte à vitória, o presidente 
+eleito concedeu entrevistas às cinco maiores emissoras, mas a primeira e mais longa 
+foi à Record, única a ser elogiada por seu “jornalismo isento” (STYCER, 2018a).
+Houve privilégios para alguns, mas registrou-se também desvantagens 
+para outros: na rádio Guaíba, Juremir Machado foi impedido de fazer perguntas 
+ao então candidato; na entrevista à Globo, depois de eleito, o presidente anunciou 
+o fim do jornal Folha de S.Paulo; nas redes sociais, a jornalista Patrícia Campos 
+Mello foi alvo de centenas de ameaças de morte em razão de uma reportagem 
+investigativa sobre ilegalidades na campanha eleitoral de Bolsonaro.
+Buscando pelo assunto em grandes portais e jornais de circulação nacional, 
+foram encontrados cerca de trinta textos. Desse material, apenas artigos, matérias 
+e reportagens que tratassem exclusivamente do uso da linguagem pelo governo 
+federal foram coletados para a análise: quer dizer, não foram selecionados textos 
+que trouxessem, por exemplo, críticas a decisões ou articulações políticas. 
+No tratamento dos dados, uma análise prévia de conteúdo revelou a existência 
+de três temas relevantes em vinte textos, que foram utilizados como operadores 
+analíticos da pesquisa, apresentada a seguir.
+Apoio e reprovação de celebridades
+A crítica de mídia buscou contrastar apoio e reprovação de celebridades ao 
+atual presidente. Em linhas gerais, os articulistas apontaram uma polarização entre o 
+apoio das celebridades paulistas relacionadas a emissoras paulistanas e a reprovação 
+das celebridades cariocas relacionadas à Globo. Durante as eleições de 2018, 
+houve muito engajamento das celebridades da Rede Globo nas mobilizações 
+Ele Não e Vira Voto. Por outro lado, especialmente após as eleições, 
+famosos ligados à mídia paulista apoiaram abertamente Jair Bolsonaro – 
+a circulação de um vídeo da apresentadora Luciana Gimenez parabenizando 
+
+84
+Crítica de mídia, sucesso de escândalo e narrativa política no Brasil hoje
+Lígia Lana 
+o candidato do PSL pela vitória antes do resultado das eleições de 2018 foi um 
+episódio marcante.
+Ainda durante o período eleitoral, dois casos tratados pela crítica de mídia 
+foram interessantes. O primeiro é sobre a atriz Regina Duarte, que se alinhou 
+ao bloco de apoio a Bolsonaro. O crítico de TV Nilson Xavier (2018) perguntou: 
+“Malu Mulher votaria em Bolsonaro?”. Analisando uma entrevista de Regina ao 
+jornal Estado de S.Paulo, Xavier retomou algumas declarações da atriz: “Quando 
+conheci Bolsonaro encontrei um cara doce, um homem dos anos 1950 […] um jeito 
+masculino” (XAVIER, 2018). Além da entrevista, Regina engajou-se na campanha 
+presidencial divulgando fotografias no Instagram e justificando arroubos machistas, 
+racistas e homofóbicos de Jair Bolsonaro. “São imagens montadas, pois mostram 
+a reação dele, mas não a de quem provocou a reação. É unilateral”. Nilson Xavier 
+então contrapôs o posicionamento da atriz à personagem Malu.
+Malu era uma mulher de ideias liberais, que se separava do marido 
+machista, rompia com os pais castradores e ia à luta pelos seus direitos, 
+de mãe, cidadã, mulher. O programa fez sucesso por abordar de forma 
+corajosa e inédita em nossa TV questões muito delicadas para uma 
+época em que o país vivia sob o jugo da ditadura militar – feminismo, 
+sexo, orgasmo, aborto, virgindade, métodos anticoncepcionais, gravidez 
+indesejada, violência doméstica, etc. (XAVIER, 2018)
+Malu era socióloga, e Ruth Cardoso, amiga de Regina, contribuiu para a 
+criação da personagem, uma tentativa de “quebrar o estigma de ‘Namoradinha 
+do Brasil’, que perseguia Regina por causa de seus papéis de mocinha romântica 
+em novelas”. O crítico de TV concluiu: “Questiono se Malu, que tanto lutou pela 
+libertação da mulher do jugo machista e patriarcal, também defenderia e votaria 
+em Bolsonaro em 2018 – como sua intérprete” (XAVIER, 2018).
+O segundo caso é sobre a cantora Anitta, que propiciou discussão sobre 
+questões relacionadas às lutas identitárias. Em setembro de 2018, a cantora 
+foi muito criticada por seguir uma amiga que declarava voto em Jair Bolsonaro. 
+Seu principal fã-clube, Central Anitta, anunciou que “devido aos últimos 
+acontecimentos” faria uma “pausa até o momento em que Anitta se pronuncie 
+
+85
+número 26 | volume 13 | julho - dezembro 2019
+sobre seguir um perfil que apoia o candidato que é contra as minorias, público-alvo 
+da cantora. Estamos tristes e queremos respostas”, texto citado pelo blogueiro 
+Chico Barney (2018a).
+O debate político deste ano está em um nível tão intenso e profundo 
+que até as relações apaixonadas entre fãs e ídolos não estão passando 
+incólumes. Resta saber se Anitta terá capital carismático para superar 
+esse momento de grande crise – ou se mudará drasticamente o conteúdo 
+de seu repertório. (BARNEY, 2018a)
+Alguns dias depois, Anitta declarou que apoiava o movimento Ele Não. 
+Antes desse caso, o organizador do Miss Bumbum, Cacau Oliver, divulgara uma 
+nota anunciando o apoio das doze postulantes do título de 2018 a Jair Bolsonaro. 
+Entre elas, havia duas transexuais que, conforme noticiou Chico Barney (2018b), 
+não apoiavam o candidato, o que fez com que a organização do Miss Bumbum 
+retificasse a informação enviada à imprensa, promovendo também o debate em torno 
+dos posicionamentos de Jair Bolsonaro a respeito das lutas por reconhecimento.
+Em 2019, as relações do governo com as celebridades permaneceram 
+observadas pela crítica de mídia. Em abril, a colunista Mônica Bergamo anunciou 
+os bastidores de um jantar em São Paulo com os ministros Guedes e Moro e
+a atriz Regina Duarte, os cantores sertanejos Zezé Di Camargo e Jorge, 
+da dupla Jorge & Mateus, as apresentadoras Ana Hickmann e Luciana 
+Gimenez e o jogador Kaká. […] Os convidados fizeram muitas selfies com 
+o ministro Moro, o mais popular do governo. A mulher do ex-magistrado, 
+Rosângela Moro, também fez selfie com os artistas e postou em suas 
+redes sociais. (BERGAMO, 2019)
+Em maio de 2019, o site Meio & Mensagem noticiou que o governo faria ações 
+de merchandising sobre a reforma da previdência5. “Além de Luciana Gimenez e 
+Ratinho, estão escalados […] os apresentadores Milton Neves e José Luiz Datena 
+(Band), Rodrigo Faro, Ana Hickmann e Renata Alves (Record)” (SACCHITIELLO, 2019). 
+5	
+Quando o próprio apresentador, durante o programa, divulga o produto anunciado.
+
+86
+Crítica de mídia, sucesso de escândalo e narrativa política no Brasil hoje
+Lígia Lana 
+Segundo a matéria, as estrelas da Rede Globo teriam ficado de fora da campanha, 
+pois a emissora veda que seus apresentadores façam merchandising.
+Com a maioria das celebridades brasileiras – vinculadas à Rede Globo – 
+não aprovando a atual administração federal, parece haver uma estratégia 
+natural do governo para se aproximar dos famosos que o apoiam. A trajetória 
+e o perfil dessas celebridades podem ajudar a compreender esse aspecto da 
+narrativa bolsonarista. Em pesquisas anteriores, analisei duas dessas figuras 
+públicas: José Luís Datena (LANA, 2009) e Luciana Gimenez (LANA, 2013). 
+Além de pertencerem ao eixo paulista da mídia, ambos possuem popularidade menor 
+quando comparados a outros apresentadores – angariando menos rendimentos 
+financeiros. Eliana, Xuxa e Angélica são mais bem pagas que Luciana Gimenez, 
+assim como Faustão, Gugu e Luciano Huck ganham mais do que Datena.
+José Luís Datena e Luciana Gimenez atuam em busca do sucesso de escândalo, 
+termo de Ari Adut (2008) para descrever acontecimentos negativos que ganham 
+notoriedade e se tornam socialmente relevantes, alterando o curso da vida social. 
+Nos programas de Datena e Gimenez, o mais importante é aumentar a audiência, 
+independentemente da boa preparação do conteúdo exibido. “Para aqueles que 
+trabalham em setores altamente competitivos e com baixo nível de consenso 
+normativo, onde ser notado por multidões é difícil e essencial para o sucesso, 
+qualquer publicidade, independente da forma obtida, pode ser boa”6 (ADUT, 2008, 
+p. 33, tradução nossa). O sucesso de escândalo possui efeitos imprevisíveis. 
+No caso de Kate Moss, por exemplo, o uso de cocaína foi um escândalo que fortaleceu 
+sua imagem pública, tornando-a uma inspiração para os dependentes químicos 
+(ADUT, 2008). Entretanto, Adut indica que nem sempre os efeitos do sucesso de 
+escândalo são positivos, já que podem macular a imagem dos envolvidos.
+Assim, cabe ainda indagar como a crítica de mídia vem percebendo 
+a construção da notoriedade do atual presidente. Maurício Stycer (2018b) lembrou 
+suas participações em Superpop, CQC e Pânico, aproximando seu processo 
+6	
+No original: “For those working in highly competitive sectors with low level of normative consensus, where being 
+noticed by multitudes is both hard and essential to success, any publicity, however obtained, can be good”.
+
+87
+número 26 | volume 13 | julho - dezembro 2019
+de celebrização às estratégias de Roger Stone, mencionado na abertura deste 
+artigo. As regras do método Roger Stone aproximam-se da noção de sucesso de 
+escândalo: por exemplo, “Ataque, ataque, ataque – nunca defenda, não admita 
+nada, negue tudo, parta para o contra-ataque” e “A única coisa pior na política do 
+que estar errado é ser chato” (GET…, 2017). Algo semelhante ocorreu na exitosa 
+criação da narrativa bolsonarista.
+CQC e Superpop entre outros, lucravam (pontos no Ibope) com a exibição 
+de ideias consideradas ultrajantes e não parou de repeti-las na TV. 
+Apostou no papel de antissistema, reproduziu fake news (o “kit gay”, 
+por exemplo) e nunca fez questão de parecer bonzinho. Raramente foi 
+confrontado nestes programas. E quando foi, o objetivo era apenas 
+elevar a temperatura da polêmica, e não esclarecer qualquer coisa. Foi 
+um casamento perfeito. (STYCER, 2018b)
+Reinaldo Azevedo (2019b) definiu a estratégia como “marketing da 
+rusticidade”, que criava um personagem do tipo “homem do povo, que não se 
+importa com códigos, regras, etiqueta”. Azevedo se referia, na análise, aos trajes 
+“escalafobéticos” usados pelo presidente recém-eleito para receber no Palácio 
+da Alvorada ministros do governo. “Usava uma calça tactel azul, uma camiseta 
+pirata do Palmeiras, um blazer que não combinava nem com uma coisa nem 
+outra e chinelos modelo slide, que não só deixam os dedos à mostra como os 
+projetam. O conjunto era a visão do inferno em matéria de estilo”. Associando 
+moda e democracia, Azevedo analisou a construção da visibilidade do presidente.
+Ocorre que, na democracia de direito, a forma não é uma escolha, mas 
+um princípio. É claro que aquela mistureba hedionda não é causa de nada. 
+Na verdade, a composição escalafobética já é consequência de um pensamento 
+torto sobre a ordem democrática e suas exigências decorosas. Bolsonaro 
+é a encarnação do poder do povo. E o nosso povo é bem melhor do que 
+aquilo. Não cumpre ao presidente da República sugerir que somos piores 
+do que somos porque ele resolveu fazer marketing pessoal, expondo ao 
+público uma combinação que nem errada consegue ser. (AZEVEDO, 2019b)
+Entretanto, é preciso lembrar que o presidente foi eleito pelo povo, o que 
+leva a uma reflexão sobre os significados da democracia em nosso país. Um dos 
+
+88
+Crítica de mídia, sucesso de escândalo e narrativa política no Brasil hoje
+Lígia Lana 
+entrevistados do documentário Get me Roger Stone afirmou: “Democracia é o 
+processo de apelar à maioria”. Na era das celebridades, a democracia parece ser 
+definida, cada vez mais, pelas lógicas de visibilidade da mídia – que a celebridade 
+sabe bem como manejar.
+Lógicas das redes sociais
+De acordo com os textos analisados, a internet é fundamental para esse 
+modelo narrativo da democracia de entretenimento político. Nesse sentido, 
+um fato importante, como mencionado antes, ocorreu durante as eleições, quando a 
+jornalista Patrícia Campos Mello publicou suas investigações sobre o financiamento 
+ilegal da campanha de Jair Bolsonaro, com o disparo em massa de mensagens pelo 
+WhatsApp. Depois das eleições, o caso mais emblemático ocorreu no carnaval, 
+quando o chefe do executivo divulgou no Twitter um vídeo pornográfico, seguido 
+da indagação sobre o significado do termo golden shower. Os articulistas avaliam o 
+uso das redes sociais tratando da obsessão do governo pelo sucesso de escândalo, 
+da celebração da comunicação direta com seus apoiadores e da conquista da atenção 
+do mundo, uma vez que possui um valioso capital de visibilidade.
+Eliane Brum (2019) defendeu que a comunicação através da internet feita 
+pelo atual governo “corrompe a democracia”, ao invés de fortalecê-la, como 
+argumentam os bolsonaristas ao enaltecerem o uso das redes sociais, que traria, 
+segundo eles, uma comunicação direta com o povo. Brum retomou dois eventos 
+ocorridos nos dois primeiros meses da nova administração – a demissão do 
+ministro Gustavo Bebianno e a reprovação do nome de Ilona Szabó para integrar 
+o Conselho Nacional de Política Criminal e Penitenciária, órgão do Ministério da 
+Justiça –, revelando a estreita ligação entre postagens no Twitter e a condução 
+da administração federal.
+Bolsonaro tenta convencer que se mover pelos gritos dos bolsocrentes 
+nas redes sociais é democracia. Não é. […] O que Bolsonaro garante é 
+apenas o desejo de um grupo capaz de fazer seus gritos ecoarem na 
+internet, muitas vezes pelo uso de robôs. (BRUM, 2019)
+
+89
+número 26 | volume 13 | julho - dezembro 2019
+De acordo com Eliane Brum, o mais desconcertante é o governo acreditar 
+que seus seguidores, sejam fãs, sejam robôs (os bots), que reproduzem e 
+aplaudem postagens, representam, de fato, a maioria da população, ponto de vista 
+compartilhado por Demétrio Magnoli (2019). Na internet, o governo de “extremistas 
+[…] confunde os ecos de seus tuítes com a voz do povo” (MAGNOLI, 2019).
+Fernando Gabeira (2019) definiu o Twitter como o sofá de Bolsonaro: 
+“Os aliados aconselham Bolsonaro a deixar o Twitter. Parecem não ter percebido 
+que o tuíte não se escreve sozinho. É apenas uma plataforma que pode ser 
+usada com sensatez ou não. Tirar o Twitter é tirar o sofá”. Gabeira associou o 
+Twitter à divulgação das ideias “retrópicas” de Bolsonaro, que, segundo ele, seria 
+a principal tendência do governo federal: a utopia de um passado inexistente. 
+No sofá, descansando da difícil e complexa tarefa que é governar na prática, 
+Bolsonaro “vai prosseguir na sua cruzada retrópica” (GABEIRA, 2019). A metáfora 
+do sofá – móvel utilizado para o descanso e, também, para assistir à televisão – 
+ilustra o posicionamento de Roger Stone sobre o entretenimento político: não há 
+problemas, na política, em estar errado ou falar mentiras; o ruim é ser chato, 
+pois é preciso entreter a plateia.
+Segundo os críticos, a provocadora narrativa bolsonarista na internet 
+revelaria uma inabilidade para governar. Os articulistas apontam que o bolsonarismo 
+parece mais à vontade na internet, entretendo a população.
+Como analisam Márcio Serelle e Rosana Soares (2019, p. 4), esse novo tipo 
+de entretenimento político tem fomentado o debate público no Brasil hoje: “as 
+formas de entretenimento vinculadas à informação muitas vezes deslocada da mídia 
+dominante são o substrato dos textos midiáticos que circulam nas redes sociais”. 
+Dessa maneira, a narrativa bolsonarista na internet utiliza o entretenimento, onde 
+pode ocorrer a suspensão momentânea da realidade, com a criação de mundos 
+imaginados. O entretenimento político fornece formas narrativas e “também a 
+possibilidade de suspensão de uma realidade imediata para que se possa vivenciar 
+um mundo à parte, onde operam produtivamente narrativas que não estão sob 
+o jugo do factual” (SERELLE; SOARES, 2019, p. 18).
+
+90
+Crítica de mídia, sucesso de escândalo e narrativa política no Brasil hoje
+Lígia Lana 
+Reinaldo Azevedo (2019a) caracterizou a “turma que passou a ter existência 
+nas redes” com as eleições de 2018 como personagens de “um eterno ‘Show de 
+Truman’”. Entretanto, ao contrário do inocente Truman, que não sabia que sua 
+vida era vivida em um estúdio de televisão, os novos “parlamentares das redes” 
+seriam mais perniciosos.
+O que há de novo, neles, em essência? Nada! Vivemos, aqui e no mundo, 
+a era do populismo eletrônico. Se a grei que dá os “likes” resolve dizer a 
+seus parlamentares virtuais um “não”, inclusive à reforma da Previdência, 
+então é “não”. […] [Têm] na cabeça o quê? A maioria, nada! Eram, com 
+raras exceções, especialistas bem-sucedidos na ofensa e na agressividade 
+gratuitas nas redes. (AZEVEDO, 2019a)
+No Twitter, o deputado Daniel Coelho (Cidadania-PE) expôs uma versão 
+interessante para o fenômeno.
+Figura 1: Postagem de Daniel Coelho no Twitter
+Fonte: Coelho (2019).
+A definição “caçadores de pokemons” vai ao encontro de algo que a crítica 
+de mídia vem mostrando sobre a narrativa bolsonarista: muita habilidade para 
+aparecer na internet, mas pouca ou nenhuma capacidade para desenvolver as 
+atividades para as quais foram eleitos. Conforme Reinaldo Azevedo (2019a), 
+as redes sociais estariam demonstrando que Bolsonaro ignora que o “objetivo 
+não é vencer as eleições, é governar […]. E isso Bolsonaro não sabe fazer. E, 
+
+91
+número 26 | volume 13 | julho - dezembro 2019
+em certa medida, não quer”. Parece, portanto, que, segundo a crítica de mídia, 
+a nova política brasileira seria mais um discurso do que, de fato, uma real 
+transformação para a administração do país.
+Crítica/metacrítica
+Por fim, muitos textos da crítica de mídia avaliaram as análises que 
+a mídia fez da narrativa bolsonarista, o que leva a pensar sobre o lugar da 
+crítica/metacrítica. Durante as eleições, a chefe de redação da Rede Record 
+pediu demissão por não concordar com a interferência da cúpula da emissora 
+na condução do noticiário da época, que não poderia ser crítico ao candidato. 
+A demissão motivou que funcionários do setor de jornalismo de todo o grupo 
+(TV, rádio e Portal R7) procurassem o sindicato dos jornalistas de São Paulo para 
+denunciar a “pressão permanente da emissora” (SINDICATO…, 2018).
+Também durante o período eleitoral, a HBO deixou de exibir o programa 
+Last Week Tonight, que fazia críticas a Bolsonaro e Haddad – as mais ácidas ao 
+futuro presidente. Segundo Maurício Stycer (2018c), o apresentador de Last Week 
+Tonight teria dito: “Qualquer coisa é melhor que Bolsonaro. O Lula diet é melhor, 
+Homem Aranha é melhor”. A crítica de mídia registrou o ocorrido, lembrando 
+a derrubada do dispositivo eleitoral que pretendia proibir sátiras políticas durante 
+as eleições. “Quem não quer ser satirizado, fica em casa, não se oferece para 
+ocupar cargos políticos”, postulou o relator do processo, ministro Alexandre de 
+Moraes, em trecho divulgado por Maurício Stycer. “Querer evitar isso por meio 
+de uma ilegítima intervenção estatal na liberdade de expressão é absolutamente 
+inconstitucional” (STYCER, 2018c).
+No início do governo, em 15 de janeiro de 2019, a Globo exibiu a “Vila Militar 
+do Chaves”, uma paródia feita pelo programa Tá no Ar, em que Marcelo Adnet 
+representa o novo dono da vila do seu Barriga, um capitão, que “depois de anos de 
+incompetência e má administração” veio “resolver esta questão”. Reproduzindo a 
+entonação do presidente recém-eleito e com texto muito crítico, “Bolsonaro de Adnet 
+é o nosso melhor presidente desde Lula do Bussunda”, afirmou Chico Barney (2019). 
+
+92
+Crítica de mídia, sucesso de escândalo e narrativa política no Brasil hoje
+Lígia Lana 
+Na análise, Barney retoma todas as paródias que a Globo fez dos últimos presidentes 
+e conclui: “Com Jair Bolsonaro, Marcelo Adnet retoma a excelente tradição global 
+de escrachar os chefe da nação. E em um alto nível que não era visto desde a fase 
+áurea do Casseta & Planeta. Não é pouca coisa” (BARNEY, 2019).
+Parece haver, assim, uma constante tensão nos dispositivos críticos da 
+narrativa política hoje. Os colunistas lembram a tradição de programas da Globo 
+em parodiar os presidentes da República e, ao mesmo tempo, informam que algo 
+que parecia improvável – a censura – voltou a acontecer no Brasil. No caso da 
+HBO, tratou-se de autocensura, o que não deixa de ser uma informação relevante 
+para a compreensão do processo eleitoral em 2018.
+Demétrio Magnoli (2018) responsabilizou Trump e Bolsonaro “pelas centelhas 
+de violência” ao cometerem “um crime chamado linguagem”, “violando a sintaxe 
+da democracia”. Magnoli retoma termos usados pelos dois presidentes para se 
+referir aos opositores: “inimigos do povo”; “guerra à imprensa” e os associa a 
+outros: “ratos” (dos nazistas para judeus); “baratas” (em Ruanda, do regime 
+hutu para os tutsis); “gusanos” (ou vermes, do castrismo para os dissidentes). 
+Para Magnoli (2018), “as democracias começam a se envenenar quando os 
+próprios governantes saltam o muro da linguagem, entrincheirando-se no fosso 
+da ‘guerra’. Aí, a pedagogia do ódio converte-se em doutrina estatal”. As violentas 
+tensões das narrativas políticas no contexto brasileiro ocorreram, de maneira 
+semelhante, em outros lugares e momentos. A reflexão sobre a crítica de mídia, 
+independentemente das particularidades dos países, leva a combater a indesejável 
+degradação da linguagem, que impede o diálogo em um registro democrático.
+Considerações finais
+A crítica de mídia, divulgada em jornais e blogs de grande visibilidade, 
+parece fornecer interessantes pistas para compreender as narrativas políticas em 
+evidência hoje no cenário brasileiro. Descortinando, no dia a dia, a linguagem do 
+governo, colunistas examinam, em consonância com a crítica acadêmica, aspectos 
+da cultura midiática contemporânea. A consolidação da figura da celebridade no 
+
+93
+número 26 | volume 13 | julho - dezembro 2019
+Brasil, por exemplo, é uma das explicações trazidas pelos articulistas, que coincide, 
+em linhas gerais, com a percepção da pesquisa científica. A busca desenfreada 
+pela fama e as engenhosas maneiras com que os indivíduos manipulam seu capital 
+de visibilidade são explicitadas tanto pela crítica de mídia quanto pela pesquisa 
+científica – cada qual com suas ferramentas, pressupostos e contribuições.
+O assunto que mais parece inquietar a crítica de mídia é a participação das 
+redes sociais nos processos decisórios da democracia. As novas possibilidades 
+de produzir conteúdo através das mídias digitais colocam em tensão as formas 
+tradicionais das narrativas políticas. O mundo imaginado por memes, correntes de 
+mensagens e vídeos virais cria uma aura de entretenimento e a necessidade 
+de constante provocação, que passam a direcionar a discussão de assuntos sérios, 
+transformando os processos deliberativos.
+A mídia possui a prerrogativa de “incluir publicamente”, quer dizer, garantir 
+publicidade para fatos, versões e acontecimentos. Por isso, conforme Ari Adut, 
+jornalistas tendem a sobrevalorizar o papel da mídia na construção de escândalos 
+políticos – e, por que não dizer, na condução de processos políticos de forma geral. 
+Quando jornalistas passam a avaliar sua participação na esfera política, “seja se 
+autoadulando como combatentes destemidos da corrupção, seja se autoflagelando 
+como corruptores da moral pública, eles estão simplesmente confirmando seu suposto 
+poder social e relevância, quiçá se entregando ao autoengrandecimento”7 (ADUT, 
+2008, p. 77, tradução nossa). A participação da mídia nas decisões políticas, para 
+Adut, parece ser mais modesta. Práticas, hábitos e valores em curso na vida social 
+são afetados pelas narrativas políticas na mídia, que devem ser compreendidas de 
+maneira mais ampla, no seio da cultura e dos processos sociais.
+Nesse sentido, os resultados deste trabalho sugerem que a crítica de 
+mídia permite pensar sobre o papel das narrativas midiáticas no contexto político 
+hoje. O controle social da mídia – que abrange a liberdade de imprensa e a 
+criatividade para criar e disseminar correntes na internet – parece ser aqui um 
+7	
+No original: “whether self-adulating as the fearless fighters of corruption or self-flagellating as the corruptor of public 
+morals, they are simply confirming their supposed social power and relevancy, if not indulging in self-aggrandizement”.
+
+94
+Crítica de mídia, sucesso de escândalo e narrativa política no Brasil hoje
+Lígia Lana 
+aspecto central. A disputa pela formação da opinião pública dos brasileiros, 
+que, infelizmente, não possuem ainda acesso justo à educação de qualidade, 
+ocorre em guerras de narrativas midiáticas, potencializadas pela polarização, 
+provocação e desrespeito. A crítica de mídia, ao observar e desnaturalizar os 
+modos como as narrativas políticas são constituídas, pode servir para aprimorar 
+a compreensão das interferências da mídia na democracia no Brasil hoje.
+Referências
+ADUT, A. On scandal: moral disturbance in society, politics, and art. Nova York: 
+Cambridge University Press, 2008.
+AZEVEDO, R. Fim do show 2: objetivo não é vencer a eleição, é governar. Bolsonaro ignora. 
+Blog do Reinaldo Azevedo, São Paulo, 2019a. Disponível em: https://bit.ly/2TTRQ0Y. 
+Acesso em: 5 abr. 2019. (a)
+AZEVEDO, R. Traje escalafobético de Bolsonaro é marketing ruim da simplicidade; 
+não é que não entenda de moda: ele nada entende é de democracia. Blog do 
+Reinaldo Azevedo, São Paulo, 2019b. Disponível em: https://bit.ly/2ACdnzg. 
+Acesso em: 5 abr. 2019.
+BARNEY, C. Fã-clube abandona Anitta após cantora seguir perfil que apoia Bolsonaro. 
+Blog do Chico Barney, São Paulo, 2018a. Disponível em: https://bit.ly/2LJGmrm. 
+Acesso em: 5 abr. 2019.
+BARNEY, C. É melhor já ir se lamentando: Miss Bumbum Trans desiste de apoiar Bolsonaro. 
+Blog do Chico Barney, São Paulo, 2018b. Disponível em: https://bit.ly/2AI1Tua. 
+Acesso em: 5 abr. 2019.
+
+95
+número 26 | volume 13 | julho - dezembro 2019
+BARNEY, C. Bolsonaro de Adnet é o nosso melhor presidente desde Lula do Bussunda. 
+Blog do Chico Barney, São Paulo, 2019. Disponível em: https://bit.ly/2LIK2cD. 
+Acesso em: 5 abr. 2019.
+BERGAMO, M. Guedes e Moro se reúnem com Kaká, Regina Duarte e Ana Hickman. 
+Folha de S.Paulo, São Paulo, 2019. Disponível em: https://bit.ly/2Uu3ccq. 
+Acesso em: 5 abr. 2019.
+BRUM, E. Bolsonaro (des)governa o Brasil pelo Twitter. El País, Madri, 2019. 
+Disponível em: https://bit.ly/2TsJEEA. Acesso em: 5 abr. 2019.
+COELHO, D. Sem desconsiderar honrosas e boas excessões, parte da renovação 
+política trouxe caçadores de pokemons para o Congresso. Não atuam em plenário ou 
+comissões, não participam de nada. Passam o dia todo fazendo selfs e comentando 
+os fatos como se nada tivessem para fazer ali. Brasília, DF, 5 abr. 2019. Twitter: 
+@DanielCoelho23. Disponível em: https://bit.ly/2B9LyhR. Acesso em: 3 jun. 2019.
+FREIRE FILHO, J.; LANA, L. Pacto de visibilidade: mídia, celebridades e humilhação. 
+Contracampo, Niterói, n. 30, p. 4-23, 2014.
+GABEIRA, F. O Twitter como um sofá. Gabeira, Rio de Janeiro, 2019. Disponível em: 
+https://bit.ly/2V8Agmo. Acesso em: 5 abr. 2019.
+GET me Roger Stone. Direção: Dylan Bank, Daniel DiMauro e Morgan Pehme. 
+Los Gatos: Netflix, 2017. 1 vídeo (92 min), son., col., HD.
+KOGUT, P. ‘Central das eleições’ faz crescer a audiência da Globo News em 
+400%. O Globo, Rio de Janeiro, 2018. Disponível em: https://glo.bo/32XDLj9. 
+Acesso em: 3 jul. 2019.
+
+96
+Crítica de mídia, sucesso de escândalo e narrativa política no Brasil hoje
+Lígia Lana 
+LANA, L. Para além do sensacionalismo: uma análise do telejornal Brasil Urgente. 
+Rio de Janeiro: E-papers, 2009.
+LANA, L. A vítima oportunista: a construção da celebridade Luciana Gimenez. 
+Interseções, Rio de Janeiro, v. 15, p. 446-462, 2013
+LIRA NETO, J. Príncipe da Escuridão é um dos responsáveis pela ascensão de 
+Trump. Folha de S.Paulo, São Paulo, 2017. Disponível em: https://bit.ly/2OjZcH4. 
+Acesso em: 3 jul. 2019.
+MAGNOLI, D. Um crime chamado linguagem. Folha de S.Paulo, São Paulo, 2018. 
+Disponível em: https://bit.ly/2pJ1ANl. Acesso em: 5 abr. 2019.
+MAGNOLI, D. Retirada tática. Folha de S.Paulo, São Paulo, 2019. Disponível em: 
+https://bit.ly/2w0gVsV. Acesso em: 5 abr. 2019.
+SACCHITIELLO, B. Governo investe em merchandising pela Previdência. 
+Meio & Mensagem, São Paulo, 2019. Disponível em: https://bit.ly/2WuFae1. 
+Acesso em: 3 jul. 2019.
+SERELLE, M. Apresentação do dossiê “Polarizações”. Rumores, São Paulo, 
+v. 10, n. 19, p. 4-7, 2016.
+SERELLE, M.; SOARES, R. As novas formas do falso: entretenimento, desinformação 
+e política nas redes digitais. In: COMPÓS, 28., 2019, Porto Alegre. Anais […]. 
+Porto Alegre: Compós.
+SINDICATO denuncia pressões abusivas sobre os jornalistas da Rede Record. 
+Sindicato dos jornalistas profissionais do estado de São Paulo, São Paulo, 2018. 
+Disponível em: https://bit.ly/2EBg8ph. Acesso em: 4 jul. 2019.
+
+97
+número 26 | volume 13 | julho - dezembro 2019
+SOUZA, J. A elite do atraso: da escravidão à Lava Jato. Rio de Janeiro: Leya, 2017.
+STYCER, M. Bolsonaro volta a privilegiar Record e dá exclusiva sobre 
+convite a Moro. Blog do Maurício Stycer, São Paulo, 2018a. Disponível em: 
+https://bit.ly/2OfX7fi. Acesso em: 5 abr. 2019.
+STYCER, M. Qual foi o papel de CQC, Superpop e Pânico na popularização 
+de Bolsonaro. Blog do Maurício Stycer, São Paulo, 2018b. Disponível em: 
+https://bit.ly/2Oj2muS. Acesso em: 5 abr. 2019.
+STYCER, M. HBO não exibe no Brasil programa de humor que critica Bolsonaro 
+e Haddad. Blog do Maurício Stycer, São Paulo, 2018c. Disponível em: 
+https://bit.ly/2LKyJRg. Acesso em: 5 abr. 2019.
+STYCER, M. Críticas a Globo, piadas de Daciolo e ajuda a Bolsonaro: 
+a eleição na TV. Blog do Maurício Stycer, São Paulo, 2018d. Disponível em: 
+https://bit.ly/2Mb3DkN. Acesso em: 5 abr. 2019.
+STYCER, M. Record ajuda Bolsonaro ao exibir entrevista na hora do debate 
+da Globo. Blog do Maurício Stycer, São Paulo, 2018e. Disponível em: 
+https://bit.ly/356PXzN. Acesso em: 5 abr. 2019.
+STYCER, M. Com cinco entrevistas, Record foi a favorita nos últimos três meses. 
+Blog do Maurício Stycer, São Paulo, 2019. Disponível em: https://bit.ly/2oMonY6. 
+Acesso em: 5 abr. 2019.
+XAVIER, N. Malu Mulher votaria em Bolsonaro? Blog do Nilson Xavier, São Paulo, 2018. 
+Disponível em: https://bit.ly/2IjxUN2. Acesso em: 5 abr. 2019.
+submetido em: 8 jul. 2019 | aprovado em: 29 ago. 2019

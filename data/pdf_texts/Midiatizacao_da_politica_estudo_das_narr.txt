@@ -1,0 +1,487 @@
+Associação Brasileira de Pesquisadores de Comunicação Organizacional e de Relações Públicas (Abrapcorp)
+XIV Congresso Brasileiro Científico de Comunicação Organizacional e de Relações Públicas - Bauru/SP - 18 a 21/05/2020
+Midiatização da política: estudo das narrativas de campanha de Fernando Haddad e
+Jair Bolsonaro no Facebook1
+Aline Cristina Camargo
+Universidade Estadual Paulista “Júlio de Mesquita Filho”, Unesp, Bauru/SP
+Resumo
+O termo midiatização tem sido utilizado em diferentes contextos para caracterizar a influência
+que a mídia exerce sobre uma série de fenômenos, entre eles os processos políticos. Este
+artigo tem como objetivo verificar de que maneira se dá midiatização da política a partir da
+análise das postagens de campanha dos dois candidatos. Ressalta-se a possibilidade de novas
+formas de interação e engajamento a partir da troca de ideias e informações de forma ativa,
+permitindo aos usuários a criação de laços de discussão e participação que permeiam a
+definição de sua identidade.
+Palavras-chave
+Eleições; Facebook; Fernando Haddad; Jair Bolsonaro; Midiatização.
+Introdução
+A necessidade social da informação é, hoje, suprida em grande parte pela mídia, que,
+por sua vez, estabelece diferentes relações com instituições sociais. Como esfera de
+visibilidade pública central na contemporaneidade, tem sido palco para a espetacularização da
+política, mas também pano de fundo para visibilidade, informação, interação, conversação e
+participação de seus interlocutores.
+O termo midiatização tem sido utilizado em diferentes contextos para caracterizar a
+influência que a mídia exerce sobre uma série de fenômenos, entre eles os processos políticos.
+Neste sentido, a pesquisa a que se refere este artigo teve como objetivo verificar de que
+maneira se dá a tematização e a visibilidade de assuntos durante o período de propaganda
+eleitoral gratuita veiculada no rádio e na televisão (primeiro turno: de 31 de agosto a 04 de
+outubro; segundo turno: de 12 a 26 de outubro) na página do Facebook dos dois candidatos
+com maior intenção de votos nas eleições presidenciais brasileiras de 2018: Fernando Haddad
+(candidato pelo Partido dos Trabalhadores) e Jair Messias Bolsonaro (candidato pelo Partido
+Social Liberal).
+Internet, redes sociais e esfera pública
+Em época de eleições, notícias sobre o assunto ou postagens de figuras políticas são
+compartilhadas pelos usuários das redes sociais. Essas publicações geram interações e
+discussões entre os usuários. A eleição presidencial de 2014, por exemplo, foi responsável por
+1 Trabalho apresentado no Grupo de Trabalho (GT 6) Comunicação digital, inovação e tecnologias, atividade integrante do
+XIV Congresso Brasileiro Científico de Comunicação Organizacional e de Relações Públicas.
+
+Associação Brasileira de Pesquisadores de Comunicação Organizacional e de Relações Públicas (Abrapcorp)
+XIV Congresso Brasileiro Científico de Comunicação Organizacional e de Relações Públicas - Bauru/SP - 18 a 21/05/2020
+674,4 milhões de interações no Facebook, de acordo com reportagem publicada pela revista
+Exame. 48,3 milhões de pessoas conversaram sobre o assunto, o equivalente a 54% de todos
+os usuários ativos do Facebook no país até então2.
+As redes caracterizam-se pela existência de laços firmados por interesses comuns, a
+partir dos quais é possível formar agrupamentos para a troca de informações e ideias,
+“gerando não apenas uma interação entre os participantes no sentido de compartilhar
+conhecimentos, mas também o engajamento em questões políticas, sociais e culturais”, afirma
+Martino (2015, p. 58). Neste sentido, para o autor, “o poder de mobilização exponencial das
+redes sociais as torna um fator relevante para se pensar elementos da vida fora da internet”
+(MARTINO, 2015, p. 58).
+Os sites de redes sociais, como é o caso do Facebook, são “ambientes onde as pessoas
+podem reunir-se publicamente através da mediação da tecnologia”, enquanto rede social é
+uma metáfora utilizada para o estudo do grupo que se apropria de um determinado sistema
+para relacionar-se, salienta Recuero (2010, p. 3).
+Entre as redes sociais utilizadas no Brasil, destaca-se o Facebook, que conquistou o
+posto de rede social mais popular do mundo em 2008. Só no Brasil são mais de 122 milhões
+de usuários. O país é, atualmente, o terceiro mais ativo no Facebook, atrás apenas dos Estados
+Unidos e da Índia.
+Dentre os 103 milhões de usuários brasileiros, 62 milhões dizem acessar a rede social
+Facebook diariamente, 50 milhões destes o fazem a partir de dispositivos móveis. Estes dados
+não indicam apenas a presença dos brasileiros na rede, mas também sua utilização como
+ferramenta de participação: A eleição presidencial de 2014 gerou 674,4 milhões de interações
+no Facebook, um novo recorde nos registros da rede social. As conversas sobre as eleições
+brasileiras envolveram 48,3 milhões de pessoas, o equivalente a 54% de todos os usuários
+ativos do Facebook no país.
+Para Recuero (2010), um elemento característico das redes sociais na internet é sua
+capacidade de difundir informações através das conexões existentes entre os atores. Essa
+capacidade alterou de forma significativa os fluxos de informação dentro da própria rede: “O
+surgimento e a popularização da internet permitiram uma pluralidade de novas informações
+circulando nos grupos sociais”, (RECUERO, 2010, p. 117).
+De acordo com Recuero (2010, p. 115), uma das características das redes sociais é a
+possibilidade de ser ambiente de conversação, que se caracteriza como um evento temporal,
+2EXAME. Eleições batem recorde de interações no Facebook. Disponível em: https://exame.abril.com.br/tecnologia/eleicoes-
+batem-recorde-de-interacoes-no-facebook/#. Acesso em: 12 jun. 2020.
+
+Associação Brasileira de Pesquisadores de Comunicação Organizacional e de Relações Públicas (Abrapcorp)
+XIV Congresso Brasileiro Científico de Comunicação Organizacional e de Relações Públicas - Bauru/SP - 18 a 21/05/2020
+com objetivos e entre dois ou mais atores. O conceito inicial referia-se à conversação como
+fenômeno das interações orais, no entanto, “a apropriação das ferramentas textuais da
+mediação do computador passou a indicar uma simulação da conversação e uma percepção de
+uso conversacional”.
+Sendo assim, a conversação mediada e possibilitada pelas tecnologias digitais
+apropria-se dos meios originalmente textuais e não propícios às interações orais. A
+conversação a partir das tecnologias digitais, e aqui mais especificamente a partir da utilização
+de redes sociais, pode ocorrer de maneira síncrona (interações que acontecem ao mesmo
+tempo, com diferentes atores), por exemplo em chats ou fóruns; e também de maneira
+assíncrona (ou seja, interações espalhadas no tempo, quando os envolvidos não estão
+conectados ao mesmo tempo), como blogs, e-mails, e o uso do Facebook e do Twitter.
+A partir de diferentes ferramentas, como as redes sociais, novos usos e novos sentidos
+são construídos de modo a permitir a interação entre dois ou mais atores. Além disso, as
+conversações, no espaço dos sites de rede social, adquirem os contornos associados aos
+públicos em rede.
+A difusão da internet nas últimas décadas trouxe expectativas em relação a seu
+potencial democratizante. Se por um lado a internet tem o potencial “de interação inédito se
+comparado com os veículos de comunicação tradicionais” (MAIA, 2006, p.1), a rede, de
+acordo com Marques, também é um “lugar de debates de naturezas distintas (uns mais sérios,
+outros nem tanto), mas sem maior viabilidade de se aliar à deliberação plena” (MARQUES,
+2006, p.172).
+De acordo com Dahlgren (2005, p. 148), a esfera pública é entendida como uma
+constelação de espaços comunicativos na sociedade que permitam a circulação de
+informações, ideias e debates. “Esses espaços, em que os meios de comunicação e agora, mais
+recentemente, a figura de mídia interativa ganhou destaque, também servem para facilitar as
+ligações de comunicação entre os cidadãos e seus representantes”.
+Já Habermas (1962), precursor do conceito de esfera pública, reconhece diferentes
+formas de esfera pública: esfera pública episódica (bares, cafés, encontros na rua), a esfera
+pública da presença organizada (reuniões de pais, oficiais em visita ao teatro, shows de rock,
+reuniões partidos ou conferências de igrejas) e esfera pública abstrata, produzida pelos meios
+de comunicação (leitores, ouvintes, telespectadores e disseminação natural globalmente).
+A internet tem a capacidade para abrigar várias dessas arenas de discussão, por ser
+uma rede pública de comunicação não necessariamente institucionalizada e, em muitas
+ocasiões, espaço que abriga a formação espontânea de opiniões. No entanto, de acordo com
+
+Associação Brasileira de Pesquisadores de Comunicação Organizacional e de Relações Públicas (Abrapcorp)
+XIV Congresso Brasileiro Científico de Comunicação Organizacional e de Relações Públicas - Bauru/SP - 18 a 21/05/2020
+Marques (2006), a esfera pública virtual, usado como um espaço de conversa civilizada (ou
+seja, as discussões desenvolvidas em grupos de discussão e fóruns online), atua mais
+efetivamente como um espaço para a formação de opinião, informação, visibilidade e
+conversação; e não como um espaço de tomada de decisões.
+Neste contexto, a esfera pública virtual é vista como um espaço para a conversação
+civil (MARQUES, 2006). Para Polat (2005), a importância da esfera pública surge de seu
+papel no fornecimento de uma plataforma para o debate racional crítico ao invés de simples
+registro de pontos de vista individuais por meio de ferramentas de agregação de informações,
+tais como pesquisas de opinião: “O que importa aqui é como as opiniões são formadas, em
+vez de como eles se expressam”, salienta Polat (2005, p. 448).
+Três características da teoria da esfera pública de Habermas (1962) são estendidas a
+partir do uso da internet: a) Em primeiro lugar, a esfera pública tem que ser igualmente aberta
+a todos: “Todo mundo tem que ser capaz de ser membro da esfera pública e participar nas
+deliberações de modo que a diversidade de pontos de vista pode ser assegurada. Só desta
+forma uma prática democrática justa e representativa pode ser sustentada” (POLAT, 2005, p.
+449); b) em segundo lugar, dentro da esfera pública um acordo racional é alcançado como
+resultado do debate crítico e livre de juízos de valor: “De maneira ideal, a esfera pública
+conecta as pessoas entre si para que possam se engajar no debate crítico racional [...] a esfera
+pública é uma arena de comunicação em que mutualidade, solidariedade e reciprocidade são
+promovidas”; c) em terceiro lugar, a esfera pública tem que ser independente da intrusão do
+governo e de interesses comerciais e de poder.
+Polat (2005, p. 449) acrescenta que “a internet não é universalmente acessível pelo
+público. Pelo contrário, o uso é mais limitado a pessoas que já estão em melhor situação em
+termos de ter acesso ao debate público racional [...] mesmo que o debate crítico racional
+online aconteça, ele não é divulgado de maneira eficaz”. Embora o potencial da internet para
+estender a esfera pública seja limitado, ainda há potencial para aumentar o engajamento e a
+participação a partir de grupos de discussão online, por exemplo.
+Polat (2005) ressalta que a internet aumenta a capacidade de comunicação de forma
+desigual, apoiando algumas formas de comunicação mais do que outras. O autor sugere a
+necessidade de uma abordagem investigativa da relação entre a capacidade de comunicação
+da internet, as interações e a participação política.
+No que diz respeito à internet como esfera pública virtual, o autor (2005) argumenta
+que seu potencial para estender a esfera pública é limitado devido à sua distribuição desigual e
+sua estrutura fragmentada. No entanto, é preciso considerar as redes sociais e comunidades
+
+Associação Brasileira de Pesquisadores de Comunicação Organizacional e de Relações Públicas (Abrapcorp)
+XIV Congresso Brasileiro Científico de Comunicação Organizacional e de Relações Públicas - Bauru/SP - 18 a 21/05/2020
+online e seu potencial para informar, dar visibilidade e oferecer espaços de debates políticos.
+Comunicação política e eleições
+No contexto da crise da democracia representativa e do declínio da confiança nas
+figuras políticas do país, é preciso considerar os meios de comunicação, analógicos e digitais,
+bem como as mídias digitais, como ferramentas importantes na disponibilização de
+informação e na visibilidade, não apenas de figuras políticas, mas também, e principalmente,
+de temáticas que geram engajamento no público.
+De acordo com Miguel (2008), a percepção negativa dos políticos é presente em países
+ricos e pobres, em velhas e novas democracias. “Não só o declínio na confiança em relação
+aos indivíduos que compõem a elite política quanto um crescente ceticismo a respeito da
+efetividade das instituições que se propõem realizar a democracia política”, (MIGUEL, 2008,
+p. 223).
+Para Graeff (2009, p. 5) a chegada de Barack Obama à presidência dos EUA em 2008
+coroa o uso político da rede e das mídias sociais e provavelmente “será o evento identificado
+como início de uma nova era para as campanhas eleitorais”. Barack Obama utilizou redes
+sociais como Twitter, Facebook e YouTube para comunicar-se e interagir com os eleitores.
+Pesquisa realizada pelo Instituto Pew Internet & American Life Project indica que 3 em cada
+4 internautas americanos utilizaram a internet para ler notícias e se informar sobre a
+campanha política de 2008.
+Ainda em 2008, enquanto as eleições presidenciais americanas eram marcadas pelo
+uso da internet não apenas como ferramenta de divulgação de ações de campanha, mas
+também de arrecadação de dinheiro e de interação entre cidadãos e candidatos, no Brasil não
+era permitido aos candidatos utilizarem, por exemplo, canal no Youtube. Até então a
+propaganda eleitoral na internet somente era permitida na página do candidato destinada
+exclusivamente à campanha eleitoral.
+A mudança veio a partir da Resolução nº 12.034, de setembro de 2009, quando passa a
+ser permitida a propaganda por meio de blogs, redes sociais e sites de mensagens instantâneas,
+“cujo conteúdo pode ser elaborado por candidatos, partidos, coligações ou por iniciativa de
+qualquer pessoa natural, o que vai além do que previa a resolução que abrangeu o pleito de
+2008” (GRAEFF, 2009, p. 42). Mais do que estratégia para garantir votos, as redes sociais
+têm se consolidado como espaço de discussão política. O cidadão comum não só se informa
+sobre os candidatos, mas também produz e compartilha conteúdos.
+
+Associação Brasileira de Pesquisadores de Comunicação Organizacional e de Relações Públicas (Abrapcorp)
+XIV Congresso Brasileiro Científico de Comunicação Organizacional e de Relações Públicas - Bauru/SP - 18 a 21/05/2020
+Para Graeff (2009, p.10), “o truque é transformar ouvinte em orador. Ao conseguir que
+a
+audiência
+escreva,
+candidatos
+conseguem
+um
+compromisso
+com
+sua
+audiência.
+Engajamento substitui recepção, que por sua vez leva à ação no mundo real”.
+Segundo Marques e Sampaio (2011) as eleições presidenciais de 2010, a primeira apos
+a resolução que regulariza a propaganda eleitoral nas mídias digitais, apresentaram um
+cenário diferenciado, permitindo afirmar que as ferramentas digitais assumiram uma
+importância inédita. Neste cenário há dois aspectos que se destacam: (1) existe uma maior
+disponibilidade
+de
+informações
+geradas
+por
+candidatos,
+partidos
+e
+usuários;
+e
+há,
+consequentemente, (2) uma maior concorrência pela atenção dos usuários.
+Neste contexto, de acordo com os autores (2011), existem três grandes fontes de
+informação política no ambiente digital: a) refere-se à cobertura promovida pela imprensa
+convencional, seja na forma de grandes portais de instituições jornalísticas ou na divulgação e
+acesso de seus próprios perfis em redes sociais, prontos para oferecer todo tipo de dados
+atualizados acerca da campanha; b) os próprios comitês de campanha de cada candidato
+(incluindo-se aqui os sites e perfis em redes sociais), responsáveis por proporcionar acesso a
+atualizações e informações dos mais variados tipos, como, por exemplo, vídeos, fotos, áudios
+e textos, além da agenda de seus assessorados, históricos, feitos, promessas e afins; c) os
+próprios usuários atuando na tarefa de encaminhar conteúdos e de elaborar materiais
+informativos (muitas vezes, tais conteúdos são de caráter opinativo, como acontece em blogs
+e redes sociais). Em outras palavras, a geração das informações é franqueada, também, aos
+cidadãos com diferentes níveis de interesse na campanha, com o diferencial de se perceber
+uma capacidade singular de reverberação de dados (MARQUES; SAMPAIO, 2011).
+Já o segundo aspecto, que diz respeito à concorrência pela atenção dos usuários, pode
+ser observado a partir do esforço crescente que os responsáveis pelas campanhas online têm
+empreendido para atrair a atenção dos usuários e, assim, “reforçar a adesão às suas
+perspectivas políticas”, afirmam Marques e Sampaio (2011, p. 212).
+Para os autores (2011, p. 218) é fato que a quantidade de informação política
+disponível ao eleitorado tem aumentado a cada eleição, “assim como se percebe um maior
+pluralismo na variedade de usuários e entidades dispostos a criarem conteúdos ou,
+simplesmente, a repassarem ideias”, mas não se sabe se a maior disponibilidade de
+informação tem representado maior engajamento e participação por parte dos jovens cidadãos.
+Neste sentido, Saisi (2013, p. 1), indica o papel central dos meios de comunicação na
+informação e na participação política. Para a autora, “os resultados nas urnas indicam um
+
+Associação Brasileira de Pesquisadores de Comunicação Organizacional e de Relações Públicas (Abrapcorp)
+XIV Congresso Brasileiro Científico de Comunicação Organizacional e de Relações Públicas - Bauru/SP - 18 a 21/05/2020
+cenário em transformação, em que a participação popular se coloca como um valor em
+ascensão e o uso de mídias digitais abre novas possibilidades na arena política”.
+Materiais e métodos
+Para se olhar tendências comunicativas em redes sociais, alguns tipos de análise
+podem ser feitos. Para esta pesquisa, optou-se pela análise de conteúdo, que se define como
+“uma técnica de investigação que tem por finalidade a descrição objetiva, sistemática e
+quantitativa do conteúdo manifesto da comunicação” (BARDIN, 1994, p.18).
+Silva, Gobbi e Simão (2005, p. 73) afirmam que a análise de conteúdo é um conjunto
+de técnicas que possuem “procedimentos sistemáticos e objetivos de descrição do conteúdo
+das
+mensagens,
+indicadores
+(quantitativos
+ou
+não)
+que
+permitam
+a
+inferência
+de
+conhecimentos relativos às condições de produção/recepção (variáveis inferidas) dessas
+mensagens”. De acordo com Krippendorf, a análise de conteúdo “permite analisar fenômenos
+não observados diretamente através dos dados relacionados com eles” (KRIPPENDORF,
+1990, p.45).
+Para esta pesquisa optou-se por adaptar categorias de análise utilizadas por Murta et.
+al (2017):
+a) Registro de atividades – tema voltado para as postagens relativas à agenda de campanha
+dos candidatos e à divulgação de atividades de campanha;
+b) Apoio a/de terceiros – tema voltado para agrupar as postagens que reproduzem
+publicamente o apoio de terceiros, muitas vezes personalidades à candidatura dos candidatos;
+c) Pedido de voto – tema voltado para identificar as postagens em que o candidato pede o
+voto diretamente aos seus eleitores;
+d) Feitos do passado – tema voltado para definir os posts que enaltecem antigas conquistas
+políticas do candidato em outros mandatos;
+e) Plataforma de campanha – tema voltado para reunir as postagens que explicam e/ou
+discutem as pretensões dos candidatos;
+f) Pessoal – tema voltado para enquadrar as publicações de caráter “não-político”, mas
+relativos à vida privada dos candidatos;
+g) Postagens que se referem a outros candidatos ou figuras políticas.
+Análises
+Os dados analisados consideraram as postagens nas páginas do Facebook dos
+candidatos às eleições presidenciais brasileiras de 2018 - Fernando Haddad (PT) e Jair
+
+Associação Brasileira de Pesquisadores de Comunicação Organizacional e de Relações Públicas (Abrapcorp)
+XIV Congresso Brasileiro Científico de Comunicação Organizacional e de Relações Públicas - Bauru/SP - 18 a 21/05/2020
+Bolsonaro (PSL) - durante os dias de propaganda eleitoral gratuita veiculada no rádio e na tv,
+sendo, portanto, de 31 de agosto a 04 de outubro (período referente ao primeiro turno) e de 12
+a 26 de outubro (período referente ao segundo turno das eleições), com o objetivo de verificar
+como se dá a tematização e a visibilidade de assuntos abordados pelos candidatos.
+De acordo com os dados obtidos, observa-se que uma maior quantidade de postagens
+realizadas na página do candidato Fernando Haddad, em comparação com seu concorrente
+Bolsonaro, nos dois períodos analisados. Sendo, no primeiro turno, um total de 408
+publicações do candidato do PT, e 173 do candidato do PSL. No segundo turno os números
+são 310 postagens de Haddad e 125 de Bolsonaro.
+Apesar de ser mais ativo na rede social Facebook, Fernando Haddad somava 1 milhão
+e 800 mil curtidas, enquanto Jair Bolsonaro possuía 8 milhões e 800 mil curtidas em
+outubro/novembro de 2018, meses em que foram realizadas as análises que seguem.
+Gráfico I – Total de postagens nos períodos de análise
+Fonte: elaborado pela autora (2020)
+A partir das análises das postagens de Jair Bolsonaro no primeiro turno, e de acordo
+com as categorias de análise utilizadas nesta pesquisa, tem-se:
+Gráfico II: Categorização de postagens de Jair Bolsonaro (PSL) no primeiro turno
+Fonte: elaborado pela autora (2020)
+
+Associação Brasileira de Pesquisadores de Comunicação Organizacional e de Relações Públicas (Abrapcorp)
+XIV Congresso Brasileiro Científico de Comunicação Organizacional e de Relações Públicas - Bauru/SP - 18 a 21/05/2020
+Observa-se que a maioria das 173 postagens publicadas no período de análise
+referente ao primeiro turno refere-se à categoria B (30%), relativa a apoio a/de terceiros –
+tema voltado para agrupar as postagens que reproduzem publicamente o apoio de terceiros,
+muitas vezes personalidades, à candidatura de Bolsonaro. O apoio de terceiros pode, também,
+ser considerado uma maneira de angariar votos e credibilidade. A segunda categoria de
+análise mais frequente foi a G (22%), categoria definida como postagens que se referem a
+outros candidatos ou figuras políticas.
+Na sequência figuram as categorias F - Pessoal – tema voltado para enquadrar as
+publicações de caráter “não-político”, mas relativos à vida privada dos candidatos, (17%); A -
+Registro de atividades – tema voltado para as postagens relativas à agenda de campanha dos
+candidatos e à divulgação de atividades de campanha, (14%); E - Plataforma de campanha –
+tema voltado para reunir as postagens que explicam e/ou discutem as pretensões dos
+candidatos, (9%); D - Feitos do passado – tema voltado para definir os posts que enaltecem
+antigas conquistas políticas do candidato em outros mandatos, (4%); e C - Pedido de voto –
+tema voltado para identificar as postagens, em que o candidato pede o voto diretamente aos
+seus eleitores, (3%).
+Gráfico III: Categorização de postagens de Fernando Haddad (PT) no primeiro turno
+Fonte: elaborado pela autora (2020)
+Já na análise das 408 postagens do candidato Fernando Haddad, referentes ao primeiro
+turno, tem-se a maioria das postagens (40%) dedicadas à categoria A – registro de atividades.
+Em segundo lugar, com 19%, estão, empatadas, as categorias C – pedido de voto – e G-
+Postagens que se referem a outros candidatos ou figuras políticas, seguidas pelas categorias E
+- Plataforma de campanha (9%), D - Feitos do passado (6%), B - Apoio a/de terceiros (4%) e
+F - Pessoal (3%).
+
+Associação Brasileira de Pesquisadores de Comunicação Organizacional e de Relações Públicas (Abrapcorp)
+XIV Congresso Brasileiro Científico de Comunicação Organizacional e de Relações Públicas - Bauru/SP - 18 a 21/05/2020
+Gráfico IV: Comparativo da categorização de postagens realizadas por Jair Bolsonaro
+(PSL) E Fernando Haddad (PT) no primeiro turno (em porcentagem)
+Fonte: elaborado pela autora (2020)
+No gráfico IV as categorias referentes às postagens do candidato pelo PSL, Jair
+Bolsonaro, estão destacadas em verde, enquanto às categorias que se referem ao candidato do
+PT, Fernando Haddad, estão em vermelho. Percebe-se que há equilíbrio entre a frequência de
+publicações destinadas às categorias D – feitos do passado - (sendo 4% e 6%), E – plataforma
+de campanha - (ambas com 9%) e G – postagens que se referem a outros candidatos (23% e
+19%).
+Entre as postagens referentes ao primeiro turno, as categorias B – apoio de terceiros- e
+F – pessoal - tiveram mais destaque nas postagens do candidato Bolsonaro, sendo 30% e 17%,
+respectivamente, em contraponto aos 4% e 3% de Haddad.
+Em contrapartida, as categorias mais utilizadas no período de análise do primeiro
+turno (de 31 de agosto a 04 de outubro) pelo candidato Haddad foram A – registro de
+atividades - e C – pedido de voto-, com 40% e 19%, respectivamente; contra 14% e 3% do
+candidato Bolsonaro.
+Gráfico V: Categorização de postagens de Jair Bolsonaro (PSL) no segundo turno
+
+Associação Brasileira de Pesquisadores de Comunicação Organizacional e de Relações Públicas (Abrapcorp)
+XIV Congresso Brasileiro Científico de Comunicação Organizacional e de Relações Públicas - Bauru/SP - 18 a 21/05/2020
+Fonte: elaborado pela autora (2020)
+No gráfico V é possível observar que, em comparação com as postagens do primeiro
+turno, no segundo turno as publicações mais frequentes do candidato do PSL configuraram
+nas categorias G - Postagens que se referem a outros candidatos ou figuras políticas (46%); e
+E – plataforma de campanha (15%). A categoria C – pedido de votos- foi, novamente, a
+menos explorada, presente em apenas 1% das postagens.
+Gráfico VI: Categorização de postagens de Fernando Haddad (PT) no segundo turno
+Fonte: elaborado pela autora (2020)
+As publicações do segundo turno presentes no Facebook do candidato Fernando
+Haddad seguiram a mesma tendência do primeiro turno, com maior frequência das categorias
+A – registro de atividades (42%), e G - Postagens que se referem a outros candidatos ou
+figuras políticas (29%).
+
+Associação Brasileira de Pesquisadores de Comunicação Organizacional e de Relações Públicas (Abrapcorp)
+XIV Congresso Brasileiro Científico de Comunicação Organizacional e de Relações Públicas - Bauru/SP - 18 a 21/05/2020
+Gráfico VII: Comparativo da categorização de postagens realizadas por Jair Bolsonaro
+(PSL) E Fernando Haddad (PT) no segundo turno (em porcentagem)
+Fonte: elaborado pela autora (2020)
+O gráfico VII evidencia que não houve mudança significativa na estratégia das
+temáticas abordadas nas postagens publicadas no Facebook dos candidatos entre o primeiro e
+o segundo turno. As categorias mais e menos exploradas por cada um dos candidatos se
+manteve.
+Gráfico VIII – Frequência de postagens por categoria, somados primeiro e segundo
+turno – candidato Jair Bolsonaro
+Fonte: elaborado pela autora (2020)
+Observa-se que há uma concentração de postagens de apoio de outros candidatos
+(categoria B – 23%), ou que se referem a outras figuras políticas (categoria G- 33%), o que
+pode ser visto como uma maneira de ganhar credibilidade entre os eleitores. Em detrimento
+de informações sobre feitos do passado do candidato (D- 3%) e postagens de pedido de votos
+(C – 1,5%).
+
+Associação Brasileira de Pesquisadores de Comunicação Organizacional e de Relações Públicas (Abrapcorp)
+XIV Congresso Brasileiro Científico de Comunicação Organizacional e de Relações Públicas - Bauru/SP - 18 a 21/05/2020
+Gráfico IX – Frequência de postagens por categoria, somados primeiro e segundo
+turno – candidato Fernando Haddad
+Fonte: elaborado pela autora (2020)
+Entre as postagens do candidato do PT há a predominância de postagens nas
+categorias A (atividades de campanha – 40%) e G (postagens que se referem a outras figuras
+políticas – 24%). Já as categorias menos presentes no recorte analisado estão B (apoio de
+terceiros – 6%), D (feitos do passado – 5%) e F (pessoal – temas voltados à vida privada do
+candidato – 2%).
+Algumas considerações
+A partir das análises propostas neste artigo, observa-se que as redes digitais,
+especificamente o Facebook, representam ambientes comunicativos e discursivos com
+potencial para empoderar o cidadão e construir um debate democrático e plural. No entanto,
+apesar da maior visibilidade de temas políticos e da maior quantidade de informação, o
+ambiente digital como espaço de conversação e participação ainda não é alcançado. Ao
+contrário, o que se vê é um “terreno fértil para conflitos que se configuram, às vezes, em uma
+violência simbólica de um discurso dominante sobre outros mais frágeis ou menos aceitos”
+(DE OLIVEIRA; DA COSTA; SIGILIANO, 2016, p. 107).
+Apesar de o conflito ser característico do processo deliberativo e da própria
+democracia, espera-se que o ambiente de conversação política seja espaço de “troca bem-
+intencionada de visões — incluindo os relatos dos participantes sobre sua própria
+compreensão de seus respectivos interesses vitais” (HABERMAS, 2004, p. 283).
+Sendo assim, os resultados obtidos a partir das análises e à luz do referencial teórico
+reafirmam as ideias compartilhas por De Oliveira, Da Costa e Sigiliano (2016, p. 119) de que,
+cada vez mais, as redes digitais têm se mostrado arena política “onde fervilham argumentos
+
+Associação Brasileira de Pesquisadores de Comunicação Organizacional e de Relações Públicas (Abrapcorp)
+XIV Congresso Brasileiro Científico de Comunicação Organizacional e de Relações Públicas - Bauru/SP - 18 a 21/05/2020
+que vão desde uma busca de uma discussão madura, buscando consensos e entendimentos; a
+uma violência simbólica em que o pensamento alheio é totalmente ignorado ou mesmo da luta
+por hegemonia e posições na estrutura social”. De acordo com Rheingold (1997), as redes
+sociais seriam a transposição do real, a construção e reconstrução de identidades.
+Nesse sentido, o ambiente possibilitado a partir das interações nas redes do
+ciberespaço é preciso considerar o potencial de mobilização nas comunidades, e a
+possibilidade de formação de espaços de debate, troca de opiniões e eventualmente de tomada
+de decisões não pode ser negligenciada (MARTINO, 2015). As informações descentralizadas
+e pulverizadas em uma dinâmica horizontal evidenciam o poder político das redes a partir da
+superação de barreiras institucionais e governamentais não apenas no que diz respeito à
+recepção, produção e compartilhamento de conteúdos, mas principalmente em seu potencial
+de alcançar a participação política informada.
+É preciso considerar, por fim, que apesar de sua estrutura horizontal e descentralizada,
+as redes representam “espaços adequados à construção de relações de poder pautadas no
+prestígio, na reputação e na quantidade/qualidade dos contatos de seus participantes”
+(MARTINO, 2015, p. 72).
+Assim, as redes sociais, aqui exemplificadas pelo Facebook, possibilitam novas formas
+de interação e engajamento em assuntos do momento a partir da troca de ideias e informações
+de forma ativa, permitindo aos usuários a criação de laços de discussão e participação que
+permeiam a definição de sua identidade. Ainda nesse sentido, muitos assuntos que até então
+estariam limitados ao espaço privado ganham publicização e pontos de debate em âmbito
+público. A internet faz com as novas tecnologias digitais tenha um potencial de incentivar,
+reconhecer e impulsionar o debate de assuntos diversos.
+Referências
+BARDIN, I. Análise de conteúdo. Lisboa: Edições Setenta, 1994.
+BRASIL. Secretaria De Comunicação Da Presidência Da República. Pesquisa brasileira de mídia
+2016: Hábitos de consumo de mídia da população brasileira. Brasília: Secom, 2016.
+DE OLIVEIRA, L.A.; DA COSTA, A. A; SIGILIANO, D. M. V. Facebook: uma mesa de debates ou
+uma arena política digital?. Revista de Estudios para el Desarrollo Social de la Comunicación, n. 14,
+p. 104-137, 2016.
+GRAEFF, A. Eleições 2.0: a internet e as mídias sociais no processo eleitoral. Publifolha, 2009.
+HABERMAS, J. A inclusão do outro: estudos de teoria política. São Paulo: Loyola. 2004.
+KRIPPENDORF, K. Análisis de contenido. Barcelona: Paidós, 1990.
+
+Associação Brasileira de Pesquisadores de Comunicação Organizacional e de Relações Públicas (Abrapcorp)
+XIV Congresso Brasileiro Científico de Comunicação Organizacional e de Relações Públicas - Bauru/SP - 18 a 21/05/2020
+MAIA, R: Democracia e a internet como esfera pública virtual: aproximando as condições do
+discurso e da deliberação. Comunicação apresentada no Congresso Internacional "Internet,
+Democracia e Bens públicos" - FAFICH/UFMG - 6 a 9 de novembro de 2006. Disponível em:
+<goo.gl/tCDWqa>. Acesso em: 21 dez.2018.
+MARQUES, F. P. J. A. Debates políticos na internet: a perspectiva da conversação civil. Opinião
+pública, Campinas, v.12, nº 1, p. 164-187, Abril/Maio, 2006.
+MARQUES, F. P. J.A.; SAMPAIO, R.C. Internet e eleições 2010 no Brasil: rupturas e continuidades
+nos padrões mediáticos das campanhas políticas online. Galáxia. Revista do Programa de Pós-
+Graduação em Comunicação e Semiótica. n. 22, 2011.
+MARTINO, L. M. S. Teoria das Mídias Digitais: linguagens, ambientes, redes. 2. Ed. Petrópolis, RJ:
+Vozes, 2015.
+MIGUEL, L. F. A mídia e o declínio da confiança na política. Sociologias, Porto Alegre, v. 10, n. 19,
+p. 250-273. Disponível em: <http://www.scielo.br/pdf/soc/n19/a11n19.pdf>. Acesso em: 11 dez. 2018.
+MURTA, F; ITUASSU, A; CAPONE, L; LA ROVERE, R. Eleições e mídias sociais: Interação e
+participação no Facebook durante a campanha para a Câmara dos Deputados em 2014. Revista
+Compolítica 2017, vol. 7 47-72.
+POLAT, R. K. The Internet and political participation: exploring the explanatory
+links.
+European
+Journal
+of
+Communication
+20:
+435,
+2005.
+Disponível
+em:
+<http://ejc.sagepub.com/content/20/4/435>. Acesso em: 07 jan. 2019.
+RECUERO, R. Redes sociais na internet. 1. ed. Porto Alegre: Meridional, 2009.
+RHEINGOLD, H. A. A comunidade virtual. Lisboa: Gradiva, 1997.
+SAISI, K. Mídia e construção de mitos políticos na campanha presidencial brasileira. Grupo de
+Trabalho de Comunicação e Democracia no V Congresso da Compolítica, 2013. Disponível em:
+http://www.compolitica.org/home/wp-content/uploads/2013/05/GT-01-Comunicacao-e-Democracia-
+KatiaSaisi.pdf. Acesso em: 05 nov. 2018.
+SILVA, C. R.; GOBBI, B. C.; SIMÃO, A. A. O Uso Da Análise De Conteúdo Como Uma Ferramenta
+Para A Pesquisa Qualitativa: Descrição e aplicação do método. Organizações Rurais &
+Agroindustriais, [S.L], v. 7, n. 1, p. 70-81, 2005.

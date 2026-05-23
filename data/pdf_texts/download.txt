@@ -1,0 +1,1229 @@
+98  •  ©RAE  •  São Paulo  •  v. 51  •  n. 1  •  jan./fev. 2011  •  098-106
+ISSN 0034-7590
+pensata
+SOCIEDADE DA INFORMAÇÃO, CAPITALISMO 
+E SOCIEDADE CIVIL: REFLEXÕES SOBRE 
+POLÍTICA, INTERNET E DEMOCRACIA NA 
+REALIDADE BRASILEIRA
+José Antonio Gomes de Pinho
+Professor da Escola de Administração, Universidade Federal da Bahia – Salvador – BA, Brasil
+jagp@ufba.br
+Dos vários impactos causados pela 
+internet, o que mais interessa neste 
+artigo é o da área política, mais es-
+pecificamente entender como a in-
+ternet pode provocar mudanças nas 
+estruturas políticas no sentido de 
+promover uma crescente democra-
+tização. Quando se fala em política, 
+dois ramos são obrigatórios para a 
+análise: de um lado, o Estado, por 
+meio  de suas estruturas e como estas 
+se adaptam à utilização da internet no 
+sentido de promover a participação, 
+interatividade, transparência e demo-
+cratização de processos.  De outro, a 
+sociedade em seus movimentos no 
+sentido da atuação política e suas 
+interações com o Estado exercendo 
+um juízo crítico e participativo. De 
+antemão, pode-se perceber que temos 
+muito mais promessas do que efeti-
+vações, estando algumas delas apenas 
+ligeiramente esboçadas. 
+O objetivo deste artigo é discutir 
+como a sociedade da informação, por 
+meio das TIC, mais especificamente 
+INTRODUÇÃO 
+A sociedade contemporânea tem sido 
+caracterizada como uma sociedade 
+da informação pela centralidade que 
+a informação tem assumido com as 
+novas Tecnologias de Informação e 
+Comunicação (TIC), principalmente 
+a partir da difusão da internet, que 
+vem despertando mudanças de vá-
+rias ordens nas relações econômicas, 
+sociais, políticas, culturais e filosófi-
+cas. Essas mudanças ainda estão em 
+aberto, e se transformam à medida 
+que a própria internet redefine seu 
+escopo e alcance. Parece que a in-
+ternet pode ser colocada como um 
+marco civilizatório: a vida antes e de-
+pois da internet, pois ela tem criado 
+expectativas elevadas de mudanças, 
+algumas até revolucionárias. Como 
+estamos frente a uma realidade ain-
+da em construção e que muda muito 
+rapidamente, muitas conclusões de-
+vem ser vistas mais com um caráter 
+precário do que perene. 
+da internet, pode constituir não só 
+uma nova forma de fazer política, 
+mas de fortalecer a própria políti-
+ca. No âmbito nacional, a questão 
+parece assumir foros ainda mais de-
+safiadores. Em uma sociedade consi-
+derada passiva, acomodada, a inter-
+net teria condições de romper essa 
+situação estrutural? Até que ponto 
+a internet pode mudar um quadro 
+estrutural existente e tornar-se um 
+ponto de ruptura na forma tradi-
+cional de fazer política por parte 
+da sociedade civil? Até que ponto a 
+internet, pelos seus conhecidos atri-
+butos de interatividade, facilidade de 
+contato, funcionamento permanente 
+e on-line, teria capacidade de ativar e 
+promover uma participação política 
+maior da sociedade civil? Por outro 
+lado, também se pode argumentar 
+que, se a sociedade civil não se mo-
+biliza para participar politicamente 
+pelos canais convencionais, tradicio-
+nais, será que irá, agora, recorrer à 
+internet para alterar esse estado de 
+
+José Antonio Gomes de Pinho
+ISSN 0034-7590
+©RAE  •  São Paulo  •  v. 51  •  n. 1  •  jan./fev. 2011  •  098-106  •  99 
+coisas? Ainda que não encontre res-
+postas definitivas e completas para 
+essas questões, este artigo objetiva 
+fazer reflexões para o avanço do seu 
+entendimento. 
+OTIMISMO E PESSIMISMO 
+QUANTO À ATIVIDADE POLÍTICA 
+NA INTERNET
+Na análise dos impactos políticos da 
+internet, observa-se a presença de 
+dois tipos de analistas: os otimistas 
+e os pessimistas, entre outras cate-
+gorizações. Para os otimistas, “[d]
+escentralização, interatividade, mul-
+timidialidade, transnacionalidade e 
+transculturalidade” são oportuniza-
+dos pelas novas tecnologias, enquan-
+to para os pessimistas gera-se “isola-
+mento e alienação, comercialização 
+sem tréguas dos espaços público e 
+privado, e o surgimento de novas for-
+mas de colonialismo digital e diferen-
+ças sociais de classe” (DOMINGUES, 
+1999, p. 117). 
+Segundo os otimistas, estaríamos 
+prestes a viver uma transformação 
+radical da democracia representativa 
+em democracia plebiscitária, suporta-
+da pelo aumento da participação dos 
+cidadãos nas decisões dos governos 
+viabilizado pelo voto eletrônico. A 
+internet permitiria “radicalizar a de-
+mocracia, criando um novo espaço 
+público construído em torno de uma 
+sociedade civil que se organizará à 
+margem do Estado” (SORJ, 2003, p. 
+57). A internet ainda teria um “papel 
+significativo” ao romper com o poder 
+da mídia, que estrutura a vida política 
+contemporânea promovendo o rela-
+cionamento direto entre os políticos 
+e os cidadãos, bem como o seu uso 
+por “jornalistas rebeldes, ativistas 
+políticos e pessoas de todo tipo como 
+um canal para difundir informação 
+e rumores políticos” (CASTELLS, 
+2003, p. 129).
+Os otimistas enxergam na inter-
+net “um potencial criativo, libertário, 
+emancipatório, de trocas de conteú-
+do” (MANEVY, 2009, p. 33). Isso não 
+é pouco, mas outros ainda vão além. 
+O Renascimento e a evolução do ca-
+pitalismo criaram especializações, e 
+com as TIC, a partir dos anos 1960, 
+ocorre “uma reversão desse processo” 
+(AMADEU, 2009, p. 67), e mediante 
+o uso da rede, que unifica o que era 
+construído separadamente, “cada vez 
+mais ciência, tecnologia e arte se jun-
+tam” (AMADEU, 2009, p. 68). Uma 
+das características da rede é libertar: 
+liberta “o texto do suporte papel, li-
+berta a música do suporte vinil, liberta 
+a imagem do suporte ali da película” 
+(AMADEU, 2009). As redes também 
+comportam outra situação, em que 
+“existem comunidades que são des-
+territorializadas, que não estão ali 
+cara a cara e que têm laços fortes”, são 
+grupos formados a partir da internet. 
+Essa seria outra forma de fazer políti-
+ca extremamente animadora, por ser 
+“uma rede onde a inteligência está 
+na periferia, e não no centro” (AMA-
+DEU, 2009, p. 75) e por não ter uma 
+empresa que mande nela, mas sendo 
+“algo que está na mão das pessoas, 
+são elas que construíram” (AMADEU, 
+2009, p. 77). 
+Outra manifestação otimista vê 
+“uma democratização gigantesca” na 
+internet por conta da possibilidade de 
+se ter acesso a livros e onde se “pega 
+tudo” (CASTRO, 2009, p. 87). Na li-
+nha de expectativas revolucionárias, 
+identifica-se a emergência de outros 
+produtores culturais situados na pró-
+pria sociedade, com a “ausência de 
+intermediários” (LEMOS, 2009, p. 
+99). Hollywood e a Rede Globo têm 
+que competir com pessoas que pro-
+duzem vídeos e os colocam no You-
+Tube, realizando  “uma transferência 
+de poder” (LEMOS, 2009), apontan-
+do, porém, para o risco de a internet 
+adotar o modelo de broadcast, o que 
+“elimina a possibilidade do usuário 
+pequeno e sem dinheiro para falar 
+com muita gente” (LEMOS, 2009, p. 
+100). O risco de a internet vir a ser re-
+gulamentada é que acabará “sobrando 
+espaço apenas para os grandes e para 
+os grandes que estão estabelecidos” 
+(LEMOS, 2009, p. 101). Assim, o ter-
+ritório de liberdade e de criação da 
+internet estaria correndo alto risco 
+se esse caminho se viabilizar. 
+Pode-se perceber que a ideia de 
+revolução, democratização, não faz 
+referência à atividade política con-
+vencional. Infere-se que se abre com 
+a internet uma atividade política à 
+parte dos meios convencionais, os 
+partidos políticos. Vale relembrar 
+que estes já têm perdido espaço nas 
+últimas décadas para os movimentos 
+sociais, e que, agora, a internet pode-
+ria ser a pá de cal nos partidos. Mas, 
+também, ainda não dá para afirmar 
+nada mais concreto sobre uma pos-
+sível revolução na política a partir do 
+meio digital.  
+Nota-se que a palavra “revolução” 
+tem sido usada de uma maneira mais 
+livre, sem rigor conceitual. A cultu-
+ra digital “significa uma revolução 
+em termos de hábitos cotidianos” ao 
+quebrar a sociedade industrial trans-
+formando-a em uma “explosão”, a 
+sociedade em rede (COELHO, 2009, 
+p. 121). O que se infere dessas argu-
+mentações é a expectativa de uma 
+mudança mais ampla, podendo-se 
+pensar em uma sociedade sem dono, 
+o que demandaria uma nova forma 
+de fazer política, e não apenas uma 
+mudança focada na política tradi-
+cional. A partir dessa afirmação já se 
+pode perguntar se seria possível uma 
+mudança fundamental não partindo 
+da política propriamente dita, mas, 
+talvez, de movimentos mais anár-
+quicos ou caóticos, individualizados. 
+A mudança na política, na forma de 
+fazer política, viria de outras áreas, 
+fundamentalmente a partir da disse-
+
+pensata • SOCIEDADE DA INFORMAÇÃO, CAPITALISMO E SOCIEDADE CIVIL: REFLEXÕES SOBRE POLÍTICA, INTERNET E DEMOCRACIA NA REALIDADE BRASILEIRA
+100  •  ©RAE  •  São Paulo  •  v. 51  •  n. 1  •  jan./fev. 2011  •  098-106
+ISSN 0034-7590
+minação da informação e do conhe-
+cimento, em direção à política. 
+Nessa linha, André Lemos chama 
+a atenção para o fato de que as tecno-
+logias que temos agora à disposição 
+“permitem a transformação comuni-
+cativa, política, social e cultural efe-
+tivamente” (LEMOS, 2009, p. 136) 
+devido a se poder “transitar informa-
+ção, bens simbólicos, não materiais, 
+de uma maneira inédita na historia 
+da humanidade” (LEMOS, 2009). 
+O computador e a internet geram 
+algo que é radical: “A possibilidade 
+de produção coletiva, colaborativa e 
+distributiva da informação” (LEMOS, 
+2009, p. 137). Podemos inferir daqui 
+que se confirma uma ideia de que 
+estamos vivendo de uma revolução 
+da informação e da possibilidade da 
+produção coletiva e independente da 
+informação. 
+Tudo isso leva a expectativas ele-
+vadíssimas com a internet ao se con-
+siderar que “pela primeira vez as 
+pessoas estão efetivamente podendo 
+produzir ou tentar buscar sentido 
+nas suas vidas a partir desses dis-
+positivos” (LEMOS, 2009, p. 140). 
+Ainda que exale esse otimismo, An-
+dré Lemos identifica, no entanto, 
+um “grande desafio” nesse contexto 
+que é “fazer com que as pessoas pro-
+duzam coisas colaborativamente” e 
+também de “maneira distributiva” 
+(LEMOS, 2009, p. 140), o que se 
+choca com o fato de estarmos “acos-
+tumados durante muitos séculos” a 
+ser espectadores passivos dos meios 
+de comunicação, sendo o “máximo 
+da inclusão” a possibilidade de ser 
+um “espectador crítico” (LEMOS, 
+2009). Com as novas tecnologias e 
+a interatividade, torna-se possível, 
+agora, não só criticar o jornal e o 
+programa de TV, como pode a pessoa 
+“fazer seu próprio jornal”, bem como 
+filme e música. Parece estar ficando 
+claro que a política no meio digital 
+se desgarra da política convencional 
+baseada em partidos políticos arregi-
+mentando outros tipos de militantes, 
+mais baseados em grupos ou ativida-
+des individuais que se distanciam das 
+ações típicas dos partidos políticos.
+Porém, ele deixa claro que não se 
+vive nenhuma “panaceia participati-
+va” (LEMOS, 2009, p. 141), que “a 
+mera participação e colaboração vai 
+resolver todos os problemas” (LE-
+MOS, 2009, p. 142). Retoma o autor 
+o otimismo por podermos “emitir 
+livremente, nos conectar aos outros, 
+nós conseguimos reconfigurar a cul-
+tura, a sociedade, a política” (LEMOS, 
+2009). Concordando em tese com o 
+autor, vale lembrar que apenas uma 
+parcela pequena das pessoas teria 
+disposição participativa e desejo de 
+reconfigurar a sociedade e a política. 
+Também para André Parente “o 
+digital mudou completamente e sub-
+verteu todas as ordens – do econômi-
+co ao político, ao artístico (estético, 
+no caso), à própria relação entre as 
+pessoas” (PARENTE, 2009, p. 165). 
+Trouxe uma “transformação radical” 
+na forma como as pessoas passaram 
+a produzir. Com a internet, ocorrem 
+mudanças até na indústria, possibili-
+tando ao consumidor montar o seu 
+próprio carro, bem como a possibili-
+dade de cada um fazer a sua progra-
+mação (filmes, documentários, pro-
+gramas) baixada do computador. A 
+rigor, pode-se perceber que, mesmo 
+que isso esteja acontecendo, ainda é 
+uma pequena parcela da população 
+que o faz ou pode fazê-lo. 
+A informação também pode ser 
+vista como ampliação das possibi-
+lidades de escolha, representando 
+uma “liberdade de escolha”, e dis-
+so resulta o aparecimento de uma 
+nova geração “muito mais crítica” 
+(SANTANA, p. 199), o que pode ser 
+entendido com maior informação 
+política para a decisão. André Stolar-
+ski observa que “existe uma transfe-
+rência nítida de parte importante da 
+vida das pessoas para o âmbito das 
+redes”, transferência essa marcada 
+por “uma dialética muito comple-
+xa”, onde “multidões são postas em 
+movimento” (STOLARSKI, 2009, 
+p. 217), identificando a capacidade 
+de a internet poder “desmontar a 
+estrutura tradicional da grande im-
+prensa, das editoras enfim” (idem, p. 
+18). Esse movimento poderia, então, 
+ser visto como um ataque ao grande 
+capital, o que se constitui em uma 
+atividade política propriamente dita. 
+Considera o autor que existe “uma 
+boa democratização” de acesso aos 
+meios digitais, de modo que “todo 
+mundo pode ser designer” (STO-
+LARSKI, 2009, 226), e, estando “as 
+ferramentas mais acessíveis” e não 
+estando mais o conhecimento “na 
+mão de especialistas”, as pessoas 
+conseguem produzir (STOLARSKI, 
+2009). Nota-se, novamente, a inter-
+net como um espaço de manifesta-
+ção da autonomia e da possibilidade 
+de confrontar o capital, o que pode, 
+por um lado, ser visto como político, 
+mas também não podendo se enxer-
+gar nada muito revolucionário até 
+porque o capital (leia-se o grande 
+capital) pode não só conviver com 
+essas novas formas de produção de 
+conhecimento, como também vir a 
+se apropriar delas, colonizando-as, 
+como será desenvolvido abaixo. 
+A cultura digital pode abalar “al-
+guns conceitos que estavam bastan-
+te cristalizados na nossa sociedade, 
+por pelo menos um ou dois sécu-
+los” (ESTEVES, 2009, p. 243). Com 
+as novas tecnologias digitais, muda 
+tanto o texto como “o leitor, o au-
+tor, a leitura, todos os processos de 
+produção, circulação e aquisição de 
+conhecimento” (ESTEVES, 2009). 
+Na área da ciência, uma mudança 
+fundamental, que representa “uma 
+ameaça a um sistema muito antigo de 
+validação do conhecimento cientifi-
+co, que á revisão por pares” idem, p. 
+
+José Antonio Gomes de Pinho
+ISSN 0034-7590
+©RAE  •  São Paulo  •  v. 51  •  n. 1  •  jan./fev. 2011  •  098-106  •  101 
+245), está corporificada no arXiv, que 
+é um repositório de artigos onde os 
+documentos postados vão recebendo 
+críticas, gerando uma revisão “mais 
+aberta” e por um número maior de 
+avaliadores do que na revisão por 
+pares. Como se pode constatar, a in-
+ternet e toda a arena digital abrem 
+um leque de possibilidades de ati-
+vidades colaborativas na produção 
+de conhecimento como nunca antes 
+experimentada na trajetória humana.
+A possibilidade de os pesquisa-
+dores construírem os seus próprios 
+sites para divulgar seus interesses 
+de pesquisa com mais liberdade, in-
+dependentemente das instituições a 
+que pertencem, “seria impossível an-
+tes” (HERCULANO-HOUZEL, 2009, 
+p. 280) da internet e pode ser vista 
+como outro passo para as pessoas se 
+desconectarem das instituições, ou 
+seja, promoverem uma desinstitu-
+cionalização, onde os empregados 
+podem prescindir de suas institui-
+ções, criando canais de comunicação 
+diretos com a sociedade para expor 
+seus trabalhos, pesquisa, ideias etc. 
+Outro aspecto da internet conside-
+rado é sua “invisibilidade” (PRADO, 
+2009, p. 51): ela “nasce porque ela 
+era invisível”, não foi percebida pelo 
+mundo corporativo como “possibili-
+dade de negócio” e nem pelo “mun-
+do regulatório” como “ameaça para 
+nada”, não sofrendo regulação nem 
+cooptação, e quando é notada “já é 
+grande o suficiente para ser anárqui-
+ca, caótica, incontrolável” (idem, p. 
+52). Podemos inferir aqui o caráter 
+contra-hegemônico da internet de 
+tentar construir uma nova ordem sem 
+que haja uma efetiva percepção do 
+que está acontecendo por parte dos 
+setores hegemônicos.
+Com a “conectividade que se 
+gera”, uma pessoa pode voltar a ser 
+“um agente de cultura”, o que re-
+presenta “um deslocamento radi-
+cal” (DOWBOR, 2009, p. 57), pois 
+“quanto mais se generaliza o conhe-
+cimento [...], mais toda humanidade 
+enriquece” (DOWBOR, 2009). Aqui, 
+a generalização do conhecimento 
+pode ser vista como uma atividade 
+política.  O “conhecimento se enri-
+quece em processos interativos de 
+pesquisa” (DOWBOR, 2009) e leva 
+ao “deslocamento do paradigma da 
+competição para o paradigma da co-
+laboração” (DOWBOR, 2009, p. 64). 
+Ainda que jamais a competição desa-
+pareça, “a prática colaborativa pode 
+ser dominante” (DOWBOR, 2009), a 
+evolução para a sociedade do conhe-
+cimento “não garante, mas abre sim 
+a possibilidade de sociedade muito 
+mais democrática” (idem). 
+Até aqui examinamos uma visão 
+predominantemente otimista. Os pes-
+simistas, por sua vez, entendem que 
+“a nova sociabilidade virtual destrói 
+as bases da interação que permite a 
+construção do espaço público e au-
+menta a capacidade de controle da 
+população pelo Estado” (SORJ, 2003, 
+p. 49). O problema reside fundamen-
+talmente no fato de que “a internet 
+destrói as relações face a face, que se-
+ria a única fonte de comunicação ca-
+paz de gerar grupos sólidos e estáveis, 
+com memória histórica (no lugar do 
+mundo atemporal da internet), que 
+seria a única base possível de susten-
+tação de uma vida publica e de ação 
+política constante”. Daí resultaria o 
+controle crescente do Estado e das 
+empresas sobre os cidadãos (SORJ, 
+2003, p. 57). Para outro pessimista, 
+“as interações na rede são somente 
+um pálido substitutivo das interações 
+cara a cara, isto é, das verdadeiras in-
+terações” (SARTORI, 2001, p. 40). O 
+interagir “é um contato empobrecido 
+que afinal nos deixa sempre sozinhos 
+diante de um teclado” (idem), ainda 
+que, relativizando, “as potencialida-
+des da internet são quase que infi-
+nitas, tanto no mal quanto no bem” 
+(SARTORI, 2001, p. 42). Como posi-
+tiva pode ser vista a obtenção de in-
+formações e conhecimentos, contudo 
+“a maioria dos usuários da internet 
+não é deste tipo e, na minha previsão, 
+nem vai ser” (SARTORI, 2001), mas 
+“analfabetos culturais que matarão o 
+tempo na internet, um tempo vazio 
+na companhia de “almas gêmeas” 
+esportivas, eróticas, ou entretidos 
+em pequenos hobbies” (SARTORI, 
+2001, p. 43). 
+A participação política possibili-
+tada pelas TIC tem sido considerada 
+como uma das promessas da inter-
+net. No entanto, os resultados, como 
+colocado abaixo, têm sido muito 
+modestos. A participação tem quer 
+entendida no contexto da contem-
+poraneidade, onde se tem detecta-
+do um abandono ou desvalorização 
+da política. “A política está em crise 
+tanto por força de uma situação ob-
+jetiva, estrutural, quanto por força da 
+ativação de projetos ideológicos bem 
+específicos e da dissolução, ainda que 
+relativa, das utopias fundamentais da 
+modernidade” (NOGUEIRA, 2001, 
+p. 18). Na sociedade contemporâ-
+nea, a “combinação de informática, 
+internet, grandes redes de comuni-
+cação, mídia, televisão e indústria de 
+entretenimento ajuda decisivamente 
+a deslocar a política, convertendo-a 
+num espetáculo dentre outros, bana-
+lizando-a, tirando-lhe eixo e substân-
+cia (NOGUEIRA, 2001, p. 18). Isso 
+posto, o cidadão perde seus referen-
+ciais e fica “confuso, entediado com 
+o roteiro e empanturrado de infor-
+mações que não consegue decifrar, 
+foge da política” (NOGUEIRA, 2001, 
+p. 22). Para aqueles que acreditam 
+na participação política dos setores 
+mais populares, as expectativas não 
+são animadoras. “Os mais pobres, 
+permanentemente insatisfeitos com 
+o que têm e com o que recebem dos 
+governos, do Estado ou da comuni-
+dade, não encontram motivos para se 
+interessar pelo jogo político ou para 
+
+pensata • SOCIEDADE DA INFORMAÇÃO, CAPITALISMO E SOCIEDADE CIVIL: REFLEXÕES SOBRE POLÍTICA, INTERNET E DEMOCRACIA NA REALIDADE BRASILEIRA
+102  •  ©RAE  •  São Paulo  •  v. 51  •  n. 1  •  jan./fev. 2011  •  098-106
+ISSN 0034-7590
+ser leais às instituições políticas” 
+(NOGUEIRA, 2001, p. 22).    
+Ademais, observa-se “uma radi-
+calização do processo de individua-
+lização”, no qual o individuo não se 
+sente mais “pautado pelos valores tra-
+dicionais ou nas normas, instituições 
+e ideologias da modernidade (pátria, 
+partidos, trabalho, família patriar-
+cal)...” (SORJ, 2003, p. 38). Por ou-
+tro lado, o indivíduo, ao se conectar 
+no contexto das informações globais 
+e ao proporcionar o aumento de seus 
+contatos com diversas redes sociais, 
+“participa do processo de radicaliza-
+ção do individualismo, na medida em 
+que o desvincula do contexto local, 
+aumentando suas possibilidades de 
+inserção nos mais diversos tipos de 
+mundos significativos” (SORJ, 2003, 
+p. 39). Assim, a internet, ao mesmo 
+tempo que possibilita uma inserção 
+maior do cidadão, também repre-
+senta uma fuga do enfrentamento 
+de seus problemas mais próximos e 
+imediatos.
+ALGUMAS EXPERIÊNCIAS E 
+RESULTADOS
+Em meados da década de 1990 já era 
+constatada a existência de milhares 
+de comunidades virtuais, perceben-
+do-se, no entanto, o caráter efêmero 
+dessas redes quanto à participação 
+dos interessados, pois “a maior par-
+te das contribuições para a intera-
+ção é esporádica, com a maioria das 
+pessoas entrando e saindo das redes 
+para atender às mudanças de inte-
+resses e expectativas não satisfeitas” 
+(Castells, 1999, p. 386).  Pinho e 
+Winkler (2008), analisando uma lista 
+de discussão de docentes da Univer-
+sidade Federal da Bahia, detectaram 
+também uma verdadeira anemia par-
+ticipativa, mesmo em um grupo ho-
+mogêneo, sem problemas de cognição 
+nem de inclusão digital. 
+Na Cidade Digital de Amsterdã 
+(DDS), implantada em 1994, basea-
+da em parâmetros sólidos de cons-
+trução de transparência, os residen-
+tes “expressavam seus sentimentos, 
+formulavam suas opiniões, organi-
+zavam protestos e votavam em pro-
+postas” (Castells, 2003, p. 121). 
+Nos primeiros anos o grau de inser-
+ção e de participação cidadã na DDS 
+foi impressionante, caindo, no en-
+tanto, rapidamente nos anos seguin-
+tes (Castells, 2003, 125). Essas 
+experiências parecem apontar para 
+um aparente paradoxo: por um lado, 
+foram bem-sucedidas nos primeiros 
+anos, produzindo uma sociedade ati-
+va, com cidadãos dispostos a partici-
+par e expressar seus pontos de vista 
+políticos. Por outro lado, com o passar 
+do tempo, perderam o interesse e o 
+engajamento político minguou, para-
+doxalmente em um período em que 
+os recursos digitais se aperfeiçoavam. 
+Possivelmente saíram os cidadãos e 
+ficaram os usuários.
+Dessa forma, as potencialidades 
+e possibilidades democratizantes da 
+internet estão longe do esperado, já 
+que os governos usam a internet ape-
+nas como “um quadro de avisos”, o 
+mesmo acontecendo no Legislativo, 
+onde os parlamentares respondem 
+aos e-mails de forma protocolar, 
+como no caso do Reino Unido (Cas-
+tells, 2003, p. 128). Do ponto de 
+vista da sociedade, tem-se a mesma 
+situação com a utilização de infor-
+mações políticas presentes na rede 
+apenas de forma “marginal” (Cas-
+tells, 2003, p. 128). 
+Isso tem levado a se relativizar o 
+papel e o potencial da internet, pois 
+“seria surpreendente se a internet, 
+por meio de sua tecnologia, inver-
+tesse a desconfiança política profun-
+damente arraigada entre a maioria 
+dos cidadãos no mundo todo” (Cas-
+tells, 2003, p. 129). A internet não 
+pode ser vista como uma tábua de 
+salvação para os problemas da falta 
+de participação política. Além disso, 
+dada a “crise generalizada de legiti-
+midade política” que marca o mun-
+do contemporâneo, e a “indiferença 
+dos cidadãos por seus representantes, 
+poucos se apropriam do canal de co-
+municação interativo, mutidirecio-
+nal, fornecido pela internet, de ambos 
+os lados da conexão” (Castells, 
+2003, p. 129). Assim, os políticos 
+“divulgam suas declarações e respon-
+dem burocraticamente”, enquanto os 
+cidadãos “não veem muito sentido 
+em gastar energia em indagações po-
+líticas, exceto quando atingidos por 
+um evento que desperta sua indigna-
+ção ou afeta seus interesses pessoais” 
+(Castells, 2003, p. 129). Então, 
+o problema não estaria em falhas da 
+internet, em promessas não atendi-
+das por esta, mas na própria “crise 
+da democracia” (Castells, 2003, 
+p. 129). Já se mostrou que existe 
+tecnologia suficiente para promover 
+interações entre cidadãos e governos, 
+mas pouca democracia no sentido de 
+que esses canais não são ativados para 
+criar uma verdadeira democracia di-
+gital (PINHO, 2008).  
+ Considerando todos esses argu-
+mentos, parece ser possível afirmar 
+que o tão decantado potencial re-
+volucionário da internet deve ser 
+relativizado. Para esse potencial se 
+realizar, depende da predisposição 
+política do Estado e da sociedade 
+civil, por meio de suas instituições, 
+associações e movimentos sociais. 
+No contexto brasileiro, assistimos a 
+deficiências e limitações históricas 
+e estruturais nos dois componentes 
+dessa equação política. Em síntese, a 
+internet pode ser vista como instru-
+mento “facilitador da participação da 
+sociedade no governo e do exercício 
+do controle social”, com consciência, 
+no entanto, de que não será “por meio 
+da tecnologia que se criará a partici-
+pação, nem o controle social, mas, 
+
+José Antonio Gomes de Pinho
+ISSN 0034-7590
+©RAE  •  São Paulo  •  v. 51  •  n. 1  •  jan./fev. 2011  •  098-106  •  103 
+se já existem mecanismos para isso, 
+então ela pode facilitar sua concreti-
+zação” (CHAIN, CUNHA, KNIGHT 
+e PINTO, 2004, p. 49). 
+A POLÍTICA EM PRIMEIRO 
+PLANO
+Como podemos perceber, a questão 
+política não aparece de forma expli-
+cita, repousando as percepções e ex-
+pectativas sobre o papel da internet 
+muito mais nas possibilidades de 
+acesso à informação, à produção de 
+conhecimento fora dos padrões tra-
+dicionais da empresa capitalista e nas 
+transformações radicais nas relações 
+sociais que o instrumento enseja. Não 
+se visualizam maiores expectativas 
+com possibilidades de transforma-
+ções na forma de fazer política por 
+meio da internet
+Eugenio Bucci traz uma perspec-
+tiva mais abertamente política ao re-
+lembrar que “o capitalismo não sabe 
+existir sem se revolucionar a cada 
+segundo, a cada dia” (BUCCI, 2009, 
+p. 204). Estaríamos vivendo, na atu-
+alidade, uma “revolução equiparada 
+à Revolução de Gutemberg” (BUCCI, 
+2009), constatando uma “ebulição 
+utópica em torno da internet e em 
+torno das novas tecnologias digitais, 
+como se elas trouxessem a igualdade, 
+a voz para todos” (BUCCI, 2009). No 
+entanto, “não necessariamente essa 
+tecnologia trará mais democratiza-
+ção, mais acesso ao poder, inclusão. 
+Isso não está embutido no DNA da 
+tecnologia” (BUCCI, 2009), sendo 
+mais correto trabalhar com a ideia de 
+continuidade, como nas tecnologias 
+do cinema e televisão, do que “hiper-
+valorizar a ruptura” (BUCCI, 2009).
+Trazendo o debate da questão para 
+a realidade específica do país, o au-
+tor aponta uma barreira no fato de 
+termos um país onde os “analfabe-
+tos funcionais são muitos”, ou seja, 
+“uma pessoa que lê, mas não com-
+preende o que lê” (BUCCI, 2009, 
+p. 205). Em outras palavras, a pos-
+sibilidade de revolução é relativiza-
+da tanto por conta da condição da 
+tecnologia propriamente dita como 
+das condições objetivas da socieda-
+de brasileira. Essa situação agora se 
+transporta para a rede. “Tem alguém 
+que entra no computador, que aces-
+sa o e-mail, mas ainda é excluído de 
+uma série de vantagens às quais não 
+tem acesso” (BUCCI, 2009), entre 
+elas a manifestação política. Em sua 
+visão, seria “um outro nível de anal-
+fabetismo” (BUCCI, 2009), que pode-
+ríamos chamar aqui de analfabetismo 
+funcional digital. Além do mais, “a 
+imagem exerce um peso muito gran-
+de na internet”, o que pode facilitar 
+a navegação dos analfabetos funcio-
+nais digitais. São incluídos digital-
+mente, mas apenas aos acessos mais 
+fáceis de compreender, aqueles que 
+não exigem muita cognição. Seria o 
+equivalente a manusear apenas uma 
+revista com muitas fotos e pouco 
+texto, acessível a pessoas com baixo 
+nível de escolaridade. Dessa maneira, 
+a “mesma tecnologia que veio para 
+permitir que mais pessoas tivessem 
+acesso ao espaço público estabeleceu 
+também uma diferenciação vertical 
+que antes não estava posta” (BUC-
+CI, 2009), expressa pelo “grau de 
+tecnologia que você pode manusear, 
+depois pela familiaridade com que 
+você tem acesso a milhões de dis-
+positivos” (BUCCI, 2009, p. 206), 
+ou seja, pela cognição do usuário. 
+Assim, para ter “um acesso privile-
+giado ao mundo digital, você precisa 
+contar com essas coisas: mais tecno-
+logia e mais poder de mobilização” 
+(BUCCI, 2009). Dessa maneira, não 
+está prevista a criação de nenhuma 
+“espécie de utopia socialista digital” 
+(BUCCI, 2009), dado que tudo que 
+vem ocorrendo “não revoga as leis 
+do capitalismo”, muito pelo contrá-
+rio, “a internet turbina os processos 
+pelos quais o capitalismo vai operar”, 
+o que vai se dar “pela diferenciação” 
+(BUCCI, 2009). Há um reconheci-
+mento de que fazer associações ficou 
+mais fácil com a era digital, não que-
+rendo isso dizer, porém, que “a lógica 
+solidária ou colaborativa suplante a 
+lógica acumulativa” (BUCCI, 2009), 
+pois continuará a prevalecer “a lógica 
+da remuneração do capital” (BUCCI, 
+2009). Em outras palavras, “não é a 
+tecnologia que muda a sociedade. 
+Nunca foi. A sociedade, ou os movi-
+mentos sociais ou as relações sociais, 
+é o que dá sentido social e histórico 
+para a tecnologia, e não o contrário” 
+(BUCCI, 2009). 
+A questão da liberdade de produ-
+zir conteúdos para postar na inter-
+net só terá viabilidade econômica se 
+“despertar mobilização do público” 
+(BUCCI, 2009, p. 209). Em outras 
+palavras, sem dúvida a internet cria 
+possibilidades infinitas de participa-
+ção, mas estas só se cristalizam se 
+despertarem o interesse de um gran-
+de número de usuários. Temos, as-
+sim, sem dúvida uma liberdade, mas 
+que não conduz necessariamente a 
+mudanças coletivas. Então, passado 
+esse “deslumbramento”, irá “incidir 
+a nova forma de concentração de ca-
+pital e a acumulação vai acontecer 
+outra vez” (BUCCI, 2009).
+A internet não tem a ver com o 
+que Habermas chama de esfera pú-
+blica, mas, sim, com o conceito de 
+mundo da vida, sendo que “[o] mun-
+do da vida está posto desde antes de 
+se pensar a internet” (BUCCI, 2009, 
+p. 211). Relembrando que o mundo 
+da vida é “o lugar em que as coisas 
+acontecem, em que as pessoas se en-
+tendem, onde se tecem os sentidos 
+– o mundo feito das coisas mais ou 
+menos naturais, dos repertórios não 
+problemáticos” (BUCCI, 2009). Com 
+a internet, esse mundo da vida “ga-
+nhou visibilidade” (BUCCI, 2009, p. 
+
+pensata • SOCIEDADE DA INFORMAÇÃO, CAPITALISMO E SOCIEDADE CIVIL: REFLEXÕES SOBRE POLÍTICA, INTERNET E DEMOCRACIA NA REALIDADE BRASILEIRA
+104  •  ©RAE  •  São Paulo  •  v. 51  •  n. 1  •  jan./fev. 2011  •  098-106
+ISSN 0034-7590
+212), e os conceitos de esfera pública, 
+de sociedade civil, entre outros, estão, 
+na concepção habermasiana, conecta-
+dos ao mundo da vida, “se abastecem 
+do mundo da vida” (BUCCI, 2009). 
+Cita o autor como assuntos, interes-
+ses do mundo da vida, coisas prosai-
+cas, tais como a criação de canários, 
+filmes alemães da década de 1950 ou 
+pessoas que querem fazer a peregri-
+nação de Santiago de Compostela. 
+“O que mais fascina as pessoas que 
+pensam e que olham para a tecnologia 
+é essa efervescência de tantas coisas 
+diferentes, tantas pessoas falando ao 
+mesmo tempo, se manifestando. Ora, 
+isso é o mundo da vida” (BUCCI, 
+2009). Além de causar fascinação, 
+“nos faz ter a ilusão de que a internet 
+é uma forma de comunicação iguali-
+tária”. E, assim, a internet é posta em 
+seu devido lugar por dar “visibilidade 
+para processos que estavam aí e que 
+passaram a ser interconectados, mas 
+ela não inventou esses processos. Ela 
+dá visibilidade e permite que eles 
+afluam mais rapidamente para uma 
+projeção para possíveis espaços pú-
+blicos” (BUCCI, 2009). E que “não 
+se caia no deslumbramento de que é 
+um outro espaço público. Não é bem 
+assim, o que houve foi uma com-
+plexificação desse espaço” (BUCCI, 
+2009). E o autor coloca as coisas em 
+seu lugar, dando uma ducha fria nos 
+otimistas, ao asseverar não ter havido 
+“uma refundação da humanidade ou 
+das comunicações” (BUCCI, 2009). 
+A política é explicitamente inseri-
+da na abordagem da questão digital ao 
+considerar a nossa “brutal diferença 
+de classes” (RISÉRIO, 2009, p. 295). 
+Para tornar viável a inclusão digital, 
+torna-se necessário ter “inclusão so-
+cial”. Ao lado de ser o Brasil “um polo 
+produtor de informações originais 
+para o mundo” (RISÉRIO, 2009), tais 
+como o futebol, a bossa nova, a poe-
+sia concreta e Brasília, não consegue 
+resolver as “questões mais básicas” 
+(RISÉRIO, 2009, p. 296), configuran-
+do-se um “atraso social”, em que, ao 
+lado de uma economia das maiores 
+do mundo, tem-se “um povo roto 
+e esfarrapado” (RISÉRIO, 2009, p. 
+301). Assim, para se viabilizar como 
+“um novo projeto civilizacional”, o 
+país “precisa se resolver como povo 
+e nação” (RISÉRIO, 2009, p. 301). 
+Nesse contexto, a questão digital 
+tem que ser colocada, “sem medo”, 
+na arena da “discussão de classes”, 
+pontificando o problema da educação 
+como central. Se a internet pode ser 
+aproveitada “para tentar reinventar 
+o mundo”, para superar a realidade 
+brasileira existente, tem-se que sa-
+ber “lidar com o difícil”, pois no país 
+“tudo é mágico: soluções mágicas, sa-
+ídas mágicas, o povo é mágico, o povo 
+resolve” (RISÉRIO, 2009, p. 301). Em 
+outras palavras, não existe saída vo-
+luntarista a partir do povo, ou, mais 
+rigorosamente, da sociedade civil, 
+enquanto mudanças substanciais não 
+ocorram nesse âmbito.  
+Na linha essencialmente política, 
+Laymert Garcia dos Santos assevera 
+que “a tecnologização da sociedade 
+é intensa” (SANTOS, 2003, p. 17) e, 
+relembrando Lênin, o comunismo era 
+definido como os sovietes acrescidos 
+da eletricidade. Será que, agora, “po-
+demos substituir a eletricidade pela 
+internet, e os sovietes pelas comuni-
+dades de base” e teríamos o caminho 
+para o socialismo atual? (SANTOS, 
+2003, p. 74). Assim, a internet es-
+taria para o socialismo no mundo 
+atual como a eletricidade estava para 
+a década de 1920. Em sua reflexão, 
+entende ser “ingênuo acharmos que 
+a internet é um território livre, que 
+vamos conseguir fazer uma revolução 
+usando a internet” (SANTOS, 2003, 
+p. 74), ainda que não negue “o as-
+pecto democrático de circulação da 
+informação que existe na internet e as 
+conexões que ela possibilita” (SAN-
+TOS, 2003). Existem “brechas dentro 
+dos sistemas” que devem ser aprovei-
+tadas, mas não se deve esquecer que 
+a internet é uma tecnologia nova e 
+que “o capital está começando a co-
+lonizá-la agora” (SANTOS, 2003, p. 
+75), e que haverá um desfecho quan-
+do houver “uma grande capilaridade 
+nos países industrializados, quando 
+a vida for impossível sem a internet, 
+então aí é que vai começar a regulação 
+da internet” (SANTOS, 2003). 
+Aponta, ainda, Santos, a existên-
+cia de um mito, o mito do progresso, 
+que apresenta as tecnologias como 
+democráticas, discordando da ideia 
+de que as novas tecnologias sejam 
+todas para o bem. Discorda também 
+da ideia de que “os indivíduos sejam 
+todos iguais” ao constatar diferenças 
+entre um operador de computador do 
+Primeiro Mundo e do Brasil devido 
+às desigualdades educacionais. Em 
+sua percepção, “o fato de existir uma 
+rede não significa que ela é necessa-
+riamente democrática” (SANTOS, 
+2003, p. 76). 
+Vale observar ainda que, mesmo 
+que a internet seja um instrumen-
+to efetivamente novo, ela vem para 
+aprofundar tendências historicamen-
+te presentes na sociedade capitalista 
+contemporânea, não existindo, no 
+entanto, indicações de que seja “um 
+fator de transformação radical da 
+estrutura social, do sistema de es-
+tratificação e das normas e valores 
+da sociedade” (SORJ, 2003, p. 41). 
+Assim, como em outros períodos 
+históricos, o capitalismo se apropria 
+das tecnologias em seu favor. Ainda 
+que a internet apareça com um ró-
+tulo de território livre, democrático, 
+isonômico, a questão que se coloca é 
+o que o capital vai fazer para exercer 
+o controle? Se não dá para controlar, 
+ou controlar plenamente, e tem que 
+conviver com essa realidade, como 
+vai se posicionar? São questões para 
+as quais, efetivamente, ainda não se 
+têm respostas conclusivas. 
+
+José Antonio Gomes de Pinho
+ISSN 0034-7590
+©RAE  •  São Paulo  •  v. 51  •  n. 1  •  jan./fev. 2011  •  098-106  •  105 
+CONCLUSÕES
+As novas TIC, e a internet, têm pro-
+vocado mudanças significativas em 
+todas as dimensões da vida, quais 
+sejam, econômica, social, política, 
+cultural, psicológica etc. A internet 
+tem se constituído em um ponto de 
+inflexão na trajetória humana pelo 
+potencial revolucionário que encerra. 
+Ainda que os interesses participantes 
+na rede possam ter um conteúdo pú-
+blico e coletivo, parece predominar a 
+busca do interesse do indivíduo. As 
+maiores promessas da internet e que 
+vêm sendo cumpridas residem na 
+exponencial capacidade de comuni-
+cação, disponibilização e circulação 
+de informação nunca dantes expe-
+rimentada na experiência humana. 
+A internet (e as TIC em geral) vem 
+embebida de um potencial criativo, 
+libertário e emancipatório, mas, pos-
+sivelmente, mais fortemente no plano 
+individual. A internet tem o potencial 
+de quebrar estruturas de poder con-
+vencionais ao democratizar o acesso 
+à informação. Permite também uma 
+desinstitucionalização ao possibili-
+tar aos cidadãos se manifestarem li-
+vremente e enquanto indivíduos ou 
+grupos independentes da força e dos 
+parâmetros do capital. 
+Outro aspecto recorrentemente 
+apontado seria a ausência de inter-
+mediário, o que permite emissores 
+falarem com um público amplo, em 
+vários ramos da atividade humana, 
+sem intermediários, sem instituições. 
+Ainda que essas mudanças, muito 
+significativas, não estejam ligadas à 
+atividade política convencional, ha-
+veria a possibilidade de, como em um 
+incêndio, as chamas se propagarem 
+pela atividade política explícita. A in-
+ternet possibilitaria a emergência de 
+cidadãos ativos. Também se localiza 
+o surgimento de uma postura cola-
+borativa, cooperativa, na produção 
+na internet. 
+Existe uma tendência forte de se 
+referir ao que está acontecendo na 
+internet como uma revolução. Se 
+esta existe, é mais no sentido de o 
+capitalismo revolucionar os meios 
+de produção e, assim, a tecnologia, 
+a internet nela presente, estaria a fa-
+vor do capital, e o movimento deste 
+colonizar a internet seria deflagra-
+do tão logo fosse oportuno. Assim, 
+a discussão da questão digital passa 
+necessariamente pelo contexto dos 
+interesses do capital e das classes.
+A internet comporta ainda um para-
+doxo, uma contradição. Por um lado, 
+parece ser um território de liberdade e 
+igualdade; por outro, aponta um risco 
+de aprofundamento do individualismo 
+convivendo com uma agregação de in-
+teresses de grupos, o que geraria gue-
+tos de interesses e não um ambiente 
+de ampla democratização. Como algo 
+típico de uma sociedade de classes, 
+parece que temos e teremos um pou-
+co de cada coisa. Quanto a resultados 
+políticos propriamente ditos, estes são 
+pífios, desanimadores, mesmo no con-
+texto de países mais desenvolvidos. 
+Na especificidade da situação brasilei-
+ra, pelas nossas condições históricas 
+e pela presença de vastos grupos de 
+analfabetos funcionais com problemas 
+sérios de cognição. 
+Assim, o problema (e a salvação) 
+não é da internet, deve ficar claro 
+para não anular suas conquistas e 
+avanços, e sim da especificidade da 
+situação sociopolítica brasileira, re-
+forçada ainda pela posição assumi-
+da pela política na sociedade global 
+contemporânea, marcada pelo fim das 
+grandes narrativas, das utopias. Cabe 
+observar que a ideia da ocorrência 
+de uma revolução, ou ao menos uma 
+mudança, com a democratização do 
+acesso à informação que a internet 
+efetivamente possibilita depende 
+fundamentalmente do nível de cog-
+nição e formação educacional dos 
+cidadãos, o que pede uma decisão 
+política nesse sentido. Não há, assim, 
+nenhum automatismo possibilitado 
+pela tecnologia.
+Trabalhando com a ideia de uma 
+metáfora, vale a pena uma compara-
+ção com a experiência do Speakers’ 
+Corner de Londres. Antes restrito a 
+poucos lugares, poucos manifestan-
+tes, poucos ouvintes, e falando sob 
+uma relativa vigilância, agora a inter-
+net seria o Speakers’ Corner amplia-
+do, muitos lugares (portais, sites, blo-
+gs, twitters, e-mails), muitos manifes-
+tantes, muitos ouvintes, e falando, até 
+agora, com muito mais liberdade. E 
+funcionando 24 horas por dia, todos 
+os dias, tanto para a emissão como a 
+recepção de conteúdos. Baseado em 
+inserções rápidas, fugazes, tópicas, 
+que podem se desmanchar rapida-
+mente. Essa seria a forma moderna 
+de fazer política após o esgotamento 
+das grandes narrativas, que implicam 
+grandes lutas, mobilizando grandes 
+contingentes por longos períodos de 
+tempo. Com a internet, a quebra das 
+grandes narrativas, o surgimento de 
+demandas e lutas por questões mais 
+específicas (feminismo, ambientalis-
+mo etc.), as inserções são mais varia-
+das e rápidas, durando enquanto se 
+mantém o interesse dos participantes. 
+A internet tem um papel fundamental 
+em viabilizar esse direcionamento. 
+Este artigo objetivou trazer algumas 
+posições na apreensão do fenômeno 
+da internet, mas ao mesmo tempo 
+deixa mais indagações e inquietação, 
+até porque estamos no meio do fura-
+cão e ele muda muito rapidamente. 
+REFERÊNCIAS
+AMADEU, S. In: SAVAZONI, R.; COHN, S. 
+(Orgs). Cultura digital.br. Rio de Janeiro: Beco 
+do Azougue, 2009. 
+BUCCI, E. In: Cultura digital.br. SAVAZONI, 
+R; COHN, S. (Orgs). Rio de Janeiro. Beco do 
+Azougue. 2009.
+
+pensata • SOCIEDADE DA INFORMAÇÃO, CAPITALISMO E SOCIEDADE CIVIL: REFLEXÕES SOBRE POLÍTICA, INTERNET E DEMOCRACIA NA REALIDADE BRASILEIRA
+106  •  ©RAE  •  São Paulo  •  v. 51  •  n. 1  •  jan./fev. 2011  •  098-106
+ISSN 0034-7590
+CASTELLS, M. A galáxia da internet: reflexões 
+sobre a internet, os negócios e a sociedade. Rio 
+de Janeiro: Jorge Zahar, 2003.
+CASTELLS, M. A sociedade em rede. São Paulo: 
+Paz e Terra, 1999.
+CASTRO, E. V. In: SAVAZONI, R; COHN, S. 
+(Orgs). Cultura digital.br.Rio de Janeiro: Beco 
+do Azougue, 2009. 
+CHAIN, A; CUNHA, M. A; KNIGTT, P; PINTO, 
+S. L. E-gov.br: a próxima revolução brasileira. São 
+Paulo: Prentice Hall, 2004.
+COELHO, F. In: SAVAZONI, R; COHN, S. 
+(Orgs). Cultura digital.br. Rio de Janeiro: Beco 
+do Azougue, 2009.
+DOMINGUES, J. M. Sociologia e modernidade: 
+para entender a sociedade contemporânea. Rio 
+de Janeiro: Civilização Brasileira, 1999.
+DOWBOR, L. In: SAVAZONI, R; COHN, S. 
+(Orgs). Cultura digital.br. Rio de Janeiro: Beco 
+do Azougue, 2009.
+ESTEVES, B. In: SAVAZONI, R; COHN, S. 
+(Orgs). Cultura digital.br. Rio de Janeiro: Beco 
+do Azougue, 2009.
+HERCULANO-HOUZEL, S. In: SAVAZONI, 
+R; COHN, S. (Orgs). Cultura digital.br. Rio de 
+Janeiro: Beco do Azougue, 2009.
+LEMOS, A. In: SAVAZONI, R; COHN, S. 
+(Orgs). Cultura digital.br. Rio de Janeiro: Beco 
+do Azougue, 2009.
+LEMOS, R. In: SAVAZONI, R; COHN, S. 
+(Orgs). Cultura digital.br. Rio de Janeiro: Beco 
+do Azougue, 2009.
+MANEV, F. In: SAVAZONI, R; COHN, S. (Orgs). 
+Cultura digital.br. Rio de Janeiro: Beco do 
+Azougue, 2009.
+NOGUEIRA, M. A. As possibilidades da política: 
+ideias para a reforma democrática do Estado. 
+São Paulo: Paz e Terra, 1998.
+PARENTE, A. In: SAVAZONI, R.; COHN, S. 
+(Orgs). Cultura digital.br. Rio de Janeiro: Beco 
+do Azougue, 2009.
+PINHO, J. A. G. Investigando portais de governo 
+eletrônico de estados no Brasil: muita tecnologia 
+e pouca democracia. Revista de Administração 
+Pública, v. 42, n. 3, p. 471-493, 2008.
+PINHO, J. A.G; WINKLER, I. Política presen-
+cial versus política virtual: uma investigação 
+no fórum digital de debates entre docentes na 
+Universidade Federal da Bahia. In: ENCONTRO 
+NACIONAL DOS PROGRAMAS DE PÓS-
+GRADUAÇÃO EM ADMINISTRAÇÃO, 32, 
+2008, Rio de Janeiro. Anais. Rio de Janeiro: 
+EnANPAD, 2008.
+PRADO, C. In: SAVAZONI, R; COHN, S. 
+(Orgs). Cultura digital.br. Rio de Janeiro: Beco 
+do Azougue, 2009.
+RISERIO, A. In: SAVAZONI, R; COHN, S. 
+(Orgs). Cultura digital.br. Rio de Janeiro: Beco 
+do Azougue, 2009.
+SANTANA, L. In: SAVAZONI, R; COHN, S. 
+(Orgs). Cultura digital.br. Rio de Janeiro: Beco 
+do Azougue, 2009.
+SANTOS, L. G. In: SAVAZONI, R; COHN, S. 
+(Orgs). Cultura digital.br. Rio de Janeiro: Beco 
+do Azougue, 2009.
+SARTORI, G. Homo videns: televisão e pós-pen-
+samento. Bauru, SP: Edusc, 2001.
+SORJ, B. Brasil@povo.com: a luta contra a desi-
+gualdade na sociedade de informação. Rio de 
+Janeiro: Zahar; Brasília: Unesco, 2003.
+STOLARSKI, A. In: SAVAZONI, R; COHN, S. 
+(Orgs). Cultura digital.br. Rio de Janeiro: Beco 
+do Azougue, 2009.
