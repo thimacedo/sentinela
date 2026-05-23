@@ -652,7 +652,18 @@ class IGZyteWorker(BaseWorker):
         self._blocked_slots.clear()
 
         if not target:
-            return CycleResult(worker_id=self.worker_id, cycle=self.cycle, source="target_claim", simulated=False, error="no_target_available")
+            # Aproveitar cooldown para classificar pendentes em lote
+            self.logger.info("[Zyte] Coleta em cooldown. Processando backlog de classificacao...")
+            batch_classified = await ai_service.run_batch_classification(limit=50)
+            
+            return CycleResult(
+                worker_id=self.worker_id, 
+                cycle=self.cycle, 
+                source="batch_classification", 
+                simulated=False, 
+                error="cooldown", 
+                classified=batch_classified
+            )
 
         self.logger.info("[Zyte] Ciclo %s | Alvo: @%s", self.cycle, target.username)
 

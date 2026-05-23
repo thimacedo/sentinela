@@ -26,29 +26,20 @@ Responda APENAS com JSON válido contendo:
 
 class AIService:
     def __init__(self):
-        # 1. Groq (Mais rápido, limite de RPM menor)
-        self.groq_client = AsyncOpenAI(
-            api_key=os.getenv("GROQ_API_KEY"),
-            base_url="https://api.groq.com/openai/v1"
-        )
-        
-        # 2. Mistral (Preciso em PT-BR, tier gratuito sustentável)
-        self.mistral_client = AsyncOpenAI(
-            api_key=os.getenv("MISTRAL_API_KEY"),
-            base_url="https://api.mistral.ai/v1"
-        )
-        
-        # 3. OpenRouter (Rede de segurança gratuita, fallback final)
-        self.openrouter_client = AsyncOpenAI(
-            api_key=os.getenv("OPENROUTER_API_KEY"),
-            base_url="https://openrouter.ai/api/v1"
+        # 1. Gemini Client (OpenAI API compatible)
+        self.gemini_client = AsyncOpenAI(
+            api_key=os.getenv("GEMINI_API_KEY"),
+            base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
         )
 
-        # Ordem de prioridade para classificação (Cloud Only)
+        # Ordem de prioridade para classificação (YOLO Cascade)
         self.providers = [
-            {"name": "groq", "client": self.groq_client, "model": "llama3-8b-8192"},
-            {"name": "mistral", "client": self.mistral_client, "model": "open-mistral-nemo"},
-            {"name": "openrouter", "client": self.openrouter_client, "model": "meta-llama/llama-3.1-8b-instruct:free"},
+            {"name": "gemini-2.5-pro-preview", "client": self.gemini_client, "model": "gemini-2.5-pro-preview"},
+            {"name": "gemini-2.5-flash-preview", "client": self.gemini_client, "model": "gemini-2.5-flash-preview"},
+            {"name": "gemini-2.0-flash", "client": self.gemini_client, "model": "gemini-2.0-flash"},
+            {"name": "gemini-2.0-flash-lite", "client": self.gemini_client, "model": "gemini-2.0-flash-lite"},
+            {"name": "gemini-1.5-pro", "client": self.gemini_client, "model": "gemini-1.5-pro"},
+            {"name": "gemini-1.5-flash", "client": self.gemini_client, "model": "gemini-1.5-flash"},
         ]
 
     async def classify_text(self, text: str) -> Dict[str, Any]:
