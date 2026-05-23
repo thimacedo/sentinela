@@ -35,7 +35,8 @@ else:
     console_format = "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
 console_handler.setFormatter(logging.Formatter(console_format))
 
-file_handler = logging.FileHandler("logs/main_runner.log", encoding="utf-8")
+from logging.handlers import RotatingFileHandler
+file_handler = RotatingFileHandler("logs/main_runner.log", maxBytes=5*1024*1024, backupCount=3, encoding="utf-8")
 file_handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
 
 root_logger.addHandler(console_handler)
@@ -67,13 +68,14 @@ def build_orchestrator() -> SentinelaOrchestrator:
     orch = SentinelaOrchestrator(engine, advisor)
 
     zyte_key = os.getenv("ZYTE_API_KEY")
-    if zyte_key:
+    enable_zyte = os.getenv("ENABLE_ZYTE", "true").lower() == "true"
+    if zyte_key and enable_zyte:
         orch.register(IGZyteWorker(
             worker_id="ig-zyte-01",
             config={"api_key": zyte_key},
         ))
     else:
-        logger.warning("[main_runner] ZYTE_API_KEY ausente; IGZyteWorker não registrado.")
+        logger.warning("[main_runner] IGZyteWorker desativado ou ZYTE_API_KEY ausente.")
 
     session_id = os.getenv("INSTAGRAM_SESSIONID")
     if session_id:

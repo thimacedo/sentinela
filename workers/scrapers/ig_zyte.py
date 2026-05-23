@@ -515,7 +515,7 @@ class IGZyteWorker(BaseWorker):
 
         html = ""
         if not user_data:
-            self.logger.info("[Zyte] API JSON falhou. Tentando Browser Rendering...")
+            self.logger.debug("[Zyte] API JSON falhou. Tentando Browser Rendering...")
             browser_url = f"https://www.instagram.com/{target.username}/"
             browser_res = await self._zyte_request(browser_url, {"User-Agent": headers["User-Agent"]}, use_browser=True)
             html = browser_res.get("browserHtml", "")
@@ -534,7 +534,7 @@ class IGZyteWorker(BaseWorker):
                 if node.get("shortcode") and node.get("id"):
                     shortcodes_to_fetch.append({"shortcode": node["shortcode"], "media_id": node["id"]})
         elif html:
-            self.logger.info("[Zyte] JSON nao encontrado no HTML. Tentando DOM...")
+            self.logger.debug("[Zyte] JSON nao encontrado no HTML. Tentando DOM...")
             for p in self._extract_from_dom(html):
                 shortcodes_to_fetch.append({"shortcode": p["shortcode"], "media_id": None})
 
@@ -574,7 +574,7 @@ class IGZyteWorker(BaseWorker):
 
             # Tier 2: Se API falhou, usa browser rendering na pagina do post
             if not post_comments:
-                self.logger.info("[Zyte] API sem resultados para %s. Tentando browser rendering...", shortcode)
+                self.logger.debug("[Zyte] API sem resultados para %s. Tentando browser rendering...", shortcode)
                 post_comments = await self._fetch_comments_browser(shortcode, target.candidato_id)
 
             all_comments.extend(post_comments)

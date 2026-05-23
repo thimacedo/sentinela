@@ -48,7 +48,7 @@ class IdentityManager:
                 return self.current_account
             
             if IG_USER and IG_PASS:
-                print("⚠️ [Identity] Nenhuma conta no DB. Usando fallback do .env.")
+                logger.debug("⚠️ [Identity] Nenhuma conta no DB. Usando fallback do .env.")
                 return {
                     'id': 'env_fallback',
                     'username': IG_USER,
@@ -57,7 +57,7 @@ class IdentityManager:
                 }
             return None
         except Exception as e:
-            print(f"❌ [Identity] Erro ao buscar conta: {e}")
+            logger.debug(f"❌ [Identity] Erro ao buscar conta: {e}")
             return None
 
     async def mark_blocked(self, account_id: str):
@@ -150,15 +150,15 @@ class InstagramHeadlessScraper:
         collected_comments: List[Dict] = []
 
         try:
-            print("🧠 [Headless] Iniciando Instagram Headless Scraper (Rotation Mode)...")
+            logger.info("🧠 [Headless] Iniciando Instagram Headless Scraper (Rotation Mode)...")
             
             self.active_account = await self.im.get_next_available_account()
             if not self.active_account:
                 error = "Nenhuma identidade disponível."
-                print(f"❌ [Headless] {error}")
+                logger.error(f"❌ [Headless] {error}")
                 return collected_comments
 
-            print(f"👤 [Headless] Usando conta: @{self.active_account['username']}")
+            logger.info(f"👤 [Headless] Usando conta: @{self.active_account['username']}")
 
             async with async_playwright() as pw:
                 self.playwright = pw
@@ -189,7 +189,7 @@ class InstagramHeadlessScraper:
                         result = await self._scrape_candidate(candidate)
                         if result is None:
                             error = f"Possível Shadowban ou Bloqueio na conta @{self.active_account['username']}"
-                            print(f"⚠️ [Headless] {error}")
+                            logger.warning(f"⚠️ [Headless] {error}")
                             await self.im.mark_shadowbanned(self.active_account['id'])
                             break
                         if isinstance(result, list):
@@ -200,7 +200,7 @@ class InstagramHeadlessScraper:
                 
         except Exception as e:
             error = str(e)
-            print(f"💥 [Headless] Erro no run: {error}")
+            logger.error(f"💥 [Headless] Erro no run: {error}")
         finally:
             duration_ms = int((time.perf_counter() - start_time) * 1000)
             target_str = ",".join([t['username'] if isinstance(t, dict) else str(t) for t in (targets or [])])
@@ -243,13 +243,13 @@ class InstagramHeadlessScraper:
         if not username:
             return None
             
-        print(f"🎯 [Headless] @{username}...")
+        logger.info(f"🎯 [Headless] @{username}...")
         try:
             await self.page.goto(f"https://www.instagram.com/{username}/", timeout=60000)
             await asyncio.sleep(3)
 
             if await self._is_profile_not_found():
-                print(f"❌ [Headless] Perfil @{username} não encontrado.")
+                logger.warning(f"❌ [Headless] Perfil @{username} não encontrado.")
                 return []
 
             # Coleta shortcodes dos posts via DOM
@@ -265,11 +265,11 @@ class InstagramHeadlessScraper:
                 post_comments = await self._collect_post_comments(username, shortcode)
                 comments.extend(post_comments)
 
-            print(f"✅ [Headless] @{username}: {len(comments)} comentários coletados")
+            logger.info(f"✅ [Headless] @{username}: {len(comments)} comentários coletados")
             return comments
             
         except Exception as e:
-            print(f"❌ [Headless] Error scraping @{username}: {e}")
+            logger.error(f"❌ [Headless] Error scraping @{username}: {e}")
             return None
 
     async def _collect_post_comments(self, username: str, shortcode: str) -> List[Dict]:
@@ -302,7 +302,7 @@ class InstagramHeadlessScraper:
                 for i, text in enumerate(raw_comments[:MAX_COMMENTS_PER_POST])
             ]
         except Exception as e:
-            print(f"❌ [Headless] Erro ao coletar post {shortcode}: {e}")
+            logger.error(f"❌ [Headless] Erro ao coletar post {shortcode}: {e}")
             return []
 
     def _update_candidate_data(self, candidate_id: str, profile_data: Dict[str, Any]):
@@ -323,10 +323,11 @@ class InstagramHeadlessScraper:
             }
             
             supabase.table('candidatos').update(update_data).eq('id', candidate_id).execute()
-            print(f"📝 [Headless] Updated candidate data for {candidate_id}")
+            logger.info(f"📝 [Headless] Updated candidate data for {candidate_id}")
             
         except Exception as e:
-            print(f"❌ [Headless] Error updating candidate data: {e}")
+            logger.error(f"❌ [Headless] Error updating candidate data: {e}")
+
 
     async def _scrape_post(self, username: str, shortcode: str):
         try:
