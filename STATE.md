@@ -137,3 +137,7 @@ python scripts/apply_migration.py
 - Corrigido constraint `worker_rewards_tier_check` em `reward_engine.py` rebaixando o tier `platinum` para `gold` garantindo persistencia da gamificacao dos workers sem crash do Orquestrador.
 - Restabelecida a API Mistral como motor primário e Groq como fallback secundário para evitar problemas de quota e API keys ausentes no ambiente.
 - Implementada classificação em lote de até 50 comentários quando a coleta Zyte está em cooldown.
+- Removido o limite rígido de 10 classificações por ciclo nos scrapers `IGZyteWorker` e `IGHeadlessWorker`, classificando todos os itens novos de forma imediata (Fase 4 - executado por Gemini 3.5 Flash).
+- Corrigida a inicialização do Supabase no dashboard local (`local_dashboard.html`) renomeando as constantes para evitar colisão com o construtor `window.URL` nativo do JS.
+- Silenciados os warnings do Tailwind CDN no console do painel local.
+- Adicionado tratamento para requisições de `/favicon.ico` no servidor FastAPI do watchdog para eliminar os erros 404.
