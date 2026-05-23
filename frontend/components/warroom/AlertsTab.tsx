@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, ShieldAlert } from 'lucide-react';
+import { supabase } from '@/src/lib/supabase';
 
 interface Alert {
   id: string;
@@ -18,9 +19,42 @@ export default function AlertsTab() {
   const { data: alerts = [], isLoading } = useQuery<Alert[]>({
     queryKey: ['active-alerts-list'],
     queryFn: async () => {
-      const response = await fetch('/api/v1/alerts/active');
-      if (!response.ok) throw new Error('Falha ao buscar alertas');
-      return await response.json();
+      try {
+        const response = await fetch('/api/v1/alerts/active');
+        if (!response.ok) {
+          throw new Error(`API respondeu com status ${response.status}`);
+        }
+        return await response.json();
+      } catch (error) {
+        console.warn("Erro ao buscar alertas da API, tentando fallback Supabase:", error);
+      }
+
+      // Fallback Supabase
+      try {
+        const { data: comments, error } = await supabase
+          .from('comentarios')
+          .select('id, texto_bruto, categoria_ia, data_coleta, candidato_id')
+          .eq('is_hate', true)
+          .order('data_coleta', { ascending: false })
+          .limit(20);
+
+        if (error || !comments) {
+          console.error("Erro no fallback Supabase de alertas:", error);
+          return [];
+        }
+
+        return comments.map((c: any) => ({
+          id: c.id,
+          texto_bruto: c.texto_bruto,
+          categoria_ia: c.categoria_ia || 'OUTROS',
+          data_coleta: c.data_coleta,
+          candidatos: { username: c.candidato_id || 'desconhecido' },
+          risco_score: c.risco_score
+        }));
+      } catch (err) {
+        console.error("Erro crítico no fallback de alertas do Supabase:", err);
+        return [];
+      }
     },
     refetchInterval: 10000, // Alertas em tempo real (10s)
   });
