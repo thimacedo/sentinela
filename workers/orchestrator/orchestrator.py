@@ -84,8 +84,9 @@ class SentinelaOrchestrator:
             # Recupera o delta a partir dos dados do ciclo ou recua se nulo
             delta_xp = getattr(result, "metadata", {}).get("xp_delta", 0.0) if getattr(result, "metadata", None) else 0.0
             
-            # Se o score consolidado do worker cair a 0, ele estourou o limite de incompetência
-            if reward.score <= 0.0:
+            # Se o score consolidado do worker cair a 0 devido a uma perda real de reputação neste ciclo,
+            # ele estourou o limite de incompetência. Evita loop de suspensão em coletas legítimas vazias (delta = 0).
+            if reward.score <= 0.0 and delta_xp < 0.0:
                 logger.error(
                     "[%s] 🛑 REPUTAÇÃO ZERO (Score acumulado zerado). Worker furado detectado.",
                     result.worker_id

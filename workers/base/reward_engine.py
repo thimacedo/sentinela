@@ -90,7 +90,12 @@ class RewardEngine:
             return 0.0
         if not result.target:
             return 0.0 # Idle: não ganha nem perde
-        if result.error or not result.db_success:
+        # Erros legítimos de dados vazios não devem ser tratados como falha crítica de sistema.
+        # Falha de banco só é crítica se havia dados extraídos para persistir.
+        is_system_error = result.error and result.error != "no_comments_found"
+        is_db_failure = not result.db_success and result.extracted > 0
+        
+        if is_system_error or is_db_failure:
             return -15.0 # Falha crítica de sistema ou DB
             
         xp_delta = 0.0

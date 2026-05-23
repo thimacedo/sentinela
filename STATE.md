@@ -145,3 +145,4 @@ python scripts/apply_migration.py
 - Atualizados modelos de IA descontinuados para llama-3.3-70b-versatile na Groq e openrouter/free no OpenRouter (Fase 4 - executado por gemini-2.5-pro-preview).
 - Criado o ponto de entrada watchdog/__main__.py habilitando a execução nativa e modular do supervisor via python -m watchdog.
 - Corrigido problema de alvos repetidos na fila através da antecipação de mark_candidate_scraped no início do ciclo de execução dos scrapers, assegurando o cooldown mesmo em coletas vazias ou com erro (Fase 4 - executado por gemini-2.5-pro-preview).
+- Corrigidas as falhas de falso-positivo de reputação: coletas vazias legítimas (no_comments_found) deixam de sofrer penalidade de -15 de XP, e suspensões por reputação zero nos orquestradores foram limitadas apenas a ciclos com perda real de pontuação (delta < 0), eliminando loops de suspensão indevida (Fase 4 - executado por gemini-2.5-pro-preview).
