@@ -142,7 +142,7 @@ class InstagramHeadlessScraper:
         except Exception:
             return False
 
-    async def run(self, limit: int = 15, targets: List[Dict] = None, test_username: str = None) -> List[Dict]:
+    async def run(self, limit: int = 15, targets: List[Dict] = None, test_username: str = None, max_posts: int = None) -> List[Dict]:
         start_time = time.perf_counter()
         total_comments = 0
         error = None
@@ -186,7 +186,7 @@ class InstagramHeadlessScraper:
                             targets = self._load_pending_targets(limit)
                     
                     for candidate in targets:
-                        result = await self._scrape_candidate(candidate)
+                        result = await self._scrape_candidate(candidate, max_posts=max_posts)
                         if result is None:
                             error = f"Possível Shadowban ou Bloqueio na conta @{self.active_account['username']}"
                             logger.warning(f"⚠️ [Headless] {error}")
@@ -234,7 +234,7 @@ class InstagramHeadlessScraper:
 
 
 
-    async def _scrape_candidate(self, candidate: Any) -> Optional[List[Dict]]:
+    async def _scrape_candidate(self, candidate: Any, max_posts: int = None) -> Optional[List[Dict]]:
         if isinstance(candidate, str):
             username = candidate
         else:
@@ -243,7 +243,8 @@ class InstagramHeadlessScraper:
         if not username:
             return None
             
-        logger.info(f"🎯 [Headless] @{username}...")
+        posts_limit = max_posts if max_posts is not None else MAX_POSTS_PER_PROFILE
+        logger.info(f"🎯 [Headless] @{username} (limit={posts_limit})...")
         try:
             captured_shortcodes = []
             
@@ -288,15 +289,15 @@ class InstagramHeadlessScraper:
 
             if captured_shortcodes:
                 logger.info(f"🕸️ [Headless] Encontrados {len(captured_shortcodes)} posts de @{username} via API/Rede")
-                shortcodes = list(dict.fromkeys(captured_shortcodes))[:3]
+                shortcodes = list(dict.fromkeys(captured_shortcodes))[:posts_limit]
             else:
                 logger.warning(f"⚠️ [Headless] Falha ao interceptar API de perfil. Recorrendo ao scraping do DOM para posts de @{username}")
                 # Coleta shortcodes dos posts via DOM
-                shortcodes = await self.page.evaluate("""
+                shortcodes = await self.page.evaluate(f"""
                     () => Array.from(document.querySelectorAll('a[href*="/p/"], a[href*="/reel/"]'))
-                        .map(a => a.href.match(/\/(p|reel)\/([^/]+)\//)?.[2])
+                        .map(a => a.href.match(/\\/(p|reel)\\/([^/]+)\\//)?.[2])
                         .filter(Boolean)
-                        .slice(0, 3)
+                        .slice(0, {posts_limit})
                 """)
                 shortcodes = list(dict.fromkeys(shortcodes))
 

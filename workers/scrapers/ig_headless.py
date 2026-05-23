@@ -55,7 +55,8 @@ class IGHeadlessWorker(BaseWorker):
         error_msg = None
 
         try:
-            comments = await self._scraper.run(targets=[{"username": target.username}])
+            max_posts = self.config.get("max_posts")
+            comments = await self._scraper.run(targets=[{"username": target.username}], max_posts=max_posts)
             extracted = len(comments)
 
             if comments:
