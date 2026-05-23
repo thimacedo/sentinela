@@ -156,14 +156,18 @@ def summary(request: Request, supa: Client = Depends(get_supa)):
         res_diaria = supa.table('metricas_diarias').select('updated_at').order('data', desc=True).limit(1).execute()
         last_update = res_diaria.data[0]['updated_at'] if res_diaria.data else now_utc.isoformat()
 
-        # 3. Calcula o Acumulado (Lifetime)
-        query_t = supa.table('candidatos').select('comentarios_totais_count, comentarios_odio_count')
+        # 3. Calcula o Acumulado (Lifetime) de forma dinâmica a partir da tabela de comentários
+        query_total = supa.table('comentarios').select('id', count='exact')
+        query_hate = supa.table('comentarios').select('id', count='exact').eq('is_hate', True)
         if org_id:
-            query_t = query_t.eq('organization_id', org_id)
-        t_res = query_t.execute()
+            query_total = query_total.eq('organization_id', org_id)
+            query_hate = query_hate.eq('organization_id', org_id)
+            
+        t_res_total = query_total.limit(1).execute()
+        t_res_hate = query_hate.limit(1).execute()
         
-        t_lifetime = sum([item.get('comentarios_totais_count', 0) or 0 for item in t_res.data])
-        h_lifetime = sum([item.get('comentarios_odio_count', 0) or 0 for item in t_res.data])
+        t_lifetime = t_res_total.count if (t_res_total and t_res_total.count is not None) else 0
+        h_lifetime = t_res_hate.count if (t_res_hate and t_res_hate.count is not None) else 0
         
         res_val = round(((t_lifetime - h_lifetime) / t_lifetime) * 100, 1) if t_lifetime > 0 else 100.0
         

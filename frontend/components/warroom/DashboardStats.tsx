@@ -35,18 +35,23 @@ export default function DashboardStats() {
         .select('*', { count: 'exact', head: true })
         .eq('status_monitoramento', 'Ativo');
 
-      const { data: candidates } = await supabase
-        .from('candidatos')
-        .select('comentarios_totais_count, comentarios_odio_count');
+      const { count: total_amostra } = await supabase
+        .from('comentarios')
+        .select('*', { count: 'exact', head: true });
 
-      const total_amostra = candidates?.reduce((acc, c) => acc + (c.comentarios_totais_count || 0), 0) || 0;
-      const total_alertas = candidates?.reduce((acc, c) => acc + (c.comentarios_odio_count || 0), 0) || 0;
-      const resiliencia = total_amostra > 0 ? round(((total_amostra - total_alertas) / total_amostra) * 100, 1) : 100.0;
+      const { count: total_alertas } = await supabase
+        .from('comentarios')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_hate', true);
+
+      const resiliencia = (total_amostra && total_amostra > 0)
+        ? round(((total_amostra - (total_alertas || 0)) / total_amostra) * 100, 1)
+        : 100.0;
 
       return {
         total_monitorados: monitorados || 0,
-        total_alertas,
-        total_amostra,
+        total_alertas: total_alertas || 0,
+        total_amostra: total_amostra || 0,
         resiliencia,
       };
     },
