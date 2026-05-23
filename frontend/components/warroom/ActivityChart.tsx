@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
+import { supabase } from '@/src/lib/supabase';
 
 interface SeriesData {
   hora: string;
@@ -19,7 +20,43 @@ export default function ActivityChart() {
           return await response.json();
         }
       } catch (error) {
-        console.error("Erro ao buscar série temporal:", error);
+        console.warn("Erro ao buscar série temporal da API, tentando fallback Supabase:", error);
+      }
+
+      // Fallback Supabase
+      try {
+        const windowDate = new Date();
+        windowDate.setHours(windowDate.getHours() - 48);
+        const windowStr = windowDate.toISOString();
+
+        const { data: comments, error } = await supabase
+          .from('comentarios')
+          .select('data_coleta')
+          .eq('is_hate', true)
+          .gte('data_coleta', windowStr)
+          .order('data_coleta', { ascending: true });
+
+        if (error || !comments) {
+          console.error("Erro no fallback Supabase:", error);
+          return [];
+        }
+
+        const hoursMap: Record<string, number> = {};
+        comments.forEach((c: any) => {
+          if (c.data_coleta) {
+            const hourKey = c.data_coleta.slice(0, 13) + ":00:00";
+            hoursMap[hourKey] = (hoursMap[hourKey] || 0) + 1;
+          }
+        });
+
+        const series = Object.entries(hoursMap).map(([hora, alertas]) => ({
+          hora,
+          alertas,
+        }));
+
+        return series.sort((a, b) => a.hora.localeCompare(b.hora));
+      } catch (err) {
+        console.error("Erro crítico no fallback Supabase da série temporal:", err);
       }
       return [];
     },
