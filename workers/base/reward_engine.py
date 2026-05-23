@@ -1,5 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
+# pyrefly: ignore [missing-import]
 from workers.base.cycle_result import CycleResult
 
 # Intervalos em segundos por tier

@@ -18,13 +18,11 @@ class SentinelaOrchestrator:
         self._workers: List[BaseWorker] = []
         self._active_targets: set = set()
         self._claim_lock = asyncio.Lock()
-        self._reputations: dict[str, float] = {}
         self._banned_until: dict[str, float] = {}
 
     def register(self, worker: BaseWorker) -> None:
         self._workers.append(worker)
-        self._reputations[worker.worker_id] = 100.0
-        logger.info("[orchestrator] registrado: %s (Reputação inicial: 100)", worker.worker_id)
+        logger.info("[orchestrator] registrado: %s", worker.worker_id)
 
     async def run_cycle_with_validation(self, worker: BaseWorker) -> None:
         import time
@@ -34,8 +32,7 @@ class SentinelaOrchestrator:
                 return
             else:
                 del self._banned_until[worker.worker_id]
-                self._reputations[worker.worker_id] = 50.0 # Reseta parcial
-                logger.info("[%s] 🔄 Suspensão encerrada. Worker reintegrado ao pool com reputação 50.", worker.worker_id)
+                logger.info("[%s] 🔄 Suspensão encerrada. Worker reintegrado ao pool.", worker.worker_id)
                 
         # Injeta o set compartilhado antes do claim para evitar alvos duplicados
         worker.active_targets = self._active_targets
@@ -82,23 +79,21 @@ class SentinelaOrchestrator:
         elif not result.simulated:
             logger.debug("[%s] AIAdvisor ignorado (tier=%s score=%.1f)", result.worker_id, reward.tier, reward.score)
 
-        # --- GESTÃO DE REPUTAÇÃO E PENALIDADE ---
+        # --- GESTÃO DE REPUTAÇÃO E PENALIDADE (Nativa do RewardEngine) ---
         if not result.simulated:
-            delta = reward.score - 50.0
-            self._reputations[result.worker_id] += delta
-            current_rep = self._reputations[result.worker_id]
+            # Recupera o delta a partir dos dados do ciclo ou recua se nulo
+            delta_xp = getattr(result, "metadata", {}).get("xp_delta", 0.0) if getattr(result, "metadata", None) else 0.0
             
-            logger.info("[%s] Reputação: %.1f (delta: %+.1f)", result.worker_id, current_rep, delta)
-            
-            if current_rep < 0:
+            # Se o score consolidado do worker cair a 0, ele estourou o limite de incompetência
+            if reward.score <= 0.0:
                 logger.error(
-                    "[%s] 🛑 REPUTAÇÃO NEGATIVA (%.1f). Worker furado detectado.",
-                    result.worker_id, current_rep
+                    "[%s] 🛑 REPUTAÇÃO ZERO (Score acumulado zerado). Worker furado detectado.",
+                    result.worker_id
                 )
                 await self.ai_advisor.memory.save_suggestion(
                     worker_id=result.worker_id,
                     cycle=result.cycle,
-                    suggestion=f"REPUTAÇÃO NEGATIVA ({current_rep:.1f}): Worker sistematicamente improdutivo e desperdiçando recursos. Sugerida a retirada do pool ou refatoração crítica."
+                    suggestion=f"REPUTAÇÃO ZERO: Worker perdeu toda a sua credibilidade (Score = 0.0). Sugerida a retirada do pool ou refatoração crítica."
                 )
                 logger.warning("[%s] ⏳ Aplicando suspensão disciplinar de 30 minutos (Privilegiando outros workers na fila).", result.worker_id)
                 import time
