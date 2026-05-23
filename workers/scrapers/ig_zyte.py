@@ -278,7 +278,7 @@ class IGZyteWorker(BaseWorker):
             if shortcode not in seen_codes:
                 posts.append({"shortcode": shortcode})
                 seen_codes.add(shortcode)
-                if len(posts) >= self.max_posts:
+                if len(posts) >= 12: # Extrai até 12 inicialmente para dar margem de filtro
                     break
         return posts
 
@@ -529,7 +529,7 @@ class IGZyteWorker(BaseWorker):
         shortcodes_to_fetch = []
         if user_data:
             edges = user_data.get("edge_owner_to_timeline_media", {}).get("edges", [])
-            for edge in edges[:self.max_posts]:
+            for edge in edges:  # Extrai todos possíveis (geralmente 12) da primeira página
                 node = edge.get("node", {})
                 if node.get("shortcode") and node.get("id"):
                     shortcodes_to_fetch.append({"shortcode": node["shortcode"], "media_id": node["id"]})
@@ -541,6 +541,25 @@ class IGZyteWorker(BaseWorker):
         if not shortcodes_to_fetch:
             self.logger.warning("[Zyte] Falha ao obter posts do perfil @%s", target.username)
             return []
+
+        # Filtra os posts já raspados consultando o banco
+        try:
+            shortcode_list = [item["shortcode"] for item in shortcodes_to_fetch]
+            res = self.db.table("comentarios").select("post_shortcode").in_("post_shortcode", shortcode_list).execute()
+            scraped_shortcodes = {row["post_shortcode"] for row in (res.data or [])}
+            
+            if scraped_shortcodes:
+                self.logger.info("[Zyte] Ignorando %d posts ja raspados: %s", len(scraped_shortcodes), list(scraped_shortcodes))
+                shortcodes_to_fetch = [item for item in shortcodes_to_fetch if item["shortcode"] not in scraped_shortcodes]
+        except Exception as e:
+            self.logger.warning("[Zyte] Erro ao verificar posts ja raspados no Supabase: %s", e)
+
+        if not shortcodes_to_fetch:
+            self.logger.info("[Zyte] Nenhum post novo (inédito) para coletar no perfil @%s", target.username)
+            return []
+
+        # Limita a extração aos novos posts baseado em max_posts
+        shortcodes_to_fetch = shortcodes_to_fetch[:self.max_posts]
 
         all_comments: list[dict] = []
         for item in shortcodes_to_fetch:
