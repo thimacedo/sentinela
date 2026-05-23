@@ -16,9 +16,10 @@ export default function ActivityChart() {
     queryFn: async () => {
       try {
         const response = await fetch('/api/v1/analytics/temporal-series');
-        if (response.ok) {
-          return await response.json();
+        if (!response.ok) {
+          throw new Error(`API respondeu com status ${response.status}`);
         }
+        return await response.json();
       } catch (error) {
         console.warn("Erro ao buscar série temporal da API, tentando fallback Supabase:", error);
       }
