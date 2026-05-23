@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from typing import Optional, Any, List, Dict
 from core.queue_manager import QueueManager
 from core.supabase_service import get_supabase_client
-from core.ai_service import ai_service
+from core.ai_service import ai_service, clean_null_chars
 from core.circuit_breaker import zyte_circuit_breaker
 import logging
 import os
@@ -599,7 +599,7 @@ class IGZyteWorker(BaseWorker):
         sent_ids = {c["id_externo"] for c in comments if c.get("id_externo")}
         try:
             res = self.db.table("comentarios").upsert(
-                comments, on_conflict="id_externo", ignore_duplicates=True
+                clean_null_chars(comments), on_conflict="id_externo", ignore_duplicates=True
             ).execute()
             stats.inserted = len(res.data)
             stats.duplicated = len(sent_ids) - stats.inserted

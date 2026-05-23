@@ -24,6 +24,20 @@ Responda APENAS com JSON válido contendo:
   "analise_pericial": "Breve justificativa em pt-BR"
 }"""
 
+def clean_null_chars(data: Any) -> Any:
+    """
+    Remove recursivamente caracteres nulos (\u0000 e \x00) de strings,
+    listas e dicionários. O PostgreSQL/Supabase não suporta \u0000 em textos.
+    """
+    from typing import Any
+    if isinstance(data, str):
+        return data.replace("\u0000", "").replace("\x00", "")
+    elif isinstance(data, list):
+        return [clean_null_chars(item) for item in data]
+    elif isinstance(data, dict):
+        return {key: clean_null_chars(value) for key, value in data.items()}
+    return data
+
 class AIService:
     def __init__(self):
         # 1. Mistral (Principal - Preciso em PT-BR)
@@ -47,8 +61,8 @@ class AIService:
         # Ordem de prioridade para classificação (Mistral -> Groq -> OpenRouter)
         self.providers = [
             {"name": "mistral", "client": self.mistral_client, "model": "open-mistral-nemo"},
-            {"name": "groq", "client": self.groq_client, "model": "llama3-8b-8192"},
-            {"name": "openrouter", "client": self.openrouter_client, "model": "meta-llama/llama-3.1-8b-instruct:free"},
+            {"name": "groq", "client": self.groq_client, "model": "llama-3.3-70b-versatile"},
+            {"name": "openrouter", "client": self.openrouter_client, "model": "openrouter/free"},
         ]
 
     async def classify_text(self, text: str) -> Dict[str, Any]:
@@ -75,6 +89,7 @@ class AIService:
                 
                 content = response.choices[0].message.content
                 result = self._parse_json_response(content)
+                result = clean_null_chars(result)
                 ai_circuit_breaker.record_success(name)
                 logger.debug(f"📊 [AI] {name.upper()} | {result.get('categoria_ia', 'ERRO')} | {result.get('confianca_ia', 0):.2f}")
                 return result

@@ -2,7 +2,7 @@ from workers.base.worker_base import BaseWorker
 from workers.base.cycle_result import CycleResult
 from core.queue_manager import QueueManager
 from core.supabase_service import get_supabase_client
-from core.ai_service import ai_service
+from core.ai_service import ai_service, clean_null_chars
 from core.instagram_headless import InstagramHeadlessScraper
 import logging
 
@@ -58,7 +58,7 @@ class IGHeadlessWorker(BaseWorker):
             if comments:
                 try:
                     res = self.db.table("comentarios").upsert(
-                        comments, on_conflict="id_externo", ignore_duplicates=True
+                        clean_null_chars(comments), on_conflict="id_externo", ignore_duplicates=True
                     ).execute()
                     inserted = len(res.data)
                     duplicated = extracted - inserted
