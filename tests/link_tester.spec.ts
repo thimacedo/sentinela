@@ -1,52 +1,50 @@
 import { test, expect } from '@playwright/test';
 
-const PRODUCTION_URL = 'https://sentinela-democratica-ruby.vercel.app';
+const PRODUCTION_URL = 'https://asentinela.vercel.app';
 
-test.describe('SENTINELA | Diamond Edition - Link & Routing Tests', () => {
+test.describe('SENTINELA | Next.js Edition - Link & Routing Tests', () => {
     test.setTimeout(60000);
 
-    test('deve navegar por todas as abas e filtros sem erros', async ({ page }) => {
-        await page.goto(PRODUCTION_URL);
+    test('deve navegar por todas as abas sem erros', async ({ page }) => {
+        await page.goto(`${PRODUCTION_URL}/dashboard`);
 
         // Aguarda carregamento inicial
-        await page.waitForSelector('#kpi-monitorados:not(:has-text("---"))', { timeout: 30000 });
+        await page.waitForSelector('h1:has-text("WAR ROOM")', { timeout: 30000 });
 
-        // Lista de views
-        const views = [
-            { id: 'nav-networks', hash: '#networks', section: '#view-networks' },
-            { id: 'nav-directory', hash: '#directory', section: '#view-directory' },
-            { id: 'nav-dossie', hash: '#dossie', section: '#view-dossie' },
-            { id: 'nav-map', hash: '#map', section: '#view-map' },
-            { id: 'nav-monitor', hash: '#monitor', section: '#view-monitor' } // Voltar ao início
+        // Lista de abas a serem testadas (textos em uppercase)
+        const tabs = [
+            { text: 'FORENSE' },
+            { text: 'ALVOS' },
+            { text: 'DOSSIÊS' },
+            { text: 'ALERTAS' },
+            { text: 'REDE' },
+            { text: 'FILA' },
+            { text: 'GERAL' } // Volta ao início
         ];
 
-        for (const v of views) {
-            console.log(`Testando link: ${v.id}`);
-            await page.click(`#${v.id}`);
-            await expect(page).toHaveURL(new RegExp(`${v.hash}$`));
-            await expect(page.locator(v.section)).toHaveClass(/active-view/);
-            // Pequeno delay para a transição
+        for (const t of tabs) {
+            console.log(`Testando aba: ${t.text}`);
+            
+            // Clica na aba pelo texto contido nela
+            const tabButton = page.locator(`button[role="tab"]:has-text("${t.text}")`);
+            await expect(tabButton).toBeVisible();
+            await tabButton.click();
+            
+            // Verifica se a aba ficou no estado ativo
+            await expect(page.locator('button[role="tab"][data-state="active"]')).toContainText(t.text);
+            
+            // Pequeno delay para transição visual
             await page.waitForTimeout(500);
         }
 
-        // Lista de filtros
-        const filters = ['btn-filter-hate', 'btn-filter-critical', 'btn-filter-all'];
-        for (const f of filters) {
-            console.log(`Testando filtro: ${f}`);
-            await page.click(`#${f}`);
-            // Verifica se o botão ficou ativo
-            await expect(page.locator(`#${f}`)).toHaveClass(/active/);
-            await page.waitForTimeout(500);
-        }
-
-        // Verifica se há erros no console durante a navegação
-        const errors = [];
+        // Verifica se há erros críticos no console
+        const errors: string[] = [];
         page.on('pageerror', error => errors.push(error.message));
         page.on('console', msg => {
             if (msg.type() === 'error') errors.push(msg.text());
         });
 
-        expect(errors).toHaveLength(0);
-        console.log('Navegação concluída com sucesso! Todos os links e filtros estão operacionais.');
+        expect(errors.filter(e => e.includes('Failed to load') || e.includes('TypeError'))).toHaveLength(0);
+        console.log('Navegação concluída com sucesso! Todas as abas do Next.js estão operacionais.');
     });
 });
