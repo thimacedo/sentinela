@@ -143,3 +143,4 @@ python scripts/apply_migration.py
 - Adicionado tratamento para requisições de `/favicon.ico` no servidor FastAPI do watchdog para eliminar os erros 404.
 - Corrigida falha de inserção de caracteres nulos (\u0000) no Supabase (Erro 22P05) através de sanitização automática no serviço de IA (ai_service.py) e na persistência inicial de comentários nos workers oficiais ig_zyte.py e ig_headless.py.
 - Atualizados modelos de IA descontinuados para llama-3.3-70b-versatile na Groq e openrouter/free no OpenRouter (Fase 4 - executado por gemini-2.5-pro-preview).
+- Criado o ponto de entrada watchdog/__main__.py habilitando a execução nativa e modular do supervisor via python -m watchdog.
