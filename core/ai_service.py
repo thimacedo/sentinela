@@ -91,7 +91,12 @@ class AIService:
                 result = self._parse_json_response(content)
                 result = clean_null_chars(result)
                 ai_circuit_breaker.record_success(name)
-                logger.info(f"📊 [AI] {name.upper()} | {result.get('categoria_ia', 'NEUTRO')} | {result.get('confianca_ia', 0):.2f}")
+                
+                # Trunca e limpa quebras de linha para exibição compacta no log
+                clean_text = text.replace("\n", " ").replace("\r", " ").strip()
+                truncated_text = clean_text if len(clean_text) <= 60 else clean_text[:57] + "..."
+                
+                logger.info(f"📊 [AI] {name.upper()} | {result.get('categoria_ia', 'NEUTRO')} | {result.get('confianca_ia', 0):.2f} | \"{truncated_text}\"")
                 return result
 
             except APIStatusError as e:
