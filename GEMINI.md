@@ -47,6 +47,7 @@ _last_updated: 2026-05-20_
 - Sempre usar banco remoto via .env
 - Sempre commitar ao fim de cada fase, não ao fim de cada arquivo
 - Comandos git sempre separados (sem &&)
+- Sempre realizar commit, push e deploy imediato após validar alterações
 
 ### Gestão de modelos (por ordem de uso)
 Quando um modelo atingir quota, passar automaticamente para o próximo:
