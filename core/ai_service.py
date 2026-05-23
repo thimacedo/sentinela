@@ -81,13 +81,11 @@ class AIService:
                 return result
 
             except APIStatusError as e:
-                # Erro HTTP da API (429, 401, 500, etc)
                 ai_circuit_breaker.record_failure(name, e.status_code)
-                logger.warning(f"⚠️ [AI] {name.upper()} falhou (HTTP {e.status_code}). Tentando próximo...")
+                logger.warning(f"⚠️ [AI] {name.upper()} falhou (HTTP {e.status_code}). Acionando Fallback...")
             except Exception as e:
-                # Erro de conexão, timeout, etc
                 ai_circuit_breaker.record_failure(name, None)
-                logger.warning(f"⚠️ [AI] {name.upper()} falhou ({type(e).__name__}). Tentando próximo...")
+                logger.warning(f"⚠️ [AI] {name.upper()} falhou ({type(e).__name__}). Acionando Fallback...")
 
         # Se chegou aqui, TODAS as IAs cloud falharam ou estão com circuito aberto
         raise RuntimeError("Todas as APIs de IA cloud estão indisponíveis ou com circuito aberto.")

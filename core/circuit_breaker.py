@@ -19,7 +19,7 @@ class CircuitBreaker:
         """Verifica se o circuito está aberto (bloqueado) para o serviço."""
         if service_name in self.open_until:
             if time.time() < self.open_until[service_name]:
-                logger.warning(f"CIRCUITO ABERTO para {service_name}. Bloqueado até {time.ctime(self.open_until[service_name])}")
+                logger.debug(f"CIRCUITO ABERTO para {service_name}. Bloqueado até {time.ctime(self.open_until[service_name])}")
                 return False
             else:
                 del self.open_until[service_name]
