@@ -26,20 +26,29 @@ Responda APENAS com JSON válido contendo:
 
 class AIService:
     def __init__(self):
-        # 1. Gemini Client (OpenAI API compatible)
-        self.gemini_client = AsyncOpenAI(
-            api_key=os.getenv("GEMINI_API_KEY"),
-            base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
+        # 1. Mistral (Principal - Preciso em PT-BR)
+        self.mistral_client = AsyncOpenAI(
+            api_key=os.getenv("MISTRAL_API_KEY"),
+            base_url="https://api.mistral.ai/v1"
         )
 
-        # Ordem de prioridade para classificação (YOLO Cascade)
+        # 2. Groq (Fallback rápido)
+        self.groq_client = AsyncOpenAI(
+            api_key=os.getenv("GROQ_API_KEY"),
+            base_url="https://api.groq.com/openai/v1"
+        )
+        
+        # 3. OpenRouter (Rede de segurança final, opcional)
+        self.openrouter_client = AsyncOpenAI(
+            api_key=os.getenv("OPENROUTER_API_KEY"),
+            base_url="https://openrouter.ai/api/v1"
+        )
+
+        # Ordem de prioridade para classificação (Mistral -> Groq -> OpenRouter)
         self.providers = [
-            {"name": "gemini-2.5-pro-preview", "client": self.gemini_client, "model": "gemini-2.5-pro-preview"},
-            {"name": "gemini-2.5-flash-preview", "client": self.gemini_client, "model": "gemini-2.5-flash-preview"},
-            {"name": "gemini-2.0-flash", "client": self.gemini_client, "model": "gemini-2.0-flash"},
-            {"name": "gemini-2.0-flash-lite", "client": self.gemini_client, "model": "gemini-2.0-flash-lite"},
-            {"name": "gemini-1.5-pro", "client": self.gemini_client, "model": "gemini-1.5-pro"},
-            {"name": "gemini-1.5-flash", "client": self.gemini_client, "model": "gemini-1.5-flash"},
+            {"name": "mistral", "client": self.mistral_client, "model": "open-mistral-nemo"},
+            {"name": "groq", "client": self.groq_client, "model": "llama3-8b-8192"},
+            {"name": "openrouter", "client": self.openrouter_client, "model": "meta-llama/llama-3.1-8b-instruct:free"},
         ]
 
     async def classify_text(self, text: str) -> Dict[str, Any]:
