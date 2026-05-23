@@ -1,5 +1,5 @@
 # STATE.md — Sentinela Democratica (Fonte de Verdade)
-_last_updated: 2026-05-22 | branch: feat/autonomous-workers_
+_last_updated: 2026-05-23 | branch: feat/autonomous-workers_
 
 ## Status Operacional
 
@@ -147,3 +147,4 @@ python scripts/apply_migration.py
 - Corrigido problema de alvos repetidos na fila através da antecipação de mark_candidate_scraped no início do ciclo de execução dos scrapers, assegurando o cooldown mesmo em coletas vazias ou com erro (Fase 4 - executado por gemini-2.5-pro-preview).
 - Corrigidas as falhas de falso-positivo de reputação: coletas vazias legítimas (no_comments_found) deixam de sofrer penalidade de -15 de XP, e suspensões por reputação zero nos orquestradores foram limitadas apenas a ciclos com perda real de pontuação (delta < 0), eliminando loops de suspensão indevida (Fase 4 - executado por gemini-2.5-pro-preview).
 - Elevado o nível de log de sucesso da classificação de IA individual para INFO no core/ai_service.py, incluindo o texto do comentário formatado, decodificado de escapes unicode e truncado a 60 caracteres no log do terminal para auditoria direta e clara (Fase 4 - executado por gemini-2.5-pro-preview).
+- Retomado o daemon de sincronização automática e classificação de comentários neutros (`scripts/auto_sync_daemon.py` e `scripts/reclassify_csv.py`) após interrupção. Corrigida a detecção de inatividade de processos instalando a biblioteca `psutil` no `.venv` do projeto, eliminando o fallback com `wmic` no Windows 11 e garantindo monitoramento e sincronização periódicos do progresso local (executado por Gemini 3.5 Flash).
