@@ -72,12 +72,13 @@ class AIService:
 
             except APIStatusError as e:
                 ai_circuit_breaker.record_failure(name, e.status_code)
-                logger.debug(f"⚠️ [AI] {name.upper()} falhou (HTTP {e.status_code}). Acionando Fallback...")
+                logger.error(f"⚠️ [AI] {name.upper()} falhou (HTTP {e.status_code}): {e.response.text}. Acionando Fallback...")
             except Exception as e:
                 ai_circuit_breaker.record_failure(name, None)
-                logger.debug(f"⚠️ [AI] {name.upper()} falhou ({type(e).__name__}). Acionando Fallback...")
+                logger.error(f"⚠️ [AI] {name.upper()} falhou ({type(e).__name__}): {str(e)}. Acionando Fallback...")
 
         # Se chegou aqui, TODAS as IAs cloud falharam ou estão com circuito aberto
+
         raise RuntimeError("Todas as APIs de IA cloud estão indisponíveis ou com circuito aberto.")
 
     def _parse_json_response(self, content: str) -> Dict[str, Any]:
