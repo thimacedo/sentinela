@@ -21,6 +21,7 @@ class RewardSummary:
     score: float
     tier: str
     badges: list[str]
+    xp_report: str = ""
 
 
 class RewardEngine:
@@ -38,8 +39,8 @@ class RewardEngine:
         recent = await self.memory.get_recent(result.worker_id, n=1)
         last_score = recent[0].score if recent else 50.0 # Começa no nível neutro (50)
         
-        # Calcula a variação (XP ganho ou perdido no ciclo)
-        delta = self.calculate_xp_delta(result)
+        # Calcula a variação (XP ganho ou perdido no ciclo) e gera o relatório
+        delta, report = self.generate_xp_report_and_delta(result)
         
         # Sistema com limite de 100: recompensas acumulam mas não viram números inatingíveis
         new_score = round(max(0.0, min(last_score + delta, 100.0)), 2)
@@ -82,41 +83,68 @@ class RewardEngine:
             score=new_score,
             tier=tier,
             badges=badges,
+            xp_report=report,
         )
 
     def calculate_xp_delta(self, result: CycleResult) -> float:
         """Calcula a variação de pontos (XP) ganhos ou perdidos neste ciclo."""
+        delta, _ = self.generate_xp_report_and_delta(result)
+        return delta
+
+    def generate_xp_report_and_delta(self, result: CycleResult) -> tuple[float, str]:
+        """Calcula o delta de XP e gera um relatório detalhado do ciclo."""
         if result.simulated:
-            return 0.0
+            return 0.0, "  - Status: Ciclo simulado (Dry-Run)\n  - Delta: +0.0 XP"
         if not result.target:
-            return 0.0 # Idle: não ganha nem perde
+            return 0.0, "  - Status: Sem alvo (Ocioso/Idle)\n  - Delta: +0.0 XP"
+            
         # Erros legítimos de dados vazios não devem ser tratados como falha crítica de sistema.
         # Falha de banco só é crítica se havia dados extraídos para persistir.
         is_system_error = result.error and result.error != "no_comments_found"
         is_db_failure = not result.db_success and result.extracted > 0
         
         if is_system_error or is_db_failure:
-            return -15.0 # Falha crítica de sistema ou DB
+            motivo = result.error if is_system_error else "Falha na gravação do banco"
+            return -15.0, f"  - Status: ❌ Falha Crítica ({motivo})\n  - Delta: -15.0 XP"
             
-        xp_delta = 0.0
+        lines = []
+        delta = 0.0
         
-        # Recompensas por produtividade (limitadas por ciclo para evitar farming)
+        # 1. Coleta
         if result.extracted > 0:
-            xp_delta += min(result.extracted * 0.5, 5.0)
+            val = min(result.extracted * 0.5, 5.0)
+            delta += val
+            lines.append(f"  - Coleta ({result.source or 'scrapers'}): OK ({result.extracted} extraídos) -> +{val:.1f} XP")
+        else:
+            lines.append(f"  - Coleta: OK (0 novos posts/comentários)")
+            
+        # 2. Banco
         if result.inserted > 0:
-            xp_delta += min(result.inserted * 1.0, 10.0)
+            val = min(result.inserted * 1.0, 10.0)
+            delta += val
+            lines.append(f"  - Banco (Supabase): OK ({result.inserted} novos gravados) -> +{val:.1f} XP")
+        elif result.extracted > 0:
+            lines.append(f"  - Banco (Supabase): OK (0 novos gravados, todos duplicados) -> +0.0 XP")
+            
+        # 3. Classificação
         if result.classifier_success and result.classified > 0:
-            xp_delta += min(result.classified * 1.0, 10.0)
+            val = min(result.classified * 1.0, 10.0)
+            delta += val
+            lines.append(f"  - IA (Classificação): OK ({result.classified} processados) -> +{val:.1f} XP")
             
-        # Penalidade por erros na coleta/inserção
+        # 4. Falhas
         if result.failed > 0:
-            xp_delta -= min(result.failed * 2.0, 20.0)
+            val = min(result.failed * 2.0, 20.0)
+            delta -= val
+            lines.append(f"  - Falhas/Erros: ⚠️ {result.failed} falhas no ciclo -> -{val:.1f} XP")
             
-        # Bônus de perfeição
+        # 5. Bônus
         if result.success_rate >= 95 and result.failed == 0 and result.inserted > 0:
-            xp_delta += 5.0
+            delta += 5.0
+            lines.append(f"  - Bônus Perfeição: Sucesso {result.success_rate:.1f}% -> +5.0 XP")
             
-        return round(xp_delta, 2)
+        report = "\n".join(lines) + f"\n  - Delta do Ciclo: {delta:+.1f} XP"
+        return round(delta, 2), report
 
     def resolve_tier(self, score: float, result: CycleResult) -> str:
         if score >= 70: return "gold"

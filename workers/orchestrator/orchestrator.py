@@ -70,6 +70,12 @@ class SentinelaOrchestrator:
             result.simulated, result.error or "nenhum",
         )
 
+        if reward.xp_report:
+            logger.info(
+                "[%s] 📊 DETALHAMENTO DE RECOMPENSAS (Ciclo #%s):\n%s\n  - Reputação Consolidada: %.1f/100.0 (Tier: %s)",
+                result.worker_id, result.cycle, reward.xp_report, reward.score, reward.tier
+            )
+
         if reward.badges:
             logger.info("[%s] badges: %s", result.worker_id, reward.badges)
 
