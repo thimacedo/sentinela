@@ -83,6 +83,7 @@ logs/
 *.log
 *.log.*
 *.html
+!local_dashboard.html
 *.csv
 *.db
 *.sqlite3

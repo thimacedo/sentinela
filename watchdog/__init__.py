@@ -27,7 +27,7 @@ except ImportError:
 
 # --- FastAPI Imports ---
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, StreamingResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 # --- Configurações ---
@@ -128,6 +128,15 @@ async def read_root():
         with open(html_path, "r", encoding="utf-8") as f:
             return f.read()
     return HTMLResponse(content=f"<h1>Dashboard não encontrado em {html_path}</h1>", status_code=404)
+
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    """Retorna o favicon do projeto para evitar erro 404."""
+    favicon_path = os.path.join(PROJECT_ROOT, "favicon.ico")
+    if os.path.exists(favicon_path):
+        return FileResponse(favicon_path)
+    from fastapi.responses import Response
+    return Response(status_code=204)
 
 @app.get("/api/stream")
 async def stream(request: Request):
