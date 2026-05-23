@@ -77,12 +77,12 @@ class WatchdogState:
         self.fast_crashes = 0
         
     def add_log(self, level: str, message: str):
-        # Print no console para facilitar depuração via terminal tratando UnicodeEncodeError no Windows
+        prefix = "" if level == "dim" else f"[{level.upper()}] "
         try:
-            print(f"[{time.strftime('%H:%M:%S')}] {level.upper()}: {message}")
+            print(f"[{time.strftime('%H:%M')}] {prefix}{message}")
         except UnicodeEncodeError:
             try:
-                print(f"[{time.strftime('%H:%M:%S')}] {level.upper()}: {message.encode('ascii', 'replace').decode('ascii')}")
+                print(f"[{time.strftime('%H:%M')}] {prefix}{message.encode('ascii', 'replace').decode('ascii')}")
             except Exception:
                 pass
         with self.lock:
@@ -121,11 +121,11 @@ app.add_middleware(
 @app.get("/", response_class=HTMLResponse)
 async def read_root():
     """Serve o dashboard HTML."""
-    html_path = os.path.join(os.path.dirname(__file__), "static", "index.html")
+    html_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "local_dashboard.html")
     if os.path.exists(html_path):
         with open(html_path, "r", encoding="utf-8") as f:
             return f.read()
-    return HTMLResponse(content="<h1>Dashboard não encontrado em /static/index.html</h1>", status_code=404)
+    return HTMLResponse(content=f"<h1>Dashboard não encontrado em {html_path}</h1>", status_code=404)
 
 @app.get("/api/stream")
 async def stream(request: Request):

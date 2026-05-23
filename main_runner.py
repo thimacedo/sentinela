@@ -22,7 +22,7 @@ root_logger.handlers.clear()
 
 console_handler = logging.StreamHandler(sys.stdout)
 if WATCHDOG_ACTIVE:
-    console_format = "%(levelname)s %(name)s: %(message)s"
+    console_format = "%(message)s"
 else:
     console_format = "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
 console_handler.setFormatter(logging.Formatter(console_format))
