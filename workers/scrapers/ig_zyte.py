@@ -635,6 +635,11 @@ class IGZyteWorker(BaseWorker):
             except Exception as e:
                 self.logger.error("[Zyte] Falha ao classificar %s: %s", comment_id, e)
                 stats.failed += 1
+                if "Todas as APIs de IA cloud estão indisponíveis" in str(e):
+                    self.logger.warning("[Zyte] Abortando classificação do lote restante devido a indisponibilidade geral de IA.")
+                    rest = len(batch) - (stats.classified + stats.failed)
+                    stats.failed += rest
+                    break
         stats.success = stats.classified > 0
         return stats
 

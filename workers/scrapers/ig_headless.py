@@ -89,6 +89,12 @@ class IGHeadlessWorker(BaseWorker):
                         classified += 1
                     except Exception as e:
                         self.logger.error("[Headless] Falha ao classificar %s: %s", comment_id, e)
+                        failed += 1
+                        if "Todas as APIs de IA cloud estão indisponíveis" in str(e):
+                            self.logger.warning("[Headless] Abortando classificação do lote restante devido a indisponibilidade geral de IA.")
+                            rest = len(inserted_ids) - (classified + failed)
+                            failed += rest
+                            break
 
             else:
                 error_msg = "no_comments_found"

@@ -189,6 +189,9 @@ class AIService:
                     stats[cat] = stats.get(cat, 0) + 1
                 except Exception as e:
                     logger.error(f"❌ Erro ao processar comentário {comment['id']}: {e}")
+                    if "Todas as APIs de IA cloud estão indisponíveis" in str(e):
+                        logger.warning("🧠 [AI] Abortando processamento em lote restante devido a indisponibilidade geral de IA.")
+                        break
             
             if processed_count > 0:
                 resumo = ", ".join([f"{k}: {v}" for k, v in stats.items()])
