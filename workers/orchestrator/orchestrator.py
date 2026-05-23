@@ -16,15 +16,27 @@ class SentinelaOrchestrator:
         self.reward_engine  = reward_engine
         self.ai_advisor     = ai_advisor
         self._workers: List[BaseWorker] = []
-        # Alvos reservados no ciclo atual — compartilhado entre workers
         self._active_targets: set = set()
         self._claim_lock = asyncio.Lock()
+        self._reputations: dict[str, float] = {}
+        self._banned_until: dict[str, float] = {}
 
     def register(self, worker: BaseWorker) -> None:
         self._workers.append(worker)
-        logger.info("[orchestrator] registrado: %s", worker.worker_id)
+        self._reputations[worker.worker_id] = 100.0
+        logger.info("[orchestrator] registrado: %s (Reputação inicial: 100)", worker.worker_id)
 
     async def run_cycle_with_validation(self, worker: BaseWorker) -> None:
+        import time
+        if worker.worker_id in self._banned_until:
+            if time.time() < self._banned_until[worker.worker_id]:
+                logger.debug("[%s] ⏳ Cumprindo suspensão (improdutividade). Ignorando ciclo.", worker.worker_id)
+                return
+            else:
+                del self._banned_until[worker.worker_id]
+                self._reputations[worker.worker_id] = 50.0 # Reseta parcial
+                logger.info("[%s] 🔄 Suspensão encerrada. Worker reintegrado ao pool com reputação 50.", worker.worker_id)
+                
         # Injeta o set compartilhado antes do claim para evitar alvos duplicados
         worker.active_targets = self._active_targets
         worker.claim_lock = self._claim_lock
@@ -64,12 +76,33 @@ class SentinelaOrchestrator:
         if reward.badges:
             logger.info("[%s] badges: %s", result.worker_id, reward.badges)
 
-        # AIAdvisor apenas quando degradado (score < 40 ou tier critical/db_failed)
         degraded = reward.score < 40 or reward.tier in ("critical", "db_failed")
         if not result.simulated and degraded:
             await self.ai_advisor.analyze_and_suggest(worker, result)
         elif not result.simulated:
             logger.debug("[%s] AIAdvisor ignorado (tier=%s score=%.1f)", result.worker_id, reward.tier, reward.score)
+
+        # --- GESTÃO DE REPUTAÇÃO E PENALIDADE ---
+        if not result.simulated:
+            delta = reward.score - 50.0
+            self._reputations[result.worker_id] += delta
+            current_rep = self._reputations[result.worker_id]
+            
+            logger.info("[%s] Reputação: %.1f (delta: %+.1f)", result.worker_id, current_rep, delta)
+            
+            if current_rep < 0:
+                logger.error(
+                    "[%s] 🛑 REPUTAÇÃO NEGATIVA (%.1f). Worker furado detectado.",
+                    result.worker_id, current_rep
+                )
+                await self.ai_advisor.memory.save_suggestion(
+                    worker_id=result.worker_id,
+                    cycle=result.cycle,
+                    suggestion=f"REPUTAÇÃO NEGATIVA ({current_rep:.1f}): Worker sistematicamente improdutivo e desperdiçando recursos. Sugerida a retirada do pool ou refatoração crítica."
+                )
+                logger.warning("[%s] ⏳ Aplicando suspensão disciplinar de 30 minutos (Privilegiando outros workers na fila).", result.worker_id)
+                import time
+                self._banned_until[result.worker_id] = time.time() + 1800
 
     async def run_all(self) -> None:
         if not self._workers:
