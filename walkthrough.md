@@ -1,6 +1,6 @@
-# Walkthrough — Correções, Refatoração, Limpeza e Carga de Fila de Coleta (v50.13)
+# Walkthrough — Correções, Refatoração, Limpeza, Carga e Sincronização de Fila (v50.15)
 
-Foram implementadas correções críticas para restabelecer a estabilidade e a integridade da classificação forense de comentários no sistema Sentinela, seguidas por melhorias de compatibilidade Unicode, refatoração de blindagem do supervisor do Watchdog, higienização de arquivos legados e o setup manual da fila de coleta.
+Foram implementadas correções críticas para restabelecer a estabilidade e a integridade da classificação forense de comentários no sistema Sentinela, seguidas por melhorias de compatibilidade Unicode, refatoração de blindagem do supervisor do Watchdog, higienização de arquivos legados, setup da fila de coleta e sincronização em lote de novos alvos.
 
 ## Alterações Realizadas
 
@@ -41,16 +41,22 @@ Foram implementadas correções críticas para restabelecer a estabilidade e a i
   - Exclusão física e remoção via Git dos arquivos de backup legados de desenvolvimento que poluiam a pasta de scrapers (`workers/scrapers/ig_zyte.py.backup` e `workers/scrapers/ig_zyte.py.backup2`).
   - Remoção de scripts temporários e rascunhos de testes na pasta `scratch/` (`inspect_queue.py`, `test_decode.py` e `test_update_permission.py`).
 
-### Carga de Fila e CSV de Prioridades (v50.13)
+### Carga de Fila e CSV de Prioridades (v50.13 - v50.14)
 - **Operação de Banco e Exportação**:
-  - Preenchimento em massa da tabela `fila_coleta` com todos os **338 candidatos ativos** do banco remoto Supabase em status `PENDENTE` e prioridade padrão `1`.
-  - Geração local do arquivo `prioridade_alvos.csv` na pasta raiz do workspace. O arquivo contém as colunas `candidato_id`, `nome` (nome completo mapeado da coluna `nome_completo` do banco), `partido`, `prioridade` (padrão `1`) e `status` (padrão `PENDENTE`).
-  - O operador poderá abrir o CSV diretamente no Excel ou editor de planilha, redefinir a prioridade numérica de cada alvo e devolvê-lo para importação direta no banco.
+  - Preenchimento em massa da tabela `fila_coleta` com todos os candidatos ativos do banco remoto Supabase em status `PENDENTE` e prioridade padrão `1`.
+  - Geração local do arquivo `prioridade_alvos.csv` na pasta raiz do workspace.
+  - Classificação e gravação no banco remoto de todas as prioridades baseadas na matriz de regras fornecida pelo usuário.
+
+### Sincronização e Inserção de Novos Alvos (v50.15) [NOVO]
+- **Sincronização Bidirecional**:
+  - O script leu o arquivo `prioridade_alvos.csv` alterado pelo operador e identificou **128 novos candidatos** ausentes no banco.
+  - **Carga na Tabela Candidatos**: Efetuada a inserção automatizada dos 128 novos alvos na tabela `candidatos` do Supabase com o status de monitoramento `"Ativo"` e cargo padrão `"Pré-candidato"`.
+  - **Atualização da Fila**: Efetuada a sincronização completa das prioridades de todos os **467 alvos** (338 anteriores + 128 novos) na tabela `fila_coleta` com o status `"PENDENTE"`.
 
 ---
 
 ## Verificação e Resultados
 
-1. **Setup de Fila Concluído**: Todos os 338 candidatos ativos já estão cadastrados na fila remota. O orquestrador priorizará essa fila no próximo ciclo.
-2. **Arquivo CSV Gerado**: O arquivo local `prioridade_alvos.csv` de 16 KB foi salvo com sucesso na raiz do projeto.
-3. **Repositório Higienizado**: A árvore de trabalho do Git está completamente limpa (`nothing to commit, working tree clean`).
+1. **Novos Alvos Cadastrados**: Os 128 novos candidatos já constam como ativos no banco e foram devidamente enfileirados.
+2. **Prioridades Sincronizadas**: A fila está em sincronia estrita com as prioridades informadas no CSV.
+3. **Repositório Limpo**: A árvore de trabalho do Git está completamente limpa (`nothing to commit, working tree clean`).
