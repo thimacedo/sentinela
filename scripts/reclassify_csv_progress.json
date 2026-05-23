@@ -42983,5 +42983,405 @@
     "categoria_ia": "NEUTRO",
     "confianca_ia": 0.95,
     "is_hate": false
+  },
+  "eb39c3af-7593-410e-bf47-88937bff9143": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "2b82cfe1-5aa6-469e-b79f-7a961674f1e3": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "2ed0ca5b-6dc2-4cc4-adc6-72bdaf974ca3": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "3e06279d-cd8f-4568-ab58-f207906c1d21": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.9,
+    "is_hate": false
+  },
+  "0a291da7-9959-4565-b8a3-3bfb71204d41": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "7346e64c-4d35-48e5-a476-ab6841e83c51": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "6f154674-3162-4965-8a24-6e0161bf9794": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "642d1efb-896e-4604-b9a6-2bae9b30696a": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "42ae1ea6-3356-4d64-9a38-f377c2875cb4": {
+    "categoria_ia": "POSITIVO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "7033655f-3b51-402a-ba46-d1a6ef23a90f": {
+    "categoria_ia": "POSITIVO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "ad8d2d32-2d13-4827-99ba-e10d92a9c777": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "bde3d47d-acda-4d48-be1e-1e0fc67aa7c1": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "ca7dd049-6856-4b32-96a0-d086d45a2342": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.9,
+    "is_hate": false
+  },
+  "c4f46376-2e53-4cf7-91c2-8e9d338c1899": {
+    "categoria_ia": "POSITIVO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "78da4374-8bdd-40a5-af5d-be33806b7984": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "0372dad1-4a2d-4392-95af-6d043458393e": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.9,
+    "is_hate": false
+  },
+  "76df682a-fe72-4734-b8ec-5585eecfb8fd": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "b36a5b93-331c-4527-bc13-62984b817453": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "42f25935-e524-49d9-b6d8-2f06f7feb4d7": {
+    "categoria_ia": "NEGATIVO",
+    "confianca_ia": 0.9,
+    "is_hate": false
+  },
+  "061481fb-f73d-487a-bbd6-80d4375ad6bf": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "e81768c3-48ad-446d-a8cf-563f13a4631f": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.9,
+    "is_hate": false
+  },
+  "47b2b354-857e-48a6-b211-60b0a05803b2": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "4bfc3c8f-362f-4456-a6fa-479fdcad49aa": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "bbc6e83c-4342-4dbb-b127-093c769c7018": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "421ec15f-31ca-48bb-83c0-ec9af3165ff7": {
+    "categoria_ia": "POSITIVO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "e51b9313-e78a-48c8-be4b-700c8884e03d": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "fbab9d04-38d6-4129-bc6b-4ecd998fd002": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "0224b840-6c1b-4492-b845-e97670af3371": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "ae2b39de-6ff7-42d4-a2ed-2de6697e1f71": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "2da4d9a1-ae03-4979-98f9-4c563657082c": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.9,
+    "is_hate": false
+  },
+  "733d8bfc-c3c2-4663-9b07-32e1794117b6": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "78a9e4d8-01b1-454e-a523-74a987a4d3ad": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "3f0be0ac-e43b-4096-93e5-de2cf425fe6e": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "6fed1b64-bee6-4178-9068-29cea3a6e42d": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.9,
+    "is_hate": false
+  },
+  "f5bcb1de-21bf-4c08-871e-f50ecfd49123": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "9c8ffd8a-1729-4bfa-8d39-726cf0569400": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.9,
+    "is_hate": false
+  },
+  "81a48a41-2006-43f0-b1ff-6a238d9c0394": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "ace39029-82ea-4e30-88ad-80048bc3e939": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.9,
+    "is_hate": false
+  },
+  "910b2499-7c1b-497d-b376-56746dc64645": {
+    "categoria_ia": "NEGATIVO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "af7d3935-bb29-431e-825e-46d036d54f3e": {
+    "categoria_ia": "NEGATIVO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "38b7a6ac-cb88-45f4-bbc5-882615055211": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "0b2b037d-3bf1-435e-bcd7-fda00931d4db": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "9f1125f1-c3a4-44fe-8e3c-9a3d5dc88816": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "459c6b5d-353f-4c36-8a9e-ef11ce85c046": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "6642ff61-3fcf-445b-b18f-73ddb31508a9": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "b1fc2d4a-91f6-4b8b-be0f-42a5ffe0fe71": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "7688364a-51b1-4a1d-9cf2-9abad31ca280": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "85c44f80-b33c-4b46-b677-24a6205939e8": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "cfedba73-cc89-439c-a432-dd8c733b17fa": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "7bb0982f-2a91-4d98-b5bd-98b1a1b9dbaf": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "f11db872-fa7e-4511-b676-216d47542249": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "f6ad8041-e1e6-489f-8df5-10dbc2e6a9f5": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "7719732e-a4b1-4948-bcd2-cb801ee404a9": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "c27f7ce6-64dc-49e6-beb7-628be2848381": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "864286de-cb6c-4bf5-97ff-29c877630da3": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.9,
+    "is_hate": false
+  },
+  "6e1bad34-d09c-4531-b5d4-6b94d66bfbe6": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.9,
+    "is_hate": false
+  },
+  "cbd1b2ac-5c11-4324-ba77-5126d194f749": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.9,
+    "is_hate": false
+  },
+  "50a2231f-e3c0-4943-8c44-d86a2229fb7d": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "ee6a1ab7-86dc-49c5-86e3-4ced22b24927": {
+    "categoria_ia": "POSITIVO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "971e7cb2-c6f7-4fe4-a978-bc81017d4275": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.9,
+    "is_hate": false
+  },
+  "fe0c76e0-91ed-488c-abd4-041a4db21b9b": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "767ece31-c58b-404b-be60-b4f08ec396ba": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "2abdf589-aaa8-43a4-b2ae-454428c7b5a1": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.9,
+    "is_hate": false
+  },
+  "48ec448b-b87f-4cfe-9a73-6fecc4676d7d": {
+    "categoria_ia": "POSITIVO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "4f6700ad-79c5-4ca1-9df8-a881cf7512b9": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "56b481d9-6b82-4048-9751-60fbbec08787": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.9,
+    "is_hate": false
+  },
+  "645f69fb-823e-4df8-ad69-783f05202b9b": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "12c874fc-c203-4d97-9a39-e62b6156f9aa": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "bf08175f-89b6-416b-aa3b-bf9b828a8d2b": {
+    "categoria_ia": "NEGATIVO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "fa79136a-3d7b-4b22-9ee2-067565ee5a5d": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "6113a456-b320-4f3e-9fd9-cb19ef7ce8db": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.9,
+    "is_hate": false
+  },
+  "246fd3d9-d397-4bb2-871d-85cd01ce96d5": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "d6199e28-39cd-4b36-a74f-6eb2aa0c8486": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "acbeb76e-b7a5-49af-ac0d-2f6cd70ff6b9": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "94e685bf-1359-4edd-bd41-7cab82ad8519": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "e09bf2f7-a035-4a5e-8cac-ce8bf4e20a03": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "9b7f9b48-2801-48e1-98c4-09292993ed07": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "3d52fd7b-c516-4bf6-8b28-a6e2582b426f": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "a2110068-a6a6-4e12-915c-b687ed59c8d3": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
+  },
+  "757f853b-2f63-4058-bebc-0d4e7e9e8c8f": {
+    "categoria_ia": "NEUTRO",
+    "confianca_ia": 0.95,
+    "is_hate": false
   }
 }
