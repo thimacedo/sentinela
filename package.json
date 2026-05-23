@@ -10,7 +10,7 @@
   "scripts": {
     "test": "playwright test tests/",
     "api": "uvicorn api.index:app --reload --host 0.0.0.0 --port 8000",
-    "dev": "concurrently \"npm run api\" \"http-server . -p 3000\" --names \"Backend,Frontend\" --prefix-colors \"blue,green\""
+    "dev": "concurrently \"npm run api\" \"npm run dev --prefix frontend\" --names \"Backend,Frontend\" --prefix-colors \"blue,green\""
   },
   "repository": {
     "type": "git",
