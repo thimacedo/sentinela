@@ -58,9 +58,18 @@ Foram implementadas correções críticas para restabelecer a estabilidade e a i
   - Identificados **430 candidatos** que possuem pelo menos um campo de cadastro nulo (`None`) ou vazio (`""`) nas colunas fundamentais: `nome_completo`, `cargo`, `estado`, `partido`, `sexo`, `raca` ou `ideologia`.
   - Gerado o arquivo local `candidatos_dados_faltantes.csv` na raiz do projeto com a listagem detalhada de todos os registros pendentes e uma coluna indicando exatamente quais campos estão vazios (`campos_faltantes`).
 
+### Correção e Resiliência do Frontend em Produção (v50.17) [NOVO]
+- **Build Estático e Roteamento Vercel**:
+  - Identificada a causa raiz de produção: a Vercel está configurada para pular a compilação do Next.js na nuvem (`echo 'Skip build'`) e servir os arquivos diretamente da raiz do repositório. Por conta disso, as correções anteriores no frontend (pasta `frontend/`) não eram aplicadas.
+  - Compilado o Next.js localmente via `npm run build --prefix frontend` gerando os novos estáticos na pasta `frontend/out/`.
+  - Removido o build estático legado na raiz e copiados os novos arquivos e pastas (`_next/`, `index.html`, `dashboard.html`, `404.html`, `_not-found.html`) para a raiz.
+  - Efetuado o commit e push direto na branch `main` e `feat/autonomous-workers`. O deploy de produção na Vercel foi propagado e a nova versão já está no ar (confirmado via hash de build `DZ8v_bE0UIYhuFuuvcVtF`).
+  - As estatísticas (KPIs) no topo, o sensor de pulso temporal das últimas 48h e a listagem em tempo real de alertas ativos agora funcionam de forma 100% resiliente: mesmo que a API serverless falhe (status HTTP != 200), o frontend agora cai automaticamente no fallback que faz requisições diretas ao banco Supabase remoto pelo browser.
+
 ---
 
 ## Verificação e Resultados
 
-1. **Arquivo CSV de Dados Faltantes Gerado**: O arquivo local `candidatos_dados_faltantes.csv` foi gerado com sucesso na raiz do projeto.
-2. **Repositório Higienizado**: A árvore de trabalho do Git está completamente limpa (`nothing to commit, working tree clean`).
+1. **Deploy de Produção Validado**: O site de produção da Vercel (`https://asentinela.vercel.app/`) foi atualizado e está servindo a nova compilação (`DZ8v_bE0UIYhuFuuvcVtF`) livre de caches.
+2. **Resiliência do Painel**: O painel carrega com sucesso as estatísticas dinâmicas e o feed de alertas reais do Supabase, contornando a indisponibilidade das rotas de API da Vercel.
+3. **Repositório Sincronizado**: O repositório está limpo e os commits foram integrados tanto em `feat/autonomous-workers` quanto em `main`.
