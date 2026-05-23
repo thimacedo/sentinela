@@ -34,9 +34,16 @@ def decode_escapes(match):
 def safe_decode_unicode(s: str) -> str:
     try:
         import re
-        return re.sub(r'\\u[0-9a-fA-F]{4}', decode_escapes, s)
+        # Regex que captura primeiro pares de surrogates UTF-16 adjacentes, depois escapes comuns
+        pattern = r'\\u[dD][89abAB][0-9a-fA-F]{2}\\u[dD][cdefCDEF][0-9a-fA-F]{2}|\\u[0-9a-fA-F]{4}'
+        decoded = re.sub(pattern, decode_escapes, s)
+        # Sanitização final: remove ou substitui quaisquer surrogates órfãos residuais
+        return decoded.encode('utf-8', errors='replace').decode('utf-8')
     except Exception:
-        return s
+        try:
+            return s.encode('utf-8', errors='replace').decode('utf-8')
+        except Exception:
+            return s
 
 def clean_null_chars(data: Any) -> Any:
     """
