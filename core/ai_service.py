@@ -91,7 +91,7 @@ class AIService:
                 result = self._parse_json_response(content)
                 result = clean_null_chars(result)
                 ai_circuit_breaker.record_success(name)
-                logger.debug(f"📊 [AI] {name.upper()} | {result.get('categoria_ia', 'ERRO')} | {result.get('confianca_ia', 0):.2f}")
+                logger.info(f"📊 [AI] {name.upper()} | {result.get('categoria_ia', 'NEUTRO')} | {result.get('confianca_ia', 0):.2f}")
                 return result
 
             except APIStatusError as e:
