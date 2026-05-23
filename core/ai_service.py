@@ -75,17 +75,16 @@ class AIService:
                 
                 content = response.choices[0].message.content
                 result = self._parse_json_response(content)
-                
                 ai_circuit_breaker.record_success(name)
-                logger.info(f"📊 [AI] {name.upper()} | {result.get('categoria_ia', 'ERRO')} | {result.get('confianca_ia', 0):.2f}")
+                logger.debug(f"📊 [AI] {name.upper()} | {result.get('categoria_ia', 'ERRO')} | {result.get('confianca_ia', 0):.2f}")
                 return result
 
             except APIStatusError as e:
                 ai_circuit_breaker.record_failure(name, e.status_code)
-                logger.warning(f"⚠️ [AI] {name.upper()} falhou (HTTP {e.status_code}). Acionando Fallback...")
+                logger.debug(f"⚠️ [AI] {name.upper()} falhou (HTTP {e.status_code}). Acionando Fallback...")
             except Exception as e:
                 ai_circuit_breaker.record_failure(name, None)
-                logger.warning(f"⚠️ [AI] {name.upper()} falhou ({type(e).__name__}). Acionando Fallback...")
+                logger.debug(f"⚠️ [AI] {name.upper()} falhou ({type(e).__name__}). Acionando Fallback...")
 
         # Se chegou aqui, TODAS as IAs cloud falharam ou estão com circuito aberto
         raise RuntimeError("Todas as APIs de IA cloud estão indisponíveis ou com circuito aberto.")
@@ -124,6 +123,7 @@ class AIService:
                 return 0
                 
             processed_count = 0
+            stats = {}
             for comment in comments:
                 try:
                     # 2. Classifica cada um
@@ -140,9 +140,15 @@ class AIService:
                     }).eq("id", comment["id"]).execute()
                     
                     processed_count += 1
+                    cat = result["categoria_ia"]
+                    stats[cat] = stats.get(cat, 0) + 1
                 except Exception as e:
                     logger.error(f"❌ Erro ao processar comentário {comment['id']}: {e}")
-                    
+            
+            if processed_count > 0:
+                resumo = ", ".join([f"{k}: {v}" for k, v in stats.items()])
+                logger.info(f"🧠 [AI] {processed_count} comentários classificados em lote ({resumo})")
+                
             return processed_count
         except Exception as e:
             logger.error(f"💥 Falha crítica no lote de classificação: {e}")
