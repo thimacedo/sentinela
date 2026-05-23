@@ -612,12 +612,12 @@ class IGZyteWorker(BaseWorker):
         return stats
 
     async def classify_comments(self, inserted_ids: list[str]) -> ClassifyStats:
-        """Classificacao via AIService. Limitado a 10 por ciclo."""
+        """Classificacao via AIService. Sem limite fixo por ciclo."""
         stats = ClassifyStats()
         if not inserted_ids:
             return stats
-        batch = inserted_ids[:10]
-        self.logger.info("[Zyte] Classificando %s/%s comentarios (limite=10)...", len(batch), len(inserted_ids))
+        batch = inserted_ids
+        self.logger.info("[Zyte] Classificando todos os %s comentarios inseridos...", len(batch))
         for comment_id in batch:
             try:
                 res = self.db.table("comentarios").select("texto_bruto").eq("id", comment_id).single().execute()

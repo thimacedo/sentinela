@@ -69,8 +69,8 @@ class IGHeadlessWorker(BaseWorker):
                     failed = extracted
                     inserted_ids = []
 
-                # Limita classificacao a 10 por ciclo
-                for comment_id in inserted_ids[:10]:
+                # Classifica todos os comentarios inseridos no ciclo
+                for comment_id in inserted_ids:
                     try:
                         res = self.db.table("comentarios").select("texto_bruto").eq("id", comment_id).single().execute()
                         if not res.data:
