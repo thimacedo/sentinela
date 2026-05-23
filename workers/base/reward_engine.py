@@ -32,14 +32,24 @@ class RewardEngine:
 
     async def process_result(self, result: CycleResult) -> RewardSummary:
         """Avalia e persiste o resultado do ciclo usando contrato CycleResult."""
-        score = self.calculate_score(result)
-        tier = self.resolve_tier(score, result)
-        badges = self.resolve_badges(result, score)
+        
+        # Recupera o XP/Score acumulado anterior do worker
+        recent = await self.memory.get_recent(result.worker_id, n=1)
+        last_score = recent[0].score if recent else 50.0 # Começa no nível neutro (50)
+        
+        # Calcula a variação (XP ganho ou perdido no ciclo)
+        delta = self.calculate_xp_delta(result)
+        
+        # Sistema com limite de 100: recompensas acumulam mas não viram números inatingíveis
+        new_score = round(max(0.0, min(last_score + delta, 100.0)), 2)
+        
+        tier = self.resolve_tier(new_score, result)
+        badges = self.resolve_badges(result, new_score)
 
         await self.memory.save_reward(
             worker_id=result.worker_id,
             cycle=result.cycle,
-            score=score,
+            score=new_score,
             tier=tier,
             collected=result.inserted,
             success_rate=result.success_rate,
@@ -60,6 +70,7 @@ class RewardEngine:
                 "classifier_success": result.classifier_success,
                 "simulated": result.simulated,
                 "error": result.error,
+                "xp_delta": delta,
                 **(result.metadata or {}),
             },
         )
@@ -67,35 +78,39 @@ class RewardEngine:
         return RewardSummary(
             worker_id=result.worker_id,
             cycle=result.cycle,
-            score=score,
+            score=new_score,
             tier=tier,
             badges=badges,
         )
 
-    def calculate_score(self, result: CycleResult) -> float:
+    def calculate_xp_delta(self, result: CycleResult) -> float:
+        """Calcula a variação de pontos (XP) ganhos ou perdidos neste ciclo."""
         if result.simulated:
             return 0.0
         if not result.target:
-            return 5.0
+            return 0.0 # Idle: não ganha nem perde
         if result.error or not result.db_success:
-            return 10.0
-        if result.extracted <= 0:
-            return 15.0
-        if result.inserted + result.duplicated <= 0:
-            return 20.0
-
-        score = 40.0
-        score += min(result.extracted * 1.0, 15.0)
-        score += min(result.inserted * 2.0, 25.0)
+            return -15.0 # Falha crítica de sistema ou DB
+            
+        xp_delta = 0.0
+        
+        # Recompensas por produtividade (limitadas por ciclo para evitar farming)
+        if result.extracted > 0:
+            xp_delta += min(result.extracted * 0.5, 5.0)
+        if result.inserted > 0:
+            xp_delta += min(result.inserted * 1.0, 10.0)
         if result.classifier_success and result.classified > 0:
-            score += min(result.classified * 1.5, 15.0)
-        score += min(result.duplicated * 0.3, 5.0)
-        score -= min(result.failed * 5.0, 35.0)
-
-        if result.success_rate >= 95 and result.failed == 0:
-            score += 10.0
-
-        return round(max(0.0, min(score, 100.0)), 2)
+            xp_delta += min(result.classified * 1.0, 10.0)
+            
+        # Penalidade por erros na coleta/inserção
+        if result.failed > 0:
+            xp_delta -= min(result.failed * 2.0, 20.0)
+            
+        # Bônus de perfeição
+        if result.success_rate >= 95 and result.failed == 0 and result.inserted > 0:
+            xp_delta += 5.0
+            
+        return round(xp_delta, 2)
 
     def resolve_tier(self, score: float, result: CycleResult) -> str:
         if score >= 70: return "gold"
