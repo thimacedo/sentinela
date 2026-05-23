@@ -8,7 +8,7 @@ _last_updated: 2026-05-22 | branch: feat/autonomous-workers_
 | Coleta Zyte (IGZyteWorker) | Operacional | Login wall em slot=2; fallback headless ativo |
 | Coleta Headless (IGHeadlessWorker) | Operacional | 150 comentarios/ciclo validados em producao |
 | Persistencia Supabase | OK | upsert id_externo, ignore_duplicates, duplicados contados corretamente |
-| Classificacao IA | OK (limitada) | 10/ciclo, cascade Groq->Mistral->OpenRouter |
+| Classificacao IA | OK | 10/ciclo normal, batch de 50 no cooldown, cascade Gemini (YOLO) |
 | Fila de Coleta | OK | rotate_target idempotente, 23505 tratado |
 | RewardEngine | Operacional | score/tier/badges persistidos, get_interval() por tier |
 | AIAdvisor | Condicional | Acionado apenas score<40 ou tier critical/db_failed |
@@ -44,7 +44,7 @@ CycleResult → RewardEngine.process_result() → RewardSummary (score, tier, ba
 Instagram
   └── Zyte API / Playwright
         └── comentarios (Supabase)
-              └── AIService.classify_text()  [Groq → Mistral → OpenRouter]
+              └── AIService.classify_text()  [Gemini YOLO Cascade]
                     └── comentarios.processado_ia = True
                           └── AlertManager → WhatsApp / Firebase
                           └── DossierWorker → PDF
@@ -92,9 +92,8 @@ INSTAGRAM_SESSIONID_2  # slot adicional (opcional)
 INSTAGRAM_COOKIE_FULL  # cookie completo (opcional, prioridade maxima)
 
 # IA
+GEMINI_API_KEY
 GROQ_API_KEY
-MISTRAL_API_KEY
-OPENROUTER_API_KEY
 
 # Seguranca
 DASHBOARD_PIN
@@ -135,3 +134,5 @@ python scripts/apply_migration.py
 - Corrigida referencia da ForeignKey na tabela `comentarios`, usando `candidato_id` mapeado para o `username` do alvo.
 - Teste completo end-to-end rodando com sucesso no alvo `lulaoficial`, incluindo extracao, persistencia e classificacao por IA (fallback Mistral ativado devido a limite Groq).
 - Corrigido constraint `worker_rewards_tier_check` em `reward_engine.py` rebaixando o tier `platinum` para `gold` garantindo persistencia da gamificacao dos workers sem crash do Orquestrador.
+- Substituída IA para modo cascata (YOLO) usando família Gemini 1.5 e 2.0 via OpenAI client.
+- Implementada classificação em lote de até 50 comentários quando a coleta Zyte está em cooldown.
