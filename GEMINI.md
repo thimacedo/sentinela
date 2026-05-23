@@ -59,6 +59,17 @@ Quando um modelo atingir quota, passar automaticamente para o próximo:
 6. Gemini 3.5 Flash (Medium)
 7. GPT-OSS 120B (Medium)
 
+### Roteamento de Modelos por Perfil de Tarefa
+Sugerir ou solicitar a alteração de modelo ativo no IDE conforme o escopo da tarefa:
+- **Deep Thinking & Arquitetura** (Refatoração estrutural, resolução de bugs complexos, segurança):
+  * Priorizar: `Claude Sonnet 4.6 (Thinking)` ou `Claude Opus 4.6 (Thinking)`
+- **Implementação Regular** (Novos módulos, lógica de workers, persistência Supabase):
+  * Priorizar: `Gemini 3.1 Pro (High)` ou `Gemini 3.1 Pro (Low)`
+- **Investigação & Boilerplate** (Análise de logs, buscas grep, scripts temporários, refatoração simples):
+  * Priorizar: `Gemini 3.5 Flash (High)` ou `Gemini 3.5 Flash (Medium)`
+- **Auditorias Léxicas Simples** (Validação de nomenclaturas ou conformidade de estilo):
+  * Priorizar: `GPT-OSS 120B (Medium)`
+
 ### Protocolo de troca de modelo
 - Erro 429 ou "quota exceeded" → trocar para próximo da lista
 - Registrar qual modelo foi usado em cada fase no STATE.md
