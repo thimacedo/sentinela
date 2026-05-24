@@ -116,8 +116,8 @@ class AIService:
         for provider in self.providers:
             name = provider["name"]
             
-            # 🛡️ Verifica se o circuito está aberto (exceto para LiteRT que é local e trivial)
-            if name != "litert" and not ai_circuit_breaker.can_execute(name):
+            # 🛡️ Verifica se o circuito está aberto para o provedor
+            if not ai_circuit_breaker.can_execute(name):
                 continue
 
             try:
@@ -136,8 +136,7 @@ class AIService:
                 result = self._parse_json_response(content)
                 result = clean_null_chars(result)
                 
-                if name != "litert":
-                    ai_circuit_breaker.record_success(name)
+                ai_circuit_breaker.record_success(name)
                 
                 decoded_text = safe_decode_unicode(text)
                 clean_text = decoded_text.replace("\n", " ").replace("\r", " ").strip()
@@ -147,9 +146,8 @@ class AIService:
                 return result
 
             except Exception as e:
-                if name != "litert":
-                    status_code = getattr(e, "status_code", None)
-                    ai_circuit_breaker.record_failure(name, status_code)
+                status_code = getattr(e, "status_code", None)
+                ai_circuit_breaker.record_failure(name, status_code)
                 
                 logger.debug(f"⚠️ [AI] {name.upper()} falhou: {str(e)[:100]}. Tentando próximo...")
 
@@ -194,8 +192,12 @@ class AIService:
                         "analise_pericial": result["analise_pericial"],
                     }).eq("id", comment["id"]).execute()
                     processed_count += 1
-                except: continue
+                except Exception as e:
+                    logger.error(f"❌ Erro ao classificar comentário {comment.get('id')}: {str(e)}")
+                    continue
             return processed_count
-        except: return 0
+        except Exception as e:
+            logger.error(f"💥 Falha crítica no lote de classificação de IA: {str(e)}")
+            return 0
 
 ai_service = AIService()

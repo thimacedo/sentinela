@@ -16,6 +16,10 @@ _last_updated: 2026-05-23 | branch: feat/autonomous-workers_
 | Frontend (nextjs) | Deployado | Vercel, Next.js 16 (Estático na raiz), /api/* FastAPI |
 | Classificacao IA | Operacional | Roteamento Híbrido: Local (Gemma/Ollama) + Cloud Cascade |
 
+## Descobertas Tecnicas (2026-05-24)
+- **Circuit Breaker Local:** Integrou-se o provedor local LiteRT (Gemma 3 1B) ao `ai_circuit_breaker`. Se o LiteRT local falhar seguidamente por estar offline, o circuito abre por 5 minutos, poupando timeouts repetitivos de 5.0s por comentário e otimizando a latência do lote de classificação.
+- **Tratamento de Exceções Lote:** Refatorou-se `run_batch_classification` para capturar exceções específicas de banco ou de API e logá-las detalhadamente, evitando interrupções silenciosas.
+
 ## Descobertas Tecnicas (2026-05-23)
 - **Roteamento Híbrido:** Implementado suporte ao Ollama no `AIService`. O sistema pode agora priorizar modelos locais (Gemma 2B) via `ENABLE_LOCAL_AI=true`.
 - **Implementação V2:** Criado `InstagramScraperV2` em `core/` focado em Playwright puro.
@@ -115,6 +119,7 @@ python scripts/test_scraper_v2.py
 ```
 
 ## Ultimas Atualizacoes (Refatoracao V2)
+- **2026-05-24:** Integrado o LiteRT (Gemma 3 1B) ao `ai_circuit_breaker` para proteger a latência em lote e adicionado tratamento de logs e erros na classificação em lote.
 - Implementado `InstagramScraperV2` eliminando dependência do Zyte (Fase 5 - executado por Gemini 1.5 Flash).
 - Refatorado `main_runner.py` e `watchdog` para rodar exclusivamente o novo motor V2.
 - Removidas verificações de saúde do Zyte e Scrapy Cloud do Watchdog.
