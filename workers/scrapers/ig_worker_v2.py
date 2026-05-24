@@ -114,6 +114,8 @@ class IGWorkerV2(BaseWorker):
 
             # 3. Classificação
             classified = 0
+            ai_junk_count = 0
+            
             if inserted_ids:
                 for cid in inserted_ids:
                     try:
@@ -121,6 +123,16 @@ class IGWorkerV2(BaseWorker):
                         c_data = self.db.table("comentarios").select("texto_bruto").eq("id", cid).single().execute()
                         if c_data.data:
                             result = await ai_service.classify_text(c_data.data["texto_bruto"])
+                            
+                            if result.get("categoria_ia") == "LIXO":
+                                # Lixo detectado pela IA pós-inserção
+                                self.db.table("comentarios").delete().eq("id", cid).execute()
+                                inserted -= 1
+                                ai_junk_count += 1
+                                # Remove também dos extraídos para não premiar na coleta
+                                comments = [c for c in comments if c.get("id_externo") != cid] # Tenta manter sync, mas o len(comments) inicial já foi feito. Vamos apenas decrementar uma variável.
+                                continue
+                                
                             self.db.table("comentarios").update({
                                 "processado_ia": True,
                                 "is_hate": result["is_hate"],
@@ -132,10 +144,19 @@ class IGWorkerV2(BaseWorker):
                     except: continue
 
             stats = self.scraper.get_stats()
+            final_extracted = len(comments) - ai_junk_count
+            
+            if final_extracted <= 0 and (stats.get("junk_detected", 0) > 0 or ai_junk_count > 0):
+                self.logger.warning(f"⚠️ [V2] Todo o conteúdo extraído de @{target.username} era LIXO. Sinalizando falha e anulando recompensas.")
+                return CycleResult(
+                    worker_id=self.worker_id, cycle=self.cycle, target=target.username,
+                    source="v2_engine", extracted=0, inserted=0, classified=0, simulated=False, error="junk_detected"
+                )
+
             return CycleResult(
                 worker_id=self.worker_id, cycle=self.cycle, target=target.username,
                 source="v2_engine",
-                extracted=len(comments),
+                extracted=final_extracted,
                 inserted=inserted,
                 duplicated=duplicated,
                 classified=classified,

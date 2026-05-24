@@ -230,6 +230,8 @@ class InstagramScraperV2:
                     is_junk = True
                 elif lower_text.startswith("seguido(a) por"):
                     is_junk = True
+                elif re.match(r"^[\w\s]+ \([\w\s]+\)$", texto): # Parnamirim (Rio Grande do Norte)
+                    is_junk = True
                     
                 if is_junk:
                     self.stats["junk_detected"] += 1

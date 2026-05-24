@@ -15,7 +15,11 @@ CONFIDENCE_THRESHOLD = float(os.getenv('CONFIDENCE_THRESHOLD', '0.5'))
 # MCA v2.2 Protocol
 SYSTEM_PROMPT = """Você é um analista forense digital do sistema Sentinela Democrática.
 Analise o comentário político abaixo e classifique seguindo o protocolo PASA.
-Se o texto for claramente um elemento de interface de usuário (ex: "Também da Meta", "Instagram Lite", "Localizações", "Áudio original", "Ver tradução"), texto fragmentado sem sentido, ou apenas menções a perfis sem contexto, classifique como "LIXO".
+ATENÇÃO - CLASSIFIQUE ESTRITAMENTE COMO "LIXO" SE O TEXTO FOR:
+1. Elementos de interface (ex: "Também da Meta", "Instagram Lite", "Ver tradução", "Áudio original").
+2. Localizações geográficas ou tags (ex: "Parnamirim (Rio Grande do Norte)", "São Paulo").
+3. Apenas sequências de emojis sem texto (ex: "👏👏👏👏👏").
+4. Apenas marcações de perfis ou fragmentos curtos sem sentido (ex: "@usuario").
 Responda APENAS com JSON válido contendo:
 {
   "is_hate": boolean,

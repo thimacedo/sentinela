@@ -22,7 +22,10 @@ logging.basicConfig(
 )
 
 async def test_scraper_v2():
-    target = "raquellyraoficial"
+    target = sys.argv[1] if len(sys.argv) > 1 else "raquellyraoficial"
+    max_posts = int(sys.argv[2]) if len(sys.argv) > 2 else 1
+    max_comments = int(sys.argv[3]) if len(sys.argv) > 3 else 10
+    
     print(f"[*] Iniciando teste do Scraper V2 para @{target}...")
     
     scraper = InstagramScraperV2(headless=True)
@@ -31,8 +34,8 @@ async def test_scraper_v2():
         comments = await scraper.scrape_profile(
             username=target,
             candidato_id="test_id_123",
-            max_posts=1,
-            max_comments_per_post=10
+            max_posts=max_posts,
+            max_comments_per_post=max_comments
         )
         
         print(f"\n[OK] Teste concluído!")
