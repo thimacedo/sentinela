@@ -45,10 +45,19 @@ class IGWorkerV2(BaseWorker):
         self.seen_targets.clear()
         self.seen_queue_ids.clear()
 
-        target = self.queue.claim_next_target(
-            self.config, self.seen_queue_ids, self.seen_targets,
-            active_targets=getattr(self, "active_targets", None),
-        )
+        # 🛡️ SELEÇÃO ATÔMICA (PASA v55.1)
+        target = None
+        if hasattr(self, "claim_lock"):
+            async with self.claim_lock:
+                target = self.queue.claim_next_target(
+                    self.config, self.seen_queue_ids, self.seen_targets,
+                    active_targets=getattr(self, "active_targets", None),
+                )
+        else:
+            target = self.queue.claim_next_target(
+                self.config, self.seen_queue_ids, self.seen_targets,
+                active_targets=getattr(self, "active_targets", None),
+            )
 
         if not target:
             # Backlog de classificação se não houver alvo
