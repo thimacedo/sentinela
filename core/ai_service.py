@@ -35,6 +35,7 @@ A ironia é usada para mascarar o ódio. Marque "is_hate": true e use a categori
 - HOSTILIDADE VELADA (AD HOMINEM): Ataques à competência técnica, moral ou intelectual do alvo usando termos "educados" mas carregados de desprezo. (ex: "Sua 'vasta' inteligência nos surpreende", "Mais um 'estudioso' do nada").
 - MISOGINIA_POLITICA: Ataques a mulheres focados em aparência, histeria, "meninas de fulano", ou "lugar de mulher". OBSERVAÇÃO: Esta categoria é EXCLUSIVA para alvos do sexo feminino. Se termos femininos forem usados para insultar um homem (ex: chamar um político homem de "histérica" ou "menina"), classifique obrigatoriamente como INSULTO_AD_HOMINEM.
 - MILICIA_DIGITAL: Ataques coordenados a instituições, descrédito do sistema eleitoral, ad hominem pesado, acusações de corrupção sem provas ("Ladrão", "Corrupto") ou memes de perseguição política ("TOC TOC TOC").
+- CAMPANHA_COORDENADA: Mensagens repetitivas, slogans de campanha idênticos em massa, ou comentários que claramente visam inflar artificialmente o engajamento sem conteúdo orgânico real (comportamento de robô).
 - RACISMO_ESTRUTURAL: Deboche de pautas raciais ou uso de termos como "escravo", "capitão do mato" em tom político.
 
 Responda APENAS com JSON válido. Aumente sua sensibilidade para ataques que tentam parecer críticas legítimas mas são ofensas gratuitas.

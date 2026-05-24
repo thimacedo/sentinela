@@ -112,7 +112,39 @@ class IGWorkerV2(BaseWorker):
                     source="v2_engine", extracted=0, simulated=False, error="no_comments_found"
                 )
 
-            # 2. Persistência
+            # 2. Detecção de Comportamento Coordenado (Bots) - PASA v56.0
+            import re
+            import collections
+            
+            def normalize_for_bot_detection(text: str) -> str:
+                # Remove emojis, pontuação e espaços extras para detectar padrões de robô
+                t = text.lower()
+                t = re.sub(r'[^\w\s]', '', t)
+                # Remove emojis específicos se o regex acima não pegar tudo
+                t = re.sub(r'[^\x00-\x7F]+', '', t) 
+                return " ".join(t.split())
+
+            # Mapeia textos normalizados para encontrar repetições
+            normalized_map = collections.defaultdict(list)
+            for idx, c in enumerate(comments):
+                norm = normalize_for_bot_detection(c.get("texto_bruto", ""))
+                if len(norm) > 5: # Ignora textos muito curtos (ex: "voto", "top")
+                    normalized_map[norm].append(idx)
+            
+            bot_detected_count = 0
+            for norm, indices in normalized_map.items():
+                if len(indices) >= 3: # Threshold: 3 ou mais repetições do mesmo padrão
+                    bot_detected_count += len(indices)
+                    for i in indices:
+                        comments[i]["is_bot"] = True
+                        comments[i]["bot_pattern"] = norm
+                        # Ajusta categoria IA preventivamente se for bot
+                        comments[i]["categoria_ia_sugerida"] = "CAMPANHA_COORDENADA"
+
+            if bot_detected_count > 0:
+                self.logger.info(f"🤖 [V2] Detectados {bot_detected_count} indícios de comportamento coordenado (Bots) em @{target.username}")
+
+            # 3. Persistência
             inserted = 0
             duplicated = 0
             inserted_ids = []
@@ -127,11 +159,16 @@ class IGWorkerV2(BaseWorker):
                 
                 inserted = len(res.data)
                 duplicated = len(comments) - inserted
+                # Guardamos os IDs reais para a classificação
                 inserted_ids = [str(item["id"]) for item in res.data]
+                
+                # Se detectamos bots, atualizamos as flags no banco (assumindo que as colunas existem ou via metadata)
+                # Como a tabela 'comentarios' não tem 'is_bot' explícito, vamos usar 'categoria_ia' = 'CAMPANHA_COORDENADA'
+                # ou injetar na análise pericial.
             except Exception as e:
                 self.logger.error(f"❌ Erro na persistência: {e}")
 
-            # 3. Classificação
+            # 4. Classificação
             classified = 0
             ai_junk_count = 0
             
@@ -139,8 +176,26 @@ class IGWorkerV2(BaseWorker):
                 for cid in inserted_ids:
                     try:
                         # Busca comentário e classifica
-                        c_data = self.db.table("comentarios").select("texto_bruto").eq("id", cid).single().execute()
+                        c_data = self.db.table("comentarios").select("*").eq("id", cid).single().execute()
                         if c_data.data:
+                            # Se o worker já marcou como bot, passamos essa info para a IA ou forçamos a categoria
+                            is_pre_flagged_bot = any(
+                                c.get("id_externo") == c_data.data["id_externo"] and c.get("is_bot") 
+                                for c in comments
+                            )
+                            
+                            if is_pre_flagged_bot:
+                                # Forçamos a classificação de Bot para economizar tokens ou guiar a IA
+                                self.db.table("comentarios").update({
+                                    "processado_ia": True,
+                                    "is_hate": True, # Bots de campanha são considerados hostilidade ao processo democrático (MCA v2.2)
+                                    "categoria_ia": "CAMPANHA_COORDENADA",
+                                    "confianca_ia": 1.0,
+                                    "analise_pericial": "Detectado comportamento coordenado inautêntico (Bot) via análise de densidade léxica."
+                                }).eq("id", cid).execute()
+                                classified += 1
+                                continue
+
                             result = await ai_service.classify_text(c_data.data["texto_bruto"], comment_id=cid)
                             
                             if result.get("categoria_ia") == "LIXO":
