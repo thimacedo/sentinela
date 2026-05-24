@@ -1,4 +1,4 @@
-# PASA v47.4: Requirements Otimizado para Vercel (API Only)
+# PASA v52.4.8: Requirements Otimizado para Vercel (API Only)
 fastapi>=0.115.0
 uvicorn[standard]>=0.30.0
 supabase>=2.11.0
@@ -10,5 +10,3 @@ pydantic-settings>=2.4.0
 traceback-with-variables==2.0.4
 mangum==0.17.0
 fpdf2==2.7.8
-# spacy, nltk, pandas, numpy, scikit-learn removidos para manter bundle < 500MB
-# Esses pacotes devem ser usados apenas em workers locais/especializados.

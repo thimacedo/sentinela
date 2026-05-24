@@ -1,4 +1,5 @@
-# Dependências do Servidor API (Vercel) e Scrapers/Workers (Locais)
+# PASA v52.4.8: Requirements Otimizado para Vercel (API Only)
+# Remove dependências pesadas (Playwright, Scrapy) para manter bundle < 500MB
 fastapi>=0.115.0
 uvicorn[standard]>=0.30.0
 supabase>=2.11.0
@@ -10,12 +11,3 @@ pydantic-settings>=2.4.0
 traceback-with-variables==2.0.4
 mangum==0.17.0
 fpdf2==2.7.8
-
-# Scrapers e Infraestrutura Local
-playwright>=1.40.0
-scrapy>=2.11.0
-watchdog>=3.0.0
-psutil>=5.9.0
-beautifulsoup4>=4.12.0
-pyotp>=2.9.0
-pillow>=10.0.0
