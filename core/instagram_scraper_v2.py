@@ -341,7 +341,10 @@ class InstagramScraperV2:
                         const isTime = /^[0-9]+[ ]?(h|d|m|w|y|sem|a|s)$/i.test(txt) || /^[0-9]+[ ]?(horas|dias|semanas|anos|segundos|minutos)/i.test(txt);
                         const isBlacklist = commentTextBlacklist.some(b => lowerTxt === b || lowerTxt.startsWith(b));
                         
-                        if (!isTime && !isBlacklist) {
+                        // Ignora comentários compostos APENAS por emojis ou pontuação (sem nenhuma letra ou número)
+                        const hasLetters = /[\p{L}\p{N}]/u.test(txt);
+                        
+                        if (!isTime && !isBlacklist && hasLetters) {
                             commentText = txt;
                             break;
                         }
