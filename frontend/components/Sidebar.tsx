@@ -46,12 +46,6 @@ const menuItems = [
     icon: Network 
   },
   { 
-    id: 'workers', 
-    label: 'WORKERS', 
-    path: '/workers',
-    icon: Users 
-  },
-  { 
     id: 'dossies', 
     label: 'DOSSIÊS', 
     path: '/dossies',

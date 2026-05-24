@@ -72,7 +72,22 @@ export default function DossiesPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-7xl mx-auto space-y-10 opacity-60 pointer-events-none select-none">
+      {/* Overlay de Congelamento */}
+      <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-auto">
+        <div className="bg-slate-900 border border-amber-500/50 p-6 rounded-lg shadow-2xl text-center space-y-4 max-w-md mx-4">
+          <div className="w-12 h-12 bg-amber-500/20 text-amber-500 rounded-full flex items-center justify-center mx-auto animate-pulse">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path><path d="M5 3v4"></path><path d="M19 17v4"></path><path d="M3 5h4"></path><path d="M17 19h4"></path></svg>
+          </div>
+          <h2 className="text-xl font-bold text-white uppercase tracking-tight">Módulo em Manutenção</h2>
+          <p className="text-slate-400 text-sm leading-relaxed">
+            O motor de geração de dossiês forenses está sendo recalibrado para a nova arquitetura PASA v54. 
+            Este recurso estará disponível em breve.
+          </p>
+        </div>
+      </div>
+
+      <div className="space-y-6 filter blur-sm">
       {/* Header */}
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-tactical-accent">
