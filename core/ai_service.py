@@ -32,7 +32,7 @@ Sua missão é classificar comentários políticos com precisão cirúrgica, det
 
 --- DIRETRIZES DE SARCASMO E ÓDIO (MCA v2.2) ---
 A ironia é usada para mascarar o ódio. Marque "is_hate": true e use a categoria adequada para:
-- MISOGINIA_POLITICA: Ataques a mulheres focados em aparência, histeria, "meninas de fulano", ou "lugar de mulher".
+- MISOGINIA_POLITICA: Ataques a mulheres focados em aparência, histeria, "meninas de fulano", ou "lugar de mulher". OBSERVAÇÃO: Esta categoria é EXCLUSIVA para alvos do sexo feminino. Se termos femininos forem usados para insultar um homem (ex: chamar um político homem de "histérica" ou "menina"), classifique obrigatoriamente como INSULTO_AD_HOMINEM.
 - MILICIA_DIGITAL: Ataques coordenados a instituições, descrédito do sistema eleitoral, ad hominem pesado, acusações de corrupção sem provas ("Ladrão", "Corrupto") ou memes de perseguição política ("TOC TOC TOC").
 - RACISMO_ESTRUTURAL: Deboche de pautas raciais ou uso de termos como "escravo", "capitão do mato" em tom político.
 
@@ -166,18 +166,22 @@ class AIService:
             {"name": "openrouter", "client": self.openrouter_client, "model": "openrouter/free", "timeout": 20.0},
         ])
 
-    async def classify(self, text: str) -> Dict[str, Any]:
+    async def classify(self, text: str, comment_id: str = "N/A") -> Dict[str, Any]:
         """Alias para classify_text para compatibilidade com PASAAuditor."""
-        return await self.classify_text(text)
+        return await self.classify_text(text, comment_id)
 
-    async def classify_text(self, text: str) -> Dict[str, Any]:
-        """Tenta classificar o texto em cascata, respeitando o Circuit Breaker."""
+    async def classify_text(self, text: str, comment_id: str = "N/A") -> Dict[str, Any]:
+        """Tenta classificar o texto em cascata, reordenando dinamicamente por saúde."""
         
+        # 1. Reordenar provedores: Provedores com falhas recentes vão para o fim da fila
+        self.providers.sort(key=lambda p: ai_circuit_breaker.failures.get(p["name"], 0))
+
         for provider in self.providers:
             name = provider["name"]
             
             # 🛡️ Verifica se o circuito está aberto para o provedor
             if not ai_circuit_breaker.can_execute(name):
+                logger.info(f"⏭️  [AI] {name.upper():<10} | ID: {comment_id:<36} | STATUS: INDISPONÍVEL")
                 continue
 
             try:
@@ -200,18 +204,23 @@ class AIService:
                 
                 decoded_text = safe_decode_unicode(text)
                 clean_text = decoded_text.replace("\n", " ").replace("\r", " ").strip()
-                truncated_text = clean_text if len(clean_text) <= 60 else clean_text[:57] + "..."
+                # Truncate to ensure log line doesn't explode in size
+                truncated_text = clean_text if len(clean_text) <= 50 else clean_text[:47] + "..."
                 
-                logger.info(f"📊 [AI] {name.upper()} | {result.get('categoria_ia', 'NEUTRO')} | {result.get('confianca_ia', 0):.2f} | \"{truncated_text}\"")
+                # Log padronizado com larguras fixas:
+                # [AI] 10 chars | ID: 36 chars | CATEGORIA: 20 chars | CONF: 4 chars | TEXTO
+                cat = result.get('categoria_ia', 'NEUTRO')
+                conf = result.get('confianca_ia', 0.0)
+                logger.info(f"📊  [AI] {name.upper():<10} | ID: {comment_id:<36} | {cat:<20} | {conf:.2f} | \"{truncated_text}\"")
                 return result
 
             except Exception as e:
                 status_code = getattr(e, "status_code", None)
                 ai_circuit_breaker.record_failure(name, status_code)
                 
-                logger.debug(f"⚠️ [AI] {name.upper()} falhou: {str(e)[:100]}. Tentando próximo...")
+                logger.warning(f"⚠️  [AI] {name.upper():<10} | ID: {comment_id:<36} | STATUS: FALHA/TIMEOUT | ERRO: {str(e)[:50]}")
 
-        raise RuntimeError("Todas as camadas de IA (Local e Cloud) falharam.")
+        raise RuntimeError(f"Todas as camadas de IA falharam para o comentário {comment_id}.")
 
     def _parse_json_response(self, content: str) -> Dict[str, Any]:
         try:
@@ -249,7 +258,8 @@ class AIService:
             processed_count = 0
             for comment in comments:
                 try:
-                    result = await self.classify_text(comment["texto_bruto"])
+                    # Passando o ID real do comentário para o log
+                    result = await self.classify_text(comment["texto_bruto"], comment_id=str(comment["id"]))
                     db.table("comentarios").update({
                         "processado_ia": True,
                         "is_hate": result["is_hate"],
