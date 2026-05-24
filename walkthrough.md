@@ -88,14 +88,21 @@ Foram implementadas correções críticas para restabelecer a estabilidade e a i
   - Atualizado o cargo do registro oficial para "Deputado Federal" e sua prioridade_coleta para 10.
   - Inativados os três perfis duplicados ou errôneos no Supabase: `@guilherme_boulos`, `@boulos_oficial` e `@guilhermeboulos_sp`.
   - Higienizada a fila de coleta (`fila_coleta`) com a remoção dos registros associados aos perfis inativados e garantia de enfileiramento pendente apenas do oficial.
+- **`scratch/apply_sanitization.py`**:
+  - Script utilitário desenvolvido para sincronizar as modificações feitas pelo operador no arquivo `alvos_sanitizacao.csv` com a base remota do Supabase.
+  - Sincroniza a inativação de alvos removidos do CSV, atualiza as colunas de nome, cargo e username modificados, e trata dependências de chave estrangeira limpando referências em `fila_coleta` antes das operações de update de candidatos no banco.
 
 ---
 
 ## Verificação e Resultados
 
 1. **Correção de Guilherme Boulos Efetuada**: A execução de `scratch/fix_boulos.py` no banco de dados remoto realizou com sucesso a desativação de 3 registros redundantes e atualizou o cadastro do perfil oficial `@guilhermeboulos.oficial` com cargo e prioridade corretos. A fila de coleta foi limpa e apenas a conta oficial permanece ativa e pendente de raspagem.
-2. **Renovação de Múltiplos Slots com Sucesso**: Executado o `scripts/export_playwright_cookies.py`, realizando o login automatizado e sem interrupções para duas contas configuradas simultaneamente no `.env`. Os cookies e novos sessionids (`INSTAGRAM_SESSIONID` e `INSTAGRAM_SESSIONID_2`) foram extraídos e injetados de forma estável no `.env` do projeto.
-3. **Deploy de Produção Validado**: O site de produção da Vercel (`https://asentinela.vercel.app/`) foi atualizado e está servindo a nova compilação (`DZ8v_bE0UIYhuFuuvcVtF`) livre de caches.
-4. **Resiliência do Painel**: O painel carrega com sucesso as estatísticas dinâmicas e o feed de alertas reais do Supabase, contornando a indisponibilidade das rotas de API da Vercel.
-5. **Repositório Sincronizado**: O repositório está limpo e os commits foram integrados tanto em `feat/autonomous-workers` quanto em `main`.
-6. **Filtro de Heurística DOM Validado**: O script `scripts/test_scraper_v2.py` executou sem falhas de encoding no Windows, comprovando que a restrição do DOM ao `article` e a nova `commentTextBlacklist` limparam 100% dos falsos positivos de áudio original, placeholders e menus. O scraper extraiu apenas comentários reais (amostra de `@raquellyraoficial` com emojis validada no log).
+2. **Sanitização Geral de Alvos por CSV Executada**: A execução de `scratch/apply_sanitization.py` leu e sincronizou com sucesso as edições de alvos no Supabase remoto:
+   - **78 alvos removidos** do CSV foram inativados no banco de dados e removidos de `fila_coleta`.
+   - **42 alvos modificados** no CSV (com correções de nomes e cargos institucionais) foram atualizados.
+   - Sincronização de 1 alteração complexa de username com tratamento preventivo de chave estrangeira concluída com sucesso.
+3. **Renovação de Múltiplos Slots com Sucesso**: Executado o `scripts/export_playwright_cookies.py`, realizando o login automatizado e sem interrupções para duas contas configuradas simultaneamente no `.env`. Os cookies e novos sessionids (`INSTAGRAM_SESSIONID` e `INSTAGRAM_SESSIONID_2`) foram extraídos e injetados de forma estável no `.env` do projeto.
+4. **Deploy de Produção Validado**: O site de produção da Vercel (`https://asentinela.vercel.app/`) foi atualizado e está servindo a nova compilação (`DZ8v_bE0UIYhuFuuvcVtF`) livre de caches.
+5. **Resiliência do Painel**: O painel carrega com sucesso as estatísticas dinâmicas e o feed de alertas reais do Supabase, contornando a indisponibilidade das rotas de API da Vercel.
+6. **Repositório Sincronizado**: O repositório está limpo e os commits foram integrados tanto em `feat/autonomous-workers` quanto em `main`.
+7. **Filtro de Heurística DOM Validado**: O script `scripts/test_scraper_v2.py` executou sem falhas de encoding no Windows, comprovando que a restrição do DOM ao `article` e a nova `commentTextBlacklist` limparam 100% dos falsos positivos de áudio original, placeholders e menus. O scraper extraiu apenas comentários reais (amostra de `@raquellyraoficial` com emojis validada no log).
