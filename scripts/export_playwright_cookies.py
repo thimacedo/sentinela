@@ -105,15 +105,15 @@ async def renew_account_cookies(browser, account: dict):
             # Clicar em entrar e esperar navegação
             submit_btn = await page.query_selector('button[type="submit"]')
             if submit_btn:
-                await asyncio.gather(
-                    page.wait_for_navigation(wait_until='networkidle', timeout=45000),
-                    submit_btn.click()
-                )
+                await submit_btn.click()
             else:
-                await asyncio.gather(
-                    page.wait_for_navigation(wait_until='networkidle', timeout=45000),
-                    page.keyboard.press("Enter")
-                )
+                await page.keyboard.press("Enter")
+                
+            # Aguarda a transição de rede pós-login
+            try:
+                await page.wait_for_load_state("networkidle", timeout=25000)
+            except:
+                await page.wait_for_timeout(8000)
                 
             print("Formulário de login submetido com sucesso")
             logged_in = True
