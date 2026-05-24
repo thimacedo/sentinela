@@ -19,6 +19,7 @@ _last_updated: 2026-05-23 | branch: feat/autonomous-workers_
 ## Descobertas Tecnicas (2026-05-24)
 - **Circuit Breaker Local:** Integrou-se o provedor local LiteRT (Gemma 3 1B) ao `ai_circuit_breaker`. Se o LiteRT local falhar seguidamente por estar offline, o circuito abre por 5 minutos, poupando timeouts repetitivos de 5.0s por comentário e otimizando a latência do lote de classificação.
 - **Tratamento de Exceções Lote:** Refatorou-se `run_batch_classification` para capturar exceções específicas de banco ou de API e logá-las detalhadamente, evitando interrupções silenciosas.
+- **Robustez de Ambiente no Watchdog:** Corrigiu-se a seleção do interpretador Python em `get_python_executable()`. Agora o watchdog detecta se a pasta `.venv` local está corrompida (ex.: sem o módulo `pip` íntegro) e prioriza o interpretador ativo que o iniciou (permitindo uso transparente sob o gerenciador `uv run`).
 
 ## Descobertas Tecnicas (2026-05-23)
 - **Roteamento Híbrido:** Implementado suporte ao Ollama no `AIService`. O sistema pode agora priorizar modelos locais (Gemma 2B) via `ENABLE_LOCAL_AI=true`.
@@ -119,7 +120,7 @@ python scripts/test_scraper_v2.py
 ```
 
 ## Ultimas Atualizacoes (Refatoracao V2)
-- **2026-05-24:** Integrado o LiteRT (Gemma 3 1B) ao `ai_circuit_breaker` para proteger a latência em lote e adicionado tratamento de logs e erros na classificação em lote.
+- **2026-05-24:** Integrado o LiteRT (Gemma 3 1B) ao `ai_circuit_breaker` para proteger a latência em lote e adicionado tratamento de logs e erros na classificação em lote. Corrigidos o NameError (`asyncio` ausente) no `ig_worker_v2` e a validação do interpretador Python do Watchdog.
 - Implementado `InstagramScraperV2` eliminando dependência do Zyte (Fase 5 - executado por Gemini 1.5 Flash).
 - Refatorado `main_runner.py` e `watchdog` para rodar exclusivamente o novo motor V2.
 - Removidas verificações de saúde do Zyte e Scrapy Cloud do Watchdog.
