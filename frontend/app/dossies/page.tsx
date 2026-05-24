@@ -160,6 +160,7 @@ export default function DossiesPage() {
           </tbody>
         </table>
       </div>
+      </div>
     </div>
   )
 }
