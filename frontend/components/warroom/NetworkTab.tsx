@@ -5,6 +5,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Share2 } from 'lucide-react';
 
+import { fetchApi } from '@/lib/api';
+
 interface Network {
   id: string;
   nome_rede: string;
@@ -17,9 +19,7 @@ export default function NetworkTab() {
   const { data: networks = [], isLoading } = useQuery<Network[]>({
     queryKey: ['networks-clusters'],
     queryFn: async () => {
-      const response = await fetch('/api/v1/networks');
-      if (!response.ok) throw new Error('Falha ao buscar redes');
-      return await response.json();
+      return await fetchApi('/api/v1/networks');
     },
     refetchInterval: 60000,
   });

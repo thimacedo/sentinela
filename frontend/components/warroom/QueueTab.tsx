@@ -4,6 +4,8 @@ import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 
+import { fetchApi } from '@/lib/api';
+
 interface Worker {
   worker: string;
   status: string;
@@ -28,9 +30,7 @@ export default function QueueTab() {
   const { data, isLoading } = useQuery<Telemetry>({
     queryKey: ['workers-telemetry'],
     queryFn: async () => {
-      const response = await fetch('/api/v1/monitor/workers');
-      if (!response.ok) throw new Error('Falha ao buscar telemetria');
-      return await response.json();
+      return await fetchApi('/api/v1/monitor/workers');
     },
     refetchInterval: 10000, // Telemetria rápida (10s)
   });

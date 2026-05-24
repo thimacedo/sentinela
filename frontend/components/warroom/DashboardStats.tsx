@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from '@/src/lib/supabase';
+import { fetchApi } from '@/lib/api';
 
 interface Stats {
   total_monitorados: number;
@@ -21,42 +22,43 @@ export default function DashboardStats() {
     queryKey: ['dashboard-stats'],
     queryFn: async () => {
       try {
-        const response = await fetch('/api/v1/summary');
-        if (!response.ok) {
-          throw new Error(`API respondeu com status ${response.status}`);
-        }
-        return await response.json();
+        return await fetchApi('/api/v1/summary');
       } catch (error) {
         console.warn("API Summary falhou, tentando fallback Supabase:", error);
       }
 
       // Fallback Supabase
-      const { count: monitorados } = await supabase
-        .from('candidatos')
-        .select('id', { count: 'exact', head: true })
-        .eq('status_monitoramento', 'Ativo');
+      try {
+        const { count: monitorados } = await supabase
+          .from('candidatos')
+          .select('id', { count: 'exact', head: true })
+          .eq('status_monitoramento', 'Ativo');
 
-      const { count: total_amostra } = await supabase
-        .from('comentarios')
-        .select('id', { count: 'exact', head: true });
+        const { count: total_amostra } = await supabase
+          .from('comentarios')
+          .select('id', { count: 'exact', head: true });
 
-      const { count: total_alertas } = await supabase
-        .from('comentarios')
-        .select('id', { count: 'exact', head: true })
-        .eq('is_hate', true);
+        const { count: total_alertas } = await supabase
+          .from('comentarios')
+          .select('id', { count: 'exact', head: true })
+          .eq('is_hate', true);
 
-      const resiliencia = (total_amostra && total_amostra > 0)
-        ? round(((total_amostra - (total_alertas || 0)) / total_amostra) * 100, 1)
-        : 100.0;
+        const resiliencia = (total_amostra && total_amostra > 0)
+          ? round(((total_amostra - (total_alertas || 0)) / total_amostra) * 100, 1)
+          : 100.0;
 
-      return {
-        total_monitorados: monitorados || 0,
-        total_alertas: total_alertas || 0,
-        total_amostra: total_amostra || 0,
-        resiliencia,
-      };
+        return {
+          total_monitorados: monitorados || 0,
+          total_alertas: total_alertas || 0,
+          total_amostra: total_amostra || 0,
+          resiliencia,
+        };
+      } catch (err) {
+        console.error("Erro crítico no fallback Supabase:", err);
+        throw err;
+      }
     },
-    refetchInterval: 30000, // Atualiza a cada 30 segundos
+    refetchInterval: 30000,
   });
 
   const displayStats = stats || {

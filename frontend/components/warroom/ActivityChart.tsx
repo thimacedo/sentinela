@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { supabase } from '@/src/lib/supabase';
+import { fetchApi } from '@/lib/api';
 
 interface SeriesData {
   hora: string;
@@ -15,11 +16,7 @@ export default function ActivityChart() {
     queryKey: ['temporal-series'],
     queryFn: async () => {
       try {
-        const response = await fetch('/api/v1/analytics/temporal-series');
-        if (!response.ok) {
-          throw new Error(`API respondeu com status ${response.status}`);
-        }
-        return await response.json();
+        return await fetchApi('/api/v1/analytics/temporal-series');
       } catch (error) {
         console.warn("Erro ao buscar série temporal da API, tentando fallback Supabase:", error);
       }

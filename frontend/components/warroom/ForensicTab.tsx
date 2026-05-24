@@ -8,9 +8,10 @@ import { supabase } from '@/src/lib/supabase';
 interface Comment {
   id: string;
   texto_bruto: string;
-  pasa_classificacao: string;
-  risco_score: string;
-  created_at: string;
+  categoria_ia: string;
+  confianca_ia: number;
+  is_hate: boolean;
+  data_coleta: string;
   username_alvo: string;
 }
 
@@ -20,9 +21,9 @@ export default function ForensicTab() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('comentarios')
-        .select('id, texto_bruto, pasa_classificacao, risco_score, created_at, candidatos(username)')
-        .not('pasa_classificacao', 'is', null)
-        .order('created_at', { ascending: false })
+        .select('id, texto_bruto, categoria_ia, confianca_ia, is_hate, data_coleta, candidatos(username)')
+        .not('categoria_ia', 'is', null)
+        .order('data_coleta', { ascending: false })
         .limit(50);
 
       if (error) throw error;
@@ -32,16 +33,14 @@ export default function ForensicTab() {
         username_alvo: c.candidatos?.username || 'N/A'
       }));
     },
-    refetchInterval: 15000, // Atualiza a cada 15 segundos para monitoramento em tempo real
+    refetchInterval: 15000,
   });
 
-  const getRiskVariant = (risk: string) => {
-    switch (risk?.toUpperCase()) {
-      case 'CRITICO': return 'destructive';
-      case 'ELEVADO': return 'outline';
-      case 'MODERADO': return 'secondary';
-      default: return 'default';
-    }
+  const getRiskColor = (isHate: boolean, confidence: number) => {
+    if (!isHate) return 'text-emerald-400';
+    if (confidence > 0.8) return 'text-red-500';
+    if (confidence > 0.5) return 'text-orange-500';
+    return 'text-yellow-500';
   };
 
   return (
@@ -56,7 +55,7 @@ export default function ForensicTab() {
             <TableHead className="text-tactical-accent/70 uppercase text-xs w-[150px]">Alvo</TableHead>
             <TableHead className="text-tactical-accent/70 uppercase text-xs">Conteúdo Analisado</TableHead>
             <TableHead className="text-tactical-accent/70 uppercase text-xs text-center">Classificação</TableHead>
-            <TableHead className="text-tactical-accent/70 uppercase text-xs text-right">Risco</TableHead>
+            <TableHead className="text-tactical-accent/70 uppercase text-xs text-right">Confiança</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -82,14 +81,12 @@ export default function ForensicTab() {
                   "{c.texto_bruto}"
                 </TableCell>
                 <TableCell className="text-center">
-                  <Badge className="bg-transparent border border-tactical-accent/30 text-[10px] text-tactical-accent">
-                    {c.pasa_classificacao}
+                  <Badge className={`bg-transparent border border-tactical-accent/30 text-[10px] ${getRiskColor(c.is_hate, c.confianca_ia)}`}>
+                    {c.categoria_ia}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-right">
-                  <Badge variant={getRiskVariant(c.risco_score) as any} className="text-[10px] font-bold">
-                    {c.risco_score || 'N/A'}
-                  </Badge>
+                <TableCell className="text-right font-mono text-[10px] text-gray-500">
+                  {(c.confianca_ia * 100).toFixed(1)}%
                 </TableCell>
               </TableRow>
             ))
@@ -99,3 +96,4 @@ export default function ForensicTab() {
     </Card>
   );
 }
+

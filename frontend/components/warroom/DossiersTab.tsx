@@ -5,11 +5,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { FileText, Download } from 'lucide-react';
 
+import { fetchApi } from '@/lib/api';
+
 interface Dossier {
   id: string;
   candidato_id: string;
   data_geracao: string;
-  pdf_url: string;
+  arquivo_path: string;
   status: string;
 }
 
@@ -17,9 +19,7 @@ export default function DossiersTab() {
   const { data: dossiers = [], isLoading } = useQuery<Dossier[]>({
     queryKey: ['dossiers-list'],
     queryFn: async () => {
-      const response = await fetch('/api/v1/dossiers');
-      if (!response.ok) throw new Error('Falha ao buscar dossiês');
-      return await response.json();
+      return await fetchApi('/api/v1/dossiers');
     },
     refetchInterval: 30000,
   });
@@ -69,7 +69,7 @@ export default function DossiersTab() {
                 </TableCell>
                 <TableCell className="text-right">
                   <a 
-                    href={d.pdf_url} 
+                    href={d.arquivo_path} 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 text-[10px] font-bold text-tactical-accent hover:underline uppercase"
@@ -86,3 +86,4 @@ export default function DossiersTab() {
     </Card>
   );
 }
+

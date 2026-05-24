@@ -4,6 +4,8 @@ import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 
+import { fetchApi } from '@/lib/api';
+
 interface Target {
   id: string;
   username: string;
@@ -19,9 +21,7 @@ export default function TargetsTab() {
   const { data: targets = [], isLoading } = useQuery<Target[]>({
     queryKey: ['active-targets-enriched'],
     queryFn: async () => {
-      const response = await fetch('/api/v1/targets');
-      if (!response.ok) throw new Error('Falha ao buscar alvos');
-      return await response.json();
+      return await fetchApi('/api/v1/targets');
     },
     refetchInterval: 60000,
   });

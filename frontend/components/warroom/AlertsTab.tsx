@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, ShieldAlert } from 'lucide-react';
+import { fetchApi } from '@/lib/api';
 import { supabase } from '@/src/lib/supabase';
 
 interface Alert {
@@ -12,7 +13,7 @@ interface Alert {
   categoria_ia: string;
   data_coleta: string;
   candidatos: { username: string };
-  risco_score: string;
+  confianca_ia: number;
 }
 
 export default function AlertsTab() {
@@ -20,11 +21,7 @@ export default function AlertsTab() {
     queryKey: ['active-alerts-list'],
     queryFn: async () => {
       try {
-        const response = await fetch('/api/v1/alerts/active');
-        if (!response.ok) {
-          throw new Error(`API respondeu com status ${response.status}`);
-        }
-        return await response.json();
+        return await fetchApi('/api/v1/alerts/active');
       } catch (error) {
         console.warn("Erro ao buscar alertas da API, tentando fallback Supabase:", error);
       }
@@ -33,7 +30,7 @@ export default function AlertsTab() {
       try {
         const { data: comments, error } = await supabase
           .from('comentarios')
-          .select('id, texto_bruto, categoria_ia, data_coleta, candidato_id')
+          .select('id, texto_bruto, categoria_ia, data_coleta, candidato_id, confianca_ia')
           .eq('is_hate', true)
           .order('data_coleta', { ascending: false })
           .limit(20);
@@ -49,14 +46,14 @@ export default function AlertsTab() {
           categoria_ia: c.categoria_ia || 'OUTROS',
           data_coleta: c.data_coleta,
           candidatos: { username: c.candidato_id || 'desconhecido' },
-          risco_score: c.risco_score
+          confianca_ia: c.confianca_ia
         }));
       } catch (err) {
         console.error("Erro crítico no fallback de alertas do Supabase:", err);
         return [];
       }
     },
-    refetchInterval: 10000, // Alertas em tempo real (10s)
+    refetchInterval: 10000,
   });
 
   return (
