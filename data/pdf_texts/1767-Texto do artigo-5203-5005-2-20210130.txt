@@ -1,0 +1,480 @@
+Padr˜oes lingu´ısticos para detecc¸˜ao de ironia em m´ultiplos
+idiomas
+Diulia J. Deon1, Leonardo P. dos Santos 2, Larissa A. de Freitas1
+1CDTec – Universidade Federal de Pelotas (UFPel)
+Rua Gomes Carneiro, 1 – 96.010-610 – Pelotas – RS – Brasil
+2Faculdade de Letras – Universidade de S˜ao Paulo (USP)
+Rua da Reitoria, 374 – 05508-220 – S˜ao Paulo – SP – Brasil
+{djdeon,larissa}@inf.ufpel.edu.br; leonardosantsper@gmail.com
+Abstract. Most of studies in Sentiment Analysis aims to classify utterances ac-
+cording to their polarity. Irony represents a challenge to this ﬁeld, since it
+comprises the meaning inversion in text. On the other hand, the big volume
+of data posted on Social Network and the micropost genre characteristics draw
+researchers’ attention. In this paper, we propose to analyze identiﬁed linguis-
+tic patterns to irony detection in microposts in Portuguese, English, Italian and
+Spanish.
+Resumo. Grande parte dos estudos em An´alise de Sentimento visam a classi-
+ﬁcar enunciados de acordo com sua polaridade. A ironia se apresenta como
+um desaﬁo a essa ´area, visto que compreende a invers˜ao do sentido no texto.
+Por outro lado, o grande volume de dados publicados nas Redes Sociais e as
+caracter´ısticas do gˆenero micropost chamam a atenc¸˜ao dos estudiosos. Nesse
+artigo, propomos analisar padr˜oes lingu´ısticos identiﬁcados para detecc¸˜ao de
+ironia em microposts em Portuguˆes, Inglˆes, Italiano e Espanhol.
+1. Introduc¸˜ao
+Com o crescente uso de blogs, f´oruns, wikis e v´arios outros tipos de m´ıdias sociais, os
+indiv´ıduos comuns se tornaram protagonistas no mercado da comunicac¸˜ao. Com isso,
+essas plataformas se tornaram grandes fontes de informac¸˜ao.
+Ao passo que as pes-
+soas comec¸aram a compartilhar experiˆencias e opini˜oes sobre produtos, servic¸os e ex-
+periˆencias na Web, a mesma passou a compor um reposit´orio cuja avaliac¸˜ao manual
+tornou-se invi´avel devido ao enorme volume de dados. Apenas no Twitter, a m´edia de
+publicac¸˜oes di´arias ´e pr´oxima de 500 milh˜oes [Aslam 2019].
+Devido ao exorbitante volume de dados e `a publicac¸˜ao volunt´aria de opini˜oes e
+avaliac¸˜oes de produtos e servic¸os na rede, surgiu o interesse da ind´ustria e da comunidade
+cient´ıﬁca no processamento autom´atico do conte´udo publicado na Web. Nesse sentido,
+atualmente, os cientistas se organizam em campos do conhecimento voltados ao desen-
+volvimento de t´ecnicas para esse ﬁm, como ´e o caso da An´alise de Sentimento.
+De acordo com Pang (2018) [Pang and Lee 2008], a An´alise de Sentimento
+preocupa-se em deﬁnir a opini˜ao que um documento expressa sobre determinado t´opico.
+As opini˜oes podem representar impactos positivos/favor´aveis ou negativos/desfavor´aveis
+
+e se tornam relevantes devido ao h´abito humano de consultar opini˜oes alheias antes de
+tomar decis˜oes.
+Todavia, apesar dos avanc¸os no desenvolvimento tecnol´ogico em Inteligˆencia
+Artiﬁcial, o processamento autom´atico de opini˜ao se depara com v´arios obst´aculos.
+Dentre eles, destaca-se a linguagem ﬁgurada.
+Nesse ´ınterim, a ironia se mos-
+tra como um desaﬁo ao Processamento de L´ıngua Natural.
+Em An´alise de
+Sentimento,
+considera-se que o primeiro passo para o processamento de tex-
+tos irˆonicos ´e a detecc¸˜ao autom´atica desse fenˆomeno lingu´ıstico.
+Diversos estu-
+dos (como [Carvalho et al. 2009], [Gonzales-Ibanez et al. 2011], [Reyes et al. 2013],
+[Freitas et al. 2014], [Ortega-Bueno et al. 2019] e [Ghanem et al. 2019]) apresentam
+m´etodos baseados em regras lingu´ıstica e aprendizado de m´aquina capazes de identiﬁcar
+ironia em diferentes idiomas. Em geral, tweets e outros textos curtos comp˜oem corpora
+para esse tipo de trabalho.
+Diante desses motivos, o presente estudo visa a testar e avaliar a implementac¸˜ao de
+padr˜oes lingu´ısticos aplicados a textos escritos em Portuguˆes, Inglˆes, Italiano e Espanhol.
+Este artigo est´a estruturado da seguinte forma: a segunda sec¸˜ao apresenta concepc¸˜oes
+de ironia; a terceira sec¸˜ao apresenta trabalhos correlatos; a quarta sec¸˜ao apresenta nossa
+proposta de trabalho; a quinta sec¸˜ao apresenta os resultados obtidos e, por ﬁm, a ´ultima
+sec¸˜ao apresenta as considerac¸˜oes ﬁnais e trabalhos futuros.
+2. Concepc¸˜oes sobre Ironia
+Usualmente, compreende-se ironia como um recurso lingu´ıstico utilizado com a ﬁnali-
+dade de expressar o sentido oposto ao literal de um enunciado [Cignarella et al. 2018].
+Seres humanos tem relativa facilidade para compreender ironias, j´a que os mesmos
+conhecem o contexto do enunciado.
+Todavia, h´a estudos que defendem a ideia que
+essa tarefa ´e complicada n˜ao apenas para os sistemas, mas tamb´em para os humanos
+[Maynard and Greenwood 2014].
+Apesar de muitos pesquisadores projetarem seus esforc¸os em estudos em iro-
+nia, n˜ao h´a consenso acerca de deﬁnic¸˜ao desse fenˆomeno lingu´ıstico.
+[Searle 1969]
+e [Grice 1975] compreendem ironia como uma aparente violac¸˜ao de princ´ıpios
+pragm´aticos.
+Ainda assim,
+ironia parece ser um mecanismo mais complexo.
+[Reyes et al. 2012] deﬁne ironia como uma propriedade contradit´oria em determinado
+contexto ou evento. [Kreuz and Glucksberg 1989] aﬁrma que a presenc¸a de ironia trans-
+mite um signiﬁcado pragm´atico ao aludir a expectativas (falhas ou n˜ao).
+Ao investigar sobre ironia, ´e comum que nos deparemos com discuss˜oes
+acerca das diferenciac¸˜oes (ou n˜ao) entre ironia e sarcasmo.
+H´a estudos que
+optam por diferenciar e escolher o termo mais adequado entre ambos,
+como
+[Grice 1975] [Sperber and Wilson 1981], enquanto outros consideram sarcasmo e ironia
+o mesmo fenˆomeno, n˜ao fazendo distinc¸˜oes, como [Attardo 2000], [Reyes et al. 2013] e
+[Van Hee et al. 2016]. [Gibbs and Colston 2001] defende que o sarmasmo, aliado `a ou-
+tros recursos lingu´ısticos como humor, hip´erbole e ret´orica, pode ser considerado um tipo
+de ironia. [Marchetti et al. 2007] apresenta a ironia como um conceito-guarda-chuva, isto
+´e, um conceito que inclui outros subconceitos (nesse caso, o sarcasmo e a s´atira, por
+exemplo).
+Levando em conta a maior parte dos estudos em Lingu´ıstica Computacional e
+
+An´alise de Sentimento, optamos por adotar o termo ironia, sem fazer distinc¸˜oes entre
+ironia, sarcasmo e eventuais outros conceitos. Vale salientar que, ao longo do presente
+artigo, ressalvas s˜ao feitas devido a menc¸˜oes de outros trabalhos.
+3. Trabalhos Correlatos
+O interesse da comunidade acadˆemica em descrever e identiﬁcar o uso de iro-
+nia em textos escritos vˆem crescendo nos
+´ultimos anos.
+Na literatura dis-
+pon´ıvel,
+´e poss´ıvel encontrar diversos trabalhos relacionados a essa tem´atica,
+tais como:
+[Carvalho et al. 2009], [Gonzales-Ibanez et al. 2011], [Reyes et al. 2013],
+[Freitas et al. 2014], [Ortega-Bueno et al. 2019] e [Ghanem et al. 2019].
+Carvalho et al. (2009) apresentaram pistas para detecc¸˜ao de ironia baseadas em
+emoticos, onomatop´eias, pontuac¸˜oes e uso de citac¸˜oes. Gonzales-Ibalnez et al. (2011)
+apontaram que os contextos (n´ıvel pragm´atico de an´alise lingu´ıstica) s˜ao extremamentes
+relevantes, sendo os aspectos lexicais insuﬁcientes para a detecc¸˜ao de ironia. Reyes et al.
+(2013) propuseram uma detecc¸˜ao autom´atica de ironia a partir da aplicac¸˜ao de t´ecnicas
+que se valem de padr˜oes lingu´ısticos, como n-gramas e part of speech n-gramas. Freitas
+et al. (2014) estabeleceram 13 padr˜oes lingu´ısticos em um corpus de tweets em Portuguˆes
+Brasileiro a partir de um contexto pr´e-deﬁnido, j´a que, segundo os autores, ´e importante
+considerar as expectativas dos falantes para compreender os enunciados.
+Al´em desses, nesse campo de investigac¸˜ao cient´ıﬁca, existem competic¸˜oes nas
+quais pesquisadores desenvolvem m´etodos para detecc¸˜ao de ironia. Exemplos dessas
+competic¸˜oes s˜ao a Evalita1 (sigla do inglˆes Evaluation of Natural Language Process-
+sing and Speech Tools for Italian), a SemEval2 (sigla do inglˆes International Workshop
+on Semantic Evaluation), a IroSvA3 (sigla do inglˆes Irony Detection in Spanish Variants)
+e a IDAT4 (sigla do inglˆes Irony Detection in Arabic Tweets). Nestas competic¸˜oes, h´a
+tarefas diretamente relacionadas `a detecc¸˜ao de ironia.
+Cignarella et al. (2018) apresentam os resultados da edic¸˜ao de 2018 do Evalita,
+especiﬁcamente na Tarefa de Detecc¸˜ao de Ironia em Tweets em Italiano (IronITA). Essa
+tarefa incluiu duas semi-tarefas: (i) detecc¸˜ao de ironia - task A e (ii) detecc¸˜ao de diferentes
+tipos de ironia, com destaque para o sarcasmo - task B. Nessa competic¸˜ao, 17 equipes
+participaram da task A e 7 equipes participaram da task B.
+Van Hee et al. (2018) explanam a primeira edic¸˜ao da atividade compartilhada de
+detecc¸˜ao de ironia no SemEval. A tarefa de Detecc¸˜ao de Ironia em Tweets em Inglˆes
+recebeu submiss˜oes de 43 equipes para a task A e 31 equipes para a task B.
+Ortega-Bueno et al. (2019) apresentam os resultados da primeira edic¸˜ao da ativi-
+dade compartilhada de detecc¸˜ao de ironia em Espanhol, denominada IroSvA. A tarefa ´e
+composta por trˆes subtarefas diferentes: (i) detecc¸˜ao de ironia em tweets da Espanha, (ii)
+detecc¸˜ao de ironia em tweets mexicanos e (iii) detecc¸˜ao de ironia em not´ıcias coment´arios
+de Cuba. Nessa competic¸˜ao 12 equipes participaram simultaneamente nas trˆes subtarefas.
+Ghanem et al. (2019) apresentam os resultados do IDAT (do inglˆes Irony Detec-
+1http://www.evalita.it/
+2http://alt.qcri.org/semeval2019/
+3http://www.autoritas.net/IroSvA2019/
+4https://www.irit.fr/IDAT2019/
+
+tion in Arabic Tweets). A tarefa consiste em uma classiﬁcac¸˜ao bin´aria de tweets como
+irˆonicos ou n˜ao irˆonicos. Nessa competic¸˜ao 18 equipes participaram. Os m´etodos dos
+participantes variaram de t´ecnicas cl´assicas de aprendizado de m´aquina at´e m´etodos de
+ensemble.
+4. Proposta
+Neste trabalho, aplicamos padr˜oes lingu´ısticos de ironia em corpora contendo microposts
+escritos em quatro idiomas.
+4.1. Corpora
+Quatro corpora distintos foram utilizadas neste trabalho. Os corpora dos idiomas Inglˆes,
+Italiano e Espanhol ﬁzeram parte de competic¸˜oes envolvendo a tarefa de detecc¸˜ao de
+ironia nos anos de 2018 e 2019. O corpus do idioma Portuguˆes Brasileiro faz parte de um
+trabalho de conclus˜ao de curso datado de 2018 [Silva 2018].
+Os corpora est˜ao descritos a seguir.
+• Portuguˆes Brasileiro: A base de dados para detecc¸˜ao de ironia em Portuguˆes
+Brasileiro ´e composta por 12.700 tweets potencialmente irˆonicos, contendo, obri-
+gatoriamente, as hashtags #ironia e #sarcasmo, postados entre 08/10/2014 e
+10/06/2017 [Silva 2018]; 2.700 tweets potencialmente n˜ao irˆonicos de cunho ge-
+ral [Silva 2018] e 804 tweets com a express˜ao “Fim do mundo”, anotados manu-
+almente como irˆonicos e n˜ao irˆonicos, postados entre 19/12/2012 e 23/12/2012
+[Freitas et al. 2014].
+• Inglˆes - SemEval 2018:
+A base de dados da Task3 do SemEval 2018
+[Van Hee et al. 2018] ´e composta por 3.834 tweets, contendo tweets com as hash-
+tags #irony, #sarcasm e #not. Todos os tweets foram coletados entre 01/12/2014
+e 04/01/2015 [Van Hee et al. 2016]. Os tweets foram anotados como irˆonicos ou
+n˜ao irˆonicos e, ainda, classiﬁcados em diferentes tipos de ironia: ironia verbal,
+situac¸˜ao irˆonica e n˜ao irˆonica.
+• Italiano
+-
+IronITA
+2018:
+A
+base
+de
+dados
+do
+IronITA
+2018
+[Cignarella et al. 2018] ´e composta por 3.977 tweets distribu´ıdos em 2.023
+irˆonicos e 1.957 n˜ao irˆonicos. Os tweets foram anotados de acordo com diferentes
+tipos de ironia: sarc´astico, n˜ao sarc´astico e n˜ao irˆonico.
+• Espanhol - IroSvA 2019: A base de dados do IroSvA 2019 [Ortega et al. 2019]
+consiste em 9.000 mensagens curtas sobre diferentes t´opicos escritos em Espanhol
+(3.000 de Cuba, 3.000 do M´exico e 3.000 da Espanha) anotados como irˆonicos e
+n˜ao irˆonicos.
+4.2. Padr˜oes Lingu´ısticos de Ironia
+Sete padr˜oes foram implementados e utilizados neste trabalho. Os padr˜oes envolvem o
+uso de listas, express˜oes exatas e s´ımbolos, conforme descritos abaixo (Tabela 1).
+• P1: uso de risadas. Express˜oes de riso encontradas na Web5 foram utilizadas nesse
+padr˜ao. Assim como os trabalhos de [Carvalho et al. 2009] e [Freitas et al. 2014]
+assumimos que textos com express˜oes de riso s˜ao irˆonicos.
+5https://awebic.com/humor/como-internautas-riem/
+
+Tabela 1. Padr˜oes Lingu´ısticos.
+Padr˜oes
+Express˜oes
+P1
+Risadas
+P2
+Emoticons
+P3
+Express˜ao Exata
+P4
+...<Express˜ao>!
+P5
+Letra Mai´uscula
+P6
+*¡ | *¿ | !* | ?* | ¡*¿* | ¿*¡* | !*?* | ?*!*
+P7
+“<Express˜ao>”
+• P2: uso de emoticons. Emoticons expressam sentido humor´ıstico. Por isso, iden-
+tiﬁcamos que todas as ocorrˆencias com estes s´ımbolos podem representar ironia.
+• P3: uso de express˜oes exatas que j´a foram consolidadas. As express˜oes exatas
+demostram que o enunciado n˜ao signiﬁca o que literalmente est´a escrito em pala-
+vras. Por isso, identiﬁcamos que estas express˜oes exatas podem representar uma
+declarac¸˜ao irˆonica. Para cada idioma de an´alise usamos as seguintes express˜oes
+exatas: “s´o que (n˜ao)”, “sim,”, “na boa” - Portuguˆes Brasileiro; “not” - Inglˆes;
+“solo che non `e” - Italiano; “no te creas”,“no es cierto”, “es broma” - Espanhol.
+• P4: uso de uma express˜ao entre reticˆencias e ponto de exclamac¸˜ao. Declarac¸˜oes
+irˆonicas s˜ao escritas ap´os reticˆencias e antes do ponto de exclamac¸˜ao, como se
+o autor do texto curto quisesse acrescentar um coment´ario que expressasse sua
+opini˜ao sobre o que acabou de ser dito.
+• P5: uso de letra mai´uscula. Os textos ou trechos de textos escritos em mai´uscula
+s˜ao utilizados para destacar/dar ˆenfase a signiﬁcados ﬁgurativos, como os irˆonicos.
+• P6: uso de pontuac¸˜ao repetida. A pontuac¸˜ao transmite um conte´udo adicional ao
+enunciado. Usando ponto de exclamac¸˜ao e de interrogac¸˜ao, as emoc¸˜oes podem
+ser comunicadas e muitas vezes podem ser pistas para mensagens humor´ısticas.
+A repetic¸˜ao do ponto de exclamac¸˜ao e de interrogac¸˜ao e a combinac¸˜ao entre eles,
+como “!!!”, “????”, “!!!!???”, podem ser pistas para conte´udo irˆonico. J´a que um
+dos idiomas de an´alise ´e o Espanhol, acrescentamos no padr˜ao as pontuac¸˜oes “¡”e
+“¿”.
+• P7: uso de uma express˜ao entre aspas. As aspas al´em de transcreverem um texto
+j´a escrito, s˜ao utilizadas para destacar certas express˜oes e servem para dar ˆenfase
+a signiﬁcados ﬁgurativos, como os irˆonicos.
+5. Resultados
+Ao aplicarmos os padr˜oes lingu´ısticos na base de dados de [Freitas et al. 2014] e
+[Silva 2018], obtivemos os seguintes resultados para dectecc¸˜ao de ironia: Tabela 2. O
+total ´e de 14757 tweets, j´a que, utilizamos os dados de treino sem repetic¸˜oes. Como ´e
+poss´ıvel observar na Matriz de Confus˜ao do Portuguˆes, a Revocac¸˜ao ´e de 41%, a Precis˜ao
+´e de 34% e a de Medida-F ´e de 34%.
+Ainda, ap´os aplicarmos os mesmos padr˜oes lingu´ısticos na base de dados do Se-
+mEval 2018 (dados de treino task A com emoji e hashtags de ironia), obtivemos os seguin-
+tes resultados para detecc¸˜ao de ironia: Tabela 3. Como apresenta a Matriz de Confus˜ao
+do Inglˆes, a Revocac¸˜ao ´e de 35%, a Precis˜ao ´e de 49% e a de Medida-F ´e de 41%.
+
+Tabela 2. Matriz de Confus˜ao do Portuguˆes.
+Classe Predita
+N˜ao Irˆonico
+Irˆonico
+Total
+Real
+N˜ao Irˆonico
+0
+2432
+2432
+Classe
+Irˆonico
+9295
+3030
+12325
+Total
+9295
+5462
+14757
+Tabela 3. Matriz de Confus˜ao do Inglˆes.
+Classe Predita
+N˜ao Irˆonico
+Irˆonico
+Total
+Real
+N˜ao Irˆonico
+1228
+695
+1923
+Classe
+Irˆonico
+1239
+672
+1911
+Total
+2467
+1367
+3834
+Os resultados da detecc¸˜ao de ironia atrav´es dos padr˜oes lingu´ısticos na base de
+dados do IronITA 2018 s˜ao apresentados na Tabela 4. Como podemos observar na Matriz
+de Confus˜ao do Italiano, a Revocac¸˜ao ´e de 34%, a Precis˜ao ´e de 47% e a de Medida-F ´e
+de 40%.
+Tabela 4. Matriz de Confus˜ao do Italiano.
+Classe Predita
+N˜ao Irˆonico
+Irˆonico
+Total
+Real
+N˜ao Irˆonico
+1175
+779
+1954
+Classe
+Irˆonico
+1320
+703
+2023
+Total
+2495
+1482
+3977
+Por ﬁm, ao aplicarmos os padr˜oes lingu´ısticos na base de dados do IroSvA 2019,
+obtivemos os seguintes resultados para detecc¸˜ao de ironia: Tabela 5 (a), (b) e (c).
+´E
+importante salientar que o total ´e 2400 mensagens curtas, uma vez que utilizamos os
+dados de treino sem repetic¸˜oes. De acordo com o que observa-se na Matriz de Confus˜ao
+do Espanhol, a Revocac¸˜ao ´e de 41% para Cuba, 35% para a variedade do M´exico, 30%
+para a variedade da Espanha; a Precis˜ao ´e de 34% para a variedade de Cuba, 32% para a
+variedade do M´exico e para a variedade Espanha; a Medida-F ´e de 37% para a variedade
+cubana, 33% para a variedade mexicana e 31% para a variedade espanhola.
+A partir dos resultados obtidos, podemos observar que padr˜oes relacionados `a
+linguagem simb´olica, como express˜oes de riso (P1) e emoticons (P2), s˜ao os melhores
+ind´ıcios de ironia e sarcasmo para o idioma Portuguˆes Brasileiro. Al´em disso, o padr˜ao
+relacionado a express˜oes exatas (P3) provou ser uma boa escolha para os idiomas Por-
+tuguˆes e Inglˆes , pois “s´o que (n˜ao)” e “not” s˜ao culturalmente considerados irˆonicos.
+O desempenho dos sete padr˜oes lingu´ısticos ´e signiﬁcativo para a detecc¸˜ao de
+
+Tabela 5. Matriz de Confus˜ao do Espanhol
+Classe Predita
+N˜ao Irˆonico
+Irˆonico
+Total
+Real
+N˜ao Irˆonico
+966
+634
+1600
+Classe
+Irˆonico
+470
+330
+800
+Total
+1436
+964
+2400
+(a) Espanhol de Cuba.
+Classe Predita
+N˜ao Irˆonico
+Irˆonico
+Total
+Real
+N˜ao Irˆonico
+1017
+583
+1600
+Classe
+Irˆonico
+519
+281
+800
+Total
+1536
+864
+2400
+(b) Espanhol do M´exico.
+Classe Predita
+N˜ao Irˆonico
+Irˆonico
+Total
+Real
+N˜ao Irˆonico
+1094
+506
+1600
+Classe
+Irˆonico
+557
+243
+800
+Total
+1651
+749
+2400
+(c) Espanhol da Espanha.
+ironia em m´ultiplos idiomas. Acreditamos que o valor de revocac¸˜ao (0.30 - 0.41) ´e um
+bom resultado, considerando que ´e um sistema baseado em padr˜oes. Com os dados de
+teste da competic¸˜ao IroSvA obtivemos uma Medida-F de 53%[Ortega-Bueno et al. 2019].
+O sistema que obteve melhor resultado obteve uma Medida-F de 68% e ´e baseado em um
+modelo Transformers Encoders.
+6. Considerac¸˜oes Finais e Trabalhos Futuros
+Conforme defendido ao longo do presente texto, declarac¸˜oes irˆonicas requerem operac¸˜oes
+mais complexas do que simplesmente interpretar o signiﬁcado oposto de uma sentenc¸a.
+Embora seja este um estudo inicial, acreditamos que podemos oferecer resultados relevan-
+tes no estabelecimento desses sete padr˜oes lingu´ısticos na detecc¸˜ao de ironia em m´ultiplos
+idiomas.
+O presente artigo apresentou, portanto, um panorama do estado da arte em
+detecc¸˜ao de ironia em microposts em quatro idiomas (Portuguˆes, Espanhol, Italiano e
+Inglˆes), com ˆenfase nos padr˜oes lingu´ısticos. Ao total, sete padr˜oes lingu´ısticos foram
+testados sobre quatro corpora nesses idiomas. A partir dessas aplicac¸˜oes, realizamos
+uma an´alise dos resultados. Com isso, foi poss´ıvel observar que o desempenho dos sete
+padr˜oes lingu´ısticos foi signiﬁcativo para a tarefa detecc¸˜ao de ironia nos idiomas supraci-
+tados.
+Como trabalhos futuros, elencamos trˆes itens centrais pertinentes `a detecc¸˜ao de
+ironia: (i) implementac¸˜ao de t´ecnicas de Deep Learning; (ii) aplicac¸˜ao dos padr˜oes
+lingu´ısticos apresentados em outros idiomas, por ﬁm, (iii) avaliar o impacto da ironia
+na tarefa de an´alise de sentimento.
+Considerando o estado da arte neste campo de investigac¸˜ao, observa-se que as
+t´ecnicas de Deep Learning tˆem ganhado cada vez mais visibilidade, tendo em vista que
+seus resultados tˆem se apresentado incrivelmente competitivos e precisos. Desse modo,
+acreditamos que a implementac¸˜ao dessas t´ecnicas ´e promissora na detecc¸˜ao de ironia,
+podendo apresentar signiﬁcativos resultados e avanc¸os para investigac¸˜oes nesse sentido.
+
+Ademais, al´em da aplicac¸˜ao dos padr˜oes lingu´ısticos em Portuguˆes, Inglˆes, Itali-
+ano e Espanhol, pretendemos realizar essa avaliac¸˜ao tamb´em em outros idiomas. Nesse
+caso, especiﬁcamente, projetamos desenvolver a investigac¸˜ao sobre tweets escritos em
+´Arabe (base de dados para detecc¸˜ao de ironia da IDAT 2019).
+Al´em disso, pretendemos avaliar o impacto da ironia na tarefa de An´alise de
+Sentimento. Como j´a mencionado aqui, a ironia nos enunciados se apresenta como um
+obst´aculo aos estudos em An´alise de Sentimento. Todavia, at´e o momento, n˜ao nos de-
+dicamos a avaliar e mapear, levantando dados quantitativos, os impactos desse fenˆomeno
+lingu´ıstico nesse processo anal´ıtico em m´ultiplos idiomas.
+Referˆencias
+Aslam, S. (2019).
+Twitter statistics.
+https://www.omnicoreagency.com/
+twitter-statistics/. Acessado em: 25-05-2019.
+Attardo, S. (2000). Irony as relevant inappropriateness. Pragmatics, 32(6):793–826.
+Carvalho, P., Sarmento, L., and Silva, M. J. (2009). Clues for detecting irony in user-
+generated contents: oh...!! it’s ”so easy”;-). In 1st International CIKM Workshop on
+Topic-sentiment Analysis for Mass Opinion, pages 53–56.
+Cignarella, A., Frenda, S., Basile, V., Bosco, C., Patti, V., and Rosso, P. (2018). Over-
+view of the evalita 2018 task on irony detection in italian tweets. In 6th Evaluation
+Campaign of Natural Language Processing and Speech Tools for Italian.
+Freitas, L. A., Vanin, A., Hogetop, D., Bochernitsan, M., and Vieira, R. (2014). Pathways
+for irony detection in tweets. In 29th Symposium on Applied Computing, pages 628–
+633.
+Ghanem, B., Karoui, J., Benamara, F., Moriceau, V., and Rosso, P. (2019). Idat@ﬁre2019:
+Overview of the track on irony detection in arabic tweets. In Working Notes of FIRE
+2019 - Forum for Information Retrieval Evaluation, Kolkata, India, December 12-15,
+2019, volume 2517 of CEUR Workshop Proceedings, pages 380–390. CEUR-WS.org.
+Gibbs, R. W. and Colston, H. L. (2001). The risks and rewards of ironic communication.
+IOS Press.
+Gonzales-Ibanez, R., Muresan, S., and Wacholder, N. (2011). Identifying sarcasm in
+twitter: a closer look. In 49th Annual Meeting of the Association for Computational
+Linguistics: Human Language Technologies, pages 581–586.
+Grice, H. P. (1975). Logic and conversation. Academic Press.
+Kreuz, R. J. and Glucksberg, S. (1989). How to be sarcastic: The choice reminder theory
+of verbal irony. Experimental Psychology, 118(4):374–386.
+Marchetti, A., Massaro, D., and Valle, A. (2007). Non dicevo sul serio. Riﬂessioni su
+ironia e psicologia. Franco Angeli.
+Maynard, D. and Greenwood, M. A. (2014). Who cares about sarcastic tweets? investi-
+gating the impact of sarcasm on sentiment analysis. In 9th International Conference
+on Language Resources and Evaluation.
+
+Ortega, R., Rangel, F., Hern´andez, I., Rosso, P., Montes, M., and Pagola, M. (2019).
+Overview of the task on irony detection in spanish variants. In 34th Conference of the
+Spanish Society for Natural Language Processing.
+Ortega-Bueno, R., Rangel, F., Far´ıas, D. I. H., Rosso, P., y G´omez, M. M., and Medina-
+Pagola, J. (2019). Overview of the task on irony detection in spanish variants. In
+Proceedings of the Iberian Languages Evaluation Forum co-located with 35th Con-
+ference of the Spanish Society for Natural Language Processing, IberLEF@SEPLN
+2019, Bilbao, Spain, September 24th, 2019, volume 2421 of CEUR Workshop Procee-
+dings, pages 229–256. CEUR-WS.org.
+Pang, B. and Lee, L. (2008). Opinion mining and sentiment analysis. Foundations and
+Trends in Information Retrieval, 2:1–135.
+Reyes, A., Rosso, P., and Buscaldi, D. (2012). From humor recognition to irony detection:
+The ﬁgurative language of social media. Data and Knowledge Engineering, 74:2–12.
+Reyes, A., Rosso, P., and Veale, T. (2013). A multidimensional approach for detecting
+irony in twitter. Language Resources and Evaluation, 47(1):239–268.
+Searle, J. R. (1969). Speech Acts: An Essay in the Philosophy of Language. Cambridge
+University Press.
+Silva, F. R. (2018). Detecc¸˜ao de ironia e sarcasmo em l´ıngua portuguesa: uma abor-
+dagem utilizando deep learning.
+https://github.com/fabio-ricardo/
+deteccao-ironia. Acessado em: 25-05-2019.
+Sperber, D. and Wilson, D. (1981). Irony and the Use - Mention Distinction. Academic
+Press.
+Van Hee, C., Lefever, E., and Hoste, V. (2016). Guidelines for annotating irony in social
+media text, version 2.0. Technical report, LT3 Technical Report Series.
+Van Hee, C., Lefever, E., and Hoste, V. (2018). Semeval-2018 task 3: Irony detection in
+english tweets. In 12th International Workshop on Semantic Evaluation.

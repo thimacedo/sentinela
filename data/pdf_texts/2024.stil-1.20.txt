@@ -1,0 +1,657 @@
+Mineração de Argumentos em Textos de Redes Sociais no
+Idioma Português
+Vitor Domingos Baldoino dos Santos 1, Livia Alabarse dos Santos1, Orlando B.
+Coelho (in memoriam)1, Renata Mendes de Araujo1,2, Ivan Carlos Alcântara de
+Oliveira1
+1Faculdade de Computação e Informática e Programa de Pós-Graduação em
+Computação Aplicada - Universidade Presbiteriana Mackenzie
+São Paulo - SP - Brasil.
+2Programa de Pós-Graduação em Sistemas de Informação - EACH/USP
+São Paulo - SP - Brasil
+{vitordomingos.santos,liviaalabarse.santos}@mackenzista.com.br
+{renata.araujo, orlando.coelho, ivan.oliveira}@mackenzie.br
+Abstract. This paper presents the challenges and research advances aimed at
+developing computational solutions capable of supporting the understanding
+of debates on social media in the Portuguese language. One of the
+fundamental bases of these solutions is the application of Argument Mining
+techniques. We present the strategies used to address the challenges of
+argument mining on social media, particularly the use of deep learning. The
+results obtained show the effectiveness of the selected models for the
+considered tasks, achieving an F1-Score of 0.85 for sentiment analysis, 0.97
+for position detection, and 0.76 for irony detection.
+Resumo. Este artigo apresenta os desafios e os avanços de pesquisa voltada à
+construção de soluções computacionais capazes de apoiar o entendimento do
+debate em redes sociais no idioma português. Uma das bases fundamentais
+dessas soluções é a aplicação de técnicas de Mineração de Argumentos.
+Apresentamos as estratégias utilizadas para o endereçamento de desafios da
+mineração de argumentos em redes sociais, em particular, o uso de deep
+learning. Os resultados obtidos demonstram boa eficácia dos modelos
+selecionados para as tarefas consideradas, tendo atingido um F1-Score de
+0,85 para a análise de sentimento, 0,97 na detecção de posição e 0,76 na
+detecção de ironia.
+1.
+Introdução
+A área de Mineração de Argumentação (MA) é uma área multidisciplinar onde se
+encontram a Linguística Computacional e a Ciência de Dados, cujo objetivo é
+identificar, extrair e compreender a estrutura de argumentação em textos e/ou discussões
+[Lawrence e Reed 2020][Lytos et al. 2019][Stede e Schneider 2019].
+Argumentação
+é
+o
+processo
+pelo
+qual
+argumentos
+são
+construídos,
+compartilhados e avaliados a partir de outros argumentos [Palau e Moens 2009]. Uma
+argumentação se estrutura a partir de evidências, premissas, fatos e falas que suportam
+ou não uma determinada alegação, em uma cadeia de raciocínio que leva à conclusão de
+discussões e à tomada de decisão [Toulmin 2003]. A argumentação tem papel
+importante nas atividades humanas, e tem sido compreendida como uma área de
+pesquisa que surge com base em campos como a Retórica e a Filosofia, mas que hoje
+196
+
+inclui estudos de Processamento de Linguagem Natural e modelos teóricos de discussão
+[Palau e Moens 2009][Lawrence et. al. 2012], tendo como áreas antecessoras a
+Mineração de Opiniões e a Análise de Sentimentos, entre outras [Lawrence e Reed
+2020][Lytos et.al. 2019].
+O projeto HEIWA1
+pretende construir soluções computacionais de análise de
+redes sociais baseadas em técnicas de MA para a compreensão de discussões em redes
+sociais, com um olhar específico para o contexto brasileiro. O principal resultado
+esperado
+com
+o
+projeto
+é
+a
+construção
+de
+uma
+plataforma que permita o
+acompanhamento de discussões em redes sociais, preferencialmente pelos usuários das
+próprias redes, mas também para interessados no estudo de comportamentos e mediação
+em redes sociais. A plataforma será composta por ferramentas computacionais capazes
+de apoiar um processo de curadoria, mineração de argumentos e visualização do debate
+para usuários de redes sociais. As implicações da construção dessas tecnologias
+envolvem aspectos sociais, como o aperfeiçoamento da qualidade do debate e a
+democracia, aspectos educacionais e de desenvolvimento de pensamento crítico.
+Neste
+artigo,
+apresentamos
+os
+avanços
+obtidos
+no
+escopo
+do projeto,
+especificamente em relação ao uso da MA para a identificação de argumentos em textos
+extraídos de redes sociais em português. Em linhas gerais, os avanços compreendem a
+necessidade de lidar com linguagem informal, uso de ironia e a polarização presente nos
+debates online. Além disso, destacamos o uso de modelos de deep learning, que se
+mostraram eficazes em tarefas como análise de sentimento, detecção de posição e
+detecção de ironia, tendo alcançado bons resultados de F1-Scores nas tarefas em um
+contexto de grande relevância, como os eventos de 8 de janeiro de 2023 em Brasília.
+O artigo se estrutura da seguinte forma: a Seção 2 apresenta o conceito e
+abordagens na literatura para a MA em redes sociais; a Seção 3 descreve as propostas já
+exploradas no projeto baseadas em análise de sentimentos e deep learning; a Seção 4
+discute a proposta atual de pipeline para execução de tarefas de identificação de tópicos,
+entidades, sentimentos e ironia; a Seção 5 mostra os resultados dos experimentos
+computacionais realizados; a Seção 6 conclui o artigo e apresenta os próximos passos da
+pesquisa.
+2.
+Mineração de Argumentos em Redes Sociais
+O processo de identificar, extrair e compreender a estrutura argumentativa a partir de
+dados textuais é o objetivo da mineração de argumentos (MA) [Stede e Schneider 2019].
+A MA tem sido explorada cientificamente para a análise de diferentes conteúdos
+textuais (documentos, transcrições de debates, transcrições de áudios, etc.), com o
+objetivo principal de extrair a estrutura de argumentação contida nesses textos e que,
+eventualmente, levaram para uma deliberação ou decisão [Lawrence e Reed 2020] e
+para a construção de tecnologias capazes de facilitar discussões ou debater com
+humanos [Slonim et. al. 2021].
+Nos últimos anos, a comunidade científica na área de MA também explora a
+oportunidade de aplicar o conceito e as técnicas de MA no estudo da argumentação em
+textos extraídos de redes sociais [Addawood e Bashir 2016][Bosc et. al. 2016][Schaefer
+1 https://ciberdem.mack.com.br/index.php/projeto-heiwa/
+197
+
+e Stede 2021][Vecchi et. al. 2021]. Essas pesquisas partem da ideia de que esses textos
+possam conter uma atividade argumentativa e que a compreensão dos argumentos
+utilizados durante a interação nas redes sociais pode agregar para a tomada de decisões,
+gestão da informação e o entendimento do comportamento coletivo em diversos
+domínios, principalmente as ciências políticas e sociais.
+Em um levantamento de literatura preliminar, identificamos que os esforços
+recentes na aplicação de MA em redes sociais focaram, em alguns casos, na criação e
+anotação de datasets apropriados para a aplicação das técnicas de MA, em maior
+número, na definição e execução de sequências pré-definidas de tarefas consideradas
+essenciais para um pipeline de mineração de argumentos, e poucos trabalhos na
+visualização dos resultados (estruturas de argumentação) [Schaefer e Stede 2021].
+A despeito dos esforços crescentes, a mineração de argumentos em redes sociais
+ainda enfrenta desafios significativos. Problemas antigos, apontados desde [Bosc et al.
+2016a], permanecem, como a escassez de datasets anotados; a baixa qualidade e/ou
+informalidade dos textos nas redes; o tamanho reduzido das falas (tweets, posts), que
+impedem a riqueza de ideias, a ausência de foco ou tópico em discussão, enquanto
+outros se intensificam, como o crescente custo e restrição de uso das APIs das
+plataformas de redes sociais de maior escala (X, Facebook etc). Além disso, a literatura
+mostra abordagens ainda exploratórias e nenhum dos trabalhos encontrados tratam de
+conteúdos em português brasileiro.
+No que se refere à definição e ao desenvolvimento de pipelines para MA em
+redes sociais, Schaefer e Stede (2021) e Bosc et al. (2016a) mencionam que as tarefas
+necessárias para aplicação de MA, em linhas gerais, incluem: (i) a anotação de corpus;
+(ii) a detecção de argumentos e suas relações; e (iii) a detecção de posicionamentos. No
+que se refere à tarefa (i) anotação de corpus, a literatura mostra um número escasso de
+bases anotadas e, pelo menos no material levantado pela presente pesquisa, nenhuma
+considerando conteúdo em português. No projeto de pesquisa em tela, avançamos nesse
+aspecto, ao anotar datasets de tweets em português coletados durante o período eleitoral
+brasileiro em 2022 [Silva et. al. 2024]. A tarefa seguinte, (ii) detecção de argumentos e
+relações, envolve, primeiramente, a identificação, no conteúdo de cada postagem, de
+elementos (alegações), que possam caracterizar as falas como argumentos ou não e,
+posteriormente, a identificação de relações entre elas (oposição, apoio), permitindo a
+identificação de estruturas (grafos) de argumentação [Stede e Schneider, 2019][Bosc et.
+al, 2016a]. Por fim, a tarefa (iii) detecção de posicionamentos consiste em extrair os
+diferentes pontos de vista sobre um determinado tópico em uma discussão. As tarefas
+(ii) e (iii) são o foco deste artigo, conforme detalharemos nas seções a seguir.
+3.
+Estudos Iniciais
+Os primeiros estudos de MA em redes sociais realizados por esta equipe focaram
+na identificação de relações de oposição e apoio entre falas em um corpus de postagens.
+As falas dos participantes foram tratadas como sentenças, e as relações entre elas foram
+identificadas pelo direcionamento das falas entre os interlocutores. Usando os
+identificadores extraídos das redes sociais, criou-se uma estrutura de dados que preserva
+a organização entre um argumento e outro, mantendo a estrutura de threads de
+discussão. A natureza da relação (oposição ou apoio) foi determinada pela análise de
+198
+
+sentimentos (negativo, positivo ou neutro).
+Os primeiros resultados desta estratégia são reportados por [Sousa et. al. 2021],
+que explora o pipeline definido por Lippi e Torroni (2016). Para cada uma das
+sentenças, utilizamos técnicas de análise de sentimentos para determinar a polaridade
+das manifestações no discurso, utilizando o algoritmo SGD (Pedregosa et al. 2011) para
+a classificação, treinado com as discussões já classificadas presentes na base Internet
+Argument Corpus (IAC) [Walker et.al. 2012]. A base IAC, contém discussões com um
+teor politizado, porém amplas o bastante para que pudéssemos usá-la em debates mais
+genéricos. Quanto ao método de classificação dos argumentos, a classificação se deu
+sentença a sentença, fornecendo três rótulos que caracterizavam a polaridade de um
+argumento: apoio, oposição ou neutro. Os resultados obtidos demonstraram uma
+precisão de 74% na identificação das polaridades dos argumentos, criando assim uma
+alternativa promissora para a classificação.
+Uma segunda abordagem desenvolvida pela equipe envolveu o uso de técnicas
+de análise de sentimentos baseadas em deep learning. A abordagem, apresentada em
+[Tokuda et. al. 2021], explora a arquitetura BERT [Devlin et al. 2019] como estratégia
+para elucidar a polaridade das afirmações presentes em um corpus de argumentação
+extraído de uma rede social. Os experimentos realizados demonstraram resultados
+satisfatórios na extração da polaridade de uma afirmação. A acurácia dos experimentos
+chegou a 88% em dados não vistos anteriormente pelo modelo, a partir de um conjunto
+de dados com diversidade extremamente alta de palavras e estruturação livre dos dados,
+em um formato livre de discussões online com razoável incidência de erros gramaticais
+e de digitação. Em outro trabalho [Salles e Coelho 2022], foi utilizada uma rede deep
+learning derivada da BERT, a DistilBERT [Zhang et al. 2020], para realizar a análise
+das emoções presentes em frases que constam do dataset em inglês GoEmotions
+[Demszky et al. 2020]. Os resultados obtidos aperfeiçoam os melhores resultados
+publicados por Cortiz (2021).
+Os estudos anteriores demonstram resultados satisfatórios para o uso da análise
+de sentimentos como parte do processo de MA, mas ainda não avançam em tarefas mais
+sofisticadas de identificação da estrutura de argumentos e não contemplam conteúdos
+em português. A estratégia atual do projeto é avançar na identificação de outros
+componentes de argumentação além de sentimentos, explorando o uso de modelos
+baseados no Transformer [Vaswani et al. 2017] e semelhantes ao BERT aplicados a
+dados extraídos de redes sociais em português.
+4.
+Proposta de Pipeline para Mineração de Argumentos
+Optamos por avançar em nosso projeto a partir da expansão do leque de tarefas
+consideradas para um pipeline de mineração de argumentos, sendo elas: análise de
+sentimento, identificação de tópico, reconhecimento de entidades, detecção de ironia,
+detecção de posição, e do uso de redes neurais como principal ferramenta para MA.
+Destaca-se que as tarefas do pipeline, em conjunto, são essenciais para o entendimento
+do discurso nas redes sociais, visando a posterior identificação de argumentos.
+A inclusão das tarefas de identificação de tópico e reconhecimento de entidades
+nomeadas objetiva desagregar duas grandes atividades vistas na literatura: (i) a
+199
+
+identificação do assunto da discussão; e (ii) a detecção de relação entre pares de texto.
+Com a desagregação, será possível investigar a eliminação da anotação de um dataset
+para pares de tweets relacionados, como o apresentado em [Bosc et al. 2016a].
+Adicionalmente, a inclusão da detecção de ironia visa resolver a dificuldade adicional da
+MA em redes sociais relacionada ao alto grau de informalidade do texto [Schaefer e
+Stede 2021] e a mudança de semântica gerada pelo uso desse recurso linguístico.
+Optamos por não incluir a tarefa de detecção de argumentação, prevista pela
+literatura, no pipeline proposto. Como exposto em [Schaefer e Stede 2021], a literatura
+recente despendeu muito esforço na construção de datasets com alguma definição
+teórico-conceitual de argumentação. O formato geral do pipeline está na Figura 1.
+Figura 1. Pipeline proposto da mineração de argumentos.
+Posto que o objetivo geral deste trabalho é compreender o debate em uma rede
+social,
+cujas
+características
+textuais
+exigem
+uma
+análise
+mais
+sofisticada
+de
+entendimento do texto antes de realizar a identificação da argumentação, entendemos
+que as tarefas de identificação de tópicos, entidades, sentimentos, posição e ironia de
+uma discussão oferecem vantagem para o seu entendimento, ainda que ali possamos
+constatar que não ocorra argumentação. Um exemplo simplificado desta estratégia,
+tendo por base textos sintéticos sem o pré-processamento e sem considerar todas as
+tarefas do pipeline, é demonstrado na Figura 2. Nela, são apresentados três tweets
+sintéticos e sem pré-processamento a respeito do filme “Duna: Parte Dois”, tópico
+correspondente a esses posts. Com os tweets pré-processados, é possível encontrar: as
+entidades “Duna”, “Aila” e “Paul Artreids”; os sentimentos de cada um deles; e a ironia
+existente. A partir disso, uma estrutura do debate realizado sobre esse tópico pode ser
+montada.
+Figura 2. Exemplo do processamento de textos em redes sociais para a
+identificação da estrutura do debate (entidades, sentimentos e ironia).
+200
+
+5.
+Experimentos
+Para dar cabo das tarefas selecionadas, procurou-se por modelos pré-treinados em
+português ou que tivessem sofrido fine-tuning para tarefas em português com um bom
+resultado. Um fator crucial para a seleção de modelos foi a sua presença no
+HuggingFace Hub2, repositório que visa armazenar e distribuir modelos de deep
+learning para facilitar sua utilização em pesquisas e aplicações comerciais. A Tabela 1
+apresenta os modelos selecionados para os experimentos, com a coluna “Modelo” sendo
+o ID dos modelos na plataforma da HuggingFace e coluna ID sendo a utilizada para
+referenciar os modelos ao longo desta seção.
+O modelo 1, apelidado na literatura de BERTimbau (Souza et al., 2020), foi
+pré-treinado na base de dados brWaC [Wagner Filho et al., 2018], ou seja, em dados
+sem domínio específico em português brasileiro. Já os modelos 2 e 3, BERTweet.BR
+[Carneiro,
+2023]
+e
+BERTaporu
+[Costa
+et
+al.,
+2023],
+respectivamente,
+foram
+pré-treinados em milhares de tweets em português. Entretanto, o modelo 4, RoBERTuito
+[Pérez et al., 2022], foi pré-treinado em tweets na língua espanhola, mas já demonstrou
+bons resultados para a tarefa de análise de sentimento em português [Pérez et al., 2023].
+Tabela 1. Modelos escolhidos para os experimentos computacionais.
+Por sua vez, a base de dados utilizada para realizar o fine-tuning dos modelos,
+[Silva et. al. 2024], foi construída a partir das discussões realizadas em torno dos
+eventos de 8 de janeiro de 2023 na praça dos Três Poderes, em Brasília, e anotada em
+etapas manuais e automáticas (com uso de LLMs) para as tarefas de análise de
+sentimento (AS) (positivo, negativo ou neutro), detecção de ironia (DI) (contém ironia,
+não contém ironia) e detecção de posição (DP) (a favor da invasão, contra a invasão).
+Considerando que a base foi construída a partir de um evento marcante, inferimos que o
+corpus já está intrinsecamente associado a um único tópico central. Dessa forma, a
+tarefa de identificação de tópico foi considerada redundante e removida desta bateria de
+experimentos. A detecção de posição, por sua vez, foi conduzida em relação a esse
+tópico pré-definido, permitindo uma análise mais precisa das opiniões expressas no
+contexto específico do evento. Além disso, optou-se por explorar o reconhecimento de
+entidades nomeadas (NER) futuramente devido ao tempo significativo que seria
+necessário para uma anotação manual da base de dados e treinamento do modelo,
+considerando o cronograma previsto.
+A Tabela 2 apresenta a quantidade de tweets utilizada para os experimentos de
+cada tarefa, bem como a distribuição entre as classes de cada tarefa. Deve-se notar que a
+base está balanceada para a tarefa de AS, mas não para as tarefas de DP e DI.
+Adicionalmente, cabe destacar que os tweets utilizados em cada uma das tarefas não
+2 https://huggingface.co/
+ID
+Modelo
+Endereço Web
+1
+neuralmind/bert-base-portuguese-cased
+huggingface.co/neuralmind/bert-base-portuguese-cased
+2
+melll-uff/bertweetbr
+huggingface.co/melll-uff/bertweetbr
+3
+pablocosta/bertabaporu-base-uncased
+huggingface.co/pablocosta/bertabaporu-base-uncased
+4
+pysentimiento/robertuito-base-cased
+huggingface.co/pysentimiento/robertuito-base-cased
+201
+
+possuem total sobreposição, isto é, não são necessariamente os mesmos entre as bases
+de cada tarefa.
+Tabela 2. Quantidade de tweets entre as tarefas e classes.
+Tarefa
+Classe
+Treino
+Validação
+Teste
+Total
+Análise de Sentimento
+Neutro
+234
+50
+50
+334
+Positivo
+233
+50
+51
+334
+Negativo
+234
+50
+50
+334
+Detecção de Posição
+Neutro
+77
+16
+17
+110
+A favor
+19
+4
+4
+27
+Contra
+1453
+312
+312
+2077
+Detecção de Ironia
+Contém ironia
+232
+50
+50
+332
+Não contém ironia
+615
+132
+132
+879
+Os resultados do ajuste dos modelos podem ser vistos na Tabela 3. Os modelos
+foram treinados com 5 passagens completas pelo conjunto de treino e aquele com
+melhor desempenho no conjunto de validação foi salvo e utilizado para avaliação no
+conjunto de teste. Todos os modelos foram treinados variando o número de camadas
+treinadas (as 2 ou 4 últimas camadas) e o batch size (testes realizados com 8, 16, 32 e
+64). Utilizou-se a taxa de aprendizado de 0.001 para todos os modelos e a entropia
+cruzada na função de custo, com ajuste para penalizar mais severamente os erros nas
+classes minoritárias. Na tarefa de DI, o melhor modelo foi o RoBERTuito (ID 4 - Tabela
+1), tendo sido ajustado nas últimas duas camadas e com um batch size de 16. Nas tarefas
+de AS e DP, o melhor modelo foi o BERTimbau (ID 1 - Tabela 1), sendo ajustado nas
+últimas 4 camadas e com o mesmo batch size do modelo anterior.
+Tabela 3. Métricas de avaliação dos melhores modelos por tarefa.
+Tarefa
+Modelo
+F1-Score
+Precision
+Recall
+Análise de Sentimento
+neuralmind/bert-base-portuguese-cased
+0,85
+0,86
+0,86
+Detecção de Ironia
+pysentimiento/robertuito-base-uncased
+0,76
+0,76
+0,76
+Detecção de Posição
+neuralmind/bert-base-portuguese-cased
+0,97
+0,97
+0,97
+Embora os resultados obtidos aqui não sejam diretamente comparáveis com a
+literatura por serem obtidos em uma base de dados diferente, eles são numericamente
+superiores aos encontrados em Pérez et al. (2023). Comparativamente, o modelo de AS
+em português ajustado em Pérez et al. (2023), treinado a partir do BERTweet.BR na
+base de dados apresentada em Brum & Volpe Nunes (2018), alcançou uma macro
+F-Score de 0,73 no conjunto de teste do dataset [Silva et. al. 2024]. Além disso, a título
+de exemplo, a Tabela 4 apresenta dois tweets do conjunto de teste, a classificação dada
+pelo modelo e a classe tida como verdadeira. Os dois tweets foram levemente
+modificados para evitar a sua identificação na rede social sem comprometimento do seu
+significado e avaliação.
+Tabela 4. Exemplos de classificação de dois tweets do conjunto de teste.
+202
+
+Texto
+Análise de Sentimento
+Detecção de Posição
+Detecção de Ironia
+Classe
+Verdadeira
+Classe
+Prevista
+Classe
+Verdadeira
+Classe
+Prevista
+Classe
+Verdadeira
+Classe
+Prevista
+mano passei a noite
+toda no meu quarto
+assistindo tbt e fui ver
+agr que tava a maior
+confusao em brasilia k
+super antenada eu sou
+Positivo
+Neutro
+Contra
+Contra
+Não
+contém
+ironia
+Não
+contém
+ironia
+nem eu acreditei
+quando vi onde ela
+tava me mandou
+corrente de excursao
+pra brasilia e tudo e
+nem dei bola
+Neutro
+Neutro
+Contra
+Contra
+Não
+contém
+ironia
+Contém
+ironia
+6.
+Conclusão
+Este artigo apresenta os avanços desta pesquisa em andamento voltada à construção de
+soluções computacionais capazes de apoiar o entendimento do debate em redes sociais.
+Uma das bases fundamentais destas soluções, explorada neste artigo, é a aplicação de
+técnicas de mineração de argumentos capazes de identificar a estrutura de argumentação
+presente nas diversas falas na rede. A expectativa é que a identificação e visualização da
+estrutura de argumentação possa auxiliar usuários da rede a compreenderem, refletirem
+e, eventualmente, melhor participarem do debate público.
+No treinamento dos modelos, os resultados mais significativos incluem o bom
+desempenho do modelo BERTimbau na tarefa de detecção de posição, com F1-Score de
+0,97. Adicionalmente, o modelo RoBERTuito também obteve um desempenho bom,
+com um F1-Score de 0,76 na detecção de ironia, uma tarefa ainda mais complexa no
+contexto das redes sociais. No entanto, destaca-se como limitação o fato de o dataset
+utilizado ser pequeno e desbalanceado, o que pode comprometer a representatividade
+estatística necessária para treinar e testar adequadamente modelos de deep learning,
+especialmente na tarefa de detecção de posição. Esse aspecto pode restringir a
+generalização dos resultados obtidos para diferentes contextos e tópicos. Os resultados
+de aplicação do pipeline proposto nos ajudarão, em passo seguinte, a projetar as
+abordagens para a realização da tarefa de detecção de argumentação, sofisticando a
+identificação da estrutura do debate. Como trabalhos futuros, planejamos aumentar a
+quantidade de dados anotados utilizados para treinamento dos modelos, bem como
+explorar outras tarefas de um pipeline de mineração de argumentos. Outra estratégia
+prevista é explorar a utilização de Large Language Models (LLMs) [Zhao et al.
+2023][(Brown et al., 2020)], abrindo a possibilidade de resumir o pipeline para apenas
+um modelo.
+Agradecimentos
+Os autores agradecem à FAPESP pelo financiamento desta pesquisa (#2021/14772-1).
+Renata Araujo é bolsista de produtividade em desenvolvimento tecnológico e extensão
+inovadora do CNPq (#305645/2022-6). Vitor dos Santos é bolsista TT1 pela FAPESP
+(#2023/04752-9). Livia Alabarse dos Santos é bolsa TT1 pela FAPESP (2023/04042-1).
+203
+
+Referências
+Addawood. A. e Bashir, M. (2016). “What Is Your Evidence? A Study of Controversial
+Topics on Social Media”. Em: Proceedings of the Third Workshop on Argument
+Mining
+(ArgMining2016).
+Berlin,
+Germany.
+Association
+for
+Computational
+Linguistics.pages 1–11.
+Bosc, T., Cabrio, E. e Villata, S. (2016). “Tweeties Squabbling: Positive and Negative
+Results in Applying Argument Mining on Social Media”. Frontiers in Artificial
+Intelligence and Applications, v. 287, p. 21–32.
+Bosc, Tom, Cabrio, E. e Villata, S. (2016a). “DART: a Dataset of Arguments and their
+Relations on Twitter” Em:
+Proceedings of the 10th edition of the Language
+Resources and Evaluation Conference. pp. 1258-1263.
+Brown, T., Mann, B., Ryder, N., et al. (2020). Language Models are Few-Shot Learners.
+Em: Advances in Neural Information Processing Systems. Curran Associates, Inc.
+Carneiro, F. P. (2023). “BERTweet.BR: A Pre-Trained Language Model for Tweets in
+Portuguese”. Dissertação de Mestrado. Universidade Federal Fluminense, Programa
+de Pós-Graduação em Computação. Niterói.
+Cortiz, D. (2021) “Exploring transformers in emotion recognition: a comparison of bert,
+distillbert, roberta, xlnet and electra”. arXiv. arXiv:2104.02041.
+Costa, P. B., Pavan, M. C., Santos, W. R., Silva, S. C., & Paraboni, I. (2023).
+“BERTabaporu: Assessing a Genre-Specific Language Model for Portuguese NLP”.
+Em: Proceedings of the 14th International Conference on Recent Advances in
+Natural
+Language
+Processing,
+p.
+217–223.
+Shoumen,
+Bulgaria.
+https://aclanthology.org/2023.ranlp-1.24
+Demszky, D., Movshovitz-Attias, D., Ko, J., Cowen, A.S., Nemade, G., & Ravi, S.
+(2020)
+“GoEmotions:
+A
+Dataset
+of
+Fine-Grained
+Emotions”.
+arXiv.
+arXiv:abs/2005.00547.
+Devlin, J., Chang, M.-W., Lee, K. and Toutanova, K. (2019). “BERT: Pre-training of
+Deep Bidirectional Transformers for Language Understanding”. Em: Proceedings of
+the 2019 Conference of the North American Chapter of the Association for
+Computational
+Linguistics:
+Human
+Language
+Technologies,
+Association
+for
+Computational Linguistics.
+Lawrence, J., Bex, F., Reed, C. e Snaith, M. (2012) “AIFdb: Infrastructure for the
+Argument
+Web.”
+Em:
+Proceedings of the 6th International Conference on
+Computational Models of Argument. IOS Press. pp. 515-516.
+Lawrence, J. e Reed, C. (2020) “Argument mining: A survey”. Computational
+Linguistics, v. 45(4), pp. 765-818, 2020.
+Lippi, M., Torroni, P. (2016). “Argumentation mining: State of the art and emerging
+trends”. ACM Transactions on Internet Technology, 16(2), 1-25.
+Palau, R. M. e Moens, M. F. (2009). “Argumentation mining: the detection,
+classification and structure of arguments in text”. Em: Proceedings of the 12th
+International Conference on Artificial Intelligence and Law. pp. 98-107.
+Pedregosa, F., Varoquaux, G., Gramfort, A., Michel, V., Thirion, B., Grisel, O., ... e
+204
+
+Duchesnay, E. (2011) “Scikit-learn: Machine learning in Python". The Journal of
+machine Learning research, 12,2825-2830.
+Pérez, J. M., Furman, D. A., Alonso Alemany, L., & Luque, F. M. (2022).
+“RoBERTuito: A pre-trained language model for social media text in Spanish”. Em:
+Proceedings of the Thirteenth Language Resources and Evaluation Conference, p.
+7235–7243.
+European
+Language
+Resources
+Association.
+https://aclanthology.org/2022.lrec-1.785
+Pérez, J. M., Rajngewerc, M., Giudici, J. C., Furman, D. A., Luque, F., Alemany, L. A.,
+& Martínez, M. V. (2023). “pysentimiento: A Python Toolkit for Opinion Mining and
+Social NLP tasks”. arXiv. http://arxiv.org/abs/2106.
+Salles, G. T., Coelho, O. B. (2022). “Reconhecimento de Emoções em Mineração de
+Argumentos com Deep Learning”. Trabalho de Conclusão de Curso. Universidade
+Presbiteriana Mackenzie.
+Schaefer, R. e Stede, M. (2021). “Argument Mining on Twitter: A survey”. Information
+Technology, v. 63, n. 1, p. 45–58.
+Silva, L. J., Santos, L. A.; Araujo, R., Coelho, O. B., Correa, A. G, D,; Oliveira, I. C. A.
+(2024)
+“Tweet_Eleições_2022:
+Um
+dataset
+de
+tweets
+durante
+as
+eleições
+presidenciais brasileiras de 2022”. Brazilian Workshop on Social Network Analysis
+and Mining (BRASNAM), 13. Brasília/DF. Porto Alegre: Sociedade Brasileira de
+Computação. p. 193-199. https://doi.org/10.5753/brasnam.2024.1940.
+Slonim, N., Bilu, Y., Alzate, C., Bar-Haim, R., Bogin, B., Bonin, F., ... e Aharonov, R.
+(2021). “An autonomous debating system”. Nature, 591(7850), p. 379-384.
+Sousa, J.P.S., Nascimento, R. C. U., Araujo, R. M., Coelho, O. B. (2021). “Não se perca
+no debate! Mineração de Argumentação em Redes Sociais”. Brazilian Workshop on
+Social Network Analysis and Mining (BRASNAM). Porto Alegre: Sociedade
+Brasileira de Computação. p. 139-150. https://doi.org/10.5753/brasnam.2021.16132.
+Souza, F., Nogueira, R., & Lotufo, R. (2020). “BERTimbau: Pretrained BERT Models
+for
+Brazilian
+Portuguese”,
+p.
+403–417.
+https://doi.org/10.1007/978-3-030-61377-8_28
+Stede, M. e Schneider, J. (2019). “Argumentation Mining”. Springer. Synthesis Lectures
+on Human Language Technologies.
+Sun, C., Qiu, X., Xu, Y. e Huang, X. (2019). “How to Fine-Tune BERT for Text
+Classification?” In Chinese Computational Linguistics. Lecture Notes in Computer
+Science. Springer International Publishing.
+Tokuda, N. H., Coelho, O. B., Araujo, R.M. (2021). “Análise de Sentimento por meio
+de Deep Learning aplicada à Mineração de Argumentos”. Trabalho de Conclusão de
+Curso. Universidade Presbiteriana Mackenzie.
+Toulmin, S. E. (2003). The uses of argument. Cambridge University Press.
+Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A.N., Kaiser, T.
+e Polosukhin, I. (2017). “Attention is All you Need”. Em: Advances in Neural
+Information Processing Systems. Curran Associates, Inc. 30.
+Vecchi, E. M., Falk, N., Jundi, I., Lapesa, G. (2021). “Towards Argument Mining for
+205
+
+Social Good: A Survey”. Em: Proceedings of the 59th Annual Meeting of the
+Association
+for
+Computational
+Linguistics
+and
+the 11th International Joint
+Conference
+on
+Natural
+Language
+Processing.
+.Online.
+Association
+for
+Computational Linguistics. p. 1338–1352.
+Wagner Filho, J. A., Wilkens, R., Idiart, M., & Villavicencio, A. (2018). "The brWaC
+Corpus: A New Open Resource for Brazilian Portuguese". Em: Proceedings of the
+Eleventh International Conference on Language Resources and Evaluation (LREC
+2018).
+European
+Language
+Resources
+Association
+(ELRA).
+https://aclanthology.org/L18-1686
+Walker, M. A., Tree, J. E. F., Anand, P., Abbott, R. e King, J. (2012). “A Corpus for
+Research on Deliberation and Debate”. Em: Proceedings of the Eighth International
+Conference on Language Resources and Evaluation (LREC ’12) v. 12. Istanbul,
+Turkey. p. 812–817.
+Zhang, T., Wu, F., Katiyar, A., Weinberger, K. Q., & Artzi, Y. (2020) “Revisiting
+few-sample BERT fine-tuning”. arXiv preprint arXiv:2006.05987.
+Zhao, W. X., Zhou, K., Li, J., et al. (2023). “A Survey of Large Language Models”.
+Arxiv. arXiv. http://arxiv.org/abs/2303.18223.
+206

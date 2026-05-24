@@ -1,0 +1,633 @@
+Bazinga! Caracterizando e Detectando
+Sarcasmo e Ironia no Twitter
+Pollyanna Gonc¸alves1, Daniel Hasan Dalip1, Julio C. S. Reis1,
+Johnnatan Messias1, Filipe Ribeiro2, Philipe Melo1,
+Leandro Ara´ujo1, Fabr´ıcio Benevenuto1, Marcos Gonc¸alves1
+1Universidade Federal de Minas Gerais (UFMG) – Brasil
+2Universidade Federal de Ouro Preto (UFOP) – Brasil
+{pollyannaog,hasan,julio.reis,johnnatan,philipe}@dcc.ufmg.br
+{leandroaraujo,fabricio,mgoncalv}@dcc.ufmg.br
+{filipe}@decea.ufop.br
+Abstract. Sarcasm and irony are widely used forms of speech used inside and
+outside the Web, having the power to transform a sentence regarding its polarity
+or sense. The ability of characterizing and detecting sarcastic and ironic mes-
+sages on data collected from Web could improve many decision-making systems
+based on Natural Language Processing (NLP) such as the sentiment analysis,
+text summarization and review ranking systems. In this work, we propose some
+approaches to the task of characterization and detection of sarcasm and irony
+in messages posted on Twitter online social network. Using an automatically
+collected dataset with the hashtags “#sarcasm” and“#irony”, and by exploiting
+a large set of characterization and classiﬁcation techniques, our results show
+satisfactory rates of accuracy and Macro-F1.
+Resumo. Sarcasmo e ironia s˜ao formas de discurso muito utilizadas dentro e
+fora da Web, tendo o poder de transformar caracter´ısticas como polaridade
+ou sentido de uma sentenc¸a. Ser capaz de caracterizar e detectar mensagens
+sarc´asticas ou irˆonicas em dados coletados da Web pode aprimorar diversos
+sistemas de tomada de decis˜ao baseados em Processamento de Linguagem Na-
+tural (PLN) como a tarefa de an´alise de sentimentos, sumarizac¸˜ao de textos
+e sistemas de ranqueamento de reviews. Nesse trabalho, propomos diversas
+abordagens para a caracterizac¸˜ao e posterior classiﬁcac¸˜ao de sarcasmo e iro-
+nia em mensagens postadas na rede social online Twitter. Utilizando uma base
+automaticamente coletada de tweets com as hashtags “#sarcasm”e “#irony”, e
+usando uma larga gama de t´ecnicas de caracterizac¸˜ao e classiﬁcac¸˜ao, nossos
+resultados de detecc¸˜ao alcanc¸aram taxas satisfat´orias de acur´acia e Macro-F1.
+1. Introduc¸˜ao
+A habilidade de identiﬁcar sarcasmo e ironia em di´alogos informais publicados na Web
+vem recebendo a atenc¸˜ao de diversas pesquisas cient´ıﬁcas na computac¸˜ao e em v´arias
+outras ´areas do conhecimento, como por exemplo, na lingu´ıstica [Cheang and Pell 2011]
+e na sociologia [Ball 1965]. No mundo real, as pessoas s˜ao capazes de compreender
+tais caracter´ısticas em uma conversa devido a v´arios fatores contextuais tais como os
+
+gestos do locutor e seu tom de voz [Gibbs and Colston 2007]. No entanto, devido a
+essa natureza intr´ınseca de interpretac¸˜ao do ser humano, a tarefa de automaticamente
+detectar sarcasmo e ironia se torna dif´ıcil em dados provenientes da Web. Uma das
+principais caracter´ısticas desse tipo de mensagem ´e a capacidade de desempenhar um
+papel de inversor de polaridade ou at´e mesmo de seu sentido, utilizando-se de v´arias
+t´ecnicas lingu´ısticas tais como simples jogos de palavras. Reconhecer essas mudanc¸as ´e
+um aspecto extremamente importante na melhora da performance de algoritmos propos-
+tos na minerac¸˜ao de opini˜ao, como por exemplo para a detecc¸˜ao de sentimentos em da-
+dos da Web [Hu and Liu 2004, Popescu and Etzioni 2005]. Al´em da pesquisa cient´ıﬁca,
+detecc¸˜ao de sarcasmo e ironia em dados da Web vˆem atraindo esforc¸os em diversos
+setores. Recentemente, a agˆencia do Servic¸o Secreto dos Estados Unidos anunciou a
+contratac¸˜ao de desenvolvedores para a construc¸˜ao de um detector de sarcasmo voltado
+para redes sociais online [BBC ]. Essa not´ıcia demonstra a relevˆancia do tema na atuali-
+dade e ressalta, principalmente, a complexidade existente por tr´as dessa tarefa.
+Redes sociais online se tornaram um meio prop´ıcio para a coleta de dados
+por pesquisadores e companhias em larga escala [Cha et al. 2010]. Nesses ambientes,
+usu´arios expressam suas opini˜oes, fatos de seu cotidiano e informac¸˜oes de situac¸˜oes
+que presenciam em tempo real [Cha et al. 2012]. Como resultado, um grande n´umero
+de estudos utiliza-se desses ambientes para o monitoramento de assuntos do momento,
+memes1, de eventos em escala global [Gomide et al. 2011, Lamb et al. 2013] e desas-
+tres [Sakaki et al. 2010]. Para exempliﬁcar o grande uso de redes sociais nos dias de hoje,
+o Twitter, atualmente considerado como uma das redes sociais online mais populares da
+Web, conta com mais de 280 milh˜oes de usu´arios ativos por mˆes e 500 milh˜oes de tweets2
+postados diariamente.
+Aqui, damos um importante passo em direc¸˜ao a caracterizac¸˜ao e detecc¸˜ao de sar-
+casmo e ironia no Twitter. Nessa rede social, mensagens podem ser associadas a hashtags
+como “#NowPlaying” (utilizado por usu´arios para indicar a m´usica sendo ouvida naquele
+momento) e “#FollowFriday” (utilizado para recomendar seguidores na rede). Utilizamos
+essa propriedade para construir uma base de dados rotulada com cerca de 2.628 tweets
+contendo sarcasmo (aqueles que contˆem a hashtag #Sarcasm), 2.628 tweets contendo
+ironia (associados `a hashtag #Irony) e 2.628 tweets com contextos aleat´orios. Nosso pro-
+cesso de caracterizac¸˜ao envolve o uso do software Linguistic Inquiry and Word Count
+(LIWC) como uma t´ecnica de Processamento de Linguagem Natural (PLN), an´alise de
+estruturas gramaticais, t´ecnicas de aprendizado de m´aquina que exploram o texto (bag-
+of-words) da mensagem, an´alise de sentimento e detecc¸˜ao de atributos de usu´arios para a
+classiﬁcac¸˜ao de mensagens como sendo ou n˜ao sarc´asticas ou irˆonicas.
+O restante desse artigo est´a organizado da seguinte forma. A Sec¸˜ao 2 descreve os
+trabalhos relacionados. Em seguida, na Sec¸˜ao 3, apresentamos a metodologia utilizada
+para a caracterizac¸˜ao e detecc¸˜ao de sarcasmo e ironia no Twitter. A an´alise e discuss˜ao
+dos resultados s˜ao apresentados na Sec¸˜ao 4. Por ﬁm, a Sec¸˜ao 5 apresenta conclus˜oes e
+direc¸˜oes para trabalhos futuros.
+1Termo que descreve um conceito que se tornou “viral”, ou seja, aquele que se espalhou rapidamente
+pela Internet.
+2Mensagem com um m´aximo de 140 caracteres postadas no Twitter.
+
+2. Terminologia e Conceitos
+Nesse trabalho, propomos uma caracterizac¸˜ao e detecc¸˜ao de sarcasmo e ironia em da-
+dos coletados do Twitter. Uma das principais diﬁculdades presentes na tarefa de detectar
+tais tipos de mensagens na Web est´a associada a falta de acordo entre a maioria dos pes-
+quisadores (soci´ologos, psic´ologos, cientistas da computac¸˜ao, etc.) em como deﬁnir ou
+diferenciar sarcasmo de ironia. Enquanto v´arias pesquisas prop˜oem que sarcasmo e ironia
+s˜ao termos associados a um mesmo fenˆomeno lingu´ıstico [Kreuz and Glucksberg 1989a],
+h´a estudos focados em mostrar evidˆencias que os diferenciam [Singh 2012].
+Considerando que nossa base possui mensagens de usu´arios que diferenciam sar-
+casmo de ironia com o uso das hashtags “#sarcasm” e “#irony”, propomos estrat´egias
+para caracterizac¸˜ao e detecc¸˜ao de mensagens sarc´asticas e irˆonicas separadamente. Outro
+fator importante que consideramos para separac¸˜ao das bases com sarcasmo e ironia foi a
+baixa quantidade de mensagens que contˆem as hashtags “#sarcasm” e “#irony” ao mesmo
+tempo (cerca de 0,0007% da base).
+Para melhor entendimento da diferenciac¸˜ao entre sarcasmo e ironia, deﬁnimos
+brevemente abaixo os conceitos desses dois temos:
+• Sarcasmo: No sarcasmo, h´a um uso de instrumentos lingu´ısticos indiretos para
+a ridicularizac¸˜ao ou zombaria, muitas vezes considerado grosseiros e ofensivos,
+sendo utilizados para ﬁns destrutivos [Singh 2012]. Um exemplo de sarcasmo
+pode ser visto no tweet “Super glad I got a sinus infection during ﬁnals week!
+#sarcasm”, em que ´e ontrastado um sentimento de agradecimento com o surgi-
+mento de um contratempo negativo em um per´ıodo possivelmente conturbado.
+• Ironia: A ironia pode ser considerada como uma discordˆancia, ou incongruˆencia,
+entre o que se diz e o que se entende, ou do que se espera e do que realmente
+ocorre [Singh 2012]. Esse tipo de mensagem geralmente vˆem acompanhado de
+um tom de brincadeira e possui menor peso ofensivo do que o sarcasmo. Um
+exemplo de ironia pode ser notado no tweet “Steve Jobs did not allow his kids to
+use iPads #irony”, onde, em um tom engrac¸ado o usu´ario encontra uma poss´ıvel
+incongruˆencia de uma situac¸˜ao.
+A seguir, apresentamos os trabalhos relacionados e posicionamos nosso trabalho
+em relac¸˜ao `a literatura.
+3. Trabalhos Relacionados
+Esforc¸os na caracterizac¸˜ao e detecc¸˜ao sarcasmo e ironia vˆem sendo abordado pela litera-
+tura em diferentes ´areas de pesquisa, tais como lingu´ıstica [Cheang and Pell 2011] e psi-
+cologia [Kreuz and Glucksberg 1989b, Gibbs and Colston 2007]. No entanto, apesar dos
+diversos estudos em diferentes ´area, ainda h´a desaﬁos a serem resolvidos, princialmente
+nas ´areas de Ciˆencia da Computac¸˜ao, como a Minerac¸˜ao de Opini˜ao, onde o objetivo ´e
+detectar tais express˜oes de forma autom´atica.
+Estudos recentes mostram,
+por exemplo,
+que ´e poss´ıvel que sentenc¸as
+sarc´asticas sejam constru´ıdas utilizando-se padr˜oes e f´ormulas, os quais facilitam sua
+identiﬁcac¸˜ao [Kreuz and Caucci 2007].
+Diante desse fato, surge a possibilidade da
+criac¸˜ao de m´etodos que busquem por fatores gramaticais, como adv´erbios e interjeic¸˜oes
+comuns em sentenc¸as classiﬁcadas como sarc´asticas ou irˆonicas, e que os utilizem na
+
+classiﬁcac¸˜ao de mensagens desse tipo na Web. Outros evidenciam como a presenc¸a de
+ironia em mensagens pode diﬁcultar a classiﬁcac¸˜ao de sentimentos em mensagens da
+Web [Carvalho et al. 2009].
+Mais relacionados ao nosso estudo, alguns trabalhos utilizam a t´ecnica de ﬁltra-
+gem por hashtags como uma estrat´egia para a identiﬁcac¸˜ao de mensagens em redes socias
+contendo sarcasmo ou ironia. Gonzales-Ib´a˜nes et. al [Gonz´alez-Ib´a˜nez et al. 2011] cons-
+tru´ıram um corpus de mensagens com teor sarc´astico postadas no Twitter, utilizando como
+r´otulo para a coleta as hashtags “#sarcasm” e “#sarcastic”. Esse estudo esteve focado na
+diferenciac¸˜ao de tweets contendo sarcasmo de tweets com teor positivo ou negativo e
+posterior identiﬁcac¸˜ao de sarcasmo na rede social online. O m´etodo desenvolvido com o
+uso de t´ecnicas de aprendizado de m´aquina se baseou no uso de atributos l´exicos como
+o LIWC e o WordNet Affect (WNA) [Valitutti 2004], atributos chamados pragm´aticos,
+como emoticons positivos e negativos e tweets destinados a um usu´ario espec´ıﬁco. Re-
+sultados mostraram que atributos l´exicos apenas n˜ao s˜ao suﬁcientes para distinguir men-
+sagens com sarcasmo de mensagens positivas ou negativas, ao contr´ario dos atributos
+pragm´aticos. O estudo tamb´em ressaltou as diﬁculdades na identiﬁcac¸˜ao de mensagens
+desse tipo, comparando resultados da classiﬁcac¸˜ao humana com resultados do m´etodo de
+aprendizado de m´aquina proposto.
+Outro estudo, de Liebrecht et al. [Liebrecht et al. 2013], realizou a coleta de mi-
+lhares de tweets no idioma Holandˆes contendo hashtags associadas ao sarcasmo e desen-
+volveram um m´etodo baseado na t´ecnica de aprendizado de m´aquina Balanced Winnow
+[Littlestone 1988] para alcanc¸ar uma performance de 75% de acur´acia na detecc¸˜ao de
+mensagens desse tipo. O algoritmo utilizado ´e considerado estado da arte na tarefa de
+classiﬁcac¸˜ao de textos e ´e capaz de associar pesos as classes com o objetivo de, por exem-
+plo, inspecionar atributos com maior ganho de informac¸˜ao em uma determinada classe.
+J´a Li et al. [Li et al. ] utilizaram hashtags como baseline para a tarefa de recuperac¸˜ao de
+informac¸˜ao e classiﬁcac¸˜ao para a construc¸˜ao de um corpus de declarac¸˜oes relevantes para
+a detecc¸˜ao de sarcasmo.
+Diferente dos trabalhos abordados na literatura, nosso estudo faz o uso abordagens
+de algoritmos de aprendizado de m´aquina que se baseiam em Bag-of-words, features asso-
+ciadas a componentes cognitivos, emocionais e estruturas gramaticais para a classiﬁcac¸˜ao
+das mensagens, al´em de caracteriz´a-las em relac¸˜ao as suas caracter´ısticas lingu´ısticas,
+atributos dos usu´arios que as postaram e dos pr´oprios tweets compartilhados e em relac¸˜ao
+a polaridade (positivo, negativo ou neutro) dos tweets. Al´em disso, comparamos o uso
+de trˆes estrat´egias de classiﬁcac¸˜ao e mostramos qual das estrat´egias tem a capacidade de
+alcanc¸ar as melhores taxas de acur´acia e Macro-F1.
+Na pr´oxima sec¸˜ao, discutimos a metodologia utilizada nesse trabalho. Descreve-
+mos o processo de coleta da base de dados utilizada, deﬁnimos os algoritmos e t´ecnicas
+propostas para a tarefa de caracterizac¸˜ao e detecc¸˜ao de sarcasmo e ironia no Twitter, assim
+como as m´etricas utilizadas para a avaliac¸˜ao das abordagens consideradas.
+4. Metodologia
+Nesta sec¸˜ao, descrevemos nosso processo para a coleta de dados e as m´etricas utilizadas
+para a avaliac¸˜ao da nossas abordagens de detecc¸˜ao de sarcasmo e ironia no Twitter.
+
+4.1. Coleta da Base de Dados
+Nesse trabalho, utilizamos a API do Twitter3 para coletar mensagens a serem detectadas
+como sarc´asticas ou irˆonicas postadas por usu´arios da rede social. O uso da API restringe
+a coleta a apenas 1% dos tweets p´ublicos compartilhados na rede. Apesar da baixa per-
+miss˜ao para coleta, 1% do total de tweets publicados diariamente signiﬁca milhares de
+mensagens aleat´orias poss´ıveis de serem coletadas por dia. Coletamos tweets p´ublicos no
+per´ıodo de Fevereiro de 2014 a Fevereiro de 2015. Ao ﬁnal desse processo, contamos com
+7.884 mensagens de onde conseguimos extrair 2.628 tweets contendo as hashtags “#sar-
+casm”, 2.628 tweets contendo “#irony” e 2.628 contendo tweets com contexto aleat´orio.
+Al´em da mensagem postada, cada tweet possui informac¸˜oes como timestamp, indicador
+de retweet e favoritos, al´em de informac¸˜oes sobre o usu´ario que postou o conte´udo, como
+ID, nome de usu´ario e n´umero de seguidores e seguidos.
+4.2. Caracterizac¸˜ao
+Com o intuito de investigar e encontrar caracter´ısticas pr´oprias de mensagens contendo
+sarcasmo ou ironia no Twitter, damos um passo na caracterizac¸˜ao da nossa base de da-
+dos. Nesse trabalho, propomos uma caracterizac¸˜ao dos tweets coletados baseando-se em
+3 estrat´egias: (i) Caracter´ısticas lingu´ısticas do conte´udo; (ii) Atributos de usu´arios e twe-
+ets; e (iii) An´alise de sentimentos. A caracterizac¸˜ao por caracter´ısticas lingu´ısticas do
+conte´udo tem como objetivo um maior entendimento do uso de atributos lingu´ısticos (ex.:
+estrutura e gram´atica das mensagens) em mensagens deﬁnidas como contendo sarcasmo
+ou ironia. Nesse trabalho, utilizamos como estrat´egia para essa caracterizac¸˜ao a ferra-
+menta Linguistic Inquiry and Word Count (LIWC) [Tausczik and Pennebaker 2010]. O
+uso dessa ferramenta ´e importante para nosso estudo pois ele nos permite estimar com-
+ponentes emocionais, cognitivos, estruturais e gramaticais de um texto fornecido como
+entrada, baseado na utilizac¸˜ao de dicion´arios contendo palavras e categorias associadas a
+cada uma. O software est´a dispon´ıvel em http://www.liwc.net/.
+A caracterizac¸˜ao focada em atributos de usu´arios e tweets nos permitir´a analisar
+as diferenc¸as do comportamento dos usu´arios nas redes e dos tweets postados (ex.: quan-
+tidade de seguidores e quantidades de amigos, quantidades de retweets favoritos, menc¸˜oes
+a outros usu´arios, URLs, m´ıdias e hashtags) em mensagens desse tipo.
+Por ﬁm, a an´alise de sentimentos nos apresentar´a como essas mensagens se dife-
+rem em termos de polaridade (positivo, negativo ou neutro).
+4.3. Predic¸˜ao de Sarcasmo e Ironia
+Para o aprendizado e detecc¸˜ao de sarcasmo ou ironia nos tweets coletados, utiliza-
+mos o m´etodo de aprendizado de m´aquina supervisionado Support Vector Machine
+(SVM) [Tsochantaridis et al. 2005]. Nessa t´ecnica, cada tweet T foi representado por
+um vetor de atributos T = (f1t, f2t...f2n) e uma classe alvo c. Essa classe alvo, no caso
+da identiﬁcac¸˜ao de ironia, ser´a “ironia” caso seja ironia e “n˜ao-ironia” caso n˜ao seja iro-
+nia. No caso da identiﬁcac¸˜ao de sarcasmo, tamb´em ser´a uma classiﬁcac¸˜ao bin´aria onde
+“sarcasmo” quando a mensagem possui sarcasmo e “n˜ao-sarcasmo” caso contr´ario.
+Este vetor de atributos do tweet ´e composto por ind´ıcios que poderiam inferir se
+um determinado tweet contem sarcasmo/ironia ou n˜ao. Com essa estrat´egia, podemos
+3https://dev.twitter.com/
+
+representar um ´unico tweet de 3 formas: (i) Utilizando as palavras do tweet (t´ecnica
+Bag-of-Words (BOW)); (ii) Utilizando os atributos extra´ıdos do LIWC; ou (iii) Utilizando
+ambas as representac¸˜oes. Essas trˆes representac¸˜oes ser˜ao chamadas nesse trabalho de
+BOW, LIWC e BOW+LIWC, respectivamente.
+Na representac¸˜ao BOW, cada tweet ´e representado por um vetor T
+=
+(w1t, w2t, w3t, ..., wvt).
+Onde v ´e o tamanho do vocabul´ario e wit ´e o peso da pala-
+vra i no tweet t, que queremos prever. O peso wit ´e calculado atrav´es da m´etrica TF-
+IDF [Baeza-Yates and Ribeiro-Neto 2011] de cada palavra, como na equac¸˜ao abaixo:
+wit = TFit × IDFi = (1 + log2(fit)) × log2(N
+ni
+)
+(1)
+onde fit ´e a frequˆencia da palavra i no tweet t, N ´e a quantidade total de tweets
+na colec¸˜ao e ni ´e a quantidade de tweets que a palavra i aparece.
+A representac¸˜ao LIWC utiliza suas 85 categorias (tratadas aqui como atributos)
+para representar um tweet. Por ﬁm, a representac¸˜ao BOW+LIWC utiliza a concatenac¸˜ao
+dos pesos por palavras (Eq. 1) e os 85 atributos da representac¸˜ao LIWC.
+Para medir o desempenho da abordagem de detecc¸˜ao proposta, utilizamos as me-
+didas convencionais de Recuperac¸˜ao de Informac¸˜ao: revocac¸˜ao, precis˜ao, acur´acia e a
+macro F1. A revocac¸˜ao (R) de uma classe ´e a frac¸˜ao do n´umero de mensagens correta-
+mente classiﬁcadas pelo n´umero de mensagens nessa classe. Precis˜ao (P) da classe ´e a
+frac¸˜ao do n´umero de mensagens corretamente classiﬁcadas pelo total de mensagens predi-
+tas como mensagens dessa classe. Com o objetivo de explicar tais m´etricas, constru´ımos
+a matriz de confus˜ao apresentada no quadro a seguir:
+Observac¸˜ao real
+Positivo
+Negativo
+Predic¸˜ao
+Positivo
+a
+b
+esperada
+Negativo
+c
+d
+Cada posic¸˜ao neste quadro representa o n´umero de elementos em cada classe, e
+como essas foram previstas pelo modelo utilizado na classiﬁcac¸˜ao. Assim, conforme essa
+matriz, a precis˜ao (Ppos) e revocac¸˜ao (Rpos) para a classe positiva podem ser calculadas
+da seguinte forma: Ppos = a/(a + b) e Rpos = a/(a + c). J´a a acur´acia e macro F1,
+podem ser calculados como: A = (a + d)/(a + b + c + d) e F1 = 2 · (P · R)/(P + R),
+respectivamente.
+Em nossos experimentos utilizamos um procedimento de validac¸˜ao cruzada em
+cinco partic¸˜oes (folds) em que quatro partic¸˜oes s˜ao usadas para treino e um para teste e
+o procedimento ´e repetido cinco vezes, com variac¸˜ao das partic¸˜oes utilizando uma es-
+trat´egia round-robin. Resultados correspondem `a m´edia das cinco partic¸˜oes de teste.
+Parˆametros do classiﬁcador SVM foram descobertos utilizando a ferramenta grid dis-
+pon´ıvel no pacote LibSVM: http://www.csie.ntu.edu.tw/˜cjlin/libsvm,
+utilizando validac¸˜ao cruzada dentro do conjunto de treino. Por estarmos trabalhando com
+classiﬁcac¸˜ao de texto com alta dimensionalidade e esparsidade, utilizamos um SVM com
+kernel linear.
+
+5. Resultados
+5.1. Caracterizac¸˜ao
+Nesta sec¸˜ao, apresentamos os resultados da etapa de caracterizac¸˜ao de sarcasmo e ironia
+nos dados coletados do Twitter.
+5.2. Caracter´ısticas Lingu´ısticas do Conte´udo
+Um dos nossos objetivos neste trabalho ´e compreender caracter´ısticas lingu´ısticas de
+determinados conte´udos que contenham sarcasmo e ironia. Para isso, comparamos e
+contrastamos as amostras de dados contendo sarcasmo e ironia com a que n˜ao cont´em,
+conforme detalhamento apresentado em sec¸˜oes anteriores, com a utilizac¸˜ao do LIWC
+[Tausczik and Pennebaker 2010].
+O LIWC consiste em um conjunto de palavras agrupadas em categorias associa-
+das a quatro classes gerais: Linguistic Processes (LP) (e.g., adv´erbios, pronomes), Psy-
+chological Processes (PP) (e.g., emoc¸˜oes negativas e positivas), Personal Concerns (PC)
+(e.g, trabalho), e Spoken Categories (SC). Al´em, disso a ferramenta nos fornece taxas de
+ocorrˆencia de Punctuation (PT) (e.g, v´ırgula, exclamac¸˜ao).
+Inicialmente, executamos a ferramenta e obtivemos o percentual de ocorrˆencia
+de palavras associadas a cada uma das 85 categorias, para os todos os cen´arios (e.g.
+aleat´orio, sarcasmo e ironia).
+Considerando que nosso prop´osito ´e investigar carac-
+ter´ısticas intr´ınsecas ao texto que cont´em sarcasmo e ironia, focamos nos dicion´arios
+ou categorias do LIWC que possuem percentual signiﬁcativo em relac¸˜ao as mensagens
+que n˜ao cont´em sarcasmo e ironia. Por exemplo, para a categoria 3rd pers plural o per-
+centual de ocorrˆencia para os dados aleat´orios foi de 0,35 enquanto para os dados que
+cont´em ironia o percentual foi de 0,74. Neste caso, a raz˜ao entre os valores ´e de 2,11
+(0,74/0,35), o que indica que a ocorrˆencia de palavras da categoria 3rd pers plural ´e 2,11
+vezes maior em ironia (em relac¸˜ao aos dados aleat´orios). Com base no exemplo apresen-
+tado, deﬁnimos como signiﬁcativa a classe cuja raz˜ao ´e menor que 0,5 (ocorrˆencia menor
+ou igual a metade) ou maior que 2 (ocorrˆencia maior ou igual ao dobro). Acreditamos
+que isso nos fornec¸a um ind´ıcio mais preciso de categorias que realmente sejam ´uteis
+para a diferenciac¸˜ao dos conte´udos analisados neste trabalho. Os resultados obtidos para
+as classes signiﬁcativas do LIWC s˜ao apresentados na Tabela 1.
+Percebemos que o tweet contendo sarcasmo faz uso signiﬁcativo de palavras que
+expressam concordˆancia, ainda que de maneira mais informal, com uso de express˜oes
+como “Er”, “hm”e “umm”(ver classe Nonﬂuencies, na Tabela 1).
+Outro aspecto ob-
+servado est´a relacionado ao uso intenso da pontuac¸˜ao dois pontos (“:”), que ´e utili-
+zada para o an´uncio ou introduc¸˜ao de um esclarecimento ou citac¸˜ao.
+J´a o conte´udo
+irˆonico tem presenc¸a signiﬁcativa de pronomes na terceira pessoa do plural.
+Estu-
+dos anteriores indicam que essas s˜ao caracter´ısticas de uma linguagem mais informal
+[Tausczik and Pennebaker 2010].
+5.2.1. Atributos de Usu´ario
+Como discutido anteriormente, gostar´ıamos de analisar as diferenc¸as dos tweets e atribu-
+tos de usu´arios no Twitter em mensagens postadas com conte´udo sarc´astico ou irˆonico.
+
+Categoria
+Sarcasmo /Aleat´orio
+Ironia /Aleat´orio
+Exemplo de Palavras
+Classe LIWC
+3rd pers plural
+1,60
+2,11
+They, their, they’d
+LP
+Assent
+2,63
+1,25
+Agree, OK, yes
+SC
+Nonﬂuencies
+3,00
+1,22
+Er, hm, umm
+Colons
+0,37
+0,53
+-
+PT
+Tabela 1. An´alise das classes signiﬁcantes do LIWC
+Aleat´orio
+Sarcasmo
+Ironia
+Ocorrˆencia de m´ıdias
+32,90%
+12,60%
+24,60%
+Ocorrˆencia de URL’s
+29,40%
+8,90%
+12,80%
+Ocorrˆencia de m´ıdia ou URL’s
+43,10%
+14,80%
+24,5%
+Tabela 2. Ocorrˆencia de m´ıdia e URL’s em tweets nas 3 categorias
+Para isso, foi necess´ario realizar uma an´alise das categorias dos tweets (tweets com a
+hashtag de sarcasmo, tweets com a hashtag de ironia e tweets aleat´orios), cada categoria
+possuindo no total 2.628 tweets.
+Nesse processo de caracterizac¸˜ao, podemos determinar algumas especiﬁcidades,
+apresentadas na Tabela 2. Primeiramente notamos que a ocorrˆencia de m´ıdias (fotos ou
+v´ıdeos) nos tweets da base aleat´oria ´e cerca de 2.9 vezes mais frequente do que na base
+de sarcasmo e 66.4% mais frequente do que na base de ironia. O mesmo ocorre com urls
+(ou links) que tamb´em s˜ao mais frequentes nos tweets da base aleat´oria do que nas outras
+bases.
+Tamb´em analisamos a ocorrˆencia de m´ıdia ou URL nos tweets. O objetivo desta
+an´alise ´e mostrar a presenc¸a de alguma informac¸˜ao externa, seja foto, v´ıdeo, URL, etc.
+Uma poss´ıvel raz˜ao para esta constatac¸˜ao pode ser consequˆencia da pr´opria permiss˜ao de
+postagem do Twitter, que ´e reduzida a um espac¸o de 140 caracteres. Uma URL, mesmo
+encurtada, por exemplo, ocupa um espac¸o essencial para a construc¸˜ao de uma mensa-
+gem de sarcasmo ou ironia, pois estas ´ultimas dependem totalmente do acompanhamento
+de um texto para transmitirem seu signiﬁcado. Outro motivo que poderia levar a esse
+comportamento, seria que ironia e sarcasmo s˜ao realizados sobre um acontecimento ou
+situac¸˜ao que ´e de “senso comum” ou ent˜ao de conhecimento de um grupo de amigos.
+Portanto, para esses acontecimentos ou situac¸˜oes j´a n˜ao ´e necess´aria nenhuma informac¸˜ao
+externa (URL ou m´ıdia) para que a ironia e sarcasmo fac¸am sentido.
+Ao analisarmos apenas os 10% tweets mais favoritados de cada base a tendˆencia
+continua. Tamb´em pode-se notar que a ocorrˆencia de informac¸˜ao externa entre os 10%
+tweets mais favoritados da base aleat´oria ´e ainda maior, alcanc¸ando 58.4%. Os valo-
+res apresentados conﬁrmam, que mesmo os tweets de sarcasmo e ironia mais populares
+possuem menos m´ıdia e URL’s do que os tweets dos demais assuntos.
+5.2.2. An´alise de Sentimentos
+No contexto de an´alise de sentimentos (ou minerac¸˜ao de opini˜ao) em dados coletados da
+Web, a tarefa de se detectar sarcasmo ou ironia se torna muito importante. Isso porque,
+como discutido em sec¸˜oes anteriores, tais estrat´egias lingu´ısticas tˆem o poder de transfor-
+
+Ironia
+Sarcasmo
+Positivo
+9%
+33%
+Negativo
+43%
+38%
+Neutro
+16%
+5%
+N˜ao-deﬁnido
+32%
+47%
+Concordˆancia
+74%
+79%
+Tabela 3. Caracterizac¸ ˜ao de sarcasmo e ironia com an´alise de sentimentos
+mar o sentimento de uma sentenc¸a, convertendo-a de uma sentenc¸a positiva para negativa,
+ou vice-versa. Nesse trabalho, temos com um dos nossos objetivos mostrar como tweets
+com sarcasmo e ironia est˜ao associados a uma polaridade (positivo, negativo e neutro).
+Para isso, solicitamos que 3 volunt´arios rotulassem 100 mensagens aleat´orias da nossa
+base de dados coletada contendo a hashtag “#irony” e 100 com a hashtag “#sarcasm”
+como positiva, negativa, neutral e n˜ao-deﬁnida (quando n˜ao conseguiam associar `a men-
+sagem um dos sentimentos anteriores). ´E v´alido ressaltar que os entrevistados tinham
+ciˆencia desses r´otulos antes de comec¸arem a tarefa. Cada volunt´ario fez sua an´alise de
+forma independente, sem a inﬂuˆencia dos demais. A porcentagem de concordˆancia entre
+eles foi de 74% nas mensagens com a hashtag de ironia e 79% nas mensagens com a
+hashtag de sarcasmo. O resultado da caracterizac¸˜ao de mensagens com ironia e sarcasmo
+em relac¸˜ao a polaridade ´e apresentado na Tabela 3.
+Como podemos perceber, mensagens associadas as hashtags de ironia e sarcasmo
+tendem a estar mais relacionadas a polaridade negativa. Tamb´em podemos notar um per-
+centual signiﬁcativo de mensagens com r´otulo “n˜ao-deﬁnido”, sugerindo que mensagens
+desse tipo s˜ao dif´ıceis de serem identiﬁcadas at´e mesmo por seres humanos.
+5.3. Identiﬁcac¸˜ao Autom´atica de Sarcasmo e Ironia
+Nesta sec¸˜ao ´e apresentado o resultado da identiﬁcac¸˜ao autom´atica de sarcasmo e ironia
+utilizando as 3 representac¸˜oes e o m´etodo de aprendizado de m´aquina descritos anterior-
+mente. As Tabelas 4 e 5 mostram resultados de acur´acia, Macro-F1, precis˜ao e revocac¸˜ao
+por classe para identiﬁcac¸˜ao de sarcasmo e ironia, respectivamente. Como discutido an-
+teriormente, a precis˜ao indica a raz˜ao entre o n´umero de instˆancias corretamente classi-
+ﬁcadas com uma determinada classe c e a quantidade de instˆancias classiﬁcadas como c.
+A revocac¸˜ao ´e a raz˜ao entre o n´umero de instˆancias corretamente classiﬁcadas com uma
+determinada classe c e a quantidade de instˆancias que s˜ao realmente desta classe.
+Analisando a performance para identiﬁcac¸˜ao de sarcasmo (Tabela 4), podemos
+observar que o BOW conseguiu uma melhor performance e, ao utilizar apenas o LIWC,
+n˜ao foi poss´ıvel identiﬁcar corretamente sarcasmo, prevendo quase todas as instˆancias
+como n˜ao-sarcasmo (revocac¸˜ao da classe sarcasmo baixa e da classe n˜ao-sarcasmo muito
+alta). Por esse motivo, ao utilizarmos a representac¸˜ao BOW+LIWC, n˜ao foi poss´ıvel
+conseguir uma melhoria.
+Na identiﬁcac¸˜ao de ironia, como podemos observar na Tabela 5, as representac¸˜oes
+BOW e LIWC conseguem uma performance similar e, ao utilizar BOW+LIWC, conse-
+guimos uma melhoria na performance demonstrando que cada uma das representac¸˜oes
+possui informac¸˜oes complementares. Por exemplo, melhorias de at´e 6,3% podem ser ob-
+servadas com a combinac¸˜ao da representac¸˜ao LIWC com BOW tanto em acur´acia quanto
+
+Classe “sarcasmo”
+Classe “n˜ao-sarcasmo”
+Representac¸˜ao
+Acur´acia
+Macro F1
+Precis˜ao
+Revocac¸˜ao
+Precis˜ao
+Revocac¸˜ao
+BOW
+71,60%
+71,79%
+70,17%
+76,25%
+74,02%
+67,54%
+LIWC
+50,24%
+36,90%
+58,63%
+5,52%
+50,12%
+94,91%
+BOW+LIWC
+71,15%
+71,13%
+70,29%
+73,55%
+72,26%
+68,83%
+Tabela 4. Precis˜ao e revocac¸ ˜ao por classe ao prever se um tweet cont´em sar-
+casmo ou n˜ao
+Classe “ironia”
+Classe “n˜ao-ironia”
+Representac¸˜ao
+Acur´acia
+Macro F1
+Precis˜ao
+Revocac¸˜ao
+Precis˜ao
+Revocac¸˜ao
+BOW
+71,51%
+71,50%
+71,33%
+72,00%
+71,74%
+71,05%
+LIWC
+67,46%
+67,42%
+66,43%
+70,57%
+68,64%
+64,36%
+BOW+LIWC
+76,00%
+75,99%
+76,60%
+74,92%
+75,46%
+77,09%
+Tabela 5. Precis˜ao e revocac¸ ˜ao por classe ao prever se um tweet cont´em ironia
+ou n˜ao
+em Macro-F1.
+Comparando os resultados da identiﬁcac¸˜ao de ironia e de sarcasmo, percebemos
+uma diﬁculdade maior na identiﬁcac¸˜ao de sarcasmo, onde n˜ao foi poss´ıvel identiﬁcar uti-
+lizando apenas a representac¸˜ao LIWC. A diﬁculdade em tratar mensagens contendo sar-
+casmo tamb´em esteve presente na tarefa de caracterizac¸˜ao de mensagens desse tipo com
+o uso de an´alise de sentimentos e na identiﬁcac¸˜ao de atributos de usu´ario, como discu-
+tido anteriormente. Esses resultados mostram a complexidade nesse tipo de classiﬁcac¸˜ao,
+sugerindo uma poss´ıvel necessidade de se combinar t´ecnicas em um esforc¸o de alcanc¸ar
+melhores resultados para mensagens com teor sarc´astico.
+6. Conclus˜oes e Trabalhos Futuros
+Sarcasmo e ironia s˜ao formas de discurso lingu´ıstico ricos e complexos que vˆem atraindo a
+atenc¸˜ao de pesquisadores na ´area de minerac¸˜ao de dados da Web devido a sua diﬁculdade
+de detecc¸˜ao nesse ambiente. Nesse trabalho, damos um passo na tarefa de caracterizac¸˜ao e
+detecc¸˜ao de sarcasmo no Twitter. Contamos com uma base de dados signiﬁcativa coletada
+para ﬁns desse trabalho, contendo 2.628 tweets com conte´udo aleat´orio, 2.628 tweets com
+as hashtags “#sarcasm” e 2.628 tweets com a hashtag “#irony”. Propomos diferentes
+abordagens para a caracterizac¸˜ao de sarcasmo e ironia e tamb´em utilizamos t´ecnicas de
+aprendizado de m´aquina para a detecc¸˜ao desse tipo de mensagem no Twitter.
+Nosso processo de caracterizac¸˜ao foi resultante da an´alise de trˆes estrat´egias, base-
+adas em caracter´ısticas lingu´ısticas do conte´udo, onde analisamos resultados provenientes
+da ferramenta LIWC, em atributos de usu´arios, onde analisamos as diferenc¸as entre tweets
+com sarcasmo e ironia em relac¸˜ao ao comportamento dos usu´arios nas redes e dos tweets
+postados, e em an´alise de sentimentos, onde diferenciamos as duas categorias de mensa-
+gens em relac¸˜ao a polaridade (positivo, negativo ou neutro). Nossos resultados mostraram
+que mensagens com teor sarc´astico ou irˆonico fazem o uso de palavras na terceira pessoa
+do plural quase 2 vezes mais que mensagens aleat´orias, al´em de desse tipo de mensagens
+utilizar mais express˜oes como “Er”, “hm” e “umm”.
+Nossa caracterizac¸˜ao em relac¸˜ao a atributos de usu´arios e tweets mostraram
+que mensagens com conte´udo irˆonico, e especialmente de sarcasmo, possuem menos
+
+informac¸˜oes externas do que os tweets comuns indicando que, em geral, o mais im-
+portante da ironia e sarcasmo ´e o conte´udo textual e um fundamentado conhecimento
+sobre o assunto abordado. Uma abordagem que possivelmente proporcionaria melho-
+res resultados, mas que n˜ao foi considerada inicialmente seria a veriﬁcac¸˜ao do contexto
+dos tweets dos usu´arios. Informac¸˜oes como a quantidade de tweets de sarcasmo e ironia
+anteriormente feitos pelo usu´ario ou a frequˆencia de postagem de sarcasmo e ironia de
+seus amigos podem auxiliar na caracterizac¸˜ao de usu´arios irˆonicos ou sarc´asticos. Al´em
+disso, tamb´em mostramos que tweets sarc´asticos e irˆonicos s˜ao mais negativos que posi-
+tivos. Essa an´alise foi poss´ıvel com um processo de rotulac¸˜ao feita por trˆes volunt´arios
+que rotularam mensagens com sarcasmo e ironia com relac¸˜ao a sua polaridade (positivo,
+negativo, neutro, e n˜ao-deﬁnido).
+Por ﬁm, apresentamos nossos resultados do processo de detecc¸˜ao de sarcasmo e
+ironia no Twitter, com o uso do classiﬁcador supervisionado SVM junto ao algoritmo
+para classiﬁcac¸˜ao de textos TF-IDF. Utilizamos t´ecnicas de Bag-of-Words (BoW) e cate-
+gorias do LIWC para a etapa de detecc¸˜ao. Nossa abordagem se deu em trˆes estrat´egias:
+(i) Detecc¸˜ao apenas com o uso do BoW, alcanc¸ando resultados acima dos 70% para sar-
+casmo e ironia; (ii) Detecc¸˜ao utilizando apenas as categorias do LIWC como atributos,
+alcanc¸ando resultados em torno de 36% para sarcasmo e 67% para ironia; e (iii) Detecc¸˜ao
+utilizando BoW e categorias do LIWC, alcanc¸ando resultados acima dos 71% para sar-
+casmo e 76% para ironia.
+Comparando esses percebemos uma maior diﬁculdade na
+identiﬁcac¸˜ao de sarcasmo, assim como a conclus˜ao que apenas os atributos do LIWC
+aplicados ao classiﬁcador SVM n˜ao ´e suﬁciente para a tarefa de detecc¸˜ao de sarcasmo
+e ironia no Twitter. Como trabalho futuro, seria interessante observarmos quais termos
+(e tipos de termos) da t´ecnica Bag-of-Words s˜ao os mais importantes para conseguirmos
+identiﬁcar sarcasmo e ironia. Dessa forma, seria poss´ıvel propor atributos mais represen-
+tativos para a tarefa.
+7. Agradecimentos
+Ao Conselho Nacional de Desenvolvimento Cient´ıﬁco e Tecnol´ogico (CNPq), a
+Coordenac¸˜ao de Aperfeic¸oamento de Pessoal de N´ıvel Superior (CAPES), e a Fundac¸˜ao
+de Amparo `a Pesquisa do estado de Minas Gerais (FAPEMIG).
+Referˆencias
+Baeza-Yates, R. A. and Ribeiro-Neto, B. A. (2011). Modern Information Retrieval - the concepts and
+technology behind search, Second edition. Pearson Education Ltd., Harlow, England.
+Ball, D. W. (1965). Sarcasm as sociation: The rhetoric of interaction. pages 190–198.
+BBC.
+Us secret service seeks twitter sarcasm detector.
+http://www.bbc.com/news/
+technology-27711109. Acessado em 12, 2015.
+Carvalho, P., Sarmento, L., Silva, M. J., and de Oliveira, E. (2009). Clues for detecting irony in user-
+generated contents: Oh...!! it’s ”so easy”;-). In Proceedings of the 1st International CIKM Workshop on
+Topic-sentiment Analysis for Mass Opinion, TSA ’09, pages 53–56, New York, NY, USA. ACM.
+Cha, M., Benevenuto, F., Haddadi, H., and Gummadi, K. (2012). The world of connections and information
+ﬂow in twitter. In IEEE Transactions on Systems, Man and Cybernetics - Part A.
+Cha, M., Haddadi, H., Benevenuto, F., and Gummadi, K. P. (2010). Measuring User Inﬂuence in Twit-
+ter: The Million Follower Fallacy. In International AAAI Conference on Weblogs and Social Media
+(ICWSM).
+
+Cheang, H. S. and Pell, M. D. (2011). Recognizing sarcasm without language: A cross-linguistic study of
+english and cantonese. page 19.
+Gibbs, R. W. and Colston, H. L. (2007).
+Irony in language and thought: A cognitive science reader.
+Psychology Press.
+Gomide, J., Veloso, A., Jr., W. M., Almeida, V., Benevenuto, F., Ferraz, F., and Teixeira, M. (2011). Dengue
+surveillance based on a computational model of spatio-temporal locality of twitter. In ACM Web Science
+Conference (WebSci).
+Gonz´alez-Ib´a˜nez, R., Muresan, S., and Wacholder, N. (2011). Identifying sarcasm in twitter: A closer look.
+In Proceedings of the 49th Annual Meeting of the Association for Computational Linguistics: Human
+Language Technologies: Short Papers - Volume 2, HLT ’11, pages 581–586, Stroudsburg, PA, USA.
+Association for Computational Linguistics.
+Hu, M. and Liu, B. (2004). Mining and summarizing customer reviews. In Proceedings of the Tenth
+ACM SIGKDD International Conference on Knowledge Discovery and Data Mining, KDD ’04, pages
+168–177, New York, NY, USA. ACM.
+Kreuz and Glucksberg (1989a). How to be sarcastic: the echoic reminder theory of verbal irony. Journal of
+Experimental Psychology: General, pages 374–386.
+Kreuz, R. J. and Caucci, G. M. (2007). Lexical inﬂuences on the perception of sarcasm. In Proceedings
+of the Workshop on Computational Approaches to Figurative Language, FigLanguages ’07, pages 1–4,
+Stroudsburg, PA, USA. Association for Computational Linguistics.
+Kreuz, R. J. and Glucksberg, S. (1989b). How to be sarcastic: The echoic reminder theory of verbal irony.
+Journal of Experimental Psychology: General, 118(4):374.
+Lamb, A., Paul, M. J., and Dredze, M. (2013). Separating Fact from Fear: Tracking Flu Infections on
+Twitter. In Conference of the North American Chapter of the Association for Computational Linguistics:
+Human Language Technologies, pages 789–795.
+Li, G., Ghosh, A., and Veale, T. Constructing a corpus of ﬁgurative language for a tweet classiﬁcation and
+retrieval task.
+Liebrecht, C., Kunneman, F., and van den Bosch, A. (2013). The perfect solution for detecting sarcasm in
+tweets# not. WASSA 2013, page 29.
+Littlestone, N. (1988). Learning quickly when irrelevant attributes abound: A new linear-threshold algo-
+rithm. In Machine Learning, pages 285–318.
+Popescu, A.-M. and Etzioni, O. (2005). Extracting product features and opinions from reviews. In Procee-
+dings of the Conference on Human Language Technology and Empirical Methods in Natural Language
+Processing, HLT ’05, pages 339–346, Stroudsburg, PA, USA. Association for Computational Linguis-
+tics.
+Sakaki, T., Okazaki, M., and Matsuo, Y. (2010). Earthquake shakes twitter users: real-time event detection
+by social sensors. In Int’l Conference on World wide web (WWW), pages 851–860.
+Singh, R. K. (2012). Humour, irony and satire in literature. pages 65–72.
+Tausczik, Y. R. and Pennebaker, J. W. (2010). The psychological meaning of words: Liwc and computerized
+text analysis methods. Journal of language and social psychology, 29(1):24–54.
+Tsochantaridis, I., Joachims, T., Hofmann, T., and Altun, Y. (2005). Large margin methods for structured
+and interdependent output variables. Journal of Machine Learning Research (JMLR), 6:1453–1484.
+Valitutti, R. (2004).
+Wordnet-affect: an affective extension of wordnet.
+In In Proceedings of the 4th
+International Conference on Language Resources and Evaluation, pages 1083–1086.

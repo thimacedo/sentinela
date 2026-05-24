@@ -1,0 +1,22 @@
+2026-05-24 10:51:06,038 INFO Dataset carregado com 25 entradas.
+2026-05-24 10:51:06,040 INFO Arquivo para fine\u2011tuning gravado em C:\Projetos\sentinela\data\training\pasa_finetune.jsonl
+2026-05-24 10:51:08,186 ERROR Falha ao iniciar o fine\u2011tuning.
+Traceback (most recent call last):
+  File "C:\Projetos\sentinela\scripts\train_ia.py", line 132, in main
+    job_id = fine_tune_openai_model(fine_tune_file, base_model)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Projetos\sentinela\scripts\train_ia.py", line 86, in fine_tune_openai_model
+    upload_resp = openai.File.create(file=open(train_file_path, "rb"), purpose="fine-tune")
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Projetos\sentinela\.venv\Lib\site-packages\openai\lib\_old_api.py", line 39, in __call__
+    raise APIRemovedInV1(symbol=self._symbol)
+openai.lib._old_api.APIRemovedInV1: 
+
+You tried to access openai.File, but this is no longer supported in openai>=1.0.0 - see the README at https://github.com/openai/openai-python for the API.
+
+You can run `openai migrate` to automatically upgrade your codebase to use the 1.0.0 interface. 
+
+Alternatively, you can pin your installation to the old version, e.g. `pip install openai==0.28`
+
+A detailed migration guide is available here: https://github.com/openai/openai-python/discussions/742
+
