@@ -44,7 +44,7 @@ async def renew_account_cookies(browser, account: dict):
             current_url = page.url
             
             # Se não fomos para a tela de login, consideramos logado
-            if 'accounts/login' not in current_url and not (await page.query_selector('input[name="username"]')):
+            if 'accounts/login' not in current_url and not (await page.query_selector('input[name="username"], input[name="email"]')):
                 print(f'Login por {sid_key} inicial parece bem-sucedido')
                 logged_in = True
             else:
@@ -71,19 +71,46 @@ async def renew_account_cookies(browser, account: dict):
 
         # Preencher formulário de login
         try:
-            await page.wait_for_selector('input[name="username"]', timeout=20000)
-            await page.fill('input[name="username"]', user)
-            await page.fill('input[name="password"]', password)
+            input_selector = 'input[name="username"], input[name="email"]'
+            await page.wait_for_selector(input_selector, timeout=20000)
+            await page.fill(input_selector, user)
+            
+            # Se o campo de senha não estiver visível (fluxo de duas etapas), avançamos a etapa
+            password_selector = 'input[name="password"]'
+            password_element = await page.query_selector(password_selector)
+            
+            if not password_element or not await password_element.is_visible():
+                print("[*] Layout de login em duas etapas detectado. Avançando...")
+                await page.keyboard.press("Enter")
+                await asyncio.sleep(4) # Aguarda transição visual
+                
+            # Preenche o campo de senha
+            await page.wait_for_selector(password_selector, timeout=15000)
+            await page.fill(password_selector, password)
             
             # Clicar em entrar e esperar navegação
-            await asyncio.gather(
-                page.wait_for_navigation(wait_until='networkidle', timeout=60000),
-                page.click('button[type="submit"]')
-            )
+            submit_btn = await page.query_selector('button[type="submit"]')
+            if submit_btn:
+                await asyncio.gather(
+                    page.wait_for_navigation(wait_until='networkidle', timeout=45000),
+                    submit_btn.click()
+                )
+            else:
+                await asyncio.gather(
+                    page.wait_for_navigation(wait_until='networkidle', timeout=45000),
+                    page.keyboard.press("Enter")
+                )
+                
             print("Formulário de login submetido com sucesso")
             logged_in = True
         except Exception as e:
             print(f"Erro ao preencher formulário ou submeter login: {e}")
+            try:
+                os.makedirs("scratch", exist_ok=True)
+                await page.screenshot(path="scratch/login_error.png")
+                print("📸 Screenshot do erro de login salvo em scratch/login_error.png")
+            except Exception as e_snap:
+                print(f"Não foi possível salvar o screenshot: {e_snap}")
             try:
                 if 'accounts/login' not in page.url:
                     logged_in = True
