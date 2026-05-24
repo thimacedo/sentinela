@@ -185,6 +185,7 @@ class AIService:
                 continue
 
             try:
+                # 🛡️ Resiliência LiteRT: Tenta detectar erro de rota (404)
                 response = await provider["client"].chat.completions.create(
                     model=provider["model"],
                     messages=[
@@ -207,8 +208,7 @@ class AIService:
                 # Truncate to ensure log line doesn't explode in size
                 truncated_text = clean_text if len(clean_text) <= 50 else clean_text[:47] + "..."
                 
-                # Log padronizado com larguras fixas:
-                # [AI] 10 chars | ID: 36 chars | CATEGORIA: 20 chars | CONF: 4 chars | TEXTO
+                # Log padronizado com larguras fixas
                 cat = result.get('categoria_ia', 'NEUTRO')
                 conf = result.get('confianca_ia', 0.0)
                 logger.info(f"📊  [AI] {name.upper():<10} | ID: {comment_id:<36} | {cat:<20} | {conf:.2f} | \"{truncated_text}\"")
@@ -216,8 +216,12 @@ class AIService:
 
             except Exception as e:
                 status_code = getattr(e, "status_code", None)
-                ai_circuit_breaker.record_failure(name, status_code)
                 
+                # Tratamento especial para erro 404 em provedores locais (erro de rota ou modelo)
+                if status_code == 404 and name in ["litert", "ollama"]:
+                    logger.error(f"❌ [AI] {name.upper()} | ID: {comment_id} | ERRO 404: Verifique se o modelo '{provider['model']}' está carregado ou se a URL '{provider['client'].base_url}' está correta.")
+                
+                ai_circuit_breaker.record_failure(name, status_code)
                 logger.warning(f"⚠️  [AI] {name.upper():<10} | ID: {comment_id:<36} | STATUS: FALHA/TIMEOUT | ERRO: {str(e)[:50]}")
 
         raise RuntimeError(f"Todas as camadas de IA falharam para o comentário {comment_id}.")
@@ -241,12 +245,18 @@ class AIService:
                 "is_hate": is_hate,
                 "categoria_ia": categoria,
                 "confianca_ia": confidence,
+                "category": categoria, # Compatibilidade legada
+                "confidence": confidence, # Compatibilidade legada
                 "evidencia_lexical": data.get("evidencia_lexical", []),
                 "analise_pericial": data.get("analise_pericial", "Sem análise"),
                 "low_confidence": low_conf
             }
         except:
-            return {"is_hate": False, "categoria_ia": "NEUTRO", "confianca_ia": 0.0, "evidencia_lexical": [], "analise_pericial": "Erro de parsing"}
+            return {
+                "is_hate": False, "categoria_ia": "NEUTRO", "confianca_ia": 0.0, 
+                "category": "NEUTRO", "confidence": 0.0,
+                "evidencia_lexical": [], "analise_pericial": "Erro de parsing"
+            }
 
     async def run_batch_classification(self, limit: int = 50) -> int:
         from core.supabase_service import supabase as db

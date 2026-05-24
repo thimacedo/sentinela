@@ -77,7 +77,7 @@ class IGHeadlessWorker(BaseWorker):
 
                     for item in to_classify:
                         try:
-                            result = await ai_service.classify_text(item["texto_bruto"])
+                            result = await ai_service.classify_text(item["texto_bruto"], comment_id=str(item["id"]))
                             self.db.table("comentarios").update({
                                 "processado_ia": True,
                                 "is_hate": result["is_hate"],

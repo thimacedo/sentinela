@@ -16,10 +16,10 @@ class PASAAuditor:
         else:
             self.ai_service = ai_service_instance
 
-    async def process(self, text: str) -> Dict[str, Any]:
+    async def process(self, text: str, comment_id: str = "N/A") -> Dict[str, Any]:
         """Pipeline completo: Classifica (IA) e Audita (PASA v16.4)."""
         # 1. Classificação via IA (usando AIService refatorado)
-        classification = await self.ai_service.classify(text)
+        classification = await self.ai_service.classify(text, comment_id=comment_id)
         
         # 2. Auditoria terminológica PASA (centralizada no ForensicsService)
         is_compliant, violations = forensics_service.audit_terms(text)

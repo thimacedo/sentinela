@@ -122,7 +122,7 @@ class IGWorkerV2(BaseWorker):
                         # Busca comentário e classifica
                         c_data = self.db.table("comentarios").select("texto_bruto").eq("id", cid).single().execute()
                         if c_data.data:
-                            result = await ai_service.classify_text(c_data.data["texto_bruto"])
+                            result = await ai_service.classify_text(c_data.data["texto_bruto"], comment_id=cid)
                             
                             if result.get("categoria_ia") == "LIXO":
                                 # Lixo detectado pela IA pós-inserção

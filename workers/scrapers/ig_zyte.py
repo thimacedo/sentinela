@@ -623,7 +623,7 @@ class IGZyteWorker(BaseWorker):
                 res = self.db.table("comentarios").select("texto_bruto").eq("id", comment_id).single().execute()
                 if not res.data:
                     continue
-                result = await ai_service.classify_text(res.data["texto_bruto"])
+                result = await ai_service.classify_text(res.data["texto_bruto"], comment_id=comment_id)
                 self.db.table("comentarios").update({
                     "processado_ia": True,
                     "is_hate": result["is_hate"],
