@@ -39,6 +39,33 @@ Responda APENAS com JSON válido contendo:
   "analise_pericial": "Breve justificativa em pt-BR"
 }"""
 
+def load_training_context() -> str:
+    """Carrega o dataset de treinamento (PDFs de ironia/sarcasmo) como contexto in-prompt (In-Context Learning)."""
+    try:
+        dataset_path = os.path.join(os.path.dirname(__file__), "..", "data", "training", "pasa_training_dataset.jsonl")
+        if not os.path.exists(dataset_path):
+            return ""
+            
+        training_text = "\n\n--- BASE DE CONHECIMENTO (TREINAMENTO DE SARCASMO E IRONIA) ---\nUtilize as referências abaixo (extraídas de artigos científicos) para embasar sua detecção de ironia:\n"
+        with open(dataset_path, "r", encoding="utf-8") as f:
+            for line in f:
+                data = json.loads(line)
+                # Extrai apenas o trecho do texto do prompt do dataset
+                prompt_text = data.get("prompt", "")
+                if "Texto:" in prompt_text:
+                    excerpt = prompt_text.split("Texto:")[1].strip()
+                    training_text += f"- {excerpt}\n"
+                    # Limite de segurança de tokens para evitar travamento em modelos locais menores
+                    if len(training_text) > 8000:
+                        break
+        return training_text
+    except Exception as e:
+        logger.error(f"Erro ao carregar contexto de treinamento: {e}")
+        return ""
+
+TRAINING_CONTEXT = load_training_context()
+FULL_SYSTEM_PROMPT = SYSTEM_PROMPT + TRAINING_CONTEXT
+
 def safe_decode_unicode(s: str) -> str:
     try:
         import re
@@ -139,7 +166,7 @@ class AIService:
                 response = await provider["client"].chat.completions.create(
                     model=provider["model"],
                     messages=[
-                        {"role": "system", "content": SYSTEM_PROMPT},
+                        {"role": "system", "content": FULL_SYSTEM_PROMPT},
                         {"role": "user", "content": f"Comentário: \"{text}\""}
                     ],
                     response_format={"type": "json_object"},
