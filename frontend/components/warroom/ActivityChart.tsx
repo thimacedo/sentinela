@@ -75,18 +75,19 @@ export default function ActivityChart() {
           <span className="text-[10px] text-gray-500 font-mono">SENSOR DE PULSO ATIVO</span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="h-[300px] w-full pt-4">
+      <CardContent className="relative h-[300px] min-h-[300px] w-full pt-4">
         {isLoading ? (
-          <div className="flex items-center justify-center h-full text-gray-500 font-mono animate-pulse">
-            VARRENDO ESPECTRO TEMPORAL...
+          <div className="flex items-center justify-center h-full text-gray-500 animate-pulse font-mono">
+            ESCANEANDO PULSOS DA REDE...
           </div>
-        ) : chartData.length === 0 ? (
+        ) : data.length === 0 ? (
           <div className="flex items-center justify-center h-full text-gray-500 font-mono italic">
             SEM PULSOS DETECTADOS NO PERÍODO.
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData}>
+          <div className="w-full h-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={data}>
               <defs>
                 <linearGradient id="colorAlerts" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#00ff41" stopOpacity={0.3}/>
