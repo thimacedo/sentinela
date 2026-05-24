@@ -1,20 +1,18 @@
 """
-PASA v49 - AI Service: Motor de Inteligência Resiliente (Cloud Only)
-Cascata de IAs (Groq -> Mistral -> OpenRouter) com Circuit Breaker.
-Sem dependências locais de LLM para preservar a memória do servidor.
+PASA v52.3 - AI Service: Motor de Inteligência Resiliente (Hybrid Cascade)
+Roteamento dinâmico: LiteRT (Local) -> Ollama (Local) -> Mistral -> Groq -> OpenRouter.
 """
 import os
 import json
 import logging
 logger = logging.getLogger("AIService")
-from typing import Dict, Any
+from typing import Dict, Any, List
 from openai import AsyncOpenAI, APIStatusError
 from core.circuit_breaker import ai_circuit_breaker
 
-CONFIDENCE_THRESHOLD = float(os.getenv('CONFIDENCE_THRESHOLD', '0.5'))  # Limiar de confiança unificado para todas as IAs
+CONFIDENCE_THRESHOLD = float(os.getenv('CONFIDENCE_THRESHOLD', '0.5'))
 
-
-# Prompt baseado no PADRONIZACAO_LINGUISTICA_FORENSE.md (MCA v2.2)
+# MCA v2.2 Protocol
 SYSTEM_PROMPT = """Você é um analista forense digital do sistema Sentinela Democrática.
 Analise o comentário político abaixo e classifique seguindo o protocolo PASA.
 Responda APENAS com JSON válido contendo:
@@ -26,33 +24,20 @@ Responda APENAS com JSON válido contendo:
   "analise_pericial": "Breve justificativa em pt-BR"
 }"""
 
-def decode_escapes(match):
-    try:
-        import codecs
-        return codecs.decode(match.group(0), 'unicode-escape')
-    except Exception:
-        return match.group(0)
-
 def safe_decode_unicode(s: str) -> str:
     try:
         import re
-        # Regex que captura primeiro pares de surrogates UTF-16 adjacentes, depois escapes comuns
+        import codecs
+        def decode_escapes(match):
+            try: return codecs.decode(match.group(0), 'unicode-escape')
+            except: return match.group(0)
         pattern = r'\\u[dD][89abAB][0-9a-fA-F]{2}\\u[dD][cdefCDEF][0-9a-fA-F]{2}|\\u[0-9a-fA-F]{4}'
         decoded = re.sub(pattern, decode_escapes, s)
-        # Sanitização final: remove ou substitui quaisquer surrogates órfãos residuais
         return decoded.encode('utf-8', errors='replace').decode('utf-8')
-    except Exception:
-        try:
-            return s.encode('utf-8', errors='replace').decode('utf-8')
-        except Exception:
-            return s
+    except:
+        return s
 
 def clean_null_chars(data: Any) -> Any:
-    """
-    Remove recursivamente caracteres nulos (\u0000 e \x00) de strings,
-    listas e dicionários. O PostgreSQL/Supabase não suporta \u0000 em textos.
-    """
-    from typing import Any
     if isinstance(data, str):
         return data.replace("\u0000", "").replace("\x00", "")
     elif isinstance(data, list):
@@ -63,44 +48,66 @@ def clean_null_chars(data: Any) -> Any:
 
 class AIService:
     def __init__(self):
-        # 0. Ollama (Local - Soberania e Custo Zero)
+        # 00. LiteRT (Local High-Speed - Gemma 3 1B)
+        self.litert_client = AsyncOpenAI(
+            api_key="litert",
+            base_url=os.getenv("LITERT_BASE_URL", "http://localhost:9379/v1")
+        )
+
+        # 0. Ollama (Local - Gemma 2B)
         self.ollama_client = AsyncOpenAI(
-            api_key="ollama", # Dummy key
+            api_key="ollama",
             base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
         )
 
-        # 1. Mistral (Principal - Preciso em PT-BR)
+        # 1. Mistral (Cloud Primary)
         self.mistral_client = AsyncOpenAI(
             api_key=os.getenv("MISTRAL_API_KEY"),
             base_url="https://api.mistral.ai/v1"
         )
 
-        # 2. Groq (Fallback rápido)
+        # 2. Groq (Cloud Fast)
         self.groq_client = AsyncOpenAI(
             api_key=os.getenv("GROQ_API_KEY"),
             base_url="https://api.groq.com/openai/v1"
         )
         
-        # 3. OpenRouter (Rede de segurança final, opcional)
+        # 3. OpenRouter (Cloud Safety)
         self.openrouter_client = AsyncOpenAI(
             api_key=os.getenv("OPENROUTER_API_KEY"),
             base_url="https://openrouter.ai/api/v1"
         )
 
-        # Determina modelo Mistral
+        # Configurações de Modelos
         finetuned_model = os.getenv('FINETUNED_MODEL_NAME')
         mistral_model = finetuned_model if finetuned_model else "open-mistral-nemo"
 
         self.providers = []
         
-        # Prioriza Local se habilitado via ENV
-        if os.getenv("ENABLE_LOCAL_AI", "false").lower() == "true":
-            self.providers.append({"name": "ollama", "client": self.ollama_client, "model": os.getenv("OLLAMA_MODEL", "gemma:2b")})
+        # Priorização de Camadas (Tiers)
+        
+        # Tier 00: LiteRT (Iniciativa Local de Altíssima Velocidade)
+        self.providers.append({
+            "name": "litert", 
+            "client": self.litert_client, 
+            "model": "gemma3-1b-gpu-custom",
+            "timeout": 5.0
+        })
 
+        # Tier 0: Ollama
+        if os.getenv("ENABLE_LOCAL_AI", "false").lower() == "true":
+            self.providers.append({
+                "name": "ollama", 
+                "client": self.ollama_client, 
+                "model": os.getenv("OLLAMA_MODEL", "gemma:2b"),
+                "timeout": 15.0
+            })
+
+        # Camadas Cloud
         self.providers.extend([
-            {"name": "mistral", "client": self.mistral_client, "model": mistral_model},
-            {"name": "groq", "client": self.groq_client, "model": "llama-3.3-70b-versatile"},
-            {"name": "openrouter", "client": self.openrouter_client, "model": "openrouter/free"},
+            {"name": "mistral", "client": self.mistral_client, "model": mistral_model, "timeout": 15.0},
+            {"name": "groq", "client": self.groq_client, "model": "llama-3.3-70b-versatile", "timeout": 10.0},
+            {"name": "openrouter", "client": self.openrouter_client, "model": "openrouter/free", "timeout": 20.0},
         ])
 
     async def classify_text(self, text: str) -> Dict[str, Any]:
@@ -109,8 +116,8 @@ class AIService:
         for provider in self.providers:
             name = provider["name"]
             
-            # 🛡️ Verifica se o circuito está aberto antes de tentar
-            if not ai_circuit_breaker.can_execute(name):
+            # 🛡️ Verifica se o circuito está aberto (exceto para LiteRT que é local e trivial)
+            if name != "litert" and not ai_circuit_breaker.can_execute(name):
                 continue
 
             try:
@@ -122,46 +129,40 @@ class AIService:
                     ],
                     response_format={"type": "json_object"},
                     temperature=0.1,
-                    timeout=15.0
+                    timeout=provider.get("timeout", 15.0)
                 )
                 
                 content = response.choices[0].message.content
                 result = self._parse_json_response(content)
                 result = clean_null_chars(result)
-                ai_circuit_breaker.record_success(name)
                 
-                # Decodifica escapes unicode para exibir acentos e emojis reais
+                if name != "litert":
+                    ai_circuit_breaker.record_success(name)
+                
                 decoded_text = safe_decode_unicode(text)
-                
-                # Trunca e limpa quebras de linha para exibição compacta no log
                 clean_text = decoded_text.replace("\n", " ").replace("\r", " ").strip()
                 truncated_text = clean_text if len(clean_text) <= 60 else clean_text[:57] + "..."
                 
                 logger.info(f"📊 [AI] {name.upper()} | {result.get('categoria_ia', 'NEUTRO')} | {result.get('confianca_ia', 0):.2f} | \"{truncated_text}\"")
                 return result
 
-            except APIStatusError as e:
-                ai_circuit_breaker.record_failure(name, e.status_code)
-                logger.error(f"⚠️ [AI] {name.upper()} falhou (HTTP {e.status_code}): {e.response.text}. Acionando Fallback...")
             except Exception as e:
-                ai_circuit_breaker.record_failure(name, None)
-                logger.error(f"⚠️ [AI] {name.upper()} falhou ({type(e).__name__}): {str(e)}. Acionando Fallback...")
+                if name != "litert":
+                    status_code = getattr(e, "status_code", None)
+                    ai_circuit_breaker.record_failure(name, status_code)
+                
+                logger.debug(f"⚠️ [AI] {name.upper()} falhou: {str(e)[:100]}. Tentando próximo...")
 
-        # Se chegou aqui, TODAS as IAs cloud falharam ou estão com circuito aberto
-
-        raise RuntimeError("Todas as APIs de IA cloud estão indisponíveis ou com circuito aberto.")
+        raise RuntimeError("Todas as camadas de IA (Local e Cloud) falharam.")
 
     def _parse_json_response(self, content: str) -> Dict[str, Any]:
-        """Extrai e valida o JSON retornado pela IA."""
         try:
             data = json.loads(content)
-            # Aplicar limiar de confiança unificado
             confidence = float(data.get("confianca_ia", 0.0))
             low_conf = confidence < CONFIDENCE_THRESHOLD
             categoria = data.get("categoria_ia", "NEUTRO")
-            if low_conf:
-                # Se baixa confiança, marcar como INDEFINIDO para revisão manual
-                categoria = "INDEFINIDO"
+            if low_conf: categoria = "INDEFINIDO"
+            
             return {
                 "is_hate": bool(data.get("is_hate", False)),
                 "categoria_ia": categoria,
@@ -170,36 +171,20 @@ class AIService:
                 "analise_pericial": data.get("analise_pericial", "Sem análise"),
                 "low_confidence": low_conf
             }
-        except json.JSONDecodeError:
-            logger.error(f"❌ [AI] Resposta não é JSON válido: {content[:100]}")
-            return {
-                "is_hate": False,
-                "categoria_ia": "NEUTRO",
-                "confianca_ia": 0.0,
-                "evidencia_lexical": [],
-                "analise_pericial": "Erro de parsing JSON"
-            }
+        except:
+            return {"is_hate": False, "categoria_ia": "NEUTRO", "confianca_ia": 0.0, "evidencia_lexical": [], "analise_pericial": "Erro de parsing"}
 
     async def run_batch_classification(self, limit: int = 50) -> int:
-        """Busca comentários não processados e classifica em lote."""
         from core.supabase_service import supabase as db
-        
         try:
-            # 1. Busca comentários pendentes
             res = db.table("comentarios").select("id, texto_bruto").eq("processado_ia", False).limit(limit).execute()
-            comments = res.data if res.data else []
-            
-            if not comments:
-                return 0
+            comments = res.data or []
+            if not comments: return 0
                 
             processed_count = 0
-            stats = {}
             for comment in comments:
                 try:
-                    # 2. Classifica cada um
                     result = await self.classify_text(comment["texto_bruto"])
-                    
-                    # 3. Persiste o resultado
                     db.table("comentarios").update({
                         "processado_ia": True,
                         "is_hate": result["is_hate"],
@@ -208,24 +193,9 @@ class AIService:
                         "evidencia_lexical": result["evidencia_lexical"],
                         "analise_pericial": result["analise_pericial"],
                     }).eq("id", comment["id"]).execute()
-                    
                     processed_count += 1
-                    cat = result["categoria_ia"]
-                    stats[cat] = stats.get(cat, 0) + 1
-                except Exception as e:
-                    logger.error(f"❌ Erro ao processar comentário {comment['id']}: {e}")
-                    if "Todas as APIs de IA cloud estão indisponíveis" in str(e):
-                        logger.warning("🧠 [AI] Abortando processamento em lote restante devido a indisponibilidade geral de IA.")
-                        break
-            
-            if processed_count > 0:
-                resumo = ", ".join([f"{k}: {v}" for k, v in stats.items()])
-                logger.info(f"🧠 [AI] {processed_count} comentários classificados em lote ({resumo})")
-                
+                except: continue
             return processed_count
-        except Exception as e:
-            logger.error(f"💥 Falha crítica no lote de classificação: {e}")
-            return 0
+        except: return 0
 
-# Instância Singleton
 ai_service = AIService()
