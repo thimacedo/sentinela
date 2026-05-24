@@ -14,7 +14,7 @@
       "runtime": "@vercel/python@4.1.0",
       "maxDuration": 15,
       "includeFiles": "api/**",
-      "excludeFiles": "{data,workers,processing,docs,tests,scripts,configs}/**"
+      "excludeFiles": "{data,workers,processing,docs,tests,scripts,configs,frontend,frontend-bleeding-edge}/**"
     }
   }
 }
