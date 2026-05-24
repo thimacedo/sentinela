@@ -159,16 +159,25 @@ class InstagramScraperV2:
         return all_comments
 
     async def _scrape_post(self, page: Page, shortcode: str, username: str, candidato_id: str, max_comments: int) -> List[Dict[str, Any]]:
-        """Extrai comentários de um post específico."""
+        """Extrai comentários de um post específico clicando no elemento do perfil para abrir o modal."""
         self.captured_data = []
-        post_url = f"https://www.instagram.com/p/{shortcode}/"
         
         try:
-            await page.goto(post_url, wait_until="domcontentloaded", timeout=45000)
-            await asyncio.sleep(random.uniform(3, 5))
+            # Encontra o elemento do post correspondente ao shortcode no feed
+            selector = f'a[href*="/{shortcode}/"]'
+            post_element = await page.query_selector(selector)
             
-            # Rola para baixo para carregar comentários
-            await page.mouse.wheel(0, 1000)
+            if not post_element:
+                logger.warning(f"⚠️ [V2] Elemento do post {shortcode} não encontrado no feed.")
+                return []
+                
+            # Clica no post para abrir o modal
+            await post_element.click()
+            await asyncio.sleep(random.uniform(5, 7)) # Aguarda abertura e requisições iniciais
+            
+            # Move o mouse para a área lateral direita do modal (onde ficam os comentários) e rola
+            await page.mouse.move(1000, 400)
+            await page.mouse.wheel(0, 800)
             await asyncio.sleep(3)
             
             # Camada 1: Network Interception (Mais rico)
@@ -183,6 +192,10 @@ class InstagramScraperV2:
                 self.stats["browser_renders"] += 1
                 comments = await self._extract_from_dom(page, shortcode)
 
+            # Fecha o modal usando a tecla Escape
+            await page.keyboard.press("Escape")
+            await asyncio.sleep(random.uniform(2, 3)) # Espera fechamento
+            
             # Normalização final
             now = datetime.now(timezone.utc).isoformat()
             normalized = []
@@ -204,7 +217,12 @@ class InstagramScraperV2:
             return normalized
 
         except Exception as e:
-            logger.error(f"⚠️ [V2] Falha ao processar post {shortcode}: {e}")
+            logger.error(f"⚠️ [V2] Falha ao processar post {shortcode} via modal: {e}")
+            # Tenta fechar o modal como contingência em caso de erro
+            try:
+                await page.keyboard.press("Escape")
+            except:
+                pass
             return []
 
     async def _extract_shortcodes(self, page: Page, limit: int) -> List[str]:
