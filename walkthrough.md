@@ -66,10 +66,23 @@ Foram implementadas correções críticas para restabelecer a estabilidade e a i
   - Efetuado o commit e push direto na branch `main` e `feat/autonomous-workers`. O deploy de produção na Vercel foi propagado e a nova versão já está no ar (confirmado via hash de build `DZ8v_bE0UIYhuFuuvcVtF`).
   - As estatísticas (KPIs) no topo, o sensor de pulso temporal das últimas 48h e a listagem em tempo real de alertas ativos agora funcionam de forma 100% resiliente: mesmo que a API serverless falhe (status HTTP != 200), o frontend agora cai automaticamente no fallback que faz requisições diretas ao banco Supabase remoto pelo browser.
 
+### Motor de Coleta & Renovação de Cookies (v52.3) [NOVO]
+- **`scripts/export_playwright_cookies.py`**:
+  - Implementado suporte robusto a seletores multipropósitos e compatíveis com a acessibilidade (`aria-label`) para lidar com as classes dinâmicas e ofuscadas do Instagram moderno.
+  - Tratado o campo de usuário variável (`name="email"` em substituição a `name="username"`).
+  - Implementado preenchimento sequencial com atraso simulado de 150ms (`page.type(..., delay=150)`) em vez de inserção instantânea, superando a segurança que bloqueava o botão de ação.
+  - Resolvido o login em múltiplas etapas (layouts com senha oculta em primeiro carregamento): emulação de clique em `Enter` e aguardo de transição de 4s para apresentação segura da senha.
+  - Validação automatizada e rotação de múltiplos slots `.env` sequenciais (`INSTAGRAM_SESSIONID_X`), atualizando de forma isolada no arquivo `.env` para evitar sobreposição ou falha geral no ciclo.
+- **`core/instagram_scraper_v2.py`**:
+  - Refatoração total para abertura de posts no feed via modal do Playwright (com clique no elemento) e fechamento por `Escape`, evitando tela branca e bloqueios por acessos diretos a URLs `/p/{shortcode}/`.
+- **`core/ai_service.py`**:
+  - Integração do modelo de IA local LiteRT (Gemma 3 1B) ao `ai_circuit_breaker`. Em caso de indisponibilidade ou falhas seguidas do modelo local, o circuito abre por 5 minutos, poupando timeouts de 5 segundos repetitivos e mantendo a taxa de processamento do lote alta.
+
 ---
 
 ## Verificação e Resultados
 
-1. **Deploy de Produção Validado**: O site de produção da Vercel (`https://asentinela.vercel.app/`) foi atualizado e está servindo a nova compilação (`DZ8v_bE0UIYhuFuuvcVtF`) livre de caches.
-2. **Resiliência do Painel**: O painel carrega com sucesso as estatísticas dinâmicas e o feed de alertas reais do Supabase, contornando a indisponibilidade das rotas de API da Vercel.
-3. **Repositório Sincronizado**: O repositório está limpo e os commits foram integrados tanto em `feat/autonomous-workers` quanto em `main`.
+1. **Renovação de Múltiplos Slots com Sucesso**: Executado o `scripts/export_playwright_cookies.py`, realizando o login automatizado e sem interrupções para duas contas configuradas simultaneamente no `.env`. Os cookies e novos sessionids (`INSTAGRAM_SESSIONID` e `INSTAGRAM_SESSIONID_2`) foram extraídos e injetados de forma estável no `.env` do projeto.
+2. **Deploy de Produção Validado**: O site de produção da Vercel (`https://asentinela.vercel.app/`) foi atualizado e está servindo a nova compilação (`DZ8v_bE0UIYhuFuuvcVtF`) livre de caches.
+3. **Resiliência do Painel**: O painel carrega com sucesso as estatísticas dinâmicas e o feed de alertas reais do Supabase, contornando a indisponibilidade das rotas de API da Vercel.
+4. **Repositório Sincronizado**: O repositório está limpo e os commits foram integrados tanto em `feat/autonomous-workers` quanto em `main`.

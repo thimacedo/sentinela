@@ -1,5 +1,5 @@
 # STATE.md — Sentinela Democratica (Fonte de Verdade)
-_last_updated: 2026-05-23 | branch: feat/autonomous-workers_
+_last_updated: 2026-05-24 | branch: feat/autonomous-workers_
 
 ## Status Operacional
 
@@ -15,8 +15,11 @@ _last_updated: 2026-05-23 | branch: feat/autonomous-workers_
 | Watchdog | Operacional | Sem restarts em producao |
 | Frontend (nextjs) | Deployado | Vercel, Next.js 16 (Estático na raiz), /api/* FastAPI |
 | Classificacao IA | Operacional | Roteamento Híbrido: Local (Gemma/Ollama) + Cloud Cascade |
+| Renovação de Sessões (export_playwright_cookies.py) | Operacional | Autenticação automatizada de multi-contas, suporte a login em etapas e atraso simulado |
 
 ## Descobertas Tecnicas (2026-05-24)
+- **Resiliência contra DOM Dinâmico no Login**: O Instagram ofusca suas classes CSS e altera elementos do DOM (`name="email"` em vez de `username`). Solucionou-se isso usando seletores baseados em atributos funcionais e rótulos de acessibilidade (`aria-label`), além de digitação sequencial (`page.type()`) com atraso simulado (150ms) para desviar da heurística de preenchimento automatizado do Instagram.
+- **Login em Múltiplas Etapas (Passkey/WebAuthn)**: Adaptou-se a rotina de login para prever telas sem campo de senha inicial. O script agora emula um clique de tecla `Enter` e aguarda a transição de rede de 4s para obter a renderização visual correta antes de preencher a senha.
 - **Modularidade de Coleta:** Modularizou-se o fluxo de modal do `InstagramScraperV2` expondo as responsabilidades de abertura, rolagem e fechamento em funções públicas auxiliares (`open_post_modal`, `scroll_comment_column`, `close_post_modal`). Isso simplifica a manutenção e integração da mecânica de modal em outras rotinas e etapas.
 - **Navegação V2 via Modal:** Diagnosticou-se que acessos a URLs diretas de posts (`/p/{shortcode}/`) no modo headless do Playwright travam em telas brancas por bloqueio silencioso do Instagram. Refatorou-se o motor para abrir postagens clicando nos elementos na própria tela do perfil (comportamento humano nativo) e fechando via clique de tecla Escape, restabelecendo a extração estruturada de comentários com sucesso.
 - **Circuit Breaker Local:** Integrou-se o provedor local LiteRT (Gemma 3 1B) ao `ai_circuit_breaker`. Se o LiteRT local falhar seguidamente por estar offline, o circuito abre por 5 minutos, poupando timeouts repetitivos de 5.0s por comentário e otimizando a latência do lote de classificação.
