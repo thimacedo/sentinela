@@ -24,6 +24,7 @@ ATENÇÃO - CLASSIFIQUE ESTRITAMENTE COMO "LIXO" SE O TEXTO FOR:
 ATENÇÃO - HOSTILIDADE E SARCASMO (FALSOS NEGATIVOS):
 - Comentários passivo-agressivos, sarcasmo hostil, acusações de preguiça (ex: "Trabalhar que é bom...", "Vai trabalhar") ou descrédito político DEVEM ser marcados com is_hate = true e enquadrados em "MILICIA_DIGITAL".
 - Sarcasmo ou diminutivos direcionados a mulheres na política (ex: "meninas do Valdemar", "descontrolada", "histérica", piadas de cunho machista) DEVEM ser marcados com is_hate = true e enquadrados rigorosamente em "MISOGINIA_POLITICA". O preconceito muitas vezes vem disfarçado de piada com emojis.
+- Comentários que zombam de características raciais, acusam pessoas negras de quererem "ser brancas" (ex: "o sonho dele é ser branco"), ou invalidam a identidade racial em tom de deboche DEVEM ser marcados com is_hate = true e categorizados como "RACISMO_ESTRUTURAL".
 
 Responda APENAS com JSON válido contendo:
 {
