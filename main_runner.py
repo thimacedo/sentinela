@@ -54,9 +54,8 @@ from workers.ai.doc_fetcher import DocFetcher
 from workers.ai.ai_advisor import AIAdvisor
 from workers.orchestrator.orchestrator import SentinelaOrchestrator
 
-# Workers disponíveis — ativar conforme validação:
-from workers.scrapers.ig_headless import IGHeadlessWorker
-from workers.scrapers.ig_zyte import IGZyteWorker
+# Workers disponíveis (PASA v52.0):
+from workers.scrapers.instagram_worker import InstagramWorker
 
 
 def build_orchestrator() -> SentinelaOrchestrator:
@@ -67,26 +66,17 @@ def build_orchestrator() -> SentinelaOrchestrator:
 
     orch = SentinelaOrchestrator(engine, advisor)
 
-    zyte_key = os.getenv("ZYTE_API_KEY")
-    enable_zyte = os.getenv("ENABLE_ZYTE", "true").lower() == "true"
-    if zyte_key and enable_zyte:
-        orch.register(IGZyteWorker(
-            worker_id="ig-zyte-01",
-            config={"api_key": zyte_key},
-        ))
-    else:
-        logger.warning("[main_runner] IGZyteWorker desativado ou ZYTE_API_KEY ausente.")
+    # Novo Worker V2 Independente
+    orch.register(InstagramWorker(
+        worker_id="ig-v2-01",
+        config={
+            "max_posts": int(os.getenv("MAX_POSTS_PER_PROFILE", "3")),
+            "max_comments_per_post": int(os.getenv("MAX_COMMENTS_PER_POST", "50")),
+            "headless": os.getenv("PLAYWRIGHT_HEADLESS", "true").lower() == "true"
+        },
+    ))
 
-    session_id = os.getenv("INSTAGRAM_SESSIONID")
-    if session_id:
-        orch.register(IGHeadlessWorker(
-            worker_id="ig-headless-01",
-            config={"session_id": session_id},
-        ))
-    else:
-        logger.warning("[main_runner] INSTAGRAM_SESSIONID ausente; IGHeadlessWorker não registrado.")
-
-    logger.info(f"[main_runner] Workers: {orch.worker_ids or ['(nenhum)']}")
+    logger.info(f"[main_runner] Workers registrados: {orch.worker_ids}")
     return orch
 
 

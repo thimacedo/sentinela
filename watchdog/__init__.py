@@ -35,11 +35,8 @@ except ImportError:
 
 try:
     from core.auto_updater import check_for_updates
-    from core.zyte_checker import check_zyte_health, check_scrapy_cloud_health
 except ImportError:
     check_for_updates = lambda: False
-    check_zyte_health = lambda: (True, "Skipped")
-    check_scrapy_cloud_health = lambda: (True, "Skipped")
 
 # --- FastAPI Imports ---
 from fastapi import FastAPI, Request
@@ -49,7 +46,6 @@ from fastapi.middleware.cors import CORSMiddleware
 # --- Configurações ---
 SERVER_SCRIPT = "main_runner.py"
 RESTART_DELAY = 30
-ZYTE_CHECK_INTERVAL = 1800
 REQUIREMENTS_FILE = "requirements.txt"
 
 import tempfile
@@ -80,7 +76,6 @@ CODE_ERRORS = [
 ALERT_COOLDOWNS = {
     "runtime": 3600,  # 1 alerta por hora
     "code": 3600,     # 1 alerta por hora
-    "zyte": 1800,     # 1 alerta a cada 30 min
     "oom": 86400      # 1 alerta por dia
 }
 last_alert_times = {k: 0.0 for k in ALERT_COOLDOWNS}
@@ -92,7 +87,6 @@ class WatchdogState:
         self.restarts = 0
         self.code_errors = 0
         self.alerts = 0
-        self.zyte_ok = True
         self.status = "OPERACIONAL"
         self.logs = []
         self.clients = []
@@ -227,7 +221,6 @@ async def get_metrics():
             "restarts": state.restarts,
             "code_errors": state.code_errors,
             "alerts": state.alerts,
-            "zyte_ok": state.zyte_ok,
             "status": state.status,
             "fast_crashes": state.fast_crashes,
             "db_status": "OPERACIONAL",
@@ -321,7 +314,6 @@ def heal_runtime_error(reason: str) -> str:
         state.add_log("warn", "[Watchdog] 🧹 Playwright detectado nos logs de erro. Limpando processos órfãos...")
         try:
             if os.name == 'nt':
-                # Removemos a matança do chrome.exe pessoal para evitar queda de sessões do usuário
                 subprocess.run(["taskkill", "/F", "/IM", "chromium.exe"], capture_output=True)
             else:
                 subprocess.run(["pkill", "-f", "chromium"], capture_output=True)
@@ -333,38 +325,17 @@ def heal_runtime_error(reason: str) -> str:
 
 def guard():
     python_exe = get_python_executable()
-    last_zyte_check = 0
     consecutive_code_errors = 0
 
     while True:
-        # 1. Verificação Saúde Zyte
-        if time.time() - last_zyte_check > ZYTE_CHECK_INTERVAL:
-            state.add_log("info", "[Watchdog] Executando check-up periódico das APIs Zyte...")
-            zyte_ok, zyte_msg = check_zyte_health()
-            if not zyte_ok:
-                send_whatsapp_alert(f"🚩 *ZYTE EXTRACTION ALERT* 🚩\nMotivo: `{zyte_msg}`", category="zyte")
-                os.environ["ZYTE_DISABLED"] = "true"
-                state.update_metrics(zyte_ok=False, status="ZYTE FALHOU")
-                state.add_log("error", "[Watchdog] Motor Zyte PAUSADO devido a falha crítica.")
-            else:
-                if os.getenv("ZYTE_DISABLED") == "true":
-                    os.environ["ZYTE_DISABLED"] = "false"
-                    state.add_log("info", "[Watchdog] Motor Zyte RECUPERADO. Retomando uso.")
-                state.update_metrics(zyte_ok=True)
-
-            scrapy_ok, scrapy_msg = check_scrapy_cloud_health()
-            if not scrapy_ok and os.getenv("SCRAPY_CLOUD_API_KEY"):
-                send_whatsapp_alert(f"⚠️ *SCRAPY CLOUD ALERT* ⚠️\nMotivo: `{scrapy_msg}`", category="zyte")
-            last_zyte_check = time.time()
-
-        # 2. Auto Update
+        # 1. Auto Update
         try:
             if check_for_updates():
                 heal_dependencies(python_exe)
         except Exception:
             pass
 
-        # 3. Executar Servidor
+        # 2. Executar Servidor
         state.update_metrics(status="OPERACIONAL")
         state.add_log("info", "[Watchdog] Iniciando main_runner.py...")
         try:
