@@ -15,10 +15,11 @@ CONFIDENCE_THRESHOLD = float(os.getenv('CONFIDENCE_THRESHOLD', '0.5'))
 # MCA v2.2 Protocol
 SYSTEM_PROMPT = """Você é um analista forense digital do sistema Sentinela Democrática.
 Analise o comentário político abaixo e classifique seguindo o protocolo PASA.
+Se o texto for claramente um elemento de interface de usuário (ex: "Também da Meta", "Instagram Lite", "Localizações", "Áudio original", "Ver tradução"), texto fragmentado sem sentido, ou apenas menções a perfis sem contexto, classifique como "LIXO".
 Responda APENAS com JSON válido contendo:
 {
   "is_hate": boolean,
-  "categoria_ia": "NEUTRO" | "XENOFOBIA_REGIONAL" | "RACISMO_RELIGIOSO" | "VIOLÊNCIA_GÊNERO" | "MILICIA_DIGITAL" | "RACISMO_ESTRUTURAL" | "MISOGINIA_POLITICA",
+  "categoria_ia": "NEUTRO" | "XENOFOBIA_REGIONAL" | "RACISMO_RELIGIOSO" | "VIOLÊNCIA_GÊNERO" | "MILICIA_DIGITAL" | "RACISMO_ESTRUTURAL" | "MISOGINIA_POLITICA" | "LIXO",
   "confianca_ia": float (0.0 a 1.0),
   "evidencia_lexical": ["termo1", "termo2"],
   "analise_pericial": "Breve justificativa em pt-BR"
@@ -159,10 +160,17 @@ class AIService:
             confidence = float(data.get("confianca_ia", 0.0))
             low_conf = confidence < CONFIDENCE_THRESHOLD
             categoria = data.get("categoria_ia", "NEUTRO")
-            if low_conf: categoria = "INDEFINIDO"
+            
+            if categoria == "LIXO":
+                confidence = 0.0
+                low_conf = False
+                is_hate = False
+            else:
+                if low_conf: categoria = "INDEFINIDO"
+                is_hate = bool(data.get("is_hate", False))
             
             return {
-                "is_hate": bool(data.get("is_hate", False)),
+                "is_hate": is_hate,
                 "categoria_ia": categoria,
                 "confianca_ia": confidence,
                 "evidencia_lexical": data.get("evidencia_lexical", []),

@@ -78,7 +78,15 @@ class IGWorkerV2(BaseWorker):
                 max_comments_per_post=self.config.get("max_comments_per_post", 50)
             )
 
+            stats = self.scraper.get_stats()
+
             if not comments:
+                if stats.get("junk_detected", 0) > 0:
+                    self.logger.warning(f"⚠️ [V2] Apenas lixo detectado para @{target.username}. Sinalizando falha de extração.")
+                    return CycleResult(
+                        worker_id=self.worker_id, cycle=self.cycle, target=target.username,
+                        source="v2_engine", extracted=0, simulated=False, error="junk_detected"
+                    )
                 # Se o scraper retornou vazio mas não levantou erro, pode ser apenas falta de conteúdo
                 return CycleResult(
                     worker_id=self.worker_id, cycle=self.cycle, target=target.username,

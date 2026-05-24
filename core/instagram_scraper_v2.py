@@ -42,6 +42,7 @@ class InstagramScraperV2:
             "api_calls": 0,
             "browser_renders": 0,
             "session_rotations": 0,
+            "junk_detected": 0,
             "errors": 0
         }
 
@@ -214,10 +215,29 @@ class InstagramScraperV2:
             # Normalização final
             now = datetime.now(timezone.utc).isoformat()
             normalized = []
+            
+            junk_patterns = ['também da meta', 'instagram lite', 'localizações', 'campanha 2201', 'áudio original']
+            
             for c in comments[:max_comments]:
+                texto = c.get("texto_bruto") or c.get("texto", "")
+                lower_text = texto.lower().strip()
+                
+                # Heurística de Lixo Local
+                is_junk = False
+                if len(lower_text) < 2:
+                    is_junk = True
+                elif any(p in lower_text for p in junk_patterns):
+                    is_junk = True
+                elif lower_text.startswith("seguido(a) por"):
+                    is_junk = True
+                    
+                if is_junk:
+                    self.stats["junk_detected"] += 1
+                    continue
+                    
                 normalized.append({
                     "id_externo": str(c.get("id_externo", f"v2_{shortcode}_{random.randint(0, 999999)}")),
-                    "texto_bruto": c.get("texto_bruto") or c.get("texto", ""),
+                    "texto_bruto": texto,
                     "autor_username": c.get("autor_username") or c.get("autor", "unknown"),
                     "data_publicacao": c.get("data_publicacao") or c.get("timestamp") or now,
                     "data_coleta": now,
@@ -297,7 +317,8 @@ class InstagramScraperV2:
                     'enviar', 'send', 'compartilhar', 'share', 'carregar mais comentários',
                     'carregar mais', 'load more comments', 'load more',
                     'áudio original', 'original audio', 'som original', 'original sound',
-                    'adicionar um comentário...', 'add a comment...', 'curtido por', 'liked by'
+                    'adicionar um comentário...', 'add a comment...', 'curtido por', 'liked by',
+                    'também da meta', 'instagram lite', 'localizações', 'campanha 2201'
                 ];
  
                 let lastUsername = "";
