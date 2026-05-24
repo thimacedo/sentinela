@@ -1,46 +1,64 @@
-# Backend — nao sobe para Vercel (apenas api/ e frontend/ sao processados)
+# === VERCEIL IGNORE (Ruthless v52.4.8) ===
+
+# 1. Ignorar todos os Workers e Lógica Pesada
 workers/
-core/
 processing/
 archive_v17_2026/
 .legacy_frontend/
 proposta_frontend/
-logs/
-data/
-metrics/
-configs/
-scripts/
-tools/
-tests/
 sentinela_novo/
 sentinela_scraper/
 sentinela_scrapy/
 scrapy-tags-2.15.2/
+pickle_ext/
 
-# Artifacts leaked to root
-__next.*.txt
+# 2. Ignorar Dados e Documentação (Grande volume)
+data/
+bases_pdf/
+bases_pesquisas/
+pdf_ironiaesarcasmo/
+logs/
+metrics/
+docs/
+milestones/
+visualizacoes/
+tests/
+test_api/
+test_scripts/
+
+# 3. Ignorar Lockfiles e Configurações que forçam o 'uv'
+uv.lock
+pyproject.toml
+api/uv.lock
+api/pyproject.toml
+
+# 4. Ignorar Entry points do backend local
+main_runner.py
+watchdog.py
+spawn-morty-win.mjs
+
+# 5. Ignorar Segredos e Cache
+.env
+.env.*
+configs/
+cookies.txt
+sentinela_ig_session
+*.session
+*.key
+*.pem
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+node_modules/
+
+# 6. Ignorar artefatos de build que vazaram
+__next.*
 index.txt
 _not-found.txt
 dashboard.txt
 _next/
 _not-found/
 
-# Entry points do backend
-main_runner.py
-watchdog.py
-
-# Segredos e sessoes
-.env
-.env.local
-.env.*
-configs/instagram_storage_state.json
-cookies.txt
-sentinela_ig_session
-*.session
-*.key
-*.pem
-
-# Runtime
-*.log
-*.db
-*.sqlite3
+# NOTA: core/ e models/ DEVEM SER INCLUÍDOS pois a API depende deles.

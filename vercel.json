@@ -13,7 +13,8 @@
     "api/**/*.py": {
       "runtime": "@vercel/python@4.1.0",
       "maxDuration": 15,
-      "includeFiles": "api/**"
+      "includeFiles": "api/**",
+      "excludeFiles": "{data,workers,processing,docs,tests,scripts,configs}/**"
     }
   }
 }
