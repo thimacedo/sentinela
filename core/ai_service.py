@@ -20,6 +20,10 @@ ATENÇÃO - CLASSIFIQUE ESTRITAMENTE COMO "LIXO" SE O TEXTO FOR:
 2. Localizações geográficas ou tags (ex: "Parnamirim (Rio Grande do Norte)", "São Paulo").
 3. Apenas sequências de emojis sem texto (ex: "👏👏👏👏👏").
 4. Apenas marcações de perfis ou fragmentos curtos sem sentido (ex: "@usuario").
+
+ATENÇÃO - HOSTILIDADE E SARCASMO (FALSOS NEGATIVOS):
+- Comentários passivo-agressivos, sarcasmo hostil, acusações de preguiça (ex: "Trabalhar que é bom...", "Vai trabalhar") ou descrédito político DEVEM ser marcados com is_hate = true. Como não envolvem raça/gênero/religião, enquadre na categoria "MILICIA_DIGITAL" (usada como abrangente para ataques de ódio político).
+
 Responda APENAS com JSON válido contendo:
 {
   "is_hate": boolean,
