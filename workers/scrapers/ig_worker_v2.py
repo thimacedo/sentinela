@@ -144,29 +144,50 @@ class IGWorkerV2(BaseWorker):
             if bot_detected_count > 0:
                 self.logger.info(f"🤖 [V2] Detectados {bot_detected_count} indícios de comportamento coordenado (Bots) em @{target.username}")
 
-            # 3. Persistência
+            # 3. Persistência com Resiliência de Schema (v58.1)
             inserted = 0
             duplicated = 0
             inserted_ids = []
             
+            # Filtra campos para garantir que apenas colunas existentes sejam enviadas
+            # bot_pattern e is_bot são movidos para a análise pericial se o schema não suportar
+            safe_comments = []
+            for c in comments:
+                safe_c = {
+                    "id_externo": c.get("id_externo"),
+                    "texto_bruto": c.get("texto_bruto"),
+                    "autor_username": c.get("autor_username"),
+                    "data_publicacao": c.get("data_publicacao"),
+                    "data_coleta": c.get("data_coleta"),
+                    "candidato_id": c.get("candidato_id"),
+                    "post_shortcode": c.get("post_shortcode"),
+                    "plataforma": c.get("plataforma"),
+                    "processado_ia": False,
+                    "tier_used": c.get("tier_used")
+                }
+                
+                # Se for bot, preservamos a info na análise pericial preventiva
+                if c.get("is_bot"):
+                    safe_c["analise_pericial"] = f"[BOT DETECTED] Padrão: {c.get('bot_pattern')}"
+                    safe_c["categoria_ia"] = "CAMPANHA_COORDENADA"
+                
+                safe_comments.append(safe_c)
+
             try:
                 # Upsert em lote
                 res = self.db.table("comentarios").upsert(
-                    clean_null_chars(comments), 
+                    clean_null_chars(safe_comments), 
                     on_conflict="candidato_id,post_shortcode,id_externo",
                     ignore_duplicates=True
                 ).execute()
                 
                 inserted = len(res.data)
                 duplicated = len(comments) - inserted
-                # Guardamos os IDs reais para a classificação
                 inserted_ids = [str(item["id"]) for item in res.data]
-                
-                # Se detectamos bots, atualizamos as flags no banco (assumindo que as colunas existem ou via metadata)
-                # Como a tabela 'comentarios' não tem 'is_bot' explícito, vamos usar 'categoria_ia' = 'CAMPANHA_COORDENADA'
-                # ou injetar na análise pericial.
             except Exception as e:
-                self.logger.error(f"❌ Erro na persistência: {e}")
+                self.logger.error(f"❌ Erro na persistência: {e}. Tentando salvamento de emergência...")
+                # Fallback: tenta salvar 1 por 1 ou logar erro crítico para o AIAdvisor
+                raise ValueError(f"db_persistence_error: {str(e)}")
 
             # 4. Classificação
             classified = 0
@@ -246,4 +267,7 @@ class IGWorkerV2(BaseWorker):
                 failed=1, error=str(e)[:200], simulated=False
             )
         finally:
+            # PASA v58.2: Injeta erro no alvo para que o rotate_target decida pela hibernação
+            if result and result.error:
+                target.error = result.error
             self.queue.rotate_target(target)

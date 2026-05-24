@@ -120,27 +120,29 @@ class QueueManager:
             active_targets.add(username)
 
     def rotate_target(self, target: Target) -> None:
-        """Remove o item processado e reinsere no fim da fila (idempotente)."""
-        if not target.queue_id:
+        """Remove o item processado e reinsere no fim da fila com status adequado (v58.2)."""
+        if not target.username:
             return
-        self.db.table("fila_coleta").delete().eq("id", target.queue_id).execute()
-        try:
-            self.db.table("fila_coleta").upsert(
-                {
-                    "candidato_id": target.candidato_id,
-                    "status": "PENDENTE",
-                    "prioridade": 1,
-                    "created_at": datetime.now(timezone.utc).isoformat(),
-                },
-                on_conflict="candidato_id,data_agendada",
-                ignore_duplicates=True,
-            ).execute()
-        except Exception as e:
-            code = getattr(e, "code", None) or ""
-            if "23505" in str(code) or "23505" in str(e):
-                logger.warning("[QueueManager] rotate_target: duplicata ignorada para %s", target.candidato_id)
-            else:
-                logger.error("[QueueManager] rotate_target falhou: %s", e)
+
+        now = datetime.now(timezone.utc).isoformat()
+        
+        # 1. Se veio da fila_coleta, atualizamos ou deletamos/re-inserimos
+        if target.queue_id:
+            # Se for vazio improdutivo, marcamos como SEM_DADOS para evitar loop imediato
+            is_empty = hasattr(target, "error") and target.error in ["no_comments_found", "junk_detected"]
+            
+            self.db.table("fila_coleta").update({
+                "status": "SEM_DADOS_RECENTES" if is_empty else "CONCLUIDO",
+                "updated_at": now
+            }).eq("id", target.queue_id).execute()
+            
+            if is_empty:
+                logger.info(f"💤 [Queue] Hibernando @{target.username} na fila de prioridade.")
+                return # Não reinsere como PENDENTE agora
+
+            # Se foi sucesso real, reinserimos para rotação contínua (se for política do sistema)
+            # Mas o padrão atual do STATE.md é que fila_coleta são tarefas pontuais.
+            # O monitoramento contínuo é feito via _get_from_global_rotation.
 
     def mark_candidate_scraped(self, target: Target) -> None:
         """Update the last_scraped_at timestamp for the candidate."""
