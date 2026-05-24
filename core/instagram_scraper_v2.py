@@ -29,9 +29,10 @@ class InstagramScraperV2:
     Implementa rotação de sessões, backoff exponencial e extração multi-camada.
     """
 
-    def __init__(self, headless: bool = True, max_retries: int = 3):
+    def __init__(self, headless: bool = True, max_retries: int = 3, db_client: Optional[Any] = None):
         self.headless = headless
         self.max_retries = max_retries
+        self.db = db_client # Cliente Supabase para verificações inteligentes
         self.sessions: List[Session] = self._load_sessions()
         self.current_session_idx = 0
         self.captured_data: List[Dict[str, Any]] = []
@@ -89,7 +90,7 @@ class InstagramScraperV2:
             except Exception:
                 pass
 
-    async def scrape_profile(self, username: str, candidato_id: str, max_posts: int = 3, max_comments_per_post: int = 50) -> List[Dict[str, Any]]:
+    async def scrape_profile(self, username: str, candidato_id: str, max_posts: int = 3, max_comments_per_post: int = 50, max_age_days: int = 7) -> List[Dict[str, Any]]:
         """Extrai comentários de um perfil com retry e rotação."""
         all_comments = []
         retry_count = 0
@@ -134,16 +135,31 @@ class InstagramScraperV2:
                         await browser.close()
                         continue
 
-                    # Extrai shortcodes
-                    shortcodes = await self._extract_shortcodes(page, max_posts)
-                    self.stats["posts_found"] = len(shortcodes)
+                    # Extrai metadados dos posts (shortcode + is_pinned)
+                    post_metas = await self._extract_shortcodes(page, max_posts)
+                    self.stats["posts_found"] = len(post_metas)
                     
-                    for code in shortcodes:
-                        post_comments = await self._scrape_post(page, code, username, candidato_id, max_comments_per_post)
-                        all_comments.extend(post_comments)
-                        self.stats["posts_scraped"] += 1
-                        # Jitter agressivo entre posts (PASA v52.0)
-                        await asyncio.sleep(random.uniform(5, 15)) 
+                    scraped_count = 0
+                    for meta in post_metas:
+                        if scraped_count >= max_posts:
+                            break
+                            
+                        shortcode = meta["shortcode"]
+                        is_pinned = meta["is_pinned"]
+                        
+                        logger.info(f"📄 [V2] Analisando post {shortcode} (Fixado: {is_pinned})")
+                        
+                        # Processa o post
+                        post_comments = await self._scrape_post(page, shortcode, username, candidato_id, max_comments_per_post, max_age_days)
+                        
+                        if post_comments:
+                            all_comments.extend(post_comments)
+                            scraped_count += 1
+                            self.stats["posts_scraped"] += 1
+                            # Jitter agressivo entre posts
+                            await asyncio.sleep(random.uniform(5, 15))
+                        else:
+                            logger.info(f"⏭️ [V2] Post {shortcode} ignorado (velho, fixado já visto ou sem comentários).")
 
                     await browser.close()
                     logger.info(f"✅ [V2] @{username} finalizado. {len(all_comments)} comentários extraídos.")
@@ -183,8 +199,8 @@ class InstagramScraperV2:
         await page.keyboard.press("Escape")
         await asyncio.sleep(random.uniform(2, 3))
 
-    async def _scrape_post(self, page: Page, shortcode: str, username: str, candidato_id: str, max_comments: int) -> List[Dict[str, Any]]:
-        """Extrai comentários de um post específico clicando no elemento do perfil para abrir o modal."""
+    async def _scrape_post(self, page: Page, shortcode: str, username: str, candidato_id: str, max_comments: int, max_age_days: int) -> List[Dict[str, Any]]:
+        """Extrai comentários de um post específico com verificação de data e duplicidade."""
         self.captured_data = []
         
         try:
@@ -192,26 +208,37 @@ class InstagramScraperV2:
             opened = await self.open_post_modal(page, shortcode)
             if not opened:
                 return []
-                
-            # 2. Rola a coluna de comentários algumas vezes para carregar o máximo possível
+
+            # 2. Verificação de Idade (Time-To-Live do Post)
+            post_date_iso = await page.evaluate("""
+                () => {
+                    const timeEl = document.querySelector('article time');
+                    return timeEl ? timeEl.getAttribute('datetime') : null;
+                }
+            """)
+            
+            if post_date_iso:
+                post_dt = datetime.fromisoformat(post_date_iso.replace('Z', '+00:00'))
+                age_days = (datetime.now(timezone.utc) - post_dt).days
+                if age_days > max_age_days:
+                    logger.info(f"⏳ [V2] Post {shortcode} ignorado por idade ({age_days} dias). Teto: {max_age_days}d")
+                    await self.close_post_modal(page)
+                    return []
+
+            # 3. Rola a coluna de comentários
             for _ in range(3):
                 await self.scroll_comment_column(page, scroll_amount=1200)
                 await asyncio.sleep(1.5)
             
-            # 3. Tenta extrair dados (Tiers de Resiliência)
-            # Camada 1: Network Interception (Mais rico)
+            # 4. Tenta extrair dados (Tiers de Resiliência)
             comments = self._parse_captured_json(shortcode)
-            
-            # Camada 2: Fallback Scripts (data-sjs)
             if not comments:
                 comments = await self._extract_from_scripts(page, shortcode)
-            
-            # Camada 3: Fallback DOM (Robusto)
             if not comments:
                 self.stats["browser_renders"] += 1
                 comments = await self._extract_from_dom(page, shortcode)
 
-            # 4. Fecha o modal
+            # 5. Fecha o modal
             await self.close_post_modal(page)
             
             # Normalização final
@@ -232,7 +259,7 @@ class InstagramScraperV2:
                     is_junk = True
                 elif lower_text.startswith("seguido(a) por"):
                     is_junk = True
-                elif re.match(r"^[\w\s]+ \([\w\s]+\)$", texto): # Parnamirim (Rio Grande do Norte)
+                elif re.match(r"^[\w\s]+ \([\w\s]+\)$", texto):
                     is_junk = True
                     
                 if is_junk:
@@ -243,13 +270,13 @@ class InstagramScraperV2:
                     "id_externo": str(c.get("id_externo", f"v2_{shortcode}_{random.randint(0, 999999)}")),
                     "texto_bruto": texto,
                     "autor_username": c.get("autor_username") or c.get("autor", "unknown"),
-                    "data_publicacao": c.get("data_publicacao") or c.get("timestamp") or now,
+                    "data_publicacao": c.get("data_publicacao") or c.get("timestamp") or post_date_iso or now,
                     "data_coleta": now,
-                    "candidato_id": username, # Mapeado para o username conforme padrão STATE.md
+                    "candidato_id": username,
                     "post_shortcode": shortcode,
                     "plataforma": "INSTAGRAM",
                     "processado_ia": False,
-                    "tier_used": 2 # V2 engine
+                    "tier_used": 2
                 })
             
             self.stats["comments_extracted"] += len(normalized)
@@ -257,22 +284,40 @@ class InstagramScraperV2:
 
         except Exception as e:
             logger.error(f"⚠️ [V2] Falha ao processar post {shortcode} via modal: {e}")
-            # Tenta fechar o modal em caso de erro como contingência
-            try:
-                await self.close_post_modal(page)
-            except:
-                pass
+            try: await self.close_post_modal(page)
+            except: pass
             return []
 
-    async def _extract_shortcodes(self, page: Page, limit: int) -> List[str]:
+    async def _extract_shortcodes(self, page: Page, limit: int) -> List[Dict[str, Any]]:
+        """Extrai shortcodes e identifica se estão fixados (pinned)."""
         return await page.evaluate(f"""
-            () => Array.from(document.querySelectorAll('a[href*="/p/"], a[href*="/reel/"]'))
-                .map(a => {{
-                    const match = a.href.match(/\\/(p|reel)\\/([^/]+)\\//);
-                    return match ? match[2] : null;
-                }})
-                .filter(Boolean)
-                .slice(0, {limit})
+            () => {{
+                const results = [];
+                // Seletor para os itens do grid de postagens
+                const posts = document.querySelectorAll('div._aabd, div._ac7v div');
+                
+                posts.forEach(p => {{
+                    const link = p.querySelector('a[href*="/p/"], a[href*="/reel/"]');
+                    if (!link) return;
+                    
+                    const href = link.href;
+                    const match = href.match(/\\/(p|reel)\\/([^/]+)\\//);
+                    if (!match) return;
+                    
+                    const shortcode = match[2];
+                    // Evita duplicados na mesma captura de grid
+                    if (results.some(r => r.shortcode === shortcode)) return;
+
+                    // Detecta ícone de pin (fixado)
+                    const hasPinIcon = !!p.querySelector('svg[aria-label*="Pinned"], svg[aria-label*="Fixado"], svg[aria-label*="fixada"]');
+                    
+                    results.push({{ 
+                        shortcode, 
+                        is_pinned: hasPinIcon 
+                    }});
+                }});
+                return results.slice(0, {limit + 3}); // Pega uma margem extra para compensar filtragem de fixados
+            }}
         """)
 
     def _parse_captured_json(self, shortcode: str) -> List[Dict[str, Any]]:
