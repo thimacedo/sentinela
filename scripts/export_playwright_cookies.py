@@ -44,7 +44,13 @@ async def renew_account_cookies(browser, account: dict):
             current_url = page.url
             
             # Se não fomos para a tela de login, consideramos logado
-            if 'accounts/login' not in current_url and not (await page.query_selector('input[name="username"], input[name="email"]')):
+            login_field_selector = (
+                'input[name="username"], input[name="email"], '
+                'input[aria-label*="usuario"], input[aria-label*="usuário"], '
+                'input[aria-label*="user"], input[aria-label*="Phone"], '
+                'input[aria-label*="telefone"]'
+            )
+            if 'accounts/login' not in current_url and not (await page.query_selector(login_field_selector)):
                 print(f'Login por {sid_key} inicial parece bem-sucedido')
                 logged_in = True
             else:
@@ -71,12 +77,20 @@ async def renew_account_cookies(browser, account: dict):
 
         # Preencher formulário de login
         try:
-            input_selector = 'input[name="username"], input[name="email"]'
+            # Seletor combinando username, email, ARIA labels em PT e EN
+            input_selector = (
+                'input[name="username"], input[name="email"], '
+                'input[aria-label*="usuario"], input[aria-label*="usuário"], '
+                'input[aria-label*="user"], input[aria-label*="Phone"], '
+                'input[aria-label*="telefone"]'
+            )
             await page.wait_for_selector(input_selector, timeout=20000)
-            await page.fill(input_selector, user)
             
-            # Se o campo de senha não estiver visível (fluxo de duas etapas), avançamos a etapa
-            password_selector = 'input[name="password"]'
+            # Digitação com delay simulando comportamento humano (PASA v52.0)
+            await page.type(input_selector, user, delay=150)
+            
+            # Seletor ultra-resiliente para senha
+            password_selector = 'input[name="password"], input[type="password"], input[aria-label*="senha"], input[aria-label*="password"]'
             password_element = await page.query_selector(password_selector)
             
             if not password_element or not await password_element.is_visible():
@@ -84,9 +98,9 @@ async def renew_account_cookies(browser, account: dict):
                 await page.keyboard.press("Enter")
                 await asyncio.sleep(4) # Aguarda transição visual
                 
-            # Preenche o campo de senha
+            # Preenche o campo de senha com delay humano
             await page.wait_for_selector(password_selector, timeout=15000)
-            await page.fill(password_selector, password)
+            await page.type(password_selector, password, delay=150)
             
             # Clicar em entrar e esperar navegação
             submit_btn = await page.query_selector('button[type="submit"]')
@@ -108,7 +122,7 @@ async def renew_account_cookies(browser, account: dict):
             try:
                 os.makedirs("scratch", exist_ok=True)
                 await page.screenshot(path="scratch/login_error.png")
-                print("📸 Screenshot do erro de login salvo em scratch/login_error.png")
+                print("[DIAGNOSTICO] Screenshot do erro de login salvo em scratch/login_error.png")
             except Exception as e_snap:
                 print(f"Não foi possível salvar o screenshot: {e_snap}")
             try:
