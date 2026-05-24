@@ -43,12 +43,11 @@ class IGHeadlessWorker(BaseWorker):
 
         self.logger.info("[Headless] Ciclo %s | Alvo: @%s", self.cycle, target.username)
         
-        # Atualiza last_scraped_at preventivamente para evitar que o alvo se repita na fila de prioridade
+        # Atualiza last_scraped_at preventivamente
         self.queue.mark_candidate_scraped(target)
 
         extracted = 0
         inserted = 0
-        duplicated = 0
         classified = 0
         failed = 0
         db_success = False
@@ -56,47 +55,42 @@ class IGHeadlessWorker(BaseWorker):
 
         try:
             max_posts = self.config.get("max_posts")
+            # O scraper ja realiza a persistencia interna agora
             comments = await self._scraper.run(targets=[{"username": target.username}], max_posts=max_posts)
             extracted = len(comments)
 
             if comments:
+                db_success = True
+                # Busca IDs dos comentarios recem inseridos para classificar
+                # Nota: O ideal seria o scraper retornar os IDs, mas por agora buscamos no DB
                 try:
-                    res = self.db.table("comentarios").upsert(
-                        clean_null_chars(comments), on_conflict="id_externo", ignore_duplicates=True
-                    ).execute()
-                    inserted = len(res.data)
-                    duplicated = extracted - inserted
-                    db_success = True
-                    inserted_ids = [str(item["id"]) for item in res.data]
+                    res = self.db.table("comentarios")\
+                        .select("id, texto_bruto")\
+                        .eq("candidato_id", target.username)\
+                        .eq("processado_ia", False)\
+                        .order("data_coleta", desc=True)\
+                        .limit(extracted)\
+                        .execute()
+                    
+                    to_classify = res.data or []
+                    inserted = len(to_classify) # Aproximacao
+
+                    for item in to_classify:
+                        try:
+                            result = await ai_service.classify_text(item["texto_bruto"])
+                            self.db.table("comentarios").update({
+                                "processado_ia": True,
+                                "is_hate": result["is_hate"],
+                                "categoria_ia": result["categoria_ia"],
+                                "confianca_ia": result["confianca_ia"],
+                                "evidence_extracted": result["evidencia_lexical"],
+                            }).eq("id", item["id"]).execute()
+                            classified += 1
+                        except Exception as e:
+                            self.logger.error("[Headless] Falha ao classificar %s: %s", item["id"], e)
+                            failed += 1
                 except Exception as e:
-                    self.logger.error("[Headless] Falha na persistencia: %s", e)
-                    failed = extracted
-                    inserted_ids = []
-
-                # Classifica todos os comentarios inseridos no ciclo
-                for comment_id in inserted_ids:
-                    try:
-                        res = self.db.table("comentarios").select("texto_bruto").eq("id", comment_id).single().execute()
-                        if not res.data:
-                            continue
-                        result = await ai_service.classify_text(res.data["texto_bruto"])
-                        self.db.table("comentarios").update({
-                            "processado_ia": True,
-                            "is_hate": result["is_hate"],
-                            "categoria_ia": result["categoria_ia"],
-                            "confianca_ia": result["confianca_ia"],
-                            "evidence_extracted": result["evidencia_lexical"],
-                        }).eq("id", comment_id).execute()
-                        classified += 1
-                    except Exception as e:
-                        self.logger.error("[Headless] Falha ao classificar %s: %s", comment_id, e)
-                        failed += 1
-                        if "Todas as APIs de IA cloud estão indisponíveis" in str(e):
-                            self.logger.warning("[Headless] Abortando classificação do lote restante devido a indisponibilidade geral de IA.")
-                            rest = len(inserted_ids) - (classified + failed)
-                            failed += rest
-                            break
-
+                    self.logger.error("[Headless] Erro ao buscar comentarios para classificacao: %s", e)
             else:
                 error_msg = "no_comments_found"
 
@@ -114,7 +108,7 @@ class IGHeadlessWorker(BaseWorker):
             source="headless",
             extracted=extracted,
             inserted=inserted,
-            duplicated=duplicated,
+            duplicated=extracted - inserted if extracted > inserted else 0,
             classified=classified,
             failed=failed,
             db_success=db_success,

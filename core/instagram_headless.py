@@ -81,6 +81,8 @@ class IdentityManager:
             supabase.table('scraping_accounts').update(data).eq('id', account_id).execute()
         except: pass
 
+from core.instagram_service import InstagramService
+
 class InstagramHeadlessScraper:
     def __init__(self):
         self.playwright = None
@@ -88,6 +90,7 @@ class InstagramHeadlessScraper:
         self.page: Optional[Page] = None
         self.im = IdentityManager()
         self.active_account: Optional[Dict] = None
+        self.service = InstagramService()
 
     def _log_kpi(self, tier_used: int, target: str, count: int, duration_ms: int, error: str = None):
         data = {
@@ -102,55 +105,13 @@ class InstagramHeadlessScraper:
         except Exception as e:
             logger.error(f"Erro ao registrar KPI: {e}")
 
-    async def _check_cooldown(self, username: str) -> bool:
-        """Verifica se o alvo está em cooldown."""
-        res = supabase.table('alvo_backoff').select('next_allowed_at').eq('candidato_id', username).execute()
-        if res.data:
-            next_allowed = datetime.fromisoformat(res.data[0]['next_allowed_at'].replace('Z', '+00:00'))
-            if datetime.now(timezone.utc) < next_allowed:
-                return True
-        return False
-
-    async def _apply_backoff(self, username: str):
-        """Aplica backoff exponencial com jitter."""
-        res = supabase.table('alvo_backoff').select('strikes').eq('candidato_id', username).execute()
-        strikes = res.data[0]['strikes'] + 1 if res.data else 1
-
-        # Backoff: 5m, 15m, 45m, 3h... até 12h max
-        base_minutes = [5, 15, 45, 180, 720]
-        idx = min(strikes - 1, len(base_minutes) - 1)
-        minutes = base_minutes[idx]
-
-        # Jitter +/- 20%
-        jitter = minutes * 0.2
-        wait_minutes = minutes + random.uniform(-jitter, jitter)
-
-        next_allowed = datetime.now(timezone.utc) + timedelta(minutes=wait_minutes)
-
-        supabase.table('alvo_backoff').upsert({
-            'candidato_id': username,
-            'strikes': strikes,
-            'next_allowed_at': next_allowed.isoformat()
-        }).execute()
-        logger.warning(f"⏳ Alvo {username} em cooldown até {next_allowed} (strike {strikes})")
-
-    async def _is_profile_not_found(self) -> bool:
-        """Verifica se a página atual indica perfil inexistente."""
-        try:
-            content = await self.page.content()
-            return "Página não disponível" in content or "Sorry, this page" in content
-        except Exception:
-            return False
-
     async def run(self, limit: int = 15, targets: List[Dict] = None, test_username: str = None, max_posts: int = None) -> List[Dict]:
         start_time = time.perf_counter()
-        total_comments = 0
-        error = None
-        
         collected_comments: List[Dict] = []
+        error = None
 
         try:
-            logger.info("🧠 [Headless] Iniciando Instagram Headless Scraper (Rotation Mode)...")
+            logger.info("🧠 [Headless] Iniciando Instagram Headless Scraper (Service Mode)...")
             
             self.active_account = await self.im.get_next_available_account()
             if not self.active_account:
@@ -186,14 +147,34 @@ class InstagramHeadlessScraper:
                             targets = self._load_pending_targets(limit)
                     
                     for candidate in targets:
-                        result = await self._scrape_candidate(candidate, max_posts=max_posts)
-                        if result is None:
-                            error = f"Possível Shadowban ou Bloqueio na conta @{self.active_account['username']}"
-                            logger.warning(f"⚠️ [Headless] {error}")
-                            await self.im.mark_shadowbanned(self.active_account['id'])
-                            break
-                        if isinstance(result, list):
-                            collected_comments.extend(result)
+                        username = candidate.get('username') if isinstance(candidate, dict) else candidate
+                        if not username: continue
+                        
+                        # Delegação para o novo serviço unificado
+                        result = await self.service.scrape_candidate_comments(
+                            self.page, 
+                            username, 
+                            max_posts=max_posts or MAX_POSTS_PER_PROFILE
+                        )
+                        
+                        if result:
+                            # Sanitização básica e limpeza
+                            for c in result:
+                                c["texto_bruto"] = clean_comment(c.get("texto_bruto", ""), username)
+                                c["tier_used"] = 4 # Headless
+                            
+                            valid_comments = [c for c in result if c.get("texto_bruto")]
+                            collected_comments.extend(valid_comments)
+                            
+                            # Persistência imediata
+                            self._persist_comments(valid_comments)
+                            
+                            # Update candidate metadata if needed (simplificado agora)
+                            try:
+                                supabase.table('candidatos').update({
+                                    'last_scraped_at': datetime.now(timezone.utc).isoformat()
+                                }).eq('username', username).execute()
+                            except: pass
                 
                 await self.im.update_usage(self.active_account['id'])
                 await self.browser.close()
@@ -208,13 +189,35 @@ class InstagramHeadlessScraper:
 
         return collected_comments
 
+    def _persist_comments(self, comments: List[Dict]):
+        """Persiste comentários no Supabase."""
+        for c in comments:
+            try:
+                # Sanitização de campos para o DB
+                data = {
+                    "candidato_id": c.get("candidato_id"),
+                    "post_shortcode": c.get("post_shortcode"),
+                    "id_externo": str(c.get("id_externo")),
+                    "texto_bruto": c.get("texto_bruto"),
+                    "autor_username": c.get("autor_username"),
+                    "data_publicacao": c.get("data_publicacao"),
+                    "data_coleta": c.get("data_coleta"),
+                    "plataforma": "INSTAGRAM",
+                    "processado_ia": False,
+                    "tier_used": c.get("tier_used", 4)
+                }
+                # Upsert utilizando a restrição única definida no SQL
+                supabase.table('comentarios').upsert(data, on_conflict='candidato_id,post_shortcode,id_externo').execute()
+            except Exception as e:
+                logger.error(f"Erro na persistência (Upsert): {e}")
+
     async def _ensure_logged_in(self) -> bool:
         try:
-            await self.page.goto("https://www.instagram.com/", wait_until="commit")
+            await self.page.goto("https://www.instagram.com/", wait_until="domcontentloaded")
             await asyncio.sleep(5)
             if "/accounts/login/" not in self.page.url: return True
             
-            print(f"🔑 [Headless] Tentando login para @{self.active_account['username']}...")
+            logger.info(f"🔑 [Headless] Tentando login para @{self.active_account['username']}...")
             await self.page.goto(INSTAGRAM_LOGIN_URL)
             await self.page.fill('input[name="username"]', self.active_account['username'])
             await self.page.fill('input[name="password"]', self.active_account['password'])
@@ -227,274 +230,6 @@ class InstagramHeadlessScraper:
         res = supabase.table('candidatos').select('id,username').order('last_scraped_at', desc=False).limit(limit).execute()
         return res.data or []
 
-    async def _has_session_cookie(self) -> bool:
-        assert self.page is not None
-        cookies = await self.page.context.cookies()
-        return any(cookie.get('name') == 'sessionid' and cookie.get('value') for cookie in cookies)
-
-
-
-    async def _scrape_candidate(self, candidate: Any, max_posts: int = None) -> Optional[List[Dict]]:
-        if isinstance(candidate, str):
-            username = candidate
-        else:
-            username = candidate.get('username')
-            
-        if not username:
-            return None
-            
-        posts_limit = max_posts if max_posts is not None else MAX_POSTS_PER_PROFILE
-        logger.info(f"🎯 [Headless] @{username} (limit={posts_limit})...")
-        try:
-            captured_shortcodes = []
-            
-            async def handle_response(response):
-                url = response.url
-                if "web_profile_info" in url:
-                    try:
-                        data = await response.json()
-                        user_data = data.get("data", {}).get("user", {})
-                        if user_data:
-                            edges = user_data.get("edge_owner_to_timeline_media", {}).get("edges", [])
-                            for edge in edges:
-                                node = edge.get("node", {})
-                                if node.get("shortcode"):
-                                    captured_shortcodes.append(node["shortcode"])
-                            
-                            if not isinstance(candidate, str):
-                                self._update_candidate_data(candidate.get("id"), {
-                                    "username": user_data.get("username"),
-                                    "full_name": user_data.get("full_name"),
-                                    "biography": user_data.get("biography"),
-                                    "follower_count": user_data.get("edge_followed_by", {}).get("count"),
-                                    "following_count": user_data.get("edge_follow", {}).get("count"),
-                                    "media_count": user_data.get("edge_owner_to_timeline_media", {}).get("count"),
-                                    "is_verified": user_data.get("is_verified", False),
-                                    "is_private": user_data.get("is_private", False),
-                                    "profile_pic_url": user_data.get("profile_pic_url_hd"),
-                                    "external_url": user_data.get("external_url"),
-                                })
-                    except Exception as e:
-                        logger.debug(f"Erro ao parsear dados do perfil via rede: {e}")
-
-            # Registra listener de rede
-            self.page.on("response", lambda r: asyncio.create_task(handle_response(r)))
-
-            await self.page.goto(f"https://www.instagram.com/{username}/", timeout=60000)
-            await asyncio.sleep(4)
-
-            if await self._is_profile_not_found():
-                logger.warning(f"❌ [Headless] Perfil @{username} não encontrado.")
-                return []
-
-            if captured_shortcodes:
-                logger.info(f"🕸️ [Headless] Encontrados {len(captured_shortcodes)} posts de @{username} via API/Rede")
-                shortcodes = list(dict.fromkeys(captured_shortcodes))[:posts_limit]
-            else:
-                logger.warning(f"⚠️ [Headless] Falha ao interceptar API de perfil. Recorrendo ao scraping do DOM para posts de @{username}")
-                # Coleta shortcodes dos posts via DOM
-                shortcodes = await self.page.evaluate(f"""
-                    () => Array.from(document.querySelectorAll('a[href*="/p/"], a[href*="/reel/"]'))
-                        .map(a => a.href.match(/\\/(p|reel)\\/([^/]+)\\//)?.[2])
-                        .filter(Boolean)
-                        .slice(0, {posts_limit})
-                """)
-                shortcodes = list(dict.fromkeys(shortcodes))
-
-            comments: List[Dict] = []
-            for shortcode in shortcodes:
-                post_comments = await self._collect_post_comments(username, shortcode)
-                comments.extend(post_comments)
-
-            logger.info(f"✅ [Headless] @{username}: {len(comments)} comentários coletados")
-            return comments
-            
-        except Exception as e:
-            logger.error(f"❌ [Headless] Error scraping @{username}: {e}")
-            return None
-
-    async def _collect_post_comments(self, username: str, shortcode: str) -> List[Dict]:
-        """Coleta comentários de um post específico via interceptação de rede e fallback DOM."""
-        try:
-            captured_comments = []
-
-            async def handle_response(response):
-                url = response.url
-                # 1. API REST (/comments/)
-                if "api/v1/media" in url and "comments" in url:
-                    try:
-                        data = await response.json()
-                        raw = data.get("comments", [])
-                        for c in raw:
-                            text = c.get("text") or ""
-                            if len(text) > 2:
-                                ts = c.get("created_at")
-                                dt_pub = datetime.fromtimestamp(ts, tz=timezone.utc).isoformat() if ts else datetime.now(timezone.utc).isoformat()
-                                captured_comments.append({
-                                    "id_externo": f"ig_{c.get('pk')}",
-                                    "texto_bruto": text,
-                                    "autor_username": c.get("user", {}).get("username") or "desconhecido",
-                                    "data_publicacao": dt_pub,
-                                    "data_coleta": datetime.now(timezone.utc).isoformat(),
-                                    "post_shortcode": shortcode,
-                                    "plataforma": "INSTAGRAM",
-                                    "rede_social": "INSTAGRAM",
-                                    "candidato_id": username,
-                                    "processado_ia": False,
-                                    "mined": True,
-                                })
-                    except Exception as e:
-                        logger.debug(f"Erro ao obter JSON de comentários da API REST: {e}")
-                # 2. GraphQL (/graphql/query)
-                elif "graphql/query" in url or "/api/graphql" in url:
-                    try:
-                        data = await response.json()
-                        media_data = data.get("data", {}).get("xdt_shortcode_media", {}) or data.get("data", {}).get("shortcode_media", {})
-                        if media_data:
-                            comment_conn = media_data.get("edge_media_to_parent_comment", {}) or media_data.get("edge_media_to_comment", {})
-                            edges = comment_conn.get("edges", [])
-                            for edge in edges:
-                                node = edge.get("node", {})
-                                text = node.get("text", "")
-                                owner = node.get("owner", {})
-                                ts = node.get("created_at")
-                                if text and len(text) > 2:
-                                    dt_pub = datetime.fromtimestamp(int(ts), tz=timezone.utc).isoformat() if ts else datetime.now(timezone.utc).isoformat()
-                                    captured_comments.append({
-                                        "id_externo": f"ig_{node.get('id', '')}",
-                                        "texto_bruto": text,
-                                        "autor_username": owner.get("username") or "desconhecido",
-                                        "data_publicacao": dt_pub,
-                                        "data_coleta": datetime.now(timezone.utc).isoformat(),
-                                        "post_shortcode": shortcode,
-                                        "plataforma": "INSTAGRAM",
-                                        "rede_social": "INSTAGRAM",
-                                        "candidato_id": username,
-                                        "processado_ia": False,
-                                        "mined": True,
-                                    })
-                    except Exception as e:
-                        logger.debug(f"Erro ao obter JSON de comentários da API GraphQL: {e}")
-
-            # Registra listener de rede
-            self.page.on("response", lambda r: asyncio.create_task(handle_response(r)))
-
-            await self.page.goto(f"https://www.instagram.com/p/{shortcode}/", timeout=60000)
-            await asyncio.sleep(5)
-
-            if captured_comments:
-                seen = set()
-                unique_comments = []
-                for c in captured_comments:
-                    if c["id_externo"] not in seen:
-                        seen.add(c["id_externo"])
-                        unique_comments.append(c)
-                logger.info(f"🕸️ [Headless] Interceptados {len(unique_comments)} comentários reais via rede para o post {shortcode}")
-                return unique_comments[:MAX_COMMENTS_PER_POST]
-
-            logger.warning(f"⚠️ [Headless] Nenhuma requisição de API de comentários interceptada. Recorrendo ao DOM para o post {shortcode}")
-            # Fallback DOM
-            raw_comments = await self.page.evaluate("""
-                () => Array.from(document.querySelectorAll('div.x9f619 span[dir="auto"], span._ap30'))
-                    .map(el => el.innerText.trim())
-                    .filter(txt => txt.length > 2)
-            """)
-
-            now = datetime.now(timezone.utc).isoformat()
-            return [
-                {
-                    "id_externo": f"headless_{shortcode}_{i}",
-                    "texto_bruto": text,
-                    "autor_username": "unknown",
-                    "data_publicacao": now,
-                    "data_coleta": now,
-                    "post_shortcode": shortcode,
-                    "plataforma": "INSTAGRAM",
-                    "rede_social": "INSTAGRAM",
-                    "candidato_id": username,
-                    "processado_ia": False,
-                    "mined": True,
-                }
-                for i, text in enumerate(raw_comments[:MAX_COMMENTS_PER_POST])
-            ]
-        except Exception as e:
-            logger.error(f"❌ [Headless] Erro ao coletar post {shortcode}: {e}")
-            return []
-
-
-    def _update_candidate_data(self, candidate_id: str, profile_data: Dict[str, Any]):
-        """Update candidate data in database with profile information."""
-        try:
-            update_data = {
-                'username': profile_data.get('username'),
-                'full_name': profile_data.get('full_name'),
-                'biography': profile_data.get('biography'),
-                'follower_count': profile_data.get('follower_count'),
-                'following_count': profile_data.get('following_count'),
-                'media_count': profile_data.get('media_count'),
-                'is_verified': profile_data.get('is_verified', False),
-                'is_private': profile_data.get('is_private', False),
-                'profile_pic_url': profile_data.get('profile_pic_url'),
-                'external_url': profile_data.get('external_url'),
-                'last_scraped_at': datetime.now(timezone.utc).isoformat()
-            }
-            
-            supabase.table('candidatos').update(update_data).eq('id', candidate_id).execute()
-            logger.info(f"📝 [Headless] Updated candidate data for {candidate_id}")
-            
-        except Exception as e:
-            logger.error(f"❌ [Headless] Error updating candidate data: {e}")
-
-
-    async def _scrape_post(self, username: str, shortcode: str):
-        try:
-            await self.page.goto(f"https://www.instagram.com/p/{shortcode}/")
-            await asyncio.sleep(4)
-            
-            comments = await self.page.evaluate("""() => {
-                return Array.from(document.querySelectorAll('div.x9f619 span[dir="auto"], span._ap30'))
-                    .map(el => el.innerText.trim())
-                    .filter(txt => txt.length > 2);
-            }""")
-            
-            for cmd in comments[:MAX_COMMENTS_PER_POST]:
-                self._save_comment(username, shortcode, cmd)
-        except: pass
-
-    def to_utc_iso(self, dt):
-        if isinstance(dt, (int, float)):  # epoch
-            return datetime.fromtimestamp(dt, tz=timezone.utc).isoformat()
-        if isinstance(dt, str):
-            return datetime.fromisoformat(dt.replace('Z', '+00:00')).astimezone(timezone.utc).isoformat()
-        if isinstance(dt, datetime):
-            return (dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)).astimezone(timezone.utc).isoformat()
-        return datetime.now(timezone.utc).isoformat()
-
-    def _save_comment(self, username: str, shortcode: str, comment_data: Dict):
-        valid_text = clean_comment(comment_data.get('text', ''), username)
-        if not valid_text: return
-
-        data = {
-            'candidato_id': username, 
-            'post_shortcode': shortcode,
-            'id_externo': comment_data.get('id', 'unknown'),
-            'autor_username': comment_data.get('ownerUsername', 'unknown'),
-            'texto_bruto': valid_text, 
-            'tier_used': 4, # Headless
-            'like_count': 0, 
-            'data_publicacao': self.to_utc_iso(comment_data.get('timestamp')),
-            'data_coleta': self.to_utc_iso(None),
-            'processado_ia': False
-        }
-        try: 
-            # Upsert utilizando a restrição única definida no SQL
-            supabase.table('comentarios')\
-                .upsert(data, on_conflict='candidato_id,post_shortcode,id_externo')\
-                .header('Prefer', 'return=representation, resolution=merge-duplicates')\
-                .header('Content-Profile', 'public')\
-                .execute()
-        except Exception as e:
-            logger.error(f"Erro na persistência (Upsert): {e}")
 
 if __name__ == '__main__':
     asyncio.run(InstagramHeadlessScraper().run())

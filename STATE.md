@@ -5,8 +5,8 @@ _last_updated: 2026-05-23 | branch: feat/autonomous-workers_
 
 | Subsistema | Status | Observacao |
 |---|---|---|
-| Coleta Zyte (IGZyteWorker) | Desativado | Desativado via ENABLE_ZYTE=false no .env |
-| Coleta Headless (IGHeadlessWorker) | Operacional | 150 comentarios/ciclo validados em producao |
+| Coleta Zyte (IGZyteWorker) | Inativo | Auth error 403 detectado; desativado via .env |
+| Coleta Headless (IGHeadlessWorker) | Inoperante | Rodando mas coletando 0 comentários devido a seletores e interceptação obsoletos |
 | Persistencia Supabase | OK | upsert id_externo, ignore_duplicates, duplicados contados corretamente |
 | Classificacao IA | OK | 10/ciclo normal, batch de 50 no cooldown, cascade Mistral->Groq |
 | Fila de Coleta | OK | rotate_target idempotente, 23505 tratado |
@@ -15,6 +15,12 @@ _last_updated: 2026-05-23 | branch: feat/autonomous-workers_
 | Watchdog | Operacional | Sem restarts em producao |
 | Frontend (nextjs) | Deployado | Vercel, Next.js 16 (Estático na raiz), /api/* FastAPI |
 | Edge Function (mcp-proxy) | Operacional | SQL arbitrario bloqueado, ROUTES semanticas |
+
+## Descobertas Tecnicas (2026-05-23)
+- **Mudanca de Arquitetura IG:** O Instagram Web agora usa quase que exclusivamente a arquitetura Comet (Relay/GraphQL).
+- **Padroes de Dados:** Novos endpoints `xdt_api__v1__media` e preloaders `adp_PolarisPostRootQueryRelayPreloader` detectados.
+- **Falha no DOM:** Seletores `div.x9f619` estao obsoletos. Comentarios reais residem em spans com `dir="auto"` dentro de containers complexos.
+- **Sessao:** O `storage_state` atual ainda é valido (validado via `probe_t3_2_storage.py`).
 
 ## Arquitetura Atual (v50.1)
 
@@ -153,8 +159,8 @@ _last_updated: 2026-05-23 | branch: feat/autonomous-workers_
 
 | Subsistema | Status | Observacao |
 |---|---|---|
-| Coleta Zyte (IGZyteWorker) | Desativado | Desativado via ENABLE_ZYTE=false no .env |
-| Coleta Headless (IGHeadlessWorker) | Operacional | 150 comentarios/ciclo validados em producao |
+| Coleta Zyte (IGZyteWorker) | Inativo | Auth error 403 detectado; desativado via .env |
+| Coleta Headless (IGHeadlessWorker) | Inoperante | Rodando mas coletando 0 comentários devido a seletores e interceptação obsoletos |
 | Persistencia Supabase | OK | upsert id_externo, ignore_duplicates, duplicados contados corretamente |
 | Classificacao IA | OK | 10/ciclo normal, batch de 50 no cooldown, cascade Mistral->Groq |
 | Fila de Coleta | OK | rotate_target idempotente, 23505 tratado |
@@ -163,6 +169,12 @@ _last_updated: 2026-05-23 | branch: feat/autonomous-workers_
 | Watchdog | Operacional | Sem restarts em producao |
 | Frontend (nextjs) | Deployado | Vercel, Next.js 16 (Estático na raiz), /api/* FastAPI |
 | Edge Function (mcp-proxy) | Operacional | SQL arbitrario bloqueado, ROUTES semanticas |
+
+## Descobertas Tecnicas (2026-05-23)
+- **Mudanca de Arquitetura IG:** O Instagram Web agora usa quase que exclusivamente a arquitetura Comet (Relay/GraphQL).
+- **Padroes de Dados:** Novos endpoints `xdt_api__v1__media` e preloaders `adp_PolarisPostRootQueryRelayPreloader` detectados.
+- **Falha no DOM:** Seletores `div.x9f619` estao obsoletos. Comentarios reais residem em spans com `dir="auto"` dentro de containers complexos.
+- **Sessao:** O `storage_state` atual ainda é valido (validado via `probe_t3_2_storage.py`).
 
 ## Arquitetura Atual (v50.1)
 
