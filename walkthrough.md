@@ -78,11 +78,19 @@ Foram implementadas correções críticas para restabelecer a estabilidade e a i
 - **`core/ai_service.py`**:
   - Integração do modelo de IA local LiteRT (Gemma 3 1B) ao `ai_circuit_breaker`. Em caso de indisponibilidade ou falhas seguidas do modelo local, o circuito abre por 5 minutos, poupando timeouts de 5 segundos repetitivos e mantendo a taxa de processamento do lote alta.
 
+### Higienização Cadastral e Unificação de Guilherme Boulos (v52.4) [NOVO]
+- **`scratch/fix_boulos.py`**:
+  - Script utilitário desenvolvido para centralizar o monitoramento do Guilherme Boulos no perfil correto e oficial (`@guilhermeboulos.oficial`, ID `141b5779-7a0d-41c5-867b-4b32810a48ea`).
+  - Atualizado o cargo do registro oficial para "Deputado Federal" e sua prioridade_coleta para 10.
+  - Inativados os três perfis duplicados ou errôneos no Supabase: `@guilherme_boulos`, `@boulos_oficial` e `@guilhermeboulos_sp`.
+  - Higienizada a fila de coleta (`fila_coleta`) com a remoção dos registros associados aos perfis inativados e garantia de enfileiramento pendente apenas do oficial.
+
 ---
 
 ## Verificação e Resultados
 
-1. **Renovação de Múltiplos Slots com Sucesso**: Executado o `scripts/export_playwright_cookies.py`, realizando o login automatizado e sem interrupções para duas contas configuradas simultaneamente no `.env`. Os cookies e novos sessionids (`INSTAGRAM_SESSIONID` e `INSTAGRAM_SESSIONID_2`) foram extraídos e injetados de forma estável no `.env` do projeto.
-2. **Deploy de Produção Validado**: O site de produção da Vercel (`https://asentinela.vercel.app/`) foi atualizado e está servindo a nova compilação (`DZ8v_bE0UIYhuFuuvcVtF`) livre de caches.
-3. **Resiliência do Painel**: O painel carrega com sucesso as estatísticas dinâmicas e o feed de alertas reais do Supabase, contornando a indisponibilidade das rotas de API da Vercel.
-4. **Repositório Sincronizado**: O repositório está limpo e os commits foram integrados tanto em `feat/autonomous-workers` quanto em `main`.
+1. **Correção de Guilherme Boulos Efetuada**: A execução de `scratch/fix_boulos.py` no banco de dados remoto realizou com sucesso a desativação de 3 registros redundantes e atualizou o cadastro do perfil oficial `@guilhermeboulos.oficial` com cargo e prioridade corretos. A fila de coleta foi limpa e apenas a conta oficial permanece ativa e pendente de raspagem.
+2. **Renovação de Múltiplos Slots com Sucesso**: Executado o `scripts/export_playwright_cookies.py`, realizando o login automatizado e sem interrupções para duas contas configuradas simultaneamente no `.env`. Os cookies e novos sessionids (`INSTAGRAM_SESSIONID` e `INSTAGRAM_SESSIONID_2`) foram extraídos e injetados de forma estável no `.env` do projeto.
+3. **Deploy de Produção Validado**: O site de produção da Vercel (`https://asentinela.vercel.app/`) foi atualizado e está servindo a nova compilação (`DZ8v_bE0UIYhuFuuvcVtF`) livre de caches.
+4. **Resiliência do Painel**: O painel carrega com sucesso as estatísticas dinâmicas e o feed de alertas reais do Supabase, contornando a indisponibilidade das rotas de API da Vercel.
+5. **Repositório Sincronizado**: O repositório está limpo e os commits foram integrados tanto em `feat/autonomous-workers` quanto em `main`.
