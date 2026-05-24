@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { supabase } from '@/src/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { fetchApi } from '@/lib/api';
 
 interface Stats {

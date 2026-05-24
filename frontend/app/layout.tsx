@@ -1,25 +1,30 @@
-import type { Metadata } from "next";
-import "./globals.css";
-import Providers from "@/components/Providers";
+import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
+import './globals.css'
+import ClientLayoutWrapper from '@/components/ClientLayoutWrapper'
+
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: "Sentinela Democrática",
-  description: "War Room de Análise Forense",
-};
+  title: 'Sentinela Democrática',
+  description: 'War Room de Análise Forense',
+}
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode
+}) {
   return (
     <html lang="pt-BR">
-      <body className="antialiased">
+      <body className={`${inter.className} antialiased bg-black text-tactical-accent`}>
+        {/* Scanline Effect */}
         <div className="scanline" />
-        <Providers>
+        
+        <ClientLayoutWrapper>
           {children}
-        </Providers>
+        </ClientLayoutWrapper>
       </body>
     </html>
-  );
+  )
 }
