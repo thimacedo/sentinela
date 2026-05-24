@@ -8,6 +8,11 @@ from dotenv import load_dotenv
 sys.path.append(os.getcwd())
 load_dotenv()
 
+# Reconfigura a saída do console no Windows para evitar falhas com acentos e emojis
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding="utf-8", errors="backslashreplace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="backslashreplace")
+
 from core.instagram_scraper_v2 import scrape_instagram, InstagramScraperV2
 
 # Configuração de logging

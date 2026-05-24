@@ -273,19 +273,33 @@ class InstagramScraperV2:
                 data = json.loads(content)
                 extracted = self._recursive_find_comments(data)
                 comments.extend(extracted)
-            except: continue
+            except:
+                continue
         return comments
 
     async def _extract_from_dom(self, page: Page, shortcode: str) -> List[Dict[str, Any]]:
-        """Heurística baseada em spans dir=auto (PASA v51.0 upgrade)."""
+        """Heurística baseada em spans dir=auto com restrição de escopo e blacklist estendida (PASA v52.5)."""
         return await page.evaluate("""
             () => {
                 const results = [];
-                const spans = Array.from(document.querySelectorAll('span[dir="auto"]'));
+                // Restringe a busca ao article (post/modal) para evitar menus e rodapés gerais do site
+                const container = document.querySelector('article') || document;
+                const spans = Array.from(container.querySelectorAll('span[dir="auto"]'));
+                
                 const blacklist = ['explorar', 'explore', 'messages', 'notificações', 'notifications', 
                                  'create', 'dashboard', 'perfil', 'profile', 'mais', 'more',
                                  'responder', 'reply', 'search', 'pesquisa', 'reels', 'home', 'threads'];
-
+                                 
+                const commentTextBlacklist = [
+                    'ver respostas', 'ocultar respostas', 'ver tradução', 'ver traduções',
+                    'ver resposta', 'ocultar resposta', 'reply', 'view replies', 'hide replies',
+                    'view translation', 'curtir', 'like', 'responder', 'reply',
+                    'enviar', 'send', 'compartilhar', 'share', 'carregar mais comentários',
+                    'carregar mais', 'load more comments', 'load more',
+                    'áudio original', 'original audio', 'som original', 'original sound',
+                    'adicionar um comentário...', 'add a comment...', 'curtido por', 'liked by'
+                ];
+ 
                 let lastUsername = "";
                 for (let i = 0; i < spans.length; i++) {
                     const txt = spans[i].innerText.trim();
@@ -295,9 +309,18 @@ class InstagramScraperV2:
                     
                     if (isUsername) {
                         lastUsername = txt;
-                    } else if (lastUsername && !/^[0-9]+[ ]?[hdm]$/i.test(txt) && !blacklist.some(b => txt.toLowerCase().includes(b))) {
-                        results.push({ autor: lastUsername, texto: txt });
-                        lastUsername = ""; 
+                    } else if (lastUsername) {
+                        // Ignora timestamps (ex: 1 h, 2 d, 3 sem, 1 a, 1 y, 3w)
+                        const isTime = /^[0-9]+[ ]?(h|d|m|w|y|sem|a)$/i.test(txt);
+                        
+                        // Ignora termos estáticos de ações de comentários
+                        const lowerTxt = txt.toLowerCase();
+                        const isStaticAction = commentTextBlacklist.some(b => lowerTxt === b || lowerTxt.startsWith(b));
+                        
+                        if (!isTime && !isStaticAction && !blacklist.some(b => txt.toLowerCase().includes(b))) {
+                            results.push({ autor: lastUsername, texto: txt });
+                            lastUsername = ""; 
+                        }
                     }
                 }
                 return results;

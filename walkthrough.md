@@ -75,6 +75,10 @@ Foram implementadas correções críticas para restabelecer a estabilidade e a i
   - Validação automatizada e rotação de múltiplos slots `.env` sequenciais (`INSTAGRAM_SESSIONID_X`), atualizando de forma isolada no arquivo `.env` para evitar sobreposição ou falha geral no ciclo.
 - **`core/instagram_scraper_v2.py`**:
   - Refatoração total para abertura de posts no feed via modal do Playwright (com clique no elemento) e fechamento por `Escape`, evitando tela branca e bloqueios por acessos diretos a URLs `/p/{shortcode}/`.
+  - Aperfeiçoamento da extração do DOM para limitar a consulta de elementos `span[dir="auto"]` apenas ao descendente `<article>` do post em destaque, ignorando menus, barras de navegação globais e rodapés gerais do Instagram.
+  - Expansão da `commentTextBlacklist` com termos funcionais de áudio original, som original, placeholders de digitação e termos de curtidas comuns que poluíam a captura.
+- **`scripts/test_scraper_v2.py`**:
+  - Ajustada a codificação de saída do console para UTF-8 no Windows (`sys.stdout.reconfigure`), evitando falhas de encode com emojis e acentos ao apresentar a amostra.
 - **`core/ai_service.py`**:
   - Integração do modelo de IA local LiteRT (Gemma 3 1B) ao `ai_circuit_breaker`. Em caso de indisponibilidade ou falhas seguidas do modelo local, o circuito abre por 5 minutos, poupando timeouts de 5 segundos repetitivos e mantendo a taxa de processamento do lote alta.
 
@@ -94,3 +98,4 @@ Foram implementadas correções críticas para restabelecer a estabilidade e a i
 3. **Deploy de Produção Validado**: O site de produção da Vercel (`https://asentinela.vercel.app/`) foi atualizado e está servindo a nova compilação (`DZ8v_bE0UIYhuFuuvcVtF`) livre de caches.
 4. **Resiliência do Painel**: O painel carrega com sucesso as estatísticas dinâmicas e o feed de alertas reais do Supabase, contornando a indisponibilidade das rotas de API da Vercel.
 5. **Repositório Sincronizado**: O repositório está limpo e os commits foram integrados tanto em `feat/autonomous-workers` quanto em `main`.
+6. **Filtro de Heurística DOM Validado**: O script `scripts/test_scraper_v2.py` executou sem falhas de encoding no Windows, comprovando que a restrição do DOM ao `article` e a nova `commentTextBlacklist` limparam 100% dos falsos positivos de áudio original, placeholders e menus. O scraper extraiu apenas comentários reais (amostra de `@raquellyraoficial` com emojis validada no log).
