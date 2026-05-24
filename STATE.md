@@ -14,29 +14,30 @@ _last_updated: 2026-05-23 | branch: feat/autonomous-workers_
 | AIAdvisor | Condicional | Acionado apenas score<40 ou tier critical/db_failed |
 | Watchdog | Operacional | Sem restarts em producao |
 | Frontend (nextjs) | Deployado | Vercel, Next.js 16 (Estático na raiz), /api/* FastAPI |
-| Edge Function (mcp-proxy) | Operacional | SQL arbitrario bloqueado, ROUTES semanticas |
+| Classificacao IA | Operacional | Roteamento Híbrido: Local (Gemma/Ollama) + Cloud Cascade |
 
 ## Descobertas Tecnicas (2026-05-23)
+- **Roteamento Híbrido:** Implementado suporte ao Ollama no `AIService`. O sistema pode agora priorizar modelos locais (Gemma 2B) via `ENABLE_LOCAL_AI=true`.
 - **Implementação V2:** Criado `InstagramScraperV2` em `core/` focado em Playwright puro.
 - **Resiliência:** Implementada rotação automática entre múltiplas sessões (`INSTAGRAM_SESSIONID_N`) e backoff exponencial.
 - **Extração Multi-camada:** O motor V2 tenta Interceptação de Rede > Scripts (data-sjs) > Heurística DOM.
 - **Independência:** O sistema não depende mais do Zyte ou outros serviços pagos para raspagem básica.
 - **Validado:** Testado com sucesso via `scripts/test_scraper_v2.py`.
 
-## Arquitetura Atual (v52.0)
+## Arquitetura Atual (v52.2)
 
 ```
 watchdog.py
   └── main_runner.py
         └── SentinelaOrchestrator
-              ├── _active_targets: set  (compartilhado entre workers)
+              ├── _active_targets: set
               └── IGWorkerV2 (ig-v2-01)
-                    ├── InstagramScraperV2 (Playwright Nativo)
-                    │     ├── Multi-Session Rotation
-                    │     ├── Exponential Backoff
-                    │     └── Multi-Tier Extraction (Network > Scripts > DOM)
-                    ├── persist_comments() → upsert candidato_id,post_shortcode,id_externo
-                    └── classify_comments()
+                    ├── InstagramScraperV2 (V2 Engine)
+                    └── AIService (Hybrid Router)
+                          ├── Tier 0: Ollama (Gemma Local)
+                          ├── Tier 1: Mistral (Cloud)
+                          ├── Tier 2: Groq (Llama 3.3)
+                          └── Tier 3: OpenRouter (Security)
 ```
 
 ## Fluxo de Dados

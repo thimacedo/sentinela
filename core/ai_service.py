@@ -63,6 +63,12 @@ def clean_null_chars(data: Any) -> Any:
 
 class AIService:
     def __init__(self):
+        # 0. Ollama (Local - Soberania e Custo Zero)
+        self.ollama_client = AsyncOpenAI(
+            api_key="ollama", # Dummy key
+            base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
+        )
+
         # 1. Mistral (Principal - Preciso em PT-BR)
         self.mistral_client = AsyncOpenAI(
             api_key=os.getenv("MISTRAL_API_KEY"),
@@ -81,19 +87,21 @@ class AIService:
             base_url="https://openrouter.ai/api/v1"
         )
 
-        # Ordem de prioridade para classificação (Mistral -> Groq -> OpenRouter)
-        # Verifica se há um modelo fine‑tuned configurado via .env
+        # Determina modelo Mistral
         finetuned_model = os.getenv('FINETUNED_MODEL_NAME')
-        if finetuned_model:
-            # Substitui o modelo base do provedor principal (Mistral) pelo fine‑tuned
-            mistral_model = finetuned_model
-        else:
-            mistral_model = "open-mistral-nemo"
-        self.providers = [
+        mistral_model = finetuned_model if finetuned_model else "open-mistral-nemo"
+
+        self.providers = []
+        
+        # Prioriza Local se habilitado via ENV
+        if os.getenv("ENABLE_LOCAL_AI", "false").lower() == "true":
+            self.providers.append({"name": "ollama", "client": self.ollama_client, "model": os.getenv("OLLAMA_MODEL", "gemma:2b")})
+
+        self.providers.extend([
             {"name": "mistral", "client": self.mistral_client, "model": mistral_model},
             {"name": "groq", "client": self.groq_client, "model": "llama-3.3-70b-versatile"},
             {"name": "openrouter", "client": self.openrouter_client, "model": "openrouter/free"},
-        ]
+        ])
 
     async def classify_text(self, text: str) -> Dict[str, Any]:
         """Tenta classificar o texto em cascata, respeitando o Circuit Breaker."""
