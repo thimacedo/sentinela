@@ -22,7 +22,8 @@ ATENÇÃO - CLASSIFIQUE ESTRITAMENTE COMO "LIXO" SE O TEXTO FOR:
 4. Apenas marcações de perfis ou fragmentos curtos sem sentido (ex: "@usuario").
 
 ATENÇÃO - HOSTILIDADE E SARCASMO (FALSOS NEGATIVOS):
-- Comentários passivo-agressivos, sarcasmo hostil, acusações de preguiça (ex: "Trabalhar que é bom...", "Vai trabalhar") ou descrédito político DEVEM ser marcados com is_hate = true. Como não envolvem raça/gênero/religião, enquadre na categoria "MILICIA_DIGITAL" (usada como abrangente para ataques de ódio político).
+- Comentários passivo-agressivos, sarcasmo hostil, acusações de preguiça (ex: "Trabalhar que é bom...", "Vai trabalhar") ou descrédito político DEVEM ser marcados com is_hate = true e enquadrados em "MILICIA_DIGITAL".
+- Sarcasmo ou diminutivos direcionados a mulheres na política (ex: "meninas do Valdemar", "descontrolada", "histérica", piadas de cunho machista) DEVEM ser marcados com is_hate = true e enquadrados rigorosamente em "MISOGINIA_POLITICA". O preconceito muitas vezes vem disfarçado de piada com emojis.
 
 Responda APENAS com JSON válido contendo:
 {
