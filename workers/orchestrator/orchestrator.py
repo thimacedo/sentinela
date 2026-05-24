@@ -19,6 +19,7 @@ class SentinelaOrchestrator:
     def __init__(self, reward_engine: RewardEngine, ai_advisor: AIAdvisor):
         self.reward_engine  = reward_engine
         self.ai_advisor     = ai_advisor
+        self.logger         = logging.getLogger("orchestrator")
         self._workers: List[BaseWorker] = []
         self._active_targets: set = set()
         self._target_timestamps: dict[str, float] = {} # PASA v57.0: Monitor de Alvos
