@@ -23,12 +23,27 @@ class SentinelaOrchestrator:
         self._cycle_total = 0
 
     def _perform_self_healing(self):
-        """Ações de autocura de infraestrutura (v57.0)."""
+        """Ações de autocura de infraestrutura (v57.1)."""
         import gc
         import time
+        import ctypes
+        import platform
         
         # 1. Limpeza de Memória (Preventiva contra OOM)
         gc.collect()
+        
+        # 2. Flush de Memória (Nível SO - Apenas Linux/Render)
+        if platform.system() == "Linux":
+            try:
+                libc = ctypes.CDLL("libc.so.6")
+                libc.malloc_trim(0)
+                logger.debug("[orchestrator] 🧊 Flush de memória (malloc_trim) concluído.")
+            except Exception as e:
+                logger.warning("[orchestrator] Falha ao executar malloc_trim: %s", e)
+
+    def register(self, worker: BaseWorker) -> None:
+        self._workers.append(worker)
+        logger.info("[orchestrator] registrado: %s", worker.worker_id)
         
         # 2. Resgate de Alvos (Zombie Cleanup)
         # Se um alvo está 'ativo' há mais de 20 minutos, provavelmente o worker travou

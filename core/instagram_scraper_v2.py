@@ -446,7 +446,7 @@ class InstagramScraperV2:
                         const isBlacklist = commentTextBlacklist.some(b => lowerTxt === b || lowerTxt.startsWith(b));
                         
                         // Ignora comentários compostos APENAS por emojis ou pontuação (sem nenhuma letra ou número)
-                        const hasLetters = /[\p{L}\p{N}]/u.test(txt);
+                        const hasLetters = /[\\p{L}\\p{N}]/u.test(txt);
                         
                         if (!isTime && !isBlacklist && hasLetters) {
                             commentText = txt;
