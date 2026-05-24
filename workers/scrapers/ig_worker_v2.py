@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import asyncio
 from typing import List, Dict
 
 from workers.base.worker_base import BaseWorker

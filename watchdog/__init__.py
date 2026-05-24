@@ -236,18 +236,28 @@ def run_web_server():
 # =========================================================
 
 def get_python_executable() -> str:
-    if sys.prefix != sys.base_prefix:
+    # Se o watchdog foi iniciado por um executável Python válido, usamos ele
+    # para herdar o ambiente correto (como o ambiente virtual gerenciado por 'uv')
+    if sys.executable and os.path.exists(sys.executable):
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        # Se estamos sob uv run ou venv ativo, sys.prefix difere ou detectamos uv pelo executável
+        if "uv" in sys.executable.lower() or sys.prefix != sys.base_prefix:
+            return sys.executable
+            
+        venv_paths = [
+            os.path.join(project_root, ".venv", "Scripts", "python.exe"),
+            os.path.join(project_root, "venv", "Scripts", "python.exe"),
+            os.path.join(project_root, ".venv", "bin", "python"),
+            os.path.join(project_root, "venv", "bin", "python"),
+        ]
+        for path in venv_paths:
+            # Verifica se o venv existe E se ele é um ambiente íntegro (com pip funcional no mesmo diretório)
+            if os.path.exists(path):
+                bin_dir = os.path.dirname(path)
+                pip_name = "pip.exe" if sys.platform.startswith("win") else "pip"
+                if os.path.exists(os.path.join(bin_dir, pip_name)):
+                    return path
         return sys.executable
-    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    venv_paths = [
-        os.path.join(project_root, ".venv", "Scripts", "python.exe"),
-        os.path.join(project_root, "venv", "Scripts", "python.exe"),
-        os.path.join(project_root, ".venv", "bin", "python"),
-        os.path.join(project_root, "venv", "bin", "python"),
-    ]
-    for path in venv_paths:
-        if os.path.exists(path):
-            return path
     return sys.executable
 
 def classify_error(stderr_output: str) -> str:
