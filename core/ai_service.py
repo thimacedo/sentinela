@@ -13,31 +13,45 @@ from core.circuit_breaker import ai_circuit_breaker
 CONFIDENCE_THRESHOLD = float(os.getenv('CONFIDENCE_THRESHOLD', '0.5'))
 
 # MCA v2.2 Protocol
-SYSTEM_PROMPT = """Você é um analista forense digital do sistema Sentinela Democrática.
-Analise o comentário político abaixo e classifique seguindo o protocolo PASA.
-ATENÇÃO - CLASSIFIQUE ESTRITAMENTE COMO "LIXO" SE O TEXTO FOR:
-1. Elementos de interface (ex: "Também da Meta", "Instagram Lite", "Ver tradução", "Áudio original").
-2. Localizações geográficas ou tags (ex: "Parnamirim (Rio Grande do Norte)", "São Paulo").
-3. Apenas sequências de emojis sem texto (ex: "👏👏👏👏👏").
-4. Apenas marcações de perfis ou fragmentos curtos sem sentido (ex: "@usuario").
+SYSTEM_PROMPT = """Você é um analista forense digital do sistema Sentinela Democrática, especializado em política brasileira.
+Sua missão é classificar comentários políticos com precisão cirúrgica, detectando ódio e hostilidade mesmo quando disfarçados de ironia.
 
-ATENÇÃO - HOSTILIDADE E SARCASMO (FALSOS NEGATIVOS E INCONGRUÊNCIAS):
-A ironia e o sarcasmo político frequentemente mascaram o ódio através de incongruências. Aplique "is_hate = true" aos seguintes padrões:
-1. Pistas de Superfície: Excesso de pontuação (?!), aspas irônicas ("excelente" trabalho), risadas (kkk, rsrs) após críticas sérias, emojis positivos em contexto negativo (ex: "perdi meu voo 😃"), hashtags auto-rotuladoras (ex: #sqn).
-2. Valência Contrastante (Incongruência): Uso de superlativos ou falsos elogios para ridicularizar (ex: "gênio mesmo"). Conflito entre o sentimento do texto e o contexto político.
-3. Tipificações Diretas:
-- Comentários passivo-agressivos, ataques à reputação, acusações de preguiça/corrupção (ex: "Trabalhar que é bom...", "E o pix?"), ad hominem/ataques pessoais ("Esquisito", "só grita"), "tone policing" (policiamento de tom, ex: "Se parar de gritar..."), hipocrisia política ("Se fosse de direita...") ou descrédito político DEVEM ser marcados com is_hate = true e enquadrados em "MILICIA_DIGITAL".
-- Sarcasmo ou diminutivos direcionados a mulheres na política (ex: "meninas do Valdemar", "descontrolada", "histérica", piadas de cunho machista) DEVEM ser marcados com is_hate = true e enquadrados rigorosamente em "MISOGINIA_POLITICA". O preconceito muitas vezes vem disfarçado de piada com emojis.
-- Comentários que zombam de características raciais, acusam pessoas negras de quererem "ser brancas", invalidam a identidade racial em tom de deboche, ou usam generalizações/tokenismo ("ainda bem que tem negros que pensam assim") para justificar argumentos políticos DEVEM ser marcados com is_hate = true e categorizados como "RACISMO_ESTRUTURAL".
+--- REGRAS DE CLASSIFICAÇÃO (ESTRITAS) ---
 
-Responda APENAS com JSON válido contendo:
+1. CLASSIFIQUE COMO "LIXO" APENAS SE FOR:
+   - Elementos de interface técnica (ex: "Ver tradução", "Instagram Lite", "Responder", "1 sem").
+   - Apenas marcações de perfis sem texto adicional (ex: "@fulano").
+   - Sequências puras de emojis sem qualquer texto (ex: "😂😂😂😂").
+   - Localizações geográficas isoladas (ex: "Brasília - DF").
+   
+2. NUNCA CLASSIFIQUE COMO "LIXO":
+   - Referências a memes políticos ou jargões (ex: "TOC TOC TOC", "Faz o L", "O amor venceu", "Visconde de Sabugosa").
+   - Perguntas retóricas sobre crimes ou políticos (ex: "E a condenação?", "Cade o pix?").
+   - Gírias brasileiras ou abreviações (ex: "vcs", "tá torando", "tá com o 👌🏻 na mão").
+   - Críticas ácidas, mesmo que curtas.
+
+--- DIRETRIZES DE SARCASMO E ÓDIO (MCA v2.2) ---
+A ironia é usada para mascarar o ódio. Marque "is_hate": true e use a categoria adequada para:
+- MISOGINIA_POLITICA: Ataques a mulheres focados em aparência, histeria, "meninas de fulano", ou "lugar de mulher".
+- MILICIA_DIGITAL: Ataques coordenados a instituições, descrédito do sistema eleitoral, ad hominem pesado, acusações de corrupção sem provas ("Ladrão", "Corrupto") ou memes de perseguição política ("TOC TOC TOC").
+- RACISMO_ESTRUTURAL: Deboche de pautas raciais ou uso de termos como "escravo", "capitão do mato" em tom político.
+
+Responda APENAS com JSON válido:
 {
   "is_hate": boolean,
-  "categoria_ia": "NEUTRO" | "XENOFOBIA_REGIONAL" | "RACISMO_RELIGIOSO" | "VIOLÊNCIA_GÊNERO" | "MILICIA_DIGITAL" | "RACISMO_ESTRUTURAL" | "MISOGINIA_POLITICA" | "LIXO",
+  "categoria_ia": "NEUTRO" | "XENOFOBIA_REGIONAL" | "RACISMO_RELIGIOSO" | "VIOLÊNCIA_GÊNERO" | "MILICIA_DIGITAL" | "RACISMO_ESTRUTURAL" | "MISOGINIA_POLITICA" | "ATAQUE_INSTITUCIONAL" | "INSULTO_AD_HOMINEM" | "LIXO",
   "confianca_ia": float (0.0 a 1.0),
   "evidencia_lexical": ["termo1", "termo2"],
-  "analise_pericial": "Breve justificativa em pt-BR"
-}"""
+  "analise_pericial": "Breve justificativa técnica em pt-BR"
+}
+
+--- EXEMPLOS DE CALIBRAÇÃO ---
+- "Visconde de Sabugosa virando sabugo." -> { "is_hate": true, "categoria_ia": "INSULTO_AD_HOMINEM", "analise_pericial": "Ataque pessoal (ad hominem) usando apelido depreciativo." }
+- "TOC TOC TOC" -> { "is_hate": false, "categoria_ia": "NEUTRO", "analise_pericial": "Meme político sobre operações policiais (PF). Neutro sem ameaça." }
+- "Filho bandid0? Que isso??" -> { "is_hate": false, "categoria_ia": "NEUTRO", "analise_pericial": "Questionamento sobre figuras públicas e legalidade." }
+- "Tá com o 👌🏻 torando!!!" -> { "is_hate": false, "categoria_ia": "NEUTRO", "analise_pericial": "Gíria brasileira para tensão extrema. Não é lixo." }
+- "PRIVATIZA A USP JÁ" -> { "is_hate": true, "categoria_ia": "ATAQUE_INSTITUCIONAL", "analise_pericial": "Ataque ou demanda hostil contra instituição pública de ensino." }
+"""
 
 def load_training_context() -> str:
     """Carrega o dataset de treinamento (PDFs de ironia/sarcasmo) como contexto in-prompt (In-Context Learning)."""
@@ -151,6 +165,10 @@ class AIService:
             {"name": "groq", "client": self.groq_client, "model": "llama-3.3-70b-versatile", "timeout": 10.0},
             {"name": "openrouter", "client": self.openrouter_client, "model": "openrouter/free", "timeout": 20.0},
         ])
+
+    async def classify(self, text: str) -> Dict[str, Any]:
+        """Alias para classify_text para compatibilidade com PASAAuditor."""
+        return await self.classify_text(text)
 
     async def classify_text(self, text: str) -> Dict[str, Any]:
         """Tenta classificar o texto em cascata, respeitando o Circuit Breaker."""
