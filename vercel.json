@@ -1,20 +1,24 @@
 {
   "version": 2,
-  "cleanUrls": true,
-  "buildCommand": "cd frontend && npm install && npm run build",
-  "outputDirectory": "frontend/out",
-  "rewrites": [
+  "builds": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/index.py"
+      "src": "frontend/package.json",
+      "use": "@vercel/next"
+    },
+    {
+      "src": "api/index.py",
+      "use": "@vercel/python",
+      "config": { "maxLambdaSize": "50mb" }
     }
   ],
-  "functions": {
-    "api/**/*.py": {
-      "runtime": "@vercel/python@4.1.0",
-      "maxDuration": 15,
-      "includeFiles": "api/**",
-      "excludeFiles": "{data,workers,processing,docs,tests,scripts,configs,frontend,frontend-bleeding-edge}/**"
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "api/index.py"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "frontend/$1"
     }
-  }
+  ]
 }

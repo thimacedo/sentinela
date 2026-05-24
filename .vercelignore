@@ -1,4 +1,4 @@
-# === VERCEIL IGNORE (Ruthless v52.4.8) ===
+# === VERCEL IGNORE (Ruthless v52.4.12) ===
 
 # 1. Ignorar todos os Workers e Lógica Pesada
 workers/
@@ -26,11 +26,14 @@ tests/
 test_api/
 test_scripts/
 
-# 3. Ignorar Lockfiles da raiz (Workspace Global)
+# 3. Ignorar Lockfiles e Requirements LOCAIS
 uv.lock
 pyproject.toml
+requirements-workers.txt
+api/uv.lock
+api/pyproject.toml
 
-# 4. Entry points do backend local
+# 4. Ignorar Entry points do backend local
 main_runner.py
 watchdog.py
 spawn-morty-win.mjs
@@ -59,4 +62,4 @@ dashboard.txt
 _next/
 _not-found/
 
-# NOTA: core/ e models/ DEVEM SER INCLUÍDOS pois a API depende deles.
+# core/ e models/ DEVEM SER INCLUÍDOS pois a API depende deles.
