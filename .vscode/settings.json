@@ -35,5 +35,8 @@
     "workbench.editor.showTabIndex": true,
     "workbench.editor.useModal": "all",
     "workbench.editor.wrapTabs": true,
-    "window.density.editorTabHeight": "compact"
+    "window.density.editorTabHeight": "compact",
+    "[jsonc]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
+    }
 }
