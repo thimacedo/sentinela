@@ -300,18 +300,14 @@ class InstagramScraperV2:
         return comments
 
     async def _extract_from_dom(self, page: Page, shortcode: str) -> List[Dict[str, Any]]:
-        """Heurística baseada em spans dir=auto com restrição de escopo e blacklist estendida (PASA v52.5)."""
+        """Heurística estruturada baseada em blocos de comentários (PASA v52.6)."""
         return await page.evaluate("""
             () => {
                 const results = [];
-                // Restringe a busca ao article (post/modal) para evitar menus e rodapés gerais do site
                 const container = document.querySelector('article') || document;
-                const spans = Array.from(container.querySelectorAll('span[dir="auto"]'));
+                // Comentaristas geralmente ficam em h3 na estrutura atual do modal
+                const h3s = Array.from(container.querySelectorAll('h3'));
                 
-                const blacklist = ['explorar', 'explore', 'messages', 'notificações', 'notifications', 
-                                 'create', 'dashboard', 'perfil', 'profile', 'mais', 'more',
-                                 'responder', 'reply', 'search', 'pesquisa', 'reels', 'home', 'threads'];
-                                 
                 const commentTextBlacklist = [
                     'ver respostas', 'ocultar respostas', 'ver tradução', 'ver traduções',
                     'ver resposta', 'ocultar resposta', 'reply', 'view replies', 'hide replies',
@@ -322,30 +318,39 @@ class InstagramScraperV2:
                     'adicionar um comentário...', 'add a comment...', 'curtido por', 'liked by',
                     'também da meta', 'instagram lite', 'localizações', 'campanha 2201'
                 ];
- 
-                let lastUsername = "";
-                for (let i = 0; i < spans.length; i++) {
-                    const txt = spans[i].innerText.trim();
-                    if (!txt || txt.length < 2) continue;
+                
+                h3s.forEach(h => {
+                    const username = h.innerText.trim();
+                    // Validação básica do username para evitar lixo
+                    if (!username || username.includes(' ') || username.length < 2) return;
                     
-                    const isUsername = /^[a-z0-9._]{3,30}$/i.test(txt) && !txt.includes(' ') && !blacklist.includes(txt.toLowerCase());
+                    let node = h;
+                    // Sobe na árvore do DOM para englobar todo o bloco do comentário (geralmente 5-6 níveis)
+                    for(let i = 0; i < 6; i++) { if(node.parentElement) node = node.parentElement; }
                     
-                    if (isUsername) {
-                        lastUsername = txt;
-                    } else if (lastUsername) {
-                        // Ignora timestamps (ex: 1 h, 2 d, 3 sem, 1 a, 1 y, 3w)
-                        const isTime = /^[0-9]+[ ]?(h|d|m|w|y|sem|a)$/i.test(txt);
+                    // Procura o texto do comentário dentro desse bloco
+                    const spans = Array.from(node.querySelectorAll('span[dir="auto"], div[dir="auto"]'));
+                    let commentText = null;
+                    
+                    for(let span of spans) {
+                        const txt = span.innerText.trim();
+                        if (!txt || txt === username) continue;
                         
-                        // Ignora termos estáticos de ações de comentários
                         const lowerTxt = txt.toLowerCase();
-                        const isStaticAction = commentTextBlacklist.some(b => lowerTxt === b || lowerTxt.startsWith(b));
+                        // Ignora timestamps e termos de blacklist estrita
+                        const isTime = /^[0-9]+[ ]?(h|d|m|w|y|sem|a|s)$/i.test(txt) || /^[0-9]+[ ]?(horas|dias|semanas|anos|segundos|minutos)/i.test(txt);
+                        const isBlacklist = commentTextBlacklist.some(b => lowerTxt === b || lowerTxt.startsWith(b));
                         
-                        if (!isTime && !isStaticAction && !blacklist.some(b => txt.toLowerCase().includes(b))) {
-                            results.push({ autor: lastUsername, texto: txt });
-                            lastUsername = ""; 
+                        if (!isTime && !isBlacklist) {
+                            commentText = txt;
+                            break;
                         }
                     }
-                }
+                    
+                    if(commentText) {
+                        results.push({ autor: username, texto: commentText });
+                    }
+                });
                 return results;
             }
         """)
