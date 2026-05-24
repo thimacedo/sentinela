@@ -2,9 +2,11 @@ import asyncio
 import logging
 import os
 import sys
+from dotenv import load_dotenv
 
 # Adiciona o diretório raiz ao PYTHONPATH
 sys.path.append(os.getcwd())
+load_dotenv()
 
 from core.instagram_scraper_v2 import scrape_instagram, InstagramScraperV2
 
