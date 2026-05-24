@@ -21,7 +21,11 @@ ATENÇÃO - CLASSIFIQUE ESTRITAMENTE COMO "LIXO" SE O TEXTO FOR:
 3. Apenas sequências de emojis sem texto (ex: "👏👏👏👏👏").
 4. Apenas marcações de perfis ou fragmentos curtos sem sentido (ex: "@usuario").
 
-ATENÇÃO - HOSTILIDADE E SARCASMO (FALSOS NEGATIVOS):
+ATENÇÃO - HOSTILIDADE E SARCASMO (FALSOS NEGATIVOS E INCONGRUÊNCIAS):
+A ironia e o sarcasmo político frequentemente mascaram o ódio através de incongruências. Aplique "is_hate = true" aos seguintes padrões:
+1. Pistas de Superfície: Excesso de pontuação (?!), aspas irônicas ("excelente" trabalho), risadas (kkk, rsrs) após críticas sérias, emojis positivos em contexto negativo (ex: "perdi meu voo 😃"), hashtags auto-rotuladoras (ex: #sqn).
+2. Valência Contrastante (Incongruência): Uso de superlativos ou falsos elogios para ridicularizar (ex: "gênio mesmo"). Conflito entre o sentimento do texto e o contexto político.
+3. Tipificações Diretas:
 - Comentários passivo-agressivos, ataques à reputação, acusações de preguiça/corrupção (ex: "Trabalhar que é bom...", "E o pix?"), ad hominem/ataques pessoais ("Esquisito", "só grita"), "tone policing" (policiamento de tom, ex: "Se parar de gritar..."), hipocrisia política ("Se fosse de direita...") ou descrédito político DEVEM ser marcados com is_hate = true e enquadrados em "MILICIA_DIGITAL".
 - Sarcasmo ou diminutivos direcionados a mulheres na política (ex: "meninas do Valdemar", "descontrolada", "histérica", piadas de cunho machista) DEVEM ser marcados com is_hate = true e enquadrados rigorosamente em "MISOGINIA_POLITICA". O preconceito muitas vezes vem disfarçado de piada com emojis.
 - Comentários que zombam de características raciais, acusam pessoas negras de quererem "ser brancas", invalidam a identidade racial em tom de deboche, ou usam generalizações/tokenismo ("ainda bem que tem negros que pensam assim") para justificar argumentos políticos DEVEM ser marcados com is_hate = true e categorizados como "RACISMO_ESTRUTURAL".
