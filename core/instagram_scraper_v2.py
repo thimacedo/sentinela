@@ -122,11 +122,25 @@ class InstagramScraperV2:
                     page.on("response", self._handle_response)
                     
                     logger.info(f"🎯 [V2] Scrape @{username} usando {session.label} (Tentativa {retry_count+1})")
-                    
                     # 1. Perfil
                     await page.goto(f"https://www.instagram.com/{username}/", wait_until="domcontentloaded", timeout=60000)
-                    await asyncio.sleep(random.uniform(5, 10)) # Cooldown space inicial maior
-                    
+
+                    # Check imediato de erro 404 antes do sleep longo
+                    try:
+                        error_header = await page.query_selector("h2")
+                        if error_header:
+                            header_text = await error_header.inner_text()
+                            if "Página não disponível" in header_text or "Sorry, this page" in header_text:
+                                logger.error(f"❌ [V2] Alvo @{username} inexistente (404 detectado no H2).")
+                                await browser.close()
+                                raise ValueError(f"invalid_target: 404_not_found")
+                    except ValueError as ve: raise ve
+                    except: pass
+
+                    await asyncio.sleep(random.uniform(5, 10))
+
+                    if "login" in page.url:
+
                     if "login" in page.url:
                         logger.warning(f"⚠️ [V2] Login wall detectado para {session.label}")
                         session.blocked = True
@@ -174,6 +188,45 @@ class InstagramScraperV2:
                 await asyncio.sleep(wait)
 
         return all_comments
+
+    async def _validate_target_identity(self, page: Page, expected_username: str) -> Dict[str, Any]:
+        """Verifica se a página carregada condiz com o alvo esperado e se está acessível."""
+        
+        # 1. Verifica página inexistente (404 simulado pelo IG)
+        page_content = await page.content()
+        error_indicators = [
+            "Esta página não está disponível",
+            "página pode ter sido removida",
+            "link que você acessou pode estar quebrado",
+            "Page Not Found",
+            "Sorry, this page isn't available"
+        ]
+        
+        if any(ind in page_content for ind in error_indicators):
+            return {"valid": False, "reason": "404_not_found"}
+
+        # 2. Verifica se a conta é privada
+        is_private = await page.query_selector("text='Esta conta é privada'") or \
+                     await page.query_selector("text='This account is private'")
+        
+        if is_private:
+            # Verifica se estamos seguindo (se o botão 'Seguir' não está lá ou diz 'Seguindo')
+            # Mas para raspagem forense, se caiu na tela de privada, não temos acesso aos posts.
+            return {"valid": False, "reason": "account_private"}
+
+        # 3. Verifica se o username renderizado bate (Proteção contra redirects malucos)
+        # O título geralmente é "Nome (@username) • Fotos e vídeos do Instagram"
+        title = await page.title()
+        if expected_username.lower() not in title.lower() and f"@{expected_username.lower()}" not in title.lower():
+            # Fallback: Verifica h2/h1 que contém o username
+            profile_header = await page.query_selector(f"h2:has-text('{expected_username}')")
+            if not profile_header:
+                logger.warning(f"⚠️ [V2] Username '{expected_username}' não encontrado no título ou header. Título: {title}")
+                # Às vezes o título demora, fazemos um check final no conteúdo
+                if expected_username.lower() not in page_content.lower():
+                    return {"valid": False, "reason": "identity_mismatch"}
+
+        return {"valid": True, "reason": "ok"}
 
     async def open_post_modal(self, page: Page, shortcode: str) -> bool:
         """Encontra e clica na postagem no feed do perfil para abrir o modal."""

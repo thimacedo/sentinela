@@ -77,7 +77,17 @@ class IGWorkerV2(BaseWorker):
                 max_posts=self.config.get("max_posts", 3),
                 max_comments_per_post=100
             )
+        except ValueError as e:
+            if "invalid_target" in str(e):
+                self.logger.error(f"🚫 [V2] Alvo @{target.username} marcado como INVÁLIDO (404/Privado/Mismatch).")
+                return CycleResult(
+                    worker_id=self.worker_id, cycle=self.cycle, target=target.username,
+                    source="v2_engine", extracted=0, simulated=False, 
+                    error=str(e), db_success=False # db_success=False garante score baixo
+                )
+            raise e
 
+        try:
             stats = self.scraper.get_stats()
 
             if not comments:

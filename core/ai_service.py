@@ -32,25 +32,19 @@ Sua missão é classificar comentários políticos com precisão cirúrgica, det
 
 --- DIRETRIZES DE SARCASMO E ÓDIO (MCA v2.2) ---
 A ironia é usada para mascarar o ódio. Marque "is_hate": true e use a categoria adequada para:
+- HOSTILIDADE VELADA (AD HOMINEM): Ataques à competência técnica, moral ou intelectual do alvo usando termos "educados" mas carregados de desprezo. (ex: "Sua 'vasta' inteligência nos surpreende", "Mais um 'estudioso' do nada").
 - MISOGINIA_POLITICA: Ataques a mulheres focados em aparência, histeria, "meninas de fulano", ou "lugar de mulher". OBSERVAÇÃO: Esta categoria é EXCLUSIVA para alvos do sexo feminino. Se termos femininos forem usados para insultar um homem (ex: chamar um político homem de "histérica" ou "menina"), classifique obrigatoriamente como INSULTO_AD_HOMINEM.
 - MILICIA_DIGITAL: Ataques coordenados a instituições, descrédito do sistema eleitoral, ad hominem pesado, acusações de corrupção sem provas ("Ladrão", "Corrupto") ou memes de perseguição política ("TOC TOC TOC").
 - RACISMO_ESTRUTURAL: Deboche de pautas raciais ou uso de termos como "escravo", "capitão do mato" em tom político.
 
-Responda APENAS com JSON válido:
-{
-  "is_hate": boolean,
-  "categoria_ia": "NEUTRO" | "XENOFOBIA_REGIONAL" | "RACISMO_RELIGIOSO" | "VIOLÊNCIA_GÊNERO" | "MILICIA_DIGITAL" | "RACISMO_ESTRUTURAL" | "MISOGINIA_POLITICA" | "ATAQUE_INSTITUCIONAL" | "INSULTO_AD_HOMINEM" | "LIXO",
-  "confianca_ia": float (0.0 a 1.0),
-  "evidencia_lexical": ["termo1", "termo2"],
-  "analise_pericial": "Breve justificativa técnica em pt-BR"
-}
+Responda APENAS com JSON válido. Aumente sua sensibilidade para ataques que tentam parecer críticas legítimas mas são ofensas gratuitas.
 
 --- EXEMPLOS DE CALIBRAÇÃO ---
 - "Visconde de Sabugosa virando sabugo." -> { "is_hate": true, "categoria_ia": "INSULTO_AD_HOMINEM", "analise_pericial": "Ataque pessoal (ad hominem) usando apelido depreciativo." }
-- "TOC TOC TOC" -> { "is_hate": false, "categoria_ia": "NEUTRO", "analise_pericial": "Meme político sobre operações policiais (PF). Neutro sem ameaça." }
-- "Filho bandid0? Que isso??" -> { "is_hate": false, "categoria_ia": "NEUTRO", "analise_pericial": "Questionamento sobre figuras públicas e legalidade." }
-- "Tá com o 👌🏻 torando!!!" -> { "is_hate": false, "categoria_ia": "NEUTRO", "analise_pericial": "Gíria brasileira para tensão extrema. Não é lixo." }
-- "PRIVATIZA A USP JÁ" -> { "is_hate": true, "categoria_ia": "ATAQUE_INSTITUCIONAL", "analise_pericial": "Ataque ou demanda hostil contra instituição pública de ensino." }
+- "Como é bom ver essa 'competência' toda em ação..." -> { "is_hate": true, "categoria_ia": "INSULTO_AD_HOMINEM", "analise_pericial": "Ironia técnica usada para atacar a honra/capacidade do alvo (ad hominem velado)." }
+- "Vai chorar, histérica?" (para mulher) -> { "is_hate": true, "categoria_ia": "MISOGINIA_POLITICA", "analise_pericial": "Uso de estereótipo de gênero (histeria) para desqualificar fala feminina." }
+- "TOC TOC TOC" -> { "is_hate": false, "categoria_ia": "NEUTRO", "analise_pericial": "Meme político sobre operações policiais (PF). Neutro sem ameaça direta no contexto isolado." }
+- "PRIVATIZA A USP JÁ" -> { "is_hate": true, "categoria_ia": "ATAQUE_INSTITUCIONAL", "analise_pericial": "Demanda hostil contra instituição pública, configurando ataque institucional no contexto de monitoramento." }
 """
 
 def load_training_context() -> str:
@@ -228,30 +222,42 @@ class AIService:
 
     def _parse_json_response(self, content: str) -> Dict[str, Any]:
         try:
-            data = json.loads(content)
-            confidence = float(data.get("confianca_ia", 0.0))
+            # Tenta limpar o conteúdo se vier com markdown code blocks
+            clean_content = content.replace("```json", "").replace("```", "").strip()
+            data = json.loads(clean_content)
+            
+            # Captura confiança de forma flexível (float ou string)
+            conf_val = data.get("confianca_ia", data.get("confidence", 0.0))
+            try:
+                confidence = float(conf_val)
+            except:
+                confidence = 0.0
+                
             low_conf = confidence < CONFIDENCE_THRESHOLD
-            categoria = data.get("categoria_ia", "NEUTRO")
+            categoria = data.get("categoria_ia", data.get("category", "NEUTRO"))
             
             if categoria == "LIXO":
                 confidence = 0.0
                 low_conf = False
                 is_hate = False
             else:
-                if low_conf: categoria = "INDEFINIDO"
+                # Se a confiança for muito baixa, marcamos como INDEFINIDO para auditoria humana
+                if low_conf and confidence > 0.0: 
+                    categoria = "INDEFINIDO"
                 is_hate = bool(data.get("is_hate", False))
             
             return {
                 "is_hate": is_hate,
                 "categoria_ia": categoria,
                 "confianca_ia": confidence,
-                "category": categoria, # Compatibilidade legada
-                "confidence": confidence, # Compatibilidade legada
+                "category": categoria, # Compatibilidade
+                "confidence": confidence, # Compatibilidade
                 "evidencia_lexical": data.get("evidencia_lexical", []),
                 "analise_pericial": data.get("analise_pericial", "Sem análise"),
                 "low_confidence": low_conf
             }
-        except:
+        except Exception as e:
+            logger.error(f"Erro ao parsear JSON da IA: {e} | Conteúdo: {content[:100]}...")
             return {
                 "is_hate": False, "categoria_ia": "NEUTRO", "confianca_ia": 0.0, 
                 "category": "NEUTRO", "confidence": 0.0,
