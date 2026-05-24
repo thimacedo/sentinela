@@ -24,12 +24,12 @@ class SentinelaOrchestrator:
         self._workers.append(worker)
         logger.info("[orchestrator] registrado: %s", worker.worker_id)
 
-    async def run_cycle_with_validation(self, worker: BaseWorker) -> None:
+    async def run_cycle_with_validation(self, worker: BaseWorker) -> float:
         import time
         if worker.worker_id in self._banned_until:
             if time.time() < self._banned_until[worker.worker_id]:
                 logger.debug("[%s] ⏳ Cumprindo suspensão (improdutividade). Ignorando ciclo.", worker.worker_id)
-                return
+                return 60.0 # Tenta novamente em 60s
             else:
                 del self._banned_until[worker.worker_id]
                 logger.info("[%s] 🔄 Suspensão encerrada. Worker reintegrado ao pool.", worker.worker_id)
@@ -87,35 +87,32 @@ class SentinelaOrchestrator:
 
         # --- GESTÃO DE REPUTAÇÃO E PENALIDADE (Nativa do RewardEngine) ---
         if not result.simulated:
-            # Recupera o delta a partir dos dados do ciclo ou recua se nulo
             delta_xp = getattr(result, "metadata", {}).get("xp_delta", 0.0) if getattr(result, "metadata", None) else 0.0
             
-            # Se o score consolidado do worker cair a 0 devido a uma perda real de reputação neste ciclo,
-            # ele estourou o limite de incompetência. Evita loop de suspensão em coletas legítimas vazias (delta = 0).
             if reward.score <= 0.0 and delta_xp < 0.0:
-                logger.error(
-                    "[%s] 🛑 REPUTAÇÃO ZERO (Score acumulado zerado). Worker furado detectado.",
-                    result.worker_id
-                )
-                await self.ai_advisor.memory.save_suggestion(
-                    worker_id=result.worker_id,
-                    cycle=result.cycle,
-                    suggestion=f"REPUTAÇÃO ZERO: Worker perdeu toda a sua credibilidade (Score = 0.0). Sugerida a retirada do pool ou refatoração crítica."
-                )
-                logger.warning("[%s] ⏳ Aplicando suspensão disciplinar de 30 minutos (Privilegiando outros workers na fila).", result.worker_id)
-                import time
+                logger.error("[%s] 🛑 REPUTAÇÃO ZERO. Aplicando suspensão disciplinar.", result.worker_id)
                 self._banned_until[result.worker_id] = time.time() + 1800
+
+        # Retorna o intervalo dinâmico para o próximo ciclo (PASA v52.0 Cooldown Space)
+        return float(self.reward_engine.get_interval(reward.tier))
 
     async def run_all(self) -> None:
         if not self._workers:
             logger.warning("[orchestrator] Nenhum worker registrado.")
             return
-        logger.info("[orchestrator] Iniciando %s worker(s)...", len(self._workers))
-        while True:
-            # Limpa alvos ativos a cada rodada
-            self._active_targets.clear()
-            await asyncio.gather(*(self.run_cycle_with_validation(w) for w in self._workers))
-            await asyncio.sleep(60)
+        
+        logger.info("[orchestrator] Iniciando %s worker(s) em loops individuais...", len(self._workers))
+        
+        async def _worker_loop(worker: BaseWorker):
+            while True:
+                # O orquestrador limpa alvos ativos em run_all, mas agora cada worker tem seu loop.
+                # Para evitar conflitos, limpamos aqui se necessário ou deixamos o claim_lock gerenciar.
+                wait_time = await self.run_cycle_with_validation(worker)
+                logger.debug("[%s] Aguardando %.0fs de cooldown space.", worker.worker_id, wait_time)
+                await asyncio.sleep(wait_time)
+
+        # Roda todos em paralelo, cada um com seu próprio ritmo de cooldown
+        await asyncio.gather(*(_worker_loop(w) for w in self._workers))
 
     def stop_all(self) -> None:
         for w in self._workers:

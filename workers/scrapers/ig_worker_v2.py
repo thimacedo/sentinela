@@ -59,6 +59,13 @@ class IGWorkerV2(BaseWorker):
             )
 
         self.logger.info(f"🔄 [V2] Ciclo {self.cycle} | Alvo: @{target.username}")
+        
+        # Jitter inicial (PASA v52.0) para quebrar padrões
+        import random
+        jitter = random.uniform(5, 30)
+        self.logger.debug(f"[V2] Aplicando jitter inicial de {jitter:.1f}s")
+        await asyncio.sleep(jitter)
+
         self.queue.mark_candidate_scraped(target)
 
         try:
@@ -71,6 +78,7 @@ class IGWorkerV2(BaseWorker):
             )
 
             if not comments:
+                # Se o scraper retornou vazio mas não levantou erro, pode ser apenas falta de conteúdo
                 return CycleResult(
                     worker_id=self.worker_id, cycle=self.cycle, target=target.username,
                     source="v2_engine", extracted=0, simulated=False, error="no_comments_found"

@@ -64,12 +64,12 @@ class InstagramScraperV2:
         logger.info(f"🔑 [V2] {len(sessions)} sessões carregadas.")
         return sessions
 
-    def _get_next_session(self) -> Optional[Session]:
-        """Rotaciona para a próxima sessão disponível."""
+    def _get_next_session(self) -> Session:
+        """Rotaciona para a próxima sessão disponível. Levanta erro se todas estiverem bloqueadas."""
         available = [s for s in self.sessions if not s.blocked]
         if not available:
-            logger.error("❌ [V2] Nenhuma sessão disponível!")
-            return None
+            logger.error("❌ [V2] Todas as sessões estão bloqueadas!")
+            raise RuntimeError("all_sessions_blocked")
         
         session = available[self.current_session_idx % len(available)]
         self.current_session_idx += 1
@@ -123,7 +123,7 @@ class InstagramScraperV2:
                     
                     # 1. Perfil
                     await page.goto(f"https://www.instagram.com/{username}/", wait_until="domcontentloaded", timeout=60000)
-                    await asyncio.sleep(random.uniform(3, 5))
+                    await asyncio.sleep(random.uniform(5, 10)) # Cooldown space inicial maior
                     
                     if "login" in page.url:
                         logger.warning(f"⚠️ [V2] Login wall detectado para {session.label}")
@@ -141,7 +141,8 @@ class InstagramScraperV2:
                         post_comments = await self._scrape_post(page, code, username, candidato_id, max_comments_per_post)
                         all_comments.extend(post_comments)
                         self.stats["posts_scraped"] += 1
-                        await asyncio.sleep(random.uniform(2, 4)) # Delay entre posts
+                        # Jitter agressivo entre posts (PASA v52.0)
+                        await asyncio.sleep(random.uniform(5, 15)) 
 
                     await browser.close()
                     logger.info(f"✅ [V2] @{username} finalizado. {len(all_comments)} comentários extraídos.")
@@ -151,8 +152,9 @@ class InstagramScraperV2:
                 logger.error(f"💥 [V2] Erro na tentativa {retry_count+1}: {e}")
                 self.stats["errors"] += 1
                 retry_count += 1
-                # Backoff exponencial
-                await asyncio.sleep(2 ** retry_count)
+                # Backoff exponencial com jitter
+                wait = (2 ** retry_count) + random.uniform(2, 5)
+                await asyncio.sleep(wait)
 
         return all_comments
 
