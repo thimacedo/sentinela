@@ -1,11 +1,11 @@
 ---
 id: fase4_t1
 title: "Implementar DocFetcher"
-status: Todo
+status: Done
 priority: High
 order: 10
 created: 2026-05-20
-updated: 2026-05-20
+updated: 2026-05-24
 links:
   - url: linear_ticket_fase4_epic.md
     title: Parent

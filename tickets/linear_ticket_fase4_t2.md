@@ -1,11 +1,11 @@
 ---
 id: fase4_t2
 title: "Implementar AIAdvisor"
-status: Todo
+status: Done
 priority: High
 order: 20
 created: 2026-05-20
-updated: 2026-05-20
+updated: 2026-05-24
 links:
   - url: linear_ticket_fase4_epic.md
     title: Parent

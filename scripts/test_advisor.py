@@ -1,0 +1,50 @@
+import asyncio
+import os
+import logging
+from datetime import datetime
+from dotenv import load_dotenv
+
+load_dotenv()
+
+from workers.base.memory_store import MemoryStore
+from workers.base.cycle_result import CycleResult
+from workers.ai.doc_fetcher import DocFetcher
+from workers.ai.ai_advisor import AIAdvisor
+
+logging.basicConfig(level=logging.INFO)
+
+async def test_advisor():
+    print("🚀 Testando AIAdvisor...")
+    
+    store = MemoryStore()
+    fetcher = DocFetcher()
+    advisor = AIAdvisor(store, fetcher)
+    
+    # Simula um resultado degradado
+    fake_result = CycleResult(
+        worker_id="ig-v2-01",
+        cycle=999,
+        target="@alvo_teste",
+        source="SCRAPER_V2",
+        extracted=0,
+        inserted=0,
+        failed=10,
+        error="429 Too Many Requests - Session Blocked",
+        db_success=True,
+        metadata={"duration_seconds": 45.5}
+    )
+    
+    # Criamos um objeto "worker" fake que o orquestrador passaria
+    class FakeWorker:
+        def __init__(self):
+            self.worker_id = "ig-v2-01"
+            
+    worker = FakeWorker()
+    
+    print("🤖 Chamando analyze_and_suggest...")
+    await advisor.analyze_and_suggest(worker, fake_result)
+    
+    print("✅ Teste finalizado. Verifique os logs e o Supabase.")
+
+if __name__ == "__main__":
+    asyncio.run(test_advisor())

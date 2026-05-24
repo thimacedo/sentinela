@@ -23,19 +23,23 @@ _last_updated: 2026-05-22 | branch: feat/autonomous-workers_
 - [x] Backend FastAPI compativel com Vercel Serverless
 - [x] Rotacao de contas de scraping via IdentityManager
 
-### Coleta Real e Workers Autonomos (v48 - v50.1)
+### Coleta Real e Workers Autonomos (v48 - v53.0)
 - [x] IGZyteWorker: extracao real com paginacao next_min_id (max 100 comentarios/post)
 - [x] IGZyteWorker: rotacao sequencial de slots, blacklist login wall, fallback storage_state
 - [x] IGZyteWorker refatorado: fallback de extração via DOM (Browser Rendering)
 - [x] IGZyteWorker: injecao de cookies (`requestCookies`) no browser e parser do DOM/GraphQL (React Hydration)
 - [x] Correcao da ForeignKey na persistencia: mapeamento de `candidato_id` para o nome de usuario na tabela `comentarios`
-- [x] IGHeadlessWorker: implementado com scraping real (150 comentarios/ciclo validados)
+- [x] IGHeadlessWorker: implementado com scraping real (150 comentários validados em produção)
 - [x] active_targets compartilhado: workers pegam alvos diferentes no mesmo ciclo
 - [x] CycleResult: contrato completo com inserted/duplicated/classified/failed
 - [x] RewardEngine: score 0-100, tiers, badges, get_interval() dinamico
 - [x] MemoryStore: tier real persistido (removido 'gold' fixo)
+- [x] DocFetcher: implementado com TTL e cache local (v53.0)
+- [x] AIAdvisor: implementado com análise via Mistral/Groq (v53.0)
 - [x] Orchestrator: loga score/tier/badges, AIAdvisor condicional
 - [x] probe_t3_2_storage.py: validacao com alvo dinamico do Supabase
+- [x] render.yaml: atualizado para main_runner.py persistente
+
 - [x] Edge Function mcp-proxy: SQL arbitrario bloqueado, ROUTES semanticas
 - [x] Frontend proposta_frontend: sem SQL bruto, /api/* FastAPI
 - [x] .gitignore e .vercelignore: reescritos UTF-8, dados de runtime protegidos

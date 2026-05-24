@@ -16,29 +16,29 @@ services:
         value: "*"
 
   - type: worker
-    name: sentinela-collector
+    name: sentinela-orchestrator
     region: ohio
     runtime: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: python -m workers.worker_sentinela
+    buildCommand: pip install -r requirements-workers.txt && playwright install chromium
+    startCommand: python main_runner.py
     envVars:
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_KEY
         sync: false
-      - key: RAPIDAPI_KEY
+      - key: SUPABASE_SERVICE_KEY
         sync: false
-
-  - type: worker
-    name: sentinela-pasa-processor
-    region: ohio
-    runtime: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: python -m workers.pasa_processor
-    envVars:
-      - key: SUPABASE_URL
-        sync: false
-      - key: SUPABASE_KEY
+      - key: MISTRAL_API_KEY
         sync: false
       - key: GROQ_API_KEY
         sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: INSTAGRAM_SESSIONID
+        sync: false
+      - key: INSTAGRAM_SESSIONID_2
+        sync: false
+      - key: PLAYWRIGHT_HEADLESS
+        value: "true"
+      - key: WATCHDOG_ACTIVE
+        value: "true"
