@@ -1,6 +1,5 @@
 # Wrapper para compatibilidade de importação
-# Expondo a implementação real do worker de coleta Instagram
+# Expondo a implementação real do worker de coleta Instagram (PASA v52.0)
 
-from .ig_zyte import IGZyteWorker as InstagramWorker
-# Caso queira usar o headless como fallback, substitua a linha acima por:
-# from .ig_headless import IGHeadlessWorker as InstagramWorker
+from .ig_worker_v2 import IGWorkerV2 as InstagramWorker
+
