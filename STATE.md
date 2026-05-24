@@ -1,155 +1,66 @@
 # STATE.md — Sentinela Democratica (Fonte de Verdade)
-_last_updated: 2026-05-24 | branch: feat/autonomous-workers_
+_last_updated: 2026-05-24 | branch: main_
 
 ## Status Operacional
 
 | Subsistema | Status | Observacao |
 |---|---|---|
-| Coleta Zyte (IGZyteWorker) | DESCARTADO | Substituído por IGWorkerV2 (independente) |
-| Coleta Independente (IGWorkerV2) | Operacional | Motor Playwright V2 com rotação de sessões e backoff |
+| Frontend (nextjs) | Operacional | War Room v54.3: Design Profissional (Slate/Emerald), Flexbox (sem sobreposição), Dossiês e Rede CONGELADOS |
+| AI-SRE Advisor | Operacional | v53.1: Diagnóstico via open-mistral-nemo funcional |
+| Coleta Independente (IGWorkerV2) | Operacional | Motor Playwright V2 com rotação de sessões, filtros de pins e idade (7d) |
 | Persistencia Supabase | OK | upsert id_externo, ignore_duplicates, duplicados contados corretamente |
-| Classificacao IA | OK | 10/ciclo normal, batch de 50 no cooldown, cascade Mistral->Groq |
-| Fila de Coleta | OK | rotate_target idempotente, 23505 tratado |
+| Classificacao IA | OK | Cascade real v55.0 Mistral->Groq com sensibilidade Ad Hominem endurecida |
+| Fila de Coleta | Operacional | v55.1: Multi-tier (Manual > Prioridade > Rotação) + Fairness 25% + Atomic Locking |
 | RewardEngine | Operacional | score/tier/badges persistidos, get_interval() por tier |
 | AIAdvisor | Condicional | Acionado apenas score<40 ou tier critical/db_failed |
-| Watchdog | Operacional | Sem restarts em producao |
-| Frontend (nextjs) | Operacional | War Room v53.1: Sidebar funcional, Tema CRT, Rotas Táticas |
-| Classificacao IA | Operacional | Roteamento Híbrido + AIAdvisor AI-Driven |
-| Renovação de Sessões (export_playwright_cookies.py) | Operacional | Autenticação automatizada de multi-contas, suporte a login em etapas e atraso simulado |
+| Watchdog | Operacional | v55.3: Alinhado com Supabase/MemoryStore e requirements-workers.txt |
+| Renovação de Sessões (export_playwright_cookies.py) | Operacional | Autenticação automatizada de multi-contas |
 
 ## Descobertas Tecnicas (2026-05-24)
 - **Integridade Forense e Calibração de IA (v55.0)**: Implementada validação rigorosa de alvos no motor V2, detectando redirecionamentos de username, páginas 404 e contas privadas. O `AIService` foi recalibrado (MCA v2.2) para endurecer a detecção de hostilidade técnica velada e ad hominem polido, reduzindo drasticamente falsos negativos persistentes.
 - **Otimização de Prioridades e Distribuição (v55.1)**: O `QueueManager` foi refatorado para suportar um fluxo de decisão multinível: alvos manuais possuem precedência total, seguidos por itens da `fila_coleta` (ordenados pelo campo `prioridade` e antiguidade), e finalmente a rotação global de candidatos ativos (baseada em `last_scraped_at`). Introduziu-se um **Mecanismo de Fairness de 25%**, que força a seleção via rotação global periodicamente para garantir que nenhum alvo fique estagnado. Adicionalmente, o `IGWorkerV2` agora utiliza um bloqueio atômico (`claim_lock`) compartilhado via orquestrador, eliminando riscos de colisão onde múltiplos workers tentariam processar o mesmo perfil simultaneamente.
-- **Filtro de Posts Fixados e Velhos (v54.4)**: O motor `InstagramScraperV2` foi aprimorado para lidar com posts fixados (pinned) e limite temporal de relevância.
- Agora, o sistema identifica posts fixados no grid via seletores SVG/Aria e, ao abrir o modal, valida a data de publicação (`datetime` do elemento `<time>`). Posts com mais de 7 dias de idade são automaticamente ignorados, e o loop de raspagem avança para os posts subsequentes no grid até atingir o limite de sucessos definido (`max_posts`). Isso evita a redundância cíclica de dados e foca o processamento em informações inéditas.
+- **Filtro de Posts Fixados e Velhos (v54.4)**: O motor `InstagramScraperV2` foi aprimorado para lidar com posts fixados (pinned) e limite temporal de relevância. Agora, o sistema identifica posts fixados no grid via seletores SVG/Aria e, ao abrir o modal, valida a data de publicação (`datetime` do elemento `<time>`). Posts com mais de 7 dias de idade são automaticamente ignorados, e o loop de raspagem avança para os posts subsequentes no grid até atingir o limite de sucessos definido (`max_posts`). Isso evita a redundância cíclica de dados e foca o processamento em informações inéditas.
 - **Design Profissional e Modularização (v54.3)**: O frontend foi integralmente reestruturado para um layout Flexbox que elimina a sobreposição do menu. A paleta foi suavizada para Slate/Emerald e a lógica de dados foi isolada no hook `useSystemInformation`. Módulos de **Workers** (removido), **Dossiês** e **Rede** (congelados) foram ajustados para refletir o foco operacional atual.
 - **Evolução Tática do Frontend (v53.1)**: O frontend foi integralmente reestruturado de um modelo baseado em abas (tabs) para uma interface de comando **"War Room"** com Sidebar persistente e funcional. Implementou-se um tema visual inspirado em terminais táticos (CRT/Scanlines) com gerenciamento de estado global via Zustand (`useUIStore`). Cada módulo operacional (Perícia, Alvos, Alertas, Rede, Workers, Dossiês) agora possui sua própria rota dedicada. Corrigidos erros de sintaxe no `ActivityChart.tsx` que impediam o build na Vercel.
-- **Integração AI-SRE Advisor (v53.1)**: O `AIAdvisor` agora atua como um SRE (Site Reliability Engineer) virtual, processando métricas de falha com o modelo `open-mistral-nemo` para sugerir correções de rede e rate-limit.
-- **AIAdvisor AI-Driven (v53.0)**: Implementada a integração real do `AIAdvisor` com o `AIService` (Mistral/Groq).
- Agora, quando um worker apresenta performance degradada (score < 40 ou tier critical), o Advisor analisa automaticamente as métricas do ciclo e a documentação técnica (via `DocFetcher`) para gerar sugestões técnicas acionáveis e as persiste na tabela `worker_suggestions` do Supabase com status `pending_review`.
+- **Integração AI-SRE Advisor (v53.1)**: O `AIAdvisor` agora atua como um SRE (Site Reliability Engineer) virtual, processando métricas de falha com o modelo `open-mistral-nemo` para sugerir correções de rede e rate-limit, aproximando o Sentinela de uma operação de "Auto-Cura" (Self-Healing).
+- **AIAdvisor AI-Driven (v53.0)**: Implementada a integração real do `AIAdvisor` com o `AIService` (Mistral/Groq). Agora, quando um worker apresenta performance degradada (score < 40 ou tier critical), o Advisor analisa automaticamente as métricas do ciclo e a documentação técnica (via `DocFetcher`) para gerar sugestões técnicas acionáveis e as persiste na tabela `worker_suggestions` do Supabase com status `pending_review`.
 - **DocFetcher com TTL**: O `DocFetcher` foi aprimorado para gerenciar o cache de documentação técnica com suporte a TTL (Time-To-Live) de 1h, garantindo que o Advisor utilize informações atualizadas sobre as APIs alvo.
 - **Validação do Motor V2**: O `InstagramScraperV2` foi testado e validado em ambiente de produção (via script `test_scraper_v2.py`), confirmando a eficácia da navegação via modal e a captura estruturada de comentários mesmo sob desafios de renderização dinâmica.
 - **Saneamento de Deploy Render**: O arquivo `render.yaml` foi reescrito para suportar o novo orquestrador (`main_runner.py`), utilizando o conjunto completo de dependências (`requirements-workers.txt`) e garantindo a instalação automatizada dos binários do Playwright (`playwright install chromium`).
 - **Inserção Direta de Alvos**: Inserido o perfil `@janainacpaschoal` diretamente na base via script `scratch/insert_janaina.py`, com ativação imediata na `fila_coleta`. Adicionalmente, o alvo `@henriquealvesoficial` foi inativado permanentemente.
-- **Heurística de Detecção de Lixo (Junk Filter)**: O motor V2 (`InstagramScraperV2`) foi atualizado para detectar dinamicamente elementos ofuscados da UI capturados incorretamente pelo fallback do DOM (como "Também da Meta", "Instagram Lite" e padrões Regex de localização como "Cidade (Estado)"). Se uma proporção crítica de lixo for detectada na varredura, o worker (`ig_worker_v2`) agora é explicitamente sinalizado com o erro `junk_detected` abortando o ciclo e poupando chamadas de API, de forma que o Worker não repita interações cegamente.
-- **Isolamento de Lixo na IA e Calibração de Prompt (v52.4)**: O prompt do `AIService` foi refatorado de forma incisiva para ser extremamente conservador com a categoria `LIXO`, movendo ataques políticos, memes ("TOC TOC TOC", "Sabugosa") e gírias para categorias reais (`INSULTO_AD_HOMINEM`, `MILICIA_DIGITAL`, `ATAQUE_INSTITUCIONAL`) ou `NEUTRO`, eliminando falsos positivos críticos. A malha de instrução agora audita ativamente Pistas de Superfície e Valência Contrastante, com **Exemplos de Calibração** integrados para guiar os modelos Cloud (Mistral/Groq). **Especificou-se que a categoria `MISOGINIA_POLITICA` é exclusiva para alvos do sexo feminino, devendo ataques com termos femininos a homens serem classificados como `INSULTO_AD_HOMINEM`.** Adicionado também o alias `AIService.classify()` e suporte a `comment_id` em todos os logs para rastreabilidade forense pontual.
-- **Resiliência de IA Local (v52.4.4)**: Implementado tratamento específico para erros 404 em provedores locais (LiteRT/Ollama), com logs diagnósticos sugerindo verificação de modelo e base URL. Padronização total dos logs de classificação com larguras fixas para melhor legibilidade no dashboard.
-- **Correção da Rotação de Alvos (v52.4.5)**: Diagnosticado que a `fila_coleta` (prioridade) não possuía ordenação explícita, causando o travamento da fila em alvos específicos. Implementada ordenação FIFO estrita via `order("created_at", desc=False)` e adicionado um Mecanismo de Fairness (20%).
-- **Saneamento de Deploy Vercel (v52.4.13)**: Limpeza total de artefatos de build na raiz (`dashboard/`, `_next/`, arquivos `.txt` vazados). Atualizada configuração de exportação estática no `frontend/next.config.ts` (`trailingSlash: true`) e `vercel.json` com builds explícitos.
-- **Diagnóstico de Conetividade Híbrida (v52.4.14)**: Adicionado logging de diagnóstico no `frontend/src/lib/supabase.ts` para identificar visualmente no console do navegador se as chaves `NEXT_PUBLIC_SUPABASE_*` estão sendo injetadas corretamente. Favicons movidos para `frontend/public` para eliminar erros 404 de recursos estáticos.
-- **Refatoração Frontend (v52.4)**: Frontend migrado para Tailwind v4, com centralização de rotas na War Room e suporte a fallback híbrido (FastAPI -> Supabase). Corrigidos esquemas de dados em todos os componentes de visualização.
-- **Sanitização Geral de Alvos via CSV**: Desenvolveu-se a rotina de importação e sincronização `scratch/apply_sanitization.py` que lê as edições do CSV do usuário. Sincronizou-se com o Supabase remoto a inativação de 78 alvos removidos, a atualização cadastral de 42 alvos modificados, e resolveu-se a integridade de chaves estrangeiras na `fila_coleta` limpando as referências antigas de usernames antes dos updates de candidatos.
-- **Sanitização de Heurística DOM do Scraper (v52.6)**: Diagnosticou-se que a heurística antiga (`span[dir="auto"]` solto) falhava gravemente em novas estruturas de modais, capturando as curtidas ou ignorando textos longos por falta de alinhamento com os usernames. A técnica foi reescrita inteiramente para um **modelo de contêineres estruturais**: o script agora mapeia todos os títulos `h3` (que sempre abrigam os arrobas dos comentaristas), sobe na árvore DOM para encontrar o contêiner do comentário (5-6 níveis) e filtra os `spans` ou `divs` descendentes que contêm o texto verdadeiro. Essa mudança resolveu a perda de comentários orgânicos (falsos negativos). Além disso, implementou-se um filtro estrito via Regex (`/[\p{L}\p{N}]/u`) diretamente no Playwright (DOM) que ignora de imediato qualquer comentário que seja composto APENAS por emojis ou pontuação, poupando inserção inútil na base. Para maximizar o volume por post, a paginação agora rola a coluna de comentários 3 vezes (`scrollBy(0, 1200)`), elevando o teto de captura estática do Worker para 100 comentários por postagem.
-- **Higienização de Alvos Duplicados (Guilherme Boulos)**: Identificou-se a existência de 4 registros ativos para Guilherme Boulos no Supabase. Inativou-se as duplicatas incorretas (`@guilherme_boulos`, `@boulos_oficial` e `@guilhermeboulos_sp`), centralizando o monitoramento no perfil oficial `@guilhermeboulos.oficial` (ID `141b5779-7a0d-41c5-867b-4b32810a48ea`), com o cargo corrigido de "Deputado Federal" e limpando-os da fila de coleta.
-- **Resiliência contra DOM Dinâmico no Login**: O Instagram ofusca suas classes CSS e altera elementos do DOM (`name="email"` em vez de `username`). Solucionou-se isso usando seletores baseados em atributos funcionais e rótulos de acessibilidade (`aria-label`), além de digitação sequencial (`page.type()`) com atraso simulado (150ms) para desviar da heurística de preenchimento automatizado do Instagram.
-- **Login em Múltiplas Etapas (Passkey/WebAuthn)**: Adaptou-se a rotina de login para prever telas sem campo de senha inicial. O script agora emula um clique de tecla `Enter` e aguarda a transição de rede de 4s para obter a renderização visual correta antes de preencher a senha.
-- **Modularidade de Coleta:** Modularizou-se o fluxo de modal do `InstagramScraperV2` expondo as responsabilidades de abertura, rolagem e fechamento em funções públicas auxiliares (`open_post_modal`, `scroll_comment_column`, `close_post_modal`). Isso simplifica a manutenção e integração da mecânica de modal em outras rotinas e etapas.
-- **Navegação V2 via Modal:** Diagnosticou-se que acessos a URLs diretas de posts (`/p/{shortcode}/`) no modo headless do Playwright travam em telas brancas por bloqueio silencioso do Instagram. Refatorou-se o motor para abrir postagens clicando nos elementos na própria tela do perfil (comportamento humano nativo) e fechando via clique de tecla Escape, restabelecendo a extração estruturada de comentários com sucesso.
-- **Circuit Breaker Local:** Integrou-se o provedor local LiteRT (Gemma 3 1B) ao `ai_circuit_breaker`. Se o LiteRT local falhar seguidamente por estar offline, o circuito abre por 5 minutos, poupando timeouts repetitivos de 5.0s por comentário e otimizando a latência do lote de classificação.
-- **Tratamento de Exceções Lote:** Refatorou-se `run_batch_classification` para capturar exceções específicas de banco ou de API e logá-las detalhadamente, evitando interrupções silenciosas.
-- **Robustez de Ambiente no Watchdog:** Corrigiu-se a seleção do interpretador Python em `get_python_executable()`. Agora o watchdog detecta se a pasta `.venv` local está corrompida (ex.: sem o módulo `pip` íntegro) e prioriza o interpretador ativo que o iniciou (permitindo uso transparente sob o gerenciador `uv run`).
 
-## Descobertas Tecnicas (2026-05-23)
-- **Roteamento Híbrido:** Implementado suporte ao Ollama no `AIService`. O sistema pode agora priorizar modelos locais (Gemma 2B) via `ENABLE_LOCAL_AI=true`.
-- **Implementação V2:** Criado `InstagramScraperV2` em `core/` focado em Playwright puro.
-- **Resiliência:** Implementada rotação automática entre múltiplas sessões (`INSTAGRAM_SESSIONID_N`) e backoff exponencial.
-- **Extração Multi-camada:** O motor V2 tenta Interceptação de Rede > Scripts (data-sjs) > Heurística DOM.
-- **Independência:** O sistema não depende mais do Zyte ou outros serviços pagos para raspagem básica.
-- **Validado:** Testado com sucesso via `scripts/test_scraper_v2.py`.
-
-## Arquitetura Atual (v52.2)
+## Arquitetura Atual (v55.3)
 
 ```
-watchdog.py
-  └── main_runner.py
+watchdog.py (Garante main_runner e dashboard local)
+  └── main_runner.py (Orquestrador Core)
         └── SentinelaOrchestrator
-              ├── _active_targets: set
+              ├── _active_targets: set (Deduplicação paralela)
+              ├── claim_lock: asyncio.Lock (Atomicidade)
               └── IGWorkerV2 (ig-v2-01)
-                    ├── InstagramScraperV2 (V2 Engine)
-                    └── AIService (Hybrid Router)
-                          ├── Tier 00: LiteRT (Gemma 3 1B)
-                          ├── Tier 0: Ollama (Gemma 2B)
-                          ├── Tier 1: Mistral (Cloud)
-                          ├── Tier 2: Groq (Llama 3.3)
-                          └── Tier 3: OpenRouter (Security)
+                    ├── InstagramScraperV2 (Motor Playwright V2)
+                    │     ├── Filtro Pins/7d/Integridade
+                    │     └── Tiers de Resiliência: GraphQL -> JS -> DOM
+                    └── AIService (Cascade v55.0)
+                          ├── Tier 0: LiteRT/Ollama (Local)
+                          ├── Tier 1: Mistral Nemo (Cloud)
+                          └── Tier 2: Groq Llama 3.3 (Cloud)
 ```
 
-## Fluxo de Dados
+## Sistema de Recompensas e Cooldown
 
-```
-Instagram Web (Comet) ➔ Playwright (V2 Engine) ➔ Supabase (REST) ➔ Gemini 1.5 (IA)
-```
+| Tier | Reputation | Intervalo | Observação |
+|---|---|---|---|
+| Platinum | >= 85 | 120s | Elite operacional |
+| Gold | >= 70 | 180s | Estável |
+| Silver | >= 50 | 300s | Padrão |
+| Bronze | >= 25 | 480s | Atenção necessária |
+| Critical | < 25 | 600s | Gatilho AI-SRE Advisor |
+| DB_Failed | — | 600s | Gatilho AI-SRE Advisor |
 
-## Status do Watchdog
-- **Autocura**: Reinício automático em caso de crash.
-- **Dependency Healing**: Auto-pip-install se houver ImportErrors.
-- **Anti-Loop**: Hibernação de 1h após 3 falhas rápidas.
-- **Alertas**: WhatsApp via CallMeBot para erros críticos.
-- **Dashboard**: Live SSE em http://localhost:8001.
+## Fila de Coleta (v55.1)
 
-## Sessoes e Autenticacao
-
-- `INSTAGRAM_SESSIONID*` — slots sequenciais (SESSION_1 a SESSION_10), slots com login wall marcados como `blocked`.
-- `INSTAGRAM_COOKIE_FULL` — prioridade maxima se presente.
-- `configs/instagram_storage_state.json` — fallback Playwright.
-
-## Fila de Coleta
-
-- Fonte primaria: `fila_coleta` (status=PENDENTE)
-- Fallback: `candidatos` (status_monitoramento=Ativo, order by last_scraped_at ASC)
-- `rotate_target()`: upsert com on_conflict=candidato_id,data_agendada + ignore_duplicates
-- `active_targets`: set compartilhado via orquestrador — workers pegam alvos diferentes no mesmo ciclo
-
-## Sistema de Recompensas
-
-| Tier | Score | Intervalo |
-|---|---|---|
-| platinum | >= 85 | 120s |
-| gold | >= 70 | 180s |
-| silver | >= 50 | 300s |
-| bronze | >= 25 | 480s |
-| critical | < 25 | 600s |
-| db_failed | — | 600s |
-
-## Variaveis de Ambiente Necessarias
-
-```
-# Supabase
-SUPABASE_URL
-SUPABASE_KEY
-SUPABASE_SERVICE_KEY
-
-# Instagram
-INSTAGRAM_SESSIONID    # slot principal
-INSTAGRAM_SESSIONID_2  # slot adicional (até _10)
-PLAYWRIGHT_HEADLESS    # default: true
-
-# IA
-MISTRAL_API_KEY
-GROQ_API_KEY
-OPENROUTER_API_KEY
-
-# Seguranca
-DASHBOARD_PIN
-WATCHDOG_ACTIVE        # true = formato de log compacto
-```
-
-## Comandos Operacionais
-
-```bash
-# Backend (Supervisor)
-python -m watchdog             # supervisor com dashboard live
-
-# Backend (Direto)
-python main_runner.py          # orquestrador principal
-
-# Validacao de sessao
-python scripts/test_scraper_v2.py
-```
-
-## Ultimas Atualizacoes (Refatoracao V2)
-- **2026-05-24:** Integrado o LiteRT (Gemma 3 1B) ao `ai_circuit_breaker` para proteger a latência em lote e adicionado tratamento de logs e erros na classificação em lote. Corrigidos o NameError (`asyncio` ausente) no `ig_worker_v2` e a validação do interpretador Python do Watchdog. Refatorada a abertura de posts no motor InstagramScraperV2 para uso de modal (clique no feed) e modularizado o controle do modal em métodos públicos auxiliares (`open_post_modal`, `scroll_comment_column`, `close_post_modal`).
-- Implementado `InstagramScraperV2` eliminando dependência do Zyte (Fase 5 - executado por Gemini 1.5 Flash).
-- Refatorado `main_runner.py` e `watchdog` para rodar exclusivamente o novo motor V2.
-- Removidas verificações de saúde do Zyte e Scrapy Cloud do Watchdog.
-- Validada extração real com rotação de sessões e interceptação de rede.
+1. **Manual**: Via Config/Env (Precedência total).
+2. **Prioritária**: `fila_coleta` (order by prioridade DESC, created_at ASC).
+3. **Justiça (Fairness 25%)**: Rotação forçada via candidatos ativos.
+4. **Global**: `candidatos` (order by last_scraped_at ASC).
