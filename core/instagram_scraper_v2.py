@@ -140,8 +140,6 @@ class InstagramScraperV2:
                     await asyncio.sleep(random.uniform(5, 10))
 
                     if "login" in page.url:
-
-                    if "login" in page.url:
                         logger.warning(f"⚠️ [V2] Login wall detectado para {session.label}")
                         session.blocked = True
                         self.stats["session_rotations"] += 1
