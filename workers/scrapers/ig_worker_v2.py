@@ -75,7 +75,7 @@ class IGWorkerV2(BaseWorker):
                 username=target.username,
                 candidato_id=target.candidato_id,
                 max_posts=self.config.get("max_posts", 3),
-                max_comments_per_post=self.config.get("max_comments_per_post", 50)
+                max_comments_per_post=100
             )
 
             stats = self.scraper.get_stats()

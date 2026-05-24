@@ -24,7 +24,7 @@ logging.basicConfig(
 async def test_scraper_v2():
     target = sys.argv[1] if len(sys.argv) > 1 else "raquellyraoficial"
     max_posts = int(sys.argv[2]) if len(sys.argv) > 2 else 1
-    max_comments = int(sys.argv[3]) if len(sys.argv) > 3 else 10
+    max_comments = int(sys.argv[3]) if len(sys.argv) > 3 else 100
     
     print(f"[*] Iniciando teste do Scraper V2 para @{target}...")
     

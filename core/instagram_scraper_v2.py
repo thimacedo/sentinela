@@ -193,10 +193,12 @@ class InstagramScraperV2:
             if not opened:
                 return []
                 
-            # 2. Rola a coluna de comentários
-            await self.scroll_comment_column(page, scroll_amount=800)
+            # 2. Rola a coluna de comentários algumas vezes para carregar o máximo possível
+            for _ in range(3):
+                await self.scroll_comment_column(page, scroll_amount=1200)
+                await asyncio.sleep(1.5)
             
-            # 3. Extrai comentários do post usando as camadas de dados
+            # 3. Tenta extrair dados (Tiers de Resiliência)
             # Camada 1: Network Interception (Mais rico)
             comments = self._parse_captured_json(shortcode)
             
