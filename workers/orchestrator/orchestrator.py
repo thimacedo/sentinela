@@ -1,6 +1,10 @@
 from __future__ import annotations
 import asyncio
 import logging
+import time
+import gc
+import ctypes
+import platform
 from typing import List
 from workers.base.worker_base import BaseWorker
 from workers.base.reward_engine import RewardEngine
@@ -24,11 +28,6 @@ class SentinelaOrchestrator:
 
     def _perform_self_healing(self):
         """Ações de autocura de infraestrutura (v57.1)."""
-        import gc
-        import time
-        import ctypes
-        import platform
-        
         # 1. Limpeza de Memória (Preventiva contra OOM)
         gc.collect()
         
@@ -57,7 +56,6 @@ class SentinelaOrchestrator:
                 del self._target_timestamps[t]
 
     async def run_cycle_with_validation(self, worker: BaseWorker) -> float:
-        import time
         self._cycle_total += 1
         
         # Autocura a cada 10 ciclos totais
