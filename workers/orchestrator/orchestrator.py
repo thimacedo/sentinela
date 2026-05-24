@@ -17,15 +17,38 @@ class SentinelaOrchestrator:
         self.ai_advisor     = ai_advisor
         self._workers: List[BaseWorker] = []
         self._active_targets: set = set()
+        self._target_timestamps: dict[str, float] = {} # PASA v57.0: Monitor de Alvos
         self._claim_lock = asyncio.Lock()
         self._banned_until: dict[str, float] = {}
+        self._cycle_total = 0
 
-    def register(self, worker: BaseWorker) -> None:
-        self._workers.append(worker)
-        logger.info("[orchestrator] registrado: %s", worker.worker_id)
+    def _perform_self_healing(self):
+        """Ações de autocura de infraestrutura (v57.0)."""
+        import gc
+        import time
+        
+        # 1. Limpeza de Memória (Preventiva contra OOM)
+        gc.collect()
+        
+        # 2. Resgate de Alvos (Zombie Cleanup)
+        # Se um alvo está 'ativo' há mais de 20 minutos, provavelmente o worker travou
+        now = time.time()
+        stale_targets = [t for t, ts in self._target_timestamps.items() if (now - ts) > 1200]
+        for t in stale_targets:
+            logger.warning("[orchestrator] 🧟 Resgatando alvo zumbi: @%s", t)
+            if t in self._active_targets:
+                self._active_targets.remove(t)
+            if t in self._target_timestamps:
+                del self._target_timestamps[t]
 
     async def run_cycle_with_validation(self, worker: BaseWorker) -> float:
         import time
+        self._cycle_total += 1
+        
+        # Autocura a cada 10 ciclos totais
+        if self._cycle_total % 10 == 0:
+            self._perform_self_healing()
+
         if worker.worker_id in self._banned_until:
             if time.time() < self._banned_until[worker.worker_id]:
                 logger.debug("[%s] ⏳ Cumprindo suspensão (improdutividade). Ignorando ciclo.", worker.worker_id)

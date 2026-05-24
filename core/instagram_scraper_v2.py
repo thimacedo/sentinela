@@ -300,7 +300,13 @@ class InstagramScraperV2:
             
             for c in comments[:max_comments]:
                 texto = c.get("texto_bruto") or c.get("texto", "")
-                lower_text = texto.lower().strip()
+                
+                # 🧼 DATA SCRUBBING (v57.0): Limpeza profunda para banco de dados
+                # Remove caracteres nulos, formata emojis e limita tamanho
+                texto = texto.replace("\u0000", "").replace("\x00", "").strip()
+                if len(texto) > 2000: texto = texto[:1997] + "..."
+                
+                lower_text = texto.lower()
                 
                 # Heurística de Lixo Local
                 is_junk = False
