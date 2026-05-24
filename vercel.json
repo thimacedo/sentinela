@@ -1,10 +1,16 @@
 {
   "version": 2,
   "cleanUrls": true,
+  "buildCommand": "cd frontend && npm install && npm run build",
+  "outputDirectory": "frontend/out",
   "rewrites": [
     {
       "source": "/api/(.*)",
       "destination": "/api/index.py"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/$1"
     }
   ],
   "functions": {

@@ -1,9 +1,10 @@
-# Backend — nao sobe para Vercel (apenas api/ e proposta_frontend/ sao deployados)
+# Backend — nao sobe para Vercel (apenas api/ e frontend/ sao processados)
 workers/
 core/
 processing/
 archive_v17_2026/
 .legacy_frontend/
+proposta_frontend/
 logs/
 data/
 metrics/
@@ -15,6 +16,14 @@ sentinela_novo/
 sentinela_scraper/
 sentinela_scrapy/
 scrapy-tags-2.15.2/
+
+# Artifacts leaked to root
+__next.*.txt
+index.txt
+_not-found.txt
+dashboard.txt
+_next/
+_not-found/
 
 # Entry points do backend
 main_runner.py
