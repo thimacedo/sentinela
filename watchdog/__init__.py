@@ -202,19 +202,24 @@ async def stream(request: Request):
 
 @app.get("/api/metrics")
 async def get_metrics():
-    """Endpoint para métricas atualizadas."""
-    worker_metrics = {"queue_size": 0, "cycle": 0, "level": 1, "trust": 0.0}
+    """Endpoint para métricas atualizadas via Supabase (v55.3)."""
+    worker_metrics = {"queue_size": 0, "cycle": 0, "level": 1, "trust": 0.0, "tier": "silver", "score": 0.0}
     try:
-        from core.state_manager import WorkerState
-        ws = WorkerState("instagram_worker")
-        worker_metrics = {
-            "queue_size": len(ws.get("fila", [])) if hasattr(ws, 'get') else 0,
-            "cycle": ws.get("cycle_count", 0) if hasattr(ws, 'get') else 0,
-            "level": ws.level,
-            "trust": round(ws.trust_score, 1)
-        }
-    except Exception:
-        pass
+        from workers.base.memory_store import MemoryStore
+        store = MemoryStore()
+        recent = await store.get_recent("ig-v2-01", n=1)
+        if recent:
+            last = recent[0]
+            worker_metrics = {
+                "queue_size": 0, # Fila dinâmica via Supabase
+                "cycle": last.cycle,
+                "level": 4 if last.tier == 'platinum' else (3 if last.tier == 'gold' else 2),
+                "trust": last.score / 10.0,
+                "tier": last.tier,
+                "score": last.score
+            }
+    except Exception as e:
+        state.add_log("dim", f"[Watchdog] Erro ao carregar métricas Supabase: {e}")
     
     with state.lock:
         return {
