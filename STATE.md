@@ -13,12 +13,15 @@ _last_updated: 2026-05-24 | branch: feat/autonomous-workers_
 | RewardEngine | Operacional | score/tier/badges persistidos, get_interval() por tier |
 | AIAdvisor | Condicional | Acionado apenas score<40 ou tier critical/db_failed |
 | Watchdog | Operacional | Sem restarts em producao |
-| Frontend (nextjs) | Deployado | Vercel, Next.js 16 (Estático na raiz), /api/* FastAPI |
-| Classificacao IA | Operacional | Roteamento Híbrido: Local (Gemma/Ollama) + Cloud Cascade |
+| Frontend (nextjs) | Operacional | War Room v53.1: Sidebar funcional, Tema CRT, Rotas Táticas |
+| Classificacao IA | Operacional | Roteamento Híbrido + AIAdvisor AI-Driven |
 | Renovação de Sessões (export_playwright_cookies.py) | Operacional | Autenticação automatizada de multi-contas, suporte a login em etapas e atraso simulado |
 
 ## Descobertas Tecnicas (2026-05-24)
-- **AIAdvisor AI-Driven (v53.0)**: Implementada a integração real do `AIAdvisor` com o `AIService` (Mistral/Groq). Agora, quando um worker apresenta performance degradada (score < 40 ou tier critical), o Advisor analisa automaticamente as métricas do ciclo e a documentação técnica (via `DocFetcher`) para gerar sugestões técnicas acionáveis e as persiste na tabela `worker_suggestions` do Supabase com status `pending_review`.
+- **Evolução Tática do Frontend (v53.1)**: O frontend foi integralmente reestruturado de um modelo baseado em abas (tabs) para uma interface de comando **"War Room"** com Sidebar persistente e funcional. Implementou-se um tema visual inspirado em terminais táticos (CRT/Scanlines) com gerenciamento de estado global via Zustand (`useUIStore`). Cada módulo operacional (Perícia, Alvos, Alertas, Rede, Workers, Dossiês) agora possui sua própria rota dedicada. Corrigidos erros de sintaxe no `ActivityChart.tsx` que impediam o build na Vercel.
+- **Integração AI-SRE Advisor (v53.1)**: O `AIAdvisor` agora atua como um SRE (Site Reliability Engineer) virtual, processando métricas de falha com o modelo `open-mistral-nemo` para sugerir correções de rede e rate-limit.
+- **AIAdvisor AI-Driven (v53.0)**: Implementada a integração real do `AIAdvisor` com o `AIService` (Mistral/Groq).
+ Agora, quando um worker apresenta performance degradada (score < 40 ou tier critical), o Advisor analisa automaticamente as métricas do ciclo e a documentação técnica (via `DocFetcher`) para gerar sugestões técnicas acionáveis e as persiste na tabela `worker_suggestions` do Supabase com status `pending_review`.
 - **DocFetcher com TTL**: O `DocFetcher` foi aprimorado para gerenciar o cache de documentação técnica com suporte a TTL (Time-To-Live) de 1h, garantindo que o Advisor utilize informações atualizadas sobre as APIs alvo.
 - **Validação do Motor V2**: O `InstagramScraperV2` foi testado e validado em ambiente de produção (via script `test_scraper_v2.py`), confirmando a eficácia da navegação via modal e a captura estruturada de comentários mesmo sob desafios de renderização dinâmica.
 - **Saneamento de Deploy Render**: O arquivo `render.yaml` foi reescrito para suportar o novo orquestrador (`main_runner.py`), utilizando o conjunto completo de dependências (`requirements-workers.txt`) e garantindo a instalação automatizada dos binários do Playwright (`playwright install chromium`).

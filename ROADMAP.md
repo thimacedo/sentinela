@@ -39,8 +39,9 @@ _last_updated: 2026-05-22 | branch: feat/autonomous-workers_
 - [x] Orchestrator: loga score/tier/badges, AIAdvisor condicional
 - [x] probe_t3_2_storage.py: validacao com alvo dinamico do Supabase
 - [x] render.yaml: atualizado para main_runner.py persistente
-
+- [x] Evolução Frontend: Interface "War Room" v53.1 com Sidebar funcional e rotas dedicadas
 - [x] Edge Function mcp-proxy: SQL arbitrario bloqueado, ROUTES semanticas
+
 - [x] Frontend proposta_frontend: sem SQL bruto, /api/* FastAPI
 - [x] .gitignore e .vercelignore: reescritos UTF-8, dados de runtime protegidos
 - [x] simulated=False confirmado em producao
