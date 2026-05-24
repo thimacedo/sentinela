@@ -68,59 +68,78 @@ export default function ActivityChart() {
   }));
 
   return (
-    <Card className="bg-black/50 border-tactical-accent mt-6">
-      <CardHeader>
-        <CardTitle className="text-tactical-accent text-sm uppercase tracking-wider flex justify-between items-center">
-          Atividade de Alertas (48h)
-          <span className="text-[10px] text-gray-500 font-mono">SENSOR DE PULSO ATIVO</span>
-        </CardTitle>
+    <Card className="bg-slate-900/50 border-slate-800 shadow-xl overflow-hidden">
+      <CardHeader className="border-b border-slate-800/50 pb-4">
+        <div className="flex justify-between items-center">
+          <div>
+            <CardTitle className="text-slate-100 text-lg font-bold tracking-tight">
+              Análise Temporal <span className="text-emerald-500/50 font-normal ml-1">48h</span>
+            </CardTitle>
+            <p className="text-[10px] text-slate-500 font-mono uppercase mt-1 tracking-widest">
+              Fluxo de Alertas Detectados
+            </p>
+          </div>
+          <div className="flex items-center gap-2 px-3 py-1 bg-slate-950 rounded-full border border-slate-800">
+            <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+            <span className="text-[9px] font-mono text-slate-400 font-bold uppercase tracking-tighter">Live Monitor</span>
+          </div>
+        </div>
       </CardHeader>
-      <CardContent className="relative h-[300px] min-h-[300px] w-full pt-4">
+      <CardContent className="relative h-[350px] min-h-[350px] w-full pt-8 px-2">
         {isLoading ? (
-          <div className="flex items-center justify-center h-full text-gray-500 animate-pulse font-mono">
-            ESCANEANDO PULSOS DA REDE...
+          <div className="flex items-center justify-center h-full text-slate-600 animate-pulse font-mono text-xs">
+            DESSERIALIZANDO SÉRIE TEMPORAL...
           </div>
         ) : data.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-gray-500 font-mono italic">
-            SEM PULSOS DETECTADOS NO PERÍODO.
+          <div className="flex items-center justify-center h-full text-slate-700 font-mono text-xs italic">
+            NENHUM REGISTRO ENCONTRADO NO PERÍODO.
           </div>
         ) : (
           <div className="w-full h-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData}>
+              <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorAlerts" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#00ff41" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#00ff41" stopOpacity={0}/>
+                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.15}/>
+                  <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} opacity={0.5} />
               <XAxis 
                 dataKey="hora_formatada" 
-                stroke="#333" 
-                fontSize={10} 
+                stroke="#475569" 
+                fontSize={9} 
                 tickLine={false}
                 axisLine={false}
+                dy={10}
               />
               <YAxis 
-                stroke="#333" 
-                fontSize={10} 
+                stroke="#475569" 
+                fontSize={9} 
                 tickLine={false}
                 axisLine={false}
               />
               <Tooltip 
-                contentStyle={{ backgroundColor: '#000', border: '1px solid #00ff41', borderRadius: '0', fontSize: '12px' }}
-                itemStyle={{ color: '#00ff41' }}
-                labelStyle={{ color: '#666', marginBottom: '4px' }}
+                contentStyle={{ 
+                  backgroundColor: '#0f172a', 
+                  border: '1px solid #334155', 
+                  borderRadius: '8px', 
+                  fontSize: '11px',
+                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)'
+                }}
+                itemStyle={{ color: '#10b981', fontWeight: 'bold' }}
+                labelStyle={{ color: '#94a3b8', marginBottom: '4px' }}
+                cursor={{ stroke: '#334155', strokeWidth: 1 }}
               />
               <Area 
                 type="monotone" 
                 dataKey="alertas" 
-                stroke="#00ff41" 
+                stroke="#10b981" 
                 fillOpacity={1} 
                 fill="url(#colorAlerts)" 
                 strokeWidth={2}
-                animationDuration={1500}
+                animationDuration={2000}
+                activeDot={{ r: 4, strokeWidth: 0, fill: '#34d399' }}
               />
             </AreaChart>
           </ResponsiveContainer>

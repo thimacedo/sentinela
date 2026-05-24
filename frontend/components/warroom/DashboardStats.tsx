@@ -1,65 +1,10 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { supabase } from '@/lib/supabase';
-import { fetchApi } from '@/lib/api';
-
-interface Stats {
-  total_monitorados: number;
-  total_alertas: number;
-  total_amostra: number;
-  resiliencia: number;
-}
-
-const round = (num: number, precision: number) => {
-  const factor = Math.pow(10, precision);
-  return Math.round(num * factor) / factor;
-};
+import { useSystemInformation } from '@/hooks/useSystemInformation';
 
 export default function DashboardStats() {
-  const { data: stats, isLoading } = useQuery<Stats>({
-    queryKey: ['dashboard-stats'],
-    queryFn: async () => {
-      try {
-        return await fetchApi('/api/v1/summary');
-      } catch (error) {
-        console.warn("API Summary falhou, tentando fallback Supabase:", error);
-      }
-
-      // Fallback Supabase
-      try {
-        const { count: monitorados } = await supabase
-          .from('candidatos')
-          .select('id', { count: 'exact', head: true })
-          .eq('status_monitoramento', 'Ativo');
-
-        const { count: total_amostra } = await supabase
-          .from('comentarios')
-          .select('id', { count: 'exact', head: true });
-
-        const { count: total_alertas } = await supabase
-          .from('comentarios')
-          .select('id', { count: 'exact', head: true })
-          .eq('is_hate', true);
-
-        const resiliencia = (total_amostra && total_amostra > 0)
-          ? round(((total_amostra - (total_alertas || 0)) / total_amostra) * 100, 1)
-          : 100.0;
-
-        return {
-          total_monitorados: monitorados || 0,
-          total_alertas: total_alertas || 0,
-          total_amostra: total_amostra || 0,
-          resiliencia,
-        };
-      } catch (err) {
-        console.error("Erro crítico no fallback Supabase:", err);
-        throw err;
-      }
-    },
-    refetchInterval: 30000,
-  });
+  const { data: stats, isLoading } = useSystemInformation();
 
   const displayStats = stats || {
     total_monitorados: 0,
@@ -69,40 +14,56 @@ export default function DashboardStats() {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-      <Card className="bg-black/50 border-tactical-accent">
-        <CardHeader>
-          <CardTitle className="text-tactical-accent text-sm uppercase">Alvos Ativos</CardTitle>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <Card className="bg-slate-900/50 border-slate-800 hover:border-emerald-500/50 transition-all duration-300 group">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-slate-500 text-[10px] uppercase font-bold tracking-widest flex justify-between">
+            Alvos Ativos
+            <span className="text-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity">●</span>
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-4xl font-bold">{isLoading ? "..." : displayStats.total_monitorados}</p>
+          <p className="text-3xl font-bold text-slate-100">{isLoading ? "..." : displayStats.total_monitorados}</p>
+          <p className="text-[10px] text-slate-600 mt-1 font-mono uppercase">Perfis em monitoramento</p>
         </CardContent>
       </Card>
       
-      <Card className="bg-black/50 border-tactical-accent">
-        <CardHeader>
-          <CardTitle className="text-tactical-accent text-sm uppercase">Indícios Detectados</CardTitle>
+      <Card className="bg-slate-900/50 border-slate-800 hover:border-emerald-500/50 transition-all duration-300 group">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-slate-500 text-[10px] uppercase font-bold tracking-widest flex justify-between">
+            Indícios Detectados
+            <span className="text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">▲</span>
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-4xl font-bold">{isLoading ? "..." : displayStats.total_alertas.toLocaleString()}</p>
+          <p className="text-3xl font-bold text-slate-100">{isLoading ? "..." : displayStats.total_alertas.toLocaleString()}</p>
+          <p className="text-[10px] text-slate-600 mt-1 font-mono uppercase">Casos para análise</p>
         </CardContent>
       </Card>
 
-      <Card className="bg-black/50 border-tactical-accent">
-        <CardHeader>
-          <CardTitle className="text-tactical-accent text-sm uppercase">Volume Analisado</CardTitle>
+      <Card className="bg-slate-900/50 border-slate-800 hover:border-emerald-500/50 transition-all duration-300 group">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-slate-500 text-[10px] uppercase font-bold tracking-widest flex justify-between">
+            Volume Analisado
+            <span className="text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">◆</span>
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-4xl font-bold">{isLoading ? "..." : displayStats.total_amostra.toLocaleString()}</p>
+          <p className="text-3xl font-bold text-slate-100">{isLoading ? "..." : displayStats.total_amostra.toLocaleString()}</p>
+          <p className="text-[10px] text-slate-600 mt-1 font-mono uppercase">Comentários extraídos</p>
         </CardContent>
       </Card>
 
-      <Card className="bg-black/50 border-tactical-accent">
-        <CardHeader>
-          <CardTitle className="text-tactical-accent text-sm uppercase">Índice de Resiliência</CardTitle>
+      <Card className="bg-slate-900/50 border-slate-800 hover:border-emerald-500/50 transition-all duration-300 group">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-slate-500 text-[10px] uppercase font-bold tracking-widest flex justify-between">
+            Resiliência
+            <span className="text-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity">✓</span>
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-4xl font-bold text-tactical-accent">{isLoading ? "..." : `${displayStats.resiliencia}%`}</p>
+          <p className="text-3xl font-bold text-emerald-500">{isLoading ? "..." : `${displayStats.resiliencia}%`}</p>
+          <p className="text-[10px] text-slate-600 mt-1 font-mono uppercase">Saúde da rede social</p>
         </CardContent>
       </Card>
     </div>

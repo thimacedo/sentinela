@@ -79,21 +79,21 @@ export default function Sidebar() {
       {/* Sidebar */}
       <aside 
         className={`
-          fixed left-0 top-0 h-screen bg-black border-r border-tactical-accent/20
+          flex flex-col h-screen bg-slate-950 border-r border-slate-800
           transition-all duration-300 ease-in-out z-50
           ${isCollapsed ? 'w-16' : 'w-64'}
         `}
       >
         {/* Header */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-tactical-accent/20">
+        <div className="h-16 flex items-center justify-between px-4 border-b border-slate-800">
           {!isCollapsed && (
-            <h1 className="text-tactical-accent font-bold text-xl tracking-wider">
-              WAR ROOM
+            <h1 className="text-emerald-500 font-bold text-lg tracking-tighter">
+              SENTINELA<span className="text-slate-500 font-light ml-1">AI</span>
             </h1>
           )}
           <button
             onClick={toggleSidebar}
-            className="text-tactical-accent hover:text-tactical-accent/70 transition-colors p-1"
+            className="text-slate-400 hover:text-emerald-500 transition-colors p-1"
             aria-label={isCollapsed ? 'Expandir menu' : 'Recolher menu'}
           >
             {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
@@ -101,7 +101,7 @@ export default function Sidebar() {
         </div>
 
         {/* Navigation */}
-        <nav className="mt-4 px-2">
+        <nav className="flex-1 mt-4 px-2 space-y-1">
           {menuItems.map((item) => {
             const isActive = pathname === item.path
             const Icon = item.icon
@@ -111,12 +111,11 @@ export default function Sidebar() {
                 key={item.id}
                 onClick={() => router.push(item.path)}
                 className={`
-                  w-full flex items-center gap-3 px-3 py-3 mb-1
-                  font-mono text-sm transition-all duration-200 rounded
-                  border-l-2
+                  w-full flex items-center gap-3 px-3 py-2.5
+                  font-medium text-sm transition-all duration-200 rounded-md
                   ${isActive 
-                    ? 'border-tactical-accent bg-tactical-accent/10 text-tactical-accent shadow-[0_0_10px_rgba(0,255,0,0.3)]' 
-                    : 'border-transparent text-tactical-accent/50 hover:text-tactical-accent hover:bg-tactical-accent/5 hover:border-tactical-accent/30'
+                    ? 'bg-emerald-500/10 text-emerald-500' 
+                    : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'
                   }
                 `}
                 title={item.label}
@@ -132,25 +131,15 @@ export default function Sidebar() {
 
         {/* Footer Info */}
         {!isCollapsed && (
-          <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-tactical-accent/20">
-            <div className="space-y-1">
-              <div className="text-[10px] font-mono text-tactical-accent/60">
-                SISTEMA SENTINELA
-              </div>
-              <div className="text-[10px] font-mono text-tactical-accent/40">
-                PASA v52.4
-              </div>
-              <div className="text-[9px] font-mono text-tactical-accent/30">
-                CENTRAL DE COMANDO OPERACIONAL
-              </div>
-            </div>
-            
-            {/* Status Indicator */}
-            <div className="mt-3 flex items-center gap-2">
-              <div className="w-2 h-2 bg-tactical-accent rounded-full animate-pulse" />
-              <span className="text-[9px] font-mono text-tactical-accent/50">
-                SISTEMA ATIVO
+          <div className="p-4 border-t border-slate-800 bg-slate-950/50">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+              <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">
+                Sistema Ativo
               </span>
+            </div>
+            <div className="text-[9px] font-mono text-slate-600">
+              PASA v54.0 // CORE OPS
             </div>
           </div>
         )}
