@@ -36,6 +36,38 @@ class IGWorkerV2(BaseWorker):
 
     async def setup(self) -> None:
         logger.info(f"🚀 Worker {self.worker_id} configurado.")
+        await self._recover_from_buffer()
+
+    async def _save_to_buffer(self, data: List[Dict]):
+        """Salva dados em cache local antes de tentar o banco (Zero Loss Policy)."""
+        import json
+        os.makedirs("runtime_state/buffer", exist_ok=True)
+        path = f"runtime_state/buffer/{self.worker_id}_pending.json"
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+
+    async def _clear_buffer(self):
+        """Remove o cache local após sucesso na persistência."""
+        path = f"runtime_state/buffer/{self.worker_id}_pending.json"
+        if os.path.exists(path):
+            os.remove(path)
+
+    async def _recover_from_buffer(self):
+        """Tenta recuperar dados de um ciclo anterior que falhou na gravação."""
+        path = f"runtime_state/buffer/{self.worker_id}_pending.json"
+        if os.path.exists(path):
+            import json
+            try:
+                self.logger.info(f"📦 [V2] Recuperando dados do buffer local: {path}")
+                with open(path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                if data:
+                    # Tenta re-inserir (usando a lógica resiliente já existente)
+                    res = self.db.table("comentarios").upsert(data, on_conflict="candidato_id,post_shortcode,id_externo", ignore_duplicates=True).execute()
+                    self.logger.info(f"✅ [V2] {len(res.data)} registros recuperados do buffer com sucesso.")
+                await self._clear_buffer()
+            except Exception as e:
+                self.logger.error(f"❌ [V2] Falha ao recuperar buffer: {e}")
 
     async def teardown(self) -> None:
         logger.info(f"🛑 Worker {self.worker_id} encerrado.")
@@ -79,13 +111,17 @@ class IGWorkerV2(BaseWorker):
         self.queue.mark_candidate_scraped(target)
 
         try:
-            # 1. Scraping
-            comments = await self.scraper.scrape_profile(
+            # 1. Scraping (v59.0: Retorna dict com comments e post_metas)
+            scrape_data = await self.scraper.scrape_profile(
                 username=target.username,
                 candidato_id=target.candidato_id,
                 max_posts=self.config.get("max_posts", 3),
                 max_comments_per_post=100
             )
+            
+            comments = scrape_data.get("comments", [])
+            target.post_metas = scrape_data.get("post_metas", [])
+            
         except ValueError as e:
             if "invalid_target" in str(e):
                 self.logger.error(f"🚫 [V2] Alvo @{target.username} marcado como INVÁLIDO (404/Privado/Mismatch).")
@@ -144,13 +180,12 @@ class IGWorkerV2(BaseWorker):
             if bot_detected_count > 0:
                 self.logger.info(f"🤖 [V2] Detectados {bot_detected_count} indícios de comportamento coordenado (Bots) em @{target.username}")
 
-            # 3. Persistência com Resiliência de Schema (v58.1)
+            # 3. Persistência com Resiliência de Schema (v58.3)
             inserted = 0
             duplicated = 0
             inserted_ids = []
             
             # Filtra campos para garantir que apenas colunas existentes sejam enviadas
-            # bot_pattern e is_bot são movidos para a análise pericial se o schema não suportar
             safe_comments = []
             for c in comments:
                 safe_c = {
@@ -165,13 +200,13 @@ class IGWorkerV2(BaseWorker):
                     "processado_ia": False,
                     "tier_used": c.get("tier_used")
                 }
-                
-                # Se for bot, preservamos a info na análise pericial preventiva
                 if c.get("is_bot"):
                     safe_c["analise_pericial"] = f"[BOT DETECTED] Padrão: {c.get('bot_pattern')}"
                     safe_c["categoria_ia"] = "CAMPANHA_COORDENADA"
-                
                 safe_comments.append(safe_c)
+
+            # --- BUFFER DE EMERGÊNCIA (Zero Loss Policy) ---
+            await self._save_to_buffer(safe_comments)
 
             try:
                 # Upsert em lote
@@ -180,6 +215,9 @@ class IGWorkerV2(BaseWorker):
                     on_conflict="candidato_id,post_shortcode,id_externo",
                     ignore_duplicates=True
                 ).execute()
+                
+                # Se chegou aqui, o banco aceitou. Limpamos o buffer.
+                await self._clear_buffer()
                 
                 inserted = len(res.data)
                 duplicated = len(comments) - inserted
