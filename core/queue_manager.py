@@ -53,11 +53,11 @@ class QueueManager:
     def _get_from_fila_coleta(self, blocked, seen_queue_ids, seen_targets, active_targets) -> Optional[Target]:
         """Busca alvos na fila de prioridade, ordenados por nível de importância."""
         try:
-            # Pega os Top 20 pendentes (Alta prioridade primeiro, depois FIFO)
+            # Pega os Top 20 pendentes (Prioridade 1 = Máxima, depois FIFO)
             pending = self.db.table("fila_coleta")\
                 .select("*")\
                 .eq("status", "PENDENTE")\
-                .order("prioridade", desc=True)\
+                .order("prioridade", desc=False)\
                 .order("created_at", desc=False)\
                 .limit(20).execute()
             

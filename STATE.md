@@ -17,6 +17,8 @@ _last_updated: 2026-05-24 | branch: main_
 | Renovação de Sessões (export_playwright_cookies.py) | Operacional | Autenticação automatizada de multi-contas |
 
 ## Descobertas Tecnicas (2026-05-24)
+- **Alinhamento de Prioridades (v56.1)**: Corrigida a divergência na ordenação da fila de coleta. O sistema agora segue o padrão '1 = Máxima Prioridade' (ordenação ASC), garantindo que alvos críticos marcados com 1 no banco de dados sejam processados antes dos demais.
+- **Detecção de Comportamento Inautêntico e Robôs (v56.0)**: Implementada camada de análise de densidade léxica no `IGWorkerV2` para identificar padrões repetitivos de mensagens (CIB). Se um padrão aparecer 3 ou mais vezes no mesmo ciclo, os comentários são auto-classificados como `CAMPANHA_COORDENADA`, economizando tokens de IA e sinalizando manipulação de engajamento.
 - **Integridade Forense e Calibração de IA (v55.0)**: Implementada validação rigorosa de alvos no motor V2, detectando redirecionamentos de username, páginas 404 e contas privadas. O `AIService` foi recalibrado (MCA v2.2) para endurecer a detecção de hostilidade técnica velada e ad hominem polido, reduzindo drasticamente falsos negativos persistentes.
 - **Otimização de Prioridades e Distribuição (v55.1)**: O `QueueManager` foi refatorado para suportar um fluxo de decisão multinível: alvos manuais possuem precedência total, seguidos por itens da `fila_coleta` (ordenados pelo campo `prioridade` e antiguidade), e finalmente a rotação global de candidatos ativos (baseada em `last_scraped_at`). Introduziu-se um **Mecanismo de Fairness de 25%**, que força a seleção via rotação global periodicamente para garantir que nenhum alvo fique estagnado. Adicionalmente, o `IGWorkerV2` agora utiliza um bloqueio atômico (`claim_lock`) compartilhado via orquestrador, eliminando riscos de colisão onde múltiplos workers tentariam processar o mesmo perfil simultaneamente.
 - **Filtro de Posts Fixados e Velhos (v54.4)**: O motor `InstagramScraperV2` foi aprimorado para lidar com posts fixados (pinned) e limite temporal de relevância. Agora, o sistema identifica posts fixados no grid via seletores SVG/Aria e, ao abrir o modal, valida a data de publicação (`datetime` do elemento `<time>`). Posts com mais de 7 dias de idade são automaticamente ignorados, e o loop de raspagem avança para os posts subsequentes no grid até atingir o limite de sucessos definido (`max_posts`). Isso evita a redundância cíclica de dados e foca o processamento em informações inéditas.
@@ -61,6 +63,6 @@ watchdog.py (Garante main_runner e dashboard local)
 ## Fila de Coleta (v55.1)
 
 1. **Manual**: Via Config/Env (Precedência total).
-2. **Prioritária**: `fila_coleta` (order by prioridade DESC, created_at ASC).
+2. **Prioritária**: `fila_coleta` (order by prioridade ASC, created_at ASC).
 3. **Justiça (Fairness 25%)**: Rotação forçada via candidatos ativos.
 4. **Global**: `candidatos` (order by last_scraped_at ASC).
