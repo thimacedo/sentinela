@@ -116,11 +116,13 @@ class RewardEngine:
             delta += val
             lines.append(f"  - Coleta ({result.source or 'scrapers'}): OK ({result.extracted} extraídos) -> +{val:.1f} XP")
         else:
-            lines.append(f"  - Coleta: OK (0 novos posts/comentários)")
+            # PENALIZAÇÃO DE VACUIDADE (v56.2): 0 comentários extraídos é baixa performance
+            delta -= 5.0
+            lines.append(f"  - Coleta: ⚠️ Ineficiente (0 comentários encontrados) -> -5.0 XP")
             
         # 2. Banco
         if result.inserted > 0:
-            val = min(result.inserted * 1.0, 10.0)
+            val = min(result.inserted * 1.5, 15.0) # Aumentado peso da inserção real
             delta += val
             lines.append(f"  - Banco (Supabase): OK ({result.inserted} novos gravados) -> +{val:.1f} XP")
         elif result.extracted > 0:
