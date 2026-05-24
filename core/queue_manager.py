@@ -39,31 +39,48 @@ class QueueManager:
                 active_targets.add(username)
             return Target(username=username, source="manual_test")
 
-        # Pending fila
-        pending = self.db.table("fila_coleta").select("*").eq("status", "PENDENTE").limit(20).execute()
-        for item in pending.data or []:
-            queue_id = item["id"]
-            username = item.get("username") or item.get("candidato_id") or item.get("target_username")
-            if username and len(str(username)) > 30:
-                cand = self.db.table("candidatos").select("username").eq("id", username).limit(1).execute()
-                if cand.data:
-                    username = cand.data[0]["username"]
-            username = str(username).strip().lstrip("@")
-            if queue_id in seen_queue_ids or username in blocked:
-                continue
-            seen_queue_ids.add(queue_id)
-            seen_targets.add(username)
-            if active_targets is not None:
-                active_targets.add(username)
-            return Target(
-                username=username,
-                candidato_id=username,
-                queue_id=queue_id,
-                source="fila_coleta",
-            )
+        # Pending fila (Priority Queue)
+        # Adicionado ordering por created_at para garantir FIFO e rotação real.
+        # Adicionado mecanismo de fairness: 20% de chance de pular a fila de prioridade 
+        # para garantir que a rotação global de candidatos não estacione.
+        import random
+        use_priority_queue = random.random() > 0.2
+        
+        if use_priority_queue:
+            pending = self.db.table("fila_coleta")\
+                .select("*")\
+                .eq("status", "PENDENTE")\
+                .order("prioridade", desc=True)\
+                .order("created_at", desc=False)\
+                .limit(20).execute()
+            
+            for item in pending.data or []:
+                queue_id = item["id"]
+                username = item.get("username") or item.get("candidato_id") or item.get("target_username")
+                if username and len(str(username)) > 30:
+                    cand = self.db.table("candidatos").select("username").eq("id", username).limit(1).execute()
+                    if cand.data:
+                        username = cand.data[0]["username"]
+                username = str(username).strip().lstrip("@")
+                if queue_id in seen_queue_ids or username in blocked:
+                    continue
+                seen_queue_ids.add(queue_id)
+                seen_targets.add(username)
+                if active_targets is not None:
+                    active_targets.add(username)
+                return Target(
+                    username=username,
+                    candidato_id=username,
+                    queue_id=queue_id,
+                    source="fila_coleta",
+                )
 
-        # Fallback to candidatos
-        candidatos = self.db.table("candidatos").select("id,username").eq("status_monitoramento", "Ativo").order("last_scraped_at", desc=False).limit(10).execute()
+        # Fallback to candidatos (Global Rotation)
+        candidatos = self.db.table("candidatos")\
+            .select("id,username")\
+            .eq("status_monitoramento", "Ativo")\
+            .order("last_scraped_at", desc=False)\
+            .limit(10).execute()
         for cand in candidatos.data or []:
             username = cand["username"]
             if username in blocked:
