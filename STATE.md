@@ -17,6 +17,7 @@ _last_updated: 2026-05-23 | branch: feat/autonomous-workers_
 | Classificacao IA | Operacional | Roteamento Híbrido: Local (Gemma/Ollama) + Cloud Cascade |
 
 ## Descobertas Tecnicas (2026-05-24)
+- **Modularidade de Coleta:** Modularizou-se o fluxo de modal do `InstagramScraperV2` expondo as responsabilidades de abertura, rolagem e fechamento em funções públicas auxiliares (`open_post_modal`, `scroll_comment_column`, `close_post_modal`). Isso simplifica a manutenção e integração da mecânica de modal em outras rotinas e etapas.
 - **Navegação V2 via Modal:** Diagnosticou-se que acessos a URLs diretas de posts (`/p/{shortcode}/`) no modo headless do Playwright travam em telas brancas por bloqueio silencioso do Instagram. Refatorou-se o motor para abrir postagens clicando nos elementos na própria tela do perfil (comportamento humano nativo) e fechando via clique de tecla Escape, restabelecendo a extração estruturada de comentários com sucesso.
 - **Circuit Breaker Local:** Integrou-se o provedor local LiteRT (Gemma 3 1B) ao `ai_circuit_breaker`. Se o LiteRT local falhar seguidamente por estar offline, o circuito abre por 5 minutos, poupando timeouts repetitivos de 5.0s por comentário e otimizando a latência do lote de classificação.
 - **Tratamento de Exceções Lote:** Refatorou-se `run_batch_classification` para capturar exceções específicas de banco ou de API e logá-las detalhadamente, evitando interrupções silenciosas.
@@ -121,7 +122,7 @@ python scripts/test_scraper_v2.py
 ```
 
 ## Ultimas Atualizacoes (Refatoracao V2)
-- **2026-05-24:** Integrado o LiteRT (Gemma 3 1B) ao `ai_circuit_breaker` para proteger a latência em lote e adicionado tratamento de logs e erros na classificação em lote. Corrigidos o NameError (`asyncio` ausente) no `ig_worker_v2` e a validação do interpretador Python do Watchdog. Refatorada a abertura de posts no motor InstagramScraperV2 para uso de modal (clique no feed), solucionando o problema de extração zerada (tela branca do Instagram).
+- **2026-05-24:** Integrado o LiteRT (Gemma 3 1B) ao `ai_circuit_breaker` para proteger a latência em lote e adicionado tratamento de logs e erros na classificação em lote. Corrigidos o NameError (`asyncio` ausente) no `ig_worker_v2` e a validação do interpretador Python do Watchdog. Refatorada a abertura de posts no motor InstagramScraperV2 para uso de modal (clique no feed) e modularizado o controle do modal em métodos públicos auxiliares (`open_post_modal`, `scroll_comment_column`, `close_post_modal`).
 - Implementado `InstagramScraperV2` eliminando dependência do Zyte (Fase 5 - executado por Gemini 1.5 Flash).
 - Refatorado `main_runner.py` e `watchdog` para rodar exclusivamente o novo motor V2.
 - Removidas verificações de saúde do Zyte e Scrapy Cloud do Watchdog.

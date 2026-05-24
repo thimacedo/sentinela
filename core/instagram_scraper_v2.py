@@ -158,28 +158,44 @@ class InstagramScraperV2:
 
         return all_comments
 
+    async def open_post_modal(self, page: Page, shortcode: str) -> bool:
+        """Encontra e clica na postagem no feed do perfil para abrir o modal."""
+        selector = f'a[href*="/{shortcode}/"]'
+        post_element = await page.query_selector(selector)
+        if not post_element:
+            logger.warning(f"⚠️ [V2] Elemento do post {shortcode} não encontrado no feed.")
+            return False
+            
+        await post_element.click()
+        # Aguarda abertura e requisições iniciais
+        await asyncio.sleep(random.uniform(5, 7))
+        return True
+
+    async def scroll_comment_column(self, page: Page, scroll_amount: int = 800) -> None:
+        """Move o mouse e rotaciona a roda para carregar os comentários no modal."""
+        await page.mouse.move(1000, 400)
+        await page.mouse.wheel(0, scroll_amount)
+        await asyncio.sleep(3)
+
+    async def close_post_modal(self, page: Page) -> None:
+        """Fecha o modal de postagem simulando a tecla Escape."""
+        await page.keyboard.press("Escape")
+        await asyncio.sleep(random.uniform(2, 3))
+
     async def _scrape_post(self, page: Page, shortcode: str, username: str, candidato_id: str, max_comments: int) -> List[Dict[str, Any]]:
         """Extrai comentários de um post específico clicando no elemento do perfil para abrir o modal."""
         self.captured_data = []
         
         try:
-            # Encontra o elemento do post correspondente ao shortcode no feed
-            selector = f'a[href*="/{shortcode}/"]'
-            post_element = await page.query_selector(selector)
-            
-            if not post_element:
-                logger.warning(f"⚠️ [V2] Elemento do post {shortcode} não encontrado no feed.")
+            # 1. Abre o modal
+            opened = await self.open_post_modal(page, shortcode)
+            if not opened:
                 return []
                 
-            # Clica no post para abrir o modal
-            await post_element.click()
-            await asyncio.sleep(random.uniform(5, 7)) # Aguarda abertura e requisições iniciais
+            # 2. Rola a coluna de comentários
+            await self.scroll_comment_column(page, scroll_amount=800)
             
-            # Move o mouse para a área lateral direita do modal (onde ficam os comentários) e rola
-            await page.mouse.move(1000, 400)
-            await page.mouse.wheel(0, 800)
-            await asyncio.sleep(3)
-            
+            # 3. Extrai comentários do post usando as camadas de dados
             # Camada 1: Network Interception (Mais rico)
             comments = self._parse_captured_json(shortcode)
             
@@ -192,9 +208,8 @@ class InstagramScraperV2:
                 self.stats["browser_renders"] += 1
                 comments = await self._extract_from_dom(page, shortcode)
 
-            # Fecha o modal usando a tecla Escape
-            await page.keyboard.press("Escape")
-            await asyncio.sleep(random.uniform(2, 3)) # Espera fechamento
+            # 4. Fecha o modal
+            await self.close_post_modal(page)
             
             # Normalização final
             now = datetime.now(timezone.utc).isoformat()
@@ -218,9 +233,9 @@ class InstagramScraperV2:
 
         except Exception as e:
             logger.error(f"⚠️ [V2] Falha ao processar post {shortcode} via modal: {e}")
-            # Tenta fechar o modal como contingência em caso de erro
+            # Tenta fechar o modal em caso de erro como contingência
             try:
-                await page.keyboard.press("Escape")
+                await self.close_post_modal(page)
             except:
                 pass
             return []
