@@ -265,15 +265,22 @@ class AIService:
                 "evidencia_lexical": [], "analise_pericial": "Erro de parsing"
             }
 
-    async def validate_identity(self, expected_name: str, display_name: str, bio: str) -> Dict[str, Any]:
-        """Valida se um perfil do Instagram pertence ao alvo esperado (v64.0)."""
+    async def validate_identity(self, expected_name: str, display_name: str, bio: str, followers: str = "0", is_verified: bool = False) -> Dict[str, Any]:
+        """Valida se um perfil do Instagram pertence ao alvo esperado (v64.1)."""
+        
+        # Regra de Ouro: Perfis Verificados ou com Milhões de seguidores são altamente prováveis de serem autênticos
+        # se o nome bater minimamente com a figura pública.
+        
         prompt = (
-            f"Você é um perito em verificação de identidade digital.\n"
+            f"Você é um perito em verificação de identidade digital de figuras públicas.\n"
             f"ALVO ESPERADO: {expected_name}\n"
             f"PERFIL ENCONTRADO:\n"
             f" - Nome de Exibição: {display_name}\n"
-            f" - Biografia: {bio}\n\n"
-            f"Analise se o perfil acima pertence à figura pública oficial ou se é um perfil inautêntico (homônimo, fã-clube, paródia ou pessoa comum).\n"
+            f" - Biografia: {bio}\n"
+            f" - Seguidores: {followers}\n"
+            f" - Selo de Verificado: {'SIM' if is_verified else 'NÃO'}\n\n"
+            f"DIRETRIZ: Seja tolerante. Se o perfil for VERIFICADO ou possuir milhares/milhões de seguidores e o nome for compatível com o alvo, marque como autêntico.\n"
+            f"Marque como inautêntico APENAS se for claramente um fã-clube, paródia, perfil de apoio não oficial ou uma pessoa comum homônima sem relevância política.\n"
             f"Responda APENAS com JSON:\n"
             f"{{\"is_authentic\": boolean, \"reason\": \"justificativa técnica curta\"}}"
         )

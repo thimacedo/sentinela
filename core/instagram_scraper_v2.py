@@ -158,9 +158,11 @@ class InstagramScraperV2:
                     
                     # Chamada de IA para validar identidade
                     bio_check = await ai_service.validate_identity(
-                        expected_name=candidato_id, # Usamos o candidato_id (que deve conter o nome/contexto do alvo)
+                        expected_name=candidato_id, 
                         display_name=validation.get("display_name", ""),
-                        bio=validation.get("biography", "")
+                        bio=validation.get("biography", ""),
+                        followers=validation.get("followers", "0"),
+                        is_verified=validation.get("is_verified", False)
                     )
 
                     if not bio_check.get("is_authentic", True):
@@ -247,7 +249,16 @@ class InstagramScraperV2:
                 if (!header) return null;
                 const name = header.querySelector('h1') ? header.querySelector('h1').innerText : '';
                 const bio = header.querySelector('section div:last-child span') ? header.querySelector('section div:last-child span').innerText : '';
-                return { name, bio };
+                
+                // Captura seguidores (ex: "8,1 mi seguidores")
+                const stats = Array.from(header.querySelectorAll('ul li'));
+                const followersEl = stats.find(s => s.innerText.includes('seguidor') || s.innerText.includes('follower'));
+                const followers = followersEl ? followersEl.innerText : '0';
+                
+                // Captura selo de verificado
+                const is_verified = !!header.querySelector('svg[aria-label*="Verified"], svg[aria-label*="Verificado"]');
+                
+                return { name, bio, followers, is_verified };
             }
         """)
 
@@ -261,7 +272,9 @@ class InstagramScraperV2:
             "valid": True, 
             "reason": "ok",
             "biography": bio_info.get("bio", "") if bio_info else "",
-            "display_name": bio_info.get("name", "") if bio_info else ""
+            "display_name": bio_info.get("name", "") if bio_info else "",
+            "followers": bio_info.get("followers", "0") if bio_info else "0",
+            "is_verified": bio_info.get("is_verified", False) if bio_info else False
         }
 
     async def open_post_modal(self, page: Page, shortcode: str) -> bool:
