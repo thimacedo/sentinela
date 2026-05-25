@@ -182,7 +182,7 @@ class AIService:
                         {"role": "user", "content": f"Comentário: \"{text}\""}
                     ],
                     response_format={"type": "json_object"},
-                    temperature=0.1,
+                    temperature=0.0, # v63.1: Máxima precisão determinística
                     timeout=provider.get("timeout", 15.0)
                 )
                 
