@@ -12,6 +12,8 @@ from typing import Any, Dict, List, Optional
 
 from playwright.async_api import Page, BrowserContext, async_playwright, Browser, TimeoutError as PlaywrightTimeoutError
 
+from core.ai_service import ai_service
+
 logger = logging.getLogger("instagram_scraper_v2")
 
 @dataclass
