@@ -3,42 +3,39 @@ _last_updated: 2026-05-24 | branch: main_
 
 ## Concluido
 
-### Coleta Real e Inteligencia (v48 - v55.3)
+### Coleta Real e Inteligencia (v48 - v64.0)
 - [x] **Motor Scraper V2**: Playwright independente sem Zyte (Fase 5).
-- [x] **Integridade Forense**: Validação de username, 404 e conta privada no scraping.
-- [x] **Filtro Inteligente**: Ignorar posts fixados (pins) e limite temporal de 7 dias (v54.4).
-- [x] **AIAdvisor SRE**: Diagnóstico automático de falhas via Mistral integrado (v53.0).
-- [x] **DocFetcher**: Cache local de docs técnicas com TTL de 1h para IA.
-- [x] **Fila Multinível**: Prioridade Ponderada + Fairness 25% + Atomic Locking (v55.1).
-- [x] **Refatoração Frontend**: Interface "War Room" profissional (Slate/Emerald) com Flexbox.
-- [x] **Modularização de Dados**: Hook `useSystemInformation` isolando lógica de busca.
-- [x] **Watchdog Sync**: Monitoramento unificado Supabase + Dashboard local atualizado.
-- [x] **Deploy Persistente**: `render.yaml` atualizado para orquestrador persistente com Playwright.
+- [x] **Integridade Forense**: Validação biográfica via IA para detecção de perfis inautênticos (v64.0).
+- [x] **Otimização de Performance**: Fast-Skip de posts fixados e velhos diretamente no grid (v62.1).
+- [x] **Inteligencia Robusta**: Detecção de Bots por densidade léxica e categoria CAMPANHA_COORDENADA.
+- [x] **Refinamento MCA**: IA calibrada anti-falsos positivos e temperatura determinística.
+- [x] **Fila Inteligente**: Prioridade Dinâmica (Termômetro) e Hibernação de alvos ociosos.
+- [x] **Resiliencia de Dados**: Buffer de emergência Zero-Loss e fallback de schema mismatch.
+- [x] **Infraestrutura**: Watchdog modernizado com 'uv' e Auto-Ancoragem global de diretórios.
+- [x] **Frontend Moderno**: Interface SAAS Premium Multitema (Light/Dark) v60.2.
+- [x] **Documentacao**: Mapa de dados v58, Mapa funcional e Índice de onboarding.
 
 ---
 
-## Em Andamento (Fase 7: Consolidação e Dossiês)
+## Em Andamento (Fase 7: Consolidação e Relatórios)
 
-### Sessão e Resiliência
-- [ ] Implementar renovação automática de sessões via worker dedicado.
-- [ ] Rotação de User-Agents dinâmica por ciclo.
+### Sessão e Escala
+- [ ] Implementar rotação de User-Agents dinâmica por ciclo para evitar detecção.
+- [ ] Worker dedicado para renovação automática de cookies via Playwright.
 
-### Expansão de Coleta
-- [ ] Ativar paginação de posts (atualmente max_posts=3) com teto adaptativo.
-- [ ] Detecção de "Shadowban" de comentários por perfil.
+### Expansão Analítica
+- [ ] Ativar paginação de posts adaptativa (max_posts dinâmico baseado no Termômetro).
+- [ ] Análise de "Shadowban" léxico: detectar quando a plataforma oculta termos específicos.
 
-### Refinamento de IA
-- [ ] Fine-tuning de modelo local (Ollama) para reduzir latência e custos Cloud.
-- [ ] Implementar Auditoria Cruzada (IA validando IA) para casos críticos.
-
-### Relatórios e Visualização
-- [ ] Reativar e recalibrar módulo de **Dossiês** (Exportação PDF v54).
-- [ ] Reativar módulo de **Rede** (Grafos de influência com nova IA).
+### Relatórios Premium
+- [ ] Recalibrar motor de **Dossiês** para nova estrutura de dados (Exportação PDF v54).
+- [ ] Reativar módulo de **Rede** (Grafos de influência baseados na nova categorização).
+- [ ] API Gateway comercial para venda de créditos e integração externa.
 
 ---
 
 ## Proximas Acoes Imediatas
 
-1. Monitoramento de estabilidade do orquestrador no Render.
-2. Fine-tuning local para redução de dependência de APIs Cloud.
-3. Recalibração do motor de Dossiês para nova estrutura de dados.
+1. Monitoramento da estabilidade do Scraper V2 sob a nova validação biográfica.
+2. Fine-tuning local (Ollama) para categorias específicas de hostilidade velada.
+3. Teste do módulo de Dossiês com os novos dados normalizados.

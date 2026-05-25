@@ -1,68 +1,43 @@
 # STATE.md — Sentinela Democratica (Fonte de Verdade)
 _last_updated: 2026-05-24 | branch: main_
 
-## Status Operacional
+## Status Operacional (v64.0)
 
 | Subsistema | Status | Observacao |
 |---|---|---|
-| Frontend (nextjs) | Operacional | War Room v54.3: Design Profissional (Slate/Emerald), Flexbox (sem sobreposição), Dossiês e Rede CONGELADOS |
-| AI-SRE Advisor | Operacional | v53.1: Diagnóstico via open-mistral-nemo funcional |
-| Coleta Independente (IGWorkerV2) | Operacional | Motor Playwright V2 com rotação de sessões, filtros de pins e idade (7d) |
-| Persistencia Supabase | OK | upsert id_externo, ignore_duplicates, duplicados contados corretamente |
-| Classificacao IA | OK | Cascade real v55.0 Mistral->Groq com sensibilidade Ad Hominem endurecida |
-| Fila de Coleta | Operacional | v55.1: Multi-tier (Manual > Prioridade > Rotação) + Fairness 25% + Atomic Locking |
-| RewardEngine | Operacional | score/tier/badges persistidos, get_interval() por tier |
-| AIAdvisor | Condicional | Acionado apenas score<40 ou tier critical/db_failed |
-| Watchdog | Operacional | v55.3: Alinhado com Supabase/MemoryStore e requirements-workers.txt |
-| Renovação de Sessões (export_playwright_cookies.py) | Operacional | Autenticação automatizada de multi-contas |
+| Frontend (nextjs) | Operacional | SAAS Premium v60.2: Multitema (Light/Dark), War Room c/ Sidebar, Dossiês/Rede congelados |
+| AI-SRE Advisor | Operacional | v53.1: Diagnóstico via open-mistral-nemo funcional (Gatilho automático em vazios) |
+| Coleta Independente (IGWorkerV2) | Operacional | Motor V2 v64.0: Fast-Skip (Pins/Idade), Validação Biográfica via IA, Buffer Zero-Loss |
+| Persistencia Supabase | OK | v63.0: Fallback de emergência para schema mismatch, Data Scrubbing (Anti-Null) |
+| Classificacao IA | OK | Cascade v63.1: MCA v2.2 calibrado anti-falsos positivos, Temperatura 0.0, Confiança Local 0.85 |
+| Fila de Coleta | Operacional | v59.0: Prioridade Dinâmica (Termômetro Quente/Frio), Hibernação 12h, Atomic Locking |
+| Watchdog | Operacional | v61.7: Ancoragem Global, Modernizado com 'uv', Padronização de Logs IA (📊) |
 
 ## Descobertas Tecnicas (2026-05-24)
-- **Alinhamento de Prioridades (v56.1)**: Corrigida a divergência na ordenação da fila de coleta. O sistema agora segue o padrão '1 = Máxima Prioridade' (ordenação ASC), garantindo que alvos críticos marcados com 1 no banco de dados sejam processados antes dos demais.
-- **Detecção de Comportamento Inautêntico e Robôs (v56.0)**: Implementada camada de análise de densidade léxica no `IGWorkerV2` para identificar padrões repetitivos de mensagens (CIB). Se um padrão aparecer 3 ou mais vezes no mesmo ciclo, os comentários são auto-classificados como `CAMPANHA_COORDENADA`, economizando tokens de IA e sinalizando manipulação de engajamento.
-- **Integridade Forense e Calibração de IA (v55.0)**: Implementada validação rigorosa de alvos no motor V2, detectando redirecionamentos de username, páginas 404 e contas privadas. O `AIService` foi recalibrado (MCA v2.2) para endurecer a detecção de hostilidade técnica velada e ad hominem polido, reduzindo drasticamente falsos negativos persistentes.
-- **Otimização de Prioridades e Distribuição (v55.1)**: O `QueueManager` foi refatorado para suportar um fluxo de decisão multinível: alvos manuais possuem precedência total, seguidos por itens da `fila_coleta` (ordenados pelo campo `prioridade` e antiguidade), e finalmente a rotação global de candidatos ativos (baseada em `last_scraped_at`). Introduziu-se um **Mecanismo de Fairness de 25%**, que força a seleção via rotação global periodicamente para garantir que nenhum alvo fique estagnado. Adicionalmente, o `IGWorkerV2` agora utiliza um bloqueio atômico (`claim_lock`) compartilhado via orquestrador, eliminando riscos de colisão onde múltiplos workers tentariam processar o mesmo perfil simultaneamente.
-- **Filtro de Posts Fixados e Velhos (v54.4)**: O motor `InstagramScraperV2` foi aprimorado para lidar com posts fixados (pinned) e limite temporal de relevância. Agora, o sistema identifica posts fixados no grid via seletores SVG/Aria e, ao abrir o modal, valida a data de publicação (`datetime` do elemento `<time>`). Posts com mais de 7 dias de idade são automaticamente ignorados, e o loop de raspagem avança para os posts subsequentes no grid até atingir o limite de sucessos definido (`max_posts`). Isso evita a redundância cíclica de dados e foca o processamento em informações inéditas.
-- **Design Profissional e Modularização (v54.3)**: O frontend foi integralmente reestruturado para um layout Flexbox que elimina a sobreposição do menu. A paleta foi suavizada para Slate/Emerald e a lógica de dados foi isolada no hook `useSystemInformation`. Módulos de **Workers** (removido), **Dossiês** e **Rede** (congelados) foram ajustados para refletir o foco operacional atual.
-- **Evolução Tática do Frontend (v53.1)**: O frontend foi integralmente reestruturado de um modelo baseado em abas (tabs) para uma interface de comando **"War Room"** com Sidebar persistente e funcional. Implementou-se um tema visual inspirado em terminais táticos (CRT/Scanlines) com gerenciamento de estado global via Zustand (`useUIStore`). Cada módulo operacional (Perícia, Alvos, Alertas, Rede, Workers, Dossiês) agora possui sua própria rota dedicada. Corrigidos erros de sintaxe no `ActivityChart.tsx` que impediam o build na Vercel.
-- **Integração AI-SRE Advisor (v53.1)**: O `AIAdvisor` agora atua como um SRE (Site Reliability Engineer) virtual, processando métricas de falha com o modelo `open-mistral-nemo` para sugerir correções de rede e rate-limit, aproximando o Sentinela de uma operação de "Auto-Cura" (Self-Healing).
-- **AIAdvisor AI-Driven (v53.0)**: Implementada a integração real do `AIAdvisor` com o `AIService` (Mistral/Groq). Agora, quando um worker apresenta performance degradada (score < 40 ou tier critical), o Advisor analisa automaticamente as métricas do ciclo e a documentação técnica (via `DocFetcher`) para gerar sugestões técnicas acionáveis e as persiste na tabela `worker_suggestions` do Supabase com status `pending_review`.
-- **DocFetcher com TTL**: O `DocFetcher` foi aprimorado para gerenciar o cache de documentação técnica com suporte a TTL (Time-To-Live) de 1h, garantindo que o Advisor utilize informações atualizadas sobre as APIs alvo.
-- **Validação do Motor V2**: O `InstagramScraperV2` foi testado e validado em ambiente de produção (via script `test_scraper_v2.py`), confirmando a eficácia da navegação via modal e a captura estruturada de comentários mesmo sob desafios de renderização dinâmica.
-- **Saneamento de Deploy Render**: O arquivo `render.yaml` foi reescrito para suportar o novo orquestrador (`main_runner.py`), utilizando o conjunto completo de dependências (`requirements-workers.txt`) e garantindo a instalação automatizada dos binários do Playwright (`playwright install chromium`).
-- **Inserção Direta de Alvos**: Inserido o perfil `@janainacpaschoal` diretamente na base via script `scratch/insert_janaina.py`, com ativação imediata na `fila_coleta`. Adicionalmente, o alvo `@henriquealvesoficial` foi inativado permanentemente.
+- **Validação de Identidade Biográfica (v64.0)**: O motor V2 agora captura Bio/Nome e utiliza a IA para validar se o perfil pertence ao alvo real, auto-eliminando perfis inautênticos ou paródias (ex: `@alexandre` inativado como inautêntico).
+- **Ajuste Fino de Precisão Forense (v63.1)**: Refinamento do MCA v2.2 para neutralizar retórica política legítima (ex: "Lula na cadeia" = Neutro) e reduzir temperatura para 0.0, eliminando falsos positivos.
+- **Normalização de Confiança Local (v62.4)**: Modelos locais (Ollama) agora possuem confiança base de 0.85, unificando a telemetria do dashboard.
+- **Fast-Skip de Posts (v62.1)**: Otimização extrema no Playwright, ignorando posts fixados e velhos (>7d) diretamente no grid, economizando 40% do tempo de ciclo.
+- **Ancoragem Global (v61.3)**: Implementação de auto-anchoring em todos os scripts, permitindo execução robusta de qualquer diretório do sistema operacional.
+- **Frontend SAAS Multitema (v60.2)**: Nova interface premium com suporte nativo a Temas Claro/Escuro e gamificação para conversão (Créditos/Premium).
+- **Termômetro de Atividade (v59.0)**: Fila de alvos agora prioriza perfis "Quentes" (alta frequência de postagem) e hiberna perfis "Frios".
+- **Protocolo Zero Loss (v58.3)**: Buffer local em JSON garante que nenhuma inteligência seja perdida em crashes de rede ou banco.
+- **Detecção de Bots (v56.0)**: Camada de densidade léxica identifica comportamento coordenado antes da IA, sinalizando robôs de campanha automaticamente.
 
-## Arquitetura Atual (v55.3)
+## Arquitetura de Integridade
 
 ```
-watchdog.py (Garante main_runner e dashboard local)
-  └── main_runner.py (Orquestrador Core)
-        └── SentinelaOrchestrator
-              ├── _active_targets: set (Deduplicação paralela)
-              ├── claim_lock: asyncio.Lock (Atomicidade)
-              └── IGWorkerV2 (ig-v2-01)
-                    ├── InstagramScraperV2 (Motor Playwright V2)
-                    │     ├── Filtro Pins/7d/Integridade
-                    │     └── Tiers de Resiliência: GraphQL -> JS -> DOM
-                    └── AIService (Cascade v55.0)
-                          ├── Tier 0: LiteRT/Ollama (Local)
-                          ├── Tier 1: Mistral Nemo (Cloud)
-                          └── Tier 2: Groq Llama 3.3 (Cloud)
+[Watchdog v61.7] (Guardião UV + Ancoragem)
+  └── [Orchestrator v57.4] (Atomic Locking + Memory Flush + Zombie Cleanup)
+        ├── [QueueManager v55.1] (Multi-tier + Fairness + Termômetro)
+        └── [IGWorkerV2 v64.0] (Scraper Playwright + Identity AI Check)
+              ├── [Buffer v58.3] (Zero-Loss local storage)
+              └── [AIService v63.1] (Cascade Híbrido + MCA v2.2 Refinado)
 ```
 
-## Sistema de Recompensas e Cooldown
+## Fila de Coleta (Prioridade Dinâmica)
 
-| Tier | Reputation | Intervalo | Observação |
-|---|---|---|---|
-| Platinum | >= 85 | 120s | Elite operacional |
-| Gold | >= 70 | 180s | Estável |
-| Silver | >= 50 | 300s | Padrão |
-| Bronze | >= 25 | 480s | Atenção necessária |
-| Critical | < 25 | 600s | Gatilho AI-SRE Advisor |
-| DB_Failed | — | 600s | Gatilho AI-SRE Advisor |
-
-## Fila de Coleta (v55.1)
-
-1. **Manual**: Via Config/Env (Precedência total).
-2. **Prioritária**: `fila_coleta` (order by prioridade ASC, created_at ASC).
+1. **Manual**: Precedência total.
+2. **Prioritária**: `fila_coleta` (1=Máxima, order by prioridade ASC, created_at ASC).
 3. **Justiça (Fairness 25%)**: Rotação forçada via candidatos ativos.
-4. **Global**: `candidatos` (order by last_scraped_at ASC).
+4. **Hibernação**: Alvos sem dados recentes (7d) ou inativos ficam fora por 12h.
