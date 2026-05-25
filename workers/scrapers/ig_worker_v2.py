@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import asyncio
+import os
 from typing import List, Dict
 
 from workers.base.worker_base import BaseWorker
