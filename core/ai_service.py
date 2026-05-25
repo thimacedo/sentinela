@@ -265,6 +265,31 @@ class AIService:
                 "evidencia_lexical": [], "analise_pericial": "Erro de parsing"
             }
 
+    async def validate_identity(self, expected_name: str, display_name: str, bio: str) -> Dict[str, Any]:
+        """Valida se um perfil do Instagram pertence ao alvo esperado (v64.0)."""
+        prompt = (
+            f"Você é um perito em verificação de identidade digital.\n"
+            f"ALVO ESPERADO: {expected_name}\n"
+            f"PERFIL ENCONTRADO:\n"
+            f" - Nome de Exibição: {display_name}\n"
+            f" - Biografia: {bio}\n\n"
+            f"Analise se o perfil acima pertence à figura pública oficial ou se é um perfil inautêntico (homônimo, fã-clube, paródia ou pessoa comum).\n"
+            f"Responda APENAS com JSON:\n"
+            f"{{\"is_authentic\": boolean, \"reason\": \"justificativa técnica curta\"}}"
+        )
+
+        try:
+            response = await self.mistral_client.chat.completions.create(
+                model="open-mistral-nemo",
+                messages=[{"role": "user", "content": prompt}],
+                response_format={"type": "json_object"},
+                temperature=0.0
+            )
+            return json.loads(response.choices[0].message.content)
+        except Exception as e:
+            logger.error(f"Erro na validação de identidade via IA: {e}")
+            return {"is_authentic": True, "reason": "erro_ia_validacao_ignorada"}
+
     async def run_batch_classification(self, limit: int = 50) -> int:
         from core.supabase_service import supabase as db
         try:

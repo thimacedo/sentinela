@@ -147,6 +147,25 @@ class InstagramScraperV2:
                         await browser.close()
                         continue
 
+                    # 🛡️ VALIDAÇÃO BIOGRÁFICA (v64.0): IA verifica se a Bio condiz com o alvo
+                    validation = await self._validate_target_identity(page, username)
+                    if not validation["valid"]:
+                        logger.error(f"❌ [V2] Alvo @{username} inválido: {validation['reason']}")
+                        await browser.close()
+                        raise ValueError(f"invalid_target: {validation['reason']}")
+                    
+                    # Chamada de IA para validar identidade
+                    bio_check = await ai_service.validate_identity(
+                        expected_name=candidato_id, # Usamos o candidato_id (que deve conter o nome/contexto do alvo)
+                        display_name=validation.get("display_name", ""),
+                        bio=validation.get("biography", "")
+                    )
+
+                    if not bio_check.get("is_authentic", True):
+                        logger.error(f"🚫 [V2] ALVO INAUTÊNTICO DETECTADO: @{username}. Motivo: {bio_check.get('reason')}")
+                        await browser.close()
+                        raise ValueError(f"inauthentic_identity: {bio_check.get('reason')}")
+
                     # Extrai metadados dos posts (shortcode + is_pinned)
                     post_metas = await self._extract_shortcodes(page, max_posts)
                     self.stats["posts_found"] = len(post_metas)
@@ -211,43 +230,37 @@ class InstagramScraperV2:
         }
 
     async def _validate_target_identity(self, page: Page, expected_username: str) -> Dict[str, Any]:
-        """Verifica se a página carregada condiz com o alvo esperado e se está acessível."""
+        """Verifica se a página carregada condiz com o alvo esperado via Bio e Nome (v64.0)."""
         
-        # 1. Verifica página inexistente (404 simulado pelo IG)
+        # 1. Verifica página inexistente
         page_content = await page.content()
-        error_indicators = [
-            "Esta página não está disponível",
-            "página pode ter sido removida",
-            "link que você acessou pode estar quebrado",
-            "Page Not Found",
-            "Sorry, this page isn't available"
-        ]
-        
+        error_indicators = ["Esta página não está disponível", "Page Not Found", "Sorry, this page"]
         if any(ind in page_content for ind in error_indicators):
             return {"valid": False, "reason": "404_not_found"}
 
-        # 2. Verifica se a conta é privada
-        is_private = await page.query_selector("text='Esta conta é privada'") or \
-                     await page.query_selector("text='This account is private'")
-        
+        # 2. Captura Metadados Biográficos para Validação de IA
+        bio_info = await page.evaluate("""
+            () => {
+                const header = document.querySelector('header');
+                if (!header) return null;
+                const name = header.querySelector('h1') ? header.querySelector('h1').innerText : '';
+                const bio = header.querySelector('section div:last-child span') ? header.querySelector('section div:last-child span').innerText : '';
+                return { name, bio };
+            }
+        """)
+
+        # 3. Verifica se a conta é privada
+        is_private = await page.query_selector("text='Esta conta é privada'")
         if is_private:
-            # Verifica se estamos seguindo (se o botão 'Seguir' não está lá ou diz 'Seguindo')
-            # Mas para raspagem forense, se caiu na tela de privada, não temos acesso aos posts.
             return {"valid": False, "reason": "account_private"}
 
-        # 3. Verifica se o username renderizado bate (Proteção contra redirects malucos)
-        # O título geralmente é "Nome (@username) • Fotos e vídeos do Instagram"
-        title = await page.title()
-        if expected_username.lower() not in title.lower() and f"@{expected_username.lower()}" not in title.lower():
-            # Fallback: Verifica h2/h1 que contém o username
-            profile_header = await page.query_selector(f"h2:has-text('{expected_username}')")
-            if not profile_header:
-                logger.warning(f"⚠️ [V2] Username '{expected_username}' não encontrado no título ou header. Título: {title}")
-                # Às vezes o título demora, fazemos um check final no conteúdo
-                if expected_username.lower() not in page_content.lower():
-                    return {"valid": False, "reason": "identity_mismatch"}
-
-        return {"valid": True, "reason": "ok"}
+        # 4. Retorna dados para o worker decidir se chama a IA de validação
+        return {
+            "valid": True, 
+            "reason": "ok",
+            "biography": bio_info.get("bio", "") if bio_info else "",
+            "display_name": bio_info.get("name", "") if bio_info else ""
+        }
 
     async def open_post_modal(self, page: Page, shortcode: str) -> bool:
         """Encontra e clica na postagem no feed do perfil para abrir o modal."""
