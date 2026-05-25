@@ -376,7 +376,7 @@ def guard():
                         upper_line = clean_line.upper()
                         if "ERROR" in upper_line or "❌" in clean_line: log_level = "error"
                         elif "WARN" in upper_line or "⚠️" in clean_line: log_level = "warn"
-                        elif "✅" in clean_line or "🚀" in clean_line: log_level = "info"
+                        elif "✅" in clean_line or "🚀" in clean_line or "📊" in clean_line: log_level = "info"
                         state.add_log(log_level, clean_line)
                 pipe.close()
 
