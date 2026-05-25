@@ -218,23 +218,53 @@ class IGWorkerV2(BaseWorker):
             await self._save_to_buffer(safe_comments)
 
             try:
-                # Upsert em lote
+                # 🛡️ TENTATIVA 1: Upsert Completo (v63.0)
                 res = self.db.table("comentarios").upsert(
                     clean_null_chars(safe_comments), 
                     on_conflict="candidato_id,post_shortcode,id_externo",
                     ignore_duplicates=True
                 ).execute()
                 
-                # Se chegou aqui, o banco aceitou. Limpamos o buffer.
                 await self._clear_buffer()
-                
                 inserted = len(res.data)
                 duplicated = len(comments) - inserted
                 inserted_ids = [str(item["id"]) for item in res.data]
+
             except Exception as e:
-                self.logger.error(f"❌ Erro na persistência: {e}. Tentando salvamento de emergência...")
-                # Fallback: tenta salvar 1 por 1 ou logar erro crítico para o AIAdvisor
-                raise ValueError(f"db_persistence_error: {str(e)}")
+                # 🆘 SALVAMENTO DE EMERGÊNCIA (v63.0): Fallback para Schema Mismatch
+                self.logger.warning(f"⚠️ [V2] Erro de Schema Detectado: {e}. Iniciando Fallback de Emergência...")
+                
+                # Remove colunas que costumam causar conflito se não existirem
+                emergency_comments = []
+                for sc in safe_comments:
+                    # Mantém APENAS o core absoluto garantido no banco
+                    emergency_comments.append({
+                        "id_externo": sc["id_externo"],
+                        "texto_bruto": sc["texto_bruto"],
+                        "candidato_id": sc["candidato_id"],
+                        "post_shortcode": sc["post_shortcode"],
+                        "autor_username": sc["autor_username"],
+                        "data_publicacao": sc["data_publicacao"],
+                        "data_coleta": sc["data_coleta"],
+                        "plataforma": sc["plataforma"],
+                        "tier_used": sc["tier_used"]
+                    })
+
+                try:
+                    res = self.db.table("comentarios").upsert(
+                        clean_null_chars(emergency_comments),
+                        on_conflict="candidato_id,post_shortcode,id_externo",
+                        ignore_duplicates=True
+                    ).execute()
+                    
+                    self.logger.info(f"✅ [V2] Salvamento de emergência concluído ({len(res.data)} registros salvos).")
+                    await self._clear_buffer()
+                    inserted = len(res.data)
+                    duplicated = len(comments) - inserted
+                    inserted_ids = [str(item["id"]) for item in res.data]
+                except Exception as e2:
+                    self.logger.error(f"❌ [V2] Falha total na persistência: {e2}")
+                    raise ValueError(f"db_persistence_fatal: {str(e2)}")
 
             # 4. Classificação
             classified = 0

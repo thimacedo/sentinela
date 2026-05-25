@@ -287,9 +287,17 @@ class AIService:
                     }).eq("id", comment["id"]).execute()
                     processed_count += 1
                 except Exception as e:
-                    logger.error(f"❌ Erro ao classificar comentário {comment.get('id')}: {str(e)}")
-                    continue
-            return processed_count
+                    # Normalização v63.0: Usa evidence_extracted (coluna real)
+                    # Removemos 'analise_pericial' do update automático enquanto a coluna não existir
+                    result = await self.classify_text(comment["texto_bruto"], comment_id=str(comment["id"]))
+                    db.table("comentarios").update({
+                        "processado_ia": True,
+                        "is_hate": result["is_hate"],
+                        "categoria_ia": result["categoria_ia"],
+                        "confianca_ia": result["confianca_ia"],
+                        "evidence_extracted": result["evidencia_lexical"],
+                        # "analise_pericial": result["analise_pericial"], # Comentado até schema update
+                    }).eq("id", comment["id"]).execute()
         except Exception as e:
             logger.error(f"💥 Falha crítica no lote de classificação de IA: {str(e)}")
             return 0
