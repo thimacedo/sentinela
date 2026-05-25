@@ -158,10 +158,23 @@ class InstagramScraperV2:
                             
                         shortcode = meta["shortcode"]
                         is_pinned = meta["is_pinned"]
+                        post_timestamp = meta.get("timestamp")
                         
+                        # 1. Skip de Fixados (v62.0)
                         if is_pinned:
                             logger.info(f"⏭️ [V2] Post {shortcode} FAST-SKIP (Fixado).")
                             continue
+
+                        # 2. Fast-Skip Temporal (v62.1): Verifica data diretamente do grid se disponível
+                        if post_timestamp:
+                            try:
+                                post_dt = datetime.fromisoformat(post_timestamp.replace('Z', '+00:00'))
+                                age_days = (datetime.now(timezone.utc) - post_dt).days
+                                if age_days > max_age_days:
+                                    logger.info(f"⏭️ [V2] Post {shortcode} FAST-SKIP (Velho: {age_days}d). Encerrando busca neste perfil.")
+                                    # Se chegamos em posts velhos no grid (e não é pin), o resto também será velho.
+                                    break 
+                            except: pass
 
                         logger.info(f"📄 [V2] Analisando post {shortcode} (Novo/Recente)")
                         
