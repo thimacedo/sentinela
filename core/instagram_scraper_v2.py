@@ -175,7 +175,10 @@ class InstagramScraperV2:
 
                     await browser.close()
                     logger.info(f"✅ [V2] @{username} finalizado. {len(all_comments)} comentários extraídos.")
-                    return all_comments
+                    return {
+                        "comments": all_comments,
+                        "post_metas": post_metas
+                    }
 
             except Exception as e:
                 logger.error(f"💥 [V2] Erro na tentativa {retry_count+1}: {e}")
@@ -185,7 +188,10 @@ class InstagramScraperV2:
                 wait = (2 ** retry_count) + random.uniform(2, 5)
                 await asyncio.sleep(wait)
 
-        return all_comments
+        return {
+            "comments": all_comments,
+            "post_metas": []
+        }
 
     async def _validate_target_identity(self, page: Page, expected_username: str) -> Dict[str, Any]:
         """Verifica se a página carregada condiz com o alvo esperado e se está acessível."""
@@ -362,18 +368,23 @@ class InstagramScraperV2:
                     if (!match) return;
                     
                     const shortcode = match[2];
-                    // Evita duplicados na mesma captura de grid
                     if (results.some(r => r.shortcode === shortcode)) return;
 
                     // Detecta ícone de pin (fixado)
                     const hasPinIcon = !!p.querySelector('svg[aria-label*="Pinned"], svg[aria-label*="Fixado"], svg[aria-label*="fixada"]');
-                    
+
+                    // Tenta capturar o timestamp (às vezes disponível no 'time' do grid ou title do link)
+                    const timeEl = p.querySelector('time');
+                    const timestamp = timeEl ? timeEl.getAttribute('datetime') : null;
+
                     results.push({{ 
                         shortcode, 
-                        is_pinned: hasPinIcon 
+                        is_pinned: hasPinIcon,
+                        timestamp: timestamp 
                     }});
-                }});
-                return results.slice(0, {limit + 3}); // Pega uma margem extra para compensar filtragem de fixados
+                    }});
+
+                return results.slice(0, {limit + 3});
             }}
         """)
 

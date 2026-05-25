@@ -76,6 +76,7 @@ class IGWorkerV2(BaseWorker):
         self.cycle += 1
         self.seen_targets.clear()
         self.seen_queue_ids.clear()
+        result = None # Inicializa para o finally
 
         # 🛡️ SELEÇÃO ATÔMICA (PASA v55.1)
         target = None
