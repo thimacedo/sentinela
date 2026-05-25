@@ -315,6 +315,8 @@ class IGWorkerV2(BaseWorker):
             )
         finally:
             # PASA v58.2: Injeta erro no alvo para que o rotate_target decida pela hibernação
-            if result and result.error:
+            if isinstance(result, dict) and result.get("error"):
+                target.error = result.get("error")
+            elif hasattr(result, "error") and result.error:
                 target.error = result.error
             self.queue.rotate_target(target)
