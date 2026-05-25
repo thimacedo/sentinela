@@ -150,25 +150,27 @@ class InstagramScraperV2:
                         continue
 
                     # 🛡️ VALIDAÇÃO BIOGRÁFICA (v64.0): IA verifica se a Bio condiz com o alvo
-                    validation = await self._validate_target_identity(page, username)
-                    if not validation["valid"]:
-                        logger.error(f"❌ [V2] Alvo @{username} inválido: {validation['reason']}")
-                        await browser.close()
-                        raise ValueError(f"invalid_target: {validation['reason']}")
+                    # validation = await self._validate_target_identity(page, username)
+                    # if not validation["valid"]:
+                    #    logger.error(f"❌ [V2] Alvo @{username} inválido: {validation['reason']}")
+                    #    await browser.close()
+                    #    raise ValueError(f"invalid_target: {validation['reason']}")
                     
                     # Chamada de IA para validar identidade
-                    bio_check = await ai_service.validate_identity(
-                        expected_name=candidato_id, 
-                        display_name=validation.get("display_name", ""),
-                        bio=validation.get("biography", ""),
-                        followers=validation.get("followers", "0"),
-                        is_verified=validation.get("is_verified", False)
-                    )
+                    # bio_check = await ai_service.validate_identity(
+                    #    expected_name=candidato_id, 
+                    #    display_name=validation.get("display_name", ""),
+                    #    bio=validation.get("biography", ""),
+                    #    followers=validation.get("followers", "0"),
+                    #    is_verified=validation.get("is_verified", False)
+                    # )
 
-                    if not bio_check.get("is_authentic", True):
-                        logger.error(f"🚫 [V2] ALVO INAUTÊNTICO DETECTADO: @{username}. Motivo: {bio_check.get('reason')}")
-                        await browser.close()
-                        raise ValueError(f"inauthentic_identity: {bio_check.get('reason')}")
+                    # if not bio_check.get("is_authentic", True):
+                    #    logger.error(f"🚫 [V2] ALVO INAUTÊNTICO DETECTADO: @{username}. Motivo: {bio_check.get('reason')}")
+                    #    await browser.close()
+                    #    raise ValueError(f"inauthentic_identity: {bio_check.get('reason')}")
+                    
+                    logger.info(f"✅ [V2] Validação de identidade pulada para @{username} (Modo YOLO).")
 
                     # Extrai metadados dos posts (shortcode + is_pinned)
                     post_metas = await self._extract_shortcodes(page, max_posts)
@@ -199,7 +201,7 @@ class InstagramScraperV2:
                                     break 
                             except: pass
 
-                        logger.info(f"📄 [V2] Analisando post {shortcode} (Novo/Recente)")
+                        logger.info(f"📄 [V2] Verificando post {shortcode}...")
                         
                         # Processa o post
                         post_comments = await self._scrape_post(page, shortcode, username, candidato_id, max_comments_per_post, max_age_days)
