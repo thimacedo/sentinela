@@ -5,19 +5,13 @@ e transmite tudo via SSE para o Dashboard.
 """
 import os
 import sys
-
-# --- AUTO-ANCHORING (v61.3) ---
-# Garante que o projeto sempre rode a partir da raiz, independente de onde o comando foi disparado.
-WATCHDOG_FILE_DIR = os.path.dirname(os.path.abspath(__file__))
-PROJECT_ROOT = os.path.dirname(WATCHDOG_FILE_DIR)
-os.chdir(PROJECT_ROOT)
-if PROJECT_ROOT not in sys.path:
-    sys.path.insert(0, PROJECT_ROOT)
-if WATCHDOG_FILE_DIR not in sys.path:
-    sys.path.insert(0, WATCHDOG_FILE_DIR)
-
 import time
 import subprocess
+import requests
+import json
+import asyncio
+from threading import Thread, Lock
+from typing import Tuple, Dict, Any, Optional
 
 # Carrega variáveis do arquivo .env local do projeto
 try:
