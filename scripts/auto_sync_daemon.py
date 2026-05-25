@@ -6,15 +6,20 @@ sincroniza com o Supabase quando há novos lotes de registros prontos.
 
 import os
 import sys
+
+# --- AUTO-ANCHORING (v61.6) ---
+# Detecta a raiz do projeto (um nível acima de /scripts)
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+os.chdir(PROJECT_ROOT)
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
 import json
 import time
 import subprocess
 import logging
 from pathlib import Path
-
-# ── raiz do projeto ──────────────────────────────────────────────────────────
-ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT))
 
 # Configurar logging
 LOG_FILE = Path(__file__).with_name("auto_sync_daemon.log")
