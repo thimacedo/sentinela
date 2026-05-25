@@ -112,7 +112,7 @@ class IGWorkerV2(BaseWorker):
         self.queue.mark_candidate_scraped(target)
 
         try:
-            # 1. Scraping (v59.0: Retorna dict com comments e post_metas)
+            # 1. Scraping (v61.2: Robusto contra retornos de lista ou dict)
             scrape_data = await self.scraper.scrape_profile(
                 username=target.username,
                 candidato_id=target.candidato_id,
@@ -120,8 +120,15 @@ class IGWorkerV2(BaseWorker):
                 max_comments_per_post=100
             )
             
-            comments = scrape_data.get("comments", [])
-            target.post_metas = scrape_data.get("post_metas", [])
+            if isinstance(scrape_data, list):
+                comments = scrape_data
+                target.post_metas = []
+            elif isinstance(scrape_data, dict):
+                comments = scrape_data.get("comments", [])
+                target.post_metas = scrape_data.get("post_metas", [])
+            else:
+                comments = []
+                target.post_metas = []
             
         except ValueError as e:
             if "invalid_target" in str(e):

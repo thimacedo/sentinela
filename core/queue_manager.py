@@ -120,29 +120,60 @@ class QueueManager:
             active_targets.add(username)
 
     def rotate_target(self, target: Target) -> None:
-        """Remove o item processado e reinsere no fim da fila com status adequado (v58.2)."""
+        """Remove o item processado e reinsere no fim da fila com status e termômetro (v59.0)."""
         if not target.username:
             return
 
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(timezone.utc)
+        now_iso = now.isoformat()
         
-        # 1. Se veio da fila_coleta, atualizamos ou deletamos/re-inserimos
+        # 1. Cálculo do Termômetro de Atividade (v59.0)
+        frequencia = 0.0
+        termometro = "MORNO"
+        
+        # Se o scraper capturou metadados de postagem (timestamps)
+        post_metas = getattr(target, "post_metas", [])
+        if post_metas:
+            valid_dates = []
+            for m in post_metas:
+                if m.get("timestamp"):
+                    try:
+                        valid_dates.append(datetime.fromisoformat(m["timestamp"].replace('Z', '+00:00')))
+                    except: continue
+            
+            if len(valid_dates) >= 2:
+                # Calcula dias entre o mais novo e o mais velho do grid capturado
+                delta_days = (max(valid_dates) - min(valid_dates)).days or 1
+                frequencia = round((len(valid_dates) / delta_days) * 7, 1) # Posts por semana
+                
+                if frequencia >= 5: termometro = "QUENTE"
+                elif frequencia < 1: termometro = "FRIO"
+        
+        # 2. Atualiza tabela principal de candidatos
+        update_data = {
+            "last_scraped_at": now_iso,
+            "posts_frequencia_semanal": frequencia,
+            "termometro": termometro
+        }
+        self.db.table("candidatos").update(update_data).eq("username", target.username).execute()
+
+        # 3. Atualiza fila_coleta (Prioridade Dinâmica)
         if target.queue_id:
-            # Se for vazio improdutivo, marcamos como SEM_DADOS para evitar loop imediato
             is_empty = hasattr(target, "error") and target.error in ["no_comments_found", "junk_detected"]
             
+            # Se for QUENTE, forçamos prioridade 1 (Máxima) para o próximo agendamento
+            # Se for FRIO, baixamos para 5.
+            nova_prioridade = 1 if termometro == "QUENTE" else (5 if termometro == "FRIO" else 3)
+
             self.db.table("fila_coleta").update({
                 "status": "SEM_DADOS_RECENTES" if is_empty else "CONCLUIDO",
-                "updated_at": now
+                "prioridade": nova_prioridade,
+                "updated_at": now_iso
             }).eq("id", target.queue_id).execute()
             
             if is_empty:
-                logger.info(f"💤 [Queue] Hibernando @{target.username} na fila de prioridade.")
-                return # Não reinsere como PENDENTE agora
-
-            # Se foi sucesso real, reinserimos para rotação contínua (se for política do sistema)
-            # Mas o padrão atual do STATE.md é que fila_coleta são tarefas pontuais.
-            # O monitoramento contínuo é feito via _get_from_global_rotation.
+                logger.info(f"💤 [Queue] @{target.username} Hibernando ({termometro} | {frequencia} p/sem)")
+                return
 
     def mark_candidate_scraped(self, target: Target) -> None:
         """Update the last_scraped_at timestamp for the candidate."""

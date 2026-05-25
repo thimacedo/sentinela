@@ -277,20 +277,21 @@ def classify_error(stderr_output: str) -> str:
 def heal_dependencies(python_exe: str) -> None:
     state.add_log("info", "[Watchdog] Verificando integridade das dependências...")
     try:
+        # v61.2: Usa uv para instalar dependências se disponível
         subprocess.run(
-            [python_exe, "-m", "pip", "install", "-r", REQUIREMENTS_FILE, "-q"],
+            ["uv", "pip", "install", "-r", REQUIREMENTS_FILE, "-q"],
             check=True, env=CHILD_ENV,
         )
-        state.add_log("info", "[Watchdog] Dependências sincronizadas.")
-    except subprocess.CalledProcessError:
-        state.add_log("warn", "[Watchdog] Falha na instalação. Purgando cache...")
+        state.add_log("info", "[Watchdog] Dependências sincronizadas via 'uv'.")
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        state.add_log("warn", "[Watchdog] Falha na instalação via 'uv'. Tentando fallback...")
         try:
-            subprocess.run([python_exe, "-m", "pip", "cache", "purge"], check=True, env=CHILD_ENV)
+            subprocess.run(["uv", "cache", "clean"], check=True, env=CHILD_ENV)
             subprocess.run(
                 [python_exe, "-m", "pip", "install", "-r", REQUIREMENTS_FILE, "-q"],
                 check=True, env=CHILD_ENV,
             )
-            state.add_log("info", "[Watchdog] Dependências sincronizadas após purga.")
+            state.add_log("info", "[Watchdog] Dependências sincronizadas após purga de cache.")
         except Exception as e2:
             state.add_log("error", f"[Watchdog] Falha crítica ao curar dependências: {e2}")
 
