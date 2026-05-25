@@ -1,13 +1,13 @@
+from __future__ import annotations
 import os
 import sys
 
-# --- AUTO-ANCHORING (v61.3) ---
+# --- AUTO-ANCHORING (v61.6) ---
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 os.chdir(PROJECT_ROOT)
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-from __future__ import annotations
 import asyncio
 import logging
 import signal
