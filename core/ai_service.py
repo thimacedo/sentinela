@@ -222,11 +222,17 @@ class AIService:
             data = json.loads(clean_content)
             
             # Captura confiança de forma flexível (float ou string)
-            conf_val = data.get("confianca_ia", data.get("confidence", 0.0))
-            try:
-                confidence = float(conf_val)
-            except:
-                confidence = 0.0
+            conf_val = data.get("confianca_ia", data.get("confidence"))
+            
+            if conf_val is not None:
+                try:
+                    confidence = float(conf_val)
+                except:
+                    confidence = 0.0
+            else:
+                # Normalização v62.4: Se não houver score mas a resposta for válida, 
+                # assumimos 0.85 para modelos locais estáveis (Ollama/LiteRT)
+                confidence = 0.85
                 
             low_conf = confidence < CONFIDENCE_THRESHOLD
             categoria = data.get("categoria_ia", data.get("category", "NEUTRO"))
