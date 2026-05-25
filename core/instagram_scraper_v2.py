@@ -159,7 +159,11 @@ class InstagramScraperV2:
                         shortcode = meta["shortcode"]
                         is_pinned = meta["is_pinned"]
                         
-                        logger.info(f"📄 [V2] Analisando post {shortcode} (Fixado: {is_pinned})")
+                        if is_pinned:
+                            logger.info(f"⏭️ [V2] Post {shortcode} FAST-SKIP (Fixado).")
+                            continue
+
+                        logger.info(f"📄 [V2] Analisando post {shortcode} (Novo/Recente)")
                         
                         # Processa o post
                         post_comments = await self._scrape_post(page, shortcode, username, candidato_id, max_comments_per_post, max_age_days)
