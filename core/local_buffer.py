@@ -70,29 +70,51 @@ class LocalBuffer:
             return conn.execute("SELECT COUNT(*) FROM pending_comments").fetchone()[0]
 
     async def sync_with_supabase(self, db_client: Any):
-        """Tenta sincronizar o buffer local com o banco remoto (PASA v65.1)."""
+        """Tenta sincronizar o buffer local com o banco remoto (PASA v65.2)."""
         pending = self.get_pending(limit=500)
         if not pending: return 0
         
+        from core.ai_service import clean_null_chars
+        clean_pending = []
+        ids_to_delete = []
+        for p in pending:
+            ids_to_delete.append(p.pop("buffer_id"))
+            clean_pending.append(p)
+
         try:
-            from core.ai_service import clean_null_chars
-            clean_pending = []
-            ids_to_delete = []
-            for p in pending:
-                ids_to_delete.append(p.pop("buffer_id"))
-                clean_pending.append(p)
-            
             res = db_client.table("comentarios").upsert(
                 clean_null_chars(clean_pending), 
                 on_conflict="candidato_id,post_shortcode,id_externo", 
                 ignore_duplicates=True
             ).execute()
             
-            if res.data:
-                self.delete_many(ids_to_delete)
-                return len(res.data)
+            # Sucesso na execução -> Remove do buffer (mesmo que sejam duplicatas ignoradas)
+            self.delete_many(ids_to_delete)
+            return len(ids_to_delete)
+            
         except Exception as e:
-            logger.error(f"❌ [Buffer] Erro na sincronização: {e}")
+            error_msg = str(e)
+            if "analise_pericial" in error_msg or "PGRST204" in error_msg:
+                logger.warning("⚠️ [Buffer] Schema mismatch detectado no sync. Tentando fallback sem 'analise_pericial'...")
+                try:
+                    # Fallback: Remove colunas que podem não existir no banco remoto
+                    fallback_pending = []
+                    for p in clean_pending:
+                        p.pop("analise_pericial", None)
+                        fallback_pending.append(p)
+                    
+                    res = db_client.table("comentarios").upsert(
+                        clean_null_chars(fallback_pending),
+                        on_conflict="candidato_id,post_shortcode,id_externo",
+                        ignore_duplicates=True
+                    ).execute()
+                    
+                    self.delete_many(ids_to_delete)
+                    return len(ids_to_delete)
+                except Exception as e2:
+                    logger.error(f"❌ [Buffer] Falha total no sync (mesmo com fallback): {e2}")
+            else:
+                logger.error(f"❌ [Buffer] Erro na sincronização: {e}")
         return 0
 
 local_buffer = LocalBuffer()

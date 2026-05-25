@@ -206,7 +206,8 @@ class IGWorkerV2(BaseWorker):
                     "tier_used": c.get("tier_used")
                 }
                 if c.get("is_bot"):
-                    safe_c["analise_pericial"] = f"[BOT DETECTED] Padrão: {c.get('bot_pattern')}"
+                    pericial_obs = f"[BOT DETECTED] Padrão: {c.get('bot_pattern')}"
+                    safe_c["evidence_extracted"] = pericial_obs # Usa coluna existente
                     safe_c["categoria_ia"] = "CAMPANHA_COORDENADA"
                 safe_comments.append(safe_c)
 
@@ -221,16 +222,14 @@ class IGWorkerV2(BaseWorker):
                     ignore_duplicates=True
                 ).execute()
                 
-                # Sucesso no banco -> Limpa apenas estes do SQLite
-                # Nota: Na v65 simplificada, deletamos via IDs recuperados se possível,
-                # ou apenas confiamos que o próximo recovery cuidará de duplicatas.
-                # Para ser preciso, capturamos os IDs externos enviados com sucesso.
                 if res.data:
-                    # O upsert do Supabase não retorna IDs internos do SQLite,
-                    # então vamos limpar o buffer baseando-se nos id_externos processados.
-                    # Mas para manter atômico, o ideal é o recovery rotineiro.
-                    # Por agora, apenas limpamos o que foi enviado.
-                    pass 
+                    inserted = len(res.data)
+                    duplicated = len(comments) - inserted
+                    inserted_ids = [str(item["id"]) for item in res.data]
+                    # O recovery via sync_with_supabase lidará com o SQLite periodicamente.
+                else:
+                    inserted = 0
+                    duplicated = len(comments)
 
             except Exception as e:
                 # 🆘 SALVAMENTO DE EMERGÊNCIA (v63.0): Fallback para Schema Mismatch
