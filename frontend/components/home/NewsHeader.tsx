@@ -46,7 +46,7 @@ export default function NewsHeader({ todayHighlight }: NewsHeaderProps) {
               <p className="text-xs md:text-sm font-black text-brand-primary uppercase tracking-[0.25em] mb-3">
                 Observatório de Discurso Cívico
               </p>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-text-main leading-tight tracking-tight uppercase">
+              <h1 className="text-sm sm:text-lg md:text-xl lg:text-2xl font-bold text-text-main leading-tight tracking-tight uppercase whitespace-nowrap">
                 Tendências no Discurso Político Brasileiro
               </h1>
             </div>
