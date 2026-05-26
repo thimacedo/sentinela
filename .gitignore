@@ -123,3 +123,6 @@ Thumbs.db
 .vercel/
 .vercel/output/
 .vercel/project.json
+
+# 7. Rascunhos e Diagnostics
+scratch/
