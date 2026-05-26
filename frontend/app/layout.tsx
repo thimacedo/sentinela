@@ -25,6 +25,7 @@ export default function RootLayout({
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1827611269042960" crossOrigin="anonymous"></script>
       </head>
       <body className={`${inter.className} antialiased bg-bg-main text-text-main`}>
+        <div dangerouslySetInnerHTML={{ __html: '<amp-auto-ads type="adsense" data-ad-client="ca-pub-1827611269042960"></amp-auto-ads>' }} />
         <ClientLayoutWrapper>
           {children}
         </ClientLayoutWrapper>

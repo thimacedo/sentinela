@@ -34,25 +34,27 @@ export default function NewsHeader({ todayHighlight }: NewsHeaderProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10">
       {/* Main Hero */}
-      <div className="border-b border-border-main pb-8">
-        <div className="flex items-start gap-4 mb-6">
-          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-brand-primary/20 to-blue-500/20 border border-brand-primary/30 flex items-center justify-center text-xl">
+      <div className="border-b border-border-main pb-12">
+        <div className="flex flex-col md:flex-row items-start gap-8">
+          <div className="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gradient-to-br from-brand-primary/10 to-blue-500/10 border border-border-main flex items-center justify-center text-4xl shadow-sm">
             📊
           </div>
-          <div>
-            <p className="text-sm font-mono text-text-muted uppercase tracking-widest mb-3">
-              Observatório de Discurso Cívico
+          <div className="flex-1 space-y-5">
+            <div>
+              <p className="text-xs md:text-sm font-black text-brand-primary uppercase tracking-[0.25em] mb-3">
+                Observatório de Discurso Cívico
+              </p>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-text-main leading-[0.9] tracking-tighter uppercase md:whitespace-nowrap">
+                Tendências no Discurso Político Brasileiro
+              </h1>
+            </div>
+            <p className="text-lg md:text-xl text-text-muted max-w-5xl leading-relaxed opacity-70 font-medium">
+              Acompanhe em tempo real os padrões de discurso de ódio e violência em redes sociais de candidatos e políticos monitorados. Transparência que alimenta a democracia.
             </p>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-text-main leading-none tracking-tighter md:text-nowrap uppercase">
-              Tendências no Discurso Político Brasileiro
-            </h1>
           </div>
         </div>
-        <p className="text-lg text-text-muted max-w-5xl leading-relaxed opacity-80">
-          Acompanhe em tempo real os padrões de discurso de ódio e violência em redes sociais de candidatos e políticos monitorados. Transparência que alimenta a democracia.
-        </p>
       </div>
 
 
