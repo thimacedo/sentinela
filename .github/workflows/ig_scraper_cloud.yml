@@ -1,5 +1,8 @@
 name: Sentinela — Cloud Scraper (Instagram)
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
 on:
   schedule:
     # Roda 3x/dia: 06h, 14h e 22h BRT (09h, 17h, 01h UTC)
@@ -43,8 +46,8 @@ jobs:
       - name: Executar ciclo de coleta
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY || secrets.SUPABASE_KEY }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY || secrets.SUPABASE_KEY }}
           INSTAGRAM_SESSIONID: ${{ secrets.INSTAGRAM_SESSIONID }}
           INSTAGRAM_SESSIONID_2: ${{ secrets.INSTAGRAM_SESSIONID_2 }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
