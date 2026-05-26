@@ -110,15 +110,15 @@ class AIService:
             base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
         )
         self.mistral_client = AsyncOpenAI(
-            api_key=os.getenv("MISTRAL_API_KEY"),
+            api_key=os.getenv("MISTRAL_API_KEY") or "dummy-mistral-key",
             base_url="https://api.mistral.ai/v1"
         )
         self.groq_client = AsyncOpenAI(
-            api_key=os.getenv("GROQ_API_KEY"),
+            api_key=os.getenv("GROQ_API_KEY") or "dummy-groq-key",
             base_url="https://api.groq.com/openai/v1"
         )
         self.openrouter_client = AsyncOpenAI(
-            api_key=os.getenv("OPENROUTER_API_KEY"),
+            api_key=os.getenv("OPENROUTER_API_KEY") or "dummy-openrouter-key",
             base_url="https://openrouter.ai/api/v1"
         )
 
