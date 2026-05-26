@@ -90,7 +90,7 @@ BEGIN
     WHERE fila_coleta.id = v_id;
 
     RETURN QUERY
-    SELECT fc.id, fc.username, fc.candidato_id, fc.prioridade
+    SELECT fc.id, fc.candidato_id AS username, fc.candidato_id, fc.prioridade
     FROM fila_coleta fc WHERE fc.id = v_id;
 END;
 $$ LANGUAGE plpgsql;

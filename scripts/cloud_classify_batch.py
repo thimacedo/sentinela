@@ -2,9 +2,22 @@
 Sentinela Cloud Classify Batch (v80.1)
 Executa classificação em lote de comentários pendentes usando o AIService.
 """
-import asyncio
-import logging
+from __future__ import annotations
+
+import os
 import sys
+import logging
+import asyncio
+
+# --- Auto-Anchoring (PASA v80.1) ---
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+os.chdir(PROJECT_ROOT)
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
+from dotenv import load_dotenv
+load_dotenv()
 
 # Configuração de Logs
 logging.basicConfig(
@@ -19,7 +32,7 @@ logger = logging.getLogger("cloud_classify_batch")
 async def main():
     logger.info("Iniciando processamento em lote da inteligência da Sentinela...")
     
-    # Importação tardia do AIService para carregar variáveis após setup do logging
+    # Importação do AIService após ancoragem do diretório
     from core.ai_service import ai_service
     
     # Processa até 100 comentários por execução no workflow do Github Actions
