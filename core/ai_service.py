@@ -230,19 +230,35 @@ class AIService:
     async def run_batch_classification(self, limit: int = 50) -> int:
         from core.supabase_service import supabase as db
         try:
-            res = db.table("comentarios").select("id, texto_bruto").eq("processado_ia", False).limit(limit).execute()
+            res = db.table("comentarios").select("id, texto_bruto, cluster_id").eq("processado_ia", False).limit(limit).execute()
             comments = res.data or []
             if not comments: return 0
+            
             count = 0
+            cluster_results = {} # Cache de resultados por cluster_id
+
             for c in comments:
+                cluster_id = c.get("cluster_id")
+                
+                # Se o comentário faz parte de um cluster já processado neste lote
+                if cluster_id and cluster_id in cluster_results:
+                    res_ia = cluster_results[cluster_id]
+                    logger.info(f"🔁 [AI] Replicando resultado de Cluster Coordenado para {c['id']}")
+                else:
+                    try:
+                        res_ia = await self.classify_text(c["texto_bruto"], comment_id=str(c["id"]))
+                        if cluster_id:
+                            cluster_results[cluster_id] = res_ia # Armazena para os próximos
+                    except:
+                        continue
+
                 try:
-                    res = await self.classify_text(c["texto_bruto"], comment_id=str(c["id"]))
                     db.table("comentarios").update({
                         "processado_ia": True,
-                        "is_hate": res["is_hate"],
-                        "categoria_ia": res["categoria_ia"],
-                        "confianca_ia": res["confianca_ia"],
-                        "analise_pericial": res["analise_pericial"],
+                        "is_hate": res_ia["is_hate"],
+                        "categoria_ia": "CAMPANHA_COORDENADA" if cluster_id else res_ia["categoria_ia"],
+                        "confianca_ia": res_ia["confianca_ia"],
+                        "analise_pericial": f"[COORDINATED] {res_ia['analise_pericial']}" if cluster_id else res_ia["analise_pericial"],
                     }).eq("id", c["id"]).execute()
                     count += 1
                 except: continue

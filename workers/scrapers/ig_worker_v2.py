@@ -129,6 +129,10 @@ class IGWorkerV2(BaseWorker):
             # ♻️ FILTRO LÉXICO (Pre-AI) - PASA v65.0
             if comments:
                 comments = lexical_filter.filter_list(comments)
+                
+                # 🤖 DETECÇÃO DE COMPORTAMENTO COORDENADO (v71.0)
+                from core.behavior_engine import behavior_engine
+                comments = behavior_engine.detect_coordinated_clusters(comments)
             
         except ValueError as e:
             if "invalid_target" in str(e):
