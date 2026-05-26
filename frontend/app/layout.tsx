@@ -22,6 +22,9 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <head>
+        <meta httpEquiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+        <meta httpEquiv="Pragma" content="no-cache" />
+        <meta httpEquiv="Expires" content="0" />
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1827611269042960" crossOrigin="anonymous"></script>
       </head>
       <body className={`${inter.className} antialiased bg-bg-main text-text-main`}>
