@@ -162,39 +162,7 @@ class IGWorkerV2(BaseWorker):
                     source="v2_engine", extracted=0, simulated=False, error="no_comments_found"
                 )
 
-            # 2. Detecção de Comportamento Coordenado (Bots) - PASA v56.0
-            import re
-            import collections
-            
-            def normalize_for_bot_detection(text: str) -> str:
-                # Remove emojis, pontuação e espaços extras para detectar padrões de robô
-                t = text.lower()
-                t = re.sub(r'[^\w\s]', '', t)
-                # Remove emojis específicos se o regex acima não pegar tudo
-                t = re.sub(r'[^\x00-\x7F]+', '', t) 
-                return " ".join(t.split())
-
-            # Mapeia textos normalizados para encontrar repetições
-            normalized_map = collections.defaultdict(list)
-            for idx, c in enumerate(comments):
-                norm = normalize_for_bot_detection(c.get("texto_bruto", ""))
-                if len(norm) > 5: # Ignora textos muito curtos (ex: "voto", "top")
-                    normalized_map[norm].append(idx)
-            
-            bot_detected_count = 0
-            for norm, indices in normalized_map.items():
-                if len(indices) >= 3: # Threshold: 3 ou mais repetições do mesmo padrão
-                    bot_detected_count += len(indices)
-                    for i in indices:
-                        comments[i]["is_bot"] = True
-                        comments[i]["bot_pattern"] = norm
-                        # Ajusta categoria IA preventivamente se for bot
-                        comments[i]["categoria_ia_sugerida"] = "CAMPANHA_COORDENADA"
-
-            if bot_detected_count > 0:
-                self.logger.info(f"🤖 [V2] Detectados {bot_detected_count} indícios de comportamento coordenado (Bots) em @{target.username}")
-
-            # 3. Persistência com Resiliência de Schema (v58.3)
+            # 2. Persistência com Resiliência de Schema (v58.3)
             inserted = 0
             duplicated = 0
             inserted_ids = []

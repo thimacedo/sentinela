@@ -7,15 +7,30 @@ from typing import List, Dict, Any
 
 logger = logging.getLogger("core.local_buffer")
 
+# Detecta ambiente cloud (filesystem efêmero)
+_IS_CLOUD = bool(
+    os.getenv("GITHUB_ACTIONS") or
+    os.getenv("RENDER") or
+    os.getenv("RAILWAY_ENVIRONMENT")
+)
+
+
 class LocalBuffer:
     """
-    Gerencia o armazenamento local de emergência usando SQLite (PASA v65.0).
-    Garante a política Zero-Loss: dados são deletados apenas após confirmação de upload.
+    Gerencia o armazenamento local de emergência (PASA v80.0).
+    - Ambiente local: SQLite persistente (Zero-Loss Policy)
+    - Ambiente cloud (GitHub Actions/Render): buffer em memória
+      sincronizado diretamente ao Supabase em cada inserção.
     """
     def __init__(self, db_path: str = "runtime_state/buffer.db"):
-        os.makedirs(os.path.dirname(db_path), exist_ok=True)
-        self.db_path = db_path
-        self._init_db()
+        self.is_cloud = _IS_CLOUD
+        if self.is_cloud:
+            logger.info("☁️ [Buffer] Ambiente cloud detectado. Usando buffer em memória (sem SQLite).")
+            self._memory_buffer: List[Dict[str, Any]] = []
+        else:
+            os.makedirs(os.path.dirname(db_path), exist_ok=True)
+            self.db_path = db_path
+            self._init_db()
 
     def _init_db(self):
         with sqlite3.connect(self.db_path) as conn:
@@ -34,6 +49,11 @@ class LocalBuffer:
 
     def save(self, comments: List[Dict[str, Any]]):
         """Salva uma lista de comentários no buffer local."""
+        if self.is_cloud:
+            self._memory_buffer.extend(comments)
+            logger.debug(f"💾 [Buffer] {len(comments)} registros no buffer em memória (cloud).")
+            return
+
         inserted = 0
         with sqlite3.connect(self.db_path) as conn:
             for c in comments:
@@ -51,6 +71,8 @@ class LocalBuffer:
 
     def get_pending(self, limit: int = 100) -> List[Dict[str, Any]]:
         """Recupera registros pendentes para tentativa de upload."""
+        if self.is_cloud:
+            return [{"buffer_id": i, **c} for i, c in enumerate(self._memory_buffer[:limit])]
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.execute("SELECT id, data_json FROM pending_comments ORDER BY created_at ASC LIMIT ?", (limit,))
@@ -59,6 +81,12 @@ class LocalBuffer:
 
     def delete_many(self, ids: List[int]):
         """Remove registros do buffer após sucesso no upload."""
+        if self.is_cloud:
+            # Em cloud, limpa os primeiros N itens do buffer de memória
+            count = len(ids)
+            if count <= len(self._memory_buffer):
+                self._memory_buffer = self._memory_buffer[count:]
+            return
         if not ids: return
         with sqlite3.connect(self.db_path) as conn:
             conn.execute(f"DELETE FROM pending_comments WHERE id IN ({','.join(['?']*len(ids))})", ids)
@@ -66,6 +94,8 @@ class LocalBuffer:
         logger.debug(f"🧹 [Buffer] {len(ids)} registros removidos do buffer local.")
 
     def get_count(self) -> int:
+        if self.is_cloud:
+            return len(self._memory_buffer)
         with sqlite3.connect(self.db_path) as conn:
             return conn.execute("SELECT COUNT(*) FROM pending_comments").fetchone()[0]
 

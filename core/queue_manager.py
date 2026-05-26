@@ -25,6 +25,9 @@ class QueueManager:
         Retorna o próximo alvo disponível com base em prioridades e distribuição (v55.1).
         Prioridades: Manual > fila_coleta (High Priority) > fila_coleta (Normal) > Fallback Rotation.
         """
+        # 🔄 AUTO-REPOPULAÇÃO (v80.0): Garante que a fila nunca esvazia
+        self._ensure_queue_populated()
+
         blocked = seen_targets | (active_targets or set())
 
         # 1. PRIORIDADE MÁXIMA: Alvo Manual
@@ -87,6 +90,63 @@ class QueueManager:
         except Exception as e:
             logger.error(f"❌ [Queue] Erro ao consultar fila_coleta: {e}")
         return None
+
+    def _ensure_queue_populated(self, min_pending: int = 5) -> None:
+        """Repopula a fila_coleta automaticamente quando há poucos itens pendentes (v80.0)."""
+        try:
+            # Conta itens PENDENTE
+            count_res = self.db.table("fila_coleta")\
+                .select("id", count="exact")\
+                .eq("status", "PENDENTE")\
+                .execute()
+            current_pending = count_res.count or 0
+
+            if current_pending >= min_pending:
+                return  # Fila saudável, nada a fazer
+
+            logger.info(f"🔄 [Queue] Apenas {current_pending} itens pendentes. Repopulando fila...")
+
+            # Busca candidatos CONCLUIDO/SEM_DADOS_RECENTES mais antigos para reinserir
+            candidatos_res = self.db.table("candidatos")\
+                .select("id,username,termometro")\
+                .eq("status_monitoramento", "Ativo")\
+                .order("last_scraped_at", desc=False)\
+                .limit(20).execute()
+
+            reinseridos = 0
+            for cand in (candidatos_res.data or []):
+                username = cand.get("username")
+                if not username:
+                    continue
+                # Verifica se já existe na fila como PENDENTE
+                check = self.db.table("fila_coleta")\
+                    .select("id")\
+                    .eq("username", username)\
+                    .eq("status", "PENDENTE")\
+                    .limit(1).execute()
+                if check.data:
+                    continue  # Já está pendente
+
+                # Determina prioridade pelo termômetro
+                termometro = cand.get("termometro", "MORNO")
+                prioridade = 1 if termometro == "QUENTE" else (5 if termometro == "FRIO" else 3)
+
+                # Reinserção via upsert (atualiza se existir, insere se não existir)
+                self.db.table("fila_coleta").upsert({
+                    "candidato_id": cand["id"],
+                    "username": username,
+                    "status": "PENDENTE",
+                    "prioridade": prioridade,
+                }, on_conflict="candidato_id").execute()
+                reinseridos += 1
+
+                if (current_pending + reinseridos) >= min_pending:
+                    break
+
+            if reinseridos > 0:
+                logger.info(f"✅ [Queue] {reinseridos} candidato(s) reinserido(s) na fila automaticamente.")
+        except Exception as e:
+            logger.error(f"❌ [Queue] Erro na auto-repopulação: {e}")
 
     def _get_from_global_rotation(self, blocked, seen_targets, active_targets) -> Optional[Target]:
         """Garante que todos os candidatos ativos sejam processados circularmente com Smart Backoff (PASA v70.4)."""

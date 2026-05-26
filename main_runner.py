@@ -58,8 +58,10 @@ from workers.base.memory_store import MemoryStore
 from workers.base.reward_engine import RewardEngine
 from workers.ai.doc_fetcher import DocFetcher
 from workers.ai.ai_advisor import AIAdvisor
+from workers.ai.suggestion_consumer import SuggestionConsumer
 from workers.orchestrator.orchestrator import SentinelaOrchestrator
 from core.autopilot.manager import autopilot
+from core.autopilot.cloud_listener import CloudListener, set_current_cycle
 
 # Workers disponíveis (PASA v52.0):
 from workers.scrapers.instagram_worker import InstagramWorker
@@ -110,8 +112,18 @@ async def main() -> None:
     loop = asyncio.get_running_loop()
     setup_signal_handlers(orch, loop)
 
-    # 🤖 ATIVAÇÃO DO AUTOPILOT (PASA v70.0)
+    # 🤖 ATIVAÇÃO DO AUTOPILOT L3 (PASA v70.0)
     asyncio.create_task(autopilot.pulse())
+
+    # 🛡️ CONTROLE REMOTO E HEARTBEAT (PASA v80.0)
+    cloud_listener = CloudListener(source="local")
+    asyncio.create_task(cloud_listener.start())
+    logger.info("[main_runner] 🛡️ CloudListener ativado (heartbeat + controle remoto).")
+
+    # 💡 LOOP DE FEEDBACK DO AI ADVISOR (PASA v80.0)
+    suggestion_consumer = SuggestionConsumer(orchestrator=orch)
+    asyncio.create_task(suggestion_consumer.start())
+    logger.info("[main_runner] 💡 SuggestionConsumer ativado (aplicação automática de sugestões).")
 
     if not orch.worker_ids:
         logger.warning(

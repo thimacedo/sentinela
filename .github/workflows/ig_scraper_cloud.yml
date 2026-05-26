@@ -1,0 +1,59 @@
+name: Sentinela — Cloud Scraper (Instagram)
+
+on:
+  schedule:
+    # Roda 3x/dia: 06h, 14h e 22h BRT (09h, 17h, 01h UTC)
+    # Total ~3 execuções × ~45 min = ~135 min/dia (dentro dos 2000 min/mês gratuitos)
+    - cron: '0 9,17,1 * * *'
+  workflow_dispatch:
+    inputs:
+      max_targets:
+        description: 'Número máximo de alvos'
+        required: false
+        default: '5'
+      max_posts:
+        description: 'Posts máximos por alvo'
+        required: false
+        default: '2'
+
+jobs:
+  scrape:
+    name: Ciclo de Coleta Cloud
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Instalar dependências
+        run: |
+          pip install -r requirements-workers.txt --quiet
+
+      - name: Instalar Playwright + Chromium
+        run: |
+          playwright install chromium --with-deps
+
+      - name: Executar ciclo de coleta
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          INSTAGRAM_SESSIONID: ${{ secrets.INSTAGRAM_SESSIONID }}
+          INSTAGRAM_SESSIONID_2: ${{ secrets.INSTAGRAM_SESSIONID_2 }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          PLAYWRIGHT_HEADLESS: 'true'
+          GITHUB_ACTIONS: 'true'
+        run: |
+          python scripts/cloud_scrape_cycle.py \
+            --max-targets ${{ github.event.inputs.max_targets || '5' }} \
+            --max-posts ${{ github.event.inputs.max_posts || '2' }} \
+            --max-comments 30
