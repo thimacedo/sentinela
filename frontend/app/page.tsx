@@ -19,7 +19,7 @@ export default function HomePage() {
     candidate: alert.candidatos?.username || alert.candidato_id || 'desconhecido',
     title: alert.categoria_ia || 'Detecção de Hostilidade',
     description: alert.texto_bruto?.substring(0, 100) + '...',
-    alertLevel: alert.categoria_ia === 'CRITICO' ? 'critical' : (alert.categoria_ia === 'ELEVADO' ? 'high' : 'medium'),
+    alertLevel: (alert.categoria_ia === 'CRITICO' ? 'critical' : (alert.categoria_ia === 'ELEVADO' ? 'high' : 'medium')) as 'critical' | 'high' | 'medium' | 'low',
     postsCount: 1,
     engagementMetric: Math.floor(Math.random() * 100) // Simulado por enquanto
   }));

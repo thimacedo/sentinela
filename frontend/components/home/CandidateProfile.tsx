@@ -82,7 +82,7 @@ export default function CandidateProfile({
 
   const recentAlerts = [
     {
-      severity: (candidateData.nivel_risco === 'CRITICO' ? 'critical' : 'high') as const,
+      severity: (candidateData.nivel_risco === 'CRITICO' ? 'critical' : 'high') as 'critical' | 'high',
       title: `Nível ${candidateData.nivel_risco}`,
       date: 'Atualizado agora',
     },
