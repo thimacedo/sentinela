@@ -40,37 +40,37 @@ export default function HighlightCards({ stories: mockStories }: HighlightCardsP
   const getSeverityStyle = (severity: string) => {
     switch (severity) {
       case 'critical':
-        return 'bg-red-500/10 border-red-500/30 hover:border-red-500/60';
+        return 'bg-red-500/5 border-red-500/20 hover:border-red-500/40';
       case 'high':
-        return 'bg-orange-500/10 border-orange-500/30 hover:border-orange-500/60';
+        return 'bg-orange-500/5 border-orange-500/20 hover:border-orange-500/40';
       case 'medium':
-        return 'bg-yellow-500/10 border-yellow-500/30 hover:border-yellow-500/60';
+        return 'bg-yellow-500/5 border-yellow-500/20 hover:border-yellow-500/40';
       default:
-        return 'bg-slate-500/10 border-slate-500/30 hover:border-slate-500/60';
+        return 'bg-bg-card border-border-main hover:border-brand-primary/40';
     }
   };
 
   const getSeverityBadge = (severity: string) => {
     switch (severity) {
       case 'critical':
-        return { label: 'Crítico', color: 'bg-red-500/20 text-red-400' };
+        return { label: 'Crítico', color: 'bg-red-500/10 text-red-600 dark:text-red-400' };
       case 'high':
-        return { label: 'Alto', color: 'bg-orange-500/20 text-orange-400' };
+        return { label: 'Alto', color: 'bg-orange-500/10 text-orange-600 dark:text-orange-400' };
       case 'medium':
-        return { label: 'Médio', color: 'bg-yellow-500/20 text-yellow-400' };
+        return { label: 'Médio', color: 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400' };
       default:
-        return { label: 'Baixo', color: 'bg-slate-500/20 text-slate-400' };
+        return { label: 'Baixo', color: 'bg-bg-main text-text-muted border border-border-main' };
     }
   };
 
   if (error) {
     return (
       <div className="space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-700 pb-4">
-          <h2 className="text-2xl font-bold text-white">📰 Destaques Hoje</h2>
+        <div className="flex items-center justify-between border-b border-border-main pb-4">
+          <h2 className="text-2xl font-bold text-text-main">📰 Destaques Hoje</h2>
         </div>
         <div className="bg-red-500/10 border border-red-500/30 rounded p-4">
-          <p className="text-sm text-red-400 font-mono">
+          <p className="text-sm text-red-600 dark:text-red-400 font-mono">
             Erro ao carregar destaques. Verifique conectividade com o backend.
           </p>
         </div>
@@ -80,20 +80,20 @@ export default function HighlightCards({ stories: mockStories }: HighlightCardsP
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between border-b border-slate-700 pb-4">
-        <h2 className="text-2xl font-bold text-white">📰 Destaques Recentes</h2>
-        <button className="text-sm text-blue-400 hover:text-blue-300 font-mono">
+      <div className="flex items-center justify-between border-b border-border-main pb-4">
+        <h2 className="text-2xl font-bold text-text-main">📰 Destaques Recentes</h2>
+        <button className="text-sm text-brand-primary hover:underline font-mono">
           Ver tudo →
         </button>
       </div>
 
       {isLoading ? (
         <div className="text-center py-8">
-          <p className="text-slate-500 font-mono text-sm animate-pulse">Carregando destaques...</p>
+          <p className="text-text-muted font-mono text-sm animate-pulse">Carregando destaques...</p>
         </div>
       ) : stories.length === 0 ? (
-        <div className="text-center py-8 bg-slate-900/30 border border-slate-700 rounded p-6">
-          <p className="text-slate-400 font-mono text-sm">Nenhum alerta recente encontrado</p>
+        <div className="text-center py-8 bg-bg-card border border-border-main rounded p-6">
+          <p className="text-text-muted font-mono text-sm">Nenhum alerta recente encontrado</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4">
@@ -102,43 +102,43 @@ export default function HighlightCards({ stories: mockStories }: HighlightCardsP
             return (
               <article
                 key={story.id}
-                className={`rounded-lg border p-6 transition-all duration-200 hover:shadow-lg cursor-pointer ${getSeverityStyle(
+                className={`rounded-lg border p-6 transition-all duration-200 hover:shadow-sm cursor-pointer ${getSeverityStyle(
                   story.severity
                 )}`}
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-sm font-bold text-slate-300">
+                    <div className="w-10 h-10 rounded-full bg-bg-main border border-border-main flex items-center justify-center text-sm font-bold text-text-muted">
                       {story.candidate.substring(0, 2).toUpperCase()}
                     </div>
                     <div>
-                      <p className="text-sm text-slate-400 font-mono">{story.candidate}</p>
-                      <p className="text-xs text-slate-500">{story.timestamp}</p>
+                      <p className="text-sm text-text-main font-bold font-mono">{story.candidate}</p>
+                      <p className="text-xs text-text-muted">{story.timestamp}</p>
                     </div>
                   </div>
-                  <span className={`px-2 py-1 rounded text-xs font-mono ${badge.color}`}>
+                  <span className={`px-2 py-1 rounded text-xs font-mono font-bold ${badge.color}`}>
                     {badge.label}
                   </span>
                 </div>
 
-                <h3 className="text-lg font-bold text-white mb-2">{story.title}</h3>
-                <p className="text-slate-300 text-sm mb-4">{story.summary}</p>
+                <h3 className="text-lg font-bold text-text-main mb-2">{story.title}</h3>
+                <p className="text-text-muted text-sm mb-4 leading-relaxed">{story.summary}</p>
 
                 <div className="flex flex-wrap gap-2 mb-4">
                   {story.topWords?.map((word, idx) => (
                     <span
                       key={idx}
-                      className="px-2 py-1 bg-slate-800/50 text-slate-300 text-xs rounded font-mono border border-slate-700"
+                      className="px-2 py-1 bg-bg-main text-text-muted text-[10px] uppercase tracking-wider rounded font-mono border border-border-main"
                     >
                       {word}
                     </span>
                   ))}
                 </div>
 
-                <div className="flex items-center justify-between text-xs text-slate-500">
-                  <span className="font-mono">{story.alertCount} caso(s)</span>
-                  <button className="text-blue-400 hover:text-blue-300 font-mono">
-                    Analisar →
+                <div className="flex items-center justify-between text-xs text-text-muted">
+                  <span className="font-mono">{story.alertCount} caso(s) identificado(s)</span>
+                  <button className="text-brand-primary hover:underline font-mono font-bold">
+                    Analisar Perícia →
                   </button>
                 </div>
               </article>

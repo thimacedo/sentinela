@@ -1,7 +1,13 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { getSummaryStats, getTargets, getActiveAlerts, getDossiers } from '@/lib/api';
+import { 
+  getSummaryStats, 
+  getTargets, 
+  getActiveAlerts, 
+  getDossiers, 
+  getTemporalSeries 
+} from '@/lib/api';
 
 export function useDashboardStats() {
   return useQuery({
@@ -36,5 +42,14 @@ export function useDossiers(candidatoId?: string) {
     queryFn: () => getDossiers(candidatoId),
     refetchInterval: 300000, // 5 minutos
     staleTime: 120000,
+  });
+}
+
+export function useTemporalSeries() {
+  return useQuery({
+    queryKey: ['temporal-series'],
+    queryFn: getTemporalSeries,
+    refetchInterval: 60000,
+    staleTime: 30000,
   });
 }

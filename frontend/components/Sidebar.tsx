@@ -3,51 +3,50 @@
 import { useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { 
-  LayoutDashboard, 
-  Target, 
-  AlertTriangle, 
-  Network, 
+  Home, 
   Users, 
+  ShieldAlert, 
+  Globe, 
   FileText,
-  Search,
+  BarChart3,
   ChevronLeft,
   ChevronRight
 } from 'lucide-react'
 
 const menuItems = [
   { 
-    id: 'panorama', 
-    label: 'PANORAMA', 
+    id: 'inicio', 
+    label: 'INÍCIO', 
     path: '/',
-    icon: LayoutDashboard 
+    icon: Home 
   },
   { 
-    id: 'pericia', 
-    label: 'PERÍCIA', 
+    id: 'analise', 
+    label: 'ANÁLISE', 
     path: '/pericia',
-    icon: Search 
+    icon: BarChart3 
   },
   { 
-    id: 'alvos', 
-    label: 'ALVOS', 
+    id: 'candidatos', 
+    label: 'CANDIDATOS', 
     path: '/alvos',
-    icon: Target 
+    icon: Users 
   },
   { 
     id: 'alertas', 
     label: 'ALERTAS', 
     path: '/alertas',
-    icon: AlertTriangle 
+    icon: ShieldAlert 
   },
   { 
-    id: 'rede', 
-    label: 'REDE', 
+    id: 'tendencias', 
+    label: 'TENDÊNCIAS', 
     path: '/rede',
-    icon: Network 
+    icon: Globe 
   },
   { 
-    id: 'dossies', 
-    label: 'DOSSIÊS', 
+    id: 'relatorios', 
+    label: 'RELATÓRIOS', 
     path: '/dossies',
     icon: FileText 
   },
@@ -73,21 +72,21 @@ export default function Sidebar() {
       {/* Sidebar */}
       <aside 
         className={`
-          flex flex-col h-screen bg-slate-950 border-r border-slate-800
+          flex flex-col h-screen bg-bg-main border-r border-border-main
           transition-all duration-300 ease-in-out z-50
           ${isCollapsed ? 'w-16' : 'w-64'}
         `}
       >
         {/* Header */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-slate-800">
+        <div className="h-16 flex items-center justify-between px-4 border-b border-border-main">
           {!isCollapsed && (
-            <h1 className="text-emerald-500 font-bold text-lg tracking-tighter">
-              SENTINELA<span className="text-slate-500 font-light ml-1">AI</span>
+            <h1 className="text-brand-primary font-bold text-lg tracking-tighter">
+              SENTINELA<span className="text-text-muted font-light ml-1">AI</span>
             </h1>
           )}
           <button
             onClick={toggleSidebar}
-            className="text-slate-400 hover:text-emerald-500 transition-colors p-1"
+            className="text-text-muted hover:text-brand-primary transition-colors p-1"
             aria-label={isCollapsed ? 'Expandir menu' : 'Recolher menu'}
           >
             {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
@@ -108,8 +107,8 @@ export default function Sidebar() {
                   w-full flex items-center gap-3 px-3 py-2.5
                   font-medium text-sm transition-all duration-200 rounded-md
                   ${isActive 
-                    ? 'bg-emerald-500/10 text-emerald-500' 
-                    : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'
+                    ? 'bg-brand-primary/10 text-brand-primary' 
+                    : 'text-text-muted hover:bg-bg-card hover:text-text-main'
                   }
                 `}
                 title={item.label}
@@ -125,15 +124,15 @@ export default function Sidebar() {
 
         {/* Footer Info */}
         {!isCollapsed && (
-          <div className="p-4 border-t border-slate-800 bg-slate-950/50">
+          <div className="p-4 border-t border-border-main bg-bg-card/50">
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-              <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">
-                Sistema Ativo
+              <div className="w-2 h-2 bg-brand-primary rounded-full animate-pulse" />
+              <span className="text-[10px] font-mono text-text-muted uppercase tracking-widest">
+                Monitor Ativo
               </span>
             </div>
-            <div className="text-[9px] font-mono text-slate-600">
-              PASA v54.0 // CORE OPS
+            <div className="text-[9px] font-mono text-text-muted opacity-50">
+              OBSERVATÓRIO CÍVICO
             </div>
           </div>
         )}

@@ -30,42 +30,42 @@ export default function InsightBox({
       case 'trend':
         return {
           icon: TrendingUp,
-          bg: 'bg-blue-500/10',
-          border: 'border-blue-500/30',
-          accent: 'text-blue-400',
-          badge: 'bg-blue-500/20 text-blue-400',
+          bg: 'bg-blue-500/5',
+          border: 'border-blue-500/20',
+          accent: 'text-blue-600 dark:text-blue-400',
+          badge: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
         };
       case 'anomaly':
         return {
           icon: AlertCircle,
-          bg: 'bg-red-500/10',
-          border: 'border-red-500/30',
-          accent: 'text-red-400',
-          badge: 'bg-red-500/20 text-red-400',
+          bg: 'bg-red-500/5',
+          border: 'border-red-500/20',
+          accent: 'text-red-600 dark:text-red-400',
+          badge: 'bg-red-500/10 text-red-600 dark:text-red-400',
         };
       case 'pattern':
         return {
           icon: Info,
-          bg: 'bg-emerald-500/10',
-          border: 'border-emerald-500/30',
-          accent: 'text-emerald-400',
-          badge: 'bg-emerald-500/20 text-emerald-400',
+          bg: 'bg-emerald-500/5',
+          border: 'border-emerald-500/20',
+          accent: 'text-emerald-600 dark:text-emerald-400',
+          badge: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
         };
       case 'alert':
         return {
           icon: AlertCircle,
-          bg: 'bg-orange-500/10',
-          border: 'border-orange-500/30',
-          accent: 'text-orange-400',
-          badge: 'bg-orange-500/20 text-orange-400',
+          bg: 'bg-orange-500/5',
+          border: 'border-orange-500/20',
+          accent: 'text-orange-600 dark:text-orange-400',
+          badge: 'bg-orange-500/10 text-orange-600 dark:text-orange-400',
         };
       default:
         return {
           icon: Info,
-          bg: 'bg-slate-500/10',
-          border: 'border-slate-500/30',
-          accent: 'text-slate-400',
-          badge: 'bg-slate-500/20 text-slate-400',
+          bg: 'bg-bg-card',
+          border: 'border-border-main',
+          accent: 'text-text-muted',
+          badge: 'bg-bg-main text-text-muted',
         };
     }
   };
@@ -81,10 +81,10 @@ export default function InsightBox({
   }[type];
 
   return (
-    <div className={`rounded-lg border-2 p-6 ${style.bg} ${style.border}`}>
+    <div className={`rounded-xl border-2 p-6 transition-all ${style.bg} ${style.border}`}>
       <div className="flex items-start gap-4">
         {/* Icon */}
-        <div className="flex-shrink-0">
+        <div className="flex-shrink-0 mt-1">
           <Icon className={`w-6 h-6 ${style.accent}`} />
         </div>
 
@@ -92,54 +92,54 @@ export default function InsightBox({
         <div className="flex-1">
           {/* Header */}
           <div className="flex items-center gap-3 mb-3">
-            <h3 className="text-lg font-bold text-white">{title}</h3>
-            <span className={`px-2 py-1 rounded text-xs font-mono ${style.badge}`}>
+            <h3 className="text-lg font-bold text-text-main">{title}</h3>
+            <span className={`px-2 py-1 rounded text-[10px] font-mono font-bold ${style.badge}`}>
               {typeLabel}
             </span>
           </div>
 
           {/* Main Description */}
-          <p className="text-slate-300 text-sm mb-4">{description}</p>
+          <p className="text-text-muted text-sm mb-4 leading-relaxed">{description}</p>
 
           {/* Metric Display */}
           {metric !== undefined && metricLabel && (
-            <div className="bg-white/5 border border-white/10 rounded p-3 mb-4">
-              <p className="text-xs text-slate-500 mb-1">📊 {metricLabel}</p>
-              <p className="text-2xl font-bold text-white">{metric}%</p>
+            <div className="bg-bg-main border border-border-main rounded-lg p-4 mb-5">
+              <p className="text-[10px] text-text-muted mb-1 font-mono uppercase tracking-wider">📊 {metricLabel}</p>
+              <p className="text-3xl font-black text-text-main">{metric}%</p>
             </div>
           )}
 
           {/* Insight Box */}
-          <div className="bg-black/30 border-l-2 border-white/20 pl-3 py-2 mb-4">
-            <p className="text-sm text-slate-300 italic">
-              <strong>💡 Insight:</strong> {insight}
+          <div className="bg-bg-card border-l-4 border-brand-primary/40 pl-4 py-3 mb-5 rounded-r-lg">
+            <p className="text-sm text-text-main italic leading-relaxed">
+              <strong className="text-brand-primary not-italic mr-1">💡 Insight:</strong> {insight}
             </p>
           </div>
 
           {/* Footer Stats */}
-          <div className="flex flex-wrap gap-4 text-xs text-slate-500 font-mono">
+          <div className="flex flex-wrap gap-6 text-[11px] text-text-muted font-mono pt-4 border-t border-border-main/50">
             {confidence && (
-              <div>
-                <span className="text-slate-400">Confiança:</span>
-                <span className="ml-2 text-emerald-400">{confidence}%</span>
+              <div className="flex items-center gap-2">
+                <span className="opacity-70">CONFIANÇA:</span>
+                <span className="text-emerald-600 dark:text-emerald-400 font-bold">{confidence}%</span>
               </div>
             )}
             {sources && (
-              <div>
-                <span className="text-slate-400">Fontes:</span>
-                <span className="ml-2 text-blue-400">{sources} posts</span>
+              <div className="flex items-center gap-2">
+                <span className="opacity-70">FONTES:</span>
+                <span className="text-blue-600 dark:text-blue-400 font-bold">{sources} posts</span>
               </div>
             )}
             {relatedCandidates && relatedCandidates.length > 0 && (
-              <div>
-                <span className="text-slate-400">Envolvidos:</span>
-                <span className="ml-2 text-orange-400">{relatedCandidates.join(', ')}</span>
+              <div className="flex items-center gap-2">
+                <span className="opacity-70">ENVOLVIDOS:</span>
+                <span className="text-orange-600 dark:text-orange-400 font-bold">{relatedCandidates.join(', ')}</span>
               </div>
             )}
           </div>
 
           {/* Action */}
-          <button className="mt-4 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded text-xs font-mono transition-colors">
+          <button className="mt-6 px-4 py-2 bg-bg-card hover:bg-bg-main border border-border-main text-text-main rounded-lg text-xs font-mono font-bold transition-all shadow-sm">
             Explorar dados completos →
           </button>
         </div>

@@ -17,10 +17,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
-      <body className={`${inter.className} antialiased bg-black text-tactical-accent`}>
-        {/* Scanline Effect */}
-        <div className="scanline" />
-        
+      <body className={`${inter.className} antialiased bg-bg-main text-text-main`}>
         <ClientLayoutWrapper>
           {children}
         </ClientLayoutWrapper>

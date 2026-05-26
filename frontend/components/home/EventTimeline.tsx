@@ -26,7 +26,7 @@ export default function EventTimeline({ events, period = '24h' }: EventTimelineP
       case 'medium':
         return 'bg-yellow-500';
       default:
-        return 'bg-slate-500';
+        return 'bg-brand-primary';
     }
   };
 
@@ -43,72 +43,78 @@ export default function EventTimeline({ events, period = '24h' }: EventTimelineP
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between border-b border-slate-700 pb-4">
-        <h2 className="text-2xl font-bold text-white">📅 Linha do Tempo</h2>
+      <div className="flex items-center justify-between border-b border-border-main pb-4">
+        <h2 className="text-2xl font-bold text-text-main">📅 Linha do Tempo</h2>
         <div className="flex gap-2">
-          <button className="px-3 py-1 text-xs font-mono bg-slate-800 hover:bg-slate-700 rounded">
+          <button className="px-3 py-1 text-xs font-mono bg-bg-card hover:bg-bg-main border border-border-main rounded transition-colors">
             24h
           </button>
-          <button className="px-3 py-1 text-xs font-mono bg-slate-800 hover:bg-slate-700 rounded">
+          <button className="px-3 py-1 text-xs font-mono bg-bg-card hover:bg-bg-main border border-border-main rounded transition-colors">
             7d
           </button>
-          <button className="px-3 py-1 text-xs font-mono bg-slate-800 hover:bg-slate-700 rounded">
+          <button className="px-3 py-1 text-xs font-mono bg-bg-card hover:bg-bg-main border border-border-main rounded transition-colors">
             30d
           </button>
         </div>
       </div>
 
-      <p className="text-sm text-slate-500 mb-6">
+      <p className="text-sm text-text-muted mb-6">
         Cronograma de eventos e picos de atividade ({getPeriodLabel()})
       </p>
 
-      <div className="space-y-6">
-        {events.map((event, idx) => (
-          <div key={event.id} className="flex gap-6">
-            {/* Timeline Connector */}
-            <div className="flex flex-col items-center">
-              {/* Dot */}
-              <div className={`w-4 h-4 rounded-full ${getAlertColor(event.alertLevel)} border-2 border-slate-900 z-10`} />
-              {/* Vertical Line */}
-              {idx < events.length - 1 && (
-                <div className={`w-1 h-20 mt-2 ${getAlertColor(event.alertLevel)}/30 rounded-full`} />
-              )}
-            </div>
+      {events.length === 0 ? (
+        <div className="text-center py-12 bg-bg-card border border-border-main border-dashed rounded-xl">
+          <p className="text-text-muted font-mono text-sm italic">Nenhum evento detectado no radar para este período.</p>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {events.map((event, idx) => (
+            <div key={event.id} className="flex gap-6">
+              {/* Timeline Connector */}
+              <div className="flex flex-col items-center">
+                {/* Dot */}
+                <div className={`w-4 h-4 rounded-full ${getAlertColor(event.alertLevel)} border-2 border-bg-main z-10 shadow-sm`} />
+                {/* Vertical Line */}
+                {idx < events.length - 1 && (
+                  <div className={`w-0.5 h-24 mt-2 ${getAlertColor(event.alertLevel)}/20 rounded-full`} />
+                )}
+              </div>
 
-            {/* Event Content */}
-            <div className="pb-6 pt-0.5 flex-1">
-              <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-4 hover:border-slate-600 transition-colors">
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <p className="text-xs text-slate-500 font-mono mb-1">
-                      {event.timestamp}
-                    </p>
-                    <h4 className="text-base font-bold text-white">{event.title}</h4>
+              {/* Event Content */}
+              <div className="pb-8 pt-0.5 flex-1">
+                <div className="bg-bg-card border border-border-main rounded-xl p-5 hover:border-brand-primary/40 transition-all hover:shadow-md">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <p className="text-[10px] text-text-muted font-mono uppercase tracking-widest mb-1">
+                        {event.timestamp}
+                      </p>
+                      <h4 className="text-lg font-bold text-text-main">{event.title}</h4>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2 py-1 rounded text-[10px] font-mono font-bold ${getAlertColor(event.alertLevel)} text-white uppercase`}>
+                        {event.postsCount} posts
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`px-2 py-1 rounded text-xs font-mono ${getAlertColor(event.alertLevel)} text-white`}>
-                      {event.postsCount} posts
-                    </span>
-                  </div>
-                </div>
 
-                <p className="text-sm text-slate-400 mb-3">{event.description}</p>
+                  <p className="text-sm text-text-muted mb-4 leading-relaxed">{event.description}</p>
 
-                <div className="flex items-center justify-between text-xs text-slate-500">
-                  <span className="font-mono">
-                    <strong className="text-slate-300">{event.candidate}</strong>
-                  </span>
-                  {event.engagementMetric && (
+                  <div className="flex items-center justify-between text-xs text-text-muted pt-4 border-t border-border-main/50">
                     <span className="font-mono">
-                      Engajamento: <strong className="text-emerald-400">{event.engagementMetric}%</strong>
+                      Candidato: <strong className="text-text-main">@{event.candidate}</strong>
                     </span>
-                  )}
+                    {event.engagementMetric && (
+                      <span className="font-mono">
+                        Engajamento: <strong className="text-emerald-500 font-bold">{event.engagementMetric}%</strong>
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

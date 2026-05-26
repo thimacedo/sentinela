@@ -4,87 +4,98 @@ import { BookOpen, CheckCircle2, AlertCircle, HelpCircle } from 'lucide-react';
 
 export default function MethodologyBox() {
   return (
-    <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-6">
+    <div className="bg-bg-card border border-border-main rounded-xl p-8 shadow-sm">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6 border-b border-slate-700 pb-4">
-        <BookOpen className="w-6 h-6 text-blue-400" />
-        <h3 className="text-lg font-bold text-white">📖 Sobre Este Observatório</h3>
+      <div className="flex items-center gap-3 mb-8 border-b border-border-main pb-4">
+        <BookOpen className="w-6 h-6 text-brand-primary" />
+        <h3 className="text-xl font-black text-text-main tracking-tight">📖 Sobre Este Observatório</h3>
       </div>
 
       {/* Description */}
-      <div className="space-y-4 mb-6">
-        <div>
-          <p className="text-sm text-slate-300 mb-3">
-            <strong>Sentinela</strong> monitora padrões de discurso em redes sociais para promover transparência e alimentar o debate democrático. Aqui você encontra análises sobre ódio, violência e desinformação em posts de candidatos e políticos.
-          </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        <div className="space-y-6">
+          <div>
+            <p className="text-base text-text-main leading-relaxed">
+              O <strong>Sentinela</strong> monitora padrões de discurso em redes sociais para promover transparência e alimentar o debate democrático brasileiro.
+            </p>
+            <p className="text-sm text-text-muted mt-3 leading-relaxed">
+              Nossa plataforma identifica tendências de ódio, hostilidade e desinformação, fornecendo dados técnicos para a sociedade civil e órgãos de controle.
+            </p>
+          </div>
+
+          {/* What We Do */}
+          <div>
+            <h4 className="text-sm font-bold text-emerald-600 dark:text-emerald-400 mb-3 flex items-center gap-2 uppercase tracking-widest">
+              <CheckCircle2 className="w-4 h-4" />
+              O Que Fazemos
+            </h4>
+            <ul className="space-y-2 ml-1">
+              {[
+                'Coleta autônoma de posts públicos em redes sociais',
+                'Identificação de padrões de discurso de ódio e violência',
+                'Relatórios forenses com classificação semântica MCA v2.2',
+                'Alertas em tempo real sobre picos anormais de hostilidade'
+              ].map((item, i) => (
+                <li key={i} className="text-xs text-text-muted flex items-start gap-2">
+                  <span className="text-emerald-500 mt-0.5">✓</span> {item}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
 
-        {/* What We Do */}
-        <div>
-          <h4 className="text-sm font-bold text-emerald-400 mb-2 flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4" />
-            O Que Fazemos
-          </h4>
-          <ul className="space-y-1 ml-6">
-            <li className="text-xs text-slate-400">✓ Coleta e análise de posts públicos em redes sociais</li>
-            <li className="text-xs text-slate-400">✓ Identificação de padrões de discurso de ódio e violência</li>
-            <li className="text-xs text-slate-400">✓ Relatórios forenses com classificação semântica</li>
-            <li className="text-xs text-slate-400">✓ Alertas contextualizados sobre picos anormais</li>
-          </ul>
-        </div>
+        <div className="space-y-6">
+          {/* Limitations */}
+          <div>
+            <h4 className="text-sm font-bold text-amber-600 dark:text-amber-500 mb-3 flex items-center gap-2 uppercase tracking-widest">
+              <AlertCircle className="w-4 h-4" />
+              Limitações Importantes
+            </h4>
+            <ul className="space-y-2 ml-1">
+              {[
+                'Não substitui análise humana — ferramenta de pesquisa',
+                'Baseado em posts públicos — não detecta contas privadas',
+                'Classificação por IA — sujeita a falsos positivos',
+                'Não visa julgamento político, apenas transparência de dados'
+              ].map((item, i) => (
+                <li key={i} className="text-xs text-text-muted flex items-start gap-2">
+                  <span className="text-amber-500 mt-0.5">⚠️</span> {item}
+                </li>
+              ))}
+            </ul>
+          </div>
 
-        {/* Limitations */}
-        <div>
-          <h4 className="text-sm font-bold text-yellow-400 mb-2 flex items-center gap-2">
-            <AlertCircle className="w-4 h-4" />
-            Limitações Importantes
-          </h4>
-          <ul className="space-y-1 ml-6">
-            <li className="text-xs text-slate-400">
-              ⚠️ Não substitui análise humana — use como ferramenta de pesquisa
-            </li>
-            <li className="text-xs text-slate-400">
-              ⚠️ Baseado em posts públicos — não detecta contas privadas
-            </li>
-            <li className="text-xs text-slate-400">
-              ⚠️ Classificação por IA — sujeita a falsos positivos/negativos
-            </li>
-            <li className="text-xs text-slate-400">
-              ⚠️ Não visa julgar políticos, apenas informar a população
-            </li>
-          </ul>
-        </div>
-
-        {/* Methodology */}
-        <div>
-          <h4 className="text-sm font-bold text-blue-400 mb-2 flex items-center gap-2">
-            <HelpCircle className="w-4 h-4" />
-            Metodologia
-          </h4>
-          <div className="ml-6 space-y-2">
-            <p className="text-xs text-slate-400">
-              <strong>Coleta:</strong> APIs de redes sociais (Instagram, Twitter, etc.)
-            </p>
-            <p className="text-xs text-slate-400">
-              <strong>Processamento:</strong> Limpeza, tokenização e análise semântica com Qwen 2.5
-            </p>
-            <p className="text-xs text-slate-400">
-              <strong>Classificação:</strong> Protocolo PASA v50 — critérios rigorosos de ódio e violência
-            </p>
-            <p className="text-xs text-slate-400">
-              <strong>Atualização:</strong> Tempo real a cada 6 horas (processamento em batch)
-            </p>
+          {/* Methodology */}
+          <div className="bg-bg-main border border-border-main rounded-xl p-5">
+            <h4 className="text-xs font-bold text-brand-primary mb-4 flex items-center gap-2 uppercase tracking-tighter">
+              <HelpCircle className="w-4 h-4" />
+              Metodologia Técnica
+            </h4>
+            <div className="space-y-3">
+              {[
+                { label: 'Coleta', val: 'Motores Playwright v2 / Zyte' },
+                { label: 'Processamento', val: 'Análise semântica Híbrida (Mistral/Ollama)' },
+                { label: 'Protocolo', val: 'PASA v70.4 — Critérios Forenses' },
+                { label: 'Frequência', val: 'Ciclos de 24h com Autopilot L3' }
+              ].map((item, i) => (
+                <p key={i} className="text-[10px] text-text-muted leading-tight">
+                  <strong className="text-text-main uppercase mr-1">{item.label}:</strong> {item.val}
+                </p>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
       {/* Footer */}
-      <div className="bg-blue-500/5 border border-blue-500/20 rounded p-3 text-xs text-blue-300">
-        <p>
-          📚 Para mais detalhes, consulte nossa{' '}
-          <button className="underline hover:text-blue-200">documentação técnica</button> ou{' '}
-          <button className="underline hover:text-blue-200">publicações</button>.
+      <div className="bg-brand-primary/5 border border-brand-primary/10 rounded-xl p-4 text-xs text-brand-primary flex justify-between items-center flex-wrap gap-4">
+        <p className="font-medium">
+          📚 Explore nossa documentação técnica para entender os algoritmos.
         </p>
+        <div className="flex gap-4">
+          <button className="underline font-bold hover:text-blue-600 transition-colors">Documentação</button>
+          <button className="underline font-bold hover:text-blue-600 transition-colors">Publicações</button>
+        </div>
       </div>
     </div>
   );

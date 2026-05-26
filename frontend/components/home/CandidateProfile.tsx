@@ -15,6 +15,7 @@ interface CandidateProfileProps {
   party?: string;
   position?: string;
   photo?: string;
+  bio?: string;
 }
 
 export default function CandidateProfile({
@@ -22,6 +23,7 @@ export default function CandidateProfile({
   party,
   position,
   photo,
+  bio,
 }: CandidateProfileProps) {
   const { data: candidates = [], isLoading, error } = useCandidates(5);
 
@@ -33,7 +35,7 @@ export default function CandidateProfile({
   if (error) {
     return (
       <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-6">
-        <p className="text-sm text-red-400 font-mono">
+        <p className="text-sm text-red-600 dark:text-red-400 font-mono">
           Erro ao carregar perfis de candidatos.
         </p>
       </div>
@@ -42,9 +44,9 @@ export default function CandidateProfile({
 
   if (isLoading) {
     return (
-      <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-6">
-        <div className="text-center py-8">
-          <p className="text-slate-500 font-mono text-sm animate-pulse">Carregando perfis...</p>
+      <div className="bg-bg-card border border-border-main rounded-xl p-6 shadow-sm">
+        <div className="text-center py-12">
+          <p className="text-text-muted font-mono text-sm animate-pulse">Carregando perfis...</p>
         </div>
       </div>
     );
@@ -52,8 +54,8 @@ export default function CandidateProfile({
 
   if (!candidateData) {
     return (
-      <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-6">
-        <p className="text-slate-400 font-mono text-sm">Nenhum candidato encontrado</p>
+      <div className="bg-bg-card border border-border-main rounded-xl p-6 shadow-sm">
+        <p className="text-text-muted font-mono text-sm">Nenhum candidato encontrado no monitoramento.</p>
       </div>
     );
   }
@@ -87,19 +89,19 @@ export default function CandidateProfile({
   ];
 
   return (
-    <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-6 hover:border-slate-600 transition-colors">
+    <div className="bg-bg-card border border-border-main rounded-xl p-8 hover:border-brand-primary/40 transition-all shadow-sm">
       {/* Header */}
-      <div className="flex gap-6 mb-6">
+      <div className="flex flex-col md:flex-row gap-8 mb-8">
         {/* Avatar */}
         <div className="flex-shrink-0">
           {photo ? (
             <img
               src={photo}
               alt={candidateData.username}
-              className="w-20 h-20 rounded-lg object-cover border border-slate-700"
+              className="w-24 h-24 rounded-2xl object-cover border-2 border-border-main shadow-md"
             />
           ) : (
-            <div className="w-20 h-20 rounded-lg bg-gradient-to-br from-blue-500/30 to-emerald-500/30 border border-slate-700 flex items-center justify-center text-2xl font-bold text-slate-400">
+            <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-brand-primary/20 to-blue-500/20 border-2 border-border-main flex items-center justify-center text-3xl font-black text-brand-primary shadow-sm">
               {candidateData.username?.substring(0, 2).toUpperCase()}
             </div>
           )}
@@ -107,49 +109,57 @@ export default function CandidateProfile({
 
         {/* Info */}
         <div className="flex-1">
-          <h3 className="text-2xl font-bold text-white mb-1">{candidateData.username}</h3>
-          {party && (
-            <p className="text-sm text-slate-400 font-mono mb-3">
-              {party} {position && `• ${position}`}
+          <div className="flex items-center gap-3 mb-2">
+            <h3 className="text-3xl font-black text-text-main tracking-tighter">@{candidateData.username}</h3>
+            {candidateData.status_monitoramento === 'Ativo' && (
+              <span className="flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold uppercase rounded-full border border-emerald-500/20">
+                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                Ativo
+              </span>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-x-4 gap-y-1 mb-4">
+            {party && (
+              <p className="text-sm text-text-muted font-bold uppercase tracking-widest">
+                {party} {position && <span className="mx-2 opacity-30">|</span>} {position}
+              </p>
+            )}
+            <p className="text-xs text-text-muted opacity-70">
+              Monitorado desde: {new Date(candidateData.data_criacao || Date.now()).toLocaleDateString('pt-BR')}
             </p>
+          </div>
+          
+          {bio && (
+            <p className="text-sm text-text-muted leading-relaxed max-w-2xl">{bio}</p>
           )}
-          <p className="text-xs text-slate-500">
-            Monitorado desde: {new Date(candidateData.data_criacao).toLocaleDateString('pt-BR')}
-          </p>
         </div>
 
         {/* Quick Status */}
-        <div className="text-right">
-          <div className="bg-slate-800/50 border border-slate-700 rounded p-3">
-            <p className="text-xs text-slate-500 mb-1 font-mono">STATUS</p>
-            <p
-              className={`text-lg font-bold ${
-                candidateData.status_monitoramento === 'Ativo'
-                  ? 'text-emerald-400'
-                  : 'text-slate-400'
-              }`}
-            >
-              {candidateData.status_monitoramento === 'Ativo' ? '✓' : '−'} Ativo
+        <div className="hidden lg:block text-right">
+          <div className="bg-bg-main border border-border-main rounded-xl p-4 min-w-[120px] shadow-inner">
+            <p className="text-[10px] text-text-muted mb-1 font-mono font-bold uppercase tracking-tighter">Score Risco</p>
+            <p className="text-3xl font-black text-text-main">
+              {Math.round(candidateData.score_risco * 100) || 0}
             </p>
           </div>
         </div>
       </div>
 
       {/* Metrics Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         {metrics.map((metric, idx) => (
-          <div key={idx} className="bg-slate-800/30 border border-slate-700 rounded p-3">
-            <p className="text-xs text-slate-500 mb-2 font-mono">{metric.label}</p>
-            <div className="flex items-center justify-between">
-              <p className="text-2xl font-bold text-white">{metric.value}</p>
+          <div key={idx} className="bg-bg-main border border-border-main rounded-xl p-4 transition-colors hover:bg-bg-card">
+            <p className="text-[10px] text-text-muted mb-2 font-mono font-bold uppercase tracking-wider">{metric.label}</p>
+            <div className="flex items-end justify-between">
+              <p className="text-2xl font-black text-text-main leading-none">{metric.value}</p>
               {metric.trend && (
                 <div
-                  className={`flex items-center gap-1 text-xs font-mono ${
+                  className={`flex items-center gap-1 text-[10px] font-bold ${
                     metric.trend === 'up'
-                      ? 'text-red-400'
+                      ? 'text-red-500'
                       : metric.trend === 'down'
-                        ? 'text-green-400'
-                        : 'text-slate-400'
+                        ? 'text-emerald-500'
+                        : 'text-text-muted'
                   }`}
                 >
                   {metric.trend === 'up' && <TrendingUp className="w-3 h-3" />}
@@ -164,127 +174,23 @@ export default function CandidateProfile({
 
       {/* Recent Alerts */}
       {recentAlerts && recentAlerts.length > 0 && (
-        <div className="border-t border-slate-700 pt-6">
-          <h4 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-orange-400" />
-            Status
+        <div className="border-t border-border-main pt-6">
+          <h4 className="text-xs font-bold text-text-muted uppercase tracking-widest mb-4 flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-orange-500" />
+            Alertas de Segurança
           </h4>
-          <div className="space-y-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {recentAlerts.map((alert, idx) => (
               <div
                 key={idx}
-                className={`text-xs p-2 rounded border ${
+                className={`text-xs p-3 rounded-lg border flex justify-between items-center ${
                   alert.severity === 'critical'
-                    ? 'bg-red-500/10 border-red-500/30 text-red-400'
-                    : 'bg-orange-500/10 border-orange-500/30 text-orange-400'
+                    ? 'bg-red-500/5 border-red-500/20 text-red-600 dark:text-red-400'
+                    : 'bg-orange-500/5 border-orange-500/20 text-orange-600 dark:text-orange-400'
                 }`}
               >
-                <p className="font-mono">{alert.title}</p>
-                <p className="text-xs opacity-75">{alert.date}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-  return (
-    <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-6 hover:border-slate-600 transition-colors">
-      {/* Header */}
-      <div className="flex gap-6 mb-6">
-        {/* Avatar */}
-        <div className="flex-shrink-0">
-          {photo ? (
-            <img
-              src={photo}
-              alt={candidateName}
-              className="w-20 h-20 rounded-lg object-cover border border-slate-700"
-            />
-          ) : (
-            <div className="w-20 h-20 rounded-lg bg-gradient-to-br from-blue-500/30 to-emerald-500/30 border border-slate-700 flex items-center justify-center text-2xl font-bold text-slate-400">
-              {candidateName.substring(0, 2).toUpperCase()}
-            </div>
-          )}
-        </div>
-
-        {/* Info */}
-        <div className="flex-1">
-          <h3 className="text-2xl font-bold text-white mb-1">{candidateName}</h3>
-          {party && (
-            <p className="text-sm text-slate-400 font-mono mb-3">
-              {party} {position && `• ${position}`}
-            </p>
-          )}
-          <p className="text-xs text-slate-500">
-            {monitoringSince && `Monitorado desde: ${monitoringSince}`}
-          </p>
-        </div>
-
-        {/* Quick Status */}
-        <div className="text-right">
-          <div className="bg-slate-800/50 border border-slate-700 rounded p-3">
-            <p className="text-xs text-slate-500 mb-1 font-mono">STATUS ATUAL</p>
-            <p className="text-lg font-bold text-emerald-400">✓ Ativo</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Bio */}
-      {bio && (
-        <div className="mb-6 pb-6 border-b border-slate-700">
-          <p className="text-sm text-slate-300">{bio}</p>
-        </div>
-      )}
-
-      {/* Metrics Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
-        {metrics.map((metric, idx) => (
-          <div key={idx} className="bg-slate-800/30 border border-slate-700 rounded p-3">
-            <p className="text-xs text-slate-500 mb-2 font-mono">{metric.label}</p>
-            <div className="flex items-center justify-between">
-              <p className="text-2xl font-bold text-white">{metric.value}</p>
-              {metric.trend && (
-                <div
-                  className={`flex items-center gap-1 text-xs font-mono ${
-                    metric.trend === 'up'
-                      ? 'text-red-400'
-                      : metric.trend === 'down'
-                        ? 'text-green-400'
-                        : 'text-slate-400'
-                  }`}
-                >
-                  {metric.trend === 'up' && <TrendingUp className="w-3 h-3" />}
-                  {metric.trend === 'down' && <TrendingDown className="w-3 h-3" />}
-                  {metric.trendValue && <span>{metric.trendValue}%</span>}
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Recent Alerts */}
-      {recentAlerts && recentAlerts.length > 0 && (
-        <div className="border-t border-slate-700 pt-6">
-          <h4 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-orange-400" />
-            Alertas Recentes
-          </h4>
-          <div className="space-y-2">
-            {recentAlerts.slice(0, 3).map((alert, idx) => (
-              <div
-                key={idx}
-                className={`text-xs p-2 rounded border ${
-                  alert.severity === 'critical'
-                    ? 'bg-red-500/10 border-red-500/30 text-red-400'
-                    : alert.severity === 'high'
-                      ? 'bg-orange-500/10 border-orange-500/30 text-orange-400'
-                      : 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400'
-                }`}
-              >
-                <p className="font-mono">{alert.title}</p>
-                <p className="text-xs opacity-75">{alert.date}</p>
+                <div className="font-bold font-mono tracking-tight uppercase">{alert.title}</div>
+                <div className="text-[10px] opacity-70 font-mono italic">{alert.date}</div>
               </div>
             ))}
           </div>
