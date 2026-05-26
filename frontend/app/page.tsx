@@ -7,6 +7,8 @@ import EventTimeline from '@/components/home/EventTimeline';
 import InsightBox from '@/components/home/InsightBox';
 import CandidateProfile from '@/components/home/CandidateProfile';
 import MethodologyBox from '@/components/home/MethodologyBox';
+import TrendChart from '@/components/home/TrendChart';
+import PremiumCTA from '@/components/home/PremiumCTA';
 
 export default function HomePage() {
   const { data: alerts = [] } = useAlerts(5);
@@ -38,6 +40,9 @@ export default function HomePage() {
             severity: resiliencia < 80 ? 'critical' : (resiliencia < 90 ? 'high' : 'medium'),
           }}
         />
+
+        {/* Section 1.5: Activity Trend (From SaaS Logic) */}
+        <TrendChart />
 
         {/* Section 2: Highlights */}
         <HighlightCards />
@@ -85,21 +90,8 @@ export default function HomePage() {
         {/* Section 6: Methodology & About */}
         <MethodologyBox />
 
-        {/* CTA Section */}
-        <div className="bg-brand-primary/10 border border-brand-primary/30 rounded-2xl p-10 text-center shadow-sm">
-          <h3 className="text-3xl font-black text-text-main mb-4 tracking-tighter uppercase">Forense Avançada</h3>
-          <p className="text-text-muted mb-8 max-w-2xl mx-auto leading-relaxed">
-            Acesse o motor completo de investigação, mapeie redes de influência e gere dossiês técnicos detalhados com validade técnica.
-          </p>
-          <div className="flex gap-4 justify-center flex-wrap">
-            <button className="px-8 py-3 bg-brand-primary hover:opacity-90 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-brand-primary/20">
-              Acessar Perícia Forense
-            </button>
-            <button className="px-8 py-3 bg-bg-card hover:bg-bg-main text-text-main rounded-xl font-bold text-sm transition-all border border-border-main shadow-sm">
-              Emitir Relatório PDF
-            </button>
-          </div>
-        </div>
+        {/* CTA Section (From SaaS Logic) */}
+        <PremiumCTA />
 
         {/* Footer */}
         <footer className="border-t border-border-main pt-10 pb-16 text-center space-y-6">
