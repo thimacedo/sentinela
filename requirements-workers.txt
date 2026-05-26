@@ -1,4 +1,4 @@
-﻿fastapi
+fastapi
 uvicorn
 supabase
 python-dotenv
@@ -117,3 +117,4 @@ tenacity
 tqdm
 typer
 wrapt
+openai>=1.0.0
