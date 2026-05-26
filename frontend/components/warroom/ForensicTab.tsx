@@ -1,8 +1,8 @@
 'use client';
 import { useQuery } from '@tanstack/react-query';
-import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Search, ShieldCheck } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 interface Comment {
@@ -37,63 +37,91 @@ export default function ForensicTab() {
   });
 
   const getRiskColor = (isHate: boolean, confidence: number) => {
-    if (!isHate) return 'text-emerald-400';
-    if (confidence > 0.8) return 'text-red-500';
-    if (confidence > 0.5) return 'text-orange-500';
-    return 'text-yellow-500';
+    if (!isHate) return 'text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-900/10';
+    if (confidence > 0.8) return 'text-red-600 dark:text-red-400 border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-900/10';
+    if (confidence > 0.5) return 'text-orange-600 dark:text-orange-400 border-orange-200 dark:border-orange-900 bg-orange-50 dark:bg-orange-900/10';
+    return 'text-yellow-600 dark:text-yellow-400 border-yellow-200 dark:border-yellow-900 bg-yellow-50 dark:bg-yellow-900/10';
   };
 
   return (
-    <Card className="p-4 bg-black/50 border-tactical-accent">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold text-tactical-accent uppercase tracking-wider">Detecções Recentes</h2>
-        <span className="text-xs text-gray-500 font-mono">ÚLTIMAS 50 CAPTURAS</span>
+    <div className="bg-bg-card border border-border-main rounded-2xl shadow-sm overflow-hidden">
+      <div className="p-6 border-b border-border-main flex justify-between items-center bg-bg-main/50">
+        <div>
+          <h2 className="text-xl font-black text-text-main tracking-tight flex items-center gap-2">
+            <Search className="w-5 h-5 text-brand-primary" />
+            Laboratório de Perícia
+          </h2>
+          <p className="text-xs text-text-muted font-medium uppercase tracking-widest mt-1">Análise Semântica MCA v2.2</p>
+        </div>
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-brand-primary/10 border border-brand-primary/20 rounded-full">
+          <ShieldCheck className="w-3.5 h-3.5 text-brand-primary" />
+          <span className="text-[10px] font-bold text-brand-primary uppercase">Audit Ativo</span>
+        </div>
       </div>
+      
       <Table>
-        <TableHeader>
-          <TableRow className="border-tactical-accent/30 hover:bg-transparent">
-            <TableHead className="text-tactical-accent/70 uppercase text-xs w-[150px]">Alvo</TableHead>
-            <TableHead className="text-tactical-accent/70 uppercase text-xs">Conteúdo Analisado</TableHead>
-            <TableHead className="text-tactical-accent/70 uppercase text-xs text-center">Classificação</TableHead>
-            <TableHead className="text-tactical-accent/70 uppercase text-xs text-right">Confiança</TableHead>
+        <TableHeader className="bg-bg-main/30">
+          <TableRow className="border-border-main hover:bg-transparent">
+            <TableHead className="text-text-muted font-bold uppercase text-[10px] tracking-wider px-6">Alvo Monitorado</TableHead>
+            <TableHead className="text-text-muted font-bold uppercase text-[10px] tracking-wider px-6">Conteúdo em Análise</TableHead>
+            <TableHead className="text-text-muted font-bold uppercase text-[10px] tracking-wider text-center">Classificação</TableHead>
+            <TableHead className="text-text-muted font-bold uppercase text-[10px] tracking-wider text-right px-6">Confiança</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {isLoading ? (
             <TableRow>
-              <TableCell colSpan={4} className="text-center py-8 text-gray-500 animate-pulse font-mono">
-                Descriptografando pacotes de dados...
+              <TableCell colSpan={4} className="text-center py-20 text-text-muted animate-pulse font-mono text-xs">
+                PROCESSANDO PACOTES DE LINGUAGEM...
               </TableCell>
             </TableRow>
           ) : comments.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={4} className="text-center py-8 text-gray-500 font-mono">
-                Nenhuma detecção confirmada no período.
+              <TableCell colSpan={4} className="text-center py-20 text-text-muted font-mono text-xs">
+                ESPECTRO LIMPO. NENHUMA DETECÇÃO NO PERÍODO.
               </TableCell>
             </TableRow>
           ) : (
             comments.map((c) => (
-              <TableRow key={c.id} className="border-tactical-accent/10 hover:bg-tactical-accent/5 transition-colors">
-                <TableCell className="font-bold text-tactical-accent/80 text-xs">
-                  @{c.username_alvo}
+              <TableRow key={c.id} className="border-border-main hover:bg-bg-main/50 transition-colors">
+                <TableCell className="px-6 py-4">
+                  <div className="font-bold text-text-main text-sm">@{c.username_alvo}</div>
+                  <div className="text-[10px] text-text-muted font-mono mt-0.5">
+                    {new Date(c.data_coleta).toLocaleTimeString('pt-BR')}
+                  </div>
                 </TableCell>
-                <TableCell className="max-w-md truncate text-xs text-gray-300 italic" title={c.texto_bruto}>
-                  "{c.texto_bruto}"
+                <TableCell className="max-w-md px-6 py-4">
+                  <p className="text-sm text-text-main/80 italic leading-relaxed line-clamp-2" title={c.texto_bruto}>
+                    "{c.texto_bruto}"
+                  </p>
                 </TableCell>
-                <TableCell className="text-center">
-                  <Badge className={`bg-transparent border border-tactical-accent/30 text-[10px] ${getRiskColor(c.is_hate, c.confianca_ia)}`}>
+                <TableCell className="text-center py-4">
+                  <Badge className={`px-2.5 py-0.5 text-[9px] font-black uppercase rounded-md border shadow-none ${getRiskColor(c.is_hate, c.confianca_ia)}`}>
                     {c.categoria_ia}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-right font-mono text-[10px] text-gray-500">
-                  {(c.confianca_ia * 100).toFixed(1)}%
+                <TableCell className="text-right px-6 py-4">
+                  <div className="text-xs font-black text-text-main">
+                    {(c.confianca_ia * 100).toFixed(1)}%
+                  </div>
+                  <div className="w-16 h-1 bg-bg-main rounded-full mt-1.5 ml-auto overflow-hidden">
+                    <div 
+                      className="h-full bg-brand-primary transition-all duration-1000" 
+                      style={{ width: `${c.confianca_ia * 100}%` }}
+                    />
+                  </div>
                 </TableCell>
               </TableRow>
             ))
           )}
         </TableBody>
       </Table>
-    </Card>
+      
+      <div className="p-4 bg-bg-main/30 border-t border-border-main text-center">
+        <button className="text-[10px] font-bold text-brand-primary uppercase tracking-widest hover:underline">
+          Carregar Histórico Completo →
+        </button>
+      </div>
+    </div>
   );
 }
-

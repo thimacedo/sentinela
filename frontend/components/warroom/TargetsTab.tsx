@@ -1,8 +1,8 @@
 'use client';
 import { useQuery } from '@tanstack/react-query';
-import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Users, Filter } from 'lucide-react';
 
 import { fetchApi } from '@/lib/api';
 
@@ -27,53 +27,68 @@ export default function TargetsTab() {
   });
 
   return (
-    <Card className="p-4 bg-black/50 border-tactical-accent">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold text-tactical-accent uppercase tracking-wider">Radar de Alvos</h2>
-        <span className="text-xs text-gray-500 font-mono">ORDENADO POR SEVERIDADE</span>
+    <div className="bg-bg-card border border-border-main rounded-2xl shadow-sm overflow-hidden">
+      <div className="p-6 border-b border-border-main flex justify-between items-center bg-bg-main/50">
+        <div>
+          <h2 className="text-xl font-black text-text-main tracking-tight flex items-center gap-2">
+            <Users className="w-5 h-5 text-brand-primary" />
+            Candidatos Monitorados
+          </h2>
+          <p className="text-xs text-text-muted font-medium uppercase tracking-widest mt-1">Radar de Severidade e Atividade</p>
+        </div>
+        <button className="flex items-center gap-2 px-3 py-1.5 bg-bg-card border border-border-main rounded-lg text-[10px] font-bold text-text-main hover:bg-bg-main transition-colors uppercase">
+          <Filter className="w-3 h-3" />
+          Filtrar
+        </button>
       </div>
+
       <Table>
-        <TableHeader>
-          <TableRow className="border-tactical-accent/30 hover:bg-transparent">
-            <TableHead className="text-tactical-accent/70 uppercase text-xs">Username</TableHead>
-            <TableHead className="text-tactical-accent/70 uppercase text-xs">Nível de Risco</TableHead>
-            <TableHead className="text-tactical-accent/70 uppercase text-xs text-center">Alertas</TableHead>
-            <TableHead className="text-tactical-accent/70 uppercase text-xs text-right">Status</TableHead>
+        <TableHeader className="bg-bg-main/30">
+          <TableRow className="border-border-main hover:bg-transparent">
+            <TableHead className="text-text-muted font-bold uppercase text-[10px] tracking-wider px-6">Identificação</TableHead>
+            <TableHead className="text-text-muted font-bold uppercase text-[10px] tracking-wider text-center">Nível de Risco</TableHead>
+            <TableHead className="text-text-muted font-bold uppercase text-[10px] tracking-wider text-center">Alertas de Ódio</TableHead>
+            <TableHead className="text-text-muted font-bold uppercase text-[10px] tracking-wider text-right px-6">Status</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {isLoading ? (
             <TableRow>
-              <TableCell colSpan={4} className="text-center py-8 text-gray-500 animate-pulse font-mono">
-                SINCRONIZANDO COM A REDE...
+              <TableCell colSpan={4} className="text-center py-20 text-text-muted animate-pulse font-mono text-xs">
+                SINCRONIZANDO COM O OBSERVATÓRIO...
               </TableCell>
             </TableRow>
           ) : targets.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={4} className="text-center py-8 text-gray-500 font-mono">
-                NENHUM ALVO ATIVO NO RADAR.
+              <TableCell colSpan={4} className="text-center py-20 text-text-muted font-mono text-xs">
+                NENHUM ALVO ATIVO NO MOMENTO.
               </TableCell>
             </TableRow>
           ) : (
             targets.map((t) => (
-              <TableRow key={t.id} className="border-tactical-accent/10 hover:bg-tactical-accent/5 transition-colors">
-                <TableCell className="font-bold text-gray-200">@{t.username}</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
+              <TableRow key={t.id} className="border-border-main hover:bg-bg-main/50 transition-colors">
+                <TableCell className="px-6 py-4">
+                  <div className="font-black text-text-main text-sm font-mono tracking-tight">@{t.username}</div>
+                  <div className="text-[10px] text-text-muted font-medium mt-0.5 uppercase tracking-tighter">
+                    ID: {t.id.substring(0, 8)}
+                  </div>
+                </TableCell>
+                <TableCell className="text-center">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-bg-main border border-border-main rounded-full">
                     <div 
-                      className="w-2 h-2 rounded-full animate-pulse" 
+                      className="w-1.5 h-1.5 rounded-full animate-pulse shadow-sm" 
                       style={{ backgroundColor: t.color || '#333' }}
                     />
-                    <span className="text-[10px] uppercase font-bold" style={{ color: t.color || '#333' }}>
+                    <span className="text-[10px] font-black uppercase tracking-wider" style={{ color: t.color || '#333' }}>
                       {t.nivel_risco}
                     </span>
                   </div>
                 </TableCell>
-                <TableCell className="text-center font-mono text-sm text-tactical-accent">
-                  {t.comentarios_odio_count}
+                <TableCell className="text-center">
+                  <div className="font-black text-text-main text-lg">{t.comentarios_odio_count}</div>
                 </TableCell>
-                <TableCell className="text-right">
-                  <Badge className="bg-tactical-accent text-black hover:bg-tactical-accent/80 border-none rounded-none text-[10px] font-bold">
+                <TableCell className="text-right px-6 py-4">
+                  <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 rounded-md shadow-none text-[9px] font-black uppercase">
                     {t.status_monitoramento}
                   </Badge>
                 </TableCell>
@@ -82,6 +97,10 @@ export default function TargetsTab() {
           )}
         </TableBody>
       </Table>
-    </Card>
+      
+      <div className="p-4 bg-bg-main/30 border-t border-border-main text-center text-xs text-text-muted">
+        Total de {targets.length} perfis monitorados em tempo real.
+      </div>
+    </div>
   );
 }

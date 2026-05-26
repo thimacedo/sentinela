@@ -1,7 +1,8 @@
 'use client';
 
-import { BarChart3, TrendingDown, TrendingUp, AlertTriangle } from 'lucide-react';
+import { BarChart3, TrendingDown, TrendingUp, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCandidates } from '@/hooks/useDashboardData';
+import { useState } from 'react';
 
 interface CandidateMetric {
   label: string;
@@ -25,12 +26,23 @@ export default function CandidateProfile({
   photo,
   bio,
 }: CandidateProfileProps) {
-  const { data: candidates = [], isLoading, error } = useCandidates(5);
+  const { data: candidates = [], isLoading, error } = useCandidates(15);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Se candidato específico é passado, usa esse, senão mostra o primeiro da lista
+  // Se candidato específico é passado, usa esse, senão usa o estado do carousel
   const candidateData = candidateName
     ? (candidates as any[]).find((c: any) => c.username === candidateName)
-    : (candidates as any[])[0];
+    : (candidates as any[])[currentIndex];
+
+  const handleNext = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentIndex((prev) => (prev + 1) % candidates.length);
+  };
+
+  const handlePrev = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentIndex((prev) => (prev - 1 + candidates.length) % candidates.length);
+  };
 
   if (error) {
     return (
@@ -89,7 +101,37 @@ export default function CandidateProfile({
   ];
 
   return (
-    <div className="bg-bg-card border border-border-main rounded-xl p-8 hover:border-brand-primary/40 transition-all shadow-sm">
+    <div className="bg-bg-card border border-border-main rounded-xl p-8 hover:border-brand-primary/40 transition-all shadow-sm relative group">
+      {/* Carousel Controls */}
+      {!candidateName && candidates.length > 1 && (
+        <>
+          <button 
+            onClick={handlePrev} 
+            className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 dark:bg-slate-800/90 border border-border-main flex items-center justify-center z-20 hover:bg-brand-primary hover:text-white transition-all shadow-lg opacity-0 group-hover:opacity-100"
+            aria-label="Candidato Anterior"
+          >
+            <ChevronLeft size={24} />
+          </button>
+          <button 
+            onClick={handleNext} 
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 dark:bg-slate-800/90 border border-border-main flex items-center justify-center z-20 hover:bg-brand-primary hover:text-white transition-all shadow-lg opacity-0 group-hover:opacity-100"
+            aria-label="Próximo Candidato"
+          >
+            <ChevronRight size={24} />
+          </button>
+          
+          {/* Pagination Indicators */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
+            {candidates.slice(0, 8).map((_, idx) => (
+              <div 
+                key={idx} 
+                className={`w-1.5 h-1.5 rounded-full transition-all ${idx === currentIndex ? 'bg-brand-primary w-4' : 'bg-border-main'}`}
+              />
+            ))}
+          </div>
+        </>
+      )}
+
       {/* Header */}
       <div className="flex flex-col md:flex-row gap-8 mb-8">
         {/* Avatar */}
@@ -119,9 +161,9 @@ export default function CandidateProfile({
             )}
           </div>
           <div className="flex flex-wrap gap-x-4 gap-y-1 mb-4">
-            {party && (
+            {(party || candidateData.partido) && (
               <p className="text-sm text-text-muted font-bold uppercase tracking-widest">
-                {party} {position && <span className="mx-2 opacity-30">|</span>} {position}
+                {party || candidateData.partido} {(position || candidateData.cargo) && <span className="mx-2 opacity-30">|</span>} {position || candidateData.cargo}
               </p>
             )}
             <p className="text-xs text-text-muted opacity-70">
@@ -129,8 +171,8 @@ export default function CandidateProfile({
             </p>
           </div>
           
-          {bio && (
-            <p className="text-sm text-text-muted leading-relaxed max-w-2xl">{bio}</p>
+          {(bio || candidateData.bio) && (
+            <p className="text-sm text-text-muted leading-relaxed max-w-2xl">{bio || candidateData.bio}</p>
           )}
         </div>
 
