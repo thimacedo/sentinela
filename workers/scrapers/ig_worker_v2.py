@@ -48,6 +48,7 @@ class IGWorkerV2(BaseWorker):
         logger.info(f"🛑 Worker {self.worker_id} encerrado.")
 
     async def run_cycle(self) -> CycleResult:
+        start_time = asyncio.get_event_loop().time()
         self.cycle += 1
         
         # 🛡️ HIBERNAÇÃO INTELIGENTE (PASA v65.1)
@@ -124,6 +125,10 @@ class IGWorkerV2(BaseWorker):
             else:
                 comments = []
                 target.post_metas = []
+
+            # ♻️ FILTRO LÉXICO (Pre-AI) - PASA v65.0
+            if comments:
+                comments = lexical_filter.filter_list(comments)
             
         except ValueError as e:
             if "invalid_target" in str(e):
@@ -207,7 +212,7 @@ class IGWorkerV2(BaseWorker):
                 }
                 if c.get("is_bot"):
                     pericial_obs = f"[BOT DETECTED] Padrão: {c.get('bot_pattern')}"
-                    safe_c["evidence_extracted"] = pericial_obs # Usa coluna existente
+                    safe_c["analise_pericial"] = pericial_obs
                     safe_c["categoria_ia"] = "CAMPANHA_COORDENADA"
                 safe_comments.append(safe_c)
 
@@ -311,7 +316,8 @@ class IGWorkerV2(BaseWorker):
                                 "is_hate": result["is_hate"],
                                 "categoria_ia": result["categoria_ia"],
                                 "confianca_ia": result["confianca_ia"],
-                                "evidence_extracted": result["evidencia_lexical"]
+                                "evidence_extracted": result["evidencia_lexical"],
+                                "analise_pericial": result["analise_pericial"]
                             }).eq("id", cid).execute()
                             classified += 1
                     except: continue
@@ -323,7 +329,8 @@ class IGWorkerV2(BaseWorker):
                 self.logger.warning(f"⚠️ [V2] Todo o conteúdo extraído de @{target.username} era LIXO. Sinalizando falha e anulando recompensas.")
                 return CycleResult(
                     worker_id=self.worker_id, cycle=self.cycle, target=target.username,
-                    source="v2_engine", extracted=0, inserted=0, classified=0, simulated=False, error="junk_detected"
+                    source="v2_engine", extracted=0, inserted=0, classified=0, simulated=False, error="junk_detected",
+                    duration=asyncio.get_event_loop().time() - start_time
                 )
 
             return CycleResult(
@@ -335,14 +342,16 @@ class IGWorkerV2(BaseWorker):
                 classified=classified,
                 db_success=inserted > 0,
                 classifier_success=classified > 0,
-                simulated=False
+                simulated=False,
+                duration=asyncio.get_event_loop().time() - start_time
             )
 
         except Exception as e:
             self.logger.error(f"💥 Erro crítico no ciclo V2: {e}")
             return CycleResult(
                 worker_id=self.worker_id, cycle=self.cycle, target=target.username,
-                failed=1, error=str(e)[:200], simulated=False
+                failed=1, error=str(e)[:200], simulated=False,
+                duration=asyncio.get_event_loop().time() - start_time
             )
         finally:
             # PASA v58.2: Injeta erro no alvo para que o rotate_target decida pela hibernação

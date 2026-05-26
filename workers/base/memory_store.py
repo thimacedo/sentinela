@@ -95,7 +95,7 @@ class MemoryStore:
             "cycle":          cycle,
             "score":          round(score, 2),
             "tier":           tier,
-            "delta":          0.0,
+            "delta":          metadata.get("xp_delta", 0.0),
             "badges":         badges,
             "recommendation": f"score={score} tier={tier} collected={collected} success_rate={round(success_rate, 2)}",
             "timestamp":      datetime.utcnow().isoformat(),

@@ -25,6 +25,7 @@ class CycleResult:
 
     simulated: bool = False
     error: Optional[str] = None
+    duration: float = 0.0
 
     metadata: dict[str, Any] = field(default_factory=dict)
 

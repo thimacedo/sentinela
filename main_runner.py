@@ -59,6 +59,7 @@ from workers.base.reward_engine import RewardEngine
 from workers.ai.doc_fetcher import DocFetcher
 from workers.ai.ai_advisor import AIAdvisor
 from workers.orchestrator.orchestrator import SentinelaOrchestrator
+from core.autopilot.manager import autopilot
 
 # Workers disponíveis (PASA v52.0):
 from workers.scrapers.instagram_worker import InstagramWorker
@@ -108,6 +109,9 @@ async def main() -> None:
 
     loop = asyncio.get_running_loop()
     setup_signal_handlers(orch, loop)
+
+    # 🤖 ATIVAÇÃO DO AUTOPILOT (PASA v70.0)
+    asyncio.create_task(autopilot.pulse())
 
     if not orch.worker_ids:
         logger.warning(

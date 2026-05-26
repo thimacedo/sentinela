@@ -91,6 +91,22 @@ class SentinelaOrchestrator:
 
         reward = await self.reward_engine.process_result(result)
 
+        # 📊 Persistência de Métricas (v70.2)
+        try:
+            from workers.base.worker_base import WorkerMetrics
+            from datetime import datetime, timezone
+            await self.reward_engine.memory.save_metrics(WorkerMetrics(
+                worker_id=result.worker_id,
+                cycle=result.cycle,
+                items_collected=result.extracted,
+                items_failed=result.failed,
+                duration_seconds=result.duration,
+                errors=[result.error] if result.error else [],
+                timestamp=datetime.now(timezone.utc)
+            ))
+        except Exception as e:
+            logger.warning("[orchestrator] Falha ao salvar métricas: %s", e)
+
         db_status = "n/a" if result.simulated else ("ok" if result.db_success else "falhou")
         ia_status = "n/a" if result.simulated else ("ok" if result.classifier_success else "nao")
 

@@ -6,40 +6,37 @@ import os
 import json
 import logging
 logger = logging.getLogger("AIService")
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from openai import AsyncOpenAI, APIStatusError
 from core.circuit_breaker import ai_circuit_breaker
 
 CONFIDENCE_THRESHOLD = float(os.getenv('CONFIDENCE_THRESHOLD', '0.5'))
 
-# MCA v2.2 Protocol - Calibragem Anti-Falsos Positivos (v61.0)
-SYSTEM_PROMPT = """Você é um analista forense digital do sistema Sentinela Democrática.
-Sua missão é classificar comentários políticos com precisão forense. 
-OBJETIVO: Identificar hostilidade real e ataques coordenados, mas NUNCA marcar como ódio mensagens de apoio, elogios ou ativismo político legítimo.
+# MCA v2.2 Protocol - Calibragem Forense Crítica (v70.3)
+SYSTEM_PROMPT = """Você é um perito em Linguística Forense Digital especializado em ataques coordenados e hostilidade política.
+Sua missão é classificar comentários com realismo absoluto, seguindo a Metodologia de Classificação de Ataques (MCA v2.2).
 
---- REGRAS DE EXCLUSÃO (MUITO IMPORTANTE) ---
-Classifique como "is_hate": false e categoria "NEUTRO" se o comentário for:
-- APOIO OU ELOGIO: Mensagens de incentivo a políticos (ex: "Boa meu irmão", "Melhor governador", "Estamos juntos").
-- NÚMEROS DE CAMPANHA: Apenas o número do partido ou candidato (ex: "22", "13", "Tudo 22").
-- SLOGANS POSITIVOS: Frases de efeito de apoio (ex: "O Brasil vai vencer", "Vitória no primeiro turno").
-- CRÍTICA POLÍTICA LEGÍTIMA: Discordância sobre políticas sem insultos pessoais (ex: "Não concordo com essa escala 6x1").
+--- REGRAS DE OURO ---
+1. REALISMO: Não ignore ataques velados, ironias destrutivas ou acusações de corrupção/crime.
+2. DISTINÇÃO: Crítica política legítima foca em IDEIAS. Ataques focam em PESSOAS ou INSTITUIÇÕES.
+3. IDIOMA: Sua resposta (incluindo a análise_pericial) deve ser 100% em Português Brasileiro (pt-BR).
 
---- DIRETRIZES DE CATEGORIZAÇÃO ---
-Marque "is_hate": true APENAS para:
-- INSULTO_AD_HOMINEM: Ataques à honra, competência ou moral (ex: "corrupto", "incompetente", "lixo de gente"). 
-- MISOGINIA_POLITICA: Hostilidade de gênero (ex: "histérica", "lugar de mulher é na cozinha").
-- MILICIA_DIGITAL: Teoria da conspiração, ataques ao sistema eleitoral ou ameaças de invasão/insurreição.
-- ATAQUE_INSTITUCIONAL: Desprezo explícito e hostil a órgãos (STF, Congresso, Polícia) ou pedidos de fechamento.
-- CAMPANHA_COORDENADA: Detecção de robôs via repetição idêntica de slogans (ex: 50 pessoas postando exatamente a mesma frase curta ao mesmo tempo).
+--- CATEGORIZAÇÃO (MCA v2.2) ---
+- INSULTO_AD_HOMINEM: Ataques à honra, moral, aparência ou competência do alvo. Palavras-chave: "corrupto", "ladrão", "incompetente", "frouxo", "traidor".
+- ATAQUE_INSTITUCIONAL: Hostilidade contra órgãos do Estado, governos ou sistema democrático. Inclui acusações de fraude eleitoral sem provas.
+- MILICIA_DIGITAL: Incitação à violência, invasão de prédios públicos ou teorias de conspiração golpistas.
+- MISOGINIA_POLITICA: Hostilidade baseada em gênero contra figuras femininas.
+- NEUTRO: Apenas mensagens de apoio ("Boa", "Estamos juntos"), slogans positivos ("22", "13") ou críticas técnicas sem adjetivos hostis.
 
---- EXEMPLOS DE CALIBRAÇÃO ---
-- "Flávio Bolsonaro 22 Presidente!" -> { "is_hate": false, "categoria_ia": "NEUTRO", "analise_pericial": "Mensagem de apoio político legítimo." }
-- "Ele repostou!!! Que felicidade 😍" -> { "is_hate": false, "categoria_ia": "NEUTRO", "analise_pericial": "Manifestação positiva de seguidor." }
-- "Pelo fim da escala 6x1 já!" -> { "is_hate": false, "categoria_ia": "NEUTRO", "analise_pericial": "Ativismo político/trabalhista legítimo." }
-- "Esse STF é uma vergonha, tem que fechar tudo!" -> { "is_hate": true, "categoria_ia": "ATAQUE_INSTITUCIONAL", "analise_pericial": "Ataque à validade e existência de órgão do Estado." }
-- "Sua 'vasta' inteligência é uma piada." -> { "is_hate": true, "categoria_ia": "INSULTO_AD_HOMINEM", "analise_pericial": "Ironia usada para ataque ad hominem velado." }
+--- FORMATO DE RESPOSTA (JSON APENAS) ---
+{
+  "is_hate": boolean, 
+  "categoria_ia": "CATEGORIA_ACIMA", 
+  "confianca_ia": float (0.0 a 1.0),
+  "analise_pericial": "Explicação técnica curta e realista do porquê desta classificação."
+}
 
-Responda APENAS com JSON válido. Seja conservador: na dúvida entre crítica política e ódio, marque NEUTRO.
+AVISO: Se o comentário contém acusações de crime ou insultos, "is_hate" DEVE ser true. Nunca minimize hostilidade real.
 """
 
 def load_training_context() -> str:
@@ -53,12 +50,10 @@ def load_training_context() -> str:
         with open(dataset_path, "r", encoding="utf-8") as f:
             for line in f:
                 data = json.loads(line)
-                # Extrai apenas o trecho do texto do prompt do dataset
                 prompt_text = data.get("prompt", "")
                 if "Texto:" in prompt_text:
                     excerpt = prompt_text.split("Texto:")[1].strip()
                     training_text += f"- {excerpt}\n"
-                    # Limite de segurança de tokens para evitar travamento em modelos locais menores
                     if len(training_text) > 8000:
                         break
         return training_text
@@ -93,198 +88,121 @@ def clean_null_chars(data: Any) -> Any:
 
 class AIService:
     def __init__(self):
-        # 00. LiteRT (Local High-Speed - Gemma 3 1B)
         self.litert_client = AsyncOpenAI(
             api_key="litert",
             base_url=os.getenv("LITERT_BASE_URL", "http://localhost:9379/v1")
         )
-
-        # 0. Ollama (Local - Gemma 2B)
         self.ollama_client = AsyncOpenAI(
             api_key="ollama",
             base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
         )
-
-        # 1. Mistral (Cloud Primary)
         self.mistral_client = AsyncOpenAI(
             api_key=os.getenv("MISTRAL_API_KEY"),
             base_url="https://api.mistral.ai/v1"
         )
-
-        # 2. Groq (Cloud Fast)
         self.groq_client = AsyncOpenAI(
             api_key=os.getenv("GROQ_API_KEY"),
             base_url="https://api.groq.com/openai/v1"
         )
-        
-        # 3. OpenRouter (Cloud Safety)
         self.openrouter_client = AsyncOpenAI(
             api_key=os.getenv("OPENROUTER_API_KEY"),
             base_url="https://openrouter.ai/api/v1"
         )
 
-        # Configurações de Modelos
         finetuned_model = os.getenv('FINETUNED_MODEL_NAME')
         mistral_model = finetuned_model if finetuned_model else "open-mistral-nemo"
 
-        self.providers = []
-        
-        # Priorização de Camadas (Tiers)
-        
-        # Tier 00: LiteRT (Iniciativa Local de Altíssima Velocidade)
-        self.providers.append({
-            "name": "litert", 
-            "client": self.litert_client, 
-            "model": "gemma3-1b-gpu-custom",
-            "timeout": 5.0
-        })
-
-        # Tier 0: Ollama
-        if os.getenv("ENABLE_LOCAL_AI", "false").lower() == "true":
-            self.providers.append({
-                "name": "ollama", 
-                "client": self.ollama_client, 
-                "model": os.getenv("OLLAMA_MODEL", "gemma:2b"),
-                "timeout": 15.0
-            })
-
-        # Camadas Cloud
-        self.providers.extend([
+        self.providers = [
+            {"name": "litert", "client": self.litert_client, "model": "gemma3-1b-it", "timeout": 3.0},
+            {"name": "ollama", "client": self.ollama_client, "model": os.getenv("OLLAMA_MODEL", "gemma:2b"), "timeout": 10.0},
             {"name": "mistral", "client": self.mistral_client, "model": mistral_model, "timeout": 15.0},
             {"name": "groq", "client": self.groq_client, "model": "llama-3.3-70b-versatile", "timeout": 10.0},
             {"name": "openrouter", "client": self.openrouter_client, "model": "openrouter/free", "timeout": 20.0},
-        ])
-
-    async def classify(self, text: str, comment_id: str = "N/A") -> Dict[str, Any]:
-        """Alias para classify_text para compatibilidade com PASAAuditor."""
-        return await self.classify_text(text, comment_id)
+        ]
 
     async def classify_text(self, text: str, comment_id: str = "N/A") -> Dict[str, Any]:
-        """Tenta classificar o texto em cascata, reordenando dinamicamente por saúde."""
-        
-        # 1. Reordenar provedores: Provedores com falhas recentes vão para o fim da fila
         self.providers.sort(key=lambda p: ai_circuit_breaker.failures.get(p["name"], 0))
-
+        local_result = None
+        
+        # CAMADA 1: FILTRAGEM LOCAL
         for provider in self.providers:
-            name = provider["name"]
-            
-            # 🛡️ Verifica se o circuito está aberto para o provedor
-            if not ai_circuit_breaker.can_execute(name):
-                logger.info(f"⏭️  [AI] {name.upper():<10} | ID: {comment_id:<36} | STATUS: INDISPONÍVEL")
+            if provider["name"] not in ["litert", "ollama"] or not ai_circuit_breaker.can_execute(provider["name"]):
                 continue
-
             try:
-                # 🛡️ Resiliência LiteRT: Tenta detectar erro de rota (404)
-                response = await provider["client"].chat.completions.create(
-                    model=provider["model"],
-                    messages=[
-                        {"role": "system", "content": FULL_SYSTEM_PROMPT},
-                        {"role": "user", "content": f"Comentário: \"{text}\""}
-                    ],
-                    response_format={"type": "json_object"},
-                    temperature=0.0, # v63.1: Máxima precisão determinística
-                    timeout=provider.get("timeout", 15.0)
-                )
-                
-                content = response.choices[0].message.content
-                result = self._parse_json_response(content)
-                result = clean_null_chars(result)
-                
-                ai_circuit_breaker.record_success(name)
-                
-                decoded_text = safe_decode_unicode(text)
-                clean_text = decoded_text.replace("\n", " ").replace("\r", " ").strip()
-                # Truncate to ensure log line doesn't explode in size
-                truncated_text = clean_text if len(clean_text) <= 50 else clean_text[:47] + "..."
-                
-                # Log padronizado com larguras fixas
-                cat = result.get('categoria_ia', 'NEUTRO')
-                conf = result.get('confianca_ia', 0.0)
-                logger.info(f"📊  [AI] {name.upper():<10} | ID: {comment_id:<36} | {cat:<20} | {conf:.2f} | \"{truncated_text}\"")
-                return result
+                res = await self._call_provider(provider, text, comment_id)
+                if res:
+                    local_result = res
+                    # Só encerra se for lixo ou neutro com alta confiança (sem contradição interna)
+                    if not res.get("low_confidence") and (res.get("categoria_ia") == "LIXO" or res.get("categoria_ia") == "NEUTRO"):
+                        logger.info(f"🟢 [AI] {provider['name'].upper():<10} | ID: {comment_id:<36} | {res['categoria_ia']:<20} | {res['confianca_ia']:.2f} | (Filtragem Local)")
+                        return res
+                    break
+            except: continue
 
-            except Exception as e:
-                status_code = getattr(e, "status_code", None)
-                
-                # Tratamento especial para erro 404 em provedores locais (erro de rota ou modelo)
-                if status_code == 404 and name in ["litert", "ollama"]:
-                    logger.error(f"❌ [AI] {name.upper()} | ID: {comment_id} | ERRO 404: Verifique se o modelo '{provider['model']}' está carregado ou se a URL '{provider['client'].base_url}' está correta.")
-                
-                ai_circuit_breaker.record_failure(name, status_code)
-                logger.warning(f"⚠️  [AI] {name.upper():<10} | ID: {comment_id:<36} | STATUS: FALHA/TIMEOUT | ERRO: {str(e)[:50]}")
+        # CAMADA 2: PERÍCIA CLOUD (Refinamento)
+        for provider in self.providers:
+            if provider["name"] in ["litert", "ollama"] or not ai_circuit_breaker.can_execute(provider["name"]):
+                continue
+            try:
+                hint = f" [Sugestão Local: {local_result.get('categoria_ia')}]" if local_result else ""
+                res = await self._call_provider(provider, text + hint, comment_id)
+                if res:
+                    source = local_result["name"] if local_result else "NONE"
+                    logger.info(f"🔍 [AI] {provider['name'].upper():<10} | ID: {comment_id:<36} | {res['categoria_ia']:<20} | {res['confianca_ia']:.2f} | (Refinado de {source})")
+                    return res
+            except: continue
 
-        raise RuntimeError(f"Todas as camadas de IA falharam para o comentário {comment_id}.")
+        if local_result:
+            logger.warning(f"⚠️ [AI] Cloud falhou. Usando local fallback para {comment_id}.")
+            return local_result
+        raise RuntimeError(f"Todas as camadas falharam para {comment_id}.")
+
+    async def _call_provider(self, provider: Dict[str, Any], text: str, comment_id: str) -> Optional[Dict[str, Any]]:
+        name = provider["name"]
+        try:
+            response = await provider["client"].chat.completions.create(
+                model=provider["model"],
+                messages=[{"role": "system", "content": FULL_SYSTEM_PROMPT}, {"role": "user", "content": f"Comentário: \"{text}\""}],
+                response_format={"type": "json_object"},
+                temperature=0.0,
+                timeout=provider.get("timeout", 15.0)
+            )
+            result = self._parse_json_response(response.choices[0].message.content)
+            result["name"] = name
+            ai_circuit_breaker.record_success(name)
+            return result
+        except Exception as e:
+            ai_circuit_breaker.record_failure(name, getattr(e, "status_code", None))
+            return None
 
     def _parse_json_response(self, content: str) -> Dict[str, Any]:
         try:
-            # Tenta limpar o conteúdo se vier com markdown code blocks
-            clean_content = content.replace("```json", "").replace("```", "").strip()
-            data = json.loads(clean_content)
-            
-            # Captura confiança de forma flexível (float ou string)
+            data = json.loads(content.replace("```json", "").replace("```", "").strip())
             conf_val = data.get("confianca_ia", data.get("confidence"))
+            confidence = float(conf_val) if conf_val is not None else 0.70
+            categoria = data.get("categoria_ia", data.get("category", "NEUTRO"))
+            analise = data.get("analise_pericial", "").lower()
             
-            if conf_val is not None:
-                try:
-                    confidence = float(conf_val)
-                except:
-                    confidence = 0.0
-            else:
-                # Normalização v62.4: Se não houver score mas a resposta for válida, 
-                # assumimos 0.85 para modelos locais estáveis (Ollama/LiteRT)
-                confidence = 0.85
+            # --- DETECÇÃO DE CONTRADIÇÃO (Escalação Automática) ---
+            attack_keywords = ["ataque", "hostil", "ofensiv", "insulto", "ódio", "ironia", "velad", "crítica pessoal"]
+            if categoria == "NEUTRO" and any(k in analise for k in attack_keywords):
+                confidence = 0.40 # Força escalação
                 
             low_conf = confidence < CONFIDENCE_THRESHOLD
-            categoria = data.get("categoria_ia", data.get("category", "NEUTRO"))
-            
-            if categoria == "LIXO":
-                confidence = 0.0
-                low_conf = False
-                is_hate = False
-            else:
-                # Se a confiança for muito baixa, marcamos como INDEFINIDO para auditoria humana
-                if low_conf and confidence > 0.0: 
-                    categoria = "INDEFINIDO"
-                is_hate = bool(data.get("is_hate", False))
-            
             return {
-                "is_hate": is_hate,
+                "is_hate": bool(data.get("is_hate", False)),
                 "categoria_ia": categoria,
                 "confianca_ia": confidence,
-                "category": categoria, # Compatibilidade
-                "confidence": confidence, # Compatibilidade
                 "evidencia_lexical": data.get("evidencia_lexical", []),
                 "analise_pericial": data.get("analise_pericial", "Sem análise"),
                 "low_confidence": low_conf
             }
-        except Exception as e:
-            logger.error(f"Erro ao parsear JSON da IA: {e} | Conteúdo: {content[:100]}...")
-            return {
-                "is_hate": False, "categoria_ia": "NEUTRO", "confianca_ia": 0.0, 
-                "category": "NEUTRO", "confidence": 0.0,
-                "evidencia_lexical": [], "analise_pericial": "Erro de parsing"
-            }
+        except:
+            return {"is_hate": False, "categoria_ia": "NEUTRO", "confianca_ia": 0.0, "analise_pericial": "Erro parsing"}
 
     async def validate_identity(self, expected_name: str, display_name: str, bio: str, followers: str = "0", is_verified: bool = False) -> Dict[str, Any]:
-        """Valida se um perfil do Instagram pertence ao alvo esperado (v64.1)."""
-        
-        # Regra de Ouro: Perfis Verificados ou com Milhões de seguidores são altamente prováveis de serem autênticos
-        # se o nome bater minimamente com a figura pública.
-        
-        prompt = (
-            f"Você é um perito em verificação de identidade digital de figuras públicas.\n"
-            f"ALVO ESPERADO: {expected_name}\n"
-            f"PERFIL ENCONTRADO:\n"
-            f" - Nome de Exibição: {display_name}\n"
-            f" - Biografia: {bio}\n"
-            f" - Seguidores: {followers}\n"
-            f" - Selo de Verificado: {'SIM' if is_verified else 'NÃO'}\n\n"
-            f"DIRETRIZ: Seja tolerante. Se o perfil for VERIFICADO ou possuir milhares/milhões de seguidores e o nome for compatível com o alvo, marque como autêntico.\n"
-            f"Marque como inautêntico APENAS se for claramente um fã-clube, paródia, perfil de apoio não oficial ou uma pessoa comum homônima sem relevância política.\n"
-            f"Responda APENAS com JSON:\n"
-            f"{{\"is_authentic\": boolean, \"reason\": \"justificativa técnica curta\"}}"
-        )
-
+        prompt = (f"Valide identidade de figura pública: {expected_name}\nPerfil: {display_name} | Bio: {bio} | Seguidores: {followers}\n"
+                 f"Seja tolerante se for verificado ou popular. Marque inautêntico apenas se for paródia/fã-clube.")
         try:
             response = await self.mistral_client.chat.completions.create(
                 model="open-mistral-nemo",
@@ -293,9 +211,7 @@ class AIService:
                 temperature=0.0
             )
             return json.loads(response.choices[0].message.content)
-        except Exception as e:
-            logger.error(f"Erro na validação de identidade via IA: {e}")
-            return {"is_authentic": True, "reason": "erro_ia_validacao_ignorada"}
+        except: return {"is_authentic": True, "reason": "erro_ia"}
 
     async def run_batch_classification(self, limit: int = 50) -> int:
         from core.supabase_service import supabase as db
@@ -303,35 +219,20 @@ class AIService:
             res = db.table("comentarios").select("id, texto_bruto").eq("processado_ia", False).limit(limit).execute()
             comments = res.data or []
             if not comments: return 0
-                
-            processed_count = 0
-            for comment in comments:
+            count = 0
+            for c in comments:
                 try:
-                    # Passando o ID real do comentário para o log
-                    result = await self.classify_text(comment["texto_bruto"], comment_id=str(comment["id"]))
+                    res = await self.classify_text(c["texto_bruto"], comment_id=str(c["id"]))
                     db.table("comentarios").update({
                         "processado_ia": True,
-                        "is_hate": result["is_hate"],
-                        "categoria_ia": result["categoria_ia"],
-                        "confianca_ia": result["confianca_ia"],
-                        "evidencia_lexical": result["evidencia_lexical"],
-                        "analise_pericial": result["analise_pericial"],
-                    }).eq("id", comment["id"]).execute()
-                    processed_count += 1
-                except Exception as e:
-                    # Normalização v63.0: Usa evidence_extracted (coluna real)
-                    # Removemos 'analise_pericial' do update automático enquanto a coluna não existir
-                    result = await self.classify_text(comment["texto_bruto"], comment_id=str(comment["id"]))
-                    db.table("comentarios").update({
-                        "processado_ia": True,
-                        "is_hate": result["is_hate"],
-                        "categoria_ia": result["categoria_ia"],
-                        "confianca_ia": result["confianca_ia"],
-                        "evidence_extracted": result["evidencia_lexical"],
-                        # "analise_pericial": result["analise_pericial"], # Comentado até schema update
-                    }).eq("id", comment["id"]).execute()
-        except Exception as e:
-            logger.error(f"💥 Falha crítica no lote de classificação de IA: {str(e)}")
-            return 0
+                        "is_hate": res["is_hate"],
+                        "categoria_ia": res["categoria_ia"],
+                        "confianca_ia": res["confianca_ia"],
+                        "analise_pericial": res["analise_pericial"],
+                    }).eq("id", c["id"]).execute()
+                    count += 1
+                except: continue
+            return count
+        except: return 0
 
 ai_service = AIService()

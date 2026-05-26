@@ -30,6 +30,9 @@ async def run_operation():
     iteration = 0
     total_sucessos = 0
     total_falhas = 0
+    
+    max_posts = 3
+    max_comments = 50
 
     while True:
         iteration += 1
@@ -50,11 +53,14 @@ async def run_operation():
             
             logger.info(f"📍 Alvo Atual: @{username} (Prioridade: {priority})")
             
-            worker = InstagramWorker(target_profile=username, max_posts=3)
+            from core.instagram_scraper_v2 import InstagramScraperV2
+            from core.ai_service import ai_service
+            
+            scraper = InstagramScraperV2(headless=False)
             
             try:
                 # Executa a Raspagem
-                result = await worker.execute()
+                result = await scraper.scrape_profile(username, candidato_id=username, max_posts=max_posts)
                 
                 if result:
                     logger.info(f"✅ SUCESSO: {len(result)} itens extraídos de @{username}")

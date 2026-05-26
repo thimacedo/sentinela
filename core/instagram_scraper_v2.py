@@ -108,9 +108,20 @@ class InstagramScraperV2:
                         headless=self.headless,
                         args=["--disable-blink-features=AutomationControlled", "--no-sandbox"]
                     )
+                    
+                    # 🎭 ROTAÇÃO DE STEALTH (PASA v65.0)
+                    device_profiles = [
+                        {"ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36", "w": 1920, "h": 1080},
+                        {"ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36", "w": 1440, "h": 900},
+                        {"ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36", "w": 1366, "h": 768},
+                        {"ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1", "w": 390, "h": 844},
+                        {"ua": "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36", "w": 412, "h": 915}
+                    ]
+                    profile = random.choice(device_profiles)
+                    
                     context = await browser.new_context(
-                        viewport={"width": 1280, "height": 800},
-                        user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+                        viewport={"width": profile["w"], "height": profile["h"]},
+                        user_agent=profile["ua"]
                     )
                     
                     await context.add_cookies([{
@@ -123,7 +134,7 @@ class InstagramScraperV2:
                     page = await context.new_page()
                     page.on("response", self._handle_response)
                     
-                    logger.info(f"🎯 [V2] Scrape @{username} usando {session.label} (Tentativa {retry_count+1})")
+                    logger.info(f"🎯 [V2] Scrape @{username} usando {session.label} | Profile: {profile['ua'][:30]}... (Tentativa {retry_count+1})")
                     # 1. Perfil
                     await page.goto(f"https://www.instagram.com/{username}/", wait_until="domcontentloaded", timeout=60000)
 
@@ -177,6 +188,8 @@ class InstagramScraperV2:
                     self.stats["posts_found"] = len(post_metas)
                     
                     scraped_count = 0
+                    consecutive_old_posts = 0
+                    
                     for meta in post_metas:
                         if scraped_count >= max_posts:
                             break
@@ -190,15 +203,21 @@ class InstagramScraperV2:
                             logger.info(f"⏭️ [V2] Post {shortcode} FAST-SKIP (Fixado).")
                             continue
 
-                        # 2. Fast-Skip Temporal (v62.1): Verifica data diretamente do grid se disponível
+                        # 2. Fast-Skip Temporal (v62.1/v65.0): Verifica data diretamente do grid
                         if post_timestamp:
                             try:
                                 post_dt = datetime.fromisoformat(post_timestamp.replace('Z', '+00:00'))
                                 age_days = (datetime.now(timezone.utc) - post_dt).days
                                 if age_days > max_age_days:
-                                    logger.info(f"⏭️ [V2] Post {shortcode} FAST-SKIP (Velho: {age_days}d). Encerrando busca neste perfil.")
-                                    # Se chegamos em posts velhos no grid (e não é pin), o resto também será velho.
-                                    break 
+                                    consecutive_old_posts += 1
+                                    logger.info(f"⏳ [V2] Post {shortcode} é velho ({age_days}d). [{consecutive_old_posts}/3]")
+                                    
+                                    if consecutive_old_posts >= 3:
+                                        logger.info(f"⏭️ [V2] Detectados 3 posts velhos seguidos em @{username}. Encerrando busca.")
+                                        break
+                                    continue # Tenta o próximo do grid
+                                else:
+                                    consecutive_old_posts = 0 # Reseta se encontrar um novo
                             except: pass
 
                         logger.info(f"📄 [V2] Verificando post {shortcode}...")
@@ -214,6 +233,8 @@ class InstagramScraperV2:
                             await asyncio.sleep(random.uniform(5, 15))
                         else:
                             logger.info(f"⏭️ [V2] Post {shortcode} ignorado (velho, fixado já visto ou sem comentários).")
+                            # Se o _scrape_post retornou vazio e não era fixado, pode ser por idade detectada lá
+                            # Mas aqui já temos a verificação temporal do grid (PASA v65.0)
 
                     await browser.close()
                     logger.info(f"✅ [V2] @{username} finalizado. {len(all_comments)} comentários extraídos.")

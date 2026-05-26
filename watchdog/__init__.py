@@ -65,6 +65,13 @@ CODE_ERRORS = [
     "valueerror", "keyerror", "exception", # Erros de config/.env
 ]
 
+# --- ATIVAÇÃO DO AUTOPILOT L3 (PASA v70.0) ---
+try:
+    from core.autopilot.manager import autopilot
+    AUTOPILOT_ENABLED = True
+except ImportError:
+    AUTOPILOT_ENABLED = False
+
 # --- Anti-Spam Categorizado ---
 ALERT_COOLDOWNS = {
     "runtime": 3600,  # 1 alerta por hora
@@ -453,6 +460,21 @@ def guard():
 
 if __name__ == "__main__":
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    
+    # 🤖 INICIALIZAÇÃO DO AUTOPILOT L3 (PASA v70.0)
+    if AUTOPILOT_ENABLED:
+        def run_autopilot():
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            state.add_log("info", "[Watchdog] 🤖 Autopilot L3 Ativado.")
+            try:
+                loop.run_until_complete(autopilot.pulse())
+            except Exception as e:
+                state.add_log("error", f"[Watchdog] 🤖 Autopilot falhou: {e}")
+
+        autopilot_thread = Thread(target=run_autopilot, daemon=True)
+        autopilot_thread.start()
+
     web_thread = Thread(target=run_web_server, daemon=True)
     web_thread.start()
     print("[START] Dashboard disponível em: http://localhost:8001")
