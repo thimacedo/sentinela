@@ -26,6 +26,7 @@ export default function RootLayout({
         <meta httpEquiv="Pragma" content="no-cache" />
         <meta httpEquiv="Expires" content="0" />
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1827611269042960" crossOrigin="anonymous"></script>
+        <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js"></script>
       </head>
       <body className={`${inter.className} antialiased bg-bg-main text-text-main`}>
         <div dangerouslySetInnerHTML={{ __html: '<amp-auto-ads type="adsense" data-ad-client="ca-pub-1827611269042960"></amp-auto-ads>' }} />
