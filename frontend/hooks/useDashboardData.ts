@@ -53,3 +53,16 @@ export function useTemporalSeries() {
     staleTime: 30000,
   });
 }
+
+export function useGeoUf() {
+  return useQuery({
+    queryKey: ['geo-uf'],
+    queryFn: () => {
+      // Importação tardia do gateway client
+      const { fetchApi } = require('@/lib/api');
+      return fetchApi('/api/v1/geo/uf');
+    },
+    refetchInterval: 120000,
+    staleTime: 60000,
+  });
+}

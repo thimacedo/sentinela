@@ -1,6 +1,6 @@
 'use client';
 
-import { TrendingUp, AlertTriangle, Users } from 'lucide-react';
+import { TrendingUp, AlertTriangle, Users, Shield } from 'lucide-react';
 import { useDashboardStats } from '@/hooks/useDashboardData';
 
 interface NewsHeaderProps {
@@ -36,61 +36,91 @@ export default function NewsHeader({ todayHighlight }: NewsHeaderProps) {
   return (
     <div className="space-y-10">
       {/* Main Hero */}
-      <div className="border-b border-border-main pb-12">
-        <div className="flex flex-col md:flex-row items-start gap-8">
-          <div className="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gradient-to-br from-brand-primary/10 to-blue-500/10 border border-border-main flex items-center justify-center text-4xl shadow-sm">
+      <div className="border-b border-border-main pb-6">
+        <div className="flex flex-col md:flex-row items-start gap-6">
+          <div className="flex-shrink-0 w-12 h-12 md:w-16 md:h-16 rounded-xl bg-gradient-to-br from-brand-primary/10 to-blue-500/10 border border-border-main flex items-center justify-center text-2xl shadow-sm">
             📊
           </div>
-          <div className="flex-1 space-y-5">
+          <div className="flex-1 space-y-2">
             <div>
-              <p className="text-xs md:text-sm font-black text-brand-primary uppercase tracking-[0.25em] mb-3">
+              <p className="text-[10px] md:text-xs font-black text-brand-primary uppercase tracking-[0.25em] mb-1">
                 Observatório de Discurso Cívico
               </p>
-              <h1 className="text-sm sm:text-lg md:text-xl lg:text-2xl font-bold text-text-main leading-tight tracking-tight uppercase whitespace-nowrap">
+              <h1 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold text-text-main leading-tight tracking-tight uppercase whitespace-nowrap">
                 Tendências no Discurso Político Brasileiro
               </h1>
             </div>
-            <p className="text-lg md:text-xl text-text-muted max-w-5xl leading-relaxed opacity-70 font-medium">
-              Acompanhe em tempo real os padrões de discurso de ódio e violência em redes sociais de candidatos e políticos monitorados. Transparência que alimenta a democracia.
+            <p className="text-xs md:text-sm text-text-muted max-w-4xl leading-relaxed opacity-80 font-medium">
+              Acompanhe em tempo real os padrões de discurso de hostilidade, insultos e ataques a instituições nas redes sociais de candidatos e políticos monitorados.
             </p>
           </div>
         </div>
       </div>
 
 
-      {/* Today's Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-bg-card border border-border-main rounded-lg p-4 hover:border-brand-primary/30 transition-all shadow-sm">
-          <div className="flex items-center gap-3 mb-3">
-            <AlertTriangle className="w-5 h-5 text-red-500" />
-            <span className="text-xs font-mono text-text-muted uppercase">Alertas Acumulados</span>
+      {/* Today's Stats - 4 Columns High Density Dashboard */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* KPI 1: Amostra Total */}
+        <div className="bg-bg-card border border-border-main rounded-lg p-3 hover:border-brand-primary/20 transition-all shadow-sm">
+          <div className="flex items-center gap-2 mb-2">
+            <TrendingUp className="w-4 h-4 text-blue-500" />
+            <span className="text-[9px] font-mono text-text-muted uppercase tracking-wider">Posts Processados</span>
           </div>
-          <div className="text-3xl font-bold text-text-main">
+          <div className="text-lg sm:text-xl font-extrabold text-text-main font-mono">
+            {isLoading ? '...' : displayStats.newPosts.toLocaleString('pt-BR')}
+          </div>
+          <p className="text-[9px] text-text-muted mt-1">Amostra total coletada</p>
+        </div>
+
+        {/* KPI 2: Alertas de Ódio */}
+        <div className="bg-bg-card border border-border-main rounded-lg p-3 hover:border-brand-primary/20 transition-all shadow-sm">
+          <div className="flex items-center gap-2 mb-2">
+            <AlertTriangle className="w-4 h-4 text-red-500" />
+            <span className="text-[9px] font-mono text-text-muted uppercase tracking-wider">Discursos Hostis</span>
+          </div>
+          <div className="text-lg sm:text-xl font-extrabold text-text-main font-mono">
             {isLoading ? '...' : displayStats.todayAlerts.toLocaleString('pt-BR')}
           </div>
-          <p className="text-xs text-text-muted mt-2">Casos com ódio identificados</p>
+          <p className="text-[9px] text-text-muted mt-1">Classificados via MCA v2.2</p>
         </div>
 
-        <div className="bg-bg-card border border-border-main rounded-lg p-4 hover:border-brand-primary/30 transition-all shadow-sm">
-          <div className="flex items-center gap-3 mb-3">
-            <Users className="w-5 h-5 text-emerald-500" />
-            <span className="text-xs font-mono text-text-muted uppercase">Monitorados</span>
+        {/* KPI 3: Resiliência Cívica com Barra */}
+        <div className="bg-bg-card border border-border-main rounded-lg p-3 hover:border-brand-primary/20 transition-all shadow-sm">
+          <div className="flex items-center gap-2 mb-2">
+            <Shield className="w-4 h-4 text-emerald-500" />
+            <span className="text-[9px] font-mono text-text-muted uppercase tracking-wider">Resiliência</span>
           </div>
-          <div className="text-3xl font-bold text-text-main">
+          <div className="flex items-baseline gap-1.5">
+            <div className="text-lg sm:text-xl font-extrabold text-text-main font-mono">
+              {isLoading ? '...' : `${stats?.resiliencia || 0}%`}
+            </div>
+            <span className="text-[9px] text-emerald-500 font-bold">Saudável</span>
+          </div>
+          {/* Mini progress bar */}
+          <div className="w-full bg-bg-main rounded-full h-1 mt-2 overflow-hidden border border-border-main/30">
+            <div 
+              className="bg-emerald-500 h-full rounded-full transition-all duration-500" 
+              style={{ width: `${stats?.resiliencia || 0}%` }}
+            />
+          </div>
+        </div>
+
+        {/* KPI 4: Alvos Monitorados */}
+        <div className="bg-bg-card border border-border-main rounded-lg p-3 hover:border-brand-primary/20 transition-all shadow-sm">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Users className="w-4 h-4 text-purple-500" />
+              <span className="text-[9px] font-mono text-text-muted uppercase tracking-wider">Monitorados</span>
+            </div>
+            <span className="flex h-2 w-2 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+          </div>
+          <div className="text-lg sm:text-xl font-extrabold text-text-main font-mono">
             {isLoading ? '...' : displayStats.candidatesMonitored}
           </div>
-          <p className="text-xs text-text-muted mt-2">Candidatos sob observação</p>
-        </div>
-
-        <div className="bg-bg-card border border-border-main rounded-lg p-4 hover:border-brand-primary/30 transition-all shadow-sm">
-          <div className="flex items-center gap-3 mb-3">
-            <TrendingUp className="w-5 h-5 text-blue-500" />
-            <span className="text-xs font-mono text-text-muted uppercase">Posts Processados</span>
-          </div>
-          <div className="text-3xl font-bold text-text-main">
-            {isLoading ? '...' : (displayStats.newPosts / 1000).toFixed(1)}k
-          </div>
-          <p className="text-xs text-text-muted mt-2">Total coletados</p>
+          <p className="text-[9px] text-text-muted mt-1">Perfis ativos sob escrutínio</p>
         </div>
       </div>
 
