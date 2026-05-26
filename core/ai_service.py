@@ -39,6 +39,19 @@ Sua missão é classificar comentários com realismo absoluto, seguindo a Metodo
 AVISO: Se o comentário contém acusações de crime ou insultos, "is_hate" DEVE ser true. Nunca minimize hostilidade real.
 """
 
+# Prompt de Triagem Local - Ultra Rápido (v70.4)
+LOCAL_SYSTEM_PROMPT = """Você é um classificador binário de hostilidade política. 
+Analise se o texto contém: insultos, acusações criminais, ataques a instituições ou ironia hostil.
+Responda APENAS com JSON:
+{
+  "is_hate": boolean,
+  "categoria_ia": "NEUTRO|LIXO|SUSPEITO",
+  "confianca_ia": float,
+  "analise_pericial": "Motivo rápido"
+}
+IMPORTANTE: Se houver QUALQUER sinal de ataque, marque como "SUSPEITO" para perícia posterior.
+"""
+
 def load_training_context() -> str:
     """Carrega o dataset de treinamento (PDFs de ironia/sarcasmo) como contexto in-prompt (In-Context Learning)."""
     try:
@@ -159,10 +172,11 @@ class AIService:
 
     async def _call_provider(self, provider: Dict[str, Any], text: str, comment_id: str) -> Optional[Dict[str, Any]]:
         name = provider["name"]
+        system_prompt = LOCAL_SYSTEM_PROMPT if name in ["litert", "ollama"] else FULL_SYSTEM_PROMPT
         try:
             response = await provider["client"].chat.completions.create(
                 model=provider["model"],
-                messages=[{"role": "system", "content": FULL_SYSTEM_PROMPT}, {"role": "user", "content": f"Comentário: \"{text}\""}],
+                messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": f"Comentário: \"{text}\""}],
                 response_format={"type": "json_object"},
                 temperature=0.0,
                 timeout=provider.get("timeout", 15.0)

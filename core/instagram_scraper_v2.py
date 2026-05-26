@@ -135,6 +135,15 @@ class InstagramScraperV2:
                     page.on("response", self._handle_response)
                     
                     logger.info(f"🎯 [V2] Scrape @{username} usando {session.label} | Profile: {profile['ua'][:30]}... (Tentativa {retry_count+1})")
+                    
+                    # 🛡️ VERIFICAÇÃO DE SESSÃO ATIVA (PASA v70.4)
+                    if not await self._verify_session(page, session):
+                        logger.warning(f"⚠️ [V2] Sessão {session.label} expirada ou inválida. Rotacionando...")
+                        session.blocked = True
+                        retry_count += 1
+                        await browser.close()
+                        continue
+
                     # 1. Perfil
                     await page.goto(f"https://www.instagram.com/{username}/", wait_until="domcontentloaded", timeout=60000)
 
@@ -145,6 +154,7 @@ class InstagramScraperV2:
                             header_text = await error_header.inner_text()
                             if "Página não disponível" in header_text or "Sorry, this page" in header_text:
                                 logger.error(f"❌ [V2] Alvo @{username} inexistente (404 detectado no H2).")
+                                await self._take_screenshot(page, f"404_{username}")
                                 await browser.close()
                                 raise ValueError(f"invalid_target: 404_not_found")
                     except ValueError as ve: raise ve
@@ -154,6 +164,7 @@ class InstagramScraperV2:
 
                     if "login" in page.url:
                         logger.warning(f"⚠️ [V2] Login wall detectado para {session.label}")
+                        await self._take_screenshot(page, f"login_wall_{session.label}")
                         session.blocked = True
                         self.stats["session_rotations"] += 1
                         retry_count += 1
@@ -363,6 +374,10 @@ class InstagramScraperV2:
                 self.stats["browser_renders"] += 1
                 comments = await self._extract_from_dom(page, shortcode)
 
+            # 📸 EVIDÊNCIA VISUAL DE VAZIO (PASA v70.4)
+            if not comments:
+                await self._take_screenshot(page, f"vazio_{username}_{shortcode}")
+
             # 5. Fecha o modal
             await self.close_post_modal(page)
             
@@ -415,6 +430,7 @@ class InstagramScraperV2:
 
         except Exception as e:
             logger.error(f"⚠️ [V2] Falha ao processar post {shortcode} via modal: {e}")
+            await self._take_screenshot(page, f"error_{username}_{shortcode}")
             try: await self.close_post_modal(page)
             except: pass
             return []
@@ -571,6 +587,30 @@ class InstagramScraperV2:
 
     def get_stats(self) -> Dict[str, Any]:
         return self.stats
+
+    async def _verify_session(self, page: Page, session: Session) -> bool:
+        """Verifica se a sessão está funcional tentando acessar os dados do usuário (PASA v70.4)."""
+        try:
+            # Tenta carregar uma URL de API simples que requer login
+            await page.goto("https://www.instagram.com/api/v1/users/web_profile_info/?username=instagram", wait_until="networkidle", timeout=15000)
+            content = await page.content()
+            if '"status": "ok"' in content:
+                return True
+            return False
+        except:
+            return False
+
+    async def _take_screenshot(self, page: Page, name: str) -> None:
+        """Captura evidência visual da falha para auditoria (PASA v70.4)."""
+        try:
+            folder = os.path.join("logs", "evidence")
+            os.makedirs(folder, exist_ok=True)
+            ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+            path = os.path.join(folder, f"{ts}_{name}.png")
+            await page.screenshot(path=path, full_page=True)
+            logger.info(f"📸 Evidência visual salva: {path}")
+        except Exception as e:
+            logger.error(f"❌ Falha ao capturar screenshot: {e}")
 
 async def scrape_instagram(username: str, candidato_id: str, max_posts: int = 3, max_comments_per_post: int = 50) -> List[Dict[str, Any]]:
     """Função utilitária rápida."""
