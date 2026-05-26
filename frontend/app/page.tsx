@@ -31,7 +31,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-bg-main transition-colors duration-300">
       {/* Main Container */}
-      <main className="max-w-6xl mx-auto py-8 space-y-12">
+      <main className="max-w-6xl mx-auto py-12 space-y-24">
         {/* Section 1: News Header */}
         <NewsHeader
           todayHighlight={{
@@ -78,10 +78,15 @@ export default function HomePage() {
         <EventTimeline events={timelineEvents} period="24h" />
 
         {/* Section 5: Candidate Profiles */}
-        <div className="space-y-4">
-          <h2 className="text-2xl font-bold text-text-main border-b border-border-main pb-4">
-            👤 Perfis em Destaque
-          </h2>
+        <div className="space-y-6">
+          <div className="flex items-center justify-between border-b border-border-main pb-4">
+            <h2 className="text-2xl font-bold text-text-main">
+              👤 Perfis em Destaque
+            </h2>
+            <p className="text-xs text-text-muted font-mono animate-pulse uppercase">
+              Use as setas para explorar →
+            </p>
+          </div>
           <div className="grid grid-cols-1 gap-6">
             <CandidateProfile />
           </div>

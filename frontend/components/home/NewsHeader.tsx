@@ -45,15 +45,15 @@ export default function NewsHeader({ todayHighlight }: NewsHeaderProps) {
             <p className="text-sm font-mono text-text-muted uppercase tracking-widest mb-3">
               Observatório de Discurso Cívico
             </p>
-            <h1 className="text-4xl md:text-5xl font-black text-text-main leading-none tracking-tighter md:whitespace-nowrap">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-text-main leading-none tracking-tighter md:text-nowrap uppercase">
               Tendências no Discurso Político Brasileiro
             </h1>
           </div>
-          </div>
-          <p className="text-lg text-text-muted max-w-4xl leading-relaxed">
+        </div>
+        <p className="text-lg text-text-muted max-w-5xl leading-relaxed opacity-80">
           Acompanhe em tempo real os padrões de discurso de ódio e violência em redes sociais de candidatos e políticos monitorados. Transparência que alimenta a democracia.
-          </p>
-          </div>
+        </p>
+      </div>
 
 
       {/* Today's Stats */}

@@ -22,12 +22,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <head>
-        <Script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1827611269042960"
-          crossOrigin="anonymous"
-          strategy="afterInteractive"
-        />
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1827611269042960" crossOrigin="anonymous"></script>
       </head>
       <body className={`${inter.className} antialiased bg-bg-main text-text-main`}>
         <ClientLayoutWrapper>
