@@ -22,3 +22,30 @@ export async function fetchApi(path: string, options: RequestInit = {}) {
 
   return response.json();
 }
+
+// ─── DASHBOARD ENDPOINTS ───
+
+export async function getSummaryStats() {
+  return fetchApi('/api/v1/summary');
+}
+
+export async function getTargets(limit = 50) {
+  return fetchApi(`/api/v1/targets?limit=${limit}`);
+}
+
+export async function getActiveAlerts(limit = 20) {
+  return fetchApi(`/api/v1/alerts/active?limit=${limit}`);
+}
+
+export async function getDossiers(candidatoId?: string) {
+  const params = candidatoId ? `?candidato_id=${candidatoId}` : '';
+  return fetchApi(`/api/v1/dossiers${params}`);
+}
+
+export async function getTemporalSeries() {
+  return fetchApi('/api/v1/analytics/temporal-series');
+}
+
+export async function getNetworks() {
+  return fetchApi('/api/v1/networks');
+}

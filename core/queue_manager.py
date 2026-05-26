@@ -89,20 +89,26 @@ class QueueManager:
         return None
 
     def _get_from_global_rotation(self, blocked, seen_targets, active_targets) -> Optional[Target]:
-        """Garante que todos os candidatos ativos sejam processados circularmente."""
+        """Garante que todos os candidatos ativos sejam processados circularmente com Smart Backoff (PASA v70.4)."""
         try:
-            candidatos = self.db.table("candidatos")\
-                .select("id,username")\
+            # ❄️ SMART BACKOFF: Pula alvos 'FRIO' que foram processados recentemente (< 12h)
+            from datetime import datetime, timedelta, timezone
+            cold_threshold = (datetime.now(timezone.utc) - timedelta(hours=12)).isoformat()
+
+            # Query otimizada: Prioriza quem nunca foi coletado ou não é frio
+            res = self.db.table("candidatos")\
+                .select("id,username,termometro,last_scraped_at")\
                 .eq("status_monitoramento", "Ativo")\
+                .or_(f"termometro.neq.FRIO,last_scraped_at.lt.{cold_threshold},last_scraped_at.is.null")\
                 .order("last_scraped_at", desc=False)\
                 .limit(15).execute()
                 
-            for cand in candidatos.data or []:
+            for cand in res.data or []:
                 username = cand["username"]
                 if username in blocked:
                     continue
                 
-                logger.info(f"🔄 [Queue] Selecionado via Rotação Global: @{username}")
+                logger.info(f"🔄 [Queue] Selecionado via Rotação Global: @{username} ({cand.get('termometro', 'MORNO')})")
                 self._add_to_blocked(username, seen_targets, active_targets)
                 return Target(
                     username=username,

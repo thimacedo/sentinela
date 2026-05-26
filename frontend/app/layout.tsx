@@ -6,8 +6,8 @@ import ClientLayoutWrapper from '@/components/ClientLayoutWrapper'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Sentinela Democrática',
-  description: 'War Room de Análise Forense',
+  title: 'Sentinela | Observatório de Discurso Cívico',
+  description: 'Transparência em tempo real sobre padrões de discurso de ódio e violência em redes sociais de candidatos e políticos brasileiros.',
 }
 
 export default function RootLayout({
