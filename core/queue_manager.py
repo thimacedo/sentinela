@@ -133,7 +133,7 @@ class QueueManager:
 
                 # Reinserção via upsert (atualiza se existir, insere se não existir)
                 self.db.table("fila_coleta").upsert({
-                    "candidato_id": cand["id"],
+                    "candidato_id": cand["username"],
                     "status": "PENDENTE",
                     "prioridade": prioridade,
                 }, on_conflict="candidato_id,data_agendada").execute()
