@@ -12,6 +12,7 @@ _last_updated: 2026-05-27 | branch: main (Model: Gemini 3.5 Flash)_
 | Persistencia Supabase | OK | v80.0: Locking Atômico via RPC (`claim_fila_target`) e schema v80 integrado |
 | Classificacao IA | OK | Cascade v70.3 + Processamento em lote Cloud (100 itens/rodada) via Actions |
 | GitHub Actions (CI/CD) | Operacional | v82.1: Saneamento concluído, suporte a Node 24 ativo e blindagem global contra crashes de credenciais de IA |
+| Relatórios Comerciais | Implementado | Geração diária, UI, API e cron
 
 ## Descobertas Tecnicas (2026-05-27)
 - **Páginas Institucionais e Navegação Funcional do Frontend (v83.5)**: Criadas as rotas e interfaces das páginas de rodapé regulatórias (`/termos`, `/metodologia`, `/lgpd`, `/privacidade`). Consertados todos os botões estáticos sem ação do dashboard, associando-os com navegações reais e implementada funcionalidade de compartilhamento com cópia para a área de transferência.

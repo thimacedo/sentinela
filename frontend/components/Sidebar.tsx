@@ -47,7 +47,7 @@ const menuItems = [
   { 
     id: 'relatorios', 
     label: 'RELATÓRIOS', 
-    path: '/dossies',
+    path: '/relatorios', 
     icon: FileText 
   },
 ]
