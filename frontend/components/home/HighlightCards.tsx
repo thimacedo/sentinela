@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useAlerts } from '@/hooks/useDashboardData';
 
 interface HighlightStory {
@@ -82,9 +83,9 @@ export default function HighlightCards({ stories: mockStories }: HighlightCardsP
     <div className="space-y-4">
       <div className="flex items-center justify-between border-b border-border-main pb-4">
         <h2 className="text-2xl font-bold text-text-main">📰 Destaques Recentes</h2>
-        <button className="text-sm text-brand-primary hover:underline font-mono">
+        <Link href="/alertas" className="text-sm text-brand-primary hover:underline font-mono">
           Ver tudo →
-        </button>
+        </Link>
       </div>
 
       {isLoading ? (
