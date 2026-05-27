@@ -20,7 +20,8 @@ async def refresh_session():
     async with async_playwright() as pw:
         # Lançamos com headless=False conforme solicitado para resolver desafios
         print(f"🚀 Lançando navegador para reautenticar @{username}...")
-        browser = await pw.chromium.launch(headless=False) 
+        headless = os.getenv('PLAYWRIGHT_HEADLESS', 'true').lower() == 'true'
+        browser = await pw.chromium.launch(headless=headless)
         context = await browser.new_context()
         page = await context.new_page()
         
