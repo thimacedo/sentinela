@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server';
 import path from 'path';
 import fs from 'fs/promises';
 
+export const dynamic = 'force-static';
+
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
 const supabase = createClient(supabaseUrl, supabaseKey);
@@ -11,6 +13,8 @@ const reportsDir = path.join(process.cwd(), 'public', 'reports');
 
 export async function GET() {
   try {
+    // Garante que o diretório exista em tempo de build/execução
+    await fs.mkdir(reportsDir, { recursive: true });
     const files = await fs.readdir(reportsDir);
     const reports = files.map((file) => {
       const ext = path.extname(file).substring(1);
@@ -22,7 +26,8 @@ export async function GET() {
     });
     return NextResponse.json({ reports });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to list reports' }, { status: 500 });
+    // Retorna lista vazia com status 200 para evitar quebras no build estático SSG
+    return NextResponse.json({ reports: [], error: 'Failed to list reports or directory empty' });
   }
 }
 
