@@ -1,6 +1,7 @@
 'use client';
 
 import TargetsTab from "@/components/warroom/TargetsTab";
+import AdSenseSlot from '@/components/ads/AdSenseSlot';
 
 export default function AlvosPage() {
   return (
@@ -13,7 +14,9 @@ export default function AlvosPage() {
       </div>
 
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <TargetsTab />
+          <TargetsTab />
+          {/* Anúncio AdSense */}
+          <AdSenseSlot adSlot="PLACEHOLDER_SLOT_ID" format="vertical" />
       </div>
     </div>
   );

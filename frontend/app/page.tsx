@@ -2,6 +2,7 @@
 
 import { useAlerts, useDashboardStats } from '@/hooks/useDashboardData';
 import NewsHeader from '@/components/home/NewsHeader';
+import AdSenseSlot from '@/components/ads/AdSenseSlot';
 import Link from 'next/link';
 import HighlightCards from '@/components/home/HighlightCards';
 
@@ -48,6 +49,8 @@ export default function HomePage() {
 
         {/* Section 2: Highlights */}
         <HighlightCards />
+        {/* Anúncio AdSense */}
+        <AdSenseSlot adSlot="2020882637" format="horizontal" />
 
         {/* Section 3: Insights & Trends */}
         <div className="space-y-4">

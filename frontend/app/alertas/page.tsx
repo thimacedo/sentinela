@@ -1,6 +1,7 @@
 'use client';
 
 import AlertsTab from "@/components/warroom/AlertsTab";
+import AdSenseSlot from '@/components/ads/AdSenseSlot';
 
 export default function AlertasPage() {
   return (
@@ -14,7 +15,9 @@ export default function AlertasPage() {
       </div>
 
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <AlertsTab />
+          <AlertsTab />
+          {/* Anúncio AdSense */}
+          <AdSenseSlot adSlot="PLACEHOLDER_SLOT_ID" format="vertical" />
       </div>
     </div>
   );
