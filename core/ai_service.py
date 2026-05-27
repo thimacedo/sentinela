@@ -150,6 +150,20 @@ class AIService:
         return await self.classify_text(text, comment_id)
 
     async def classify_text(self, text: str, comment_id: str = "N/A") -> Dict[str, Any]:
+        # Filtragem Lexical Preventiva (Anti-Falso Positivo de Menções Puras / Lixo)
+        from core.lexical_filter import lexical_filter
+        if lexical_filter.is_junk(text):
+            logger.info(f"♻️ [AI] Descartando preventivamente comentário por baixa qualidade léxica/menção pura (ID: {comment_id})")
+            return {
+                "is_hate": False,
+                "categoria_ia": "NEUTRO",
+                "category": "NEUTRO",
+                "confianca_ia": 1.0,
+                "confidence": 1.0,
+                "analise_pericial": "Descartado preventivamente pelo filtro léxico (menção pura ou texto sem conteúdo útil).",
+                "low_confidence": False
+            }
+
         self.providers.sort(key=lambda p: ai_circuit_breaker.failures.get(p["name"], 0))
         local_result = None
         
