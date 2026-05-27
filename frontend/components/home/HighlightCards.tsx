@@ -27,7 +27,7 @@ export default function HighlightCards({ stories: mockStories }: HighlightCardsP
       id: `${idx}`,
       candidate: alert.candidatos?.username || 'Desconhecido',
       title: `Discurso de ódio detectado`,
-      summary: alert.texto_bruto?.substring(0, 120) + '...' || 'Análise forense em progresso',
+      summary: alert.texto_bruto?.substring(0, 120) + '...' || 'Análise analítica em progresso',
       alertCount: 1,
       severity:
         (alert.categoria_ia === 'CRITICO' ? 'critical' : alert.categoria_ia === 'ELEVADO' ? 'high' : 'medium') as any,
@@ -138,7 +138,7 @@ export default function HighlightCards({ stories: mockStories }: HighlightCardsP
                 <div className="flex items-center justify-between text-xs text-text-muted">
                   <span className="font-mono">{story.alertCount} caso(s) identificado(s)</span>
                   <button className="text-brand-primary hover:underline font-mono font-bold">
-                    Analisar Perícia →
+                    Explorar Análise →
                   </button>
                 </div>
               </article>

@@ -23,7 +23,7 @@ const menuItems = [
   { 
     id: 'analise', 
     label: 'ANÁLISE', 
-    path: '/pericia',
+    path: '/analise',
     icon: BarChart3 
   },
   { 

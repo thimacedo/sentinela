@@ -31,7 +31,7 @@ export default function DossiersTab() {
             <FileText className="w-5 h-5 text-brand-primary" />
             Relatórios e Dossiês
           </h2>
-          <p className="text-xs text-text-muted font-medium uppercase tracking-widest mt-1">Exportação de Evidências Técnicas</p>
+          <p className="text-xs text-text-muted font-medium uppercase tracking-widest mt-1">Exportação de Relatórios Analíticos</p>
         </div>
         <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
@@ -52,7 +52,7 @@ export default function DossiersTab() {
           {isLoading ? (
             <TableRow>
               <TableCell colSpan={4} className="text-center py-20 text-text-muted animate-pulse font-mono text-xs">
-                CONSOLIDANDO ARQUIVOS FORENSES...
+                CONSOLIDANDO RELATÓRIOS DO SISTEMA...
               </TableCell>
             </TableRow>
           ) : dossiers.length === 0 ? (

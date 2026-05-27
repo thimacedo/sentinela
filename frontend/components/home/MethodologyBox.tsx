@@ -33,7 +33,7 @@ export default function MethodologyBox() {
               {[
                 'Coleta autônoma de posts públicos em redes sociais',
                 'Identificação de padrões de discurso de ódio e violência',
-                'Relatórios forenses com classificação semântica MCA v2.2',
+                'Relatórios analíticos com classificação semântica MCA v2.2',
                 'Alertas em tempo real sobre picos anormais de hostilidade'
               ].map((item, i) => (
                 <li key={i} className="text-xs text-text-muted flex items-start gap-2">
@@ -75,7 +75,7 @@ export default function MethodologyBox() {
               {[
                 { label: 'Coleta', val: 'Motores Playwright v2 / Zyte' },
                 { label: 'Processamento', val: 'Análise semântica Híbrida (Mistral/Ollama)' },
-                { label: 'Protocolo', val: 'PASA v70.4 — Critérios Forenses' },
+                { label: 'Protocolo', val: 'PASA v70.4 — Critérios de Análise' },
                 { label: 'Frequência', val: 'Ciclos de 24h com Autopilot L3' }
               ].map((item, i) => (
                 <p key={i} className="text-[10px] text-text-muted leading-tight">
