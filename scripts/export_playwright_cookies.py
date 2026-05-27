@@ -158,7 +158,26 @@ async def renew_account_cookies(browser, account: dict):
             print(f"Aviso ao fechar 'Ativar notificações': {e}")
 
         # 4. Capturar cookies e salvar no .env
-        cookies = await context.cookies()
+        # Garante que o contexto está estável navegando para a home antes de capturar
+        try:
+            current_url = page.url
+            if "accounts/login" not in current_url and not page.is_closed():
+                # Navega para a home para estabilizar qualquer redirecionamento SPA pendente
+                try:
+                    await page.goto('https://www.instagram.com/', wait_until='domcontentloaded', timeout=20000)
+                    await page.wait_for_timeout(3000)
+                except Exception:
+                    pass  # Ignora erros de navegação, tenta coletar assim mesmo
+        except Exception:
+            pass
+        
+        try:
+            cookies = await context.cookies()
+        except Exception as e_cookies:
+            print(f"[AVISO] Não foi possível coletar cookies do contexto: {e_cookies}")
+            await context.close()
+            return
+        
         new_sessionid = next((c['value'] for c in cookies if c['name'] == 'sessionid'), None)
         cookie_string = "; ".join([f"{c['name']}={c['value']}" for c in cookies])
         
@@ -238,7 +257,7 @@ async def export_cookies():
             try:
                 await renew_account_cookies(browser, acc)
             except Exception as e:
-                print(f"💥 Erro na renovação da conta {acc['user']}: {e}")
+                print(f"[ERRO] Falha na renovacao da conta {acc['user']}: {e}")
                 
         await browser.close()
 
