@@ -2,7 +2,9 @@
 
 import { useAlerts, useDashboardStats } from '@/hooks/useDashboardData';
 import NewsHeader from '@/components/home/NewsHeader';
+import Link from 'next/link';
 import HighlightCards from '@/components/home/HighlightCards';
+
 import EventTimeline from '@/components/home/EventTimeline';
 import InsightBox from '@/components/home/InsightBox';
 import CandidateProfile from '@/components/home/CandidateProfile';
@@ -110,11 +112,11 @@ export default function HomePage() {
             Tecnologia de vigilância cívica para a transparência do processo democrático brasileiro.
           </p>
           <div className="flex gap-8 justify-center text-[10px] font-bold text-text-muted uppercase tracking-tighter">
-            <button className="hover:text-brand-primary transition-colors">Termos</button>
-            <button className="hover:text-brand-primary transition-colors">Metodologia</button>
-            <button className="hover:text-brand-primary transition-colors">LGPD</button>
-            <button className="hover:text-brand-primary transition-colors">Privacidade</button>
-            <button className="hover:text-brand-primary transition-colors">GitHub</button>
+            <Link href="/termos" className="hover:text-brand-primary transition-colors">Termos</Link>
+            <Link href="/metodologia" className="hover:text-brand-primary transition-colors">Metodologia</Link>
+            <Link href="/lgpd" className="hover:text-brand-primary transition-colors">LGPD</Link>
+            <Link href="/privacidade" className="hover:text-brand-primary transition-colors">Privacidade</Link>
+            <Link href="https://github.com/THIAGO/sentinela" className="hover:text-brand-primary transition-colors" target="_blank" rel="noopener noreferrer">GitHub</Link>
           </div>
         </footer>
       </main>
