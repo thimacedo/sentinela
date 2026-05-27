@@ -136,7 +136,7 @@ class QueueManager:
                     "candidato_id": cand["id"],
                     "status": "PENDENTE",
                     "prioridade": prioridade,
-                }, on_conflict="candidato_id").execute()
+                }, on_conflict="candidato_id,data_agendada").execute()
                 reinseridos += 1
 
                 if (current_pending + reinseridos) >= min_pending:
