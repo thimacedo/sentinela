@@ -138,9 +138,9 @@ export default function HighlightCards({ stories: mockStories }: HighlightCardsP
 
                 <div className="flex items-center justify-between text-xs text-text-muted">
                   <span className="font-mono">{story.alertCount} caso(s) identificado(s)</span>
-                  <button className="text-brand-primary hover:underline font-mono font-bold">
+                  <Link href="/analise" className="text-brand-primary hover:underline font-mono font-bold">
                     Explorar Análise →
-                  </button>
+                  </Link>
                 </div>
               </article>
             );

@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+import Link from 'next/link';
 import { TrendingUp, AlertTriangle, Users } from 'lucide-react';
 import { useDashboardStats } from '@/hooks/useDashboardData';
 
@@ -13,6 +15,20 @@ interface NewsHeaderProps {
 
 export default function NewsHeader({ todayHighlight }: NewsHeaderProps) {
   const { data: stats, isLoading, error } = useDashboardStats();
+  const [copied, setCopied] = useState(false);
+
+  const handleShare = async () => {
+    if (!todayHighlight) return;
+    const shareText = `Sentinela: ${todayHighlight.title} - ${todayHighlight.description} Acompanhe em tempo real: ${typeof window !== 'undefined' ? window.location.origin : 'https://sentinela.democratica'}`;
+    
+    try {
+      await navigator.clipboard.writeText(shareText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Erro ao copiar texto:', err);
+    }
+  };
 
   const severityColor = {
     critical: 'bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400',
@@ -103,11 +119,17 @@ export default function NewsHeader({ todayHighlight }: NewsHeaderProps) {
               <h3 className="text-lg font-bold mb-2">{todayHighlight.title}</h3>
               <p className="text-sm opacity-90">{todayHighlight.description}</p>
               <div className="mt-4 flex gap-2">
-                <button className="px-3 py-1 bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 rounded text-sm font-mono transition-colors">
+                <Link
+                  href="/metodologia"
+                  className="px-3 py-1 bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 rounded text-sm font-mono transition-colors inline-block"
+                >
                   Ver Detalhes
-                </button>
-                <button className="px-3 py-1 bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 rounded text-sm font-mono transition-colors">
-                  Compartilhar
+                </Link>
+                <button
+                  onClick={handleShare}
+                  className="px-3 py-1 bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 rounded text-sm font-mono transition-colors"
+                >
+                  {copied ? 'Copiado! 📋' : 'Compartilhar'}
                 </button>
               </div>
             </div>

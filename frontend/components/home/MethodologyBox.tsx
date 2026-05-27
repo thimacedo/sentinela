@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { BookOpen, CheckCircle2, AlertCircle, HelpCircle } from 'lucide-react';
 
 export default function MethodologyBox() {
@@ -93,8 +94,8 @@ export default function MethodologyBox() {
           📚 Explore nossa documentação técnica para entender os algoritmos.
         </p>
         <div className="flex gap-4">
-          <button className="underline font-bold hover:text-blue-600 transition-colors">Documentação</button>
-          <button className="underline font-bold hover:text-blue-600 transition-colors">Publicações</button>
+          <Link href="/metodologia" className="underline font-bold hover:text-blue-600 transition-colors">Documentação</Link>
+          <Link href="/dossies" className="underline font-bold hover:text-blue-600 transition-colors">Publicações</Link>
         </div>
       </div>
     </div>
