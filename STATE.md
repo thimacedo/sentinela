@@ -5,7 +5,7 @@ _last_updated: 2026-05-27 | branch: feat/autonomous-workers (Model: Claude Sonne
 
 | Subsistema | Status | Observacao |
 |---|---|---|
-| Frontend (nextjs) | Operacional | v80.1: Título otimizado NewsHeader (whitespace-nowrap sóbrio), Mobile 100% OK, Build compilando com sucesso |
+| Frontend (nextjs) | Operacional | v83.1: Adequação linguística concluída (remoção de termos restritos), rota física alterada de /pericia para /analise, build e typecheck concluídos com Turbopack em 5.3s |
 | Autopilot L3 | Operacional | v80.0: Heartbeat e Polling de Comandos Cloud integrados à telemetria remota |
 | Watchdog (Guardião) | Operacional | v61.7: Hot-Reload, Integração L3 Autopilot, Cleanup de Órfãos automático |
 | Coleta Independente (IGWorkerV2) | Operacional | Motor V2 v71.0: Rotação Stealth, Cookies renovados com sucesso via Playwright em 2026-05-27, Buffer Adaptativo (SQLite local / Memória em Cloud) |
@@ -14,6 +14,7 @@ _last_updated: 2026-05-27 | branch: feat/autonomous-workers (Model: Claude Sonne
 | GitHub Actions (CI/CD) | Operacional | v82.1: Saneamento concluído, suporte a Node 24 ativo e blindagem global contra crashes de credenciais de IA |
 
 ## Descobertas Tecnicas (2026-05-27)
+- **Adequação Linguística Legal do Frontend (v83.1)**: Removidas todas as strings que faziam uso de termos legalmente regulados (como "perícia", "forense", "prova", "evidência") em todo o frontend do Next.js. A rota física `/pericia` foi renomeada para `/analise` e o componente `ForensicTab.tsx` para `AnaliseTab.tsx`. O build e o typecheck do TypeScript concluíram com sucesso em 5.3s.
 - **Renovação Automatizada de Cookies via Playwright (v83.0)**: Executada com sucesso a renovação dos cookies e sessionids das contas do Instagram (`tempareiapodcast` e `monitoramento.discurso`) utilizando o fluxo automatizado com usuário e senha do `.env` por meio do parâmetro `--force` no `export_playwright_cookies.py`. O arquivo `.env` foi atualizado com as chaves `INSTAGRAM_SESSIONID`, `INSTAGRAM_COOKIE_FULL` e `INSTAGRAM_SESSIONID_2`.
 - **Blindagem de Efeito Colateral na Importação (v82.1)**: Configurados fallbacks com strings fictícias ("dummy") para as credenciais da API da OpenAI/Mistral no construtor do `AIService`. Isso previne crashes prematuros por falta de chaves em scripts que apenas importam o serviço (como o raspador de Instagram), mas que não executam classificação em tempo de execução.
 - **Módulo Solenya (v71.0)**: Implementação de detecção de comportamento coordenado (Bots) via similaridade textual. Clusterização pré-IA economiza até 95% de tokens em ataques massivos, mantendo registros forenses completos.
