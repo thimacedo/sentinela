@@ -1,4 +1,5 @@
 'use client';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -18,12 +19,22 @@ interface Target {
 }
 
 export default function TargetsTab() {
+  const [showFilters, setShowFilters] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [riskFilter, setRiskFilter] = useState('ALL');
+
   const { data: targets = [], isLoading } = useQuery<Target[]>({
     queryKey: ['active-targets-enriched'],
     queryFn: async () => {
       return await fetchApi('/api/v1/targets');
     },
     refetchInterval: 60000,
+  });
+
+  const filteredTargets = targets.filter((t) => {
+    const matchesSearch = t.username.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesRisk = riskFilter === 'ALL' || t.nivel_risco === riskFilter;
+    return matchesSearch && matchesRisk;
   });
 
   return (
@@ -36,11 +47,54 @@ export default function TargetsTab() {
           </h2>
           <p className="text-xs text-text-muted font-medium uppercase tracking-widest mt-1">Radar de Severidade e Atividade</p>
         </div>
-        <button className="flex items-center gap-2 px-3 py-1.5 bg-bg-card border border-border-main rounded-lg text-[10px] font-bold text-text-main hover:bg-bg-main transition-colors uppercase">
+        <button 
+          onClick={() => setShowFilters(!showFilters)}
+          className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg text-[10px] font-bold transition-colors uppercase ${showFilters ? 'bg-brand-primary/10 border-brand-primary text-brand-primary' : 'bg-bg-card border-border-main text-text-main hover:bg-bg-main'}`}
+        >
           <Filter className="w-3 h-3" />
           Filtrar
         </button>
       </div>
+
+      {showFilters && (
+        <div className="p-4 bg-bg-main/30 border-b border-border-main flex flex-wrap gap-4 items-center">
+          <div className="flex-1 min-w-[200px]">
+            <label className="block text-[9px] font-bold text-text-muted uppercase tracking-wider mb-1.5">Buscar Username</label>
+            <input 
+              type="text"
+              placeholder="Ex: samia"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-3 py-1.5 bg-bg-card border border-border-main rounded-lg text-xs text-text-main placeholder:text-text-muted focus:outline-none focus:border-brand-primary transition-colors"
+            />
+          </div>
+          <div className="w-[180px]">
+            <label className="block text-[9px] font-bold text-text-muted uppercase tracking-wider mb-1.5">Nível de Risco</label>
+            <select
+              value={riskFilter}
+              onChange={(e) => setRiskFilter(e.target.value)}
+              className="w-full px-3 py-1.5 bg-bg-card border border-border-main rounded-lg text-xs text-text-main focus:outline-none focus:border-brand-primary transition-colors"
+            >
+              <option value="ALL">TODOS</option>
+              <option value="CRITICO">CRÍTICO</option>
+              <option value="ELEVADO">ELEVADO</option>
+              <option value="MONITORANDO">MONITORANDO</option>
+              <option value="CONTROLADO">CONTROLADO</option>
+            </select>
+          </div>
+          {(searchQuery || riskFilter !== 'ALL') && (
+            <button 
+              onClick={() => {
+                setSearchQuery('');
+                setRiskFilter('ALL');
+              }}
+              className="mt-5 text-[9px] font-bold text-red-500 hover:underline uppercase tracking-wider"
+            >
+              Limpar
+            </button>
+          )}
+        </div>
+      )}
 
       <Table>
         <TableHeader className="bg-bg-main/30">
@@ -58,14 +112,14 @@ export default function TargetsTab() {
                 SINCRONIZANDO COM O OBSERVATÓRIO...
               </TableCell>
             </TableRow>
-          ) : targets.length === 0 ? (
+          ) : filteredTargets.length === 0 ? (
             <TableRow>
               <TableCell colSpan={4} className="text-center py-20 text-text-muted font-mono text-xs">
-                NENHUM ALVO ATIVO NO MOMENTO.
+                NENHUM ALVO ATIVO COM OS FILTROS SELECIONADOS.
               </TableCell>
             </TableRow>
           ) : (
-            targets.map((t) => (
+            filteredTargets.map((t) => (
               <TableRow key={t.id} className="border-border-main hover:bg-bg-main/50 transition-colors">
                 <TableCell className="px-6 py-4">
                   <div className="font-black text-text-main text-sm font-mono tracking-tight">@{t.username}</div>
@@ -99,7 +153,7 @@ export default function TargetsTab() {
       </Table>
       
       <div className="p-4 bg-bg-main/30 border-t border-border-main text-center text-xs text-text-muted">
-        Total de {targets.length} perfis monitorados em tempo real.
+        Total de {filteredTargets.length} perfis exibidos de {targets.length} monitorados.
       </div>
     </div>
   );

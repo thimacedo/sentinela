@@ -350,14 +350,19 @@ async def audit_validate(payload: Dict[str, Any] = Body(...), supa: Client = Dep
     try:
         comment_id = payload.get("comment_id")
         rotulo = payload.get("rotulo_correto")
+        analise_pericial = payload.get("analise_pericial")
         
         # Atualiza o comentário original
         is_hate = rotulo == 'hate'
-        supa.table('comentarios').update({
+        update_data = {
             "is_hate": is_hate,
             "processado_ia": True,
             "categoria_ia": "VALIDADO_MANUALMENTE"
-        }).eq('id', comment_id).execute()
+        }
+        if analise_pericial is not None:
+            update_data["analise_pericial"] = analise_pericial
+            
+        supa.table('comentarios').update(update_data).eq('id', comment_id).execute()
         
         return {"status": "success"}
     except Exception as e:

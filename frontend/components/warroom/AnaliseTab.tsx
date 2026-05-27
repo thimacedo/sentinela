@@ -1,4 +1,5 @@
 'use client';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -16,15 +17,18 @@ interface Comment {
 }
 
 export default function AnaliseTab() {
+  const [limit, setLimit] = useState(50);
+  const [isExpanding, setIsExpanding] = useState(false);
+
   const { data: comments = [], isLoading } = useQuery<Comment[]>({
-    queryKey: ['analise-comments'],
+    queryKey: ['analise-comments', limit],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('comentarios')
         .select('id, texto_bruto, categoria_ia, confianca_ia, is_hate, data_coleta, candidatos(username)')
         .not('categoria_ia', 'is', null)
         .order('data_coleta', { ascending: false })
-        .limit(50);
+        .limit(limit);
 
       if (error) throw error;
       
@@ -118,8 +122,21 @@ export default function AnaliseTab() {
       </Table>
       
       <div className="p-4 bg-bg-main/30 border-t border-border-main text-center">
-        <button className="text-[10px] font-bold text-brand-primary uppercase tracking-widest hover:underline">
-          Carregar Histórico Completo →
+        <button 
+          onClick={() => {
+            setIsExpanding(true);
+            setLimit(prev => prev + 50);
+            setTimeout(() => setIsExpanding(false), 500);
+          }}
+          disabled={comments.length < limit || isExpanding}
+          className="text-[10px] font-bold text-brand-primary uppercase tracking-widest hover:underline disabled:opacity-50 disabled:no-underline disabled:cursor-not-allowed"
+        >
+          {isExpanding 
+            ? 'Carregando registros...' 
+            : comments.length < limit 
+              ? 'Todo o Histórico Carregado ✓' 
+              : 'Carregar Histórico Completo →'
+          }
         </button>
       </div>
     </div>
