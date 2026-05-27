@@ -92,6 +92,84 @@ class InstagramScraperV2:
             except Exception:
                 pass
 
+    def _generate_stealth_profile(self) -> Dict[str, Any]:
+        """Gera perfis de dispositivos e cabeçalhos HTTP realistas e aleatórios (PASA v83.6)."""
+        chrome_major = random.choice([122, 123, 124, 125])
+        chrome_build = random.randint(5000, 6400)
+        chrome_patch = random.randint(100, 200)
+        chrome_ver = f"{chrome_major}.0.{chrome_build}.{chrome_patch}"
+
+        firefox_ver = f"{random.choice([124, 125, 126])}.0"
+        safari_ver = f"17.{random.choice([3, 4, 5])}"
+
+        os_templates = [
+            # Windows Chrome
+            {
+                "ua": f"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{chrome_ver} Safari/537.36",
+                "w": random.choice([1920, 1366, 1536]),
+                "h": random.choice([1080, 768, 864])
+            },
+            # Edge no Windows
+            {
+                "ua": f"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{chrome_ver} Safari/537.36 Edg/{chrome_major}.0.0.0",
+                "w": 1920,
+                "h": 1080
+            },
+            # Firefox no Windows
+            {
+                "ua": f"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:{firefox_ver}) Gecko/20100101 Firefox/{firefox_ver}",
+                "w": 1920,
+                "h": 1080
+            },
+            # macOS Chrome
+            {
+                "ua": f"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{chrome_ver} Safari/537.36",
+                "w": random.choice([1440, 1680, 2560]),
+                "h": random.choice([900, 1050, 1600])
+            },
+            # macOS Safari
+            {
+                "ua": f"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/{safari_ver} Safari/605.1.15",
+                "w": 1440,
+                "h": 900
+            },
+            # Linux Chrome
+            {
+                "ua": f"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{chrome_ver} Safari/537.36",
+                "w": 1366,
+                "h": 768
+            },
+            # iPhone iOS Safari
+            {
+                "ua": f"Mozilla/5.0 (iPhone; CPU iPhone OS 17_{random.choice([3,4,5])} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/605.1",
+                "w": 390,
+                "h": 844
+            },
+            # Android Chrome
+            {
+                "ua": f"Mozilla/5.0 (Linux; Android 14; Pixel {random.choice([7, 8])}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{chrome_ver} Mobile Safari/537.36",
+                "w": 412,
+                "h": 915
+            }
+        ]
+
+        profile = random.choice(os_templates)
+
+        headers = {
+            "Accept-Language": random.choice([
+                "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
+                "pt-BR,pt;q=0.9,en-US;q=0.9",
+                "en-US,en;q=0.9,pt-BR;q=0.8,pt;q=0.7"
+            ])
+        }
+
+        return {
+            "ua": profile["ua"],
+            "w": profile["w"],
+            "h": profile["h"],
+            "headers": headers
+        }
+
     async def scrape_profile(self, username: str, candidato_id: str, max_posts: int = 3, max_comments_per_post: int = 50, max_age_days: int = 7) -> List[Dict[str, Any]]:
         """Extrai comentários de um perfil com retry e rotação."""
         all_comments = []
@@ -109,19 +187,13 @@ class InstagramScraperV2:
                         args=["--disable-blink-features=AutomationControlled", "--no-sandbox"]
                     )
                     
-                    # 🎭 ROTAÇÃO DE STEALTH (PASA v65.0)
-                    device_profiles = [
-                        {"ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36", "w": 1920, "h": 1080},
-                        {"ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36", "w": 1440, "h": 900},
-                        {"ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36", "w": 1366, "h": 768},
-                        {"ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1", "w": 390, "h": 844},
-                        {"ua": "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36", "w": 412, "h": 915}
-                    ]
-                    profile = random.choice(device_profiles)
+                    # 🎭 ROTAÇÃO DE STEALTH AMPLIADA (PASA v83.6)
+                    profile = self._generate_stealth_profile()
                     
                     context = await browser.new_context(
                         viewport={"width": profile["w"], "height": profile["h"]},
-                        user_agent=profile["ua"]
+                        user_agent=profile["ua"],
+                        extra_http_headers=profile["headers"]
                     )
                     
                     await context.add_cookies([{

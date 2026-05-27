@@ -27,6 +27,7 @@ class AutopilotManager:
     def __init__(self, db_client=None):
         self.db = db_client or get_supabase_client()
         self.last_check = datetime.now(timezone.utc)
+        self.last_preventive_heal = datetime.now(timezone.utc)
         self.failure_threshold = 0.20   # 20% de falha/vazio aciona intervenção
         self.is_active = True
         self._intervention_count = 0
@@ -46,6 +47,20 @@ class AutopilotManager:
         """Ciclo de vida do Autopilot — Loop OODA a cada 5 minutos."""
         while self.is_active:
             try:
+                # 🛡️ CURA PREVENTIVA OPERACIONAL (PASA v83.6): Executada a cada 12 horas
+                now = datetime.now(timezone.utc)
+                elapsed_preventive = (now - self.last_preventive_heal).total_seconds()
+                if elapsed_preventive >= 43200:
+                    logger.info("🔑 [Autopilot] Iniciando verificação preventiva periódica de cookies...")
+                    try:
+                        from core.autopilot.session_healer import SessionHealer
+                        healer = SessionHealer()
+                        # Roda sem force para apenas auditar e corrigir contas com sessões falhas
+                        await healer.heal(force=False)
+                        self.last_preventive_heal = now
+                    except Exception as e_preventive:
+                        logger.error(f"💥 [Autopilot] Erro na renovação preventiva de cookies: {e_preventive}")
+
                 logger.info("🔍 [Autopilot] Iniciando pulso de diagnóstico...")
                 metrics = await self._collect_recent_metrics()
 
@@ -167,14 +182,14 @@ class AutopilotManager:
 
     async def _trigger_session_healing(self):
         """Aciona o SessionHealer para renovar sessões expiradas."""
-        logger.warning("🔑 [Autopilot] Sessão expirada detectada. Acionando SessionHealer...")
+        logger.warning("🔑 [Autopilot] Sessão expirada detectada. Acionando SessionHealer com re-login forçado...")
         try:
             from core.autopilot.session_healer import SessionHealer
             healer = SessionHealer()
-            success = await healer.heal()
+            success = await healer.heal(force=True)
             if success:
                 logger.info("✅ [Autopilot] SessionHealer renovou as sessões com sucesso.")
-                self._log_event("session_healer", "Sessões renovadas pelo SessionHealer.", {})
+                self._log_event("session_healer", "Sessões renovadas pelo SessionHealer (forçado).", {})
             else:
                 logger.error("❌ [Autopilot] SessionHealer não conseguiu renovar as sessões. Intervenção humana necessária.")
                 self._log_event("session_healer", "Falha na renovação de sessão. Requer ação manual.", {},)

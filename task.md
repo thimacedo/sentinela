@@ -1,5 +1,12 @@
-# Checklist de Correções operacionais e Relatórios (v83.6)
+# Checklist de Correções operacionais e Relatórios (v83.7)
 
+- `[x]` Passo 1: Estabilidade & Rotação de Sessões (Backend/Coleta):
+  - `[x]` Automação de Renovação de Cookies: Atualizar `SessionHealer` para rodar `export_playwright_cookies.py` assincronamente.
+  - `[x]` Checagem preventiva: Configurar no `AutopilotManager` a cura preventiva periódica de cookies a cada 12 horas.
+  - `[x]` Cura sob demanda: Acionar re-login forçado (`force=True`) se for detectado `SESSION_EXPIRED` pela IA.
+  - `[x]` Rotação Stealth Ampliada: Criar catálogo dinâmico de User-Agents Chrome/Firefox/Safari.
+  - `[x]` Injeção de cabeçalhos consistentes: Configurar cabeçalhos HTTP realistas (`Accept-Language` multilíngue) sem conflito de `Sec-Fetch-*`.
+  - `[x]` Validar a integridade das melhorias do scraper com testes de sucesso local.
 - `[x]` Mitigar os 13 alertas de erros operacionais no `core/instagram_scraper_v2.py`:
   - `[x]` Adicionar verificação contínua de `page.is_closed()` nos loops de posts.
   - `[x]` Implementar `try-except` com timeout de clique explícito de 10s em `open_post_modal`.
