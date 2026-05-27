@@ -206,6 +206,10 @@ class InstagramScraperV2:
                             break
                             
                         shortcode = meta["shortcode"]
+                        if page.is_closed():
+                            logger.warning(f"⚠️ [V2] A página do navegador foi fechada antes de processar o post {shortcode}. Abortando o loop de posts.")
+                            break
+
                         is_pinned = meta["is_pinned"]
                         post_timestamp = meta.get("timestamp")
                         
@@ -235,6 +239,10 @@ class InstagramScraperV2:
                         
                         # Processa o post
                         post_comments = await self._scrape_post(page, shortcode, username, candidato_id, max_comments_per_post, max_age_days)
+                        
+                        if page.is_closed():
+                            logger.warning(f"⚠️ [V2] A página do navegador foi fechada durante o processamento do post {shortcode}. Abortando o loop de posts.")
+                            break
                         
                         if post_comments:
                             all_comments.extend(post_comments)
@@ -313,16 +321,24 @@ class InstagramScraperV2:
 
     async def open_post_modal(self, page: Page, shortcode: str) -> bool:
         """Encontra e clica na postagem no feed do perfil para abrir o modal."""
-        selector = f'a[href*="/{shortcode}/"]'
-        post_element = await page.query_selector(selector)
-        if not post_element:
-            logger.warning(f"⚠️ [V2] Elemento do post {shortcode} não encontrado no feed.")
+        if page.is_closed():
+            logger.warning("⚠️ [V2] Não é possível abrir o modal: a página está fechada.")
             return False
-            
-        await post_element.click()
-        # Aguarda abertura e requisições iniciais
-        await asyncio.sleep(random.uniform(5, 7))
-        return True
+        selector = f'a[href*="/{shortcode}/"]'
+        try:
+            post_element = await page.query_selector(selector)
+            if not post_element:
+                logger.warning(f"⚠️ [V2] Elemento do post {shortcode} não encontrado no feed.")
+                return False
+                
+            # Adiciona timeout explícito de clique para evitar travar por 30s
+            await post_element.click(timeout=10000)
+            # Aguarda abertura e requisições iniciais
+            await asyncio.sleep(random.uniform(3, 5))
+            return True
+        except Exception as e:
+            logger.warning(f"⚠️ [V2] Falha ao abrir modal do post {shortcode} via clique: {e}")
+            return False
 
     async def scroll_comment_column(self, page: Page, scroll_amount: int = 800) -> None:
         """Move o mouse e rotaciona a roda para carregar os comentários no modal."""
@@ -332,14 +348,22 @@ class InstagramScraperV2:
 
     async def close_post_modal(self, page: Page) -> None:
         """Fecha o modal de postagem simulando a tecla Escape."""
-        await page.keyboard.press("Escape")
-        await asyncio.sleep(random.uniform(2, 3))
+        if page.is_closed():
+            return
+        try:
+            await page.keyboard.press("Escape")
+            await asyncio.sleep(random.uniform(2, 3))
+        except Exception as e:
+            logger.warning(f"⚠️ [V2] Falha ao fechar modal do post: {e}")
 
     async def _scrape_post(self, page: Page, shortcode: str, username: str, candidato_id: str, max_comments: int, max_age_days: int) -> List[Dict[str, Any]]:
         """Extrai comentários de um post específico com verificação de data e duplicidade."""
         self.captured_data = []
         
         try:
+            if page.is_closed():
+                return []
+                
             # 1. Abre o modal
             opened = await self.open_post_modal(page, shortcode)
             if not opened:
@@ -430,9 +454,10 @@ class InstagramScraperV2:
 
         except Exception as e:
             logger.error(f"⚠️ [V2] Falha ao processar post {shortcode} via modal: {e}")
-            await self._take_screenshot(page, f"error_{username}_{shortcode}")
-            try: await self.close_post_modal(page)
-            except: pass
+            if not page.is_closed():
+                await self._take_screenshot(page, f"error_{username}_{shortcode}")
+                try: await self.close_post_modal(page)
+                except: pass
             return []
 
     async def _extract_shortcodes(self, page: Page, limit: int) -> List[Dict[str, Any]]:
@@ -612,11 +637,14 @@ class InstagramScraperV2:
     async def _take_screenshot(self, page: Page, name: str) -> None:
         """Captura evidência visual da falha para auditoria (PASA v70.4)."""
         try:
+            if page.is_closed():
+                logger.warning(f"⚠️ Não é possível tirar screenshot: a página está fechada.")
+                return
             folder = os.path.join("logs", "evidence")
             os.makedirs(folder, exist_ok=True)
             ts = datetime.now().strftime("%Y%m%d_%H%M%S")
             path = os.path.join(folder, f"{ts}_{name}.png")
-            await page.screenshot(path=path, full_page=True)
+            await page.screenshot(path=path, full_page=True, timeout=5000)
             logger.info(f"📸 Evidência visual salva: {path}")
         except Exception as e:
             logger.error(f"❌ Falha ao capturar screenshot: {e}")

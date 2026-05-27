@@ -16,7 +16,7 @@ type AdSenseSlotProps = {
  * renderização do anúncio.
  */
 export default function AdSenseSlot({ adSlot, format = 'auto' }: AdSenseSlotProps) {
-  const insRef = useRef<HTMLDivElement>(null);
+  const insRef = useRef<HTMLModElement>(null);
 
   useEffect(() => {
     // Garantir que o script já está disponível antes de chamar push

@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import ReportCard from '@/components/ReportCard';
 import BuyButton from '@/components/BuyButton';
 
-interface Report {
+export interface Report {
   name: string;
   type: string;
   url: string;
@@ -38,8 +38,8 @@ export default function RelatoriosPage() {
       });
       const data = await res.json();
       if (data.downloadUrl) {
-        // open download in new tab
-        window.open(data.downloadUrl, '_blank');
+        // open visualizer with the signed URL in a new tab
+        window.open(`/relatorios/visualizar?url=${encodeURIComponent(data.downloadUrl)}`, '_blank');
       } else {
         alert('Falha na compra: ' + (data.error || '')); 
       }
