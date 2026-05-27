@@ -1,11 +1,11 @@
 # STATE.md — Sentinela Democratica (Fonte de Verdade)
 _last_updated: 2026-05-27 | branch: main (Model: Gemini 3.5 Flash)_
 
-## Status Operacional (v84.0)
+## Status Operacional (v84.1)
 
 | Subsistema | Status | Observacao |
 |---|---|---|
-| Frontend (nextjs) | Operacional | v83.8: Botões estáticos ativados (Carregamento progressivo de histórico, Painel de Filtros Reativos de alvos e Modal de Investigação de incidentes com salvamento da Análise Analítica). Build de produção executado com Turbopack com sucesso. |
+| Frontend (nextjs) | Operacional | v84.1: Consolidação da integração AdSense. Removidos todos os placeholders e otimizada a injeção não-bloqueante do script do AdSense com a estratégia afterInteractive no RootLayout. |
 | Autopilot L3 | Operacional | v80.0: Heartbeat e Polling de Comandos Cloud integrados à telemetria remota |
 | Watchdog (Guardião) | Operacional | v61.7: Hot-Reload, Integração L3 Autopilot, Cleanup de Órfãos automático |
 | Coleta Independente (IGWorkerV2) | Operacional | Motor V2 v83.9: Automação preventiva de cookies, rotação stealth ativa e correção de regressão léxica eliminando falsos positivos de menções puras (@username). |
@@ -15,6 +15,7 @@ _last_updated: 2026-05-27 | branch: main (Model: Gemini 3.5 Flash)_
 | Relatórios Comerciais | Implementado | Geração diária, UI, API, visualizador e exportação a PDF client-side integrada (v83.6) |
 
 ## Descobertas Tecnicas (2026-05-27)
+- **Consolidação do AdSense e Prontidão para Monetização (v84.1)**: Removidos todos os placeholders do AdSense (`PLACEHOLDER_SLOT_ID`) nas rotas `/alvos` e `/alertas`, substituindo-os pelo identificador de slot oficial funcional (`2020882637`). Adicionalmente, reestruturamos a inclusão do script global do Google AdSense no `layout.tsx` para rodar fora da tag `<head>` utilizando o componente `Script` nativo do Next.js com a estratégia de carregamento `afterInteractive`, eliminando warnings de hidratação no StrictMode/Turbopack e garantindo a exibição e renderização corretas dos anúncios conforme a folha de estilo de rede social com rolagem infinita.
 - **Alinhamento e Padronização Global de IA (v84.0)**: Realinhamento total do motor de IA (`ai_service.py`) com os critérios oficiais de treinamento do `CRITERIOS_TREINAMENTO.md`. Padronizamos as categorias na IA com o dicionário de banco/API da `PASA_CONFIG`, e adicionamos a Blindagem contra Falsos Positivos (Protocolo de Defesa) tanto no prompt local (LiteRT/Ollama) quanto no refinamento Cloud. Adicionalmente, mitigamos possíveis erros de quebra de API ao expor o alias de compatibilidade `classify` (usado por `pasa_auditor` e `ad_processor`) e ao injetar os aliases `category`/`confidence` nas respostas JSON do parser.
 - **Filtro Léxico Dinâmico Contra Falsos Positivos de Menção (v83.9)**: Identificada e resolvida regressão na classificação automática de comentários. Marcações isoladas (ex: `@username`) estavam alcançando o classificador IA e gerando falsos positivos de `INSULTO_AD_HOMINEM`. Corrigimos o motor estendendo o `LexicalFilter` para expurgar comentários compostos estritamente de marcações de usuário e emojis/pontuações antes de enviar para classificação de IA, com sucesso absoluto validado por testes locais.
 - **Integração de Recursos Interativos e Investigação Cívica no Frontend (v83.8)**: Atribuição de funcionalidade premium aos botões estáticos identificados. Implementamos carregamento progressivo de dados na Central de Análises (`AnaliseTab.tsx`); criamos um painel de filtros de pesquisa e risco em tempo real para Candidatos Monitorados (`TargetsTab.tsx`); e desenvolvemos um modal completo de Investigação Cívica e Descarte de falsos positivos na aba de Alertas de Segurança (`AlertsTab.tsx`), com persistência de `analise_pericial` (análise analítica) integrada ao endpoint de auditoria do backend e invalidação de cache do React Query.

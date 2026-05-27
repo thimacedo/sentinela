@@ -17,7 +17,7 @@ export default function AlertasPage() {
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
           <AlertsTab />
           {/* Anúncio AdSense */}
-          <AdSenseSlot adSlot="PLACEHOLDER_SLOT_ID" format="vertical" />
+          <AdSenseSlot adSlot="2020882637" format="vertical" />
       </div>
     </div>
   );
