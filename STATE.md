@@ -1,20 +1,21 @@
 # STATE.md — Sentinela Democratica (Fonte de Verdade)
 _last_updated: 2026-05-27 | branch: main (Model: Gemini 3.5 Flash)_
 
-## Status Operacional (v83.8)
+## Status Operacional (v83.9)
 
 | Subsistema | Status | Observacao |
 |---|---|---|
 | Frontend (nextjs) | Operacional | v83.8: Botões estáticos ativados (Carregamento progressivo de histórico, Painel de Filtros Reativos de alvos e Modal de Investigação de incidentes com salvamento da Análise Analítica). Build de produção executado com Turbopack com sucesso. |
 | Autopilot L3 | Operacional | v80.0: Heartbeat e Polling de Comandos Cloud integrados à telemetria remota |
 | Watchdog (Guardião) | Operacional | v61.7: Hot-Reload, Integração L3 Autopilot, Cleanup de Órfãos automático |
-| Coleta Independente (IGWorkerV2) | Operacional | Motor V2 v83.7: Automação preventiva de cookies a cada 12h, re-login forçado sob demanda e rotação stealth dinâmica ampliada (v83.7) |
+| Coleta Independente (IGWorkerV2) | Operacional | Motor V2 v83.9: Automação preventiva de cookies, rotação stealth ativa e correção de regressão léxica eliminando falsos positivos de menções puras (@username). |
 | Persistencia Supabase | OK | v80.0: Locking Atômico via RPC (`claim_fila_target`) e schema v80 integrado |
 | Classificacao IA | OK | Cascade v70.3 + Processamento em lote Cloud (100 itens/rodada) via Actions |
 | GitHub Actions (CI/CD) | Operacional | v82.1: Saneamento concluído, suporte a Node 24 ativo e blindagem global contra crashes de credenciais de IA |
 | Relatórios Comerciais | Implementado | Geração diária, UI, API, visualizador e exportação a PDF client-side integrada (v83.6) |
 
 ## Descobertas Tecnicas (2026-05-27)
+- **Filtro Léxico Dinâmico Contra Falsos Positivos de Menção (v83.9)**: Identificada e resolvida regressão na classificação automática de comentários. Marcações isoladas (ex: `@username`) estavam alcançando o classificador IA e gerando falsos positivos de `INSULTO_AD_HOMINEM`. Corrigimos o motor estendendo o `LexicalFilter` para expurgar comentários compostos estritamente de marcações de usuário e emojis/pontuações antes de enviar para classificação de IA, com sucesso absoluto validado por testes locais.
 - **Integração de Recursos Interativos e Investigação Cívica no Frontend (v83.8)**: Atribuição de funcionalidade premium aos botões estáticos identificados. Implementamos carregamento progressivo de dados na Central de Análises (`AnaliseTab.tsx`); criamos um painel de filtros de pesquisa e risco em tempo real para Candidatos Monitorados (`TargetsTab.tsx`); e desenvolvemos um modal completo de Investigação Cívica e Descarte de falsos positivos na aba de Alertas de Segurança (`AlertsTab.tsx`), com persistência de `analise_pericial` (análise analítica) integrada ao endpoint de auditoria do backend e invalidação de cache do React Query.
 - **Automação de Cookies e Rotação Stealth de Alta Disponibilidade (v83.7)**: Integrado o script unificado `export_playwright_cookies.py` ao `SessionHealer` sob o controle do `AutopilotManager`. Implementada a cura preventiva de cookies automática a cada 12 horas e o re-login forçado sob demanda ao detectar degradação (`SESSION_EXPIRED`). Adicionalmente, expandimos o motor com geração dinâmica de assinaturas Chrome/Firefox/Safari e injeção coerente de `Accept-Language` dinâmico para evasão de bloqueios.
 - **Resiliência do Modal e Conexão de Browser do InstagramScraperV2 (v83.6)**: Implementação de proteção robusta contra erros de conexão fechada e timeouts de clique de modais. Adicionados timeouts de clique de 10s e monitoramento contínuo de `page.is_closed()` no processamento de postagens do feed, abortando o processamento imediatamente em caso de fechamento do navegador. Isso evitou com sucesso falhas subsequentes em cascata e eliminou alertas repetidos de screenshots em páginas inválidas.
