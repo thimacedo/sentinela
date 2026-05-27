@@ -31,6 +31,12 @@ class LexicalFilter:
             if pattern.search(clean_text):
                 return True
         
+        # 1.5 Checa se o comentário é composto APENAS de menções a usuários (ex: @usuario)
+        # Remove menções e verifica se o que sobra contém alguma letra ou número útil
+        text_without_mentions = re.sub(r'@[\w\.]+', '', clean_text).strip()
+        if not re.search(r'[\w\d]', text_without_mentions, re.UNICODE):
+            return True
+        
         # 2. Checa densidade de letras (se não tiver pelo menos uma letra ou número, é lixo)
         if not re.search(r'[\w\d]', clean_text, re.UNICODE):
             return True
