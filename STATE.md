@@ -1,5 +1,5 @@
 # STATE.md — Sentinela Democratica (Fonte de Verdade)
-_last_updated: 2026-05-27 | branch: feat/autonomous-workers (Model: Gemini 3.5 Flash)_
+_last_updated: 2026-05-27 | branch: main (Model: Gemini 3.5 Flash)_
 
 ## Status Operacional (v83.5)
 

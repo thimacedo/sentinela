@@ -77,6 +77,6 @@ Sugerir ou solicitar a alteração de modelo ativo no IDE conforme o escopo da t
 
 ### Contexto permanente
 - Projeto: Sentinela
-- Branch ativa: feat/autonomous-workers
+- Branch ativa: main
 - Banco: Supabase remoto (vhamejkldzxbeibqeqpk)
 - Fase atual: 4 (DocFetcher → AIAdvisor → Workers)
