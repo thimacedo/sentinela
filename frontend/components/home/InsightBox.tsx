@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { AlertCircle, TrendingUp, Info } from 'lucide-react';
 
 interface InsightBoxProps {
@@ -139,9 +140,12 @@ export default function InsightBox({
           </div>
 
           {/* Action */}
-          <button className="mt-6 px-4 py-2 bg-bg-card hover:bg-bg-main border border-border-main text-text-main rounded-lg text-xs font-mono font-bold transition-all shadow-sm">
+          <Link
+            href="/analise"
+            className="mt-6 inline-block px-4 py-2 bg-bg-card hover:bg-bg-main border border-border-main text-text-main rounded-lg text-xs font-mono font-bold transition-all shadow-sm"
+          >
             Explorar dados completos →
-          </button>
+          </Link>
         </div>
       </div>
     </div>

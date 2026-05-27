@@ -23,7 +23,9 @@ async def renew_account_cookies(browser, account: dict):
     logged_in = False
     
     # 1. Tentar login usando o SESSIONID atual correspondente no .env
-    sessionid = os.getenv(sid_key)
+    import sys
+    force_login = "--force" in sys.argv or "-f" in sys.argv
+    sessionid = os.getenv(sid_key) if not force_login else None
     
     if sessionid:
         print(f"Tentando autenticar usando {sid_key} do .env...")

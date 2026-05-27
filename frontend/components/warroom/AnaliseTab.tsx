@@ -15,9 +15,9 @@ interface Comment {
   username_alvo: string;
 }
 
-export default function ForensicTab() {
+export default function AnaliseTab() {
   const { data: comments = [], isLoading } = useQuery<Comment[]>({
-    queryKey: ['forensic-comments'],
+    queryKey: ['analise-comments'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('comentarios')
@@ -49,7 +49,7 @@ export default function ForensicTab() {
         <div>
           <h2 className="text-xl font-black text-text-main tracking-tight flex items-center gap-2">
             <Search className="w-5 h-5 text-brand-primary" />
-            Laboratório de Perícia
+            Central de Análise
           </h2>
           <p className="text-xs text-text-muted font-medium uppercase tracking-widest mt-1">Análise Semântica MCA v2.2</p>
         </div>

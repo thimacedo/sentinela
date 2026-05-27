@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { BookOpen, CheckCircle2, AlertCircle, HelpCircle } from 'lucide-react';
 
 export default function MethodologyBox() {
@@ -33,7 +34,7 @@ export default function MethodologyBox() {
               {[
                 'Coleta autônoma de posts públicos em redes sociais',
                 'Identificação de padrões de discurso de ódio e violência',
-                'Relatórios forenses com classificação semântica MCA v2.2',
+                'Relatórios analíticos com classificação semântica MCA v2.2',
                 'Alertas em tempo real sobre picos anormais de hostilidade'
               ].map((item, i) => (
                 <li key={i} className="text-xs text-text-muted flex items-start gap-2">
@@ -75,7 +76,7 @@ export default function MethodologyBox() {
               {[
                 { label: 'Coleta', val: 'Motores Playwright v2 / Zyte' },
                 { label: 'Processamento', val: 'Análise semântica Híbrida (Mistral/Ollama)' },
-                { label: 'Protocolo', val: 'PASA v70.4 — Critérios Forenses' },
+                { label: 'Protocolo', val: 'PASA v70.4 — Critérios de Análise' },
                 { label: 'Frequência', val: 'Ciclos de 24h com Autopilot L3' }
               ].map((item, i) => (
                 <p key={i} className="text-[10px] text-text-muted leading-tight">
@@ -93,8 +94,8 @@ export default function MethodologyBox() {
           📚 Explore nossa documentação técnica para entender os algoritmos.
         </p>
         <div className="flex gap-4">
-          <button className="underline font-bold hover:text-blue-600 transition-colors">Documentação</button>
-          <button className="underline font-bold hover:text-blue-600 transition-colors">Publicações</button>
+          <Link href="/metodologia" className="underline font-bold hover:text-blue-600 transition-colors">Documentação</Link>
+          <Link href="/dossies" className="underline font-bold hover:text-blue-600 transition-colors">Publicações</Link>
         </div>
       </div>
     </div>

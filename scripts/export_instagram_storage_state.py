@@ -7,7 +7,8 @@ STORAGE_STATE_PATH = "configs/instagram_storage_state.json"
 async def export_storage_state():
     async with async_playwright() as pw:
         # Abrir navegador headed para login manual
-        browser = await pw.chromium.launch(headless=False)
+        headless = os.getenv('PLAYWRIGHT_HEADLESS', 'true').lower() == 'true'
+        browser = await pw.chromium.launch(headless=headless)
         context = await browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
         )

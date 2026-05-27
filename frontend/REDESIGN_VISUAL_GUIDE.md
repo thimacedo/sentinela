@@ -137,7 +137,7 @@
 │ ✅ O Que Fazemos                   ⚠️ Limitações                │
 │ • Coleta de posts públicos          • Não substitui análise     │
 │ • Identificação de ódio             • Apenas contas públicas    │ ← MethodologyBox
-│ • Relatórios forenses               • IA sujeita a erros        │
+│ • Análise de tendências             • IA sujeita a erros        │
 │ • Alertas contextualizados          • Não visa julgar           │
 │                                                                   │
 │ 💡 Metodologia                                                   │
@@ -152,7 +152,7 @@
 │                                                                   │
 │ 💭 QUER EXPLORAR MAIS?                                          │
 │                                                                   │
-│ [→ Ir para Perícia Forense] [→ Gerar Relatório] [→ Alertas]    │
+│ [→ Ir para Painel de Análise] [→ Gerar Relatório] [→ Alertas]    │
 │                                                                   │
 ├─────────────────────────────────────────────────────────────────┤
 │ Sentinela © 2024 | Transparência democrática                    │
@@ -355,7 +355,7 @@ Acompanhe em tempo real os padrões de discurso de ódio...
 | Primeiro parágrafo | Técnico, jargão | Acessível, contextual |
 | Ícones | Nenhum ou genérico | Emojis expressivos |
 | Terminologia | "módulo", "inteligência" | "observatório", "discurso" |
-| Call-to-action | "Ver detalhes" | "Explorar análise forense" |
+| Call-to-action | "Ver detalhes" | "Explorar análise analítica" |
 | Métricas | Números puros | Narrativas + números |
 
 ---

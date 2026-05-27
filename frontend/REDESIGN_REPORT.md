@@ -213,7 +213,7 @@ Vê tabelas numéricas denso
     ↓
 Confuso: "O que isso significa?"
     ↓
-Sai ou vai direto para Perícia (pular home)
+Sai ou vai direto para Análise (pular home)
 ```
 
 ### Depois (Newsroom)
@@ -228,7 +228,7 @@ Explore: "Pico de 340% em ódio detectado"
     ↓
 Entende: "João Silva intensificou discurso hostil"
     ↓
-Decide: Clicar em perfil, relatório ou análise forense
+Decide: Clicar em perfil, relatório ou análise analítica
 ```
 
 ---
@@ -325,7 +325,7 @@ DOSSIÊS (burocrático)
 ### Depois
 ```
 🏠 INICIO (home informativa)
-📊 ANÁLISE (forense, mas educativa)
+📊 ANÁLISE (analítica, mas educativa)
 👥 CANDIDATOS (perfis e contexto)
 🚨 ALERTAS (contextualizados)
 🌐 TENDÊNCIAS (timeline global)

@@ -54,24 +54,19 @@ class QueueManager:
         return target
 
     def _get_from_fila_coleta(self, blocked, seen_queue_ids, seen_targets, active_targets) -> Optional[Target]:
-        """Busca alvos na fila de prioridade usando locking atômico via RPC (v80.0) com fallback robusto."""
+        """Busca alvos na fila de prioridade, ordenados por nível de importância."""
         try:
-            # Define identificador do worker para o lock
-            import socket
-            hostname = socket.gethostname()
-            run_id = os.getenv("GITHUB_RUN_ID")
-            worker_id = f"github_actions_{run_id}" if run_id else f"worker_local_{hostname}"
-
-            # Chama RPC para claim atômico com exclusão mútua
-            res = self.db.rpc("claim_fila_target", {
-                "p_worker_id": worker_id,
-                "p_lock_minutes": 20
-            }).execute()
-
-            if res.data and len(res.data) > 0:
-                item = res.data[0]
+            # Pega os Top 20 pendentes (Prioridade 1 = Máxima, depois FIFO)
+            pending = self.db.table("fila_coleta")\
+                .select("*")\
+                .eq("status", "PENDENTE")\
+                .order("prioridade", desc=False)\
+                .order("created_at", desc=False)\
+                .limit(20).execute()
+            
+            for item in pending.data or []:
                 queue_id = item["id"]
-                username = item.get("username") or item.get("candidato_id")
+                username = item.get("username") or item.get("candidato_id") or item.get("target_username")
                 
                 # Resolução de ID para Username se necessário
                 if username and len(str(username)) > 30:
@@ -80,7 +75,10 @@ class QueueManager:
                 
                 username = str(username).strip().lstrip("@")
                 
-                logger.info(f"⚡ [Queue] Claimed da Fila (RPC) sob bloqueio de {worker_id}: @{username}")
+                if queue_id in seen_queue_ids or username in blocked:
+                    continue
+                
+                logger.info(f"⚡ [Queue] Selecionado da Fila de Prioridade (P{item.get('prioridade', 1)}): @{username}")
                 seen_queue_ids.add(queue_id)
                 self._add_to_blocked(username, seen_targets, active_targets)
                 return Target(
@@ -90,42 +88,7 @@ class QueueManager:
                     source="fila_coleta",
                 )
         except Exception as e:
-            logger.error(f"❌ [Queue] Erro ao buscar da fila_coleta via RPC claim_fila_target: {e}")
-            logger.warning("⚠️ [Queue] Fazendo fallback para consulta sem lock...")
-            
-            # Fallback para o comportamento clássico sem RPC
-            try:
-                pending = self.db.table("fila_coleta")\
-                    .select("*")\
-                    .eq("status", "PENDENTE")\
-                    .order("prioridade", desc=False)\
-                    .order("created_at", desc=False)\
-                    .limit(20).execute()
-                
-                for item in pending.data or []:
-                    queue_id = item["id"]
-                    username = item.get("username") or item.get("candidato_id")
-                    
-                    if username and len(str(username)) > 30:
-                        cand = self.db.table("candidatos").select("username").eq("id", username).limit(1).execute()
-                        if cand.data: username = cand.data[0]["username"]
-                    
-                    username = str(username).strip().lstrip("@")
-                    
-                    if queue_id in seen_queue_ids or username in blocked:
-                        continue
-                    
-                    logger.info(f"⚡ [Queue] Fallback: Selecionado sem Lock: @{username}")
-                    seen_queue_ids.add(queue_id)
-                    self._add_to_blocked(username, seen_targets, active_targets)
-                    return Target(
-                        username=username,
-                        candidato_id=username,
-                        queue_id=queue_id,
-                        source="fila_coleta",
-                    )
-            except Exception as e_fallback:
-                logger.error(f"❌ [Queue] Erro no fallback de consulta: {e_fallback}")
+            logger.error(f"❌ [Queue] Erro ao consultar fila_coleta: {e}")
         return None
 
     def _ensure_queue_populated(self, min_pending: int = 5) -> None:
@@ -158,7 +121,7 @@ class QueueManager:
                 # Verifica se já existe na fila como PENDENTE
                 check = self.db.table("fila_coleta")\
                     .select("id")\
-                    .eq("candidato_id", username)\
+                    .eq("candidato_id", cand["id"])\
                     .eq("status", "PENDENTE")\
                     .limit(1).execute()
                 if check.data:
@@ -170,7 +133,7 @@ class QueueManager:
 
                 # Reinserção via upsert (atualiza se existir, insere se não existir)
                 self.db.table("fila_coleta").upsert({
-                    "candidato_id": username,
+                    "candidato_id": cand["username"],
                     "status": "PENDENTE",
                     "prioridade": prioridade,
                 }, on_conflict="candidato_id,data_agendada").execute()

@@ -56,7 +56,8 @@ async def run_operation():
             from core.instagram_scraper_v2 import InstagramScraperV2
             from core.ai_service import ai_service
             
-            scraper = InstagramScraperV2(headless=False)
+            headless = os.getenv('PLAYWRIGHT_HEADLESS', 'true').lower() == 'true'
+            scraper = InstagramScraperV2(headless=headless)
             
             try:
                 # Executa a Raspagem
