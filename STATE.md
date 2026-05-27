@@ -1,20 +1,21 @@
 # STATE.md — Sentinela Democratica (Fonte de Verdade)
 _last_updated: 2026-05-27 | branch: main (Model: Gemini 3.5 Flash)_
 
-## Status Operacional (v84.2)
+## Status Operacional (v84.3)
 
 | Subsistema | Status | Observacao |
 |---|---|---|
 | Frontend (nextjs) | Operacional | v84.1: Consolidação da integração AdSense. Removidos todos os placeholders e otimizada a injeção não-bloqueante do script do AdSense com a estratégia afterInteractive no RootLayout. |
 | Autopilot L3 | Operacional | v80.0: Heartbeat e Polling de Comandos Cloud integrados à telemetria remota |
 | Watchdog (Guardião) | Operacional | v61.7: Hot-Reload, Integração L3 Autopilot, Cleanup de Órfãos automático |
-| Coleta Independente (IGWorkerV2) | Operacional | Motor V2 v83.9: Automação preventiva de cookies, rotação stealth ativa e correção de regressão léxica eliminando falsos positivos de menções puras (@username). |
+| Coleta Independente (IGWorkerV2) | Operacional | Motor V2 v84.3: Navegacao direta por URL substituindo clique em modal (anti-timeout). Script de cookies blindado contra TargetClosedError do Playwright. |
 | Persistencia Supabase | OK | v80.0: Locking Atômico via RPC (`claim_fila_target`) e schema v80 integrado |
 | Classificacao IA | OK | Cascade v84.2: Filtro lexical preventivo integrado diretamente no classify_text para evitar chamadas de IA desnecessárias e falsos positivos de menções puras (@username). Saneamento de dados aplicado com sucesso. |
 | GitHub Actions (CI/CD) | Operacional | v82.1: Saneamento concluído, suporte a Node 24 ativo e blindagem global contra crashes de credenciais de IA |
 | Relatórios Comerciais | Implementado | Geração diária, UI, API, visualizador e exportação a PDF client-side integrada (v83.6) |
 
 ## Descobertas Tecnicas (2026-05-27)
+- **Correcao de Timeout de Scraping e Renovacao de Sessao (v84.3)**: Identificado e resolvido o erro `ElementHandle.click: Timeout 30000ms exceeded` no `instagram_scraper_v2.py`. A abertura de posts foi refatorada para usar navegacao direta por URL (`/p/{shortcode}/`) como estrategia primaria, eliminando a dependencia fragil do clique DOM no grid de postagens. O metodo `close_post_modal` foi atualizado para usar `page.go_back()` de forma consistente. Paralelamente, o script `export_playwright_cookies.py` foi blindado contra o `TargetClosedError` do Playwright, que ocorria quando o Instagram redirecionava a pagina SPA durante a etapa de coleta de cookies pos-login, adicionando re-navegacao para a home antes da captura e tratamento explicito da excecao.
 - **Filtro Lexical Preventivo no Fluxo Global de IA e Saneamento de Dados (v84.2)**: Consolidamos a blindagem contra falsos positivos inserindo o `lexical_filter` diretamente no método principal de classificação (`classify_text` no `ai_service.py`), garantindo que qualquer fluxo (scrape direto, reclassificação ou processamento em lote) descarte menções puras a usuários e lixo como `NEUTRO` imediatamente. Adicionalmente, desenvolvemos e executamos o script `saneamento_lexical.py`, corrigindo com sucesso no Supabase remoto 11 comentários antigos que haviam sido classificados erroneamente como ódio, regularizando os dados históricos dos candidatos e alertas.
 - **Consolidação do AdSense e Prontidão para Monetização (v84.1)**: Removidos todos os placeholders do AdSense (`PLACEHOLDER_SLOT_ID`) nas rotas `/alvos` e `/alertas`, substituindo-os pelo identificador de slot oficial funcional (`2020882637`). Adicionalmente, reestruturamos a inclusão do script global do Google AdSense no `layout.tsx` para rodar fora da tag `<head>` utilizando o componente `Script` nativo do Next.js com a estratégia de carregamento `afterInteractive`, eliminando warnings de hidratação no StrictMode/Turbopack e garantindo a exibição e renderização corretas dos anúncios conforme a folha de estilo de rede social com rolagem infinita.
 - **Alinhamento e Padronização Global de IA (v84.0)**: Realinhamento total do motor de IA (`ai_service.py`) com os critérios oficiais de treinamento do `CRITERIOS_TREINAMENTO.md`. Padronizamos as categorias na IA com o dicionário de banco/API da `PASA_CONFIG`, e adicionamos a Blindagem contra Falsos Positivos (Protocolo de Defesa) tanto no prompt local (LiteRT/Ollama) quanto no refinamento Cloud. Adicionalmente, mitigamos possíveis erros de quebra de API ao expor o alias de compatibilidade `classify` (usado por `pasa_auditor` e `ad_processor`) e ao injetar os aliases `category`/`confidence` nas respostas JSON do parser.
