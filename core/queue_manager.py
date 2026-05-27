@@ -121,7 +121,7 @@ class QueueManager:
                 # Verifica se já existe na fila como PENDENTE
                 check = self.db.table("fila_coleta")\
                     .select("id")\
-                    .eq("username", username)\
+                    .eq("candidato_id", cand["id"])\
                     .eq("status", "PENDENTE")\
                     .limit(1).execute()
                 if check.data:
@@ -134,7 +134,6 @@ class QueueManager:
                 # Reinserção via upsert (atualiza se existir, insere se não existir)
                 self.db.table("fila_coleta").upsert({
                     "candidato_id": cand["id"],
-                    "username": username,
                     "status": "PENDENTE",
                     "prioridade": prioridade,
                 }, on_conflict="candidato_id").execute()
