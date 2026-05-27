@@ -11,6 +11,8 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from workers.core.base_worker import BaseWorker
 from core.supabase_service import get_supabase_client
+from workers.analytics.trends_worker import generate_trends
+from workers.analytics.network_worker import generate_network
 
 
 class ReportWorker(BaseWorker):
@@ -83,7 +85,11 @@ class ReportWorker(BaseWorker):
             f"✅ Relatório gerado | {len(relatorio)} candidatos "
             f"| {ajustes} ajustes de prioridade"
         )
-        return relatorio  # BaseWorker usa len() para registrar items_processed
+        trend_path = generate_trends()
+network_path = generate_network()
+self.logger.info(f"✅ Trends generated at {trend_path}")
+self.logger.info(f"✅ Network generated at {network_path}")
+return relatorio  # BaseWorker usa len() para registrar items_processed
 
 
 if __name__ == "__main__":
