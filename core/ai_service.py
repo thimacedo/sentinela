@@ -11,37 +11,48 @@ from openai import AsyncOpenAI, APIStatusError
 from core.circuit_breaker import ai_circuit_breaker
 
 CONFIDENCE_THRESHOLD = float(os.getenv('CONFIDENCE_THRESHOLD', '0.5'))
-
-# MCA v2.2 Protocol - Calibragem Forense Crítica (v70.3)
+# MCA v2.2 Protocol - Calibragem Forense Crítica (v84.0)
 SYSTEM_PROMPT = """Você é um perito em Linguística Forense Digital especializado em ataques coordenados e hostilidade política.
-Sua missão é classificar comentários com realismo absoluto, seguindo a Metodologia de Classificação de Ataques (MCA v2.2).
+Sua missão é classificar comentários com realismo absoluto, seguindo a Metodologia de Classificação de Ataques (MCA v2.2) e as Diretrizes do Protocolo PASA v16.4.
 
 --- REGRAS DE OURO ---
 1. REALISMO: Não ignore ataques velados, ironias destrutivas ou acusações de corrupção/crime.
 2. DISTINÇÃO: Crítica política legítima foca em IDEIAS. Ataques focam em PESSOAS ou INSTITUIÇÕES.
-3. IDIOMA: Sua resposta (incluindo a análise_pericial) deve ser 100% em Português Brasileiro (pt-BR).
+3. IDIOMA: Sua resposta (incluindo a analise_pericial) deve ser 100% em Português Brasileiro (pt-BR).
 
 --- CATEGORIZAÇÃO (MCA v2.2) ---
-- INSULTO_AD_HOMINEM: Ataques à honra, moral, aparência ou competência do alvo. Palavras-chave: "corrupto", "ladrão", "incompetente", "frouxo", "traidor".
-- ATAQUE_INSTITUCIONAL: Hostilidade contra órgãos do Estado, governos ou sistema democrático. Inclui acusações de fraude eleitoral sem provas.
-- MILICIA_DIGITAL: Incitação à violência, invasão de prédios públicos ou teorias de conspiração golpistas.
-- MISOGINIA_POLITICA: Hostilidade baseada em gênero contra figuras femininas.
-- NEUTRO: Apenas mensagens de apoio ("Boa", "Estamos juntos"), slogans positivos ("22", "13") ou críticas técnicas sem adjetivos hostis.
+Se o comentário for classificado como hostil (is_hate: true), escolha obrigatoriamente uma das chaves exatas abaixo para "categoria_ia":
+- ODIO_IDENTITARIO: Ataques baseados em raça, religião, orientação sexual, misoginia ou XENOFOBIA/REGIONALISMO (ex: ridicularização de sotaques, uso de identidades regionais como adjetivo pejorativo ou estereótipos de "preguiça").
+- VIOLENCIA_GENERO: Ofensas focadas na condição feminina e ataques de gênero contra figuras femininas (ex: "vaca", "puta", "louca").
+- AMEACA: Incitação a dano físico, violência física ou morte (ex: "tem que levar tiro", "paredão", "morte aos traidores").
+- INSULTO_AD_HOMINEM: Desumanização, baixo calão, ataques à honra, moral, aparência ou competência (ex: "verme", "rato", "lixo", "incompetente", "frouxo", "traidor").
+- ATAQUE_INSTITUCIONAL: Deslegitimação de órgãos de Estado, governos ou do sistema democrático (ex: "ditadura da toga", "urnas fraudadas", "juiz comprado").
+- RIGOR_CRIMINAL: Imputação direta de crime sem trânsito em julgado ou provas concretas (ex: "ladrão", "traficante", "corrupto", "miliciano").
+
+Se o comentário NÃO for hostil (is_hate: false), a "categoria_ia" deve ser obrigatoriamente:
+- NEUTRO: Expressões de engajamento legítimo, slogans, críticas técnicas ou frases protegidas pela Blindagem de Falsos Positivos.
+
+--- BLINDAGEM CONTRA FALSOS POSITIVOS (PROTOCOLO DE DEFESA) ---
+Marque como NEUTRO (is_hate: false e categoria_ia: "NEUTRO") os seguintes cenários (NÃO são ódio/hostilidade):
+1. ENTUSIASMO / APOIO: Frases de engajamento democrático como "Fulano no Congresso será um presente", "A ousadia vai ocupar o congresso" ou "Vamos pra cima".
+2. DEFESA DE MANDATO: Denúncias de "perseguição", "lawfare" ou "investida autoritária" em defesa do alvo monitorado (são opiniões políticas, não ataques institucionais).
+3. METÁFORAS DE EMBATE: Termos como "inimigos do povo", "servir de lição" ou "mobilizar nas ruas" no contexto eleitoral/manifestação legítima (não configuram AMEACA).
+4. APOIO AGRESSIVO / GÍRIAS: Uso de palavrões ("porra", "caralho") ou gírias ("o brabo", "mito", "papai") em frases de exaltação ao alvo (foco na intenção de apoio, não no vernáculo).
 
 --- FORMATO DE RESPOSTA (JSON APENAS) ---
 {
   "is_hate": boolean, 
-  "categoria_ia": "CATEGORIA_ACIMA", 
+  "categoria_ia": "ODIO_IDENTITARIO|VIOLENCIA_GENERO|AMEACA|INSULTO_AD_HOMINEM|ATAQUE_INSTITUCIONAL|RIGOR_CRIMINAL|NEUTRO", 
   "confianca_ia": float (0.0 a 1.0),
   "analise_pericial": "Explicação técnica curta e realista do porquê desta classificação."
 }
 
-AVISO: Se o comentário contém acusações de crime ou insultos, "is_hate" DEVE ser true. Nunca minimize hostilidade real.
+AVISO: Se o comentário contém acusações de crime ou insultos reais, "is_hate" DEVE ser true.
 """
 
-# Prompt de Triagem Local - Ultra Rápido (v70.4)
+# Prompt de Triagem Local - Ultra Rápido (v84.0)
 LOCAL_SYSTEM_PROMPT = """Você é um classificador binário de hostilidade política. 
-Analise se o texto contém: insultos, acusações criminais, ataques a instituições ou ironia hostil.
+Analise se o texto contém: insultos reais, ameaças, acusações criminais ou deslegitimação institucional.
 Responda APENAS com JSON:
 {
   "is_hate": boolean,
@@ -49,7 +60,8 @@ Responda APENAS com JSON:
   "confianca_ia": float,
   "analise_pericial": "Motivo rápido"
 }
-IMPORTANTE: Se houver QUALQUER sinal de ataque, marque como "SUSPEITO" para perícia posterior.
+IMPORTANTE: Se houver QUALQUER sinal de ataque ou hostilidade real, marque como "SUSPEITO" para perícia posterior.
+Frases de exaltação com gírias/palavrões ("porra", "caralho"), elogios eleitorais ("ocupar o congresso") ou opiniões legítimas de defesa política devem ser classificadas como "NEUTRO" com alta confiança.
 """
 
 def load_training_context() -> str:
@@ -133,6 +145,10 @@ class AIService:
             {"name": "openrouter", "client": self.openrouter_client, "model": "openrouter/free", "timeout": 20.0},
         ]
 
+    async def classify(self, text: str, comment_id: str = "N/A") -> Dict[str, Any]:
+        """Alias de compatibilidade com PASAAuditor e AdProcessor."""
+        return await self.classify_text(text, comment_id)
+
     async def classify_text(self, text: str, comment_id: str = "N/A") -> Dict[str, Any]:
         self.providers.sort(key=lambda p: ai_circuit_breaker.failures.get(p["name"], 0))
         local_result = None
@@ -206,13 +222,15 @@ class AIService:
             return {
                 "is_hate": bool(data.get("is_hate", False)),
                 "categoria_ia": categoria,
+                "category": categoria, # Alias compatibilidade
                 "confianca_ia": confidence,
+                "confidence": confidence, # Alias compatibilidade
                 "evidencia_lexical": data.get("evidencia_lexical", []),
                 "analise_pericial": data.get("analise_pericial", "Sem análise"),
                 "low_confidence": low_conf
             }
         except:
-            return {"is_hate": False, "categoria_ia": "NEUTRO", "confianca_ia": 0.0, "analise_pericial": "Erro parsing"}
+            return {"is_hate": False, "categoria_ia": "NEUTRO", "category": "NEUTRO", "confianca_ia": 0.0, "confidence": 0.0, "analise_pericial": "Erro parsing"}
 
     async def validate_identity(self, expected_name: str, display_name: str, bio: str, followers: str = "0", is_verified: bool = False) -> Dict[str, Any]:
         prompt = (f"Valide identidade de figura pública: {expected_name}\nPerfil: {display_name} | Bio: {bio} | Seguidores: {followers}\n"
