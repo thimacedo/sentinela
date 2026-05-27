@@ -589,15 +589,24 @@ class InstagramScraperV2:
         return self.stats
 
     async def _verify_session(self, page: Page, session: Session) -> bool:
-        """Verifica se a sessão está funcional tentando acessar os dados do usuário (PASA v70.4)."""
+        """Verifica se a sessão está funcional na Home do Instagram (PASA v83.2)."""
         try:
-            # Tenta carregar uma URL de API simples que requer login
-            await page.goto("https://www.instagram.com/api/v1/users/web_profile_info/?username=instagram", wait_until="networkidle", timeout=15000)
-            content = await page.content()
-            if '"status": "ok"' in content:
-                return True
-            return False
-        except:
+            # Navega para a Home para validar cookies injetados de forma estável
+            await page.goto("https://www.instagram.com/", wait_until="domcontentloaded", timeout=25000)
+            await page.wait_for_timeout(3000)
+            
+            current_url = page.url
+            if "accounts/login" in current_url:
+                return False
+                
+            # Verifica a visibilidade de campos de login
+            login_field = await page.query_selector('input[name="username"], input[name="password"]')
+            if login_field and await login_field.is_visible():
+                return False
+                
+            return True
+        except Exception as e:
+            logger.warning(f"⚠️ [V2] Erro na verificação de sessão: {e}")
             return False
 
     async def _take_screenshot(self, page: Page, name: str) -> None:

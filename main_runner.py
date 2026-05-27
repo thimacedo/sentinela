@@ -140,3 +140,4 @@ async def main() -> None:
 
 if __name__ == "__main__":
     asyncio.run(main())
+# hot-reload trigger: 2026-05-26 v2
