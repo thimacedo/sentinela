@@ -330,9 +330,9 @@ def heal_runtime_error(reason: str) -> str:
         state.add_log("warn", "[Watchdog] 🧹 Playwright detectado nos logs de erro. Limpando processos órfãos...")
         try:
             if os.name == 'nt':
-                subprocess.run(["taskkill", "/F", "/IM", "chromium.exe"], capture_output=True)
+                subprocess.run('wmic process where "ExecutablePath like \'%ms-playwright%\'" call terminate', shell=True, capture_output=True)
             else:
-                subprocess.run(["pkill", "-f", "chromium"], capture_output=True)
+                subprocess.run(["pkill", "-f", "playwright"], capture_output=True)
         except Exception:
             pass
         return "restart"

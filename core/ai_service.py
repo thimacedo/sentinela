@@ -149,6 +149,35 @@ class AIService:
         """Alias de compatibilidade com PASAAuditor e AdProcessor."""
         return await self.classify_text(text, comment_id)
 
+    async def chat_completion(self, prompt: str, system_prompt: str = "Você é um assistente técnico especializado no sistema Sentinela.", response_format: str = "json_object") -> Optional[Dict[str, Any]]:
+        """Executa uma chamada de chat genérica, fora do fluxo de classificação de ódio."""
+        # Prioriza Mistral/Groq para tarefas genéricas
+        providers = [p for p in self.providers if p["name"] not in ["litert", "ollama"]]
+        if not providers: providers = self.providers # Fallback local
+
+        for provider in providers:
+            if not ai_circuit_breaker.can_execute(provider["name"]):
+                continue
+            try:
+                response = await provider["client"].chat.completions.create(
+                    model=provider["model"],
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": prompt}
+                    ],
+                    response_format={"type": response_format},
+                    temperature=0.0,
+                    timeout=20.0
+                )
+                content = response.choices[0].message.content
+                if response_format == "json_object":
+                    return json.loads(content)
+                return {"content": content}
+            except Exception as e:
+                logger.warning(f"⚠️ [AI] Provider {provider['name']} falhou no chat_completion: {e}")
+                continue
+        return None
+
     async def classify_text(self, text: str, comment_id: str = "N/A") -> Dict[str, Any]:
         # Filtragem Lexical Preventiva (Anti-Falso Positivo de Menções Puras / Lixo)
         from core.lexical_filter import lexical_filter

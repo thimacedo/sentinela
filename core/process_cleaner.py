@@ -7,24 +7,26 @@ logger = logging.getLogger("core.process_cleaner")
 
 def cleanup_orphans():
     """
-    Limpa processos órfãos de navegadores e drivers para evitar vazamento de memória (PASA v65.0).
+    Limpa processos órfãos de navegadores e drivers de forma SEGURA,
+    garantindo que não afete os navegadores de uso pessoal do usuário (PASA v65.1).
     """
     if os.name == 'nt': # Windows
-        targets = ["chromium.exe", "chrome.exe", "msedge.exe", "chromedriver.exe"]
-        for target in targets:
-            try:
-                # /T mata a árvore de processos, /F força
-                subprocess.run(["taskkill", "/F", "/IM", target, "/T"], capture_output=True, check=False)
-            except Exception:
-                pass
+        try:
+            # Mata apenas processos de automação que contêm '--headless' ou vêm do diretório 'ms-playwright'
+            subprocess.run('wmic process where "CommandLine like \'%--headless%\' and name=\'chrome.exe\'" call terminate', shell=True, capture_output=True)
+            subprocess.run('wmic process where "CommandLine like \'%--headless%\' and name=\'msedge.exe\'" call terminate', shell=True, capture_output=True)
+            subprocess.run('wmic process where "ExecutablePath like \'%ms-playwright%\'" call terminate', shell=True, capture_output=True)
+            
+            # Chromedriver é seguro matar, pois é só de automação
+            subprocess.run(["taskkill", "/F", "/IM", "chromedriver.exe", "/T"], capture_output=True, check=False)
+        except Exception:
+            pass
     else: # Linux
-        targets = ["chromium", "chrome", "playwright"]
-        for target in targets:
-            try:
-                subprocess.run(["pkill", "-9", "-f", target], capture_output=True, check=False)
-            except Exception:
-                pass
-    logger.info("🧹 [Cleaner] Processos órfãos removidos com sucesso.")
+        try:
+            subprocess.run(["pkill", "-9", "-f", "playwright"], capture_output=True, check=False)
+        except Exception:
+            pass
+    logger.info("🧹 [Cleaner] Processos órfãos de automação removidos com segurança.")
 
 if __name__ == "__main__":
     cleanup_orphans()
