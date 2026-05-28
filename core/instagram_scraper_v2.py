@@ -397,47 +397,45 @@ class InstagramScraperV2:
         }
 
     async def open_post_modal(self, page: Page, shortcode: str) -> bool:
-        """Abre um post do Instagram via navegação direta por URL (PASA v84.3).
+        """Abre um post do Instagram via clique no elemento do grid (PASA v84.10).
         
-        Estratégia principal: navegação direta a /p/{shortcode}/ — mais confiável
-        que o clique no grid, que sofre de timeout ao não encontrar o elemento.
-        Fallback: clique no elemento do grid se já estivermos na página do perfil.
+        Estratégia principal: clique no seletor do grid — mais estável para hidratação
+        do modal e interceptação de JSONs de comentários.
+        Fallback: navegação direta via URL.
         """
         if page.is_closed():
             logger.warning("⚠️ [V2] Não é possível abrir o modal: a página está fechada.")
             return False
         
-        # Estratégia 1: Navegação direta por URL (primária — sem dependência de DOM do grid)
-        try:
-            post_url = f"https://www.instagram.com/p/{shortcode}/"
-            await page.goto(post_url, wait_until="domcontentloaded", timeout=30000)
-            await asyncio.sleep(random.uniform(2, 4))
-            if page.is_closed():
-                return False
-            # Verifica se a página do post foi carregada (artigo presente ou sections detectadas)
-            article = await page.query_selector("article")
-            sections = await page.query_selector_all("section")
-            if article or len(sections) > 0:
-                logger.debug(f"✅ [V2] Post {shortcode} aberto via navegação direta (Artigo: {article is not None}, Sections: {len(sections)}).")
-                return True
-            logger.warning(f"⚠️ [V2] Post {shortcode} carregado via URL mas sem elementos de conteúdo detectados.")
-            return True  # Continua mesmo assim, os dados JSON já foram interceptados
-        except Exception as e:
-            logger.warning(f"⚠️ [V2] Navegação direta para {shortcode} falhou: {e}. Tentando clique no grid...")
-        
-        # Estratégia 2: Clique no elemento do grid (fallback)
+        # Estratégia 1: Clique no elemento do grid (Primária)
         selector = f'a[href*="/{shortcode}/"]'
         try:
             post_element = await page.query_selector(selector)
-            if not post_element:
-                logger.warning(f"⚠️ [V2] Elemento do post {shortcode} não encontrado no feed para clique.")
-                return False
-            await post_element.click(timeout=10000)
-            await asyncio.sleep(random.uniform(3, 5))
-            return True
+            if post_element:
+                await post_element.click(timeout=10000)
+                await asyncio.sleep(random.uniform(3, 5))
+                # Verifica se o modal abriu (presença de article)
+                article = await page.query_selector("article")
+                if article:
+                    logger.debug(f"✅ [V2] Post {shortcode} aberto via clique no grid.")
+                    return True
         except Exception as e:
             logger.warning(f"⚠️ [V2] Falha ao abrir modal do post {shortcode} via clique: {e}")
-            return False
+
+        # Estratégia 2: Navegação direta por URL (Fallback)
+        try:
+            logger.info(f"🔄 [V2] Tentando fallback de navegação direta para {shortcode}...")
+            post_url = f"https://www.instagram.com/p/{shortcode}/"
+            await page.goto(post_url, wait_until="domcontentloaded", timeout=30000)
+            await asyncio.sleep(random.uniform(3, 5))
+            article = await page.query_selector("article")
+            if article:
+                logger.debug(f"✅ [V2] Post {shortcode} aberto via navegação direta.")
+                return True
+        except Exception as e:
+            logger.warning(f"❌ [V2] Falha total ao abrir post {shortcode}: {e}")
+        
+        return False
 
     async def scroll_comment_column(self, page: Page, scroll_amount: int = 800) -> None:
         """Move o mouse e rotaciona a roda para carregar os comentários no modal."""
@@ -446,24 +444,22 @@ class InstagramScraperV2:
         await asyncio.sleep(3)
 
     async def close_post_modal(self, page: Page) -> None:
-        """Fecha a página do post retornando ao perfil do candidato (PASA v84.3).
-        
-        Como agora usamos navegação direta em vez de modal, o 'fechamento' é
-        simplesmente voltar na history do navegador com page.go_back().
-        """
+        """Fecha o modal do post retornando ao perfil (PASA v84.10)."""
         if page.is_closed():
             return
         try:
-            await page.go_back(wait_until="domcontentloaded", timeout=15000)
-            await asyncio.sleep(random.uniform(2, 3))
+            # 1. Tenta tecla Escape
+            await page.keyboard.press("Escape")
+            await asyncio.sleep(1.5)
+            
+            # 2. Verifica se ainda há article (modal aberto)
+            article = await page.query_selector("article")
+            if article:
+                # 3. Tenta voltar na história se for navegação direta
+                await page.go_back(wait_until="domcontentloaded", timeout=10000)
+                await asyncio.sleep(2)
         except Exception as e:
-            logger.warning(f"⚠️ [V2] Falha ao voltar para o perfil após visitar o post: {e}")
-            # Fallback: tecla Escape
-            try:
-                await page.keyboard.press("Escape")
-                await asyncio.sleep(1)
-            except Exception:
-                pass
+            logger.warning(f"⚠️ [V2] Falha ao fechar modal: {e}")
 
     async def _scrape_post(self, page: Page, shortcode: str, username: str, candidato_id: str, max_comments: int, max_age_days: int) -> List[Dict[str, Any]]:
         """Extrai comentários de um post específico com verificação de data e duplicidade."""
