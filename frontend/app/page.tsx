@@ -15,6 +15,7 @@ import TrendChart from '@/components/home/TrendChart';
 import PremiumCTA from '@/components/home/PremiumCTA';
 
 export default function HomePage() {
+  const [period, setPeriod] = useState<'24h' | '7d' | '30d'>('24h');
   const { data: alerts = [] } = useAlerts(5);
   const { data: stats } = useDashboardStats();
 
@@ -37,16 +38,14 @@ export default function HomePage() {
       {/* Main Container */}
       <main className="max-w-6xl mx-auto py-6 space-y-12">
         {/* Section 1: News Header */}
-        <NewsHeader
-          todayHighlight={{
-            title: 'Análise de Resiliência Democrática',
-            description: `O sistema detectou um índice de resiliência de ${resiliencia}% no discurso das redes sociais brasileiras nas últimas 24h.`,
-            severity: resiliencia < 80 ? 'critical' : (resiliencia < 90 ? 'high' : 'medium'),
-          }}
-        />
+        <NewsHeader />
 
-        {/* Timeline Movida para o Topo */}
-        <EventTimeline events={timelineEvents} period="24h" />
+        {/* Timeline Movida para o Topo com Controle de Período */}
+        <EventTimeline 
+          events={timelineEvents} 
+          period={period} 
+          onPeriodChange={setPeriod}
+        />
 
         {/* Section 1.5: Activity Trend (From SaaS Logic) */}
         <TrendChart />

@@ -14,9 +14,10 @@ interface TimelineEvent {
 interface EventTimelineProps {
   events: TimelineEvent[];
   period?: '24h' | '7d' | '30d';
+  onPeriodChange?: (period: '24h' | '7d' | '30d') => void;
 }
 
-export default function EventTimeline({ events, period = '24h' }: EventTimelineProps) {
+export default function EventTimeline({ events, period = '24h', onPeriodChange }: EventTimelineProps) {
   const getAlertColor = (level: string) => {
     switch (level) {
       case 'critical':
@@ -49,15 +50,19 @@ export default function EventTimeline({ events, period = '24h' }: EventTimelineP
           📅 Linha do Tempo
         </h2>
         <div className="flex gap-1.5">
-          <button className="px-2 py-0.5 text-[10px] font-mono bg-bg-card hover:bg-bg-main border border-border-main rounded transition-colors cursor-pointer">
-            24h
-          </button>
-          <button className="px-2 py-0.5 text-[10px] font-mono bg-bg-card hover:bg-bg-main border border-border-main rounded transition-colors cursor-pointer">
-            7d
-          </button>
-          <button className="px-2 py-0.5 text-[10px] font-mono bg-bg-card hover:bg-bg-main border border-border-main rounded transition-colors cursor-pointer">
-            30d
-          </button>
+          {(['24h', '7d', '30d'] as const).map((p) => (
+            <button
+              key={p}
+              onClick={() => onPeriodChange?.(p)}
+              className={`px-2 py-0.5 text-[10px] font-mono border rounded transition-colors cursor-pointer ${
+                period === p 
+                  ? 'bg-brand-primary text-white border-brand-primary shadow-sm' 
+                  : 'bg-bg-card hover:bg-bg-main border-border-main text-text-muted'
+              }`}
+            >
+              {p}
+            </button>
+          ))}
         </div>
       </div>
 

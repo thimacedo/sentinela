@@ -276,43 +276,46 @@ def get_finance_dashboard(supa: Client = Depends(get_supa)):
 
 @app.get("/api/v1/summary")
 def summary(request: Request, supa: Client = Depends(get_supa)):
-    """Retorna KPIs consolidados com o ACUMULADO (Solenya Edition)."""
+    """Retorna KPIs consolidados com RECALCULO EM TEMPO REAL (PASA v85.3)."""
     try:
         org_id = request.headers.get("X-Organization-Id")
         now_utc = datetime.now(timezone.utc)
-        
-        # 1. Total de Alvos Ativos (Continua dinâmico)
+
+        # 1. Total de Alvos Ativos (Dinâmico)
         query_c = supa.table('candidatos').select('id', count='exact').eq('status_monitoramento', 'Ativo')
         if org_id:
             query_c = query_c.eq('organization_id', org_id)
-        c_res = query_c.limit(0).execute()
+        c_res = query_c.execute()
         c = c_res.count if (c_res and c_res.count is not None) else 0
-        
-        # 2. Busca Métrica Diária mais recente para o timestamp
-        res_diaria = supa.table('metricas_diarias').select('updated_at').order('data', desc=True).limit(1).execute()
-        last_update = res_diaria.data[0]['updated_at'] if res_diaria.data else now_utc.isoformat()
+
+        # 2. Busca o timestamp da coleta mais recente para o indicador de atividade
+        last_comment_res = supa.table('comentarios').select('data_coleta').order('data_coleta', desc=True).limit(1).execute()
+        last_update = last_comment_res.data[0]['data_coleta'] if last_comment_res.data else now_utc.isoformat()
 
         # 3. Calcula o Acumulado (Lifetime) de forma dinâmica a partir da tabela de comentários
+        # Forçamos a contagem exata para garantir que o KPI reflita as últimas inserções
         query_total = supa.table('comentarios').select('id', count='exact')
         query_hate = supa.table('comentarios').select('id', count='exact').eq('is_hate', True)
+
         if org_id:
             query_total = query_total.eq('organization_id', org_id)
             query_hate = query_hate.eq('organization_id', org_id)
-            
-        t_res_total = query_total.limit(1).execute()
-        t_res_hate = query_hate.limit(1).execute()
-        
+
+        t_res_total = query_total.execute()
+        t_res_hate = query_hate.execute()
+
         t_lifetime = t_res_total.count if (t_res_total and t_res_total.count is not None) else 0
         h_lifetime = t_res_hate.count if (t_res_hate and t_res_hate.count is not None) else 0
-        
+
+        # Cálculo da Resiliência Democrática (Saúde do Discurso)
         res_val = round(((t_lifetime - h_lifetime) / t_lifetime) * 100, 1) if t_lifetime > 0 else 100.0
-        
+
         return {
-            "total_monitorados": c, 
-            "total_alertas": h_lifetime, 
-            "total_amostra": t_lifetime, 
-            "resiliencia": res_val, 
-            "periodo": "Acumulado",
+            "total_monitorados": c,
+            "total_alertas": h_lifetime,
+            "total_amostra": t_lifetime,
+            "resiliencia": res_val,
+            "periodo": "Realtime",
             "org_id": org_id,
             "timestamp": last_update
         }
@@ -332,21 +335,28 @@ def get_networks(request: Request, supa: Client = Depends(get_supa)):
 
 @app.get("/api/v1/targets")
 def get_targets(request: Request, limit: int = 50, supa: Client = Depends(get_supa)):
+    """Retorna candidatos monitorados com ALTA VARIABILIDADE (PASA v85.4)."""
     try:
         org_id = request.headers.get("X-Organization-Id")
         
-        # Busca candidatos ativos escopados
+        # 1. Busca candidatos ativos escopados
         query_cand = supa.table('candidatos').select('*').eq('status_monitoramento', 'Ativo')
         if org_id:
             query_cand = query_cand.eq('organization_id', org_id)
         candidates_res = query_cand.execute()
         candidates = candidates_res.data or []
+
+        # 2. ALGORITMO DE VARIABILIDADE: Embaralha a lista para evitar repetições fixas no dashboard
+        import random
+        random.shuffle(candidates)
         
-        # Busca ódio recente escopado
+        # 3. Busca ódio recente escopado para enriquecimento
         query_h = supa.table('comentarios').select('candidato_id, categoria_ia').eq('is_hate', True)
         if org_id:
             query_h = query_h.eq('organization_id', org_id)
-        h_res = query_h.limit(2000).execute()
+        
+        # Pegamos uma amostra maior de ódio para garantir que o cruzamento funcione
+        h_res = query_h.order('data_coleta', desc=True).limit(5000).execute()
         h_data = h_res.data or []
         
         counts = Counter([h['candidato_id'] for h in h_data])
@@ -370,7 +380,8 @@ def get_targets(request: Request, limit: int = 50, supa: Client = Depends(get_su
                 "breakdown": dict(breakdowns.get(cid, {}))
             })
             
-        return sorted(enriched, key=lambda x: x.get('comentarios_odio_count', 0), reverse=True)[:limit]
+        # Retorna os alvos processados respeitando o limite, mas já embaralhados
+        return enriched[:limit]
     except Exception as e:
         logger.error(f"Targets Error: {e}\n{traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=str(e))

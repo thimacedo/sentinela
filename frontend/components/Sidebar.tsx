@@ -60,10 +60,12 @@ const menuItems = [
 
 import { useUIStore } from '@/src/store/useUIStore'
 import { useWallet } from '@/hooks/useWallet'
+import { useDashboardStats } from '@/hooks/useDashboardData'
 
 export default function Sidebar() {
   const { isCollapsed, setIsCollapsed, toggleSidebar } = useUIStore()
-  const { balance, loading } = useWallet()
+  const { balance, loading: walletLoading } = useWallet()
+  const { data: stats, isLoading: statsLoading } = useDashboardStats()
   const pathname = usePathname()
   const router = useRouter()
 
@@ -130,16 +132,16 @@ export default function Sidebar() {
           })}
         </nav>
 
-        {/* Footer Info & Gamification */}
+        {/* Footer Info & Global KPIs */}
         {!isCollapsed && (
-          <div className="p-4 border-t border-border-main bg-bg-card/50">
-            {/* Gamification Balance */}
+          <div className="p-4 border-t border-border-main bg-bg-card/50 overflow-y-auto custom-scrollbar">
+            {/* Wallet Balance */}
             <div className="mb-4 bg-bg-main border border-border-main rounded-lg p-3">
               <div className="flex items-center justify-between mb-1">
                 <span className="text-[10px] font-mono text-text-muted uppercase tracking-widest flex items-center gap-1">
                   Aporte Tático
                 </span>
-                {loading ? (
+                {walletLoading ? (
                   <span className="w-10 h-4 bg-border-main rounded animate-pulse"></span>
                 ) : (
                   <span className={`text-xs font-black font-mono ${balance > 0 ? 'text-brand-primary' : 'text-red-500'}`}>
@@ -162,13 +164,51 @@ export default function Sidebar() {
               </button>
             </div>
 
-            <div className="flex items-center gap-2 mb-2">
+            {/* Indicator Ativo */}
+            <div className="flex items-center gap-2 mb-6">
               <div className="w-2 h-2 bg-brand-primary rounded-full animate-pulse" />
               <span className="text-[10px] font-mono text-text-muted uppercase tracking-widest">
                 Monitor Ativo
               </span>
             </div>
-            <div className="text-[9px] font-mono text-text-muted opacity-50">
+
+            {/* Global KPIs (Movi do Topo para cá) */}
+            <div className="space-y-4 mb-6 pt-4 border-t border-border-main/30">
+                <div className="flex flex-col">
+                    <span className="text-[9px] font-bold text-text-muted uppercase tracking-tighter mb-1">Alertas (24h)</span>
+                    <span className="text-lg font-black text-text-main font-mono leading-none tracking-tighter">
+                        {statsLoading ? '...' : (stats?.total_alertas || 0).toLocaleString('pt-BR')}
+                    </span>
+                </div>
+                <div className="flex flex-col">
+                    <span className="text-[9px] font-bold text-text-muted uppercase tracking-tighter mb-1">Monitorados</span>
+                    <span className="text-lg font-black text-text-main font-mono leading-none tracking-tighter">
+                        {statsLoading ? '...' : (stats?.total_monitorados || 0)}
+                    </span>
+                </div>
+                <div className="flex flex-col">
+                    <span className="text-[9px] font-bold text-text-muted uppercase tracking-tighter mb-1">Amostragem</span>
+                    <span className="text-lg font-black text-text-main font-mono leading-none tracking-tighter">
+                        {statsLoading ? '...' : `${((stats?.total_amostra || 0) / 1000).toFixed(1)}k`}
+                    </span>
+                </div>
+                
+                {/* Resiliência */}
+                <div className="mt-4 p-3 bg-brand-primary/5 border border-brand-primary/20 rounded-lg">
+                    <div className="flex justify-between items-center mb-1.5">
+                        <span className="text-[9px] font-bold text-brand-primary uppercase">Resiliência</span>
+                        <span className="text-xs font-black text-brand-primary font-mono">{stats?.resiliencia || 0}%</span>
+                    </div>
+                    <div className="w-full bg-brand-primary/20 rounded-full h-1 overflow-hidden">
+                        <div 
+                            className="bg-brand-primary h-1 transition-all duration-1000" 
+                            style={{ width: `${stats?.resiliencia || 0}%` }}
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <div className="text-[9px] font-mono text-text-muted opacity-50 text-center border-t border-border-main/30 pt-4">
               OBSERVATÓRIO CÍVICO
             </div>
           </div>
