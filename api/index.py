@@ -191,6 +191,10 @@ async def stripe_webhook(request: Request, supa: Client = Depends(get_supa)):
 def calculate_risk(item: Dict[str, Any]):
     totais = item.get('comentarios_totais_count', 0) or 0
     odio = item.get('comentarios_odio_count', 0) or 0
+    
+    if totais < odio:
+        totais = odio
+
     if totais == 0:
         return 0, 'CONTROLADO', RISK_COLORS["CONTROLADO"]
     
@@ -355,7 +359,7 @@ def get_targets(request: Request, limit: int = 50, supa: Client = Depends(get_su
         
         enriched = []
         for item in candidates:
-            cid = item.get('username')
+            cid = item.get('id')
             item['comentarios_odio_count'] = counts.get(cid, 0)
             score, nivel, color = calculate_risk(item)
             enriched.append({
