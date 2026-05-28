@@ -77,15 +77,15 @@ export default function PricingGrid() {
             </li>
           </ul>
 
-          <button onClick={() => handleCheckout('Operação Tática', '1.000', '497,00')} className="w-full py-4 rounded-xl border border-border-main bg-bg-main hover:bg-brand-primary/10 hover:border-brand-primary hover:text-brand-primary transition-colors text-sm font-black uppercase tracking-widest text-text-main">
-            Liberar Acesso Tático
+          <button onClick={() => handleCheckout('Operação Tática', '1.000', '497,00')} className="w-full py-4 rounded-xl border border-border-main bg-bg-main hover:bg-brand-primary/10 hover:border-brand-primary hover:text-brand-primary transition-colors text-sm font-black uppercase tracking-widest text-text-main shadow-sm">
+            Autorizar Aporte Tático
           </button>
         </div>
 
         {/* Tier 2 (Mais Popular) */}
         <div className="bg-bg-card border-2 border-brand-primary rounded-2xl p-8 flex flex-col relative shadow-xl transform md:-translate-y-4">
           <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-brand-primary text-white px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg flex items-center gap-1.5">
-            <Zap className="w-3 h-3 fill-white" /> Recomendado
+            <Zap className="w-3 h-3 fill-white" /> Escolha Estratégica
           </div>
 
           <div className="mb-6">
@@ -104,11 +104,11 @@ export default function PricingGrid() {
               </div>
               {timeLeft > 0 && (
                 <div className="text-xs font-mono font-bold text-emerald-500 mt-2 bg-emerald-500/10 inline-block px-2 py-1 rounded border border-emerald-500/20">
-                  +1.000 CI BÔNUS TEMPORÁRIO
+                  +1.000 CI BÔNUS DE URGÊNCIA
                 </div>
               )}
             </div>
-            <p className="text-[10px] text-text-muted uppercase tracking-widest mt-4">Investimento: R$ 1.997</p>
+            <p className="text-[10px] text-text-muted uppercase tracking-widest mt-4">Investimento Inicial: R$ 1.997</p>
           </div>
 
           <ul className="space-y-4 mb-8 flex-1">
@@ -127,16 +127,18 @@ export default function PricingGrid() {
           </ul>
 
           <button onClick={() => handleCheckout('War Room', '6.000', '1.997,00')} className="w-full py-4 rounded-xl bg-brand-primary text-white hover:bg-brand-primary/90 transition-all text-sm font-black uppercase tracking-widest shadow-lg shadow-brand-primary/20">
-            Montar War Room
+            Ativar War Room Imediato
           </button>
-          <p className="text-[9px] text-center text-text-muted mt-3 font-mono uppercase">Apenas 3 Vagas Restantes no Servidor</p>
+          <p className="text-[9px] text-center text-red-400 mt-3 font-mono uppercase tracking-widest animate-pulse">
+            Apenas 3 Vagas Restantes no Cluster
+          </p>
         </div>
 
         {/* Tier 3 */}
-        <div className="bg-bg-card border border-border-main rounded-2xl p-8 flex flex-col hover:border-brand-primary/30 transition-all shadow-sm">
+        <div className="bg-bg-card border border-border-main rounded-2xl p-8 flex flex-col hover:border-brand-primary/30 transition-all shadow-sm opacity-90 hover:opacity-100">
           <div className="mb-6">
             <h3 className="text-lg font-black text-text-main uppercase tracking-widest mb-2">Escala Nacional</h3>
-            <p className="text-xs text-text-muted">Acesso ilimitado de IPs residenciais e suporte de equipe técnica dedicada.</p>
+            <p className="text-xs text-text-muted">Acesso ilimitado à malha de IPs residenciais e suporte de engenharia dedicada.</p>
           </div>
           
           <div className="mb-6 pb-6 border-b border-border-main">
@@ -144,7 +146,7 @@ export default function PricingGrid() {
               <span className="text-4xl font-black text-text-main font-mono">25.000</span>
               <span className="text-sm font-bold text-brand-primary mb-1">CI</span>
             </div>
-            <p className="text-[10px] text-text-muted uppercase tracking-widest mt-2">Investimento: R$ 7.997</p>
+            <p className="text-[10px] text-text-muted uppercase tracking-widest mt-2">Investimento Corporativo: R$ 7.997</p>
           </div>
 
           <ul className="space-y-4 mb-8 flex-1">
@@ -154,12 +156,12 @@ export default function PricingGrid() {
             </li>
             <li className="flex items-start gap-3 text-sm text-text-main">
               <Check className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
-              <span>Operação em múltiplos alvos e múltiplos diretórios estaduais.</span>
+              <span>Operação multi-alvo irrestrita em diretórios estaduais.</span>
             </li>
           </ul>
 
-          <button onClick={() => handleCheckout('Escala Nacional', '25.000', '7.997,00')} className="w-full py-4 rounded-xl border border-border-main bg-bg-main hover:bg-brand-primary/10 hover:border-brand-primary hover:text-brand-primary transition-colors text-sm font-black uppercase tracking-widest text-text-main">
-            Consultar Disponibilidade
+          <button onClick={() => handleCheckout('Escala Nacional', '25.000', '7.997,00')} className="w-full py-4 rounded-xl border border-border-main bg-bg-main hover:bg-brand-primary/10 hover:border-brand-primary hover:text-brand-primary transition-colors text-sm font-black uppercase tracking-widest text-text-main shadow-sm">
+            Solicitar Liberação de Malha
           </button>
         </div>
       </div>

@@ -64,12 +64,12 @@ export default function CheckoutModal({ isOpen, onClose, planName, ciAmount, pri
           {/* Order Summary */}
           <div className="mb-8 p-4 bg-bg-main border border-border-main rounded-xl flex justify-between items-center">
             <div>
-              <p className="text-xs text-text-muted uppercase tracking-widest font-bold mb-1">Pacote Selecionado</p>
+              <p className="text-xs text-text-muted uppercase tracking-widest font-bold mb-1">Aporte Estratégico</p>
               <p className="text-sm font-black text-text-main">{planName}</p>
               <p className="text-xs text-brand-primary font-mono mt-0.5">+{ciAmount} CI</p>
             </div>
             <div className="text-right">
-              <p className="text-[10px] text-text-muted uppercase tracking-widest font-bold mb-1">Total</p>
+              <p className="text-[10px] text-text-muted uppercase tracking-widest font-bold mb-1">Investimento Tático</p>
               <p className="text-2xl font-black text-text-main font-mono">R$ {price}</p>
             </div>
           </div>
