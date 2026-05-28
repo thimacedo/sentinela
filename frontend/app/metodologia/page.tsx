@@ -8,13 +8,16 @@ export default function MetodologiaPage() {
   return (
     <div className="max-w-4xl mx-auto py-12 px-4 space-y-10">
       {/* Header */}
-      <div className="border-b border-border-main pb-6">
-        <h1 className="text-3xl font-extrabold tracking-tight text-text-main uppercase flex items-center gap-3">
-          <BookOpen className="w-8 h-8 text-brand-primary" /> Metodologia Técnica
-        </h1>
-        <p className="text-sm text-text-muted mt-2 font-mono">
-          Documentação do índice de resiliência e classificação semântica (PASA v70.4)
-        </p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+        <div>
+          <h1 className="text-2xl font-bold text-text-main tracking-tight uppercase flex items-center gap-3">
+            <BookOpen className="w-6 h-6 text-brand-primary" />
+            Metodologia Científica
+          </h1>
+          <p className="text-xs text-text-muted mt-1">
+            Protocolo Analítico MCA v2.2 (Multi-Channel Assessment)
+          </p>
+        </div>
       </div>
 
       {/* Content */}

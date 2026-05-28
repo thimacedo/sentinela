@@ -7,13 +7,15 @@ export default function PrivacidadePage() {
   return (
     <div className="max-w-4xl mx-auto py-12 px-4 space-y-10">
       {/* Header */}
-      <div className="border-b border-border-main pb-6">
-        <h1 className="text-3xl font-extrabold tracking-tight text-text-main uppercase">
-          Política de Privacidade
-        </h1>
-        <p className="text-sm text-text-muted mt-2 font-mono">
-          Compromisso com a transparência e sigilo das informações do usuário
-        </p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+        <div>
+          <h1 className="text-2xl font-bold text-text-main tracking-tight uppercase">
+            Política de Privacidade
+          </h1>
+          <p className="text-xs text-text-muted mt-1">
+            Transparência sobre o uso de tecnologias de rastreamento e coleta
+          </p>
+        </div>
       </div>
 
       {/* Content */}

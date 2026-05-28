@@ -7,13 +7,15 @@ export default function TermosPage() {
   return (
     <div className="max-w-4xl mx-auto py-12 px-4 space-y-10">
       {/* Header */}
-      <div className="border-b border-border-main pb-6">
-        <h1 className="text-3xl font-extrabold tracking-tight text-text-main uppercase">
-          Termos de Uso
-        </h1>
-        <p className="text-sm text-text-muted mt-2 font-mono">
-          Última atualização: 27 de maio de 2026
-        </p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+        <div>
+          <h1 className="text-2xl font-bold text-text-main tracking-tight uppercase">
+            Termos de Uso
+          </h1>
+          <p className="text-xs text-text-muted mt-1">
+            Última atualização: 27 de maio de 2026
+          </p>
+        </div>
       </div>
 
       {/* Content */}
