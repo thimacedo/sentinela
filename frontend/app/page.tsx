@@ -45,6 +45,9 @@ export default function HomePage() {
           }}
         />
 
+        {/* Timeline Movida para o Topo */}
+        <EventTimeline events={timelineEvents} period="24h" />
+
         {/* Section 1.5: Activity Trend (From SaaS Logic) */}
         <TrendChart />
 
@@ -80,8 +83,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Section 4: Timeline */}
-        <EventTimeline events={timelineEvents} period="24h" />
+
 
         {/* Section 5: Candidate Profiles */}
         <div className="space-y-6">
