@@ -186,20 +186,21 @@ class QueueManager:
             active_targets.add(username)
 
     def rotate_target(self, target: Target) -> None:
-        """Remove o item processado e reinsere no fim da fila com status e termômetro (v59.0)."""
+        """Remove o item processado e reinsere no fim da fila com status e termômetro (v84.13)."""
         if not target.username:
             return
 
         now = datetime.now(timezone.utc)
         now_iso = now.isoformat()
         
-        # 1. Cálculo do Termômetro de Atividade (v59.0)
+        # 1. Cálculo do Termômetro de Atividade (v84.13)
         frequencia = 0.0
-        termometro = "MORNO"
+        # Se o scraper retornou que não há comentários recentes, o alvo é FRIO por definição
+        is_empty = hasattr(target, "error") and target.error in ["no_comments_found", "junk_detected"]
+        termometro = "FRIO" if is_empty else "MORNO"
         
-        # Se o scraper capturou metadados de postagem (timestamps)
         post_metas = getattr(target, "post_metas", [])
-        if post_metas:
+        if post_metas and not is_empty:
             valid_dates = []
             for m in post_metas:
                 if m.get("timestamp"):
@@ -208,10 +209,8 @@ class QueueManager:
                     except: continue
             
             if len(valid_dates) >= 2:
-                # Calcula dias entre o mais novo e o mais velho do grid capturado
                 delta_days = (max(valid_dates) - min(valid_dates)).days or 1
                 frequencia = round((len(valid_dates) / delta_days) * 7, 1) # Posts por semana
-                
                 if frequencia >= 5: termometro = "QUENTE"
                 elif frequencia < 1: termometro = "FRIO"
         
@@ -223,23 +222,16 @@ class QueueManager:
         }
         self.db.table("candidatos").update(update_data).eq("username", target.username).execute()
 
-        # 3. Atualiza fila_coleta (Prioridade Dinâmica)
+        # 3. Atualiza fila_coleta e Log Amigável
         if target.queue_id:
-            is_empty = hasattr(target, "error") and target.error in ["no_comments_found", "junk_detected"]
-            
-            # Se for QUENTE, forçamos prioridade 1 (Máxima) para o próximo agendamento
-            # Se for FRIO, baixamos para 5.
             nova_prioridade = 1 if termometro == "QUENTE" else (5 if termometro == "FRIO" else 3)
-
             self.db.table("fila_coleta").update({
                 "status": "SEM_DADOS_RECENTES" if is_empty else "CONCLUIDO",
                 "prioridade": nova_prioridade,
                 "updated_at": now_iso
             }).eq("id", target.queue_id).execute()
             
-            if is_empty:
-                logger.info(f"💤 [Queue] @{target.username} Hibernando ({termometro} | {frequencia} p/sem)")
-                return
+        logger.info(f"❄️ [Queue] @{target.username} -> {termometro} ({frequencia} posts/sem)")
 
     def mark_candidate_scraped(self, target: Target) -> None:
         """Update the last_scraped_at timestamp for the candidate."""

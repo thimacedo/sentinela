@@ -31,7 +31,7 @@ os.makedirs("logs", exist_ok=True)
 WATCHDOG_ACTIVE = os.getenv("WATCHDOG_ACTIVE") == "true"
 
 root_logger = logging.getLogger()
-root_logger.setLevel(logging.INFO)
+root_logger.setLevel(logging.WARNING) # Modo Quiet por padrão (v84.13)
 root_logger.handlers.clear()
 
 console_handler = logging.StreamHandler(sys.stdout)
@@ -48,8 +48,12 @@ file_handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)
 root_logger.addHandler(console_handler)
 root_logger.addHandler(file_handler)
 
+# Habilitar INFO apenas para os logs operacionais essenciais
+for important_logger in ["main_runner", "orchestrator", "queue_manager", "worker.ig_v2", "worker.researcher", "instagram_scraper_v2"]:
+    logging.getLogger(important_logger).setLevel(logging.INFO)
+
 # Silenciar bibliotecas barulhentas
-for noisy_logger in ["httpx", "httpcore", "supabase", "postgrest", "urllib3"]:
+for noisy_logger in ["httpx", "httpcore", "supabase", "postgrest", "urllib3", "playwright"]:
     logging.getLogger(noisy_logger).setLevel(logging.WARNING)
 
 logger = logging.getLogger("main_runner")

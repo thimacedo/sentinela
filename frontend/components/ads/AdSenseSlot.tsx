@@ -49,15 +49,25 @@ export default function AdSenseSlot({ adSlot, format = 'auto' }: AdSenseSlotProp
       ? { width: 300, height: 250 }
       : { width: 'auto', height: 'auto' };
 
+  const minHeight = format === 'horizontal' ? 90 : format === 'vertical' ? 250 : 100;
+
   return (
-    <div className="my-6 flex justify-center w-full overflow-hidden">
+    <div 
+      className="my-6 w-full flex items-center justify-center bg-bg-card/30 border border-border-main/50 rounded-lg relative overflow-hidden transition-colors hover:border-border-main/80"
+      style={{ minHeight: `${minHeight}px` }}
+      aria-label="Espaço Publicitário"
+    >
+      <span className="absolute text-[10px] uppercase font-mono text-text-muted opacity-40 select-none tracking-widest z-0 flex items-center gap-2">
+        <span className="w-2 h-2 bg-text-muted/20 rounded-full animate-pulse" />
+        Publicidade
+      </span>
       <ins
         ref={insRef}
-        className="adsbygoogle"
+        className="adsbygoogle z-10 w-full"
         style={{
           display: 'block',
-          width: dimensions.width as any,
-          height: dimensions.height as any,
+          width: dimensions.width === 'auto' ? '100%' : (dimensions.width as any),
+          height: dimensions.height === 'auto' ? '100%' : (dimensions.height as any),
           margin: '0 auto',
         }}
         data-ad-client="ca-pub-1827611269042960"
