@@ -25,6 +25,10 @@ _last_updated: 2026-05-28 | branch: main (Model: Gemini Pro)_
   - Catraca de 850 CI implantada no Live Feed de Alertas (Dados em tempo real vs Atraso induzido).
   - Catraca de 500 CI para Injeção de Novos Alvos na Malha de Extração (Targeting).
 
+### 2. Redesign de Interface (Objetividade)
+- **Compactação de Headers**: Todos os cabeçalhos das páginas principais (Análise, Alertas, Alvos, Dossiês, Rede, Relatórios) foram refatorados para ocupar menos espaço vertical (fontes menores, paddings removidos, descrições secundárias omitidas em mobile).
+- **Repocisionamento de Ads**: Os blocos do `AdSenseSlot` que ocupavam o topo do layout foram movidos para o rodapé das páginas ou para baixo do conteúdo principal, eliminando o desperdício da primeira dobra da tela (above the fold).
+
 ### 2. Rocket Mode: Desacoplamento e Performance (v85.0)
 - **Arquitetura Assíncrona**: O Sentinela agora opera como uma malha de workers independentes. Os coletores (Scrapers) focam exclusivamente em I/O, enquanto o `AIProcessorWorker` gerencia a perícia PASA em lote.
 - **Paralelismo Real**: O Orquestrador utiliza `asyncio.Semaphore` para permitir múltiplas coletas simultâneas, otimizando o tempo de atividade e a taxa de ingestão de dados.

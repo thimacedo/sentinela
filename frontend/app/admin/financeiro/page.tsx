@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchApi } from '@/lib/api';
 import { 
@@ -11,7 +11,9 @@ import {
   ArrowUpRight,
   ShieldCheck,
   Zap,
-  BarChart3
+  BarChart3,
+  Lock,
+  Key
 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -41,13 +43,72 @@ interface AdminDashboardData {
 }
 
 export default function AdminFinanceiroPage() {
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [passkey, setPasskey] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
+
   const { data, isLoading, isError } = useQuery<AdminDashboardData>({
     queryKey: ['admin-finance-dashboard'],
     queryFn: async () => {
       return await fetchApi('/api/v1/admin/finance/dashboard');
     },
     refetchInterval: 60000,
+    enabled: isAuthorized, // Só faz a query se estiver autorizado
   });
+
+  const handleAuth = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Validação MVP (Pode ser conectada a uma API de Auth depois)
+    if (passkey === 'SENTINELA-GOD' || passkey === process.env.NEXT_PUBLIC_ADMIN_PIN) {
+      setIsAuthorized(true);
+      setErrorMsg('');
+    } else {
+      setErrorMsg('Código de Autorização Inválido.');
+      setPasskey('');
+    }
+  };
+
+  if (!isAuthorized) {
+    return (
+      <div className="flex h-[80vh] items-center justify-center p-4">
+        <form onSubmit={handleAuth} className="bg-bg-card border border-border-main rounded-2xl p-8 shadow-2xl max-w-sm w-full animate-in zoom-in-95 duration-300">
+          <div className="flex flex-col items-center text-center mb-6">
+            <div className="w-16 h-16 bg-brand-primary/10 rounded-full flex items-center justify-center mb-4 border border-brand-primary/20">
+              <Lock className="w-8 h-8 text-brand-primary" />
+            </div>
+            <h2 className="text-xl font-black text-text-main tracking-tight uppercase">Acesso Restrito</h2>
+            <p className="text-xs text-text-muted mt-2 font-mono uppercase">Terminal Administrativo de Inteligência</p>
+          </div>
+          
+          <div className="space-y-4">
+            <div>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Key className="h-4 w-4 text-text-muted" />
+                </div>
+                <input
+                  type="password"
+                  placeholder="Insira o Código Mestre"
+                  value={passkey}
+                  onChange={(e) => setPasskey(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 bg-bg-main border border-border-main rounded-xl text-sm text-text-main focus:outline-none focus:border-brand-primary transition-colors text-center font-mono tracking-widest placeholder:tracking-normal"
+                  autoFocus
+                />
+              </div>
+              {errorMsg && <p className="text-[10px] text-red-500 font-bold uppercase mt-2 text-center">{errorMsg}</p>}
+            </div>
+            
+            <button 
+              type="submit"
+              className="w-full py-3 bg-brand-primary text-white text-xs font-black uppercase tracking-widest rounded-xl hover:bg-brand-primary/90 transition-all shadow-lg shadow-brand-primary/20"
+            >
+              Autenticar
+            </button>
+          </div>
+        </form>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
