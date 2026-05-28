@@ -22,7 +22,8 @@ _last_updated: 2026-05-28 | branch: main (Model: Gemini 3.5 Flash)_
   3. O serviço do Watchdog/Runner deve ser mantido ativo para processar a fila represada.
 
 ## Descobertas Tecnicas (2026-05-28)
-- **Expansão do Monitoramento (v84.7)**: Novos alvos `@rncomjorge` e `@sirlenojr` adicionados à base de dados com status `ATIVO` e agendamento imediato na `fila_coleta` com alta prioridade (10).
+- **Inclusão Inteligente de Alvos (v84.8)**: Implementado o `TargetResearchWorker` e o script `scripts/add_target.py`. A rotina agora automatiza a pesquisa de dados biográficos no Instagram e o enriquecimento de informações políticas (Cargo, Partido, Estado, Ideologia) via IA (Mistral), consultando simuladamente fontes oficiais como TSE/TRE para garantir a integridade dos dados cadastrais.
+- **Expansão do Monitoramento (v84.7)**: Novos alvos `@rncomjorge` e `@sirlenojr` adicionados à base de dados com status `ATIVO`.
 - **Recuperação de Sessão (v84.6)**: Sessões do Instagram restauradas via intervenção manual.
  Identificamos que a nova chave `INSTAGRAM_SESSIONID_VAL` é funcional, juntamente com `INSTAGRAM_SESSIONID_2`. O motor V2 foi testado e confirmou a capacidade de visualizar postagens, superando o bloqueio anterior.
 - **Ativação da Fase 4 (AIAdvisor → Workers) (v84.5)**: Integrado o fluxo de auto-diagnóstico onde falhas críticas de coleta (como `junk_detected` ou `session_blocked`) acionam automaticamente o `AIAdvisor`. O advisor consulta o `DocFetcher` (cache local de documentação técnica) para gerar sugestões de correção em tempo real, que são persistidas para auditoria.

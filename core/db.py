@@ -235,4 +235,19 @@ class DatabaseClient:
             print(f"❌ [DB] Erro ao buscar anúncios não minerados: {e}")
             return []
 
+    async def upsert_candidate(self, data: Dict[str, Any]):
+        """Insere ou atualiza um candidato/alvo na base de dados."""
+        if not self.client: return
+        try:
+            # Garante que o username está em minúsculas e limpo
+            if 'username' in data:
+                data['username'] = str(data['username']).lower().strip().replace('@', '')
+            
+            res = self.client.table('candidatos').upsert(data, on_conflict='username').execute()
+            print(f"✅ [DB] Alvo @{data.get('username')} persistido com sucesso.")
+            return res.data
+        except Exception as e:
+            print(f"❌ [DB] Erro ao persistir alvo: {e}")
+            return None
+
 db_client = DatabaseClient()
