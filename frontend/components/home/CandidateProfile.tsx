@@ -66,12 +66,17 @@ export default function CandidateProfile({
     );
   }
 
-  // Fallback determinístico caso o backend não envie score_risco, derivado do nivel_risco
-  const baseScore = candidateData.score_risco 
-    ? Math.round(candidateData.score_risco * 100)
-    : (candidateData.nivel_risco === 'CRITICO' ? 95 
-      : candidateData.nivel_risco === 'ELEVADO' ? 75 
-      : candidateData.comentarios_odio_count > 0 ? 45 : 0);
+  // Fallback dinâmico caso o backend não envie score_risco ou envie 0 por falha na contagem de totais
+  let baseScore = 0;
+  if (typeof candidateData.score_risco === 'number' && candidateData.score_risco > 0) {
+    baseScore = candidateData.score_risco <= 1 ? Math.round(candidateData.score_risco * 100) : Math.round(candidateData.score_risco);
+  } else if (candidateData.nivel_risco === 'CRITICO') {
+    baseScore = 95;
+  } else if (candidateData.nivel_risco === 'ELEVADO') {
+    baseScore = 75;
+  } else if (candidateData.comentarios_odio_count > 0) {
+    baseScore = Math.min(98, 30 + (candidateData.comentarios_odio_count * 5));
+  }
 
   const metrics = [
     {
