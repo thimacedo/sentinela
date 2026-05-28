@@ -10,7 +10,7 @@ export default function DossiesPage() {
         <div>
           <h1 className="text-2xl font-bold text-text-main tracking-tight uppercase">Emissão de Relatórios</h1>
           <p className="text-xs text-text-muted mt-1">
-            Consolidação de evidências e métricas em documentos técnicos (PDF).
+            Consolidação de indícios e métricas em documentos técnicos (PDF).
           </p>
         </div>
       </div>

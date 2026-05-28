@@ -61,7 +61,7 @@ export default function RelatoriosPage() {
             </div>
           </div>
           <p className="text-xs text-text-muted hidden md:block max-w-md text-right">
-            Acesso aos relatórios periciais. O desbloqueio consome Créditos de Inteligência (CI).
+            Acesso aos relatórios analíticos. O desbloqueio consome Créditos de Inteligência (CI).
           </p>
         </div>
 

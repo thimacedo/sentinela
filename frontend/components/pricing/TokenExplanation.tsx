@@ -6,9 +6,9 @@ export default function TokenExplanation() {
   const operations = [
     {
       icon: <FileText className="w-5 h-5 text-brand-primary" />,
-      title: 'Dossiê Forense Completo',
+      title: 'Dossiê Analítico Completo',
       cost: '350 CI',
-      desc: 'Antecipe crises. Obtenha relatórios técnicos irrefutáveis com o histórico estruturado de evidências do alvo.'
+      desc: 'Antecipe crises. Obtenha relatórios técnicos com o histórico estruturado de indícios do alvo.'
     },
     {
       icon: <Eye className="w-5 h-5 text-purple-500" />,

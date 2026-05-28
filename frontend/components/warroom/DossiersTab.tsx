@@ -49,7 +49,7 @@ export default function DossiersTab() {
       return;
     }
 
-    const confirmUnlock = window.confirm("Desbloquear este Dossiê Forense exigirá um aporte de 350 CI da sua carteira tática. Confirmar operação?");
+    const confirmUnlock = window.confirm("Desbloquear este Dossiê Analítico exigirá um aporte de 350 CI da sua carteira tática. Confirmar operação?");
     if (!confirmUnlock) return;
 
     try {
