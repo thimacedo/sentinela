@@ -118,6 +118,71 @@ class SessionRotationRequest(BaseModel):
 class SessionCookieRequest(BaseModel):
     cookies: str
 
+@app.post("/api/v1/webhooks/stripe")
+async def stripe_webhook(request: Request, supa: Client = Depends(get_supa)):
+    """Recebe e processa confirmações de pagamento da Stripe."""
+    payload = await request.body()
+    sig_header = request.headers.get("Stripe-Signature")
+    
+    if not STRIPE_WEBHOOK_SECRET:
+        logger.error("STRIPE_WEBHOOK_SECRET não configurado.")
+        raise HTTPException(status_code=500, detail="Server webhook secret missing")
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, STRIPE_WEBHOOK_SECRET
+        )
+    except ValueError as e:
+        logger.error(f"Payload inválido: {e}")
+        raise HTTPException(status_code=400, detail="Invalid payload")
+    except stripe.error.SignatureVerificationError as e:
+        logger.error(f"Assinatura inválida: {e}")
+        raise HTTPException(status_code=400, detail="Invalid signature")
+
+    # Tratamento dos eventos de conclusão de compra
+    # 'checkout.session.completed': Pagamentos imediatos (Cartão)
+    # 'checkout.session.async_payment_succeeded': Pagamentos atrasados (Boleto/Alguns PIX)
+    if event['type'] in ['checkout.session.completed', 'checkout.session.async_payment_succeeded']:
+        session = event['data']['object']
+        
+        # Ignora se o pagamento não estiver "pago"
+        if session.get('payment_status') != 'paid':
+            return {"status": "ignored", "reason": "payment_status not paid"}
+
+        # Extrai os dados customizados que injetamos na criação
+        metadata = session.get('metadata', {})
+        user_id = metadata.get('user_id')
+        ci_amount = metadata.get('ci_amount')
+        
+        if not user_id or not ci_amount:
+            logger.error(f"Metadata incompleta na sessão Stripe: {session.get('id')}")
+            return {"status": "error", "reason": "missing metadata"}
+
+        try:
+            ci_amount = int(ci_amount)
+            # Injeta os tokens na carteira do usuário via RPC (Atômico)
+            rpc_payload = {
+                "p_user_id": user_id,
+                "p_amount": ci_amount,
+                "p_type": "PURCHASE",
+                "p_session_id": session.get('id'),
+                "p_metadata": metadata
+            }
+            
+            # Utiliza a RPC que já está implementada na infraestrutura STN
+            res = supa.rpc('process_stn_transaction', rpc_payload).execute()
+            
+            if res.data is True:
+                logger.info(f"✅ Webhook Sucesso: {ci_amount} CI injetados para o usuário {user_id}")
+            else:
+                logger.error(f"❌ Webhook Falha Lógica: RPC retornou {res.data}")
+                
+        except Exception as e:
+            logger.error(f"Erro na injeção de CI pelo Webhook: {e}")
+            raise HTTPException(status_code=500, detail="Database RPC error")
+
+    return {"status": "success"}
+
 # --- UTILS ---
 def calculate_risk(item: Dict[str, Any]):
     totais = item.get('comentarios_totais_count', 0) or 0
