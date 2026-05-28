@@ -31,6 +31,8 @@ class AutopilotManager:
         self.failure_threshold = 0.20   # 20% de falha/vazio aciona intervenção
         self.is_active = True
         self._intervention_count = 0
+        # Cooldown anti-detecção: mínimo 6h entre renovações reativas de sessão
+        self.last_session_heal = datetime.now(timezone.utc).replace(year=2000)  # Força elegível no início
 
         # Inicializa submódulos de diagnóstico e correção
         try:
@@ -47,10 +49,11 @@ class AutopilotManager:
         """Ciclo de vida do Autopilot — Loop OODA a cada 5 minutos."""
         while self.is_active:
             try:
-                # 🛡️ CURA PREVENTIVA OPERACIONAL (PASA v83.6): Executada a cada 12 horas
+                # 🛡️ CURA PREVENTIVA OPERACIONAL (PASA v84.3): Executada a cada 24 horas
+                # Intervalo aumentado de 12h → 24h para evitar detecção por frequência de re-login
                 now = datetime.now(timezone.utc)
                 elapsed_preventive = (now - self.last_preventive_heal).total_seconds()
-                if elapsed_preventive >= 43200:
+                if elapsed_preventive >= 86400:
                     logger.info("🔑 [Autopilot] Iniciando verificação preventiva periódica de cookies...")
                     try:
                         from core.autopilot.session_healer import SessionHealer
@@ -181,18 +184,33 @@ class AutopilotManager:
             logger.warning("⚠️ [Autopilot] Diagnóstico não retornou seletor válido para correção automática.")
 
     async def _trigger_session_healing(self):
-        """Aciona o SessionHealer para renovar sessões expiradas."""
+        """Aciona o SessionHealer para renovar sessões expiradas (com cooldown de 6h anti-detecção)."""
+        now = datetime.now(timezone.utc)
+        elapsed_heal = (now - self.last_session_heal).total_seconds()
+        cooldown_seconds = 21600  # 6 horas
+        
+        if elapsed_heal < cooldown_seconds:
+            remaining = int((cooldown_seconds - elapsed_heal) / 60)
+            logger.warning(
+                f"🕒 [Autopilot] SessionHealer em cooldown anti-detecção. "
+                f"Próxima renovação disponível em ~{remaining} min. Aguardando..."
+            )
+            return
+        
         logger.warning("🔑 [Autopilot] Sessão expirada detectada. Acionando SessionHealer com re-login forçado...")
         try:
             from core.autopilot.session_healer import SessionHealer
             healer = SessionHealer()
             success = await healer.heal(force=True)
             if success:
+                self.last_session_heal = now
                 logger.info("✅ [Autopilot] SessionHealer renovou as sessões com sucesso.")
-                self._log_event("session_healer", "Sessões renovadas pelo SessionHealer (forçado).", {})
+                self._log_event("session_healer", "Sessões renovadas pelo SessionHealer (forçado).", {
+                    "cooldown_next_available_minutes": cooldown_seconds // 60
+                })
             else:
                 logger.error("❌ [Autopilot] SessionHealer não conseguiu renovar as sessões. Intervenção humana necessária.")
-                self._log_event("session_healer", "Falha na renovação de sessão. Requer ação manual.", {},)
+                self._log_event("session_healer", "Falha na renovação de sessão. Requer ação manual.", {})
         except Exception as e:
             logger.error(f"💥 [Autopilot] Erro ao acionar SessionHealer: {e}")
 
