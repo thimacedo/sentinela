@@ -35,7 +35,7 @@ class QueueManager:
         if manual_target:
             username = manual_target.strip().lstrip("@")
             if username not in blocked:
-                logger.info(f"📍 [Queue] Selecionado alvo manual: @{username}")
+                logger.info(f"[Manual] Selecionado: @{username}")
                 self._add_to_blocked(username, seen_targets, active_targets)
                 return Target(username=username, candidato_id=username, source="manual")
 

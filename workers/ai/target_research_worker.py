@@ -1,3 +1,6 @@
+from __future__ import annotations
+import asyncio
+import logging
 from workers.base.worker_base import BaseWorker
 from workers.base.cycle_result import CycleResult
 from core.intelligence_service import intelligence_service
@@ -7,8 +10,9 @@ logger = logging.getLogger("worker.researcher")
 
 class TargetResearchWorker(BaseWorker):
     """
-    Worker especializado em curadoria e manutenção de dados de alvos (PASA v84.15).
+    Worker especializado em curadoria e manutenção de dados de alvos (PASA v84.16).
     Utiliza IntelligenceService para processamento estruturado.
+    Saneado para compatibilidade com terminais Windows.
     """
 
     def __init__(self, worker_id: str, config: dict):
@@ -16,7 +20,7 @@ class TargetResearchWorker(BaseWorker):
         self.cycle = 0
 
     def describe(self) -> str:
-        return "Motor de Curadoria e Inteligência de Alvos"
+        return "Motor de Curadoria e Inteligencia de Alvos"
 
     async def run_cycle(self) -> CycleResult:
         start_time = asyncio.get_event_loop().time()
@@ -26,10 +30,9 @@ class TargetResearchWorker(BaseWorker):
         extracted = 0
         error = None
         quality_score = 0.0
-        mode = "curation"
         
         try:
-            # 1. Busca alvos pendentes de validação ou curadoria
+            # 1. Busca alvos pendentes de validacao ou curadoria
             res = db_client.client.table('candidatos')\
                 .select('username')\
                 .or_('identidade_validada.is.null,cargo.eq.DESCONHECIDO,cargo.is.null')\
@@ -40,24 +43,24 @@ class TargetResearchWorker(BaseWorker):
 
             if res.data:
                 target_username = res.data[0]['username']
-                self.logger.info(f"🧹 [Researcher] Curadoria: @{target_username}")
+                self.logger.info(f"[Curador] Processando: @{target_username}")
                 
-                # Executa inteligência via serviço unificado
+                # Executa inteligencia via servico unificado
                 data = await intelligence_service.research_and_validate(target_username)
                 
                 if data:
                     extracted = 1
                     quality_score = data.get("_quality", 0.5)
                     if data.get("status_monitoramento") == "DESATIVADO":
-                        self.logger.warning(f"🚫 [Researcher] @{target_username} desativado.")
+                        self.logger.warning(f"[Curador] @{target_username} desativado.")
             else:
                 error = "no_tasks_available"
 
         except Exception as e:
-            self.logger.error(f"💥 Erro na curadoria: {e}")
+            self.logger.error(f"Erro na curadoria: {e}")
             error = str(e)
 
-        # Cálculo de Recompensas simplificado (delegado ao RewardEngine via metadata)
+        # Calculo de Recompensas simplificado
         xp_delta = 15.0 if quality_score > 0.8 else (5.0 if extracted > 0 else -5.0)
         if error == "no_tasks_available": xp_delta = 0.0
 

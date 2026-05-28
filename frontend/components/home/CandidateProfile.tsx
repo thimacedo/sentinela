@@ -88,7 +88,7 @@ export default function CandidateProfile({
       isScore: false,
     },
     {
-      label: 'Nível de Risco',
+      label: 'Score de Ameaça', // Alterado para quebrar cache visual
       value: baseScore,
       icon: Flame,
       context: 'índice de periculosidade',

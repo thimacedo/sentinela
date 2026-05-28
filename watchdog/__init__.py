@@ -413,36 +413,36 @@ def guard():
                 if error_type == "code":
                     consecutive_code_errors += 1
                     state.update_metrics(code_errors=consecutive_code_errors)
-                    state.add_log("error", f"[Watchdog] ⛔ ERRO DE CÓDIGO detectado (tentativa {consecutive_code_errors})")
+                    state.add_log("error", f"[Watchdog] ERRO DE CODIGO detectado (tentativa {consecutive_code_errors})")
                     
                     if consecutive_code_errors >= 3:
-                        send_whatsapp_alert("🛑 *WATCHDOG: ERRO DE CÓDIGO* 🛑\nReinícios parados. Correção manual necessária.", category="code")
+                        send_whatsapp_alert("WATCHDOG: ERRO DE CODIGO - Reinicios parados. Correcao manual necessaria.", category="code")
                         state.update_metrics(status="PARADO - ERRO CODIGO")
-                        state.add_log("error", "[Watchdog] 🛑 3 erros consecutivos. Parando.")
+                        state.add_log("error", "[Watchdog] 3 erros consecutivos. Parando.")
                         break
                     elif consecutive_code_errors == 1:
                         heal_dependencies(python_exe)
                 else:
                     consecutive_code_errors = 0
                     state.update_metrics(restarts=state.restarts + 1)
-                    state.add_log("warn", "[Watchdog] ⚠️ Falha rápida na inicialização. Analisando autocura...")
+                    state.add_log("warn", "[Watchdog] Falha rapida na inicializacao. Analisando autocura...")
                     
                     healing_action = heal_runtime_error(recent_logs or "erro desconhecido")
                     
                     if healing_action == "fatal":
-                        send_whatsapp_alert("🛑 *WATCHDOG: OOM FATAL* 🛑\nMemória esgotada. Sistema pausado.", category="oom")
+                        send_whatsapp_alert("WATCHDOG: OOM FATAL - Memoria esgotada. Sistema pausado.", category="oom")
                         break
                     
                     state.fast_crashes += 1
                     
                     if state.fast_crashes >= 3:
-                        state.add_log("error", "[Watchdog] 🛑 3 falhas rápidas consecutivas. Hibernando por 1h.")
-                        send_whatsapp_alert("⚠️ *WATCHDOG: INIT LOOP* ⚠️\nServidor falhou ao iniciar 3x. Hibernando 1h.", category="runtime")
+                        state.add_log("error", "[Watchdog] 3 falhas rapidas consecutivas. Hibernando por 1h.")
+                        send_whatsapp_alert("WATCHDOG: INIT LOOP - Servidor falhou ao iniciar 3x. Hibernando 1h.", category="runtime")
                         state.update_metrics(status="HIBERNANDO - INIT LOOP")
                         time.sleep(3600)
                         state.fast_crashes = 0
                     else:
-                        send_whatsapp_alert(f"🚨 *WATCHDOG: RUNTIME ERROR* 🚨\nCode: {poll}. Reiniciando.", category="runtime")
+                        send_whatsapp_alert(f"WATCHDOG: RUNTIME ERROR - Code: {poll}. Reiniciando.", category="runtime")
             else:
                 consecutive_code_errors = 0
                 state.fast_crashes = 0
