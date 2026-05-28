@@ -1,16 +1,9 @@
 'use client';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { BarChart3, TrendingDown, TrendingUp, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { AlertTriangle, ChevronLeft, ChevronRight, MessageSquare, Flame, Tags } from 'lucide-react';
 import { useCandidates } from '@/hooks/useDashboardData';
 import { useState } from 'react';
-
-interface CandidateMetric {
-  label: string;
-  value: number;
-  trend?: 'up' | 'down' | 'stable';
-  trendValue?: number;
-}
 
 interface CandidateProfileProps {
   candidateName?: string;
@@ -80,18 +73,30 @@ export default function CandidateProfile({
       : candidateData.nivel_risco === 'ELEVADO' ? 75 
       : candidateData.comentarios_odio_count > 0 ? 45 : 0);
 
-  const metrics: CandidateMetric[] = [
+  const metrics = [
     {
-      label: 'Comentários',
+      label: 'Incidentes Detectados',
       value: candidateData.comentarios_odio_count || 0,
+      icon: MessageSquare,
+      context: 'comentários hostis validados',
+      color: 'text-orange-500',
+      isScore: false,
     },
     {
       label: 'Nível de Risco',
       value: baseScore,
+      icon: Flame,
+      context: 'índice de periculosidade',
+      color: baseScore > 80 ? 'text-red-500' : baseScore > 50 ? 'text-orange-500' : 'text-emerald-500',
+      isScore: true,
     },
     {
-      label: 'Categorias',
+      label: 'Vetores de Ataque',
       value: Object.keys(candidateData.breakdown || {}).length,
+      icon: Tags,
+      context: 'categorias de ódio distintas',
+      color: 'text-brand-primary',
+      isScore: false,
     },
   ];
 
@@ -192,29 +197,43 @@ export default function CandidateProfile({
 
       {/* Metrics Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        {metrics.map((metric, idx) => (
-          <div key={idx} className="bg-bg-main border border-border-main rounded-xl p-4 transition-colors hover:bg-bg-card">
-            <p className="text-[10px] text-text-muted mb-2 font-mono font-bold uppercase tracking-wider">{metric.label}</p>
-            <div className="flex items-end justify-between">
-              <p className="text-2xl font-black text-text-main leading-none">{metric.value}</p>
-              {metric.trend && (
-                <div
-                  className={`flex items-center gap-1 text-[10px] font-bold ${
-                    metric.trend === 'up'
-                      ? 'text-red-500'
-                      : metric.trend === 'down'
-                        ? 'text-emerald-500'
-                        : 'text-text-muted'
-                  }`}
-                >
-                  {metric.trend === 'up' && <TrendingUp className="w-3 h-3" />}
-                  {metric.trend === 'down' && <TrendingDown className="w-3 h-3" />}
-                  {metric.trendValue && <span>{metric.trendValue}%</span>}
+        {metrics.map((metric, idx) => {
+          const IconComponent = metric.icon;
+          return (
+            <div key={idx} className="bg-bg-main border border-border-main rounded-xl p-4 transition-colors hover:bg-bg-card flex flex-col justify-between h-full min-h-[120px]">
+              <div className="flex items-center gap-2 mb-2">
+                <IconComponent className={`w-4 h-4 ${metric.color}`} />
+                <p className="text-[10px] text-text-muted font-mono font-bold uppercase tracking-wider">{metric.label}</p>
+              </div>
+              
+              <div className="flex-1 flex flex-col justify-end mt-2">
+                <div className="flex items-end gap-1">
+                  <p className={`text-3xl font-black leading-none ${metric.color}`}>
+                    {metric.value}
+                  </p>
+                  {metric.isScore && (
+                    <span className="text-xs font-bold text-text-muted mb-1">/100</span>
+                  )}
                 </div>
-              )}
+                
+                {metric.isScore && (
+                  <div className="w-full h-1.5 bg-bg-card rounded-full mt-3 overflow-hidden">
+                    <div 
+                      className={`h-full transition-all duration-1000 ${
+                        metric.value > 80 ? 'bg-red-500' : metric.value > 50 ? 'bg-orange-500' : 'bg-emerald-500'
+                      }`}
+                      style={{ width: `${metric.value}%` }}
+                    />
+                  </div>
+                )}
+                
+                <p className="text-[9px] font-medium text-text-muted mt-2 uppercase tracking-widest opacity-70">
+                  {metric.context}
+                </p>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Recent Alerts */}
