@@ -207,6 +207,69 @@ def calculate_risk(item: Dict[str, Any]):
 
 # --- ENDPOINTS ---
 
+@app.get("/api/v1/admin/finance/dashboard")
+def get_finance_dashboard(supa: Client = Depends(get_supa)):
+    """Retorna dados agregados do faturamento e consumo de CI (GOD Mode)."""
+    try:
+        # 1. Total CI e Receita (baseado na tabela profiles para performance na MVP)
+        profiles_res = supa.table('profiles').select('id, full_name, stn_tokens, total_stn_spent').execute()
+        profiles = profiles_res.data or []
+        
+        total_circulating = sum(p.get('stn_tokens', 0) for p in profiles)
+        total_spent = sum(p.get('total_stn_spent', 0) for p in profiles)
+        total_purchased = total_circulating + total_spent
+        
+        # Receita Estimada (Ex: 1000 CI = R$ 497 -> R$ 0,497 por CI)
+        estimated_revenue = (total_purchased / 1000) * 497.0
+        
+        # Top 5 usuários por consumo
+        top_spenders = sorted(profiles, key=lambda x: x.get('total_stn_spent', 0), reverse=True)[:5]
+        
+        # 2. Distribuição de Consumo (busca as transações recentes)
+        tx_res = supa.table('stn_transactions').select('metadata, amount').eq('type', 'CONSUMPTION').order('created_at', desc=True).limit(5000).execute()
+        transactions = tx_res.data or []
+        
+        modules_breakdown = {
+            "Dossiês Forenses": 0,
+            "Inclusão de Alvos": 0,
+            "Radar de Tendências": 0,
+            "Alertas Live": 0,
+            "Outros": 0
+        }
+        
+        action_map = {
+            "unlock_dossier": "Dossiês Forenses",
+            "add_target": "Inclusão de Alvos",
+            "unlock_radar": "Radar de Tendências",
+            "unlock_alerts": "Alertas Live"
+        }
+        
+        for tx in transactions:
+            meta = tx.get('metadata') or {}
+            action = meta.get('action', 'outros')
+            label = action_map.get(action, "Outros")
+            amt = abs(tx.get('amount', 0))
+            modules_breakdown[label] += amt
+
+        # 3. Transações Recentes
+        recent_tx_res = supa.table('stn_transactions').select('id, type, amount, created_at, user_id, metadata').order('created_at', desc=True).limit(10).execute()
+        recent_tx = recent_tx_res.data or []
+
+        return {
+            "kpis": {
+                "total_purchased": total_purchased,
+                "total_spent": total_spent,
+                "total_circulating": total_circulating,
+                "estimated_revenue_brl": estimated_revenue
+            },
+            "top_spenders": top_spenders,
+            "modules_breakdown": modules_breakdown,
+            "recent_transactions": recent_tx
+        }
+    except Exception as e:
+        logger.error(f"Admin Finance Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.get("/api/v1/summary")
 def summary(request: Request, supa: Client = Depends(get_supa)):
     """Retorna KPIs consolidados com o ACUMULADO (Solenya Edition)."""

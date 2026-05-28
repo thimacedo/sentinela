@@ -9,45 +9,52 @@ import {
   FileText,
   BarChart3,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Activity
 } from 'lucide-react'
 
 const menuItems = [
-  { 
-    id: 'inicio', 
-    label: 'INÍCIO', 
+  {
+    id: 'inicio',
+    label: 'INÍCIO',
     path: '/',
-    icon: Home 
+    icon: Home
   },
-  { 
-    id: 'analise', 
-    label: 'ANÁLISE', 
+  {
+    id: 'analise',
+    label: 'ANÁLISE',
     path: '/analise',
-    icon: BarChart3 
+    icon: BarChart3
   },
-  { 
-    id: 'candidatos', 
-    label: 'CANDIDATOS', 
+  {
+    id: 'candidatos',
+    label: 'CANDIDATOS',
     path: '/alvos',
-    icon: Users 
+    icon: Users
   },
-  { 
-    id: 'alertas', 
-    label: 'ALERTAS', 
+  {
+    id: 'alertas',
+    label: 'ALERTAS',
     path: '/alertas',
-    icon: ShieldAlert 
+    icon: ShieldAlert
   },
-  { 
-    id: 'tendencias', 
-    label: 'TENDÊNCIAS', 
+  {
+    id: 'tendencias',
+    label: 'TENDÊNCIAS',
     path: '/rede',
-    icon: Globe 
+    icon: Globe
   },
-  { 
-    id: 'relatorios', 
-    label: 'RELATÓRIOS', 
-    path: '/relatorios', 
-    icon: FileText 
+  {
+    id: 'relatorios',
+    label: 'RELATÓRIOS',
+    path: '/relatorios',
+    icon: FileText
+  },
+  {
+    id: 'financeiro',
+    label: 'GOD MODE',
+    path: '/admin/financeiro',
+    icon: Activity
   },
 ]
 
