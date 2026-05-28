@@ -14,6 +14,15 @@ _last_updated: 2026-05-27 | branch: main (Model: Gemini 3.5 Flash)_
 | GitHub Actions (CI/CD) | Operacional | v82.1: Saneamento concluído, suporte a Node 24 ativo e blindagem global contra crashes de credenciais de IA |
 | Relatórios Comerciais | Implementado | Geração diária, UI, API, visualizador e exportação a PDF client-side integrada (v83.6) |
 
+## 🚨 INTERVENÇÃO MANUAL PENDENTE (Pós-Reset)
+- **Sessões do Instagram Bloqueadas**: A automação foi identificada pelo Instagram e ambas as sessões (`tempareiapodcast` e `monitoramento.discurso`) foram invalidadas (status: `Todas as sessões estão bloqueadas!`). A renovação automatizada falhou com desafio de segurança (CAPTCHA/2FA).
+- **Ações Requeridas ao Reiniciar**:
+  1. Fazer login manual nas duas contas usando um navegador real (não automatizado) no computador.
+  2. Passar por qualquer verificação exigida (SMS, email, aprovação no app).
+  3. Extrair manualmente os cookies `sessionid` de ambas as contas.
+  4. Atualizar o arquivo `.env` com os novos valores para `INSTAGRAM_SESSIONID` e `INSTAGRAM_SESSIONID_2`.
+  5. **Reiniciar o serviço do Watchdog/Runner**: Isso garantirá que as melhorias mais recentes da versão v84.3 (navegação direta via URL em vez de cliques em modais, que mitigam os timeouts de `ElementHandle.click`) sejam carregadas na memória, substituindo o binário antigo (PID 18544).
+
 ## Descobertas Tecnicas (2026-05-27)
 - **Correcao de Timeout de Scraping e Renovacao de Sessao (v84.3)**: Identificado e resolvido o erro `ElementHandle.click: Timeout 30000ms exceeded` no `instagram_scraper_v2.py`. A abertura de posts foi refatorada para usar navegacao direta por URL (`/p/{shortcode}/`) como estrategia primaria, eliminando a dependencia fragil do clique DOM no grid de postagens. O metodo `close_post_modal` foi atualizado para usar `page.go_back()` de forma consistente. Paralelamente, o script `export_playwright_cookies.py` foi blindado contra o `TargetClosedError` do Playwright, que ocorria quando o Instagram redirecionava a pagina SPA durante a etapa de coleta de cookies pos-login, adicionando re-navegacao para a home antes da captura e tratamento explicito da excecao.
 - **Filtro Lexical Preventivo no Fluxo Global de IA e Saneamento de Dados (v84.2)**: Consolidamos a blindagem contra falsos positivos inserindo o `lexical_filter` diretamente no método principal de classificação (`classify_text` no `ai_service.py`), garantindo que qualquer fluxo (scrape direto, reclassificação ou processamento em lote) descarte menções puras a usuários e lixo como `NEUTRO` imediatamente. Adicionalmente, desenvolvemos e executamos o script `saneamento_lexical.py`, corrigindo com sucesso no Supabase remoto 11 comentários antigos que haviam sido classificados erroneamente como ódio, regularizando os dados históricos dos candidatos e alertas.
