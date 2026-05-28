@@ -1,6 +1,7 @@
 'use client';
 
 import AnaliseTab from "@/components/warroom/AnaliseTab";
+import AdSenseSlot from "@/components/ads/AdSenseSlot";
 
 export default function AnalisePage() {
   return (
@@ -12,7 +13,8 @@ export default function AnalisePage() {
           Acompanhe os marcadores linguísticos e o score de confiança técnica.
         </p>
       </div>
-      
+      <AdSenseSlot adSlot="2020882637" format="horizontal" />
+
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
         <AnaliseTab />
       </div>

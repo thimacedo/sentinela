@@ -1,6 +1,7 @@
 'use client';
 
 import NetworkTab from "@/components/warroom/NetworkTab";
+import AdSenseSlot from "@/components/ads/AdSenseSlot";
 
 export default function RedePage() {
   return (
@@ -12,6 +13,8 @@ export default function RedePage() {
           Identifique redes artificiais e padrões de automação no discurso digital.
         </p>
       </div>
+
+      <AdSenseSlot adSlot="2020882637" format="horizontal" />
 
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
         <NetworkTab />

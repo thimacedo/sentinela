@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import ReportCard from '@/components/ReportCard';
+import AdSenseSlot from '@/components/ads/AdSenseSlot';
 
 export interface Report {
   name: string;
@@ -50,6 +51,7 @@ export default function RelatoriosPage() {
   return (
     <div className="p-8 min-h-screen bg-gray-50">
       <h1 className="text-3xl font-bold mb-6" style={{ fontFamily: 'Inter, sans-serif' }}>Relatórios Comerciais</h1>
+      <AdSenseSlot adSlot="2020882637" format="horizontal" />
       {loading ? (
         <p>Carregando...</p>
       ) : (
