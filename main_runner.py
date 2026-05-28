@@ -80,15 +80,32 @@ def build_orchestrator() -> SentinelaOrchestrator:
 
     orch = SentinelaOrchestrator(engine, advisor)
 
-    # Novo Worker V2 Independente
-    orch.register(InstagramWorker(
-        worker_id="ig-v2-01",
-        config={
-            "max_posts": int(os.getenv("MAX_POSTS_PER_PROFILE", "3")),
-            "max_comments_per_post": int(os.getenv("MAX_COMMENTS_PER_POST", "50")),
-            "headless": os.getenv("PLAYWRIGHT_HEADLESS", "true").lower() == "true"
-        },
-    ))
+    # 🚀 ROCKET MODE: Escalonamento de Scrapers
+    num_scrapers = int(os.getenv("NUM_SCRAPER_WORKERS", "1"))
+    logger.info(f"[main_runner] Configurando {num_scrapers} Scraper Workers...")
+    
+    for i in range(num_scrapers):
+        worker_id = f"ig-v2-{i+1:02d}"
+        orch.register(InstagramWorker(
+            worker_id=worker_id,
+            config={
+                "max_posts": int(os.getenv("MAX_POSTS_PER_PROFILE", "3")),
+                "max_comments_per_post": int(os.getenv("MAX_COMMENTS_PER_POST", "50")),
+                "headless": os.getenv("PLAYWRIGHT_HEADLESS", "true").lower() == "true"
+            },
+        ))
+
+    # 🧠 AI PROCESSOR: Worker dedicado para classificação PASA
+    # Este worker consome o backlog deixado pelos scrapers
+    try:
+        from workers.processors.ai_processor_worker import AIProcessorWorker
+        orch.register(AIProcessorWorker(
+            worker_id="ai-processor-01",
+            config={}
+        ))
+        logger.info("[main_runner] AIProcessorWorker registrado com sucesso.")
+    except ImportError:
+        logger.warning("[main_runner] AIProcessorWorker ainda não disponível. Pulando registro...")
 
     # Motor de Curadoria e Inteligência de Alvos (v84.9)
     orch.register(TargetResearchWorker(

@@ -1,42 +1,33 @@
-# Handle Junk Data in Scraping and Classification
+# Plano de Implementação: Escalabilidade, Desacoplamento e Resiliência (Fase 8)
 
-This plan addresses the user's request to signal the worker when a scrape returns junk data (UI elements) and to prevent the AI classifier from scoring junk.
+Este documento centraliza as especificações estruturais para elevar a arquitetura do Sentinela Democrática, embasado na verificação e no estado real da base de código atual.
 
-## User Review Required
+## 1. Desacoplamento entre Coleta (Scraping) e Processamento (IA)
+- **Status Atual:** Acoplado. O `IGWorkerV2` (`workers/scrapers/ig_worker_v2.py`) executa o scraping e, logo em seguida, itera sobre os comentários inseridos chamando `ai_service.classify_text`. Isso mantém o worker ocupado e o contexto do navegador (Playwright) aberto desnecessariamente.
+- **Viabilidade:** Alta. Podemos transformar o `IGWorkerV2` em apenas `InstagramScraperWorker` e criar um `AIClassificationWorker`.
+- **Impacto:** Crítico. Reduzirá drasticamente o consumo de memória e CPU, permitindo que a coleta ocorra na velocidade máxima do I/O, enquanto a IA processa o backlog em seu próprio ritmo (rate limiting).
 
-Please review the definitions of "lixo" and the proposed actions when junk is detected. 
+## 2. Paralelismo Assíncrono no Orchestrator
+- **Status Atual:** Sequencial. O `Orchestrator.run_scraper` percorre os alvos em um loop `for` simples. Embora o `main_runner.py` suporte múltiplos workers, cada worker processa um alvo por vez.
+- **Viabilidade:** Alta. Implementar `asyncio.Semaphore(3)` no loop de processamento de alvos é uma mudança simples no `orquestrador.py`.
+- **Impacto:** Multiplica a taxa de ingestão por N (onde N é o limite do semáforo), otimizando o tempo de atividade da máquina.
 
-## Open Questions
+## 3. Fila de Tarefas Distribuída (Message Broker)
+- **Status Atual:** Simulado via Tabela. O `QueueManager` utiliza a tabela `fila_coleta` do Supabase. Embora funcional, o método `claim_next_target` não possui travas atômicas (como `SELECT FOR UPDATE` ou PGMQ), o que causará colisões se rodarmos o Sentinela em dois servidores simultâneos.
+- **Viabilidade:** Média. Já existe um arquivo `pgmq_setup.sql` na raiz, indicando que o suporte a PGMQ (Postgres Message Queue) está no radar. Integrar isso ou Redis seria o próximo passo lógico.
+- **Impacto:** Essencial para escalabilidade horizontal (Cluster de Sentinelas).
 
-None at this moment.
+## 4. Rotação Dinâmica de Proxies e Fingerprints
+- **Status Atual:** Parcial (Apenas Fingerprints). O `InstagramScraperV2` já possui o método `_generate_stealth_profile` que rotaciona User-Agents e viewports, mas não rotaciona IPs/Proxies. Ele depende apenas do IP da máquina local.
+- **Viabilidade:** Alta. Precisamos acoplar um provedor de proxy (ex: Bright Data, Oxylabs ou ProxyRack) no `new_context` do Playwright dentro do `InstagramScraperV2`.
+- **Impacto:** Aumenta a resiliência contra Shadowbans da Meta de "Médio" para "Extremo".
 
-## Proposed Changes
+## 5. Encerramento Gracioso (Graceful Shutdown)
+- **Status Atual:** Parcial. O `main_runner.py` já possui `setup_signal_handlers` capturando `SIGINT` e `SIGTERM`, mas o `IGWorkerV2` não possui um mecanismo de "checkpoint" para salvar exatamente onde parou em uma lista de 500 comentários, por exemplo.
+- **Viabilidade:** Média. Requer que o loop de comentários salve o estado no `local_buffer` (SQLite) a cada lote pequeno.
+- **Impacto:** Protege a integridade dos dados em caso de reinicializações do servidor ou atualizações automáticas.
 
-### `core/ai_service.py`
-
-Update the AI classifier to recognize and handle "lixo" correctly:
-- **[MODIFY]** Update `SYSTEM_PROMPT` to add instructions on how to identify UI elements (e.g., "Também da Meta", "Instagram Lite", "Localizações", "Áudio original") and fragment texts, assigning them the category `"LIXO"`.
-- **[MODIFY]** Update `_parse_json_response` to check if `categoria_ia == "LIXO"`. If so, force `is_hate = False` and `confianca_ia = 0.0`, ensuring it does not score or pollute analytics.
-
-### `core/instagram_scraper_v2.py`
-
-Implement junk detection during the extraction phase:
-- **[MODIFY]** Expand `commentTextBlacklist` to include the specific UI terms identified in logs ("também da meta", "instagram lite", "localizações", etc.).
-- **[MODIFY]** Add a local heuristic check `is_junk(text)` inside `_scrape_post` or `scrape_profile`. If the extracted comments for a post contain a high ratio of junk (or if any critical junk patterns are found that indicate we are reading the page footer instead of the comments section), we flag it.
-- **[MODIFY]** Add a `junk_detected` metric to `stats`.
-
-### `workers/scrapers/ig_worker_v2.py`
-
-Signal the worker to take action when junk is detected:
-- **[MODIFY]** After `self.scraper.scrape_profile`, inspect the scraper stats or the returned comments.
-- **[MODIFY]** If a significant amount of junk was detected (e.g., the fallback DOM parser grabbed the footer instead of comments), filter the junk out locally before hitting the database or the AI.
-- **[MODIFY]** Return a specific `error="junk_detected"` in `CycleResult` if the scrape was compromised by junk, so the orchestrator knows the DOM extraction missed the target, preventing repeated useless movements.
-
-## Verification Plan
-
-### Automated Tests
-- Run `pytest` or `test_scraper_v2.py` to ensure normal comments still extract properly.
-- Verify `ai_service.py` returns `confianca_ia = 0.0` when text is classified as "LIXO".
-
-### Manual Verification
-- Check worker logs to see if it correctly aborts or filters when encountering "Também da Meta".
+## 6. Sistema de Circuit Breaker para a IA
+- **Status Atual:** Implementado (v49). O `core/circuit_breaker.py` já existe e o `ai_service.py` já o utiliza (`ai_circuit_breaker`). Ele bloqueia chamadas se detectar falhas consecutivas ou erros 429/503.
+- **Melhoria:** Podemos expandir esse Circuit Breaker para o próprio Supabase e para o Scraping (Zyte/Instagram).
+- **Impacto:** Já mitigado para a IA, mas expansível para o resto da infraestrutura, garantindo proteção total contra instabilidade externa.

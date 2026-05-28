@@ -86,12 +86,9 @@ class IGWorkerV2(BaseWorker):
             )
 
         if not target:
-            # Backlog de classificação se não houver alvo
-            classified = await ai_service.run_batch_classification(limit=50)
             return CycleResult(
                 worker_id=self.worker_id, cycle=self.cycle,
-                source="batch_classification", simulated=False, error="no_target",
-                classified=classified
+                source="no_target", simulated=False, error="no_target"
             )
 
         self.logger.info(f"🔄 [V2] Ciclo {self.cycle} | Alvo: @{target.username}")
@@ -262,64 +259,14 @@ class IGWorkerV2(BaseWorker):
                     self.logger.error(f"❌ [V2] Falha total na persistência: {e2}")
                     raise ValueError(f"db_persistence_fatal: {str(e2)}")
 
-            # 4. Classificação
-            classified = 0
-            ai_junk_count = 0
-            
-            if inserted_ids:
-                for cid in inserted_ids:
-                    try:
-                        # Busca comentário e classifica
-                        c_data = self.db.table("comentarios").select("*").eq("id", cid).single().execute()
-                        if c_data.data:
-                            # Se o worker já marcou como bot, passamos essa info para a IA ou forçamos a categoria
-                            is_pre_flagged_bot = any(
-                                c.get("id_externo") == c_data.data["id_externo"] and c.get("is_bot") 
-                                for c in comments
-                            )
-                            
-                            if is_pre_flagged_bot:
-                                # Forçamos a classificação de Bot para economizar tokens ou guiar a IA
-                                self.db.table("comentarios").update({
-                                    "processado_ia": True,
-                                    "is_hate": True, # Bots de campanha são considerados hostilidade ao processo democrático (MCA v2.2)
-                                    "categoria_ia": "CAMPANHA_COORDENADA",
-                                    "confianca_ia": 1.0,
-                                    "analise_pericial": "Detectado comportamento coordenado inautêntico (Bot) via análise de densidade léxica."
-                                }).eq("id", cid).execute()
-                                classified += 1
-                                continue
-
-                            result = await ai_service.classify_text(c_data.data["texto_bruto"], comment_id=cid)
-                            
-                            if result.get("categoria_ia") == "LIXO":
-                                # Lixo detectado pela IA pós-inserção
-                                self.db.table("comentarios").delete().eq("id", cid).execute()
-                                inserted -= 1
-                                ai_junk_count += 1
-                                # Remove também dos extraídos para não premiar na coleta
-                                comments = [c for c in comments if c.get("id_externo") != cid] # Tenta manter sync, mas o len(comments) inicial já foi feito. Vamos apenas decrementar uma variável.
-                                continue
-                                
-                            self.db.table("comentarios").update({
-                                "processado_ia": True,
-                                "is_hate": result["is_hate"],
-                                "categoria_ia": result["categoria_ia"],
-                                "confianca_ia": result["confianca_ia"],
-                                "evidence_extracted": result["evidencia_lexical"],
-                                "analise_pericial": result["analise_pericial"]
-                            }).eq("id", cid).execute()
-                            classified += 1
-                    except: continue
-
             stats = self.scraper.get_stats()
-            final_extracted = len(comments) - ai_junk_count
+            final_extracted = len(comments)
             
-            if final_extracted <= 0 and (stats.get("junk_detected", 0) > 0 or ai_junk_count > 0):
+            if final_extracted <= 0 and stats.get("junk_detected", 0) > 0:
                 self.logger.warning(f"⚠️ [V2] Todo o conteúdo extraído de @{target.username} era LIXO. Sinalizando falha e anulando recompensas.")
                 return CycleResult(
                     worker_id=self.worker_id, cycle=self.cycle, target=target.username,
-                    source="v2_engine", extracted=0, inserted=0, classified=0, simulated=False, error="junk_detected",
+                    source="v2_engine", extracted=0, inserted=0, simulated=False, error="junk_detected",
                     duration=asyncio.get_event_loop().time() - start_time
                 )
 
@@ -329,9 +276,7 @@ class IGWorkerV2(BaseWorker):
                 extracted=final_extracted,
                 inserted=inserted,
                 duplicated=duplicated,
-                classified=classified,
                 db_success=inserted > 0,
-                classifier_success=classified > 0,
                 simulated=False,
                 duration=asyncio.get_event_loop().time() - start_time
             )

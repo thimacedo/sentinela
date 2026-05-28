@@ -49,28 +49,30 @@ class Orchestrator:
             print("✅ Fila central de hoje já processada ou vazia.")
             return
 
-        print(f"🤖 Iniciando Ciclo de Coleta Intercalada para {len(targets)} alvos...")
-        from core.instagram_headless import InstagramHeadlessScraper
-        scraper = InstagramHeadlessScraper()
+        print(f"🤖 Iniciando Ciclo de Coleta Paralela (Rocket Mode) para {len(targets)} alvos...")
         
-        for i, target in enumerate(targets):
-            print(f"\n🎯 [{i+1}/{len(targets)}] Raspando @{target}...")
-            try:
-                await scraper.run(targets=[target])
-                
-                # Pickle Rick: Se houver mais alvos, aproveita o cooldown para classificar
-                if i < len(targets) - 1:
-                    print(f"⏳ Cooldown de {cooldown}s. Iniciando Limpeza de FALHA_IA e Classificação pendente...")
-                    # 1. Tenta recuperar falhas anteriores
-                    await ai_service.run_batch_classification(limit=50, force_retry_failures=True)
-                    # 2. Processa o que acabou de ser coletado
-                    await ai_service.run_batch_classification(limit=100)
-                    
-                    print(f"🛌 Descansando o restante do tempo...")
-                    await asyncio.sleep(max(0, cooldown - 60)) # Deduz o tempo da classificação
-            except Exception as e:
-                print(f"❌ Erro ao processar @{target}: {e}")
-                continue
+        # Configuração de Concorrência
+        concurrency_limit = int(os.getenv("CONCURRENT_SCRAPES", "2"))
+        semaphore = asyncio.Semaphore(concurrency_limit)
+        
+        async def scrape_task(target, i):
+            async with semaphore:
+                print(f"🎯 [{i+1}/{len(targets)}] Iniciando raspagem paralela: @{target}...")
+                from core.instagram_headless import InstagramHeadlessScraper
+                scraper = InstagramHeadlessScraper()
+                try:
+                    await scraper.run(targets=[target])
+                    print(f"✅ [{i+1}/{len(targets)}] Sucesso: @{target}")
+                except Exception as e:
+                    print(f"❌ [{i+1}/{len(targets)}] Erro em @{target}: {e}")
+
+        # Dispara todas as tasks, o semáforo controlará a execução
+        tasks = [scrape_task(target, i) for i, target in enumerate(targets)]
+        await asyncio.gather(*tasks)
+        
+        print("\n🏁 Ciclo de coleta paralela finalizado. Iniciando classificação massiva...")
+        # Após a coleta paralela, fazemos uma classificação massiva de tudo o que foi coletado
+        await ai_service.run_batch_classification(limit=500, force_retry_failures=True)
 
     async def run_ia_classification(self):
         print("🧠 [2/5] Iniciando Perícia PASA v16.4...")

@@ -657,17 +657,12 @@ class IGZyteWorker(BaseWorker):
         self._blocked_slots.clear()
 
         if not target:
-            # Aproveitar cooldown para classificar pendentes em lote
-            self.logger.info("[Zyte] Coleta em cooldown. Processando backlog de classificacao...")
-            batch_classified = await ai_service.run_batch_classification(limit=50)
-            
             return CycleResult(
                 worker_id=self.worker_id, 
                 cycle=self.cycle, 
-                source="batch_classification", 
+                source="no_target", 
                 simulated=False, 
-                error="cooldown", 
-                classified=batch_classified
+                error="no_target"
             )
 
         self.logger.info("[Zyte] Ciclo %s | Alvo: @%s", self.cycle, target.username)
@@ -696,7 +691,7 @@ class IGZyteWorker(BaseWorker):
                     simulated=False, error="no_comments_found")
 
             persist = self.persist_comments(target, comments)
-            classify = await self.classify_comments(persist.inserted_ids)
+            # 4. Classificação (REMOVIDO: Processamento agora é feito pelo AIProcessorWorker)
 
             result = CycleResult(
                 worker_id=self.worker_id, cycle=self.cycle,
@@ -705,10 +700,10 @@ class IGZyteWorker(BaseWorker):
                 extracted=len(comments),
                 inserted=persist.inserted,
                 duplicated=persist.duplicated,
-                classified=classify.classified,
-                failed=persist.failed + classify.failed,
+                classified=0, # IA fará isso em paralelo
+                failed=persist.failed,
                 db_success=persist.success,
-                classifier_success=classify.success,
+                classifier_success=False,
                 simulated=False,
             )
 
