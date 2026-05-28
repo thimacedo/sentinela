@@ -39,9 +39,9 @@ export default function CheckoutModal({ isOpen, onClose, planName, ciAmount, pri
       />
 
       {/* Modal Box */}
-      <div className="relative w-full max-w-md bg-bg-card border border-border-main rounded-3xl shadow-2xl overflow-hidden transform transition-all">
+      <div className="relative w-full max-w-md max-h-[90vh] flex flex-col bg-bg-card border border-border-main rounded-3xl shadow-2xl overflow-hidden transform transition-all">
         {/* Header */}
-        <div className="bg-bg-main p-6 border-b border-border-main flex items-center justify-between">
+        <div className="bg-bg-main p-6 border-b border-border-main flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-brand-primary/10 rounded-xl flex items-center justify-center border border-brand-primary/20">
               <QrCode className="w-5 h-5 text-brand-primary" />
@@ -60,7 +60,7 @@ export default function CheckoutModal({ isOpen, onClose, planName, ciAmount, pri
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
           {/* Order Summary */}
           <div className="mb-8 p-4 bg-bg-main border border-border-main rounded-xl flex justify-between items-center">
             <div>
@@ -96,7 +96,7 @@ export default function CheckoutModal({ isOpen, onClose, planName, ciAmount, pri
                 </div>
               </div>
               
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <input 
                   type="text" 
                   readOnly 
@@ -123,7 +123,7 @@ export default function CheckoutModal({ isOpen, onClose, planName, ciAmount, pri
         </div>
 
         {/* Footer info */}
-        <div className="bg-brand-primary/5 border-t border-brand-primary/10 p-4 flex items-start gap-3">
+        <div className="bg-brand-primary/5 border-t border-brand-primary/10 p-4 flex items-start gap-3 shrink-0">
           <HelpCircle className="w-5 h-5 text-brand-primary shrink-0 mt-0.5" />
           <p className="text-[10px] text-text-muted leading-relaxed font-mono">
             Após a confirmação do pagamento, os <strong className="text-text-main">Créditos de Inteligência (CI)</strong> serão depositados automaticamente na sua conta em até 2 minutos, liberando acesso às varreduras táticas.
