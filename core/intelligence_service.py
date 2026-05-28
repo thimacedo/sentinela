@@ -106,19 +106,23 @@ class IntelligenceService:
     async def _enrich_and_validate(self, username: str, ig_data: Dict[str, Any], official_data: Dict[str, Any]) -> Dict[str, Any]:
         prompt = f"""
         Consolidador de Inteligência Sentinela. Analise a elegibilidade do alvo para monitoramento.
-        ESCOPO: Candidatos, Políticos, Jornalistas, Veículos de Notícia, Ativistas Políticos e Instituições de Poder.
+        ESCOPO: Candidatos reais, Políticos em mandato, Jornalistas de política, Ativistas e Influenciadores Políticos.
         
         IG={json.dumps(ig_data)}
         OFICIAL={json.dumps(official_data)}
+
+        REGRA DE OURO: Diferencie Influenciadores/Comunicadores de Pré-Candidatos.
+        Só atribua cargos como 'Deputado', 'Prefeito' ou 'Candidato' se houver evidência oficial (DivulgaCand/Notícias).
+        Se for uma figura pública que apenas comenta política ou tem influência, use 'Influenciador Político'.
 
         Retorne JSON:
         {{
             "identidade_validada": boolean,
             "motivo_rejeicao": "string ou null",
             "nome_completo": "string",
-            "cargo": "string",
-            "partido": "string",
-            "estado": "string",
+            "cargo": "Ex: Influenciador Político, Deputado Federal, Jornalista",
+            "partido": "Sigla ou 'SEM PARTIDO'",
+            "estado": "Sigla UF ou 'NACIONAL'",
             "ideologia": "DIREITA|ESQUERDA|CENTRO|DESCONHECIDO",
             "quality_confidence": float (0.0-1.0)
         }}
