@@ -381,6 +381,9 @@ class InstagramScraperV2:
             }
         """)
 
+        if not bio_info:
+            return {"valid": False, "reason": "header_not_found"}
+
         # 3. Verifica se a conta é privada
         is_private = await page.query_selector("text='Esta conta é privada'")
         if is_private:

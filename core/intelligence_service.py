@@ -23,29 +23,46 @@ class IntelligenceService:
 
     async def research_and_validate(self, username: str) -> Optional[Dict[str, Any]]:
         """
-        Executa o pipeline completo de inteligência para um alvo.
+        Executa o pipeline completo de inteligencia para um alvo.
         """
         username = username.lower().strip().replace('@', '')
-        logger.info(f"🔎 Inteligência: Analisando @{username}...")
+        logger.info(f"Inteligencia: Analisando @{username}...")
 
-        # 1. Coleta básica via Instagram
-        ig_data = await self._fetch_ig_basic_info(username)
-        if not ig_data:
-            logger.warning(f"⚠️ Inteligência: @{username} inacessível no Instagram.")
+        # 1. Coleta basica via Instagram
+        ig_res = await self._fetch_ig_basic_info(username)
+        
+        # Se falhou mas temos um motivo claro (404 ou Privado), podemos validar negativamente ja
+        if not ig_res or not ig_res.get("valid"):
+            reason = ig_res.get("reason") if ig_res else "unknown_error"
+            
+            if reason in ["404_not_found", "account_private", "header_not_found"]:
+                logger.warning(f"Inteligencia: @{username} negado por {reason}.")
+                final_data = {
+                    "username": username,
+                    "identidade_validada": False,
+                    "status_monitoramento": "DESATIVADO",
+                    "motivo_desativacao": f"Perfil inacessivel no Instagram: {reason}",
+                    "atualizado_em": datetime.now(timezone.utc).isoformat()
+                }
+                await db_client.upsert_candidate(final_data)
+                return final_data
+            
+            logger.warning(f"Inteligencia: @{username} inacessivel temporariamente ({reason}).")
             return None
 
         # 2. Pesquisa em Fontes Oficiais
+        ig_data = ig_res # Para compatibilidade com os metodos abaixo
         official_data = await self._search_official_sources(username, ig_data.get("display_name"))
 
-        # 3. Consolidação e Validação de Escopo via IA
+        # 3. Consolidacao e Validacao de Escopo via IA
         enriched = await self._enrich_and_validate(username, ig_data, official_data)
         
-        # 4. Decisão de Governança
+        # 4. Decisao de Governanca
         is_valid = enriched.get("identidade_validada", False)
         status = "ATIVO" if is_valid else "DESATIVADO"
         motivo = enriched.get("motivo_rejeicao") if not is_valid else None
 
-        # 5. Consolidação Final
+        # 5. Consolidacao Final
         final_data = {
             "username": username,
             "nome_completo": enriched.get("nome_completo") or ig_data.get("display_name"),
@@ -61,14 +78,14 @@ class IntelligenceService:
             "atualizado_em": datetime.now(timezone.utc).isoformat()
         }
 
-        # 6. Persistência
+        # 6. Persistencia
         await db_client.upsert_candidate(final_data)
         
-        # Retorna com metadados de controle
         final_data["_quality"] = enriched.get("quality_confidence", 0.5)
         return final_data
 
     async def _fetch_ig_basic_info(self, username: str) -> Optional[Dict[str, Any]]:
+        """Retorna o dicionario de validacao completo do scraper."""
         try:
             from playwright.async_api import async_playwright
             async with async_playwright() as pw:
@@ -81,14 +98,14 @@ class IntelligenceService:
                 await asyncio.sleep(5)
                 validation = await self.scraper._validate_target_identity(page, username)
                 await browser.close()
+                
+                # Se for valido, adiciona campo de seguidores formatado
                 if validation["valid"]:
-                    return {
-                        "display_name": validation.get("display_name"),
-                        "biography": validation.get("biography"),
-                        "followers_count": self._parse_followers(validation.get("followers", "0")),
-                        "is_verified": validation.get("is_verified", False)
-                    }
-        except: pass
+                    validation["followers_count"] = self._parse_followers(validation.get("followers", "0"))
+                
+                return validation
+        except Exception as e:
+            return {"valid": False, "reason": f"exception: {str(e)[:50]}"}
         return None
 
     async def _search_official_sources(self, username: str, name: str) -> Dict[str, Any]:
