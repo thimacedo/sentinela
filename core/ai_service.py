@@ -276,17 +276,24 @@ class AIService:
             return {"is_hate": False, "categoria_ia": "NEUTRO", "category": "NEUTRO", "confianca_ia": 0.0, "confidence": 0.0, "analise_pericial": "Erro parsing"}
 
     async def validate_identity(self, expected_name: str, display_name: str, bio: str, followers: str = "0", is_verified: bool = False) -> Dict[str, Any]:
-        prompt = (f"Valide identidade de figura pública: {expected_name}\nPerfil: {display_name} | Bio: {bio} | Seguidores: {followers}\n"
+        """Valida se um perfil do Instagram condiz com a identidade esperada."""
+        prompt = (f"Valide identidade de figura pública: {expected_name}\n"
+                 f"Perfil: {display_name} | Bio: {bio} | Seguidores: {followers}\n"
                  f"Seja tolerante se for verificado ou popular. Marque inautêntico apenas se for paródia/fã-clube.")
+        
+        system_prompt = "Você é um auditor de autenticidade de redes sociais."
+        
         try:
-            response = await self.mistral_client.chat.completions.create(
-                model="open-mistral-nemo",
-                messages=[{"role": "user", "content": prompt}],
-                response_format={"type": "json_object"},
-                temperature=0.0
-            )
-            return json.loads(response.choices[0].message.content)
-        except: return {"is_authentic": True, "reason": "erro_ia"}
+            res = await self.chat_completion(prompt, system_prompt=system_prompt)
+            if res:
+                return {
+                    "is_authentic": bool(res.get("is_authentic", True)),
+                    "reason": res.get("reason", "Perfil validado")
+                }
+            return {"is_authentic": True, "reason": "IA não retornou resposta (bypass)"}
+        except Exception as e:
+            logger.warning(f"⚠️ [AI] Falha na validação de identidade: {e}")
+            return {"is_authentic": True, "reason": "erro_ia"}
 
     async def run_batch_classification(self, limit: int = 50) -> int:
         from core.supabase_service import supabase as db

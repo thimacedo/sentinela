@@ -1,12 +1,12 @@
 # STATE.md — Sentinela Democratica (Fonte de Verdade)
 _last_updated: 2026-05-28 | branch: main (Model: Gemini 3.5 Flash)_
 
-## Status Operacional (v84.20)
+## Status Operacional (v84.21)
 
 | Subsistema | Status | Observacao |
 |---|---|---|
 | Frontend (nextjs) | Operacional | v84.1: Consolidação AdSense e injeção otimizada. |
-| Autopilot L3 | Operacional | v84.4: Proteção anti-detecção com cooldown de 6h. |
+| Autopilot L3 | Operacional | v84.21: Diagnóstico técnico via chat_completion restaurado. |
 | Watchdog (Guardião) | Operacional | v84.17: Saneamento de codificação (Windows) e autocura absoluta. |
 | Coleta (IGWorkerV2) | Operacional | v84.15: Pipeline INTEGRADO com IntelligenceService (Inline Research). |
 | Pesquisa (Researcher) | Operacional | v84.20: Purga automática de perfis inacessíveis (404/Privado) ativa. |
@@ -16,9 +16,9 @@ _last_updated: 2026-05-28 | branch: main (Model: Gemini 3.5 Flash)_
 ## ✅ CONSOLIDAÇÃO DA RODADA (28/05/2026)
 
 ### 1. Governança e Auto-Limpeza (v84.20)
-- **Purga de Inacessíveis**: Alvos que resultam em erro 404 (Página não disponível) ou são perfis privados agora são desativados automaticamente pelo `IntelligenceService`. Isso elimina loops de avisos redundantes nos logs.
-- **Deteção de Header**: Corrigido bug no motor V2 que ignorava falhas de carregamento biográfico; agora, a ausência de metadados força a reavaliação ou desativação do alvo.
-- **Rigor Político**: IA instruída a distinguir rigorosamente "Influenciadores Políticos" de "Candidatos Reais", exigindo prova oficial para cargos eletivos.
+- **Resiliência do Autopilot (v84.21)**: Corrigido erro de diagnóstico "Todas as camadas falharam para N/A". Implementado o método `chat_completion` no `AIService` para separar o fluxo de inteligência técnica (SRE/Scraping) do fluxo de classificação de ódio, garantindo que diagnósticos de sistema e validações de identidade utilizem a cascata de provedores (Mistral/Groq) de forma otimizada.
+- **Governança e Auto-Limpeza (v84.20)**: Purga automática de perfis inacessíveis (404/Privado) ativa.
+
 
 ### 2. Pipeline Unificado e Inteligência
 - **Pesquisa Inline**: O coletor (`IGWorkerV2`) agora executa a pesquisa de dados biográficos em tempo real para novos alvos antes da primeira extração.
@@ -30,15 +30,15 @@ _last_updated: 2026-05-28 | branch: main (Model: Gemini 3.5 Flash)_
 - **Resiliência de Clique**: Implementado `force=True` no Playwright para contornar overlays do Instagram que bloqueavam o grid.
 - **Automação de Partida**: Criado `start_watchdog.ps1` e consolidado o fluxo de inicialização via `uv`.
 
-## 📋 ARQUITETURA DE INTEGRIDADE (v84.20)
+## 📋 ARQUITETURA DE INTEGRIDADE (v84.21)
 
 ```
 [Watchdog v84.17] (Guardião Saneado + Autocura)
-  ├── [Autopilot v84.4] (Anti-Detecção + Cooldown 6h)
+  ├── [Autopilot v84.21] (Diagnóstico Resiliente via ChatCompletion)
   └── [Orchestrator v57.4]
         ├── [QueueManager v84.18] (Smart Backoff + Auto-Cooling + Filtro Governança)
         ├── [IGWorkerV2 v84.15] (Integrated Intel -> Force Click -> Fallback Híbrido)
-        └── [IntelligenceService v84.20] (Purga 404/Privado + IA Criteriosa + TSE/TRE)
+        └── [IntelligenceService v84.21] (Purga 404/Privado + IA Criteriosa + TSE/TRE)
 ```
 
 ## Descobertas Tecnicas (2026-05-28)
