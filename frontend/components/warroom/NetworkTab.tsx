@@ -31,7 +31,9 @@ export default function NetworkTab() {
       const parsed = JSON.parse(unlockData);
       // Desbloqueio válido por 24 horas
       if (new Date().getTime() - parsed.timestamp < 24 * 60 * 60 * 1000) {
-        setUnlocked(true);
+        setTimeout(() => {
+          setUnlocked(true);
+        }, 0);
       }
     }
   }, []);

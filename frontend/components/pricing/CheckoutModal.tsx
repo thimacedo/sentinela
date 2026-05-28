@@ -19,7 +19,13 @@ export default function CheckoutModal({ isOpen, onClose, planName, ciAmount, pri
   const [paymentMethod, setPaymentMethod] = useState<'pix' | 'card'>('pix');
   
   // Calcula preço numérico e desconto de 5% para o PIX Direto
-  const numericPrice = useMemo(() => parseFloat(price.replace('.', '').replace(',', '.')), [price]);
+  const numericPrice = useMemo(() => {
+    if (!price) return 0;
+    const cleanPrice = price.toString().replace(/\./g, '').replace(',', '.');
+    const parsed = parseFloat(cleanPrice);
+    return isNaN(parsed) ? 0 : parsed;
+  }, [price]);
+
   const pixDiscountedPrice = numericPrice * 0.95;
   
   const pixPayload = useMemo(() => {

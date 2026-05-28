@@ -41,7 +41,9 @@ export default function AlertsTab() {
     if (unlockData) {
       const parsed = JSON.parse(unlockData);
       if (new Date().getTime() - parsed.timestamp < 24 * 60 * 60 * 1000) {
-        setUnlocked(true);
+        setTimeout(() => {
+          setUnlocked(true);
+        }, 0);
       }
     }
   }, []);

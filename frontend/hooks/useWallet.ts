@@ -9,6 +9,8 @@ export function useWallet() {
 
   const fetchBalance = async () => {
     try {
+      if (typeof window === 'undefined') return;
+      
       const userId = localStorage.getItem('sentinela_user_id');
       
       // Fallback for demo/guest if no auth implemented yet, but we should fetch from Supabase if possible
@@ -38,8 +40,12 @@ export function useWallet() {
   };
 
   useEffect(() => {
-    fetchBalance();
+    // Adia a execução para evitar cascading renders (PASA v60.1 compliance)
+    const timeout = setTimeout(() => {
+      fetchBalance();
+    }, 0);
     
+    return () => clearTimeout(timeout);
     // Optional: Set up real-time subscription here later if needed
   }, []);
 

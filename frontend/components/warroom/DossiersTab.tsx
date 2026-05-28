@@ -26,7 +26,11 @@ export default function DossiersTab() {
 
   useEffect(() => {
     const saved = localStorage.getItem('sentinela_unlocked_dossiers');
-    if (saved) setUnlocked(JSON.parse(saved));
+    if (saved) {
+      setTimeout(() => {
+        setUnlocked(JSON.parse(saved));
+      }, 0);
+    }
   }, []);
 
   const { data: dossiers = [], isLoading } = useQuery<Dossier[]>({

@@ -54,7 +54,7 @@ export default function TokenExplanation() {
               <div className="w-10 h-10 bg-bg-main rounded-lg flex items-center justify-center border border-border-main group-hover:border-brand-primary/30 transition-colors">
                 {op.icon}
               </div>
-              <span className="px-2.5 py-1 bg-brand-primary/10 text-brand-primary text-[10px] font-black font-mono rounded uppercase tracking-widest border border-brand-primary/20 shadow-[0_0_10px_rgba(var(--brand-primary),0.2)]">
+              <span className="px-2.5 py-1 bg-brand-primary/10 text-brand-primary text-[10px] font-black font-mono rounded uppercase tracking-widest border border-brand-primary/20 shadow-sm">
                 Aporte: {op.cost}
               </span>
             </div>
