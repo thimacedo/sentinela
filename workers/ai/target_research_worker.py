@@ -22,6 +22,14 @@ class TargetResearchWorker(BaseWorker):
     def describe(self) -> str:
         return "Motor de Curadoria e Inteligencia de Alvos"
 
+    async def setup(self) -> None:
+        """Inicializacao de recursos (obrigatorio BaseWorker)."""
+        self.logger.info(f"[Curador] {self.worker_id} pronto.")
+
+    async def teardown(self) -> None:
+        """Liberacao de recursos (obrigatorio BaseWorker)."""
+        self.logger.info(f"[Curador] {self.worker_id} encerrado.")
+
     async def run_cycle(self) -> CycleResult:
         start_time = asyncio.get_event_loop().time()
         self.cycle += 1

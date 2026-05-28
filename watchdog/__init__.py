@@ -39,7 +39,7 @@ from fastapi.middleware.cors import CORSMiddleware
 # --- Configurações ---
 SERVER_SCRIPT = "main_runner.py"
 RESTART_DELAY = 30
-REQUIREMENTS_FILE = "requirements-workers.txt" # ✅ Corrigido para workers
+REQUIREMENTS_FILE = os.path.join(PROJECT_ROOT, "requirements-workers.txt") 
 
 import tempfile
 CACHE_DIR = os.path.join(tempfile.gettempdir(), "sentinela_pip_cache")
