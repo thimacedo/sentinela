@@ -45,9 +45,6 @@ export default function HomePage() {
           }}
         />
 
-        {/* Anúncio AdSense Topo */}
-        <AdSenseSlot adSlot="2020882637" format="horizontal" />
-
         {/* Section 1.5: Activity Trend (From SaaS Logic) */}
         <TrendChart />
 

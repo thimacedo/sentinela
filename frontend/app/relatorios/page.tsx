@@ -51,20 +51,18 @@ export default function RelatoriosPage() {
   return (
     <div className="min-h-screen bg-bg-main p-6 md:p-12">
       <div className="max-w-6xl mx-auto">
-        <div className="mb-12 border-b border-border-main pb-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-primary/10 text-brand-primary border border-brand-primary/20 rounded-full mb-6 text-[10px] font-black uppercase tracking-widest">
-            Arquivo Confidencial
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold text-text-main tracking-tight uppercase">
+              Dossiês de Inteligência
+            </h1>
+            <div className="hidden md:inline-flex items-center px-2 py-0.5 bg-brand-primary/10 text-brand-primary border border-brand-primary/20 rounded-full text-[10px] font-black uppercase tracking-widest">
+              Arquivo Confidencial
+            </div>
           </div>
-          <h1 className="text-3xl md:text-4xl font-black text-text-main tracking-tighter mb-4">
-            Dossiês de Inteligência
-          </h1>
-          <p className="text-sm text-text-muted max-w-2xl leading-relaxed">
-            Acesso aos relatórios periciais gerados pela plataforma. O desbloqueio de novos documentos consome Créditos de Inteligência (CI) devido ao uso intensivo de exportação e processamento forense.
+          <p className="text-xs text-text-muted hidden md:block max-w-md text-right">
+            Acesso aos relatórios periciais. O desbloqueio consome Créditos de Inteligência (CI).
           </p>
-        </div>
-
-        <div className="mb-8">
-          <AdSenseSlot adSlot="2020882637" format="horizontal" />
         </div>
 
         {loading ? (
@@ -77,11 +75,16 @@ export default function RelatoriosPage() {
             </div>
           </div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {reports.map((r) => (
-              <ReportCard key={r.name} report={r} onBuy={handleBuy} />
-            ))}
-          </div>
+          <>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {reports.map((r) => (
+                <ReportCard key={r.name} report={r} onBuy={handleBuy} />
+              ))}
+            </div>
+            <div className="mt-8">
+              <AdSenseSlot adSlot="2020882637" format="horizontal" />
+            </div>
+          </>
         )}
       </div>
     </div>
