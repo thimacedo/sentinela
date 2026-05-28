@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { BookOpen, ShieldCheck, Cpu, Database } from 'lucide-react';
+import AdSenseSlot from '@/components/ads/AdSenseSlot';
 
 export default function MetodologiaPage() {
   return (
@@ -79,6 +80,8 @@ export default function MetodologiaPage() {
           </p>
         </section>
       </div>
+
+      <AdSenseSlot adSlot="2020882637" format="horizontal" />
 
       {/* Footer Navigation */}
       <div className="pt-8 border-t border-border-main flex gap-4">

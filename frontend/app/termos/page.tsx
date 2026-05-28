@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import AdSenseSlot from '@/components/ads/AdSenseSlot';
 
 export default function TermosPage() {
   return (
@@ -48,6 +49,8 @@ export default function TermosPage() {
           </p>
         </section>
       </div>
+
+      <AdSenseSlot adSlot="2020882637" format="horizontal" />
 
       {/* Footer Navigation */}
       <div className="pt-8 border-t border-border-main flex gap-4">
