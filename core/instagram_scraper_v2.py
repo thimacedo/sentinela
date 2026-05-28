@@ -414,12 +414,13 @@ class InstagramScraperV2:
             await asyncio.sleep(random.uniform(2, 4))
             if page.is_closed():
                 return False
-            # Verifica se a página do post foi carregada (artigo presente)
+            # Verifica se a página do post foi carregada (artigo presente ou sections detectadas)
             article = await page.query_selector("article")
-            if article:
-                logger.debug(f"✅ [V2] Post {shortcode} aberto via navegação direta.")
+            sections = await page.query_selector_all("section")
+            if article or len(sections) > 0:
+                logger.debug(f"✅ [V2] Post {shortcode} aberto via navegação direta (Artigo: {article is not None}, Sections: {len(sections)}).")
                 return True
-            logger.warning(f"⚠️ [V2] Post {shortcode} carregado via URL mas sem artigo detectado.")
+            logger.warning(f"⚠️ [V2] Post {shortcode} carregado via URL mas sem elementos de conteúdo detectados.")
             return True  # Continua mesmo assim, os dados JSON já foram interceptados
         except Exception as e:
             logger.warning(f"⚠️ [V2] Navegação direta para {shortcode} falhou: {e}. Tentando clique no grid...")
