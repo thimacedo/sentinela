@@ -69,11 +69,11 @@ export default function PricingGrid() {
           <ul className="space-y-4 mb-8 flex-1">
             <li className="flex items-start gap-3 text-sm text-text-main">
               <Check className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
-              <span>Suficiente para ~2 Dossiês ou 6 dias de monitoramento ativo.</span>
+              <span>Suficiente para ~2 Dossiês ou ativação do Radar de Tendências.</span>
             </li>
             <li className="flex items-start gap-3 text-sm text-text-main">
               <Check className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
-              <span>Acesso ao Painel Central.</span>
+              <span>Acesso ao Painel Central e Cadastro de Candidatos.</span>
             </li>
           </ul>
 
@@ -114,15 +114,15 @@ export default function PricingGrid() {
           <ul className="space-y-4 mb-8 flex-1">
             <li className="flex items-start gap-3 text-sm text-text-main">
               <Check className="w-4 h-4 text-brand-primary mt-0.5 shrink-0" />
-              <span className="font-bold">Acesso Antecipado ao Deep Scrape.</span>
+              <span className="font-bold">Acesso ininterrupto ao Feed de Alertas.</span>
             </li>
             <li className="flex items-start gap-3 text-sm text-text-main">
               <Check className="w-4 h-4 text-brand-primary mt-0.5 shrink-0" />
-              <span>Suficiente para monitoramento maciço e investigações cruzadas.</span>
+              <span>Monitoramento de longo prazo para Campanhas Eleitorais.</span>
             </li>
             <li className="flex items-start gap-3 text-sm text-text-main">
               <Check className="w-4 h-4 text-brand-primary mt-0.5 shrink-0" />
-              <span>Alertas SMS/WhatsApp em Tempo Real.</span>
+              <span>Exportação prioritária de Relatórios (Dossiês).</span>
             </li>
           </ul>
 

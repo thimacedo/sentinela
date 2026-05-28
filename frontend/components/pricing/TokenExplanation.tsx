@@ -8,25 +8,25 @@ export default function TokenExplanation() {
       icon: <FileText className="w-5 h-5 text-brand-primary" />,
       title: 'Desbloqueio de Dossiê',
       cost: '350 CI',
-      desc: 'Análise pericial completa de um alvo com exportação legal.'
+      desc: 'Exportação de relatório detalhado do alvo (Módulo Relatórios).'
     },
     {
       icon: <Eye className="w-5 h-5 text-purple-500" />,
-      title: 'Ativar Deep Scrape',
+      title: 'Radar de Tendências',
       cost: '150 CI',
-      desc: 'Rastreio em profundidade de redes coordenadas (Diário).'
+      desc: 'Acesso visual ao mapa de narrativas em rede (Módulo Tendências).'
     },
     {
       icon: <Shield className="w-5 h-5 text-emerald-500" />,
-      title: 'Adição de Novo Alvo',
+      title: 'Inclusão de Candidato',
       cost: '500 CI',
-      desc: 'Inclusão de um novo político no pipeline de monitoramento.'
+      desc: 'Adiciona um novo político ao pipeline de análise (Módulo Candidatos).'
     },
     {
       icon: <AlertTriangle className="w-5 h-5 text-orange-500" />,
-      title: 'Auditoria Forense (Solenya)',
+      title: 'Feed de Alertas',
       cost: '850 CI',
-      desc: 'Investigação automatizada avançada sobre ataque coordenado.'
+      desc: 'Monitoramento 24/7 do discurso de ódio com feed ao vivo (Módulo Alertas).'
     }
   ];
 
