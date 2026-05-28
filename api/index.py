@@ -294,8 +294,8 @@ def summary(request: Request, supa: Client = Depends(get_supa)):
 
         # 3. Calcula o Acumulado (Lifetime) de forma dinâmica a partir da tabela de comentários
         # Forçamos a contagem exata para garantir que o KPI reflita as últimas inserções
-        query_total = supa.table('comentarios').select('id', count='exact')
-        query_hate = supa.table('comentarios').select('id', count='exact').eq('is_hate', True)
+        query_total = supa.table('comentarios').select('id', count='exact').limit(1)
+        query_hate = supa.table('comentarios').select('id', count='exact').eq('is_hate', True).limit(1)
 
         if org_id:
             query_total = query_total.eq('organization_id', org_id)
