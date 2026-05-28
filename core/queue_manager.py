@@ -186,33 +186,52 @@ class QueueManager:
             active_targets.add(username)
 
     def rotate_target(self, target: Target) -> None:
-        """Remove o item processado e reinsere no fim da fila com status e termômetro (v84.13)."""
+        """Remove o item processado e reinsere no fim da fila com status e termômetro (v84.18)."""
         if not target.username:
             return
 
         now = datetime.now(timezone.utc)
         now_iso = now.isoformat()
         
-        # 1. Cálculo do Termômetro de Atividade (v84.13)
+        # 1. Cálculo do Termômetro de Atividade (v84.18)
         frequencia = 0.0
-        # Se o scraper retornou que não há comentários recentes, o alvo é FRIO por definição
+        # Alvos com erro de conteúdo vazio são resfriados imediatamente
         is_empty = hasattr(target, "error") and target.error in ["no_comments_found", "junk_detected"]
-        termometro = "FRIO" if is_empty else "MORNO"
         
         post_metas = getattr(target, "post_metas", [])
-        if post_metas and not is_empty:
-            valid_dates = []
+        valid_dates = []
+        if post_metas:
             for m in post_metas:
                 if m.get("timestamp"):
                     try:
                         valid_dates.append(datetime.fromisoformat(m["timestamp"].replace('Z', '+00:00')))
                     except: continue
+        
+        # Lógica de Decisão de Temperatura:
+        if is_empty or not valid_dates:
+            termometro = "FRIO"
+            frequencia = 0.0
+        else:
+            # Verifica idade do post mais recente
+            last_post_date = max(valid_dates)
+            days_since_last_post = (now - last_post_date).days
             
             if len(valid_dates) >= 2:
                 delta_days = (max(valid_dates) - min(valid_dates)).days or 1
                 frequencia = round((len(valid_dates) / delta_days) * 7, 1) # Posts por semana
-                if frequencia >= 5: termometro = "QUENTE"
-                elif frequencia < 1: termometro = "FRIO"
+            else:
+                # Apenas 1 post encontrado: frequência baseada na idade desse post
+                frequencia = round(7 / (days_since_last_post + 1), 1)
+
+            # Critérios de Reclassificação
+            if days_since_last_post > 7:
+                termometro = "FRIO" # Post mais recente é muito antigo
+            elif frequencia >= 5:
+                termometro = "QUENTE"
+            elif frequencia < 1:
+                termometro = "FRIO"
+            else:
+                termometro = "MORNO"
         
         # 2. Atualiza tabela principal de candidatos
         update_data = {
@@ -231,8 +250,7 @@ class QueueManager:
                 "updated_at": now_iso
             }).eq("id", target.queue_id).execute()
             
-        logger.info(f"❄️ [Queue] @{target.username} -> {termometro} ({frequencia} posts/sem)")
-
+        logger.info(f"[Queue] @{target.username} -> {termometro} ({frequencia} posts/sem)")
     def mark_candidate_scraped(self, target: Target) -> None:
         """Update the last_scraped_at timestamp for the candidate."""
         if not target.username:
