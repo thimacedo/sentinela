@@ -12,8 +12,9 @@ _last_updated: 2026-05-24 | branch: main_
 - [x] **Fila Inteligente**: Prioridade Dinâmica (Termômetro) e Hibernação de alvos ociosos.
 - [x] **Resiliencia de Dados**: Buffer de emergência Zero-Loss e fallback de schema mismatch.
 - [x] **Infraestrutura**: Watchdog modernizado com 'uv' e Auto-Ancoragem global de diretórios.
-- [x] **Frontend Moderno**: Interface SAAS Premium Multitema (Light/Dark) v60.2.
-- [x] **Documentacao**: Mapa de dados v58, Mapa funcional e Índice de onboarding.
+- [x] **Frontend Moderno e Testado**: Interface Next.js 16 (App Router), integração total de anúncios (v84.11), zero erros de linting e testes E2E com Playwright validados.
+- [x] **Inteligência Contínua**: `TargetResearchWorker` para inclusão e curadoria automática de alvos no ciclo 24/7 (v84.9).
+- [x] **Documentacao**: Mapa de dados v58, Mapa funcional, Índice de onboarding e Walkthrough do sistema atualizado.
 
 ---
 

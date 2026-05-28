@@ -1,6 +1,6 @@
-# Sentinela — PASA v50.1
+# Sentinela — PASA v84.11
 
-Este repositório opera na arquitetura PASA v50.1 (God Mode Data Layer).
+Este repositório opera na arquitetura PASA v84.11 (God Mode Data Layer & Frontend Premium).
 
 ## Documentação Técnica
 - [STATE.md](./STATE.md) (Fonte de verdade atual)
@@ -19,10 +19,11 @@ python watchdog.py
 ```
 
 ## Frontend Oficial
-O frontend oficial está em `proposta_frontend/`. 
+O frontend oficial está em `frontend/` operando sob Next.js 16 (App Router) + TailwindCSS.
 Configuração na Vercel:
-- `Root Directory = proposta_frontend`
+- `Root Directory = frontend`
 - Framework Preset: `Next.js`
+- Comandos de Build: `npm run build`
 
 ## Legado
 Componentes legados foram isolados em `archive_v17_2026/`. Não reativar sem revisão arquitetural.
