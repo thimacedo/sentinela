@@ -45,6 +45,9 @@ export default function HomePage() {
           }}
         />
 
+        {/* Anúncio AdSense Topo */}
+        <AdSenseSlot adSlot="2020882637" format="horizontal" />
+
         {/* Section 1.5: Activity Trend (From SaaS Logic) */}
         <TrendChart />
 
@@ -100,6 +103,9 @@ export default function HomePage() {
 
         {/* Section 6: Methodology & About */}
         <MethodologyBox />
+
+        {/* Anúncio AdSense Bottom */}
+        <AdSenseSlot adSlot="2020882637" format="horizontal" />
 
         {/* CTA Section (From SaaS Logic) */}
         <PremiumCTA />

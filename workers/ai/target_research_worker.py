@@ -40,35 +40,28 @@ class TargetResearchWorker(BaseWorker):
         start_time = asyncio.get_event_loop().time()
         self.cycle += 1
         
-        # Estratégia: Prioriza validação de novos alvos (identidade_validada IS NULL)
-        import random
-        
         target_username = None
         extracted = 0
         error = None
         quality_score = 0.0
+        mode = "idle" # Inicializa para evitar UnboundLocalError (v84.14)
         
         try:
             # 1. Busca alvos pendentes de validação de identidade (GOVERNANÇA)
-            res = db_client.client.table('candidatos')\
-                .select('username')\
-                .is_('identidade_validada', 'null')\
-                .limit(1)\
-                .execute()
-            
-            mode = "governance"
-            if not res.data:
-                # 2. Fallback para Curadoria de dados incompletos
-                mode = "curation"
+            # Tentativa protegida para lidar com schema possivelmente desatualizado
+            try:
                 res = db_client.client.table('candidatos')\
                     .select('username')\
-                    .or_('cargo.eq.DESCONHECIDO,partido.is.null,estado.is.null')\
-                    .eq('status_monitoramento', 'ATIVO')\
-                    .order('atualizado_em', desc=False)\
+                    .is_('identidade_validada', 'null')\
                     .limit(1)\
                     .execute()
-
-            if res.data:
+                
+                mode = "governance"
+            except Exception as e_db:
+                logger.error(f"⚠️ [V2] Falha ao consultar candidatos (schema desatualizado?): {e_db}")
+                res = None
+            
+            if res and res.data:
                 target_username = res.data[0]['username']
                 logger.info(f"🔎 [{self.worker_id}] Modo {mode.upper()}: @{target_username}")
                 data = await self.research_target(target_username)
@@ -76,11 +69,32 @@ class TargetResearchWorker(BaseWorker):
                     extracted = 1
                     quality_score = data.get("_quality", 0.5)
                     
-                    # Notificação de Purga no Log
                     if data.get("status_monitoramento") == "DESATIVADO":
                         logger.warning(f"🚫 [PURGA] Alvo @{target_username} foi desativado: {data.get('motivo_desativacao')}")
             else:
-                error = "no_tasks_available"
+                # 2. Fallback para Curadoria de dados incompletos
+                mode = "curation"
+                try:
+                    res = db_client.client.table('candidatos')\
+                        .select('username')\
+                        .or_('cargo.eq.DESCONHECIDO,partido.is.null,estado.is.null')\
+                        .eq('status_monitoramento', 'ATIVO')\
+                        .order('atualizado_em', desc=False)\
+                        .limit(1)\
+                        .execute()
+                except Exception as e_db:
+                    logger.error(f"⚠️ [V2] Falha na query de curadoria: {e_db}")
+                    res = None
+
+                if res and res.data:
+                    target_username = res.data[0]['username']
+                    logger.info(f"🧹 [{self.worker_id}] Modo {mode.upper()}: @{target_username}")
+                    data = await self.research_target(target_username)
+                    if data:
+                        extracted = 1
+                        quality_score = data.get("_quality", 0.5)
+                else:
+                    error = "no_tasks_available"
 
         except Exception as e:
             logger.error(f"💥 Erro no ciclo de pesquisa: {e}")
