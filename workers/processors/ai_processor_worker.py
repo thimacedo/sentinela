@@ -32,6 +32,14 @@ class AIProcessorWorker(BaseWorker):
         start_time = asyncio.get_event_loop().time()
         self.cycle += 1
         
+        if self.shutdown_event and self.shutdown_event.is_set():
+            logger.warning(f"🛑 [AI] Interrupção detectada! Abortando ciclo {self.cycle}...")
+            return CycleResult(
+                worker_id=self.worker_id, cycle=self.cycle,
+                source="ai_processor", error="shutdown_requested",
+                duration=asyncio.get_event_loop().time() - start_time
+            )
+
         logger.info(f"🧠 [AI] Ciclo {self.cycle} | Processando lote de {self.batch_size}...")
         
         try:

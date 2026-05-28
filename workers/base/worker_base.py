@@ -52,6 +52,7 @@ class BaseWorker(ABC):
         self.is_running           = False
         self._consecutive_failures = 0
         self.logger               = logging.getLogger(f"worker.{worker_id}")
+        self.shutdown_event: Optional[asyncio.Event] = None # PASA v85.0
 
     # ── Contrato obrigatório ──────────────────────────────────────────────────
 

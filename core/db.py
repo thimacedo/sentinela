@@ -4,6 +4,8 @@ from typing import List, Dict, Any, Optional
 from core.config import settings
 from supabase import create_client, Client
 
+from core.circuit_breaker import db_circuit_breaker
+
 class DatabaseClient:
     def __init__(self):
         self.url = settings.SUPABASE_URL
@@ -16,14 +18,24 @@ class DatabaseClient:
         self.client: Client = create_client(self.url, self.key) if self.url and self.key else None
 
     async def fetch_unprocessed_comments(self, limit: int = 200, org_id: str = None) -> List[Dict[str, Any]]:
-        """Busca comentários que ainda não foram processados pela IA, filtrados por org opcional."""
+        """Busca comentários que ainda não foram processados pela IA."""
+        if not db_circuit_breaker.can_execute("supabase"):
+            return []
+        
         url = f"{self.url}/rest/v1/comentarios?processado_ia=not.eq.true&limit={limit}"
         if org_id:
             url += f"&organization_id=eq.{org_id}"
-        async with httpx.AsyncClient() as client:
-            resp = await client.get(url, headers=self.headers)
-            if resp.status_code == 200:
-                return resp.json()
+            
+        try:
+            async with httpx.AsyncClient() as client:
+                resp = await client.get(url, headers=self.headers)
+                if resp.status_code == 200:
+                    db_circuit_breaker.record_success("supabase")
+                    return resp.json()
+                db_circuit_breaker.record_failure("supabase", resp.status_code)
+                return []
+        except Exception:
+            db_circuit_breaker.record_failure("supabase")
             return []
 
     async def fetch_all_data(self, org_id: str = None) -> List[Dict[str, Any]]:

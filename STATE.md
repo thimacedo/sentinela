@@ -1,44 +1,42 @@
 # STATE.md — Sentinela Democratica (Fonte de Verdade)
-_last_updated: 2026-05-28 | branch: main (Model: Gemini 3.5 Flash)_
+_last_updated: 2026-05-28 | branch: main (Model: Claude Sonnet 4.6)_
 
-## Status Operacional (v84.21)
+## Status Operacional (v85.0 - Rocket Mode)
 
 | Subsistema | Status | Observacao |
 |---|---|---|
 | Frontend (nextjs) | Operacional | v84.1: Consolidação AdSense e injeção otimizada. |
 | Autopilot L3 | Operacional | v84.21: Diagnóstico técnico via chat_completion restaurado. |
 | Watchdog (Guardião) | Operacional | v84.17: Saneamento de codificação (Windows) e autocura absoluta. |
-| Coleta (IGWorkerV2) | Operacional | v84.15: Pipeline INTEGRADO com IntelligenceService (Inline Research). |
-| Pesquisa (Researcher) | Operacional | v84.20: Purga automática de perfis inacessíveis (404/Privado) ativa. |
-| Persistencia Supabase | OK | v84.14: Campos de governança e validação de identidade ativos. |
-| Classificacao IA | OK | Cascade v84.2: Filtro lexical preventivo integrado. |
+| Coleta (Rocket Scraper) | Operacional | v85.0: Desacoplado da IA. Paralelismo assíncrono via Semaphore. |
+| Perícia (AI Processor) | Operacional | v85.0: Worker dedicado para classificação PASA em lote. |
+| Persistencia Supabase | OK | v85.0: Protegido por Circuit Breaker Global (DB Protection). |
+| Graceful Shutdown | Ativo | v85.0: Checkpointing de dados em caso de interrupção (SIGINT). |
 
 ## ✅ CONSOLIDAÇÃO DA RODADA (28/05/2026)
 
-### 1. Governança e Auto-Limpeza (v84.20)
-- **Resiliência do Autopilot (v84.21)**: Corrigido erro de diagnóstico "Todas as camadas falharam para N/A". Implementado o método `chat_completion` no `AIService` para separar o fluxo de inteligência técnica (SRE/Scraping) do fluxo de classificação de ódio, garantindo que diagnósticos de sistema e validações de identidade utilizem a cascata de provedores (Mistral/Groq) de forma otimizada.
-- **Governança e Auto-Limpeza (v84.20)**: Purga automática de perfis inacessíveis (404/Privado) ativa.
+### 1. Rocket Mode: Desacoplamento e Performance (v85.0)
+- **Arquitetura Assíncrona**: O Sentinela agora opera como uma malha de workers independentes. Os coletores (Scrapers) focam exclusivamente em I/O, enquanto o `AIProcessorWorker` gerencia a perícia PASA em lote.
+- **Paralelismo Real**: O Orquestrador utiliza `asyncio.Semaphore` para permitir múltiplas coletas simultâneas, otimizando o tempo de atividade e a taxa de ingestão de dados.
 
+### 2. Resiliência e Integridade de Dados
+- **Circuit Breaker DB**: Implementado `db_circuit_breaker` que protege o Supabase contra enxurradas de requests em caso de instabilidade, chaveando para o `local_buffer` (SQLite) automaticamente.
+- **Graceful Shutdown**: Sistema de "Pouso de Emergência" via `shutdown_event`. Se o processo for encerrado, os scrapers interrompem a paginação e retornam os dados coletados até o momento para salvamento seguro.
 
-### 2. Pipeline Unificado e Inteligência
-- **Pesquisa Inline**: O coletor (`IGWorkerV2`) agora executa a pesquisa de dados biográficos em tempo real para novos alvos antes da primeira extração.
-- **Curadoria Contínua**: O `researcher-01` opera em background atualizando dados obsoletos e limpando o banco de dados.
-- **Resfriamento Inteligente (v84.18)**: Perfis sem atividade recente (> 7 dias) são marcados como `FRIO` e entram em hibernação automática para proteger os coletores.
+### 3. Sincronia Inter-Agentes
+- **Canal AGENTS_SYNC**: Estabelecido protocolo de comunicação entre Gemini e Antigravity para orquestração de missões complexas.
+- **Rocket Launcher**: Criado `rocket.ps1` como gatilho unificado para disparar missões paralelas.
 
-### 3. Estabilização e Infraestrutura Windows
-- **Logs Clean & Quiet**: Terminal saneado para Windows PowerShell; emojis e caracteres especiais removidos para evitar símbolos corrompidos (`ðŸš€`).
-- **Resiliência de Clique**: Implementado `force=True` no Playwright para contornar overlays do Instagram que bloqueavam o grid.
-- **Automação de Partida**: Criado `start_watchdog.ps1` e consolidado o fluxo de inicialização via `uv`.
-
-## 📋 ARQUITETURA DE INTEGRIDADE (v84.21)
+## 📋 ARQUITETURA DE INTEGRIDADE (v85.0)
 
 ```
 [Watchdog v84.17] (Guardião Saneado + Autocura)
-  ├── [Autopilot v84.21] (Diagnóstico Resiliente via ChatCompletion)
-  └── [Orchestrator v57.4]
-        ├── [QueueManager v84.18] (Smart Backoff + Auto-Cooling + Filtro Governança)
-        ├── [IGWorkerV2 v84.15] (Integrated Intel -> Force Click -> Fallback Híbrido)
-        └── [IntelligenceService v84.21] (Purga 404/Privado + IA Criteriosa + TSE/TRE)
+  ├── [Graceful Shutdown Handler] (SIGINT/SIGTERM -> shutdown_event)
+  └── [Orchestrator v85.0] (Semaphore Parallelism)
+        ├── [QueueManager v84.18] (Smart Backoff + Auto-Cooling)
+        ├── [Scraper Mesh] (IGWorkerV2, IGZyteWorker - Pure I/O)
+        │     └── [Circuit Breaker DB] (Supabase Protection)
+        └── [AI Processor Mesh] (AIProcessorWorker - Batch Pericia)
 ```
 
 ## Descobertas Tecnicas (2026-05-28)

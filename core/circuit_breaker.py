@@ -64,3 +64,6 @@ ai_circuit_breaker = CircuitBreaker(failure_threshold=3, cooldown_seconds=300)
 
 # Para o serviço de Scraping da Zyte
 zyte_circuit_breaker = CircuitBreaker(failure_threshold=2, cooldown_seconds=600) # 10 min de cooldown
+
+# Para o serviço de Banco de Dados (Supabase)
+db_circuit_breaker = CircuitBreaker(failure_threshold=5, cooldown_seconds=60)

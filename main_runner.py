@@ -119,12 +119,16 @@ def build_orchestrator() -> SentinelaOrchestrator:
     return orch
 
 
+# Evento global de desligamento (PASA v85.0)
+shutdown_event = asyncio.Event()
+
 def setup_signal_handlers(
     orch: SentinelaOrchestrator,
     loop: asyncio.AbstractEventLoop,
 ) -> None:
     def _shutdown(sig_name: str) -> None:
-        logger.info(f"[main_runner] {sig_name} — encerrando...")
+        logger.info(f"[main_runner] {sig_name} detectado — sinalizando pouso de emergência (Graceful Shutdown)...")
+        shutdown_event.set()
         orch.stop_all()
 
     for sig in (signal.SIGINT, signal.SIGTERM):
@@ -138,6 +142,8 @@ async def main() -> None:
     logger.info("[main_runner] Sentinela iniciando...")
 
     orch = build_orchestrator()
+    # Injeta o evento de shutdown no orquestrador
+    orch.shutdown_event = shutdown_event
 
     loop = asyncio.get_running_loop()
     setup_signal_handlers(orch, loop)

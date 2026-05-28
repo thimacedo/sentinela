@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from supabase import create_client, Client
+from core.circuit_breaker import db_circuit_breaker
 
 class SupabaseService:
     """
@@ -62,6 +63,8 @@ def save_alerts(alerts_data: list):
 
 def get_next_targets_to_scrape(limit: int = 5) -> list:
     """Busca os alvos mais prioritários e que não foram raspados recentemente."""
+    if not db_circuit_breaker.can_execute("supabase"):
+        return []
     try:
         supabase_client = get_supabase_client()
         response = supabase_client.table('candidatos') \
@@ -72,9 +75,11 @@ def get_next_targets_to_scrape(limit: int = 5) -> list:
             .limit(limit) \
             .execute()
 
+        db_circuit_breaker.record_success("supabase")
         return response.data
     except Exception as e:
         print(f"❌ Erro ao buscar alvos no banco: {e}")
+        db_circuit_breaker.record_failure("supabase")
         return []
 
 def update_last_scraped_at(username: str):
@@ -90,15 +95,19 @@ def update_last_scraped_at(username: str):
 
 def save_comments(comments_data: list):
     """Insere ou atualiza comentários extraídos na tabela 'comentarios'."""
+    if not db_circuit_breaker.can_execute("supabase"):
+        return False
     try:
         supabase_client = get_supabase_client()
         supabase_client.table('comentarios').upsert(
             comments_data,
             on_conflict="id_externo"
         ).execute()
+        db_circuit_breaker.record_success("supabase")
         return True
     except Exception as e:
         print(f"❌ Erro ao salvar comentários no Supabase: {e}")
+        db_circuit_breaker.record_failure("supabase")
         return False
 
 def save_scrape_error(username: str, error_type: str):

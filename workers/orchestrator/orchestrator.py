@@ -71,9 +71,10 @@ class SentinelaOrchestrator:
                 del self._banned_until[worker.worker_id]
                 logger.info("[%s] 🔄 Suspensão encerrada. Worker reintegrado ao pool.", worker.worker_id)
                 
-        # Injeta o set compartilhado antes do claim para evitar alvos duplicados
+        # Injeta o set compartilhado e o evento de shutdown antes do claim
         worker.active_targets = self._active_targets
         worker.claim_lock = self._claim_lock
+        worker.shutdown_event = getattr(self, "shutdown_event", None)
 
         result = await worker.run_cycle()
 

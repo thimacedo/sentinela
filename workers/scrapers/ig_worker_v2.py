@@ -34,7 +34,8 @@ class IGWorkerV2(BaseWorker):
         self.seen_targets: set = set()
         self.scraper = InstagramScraperV2(
             headless=config.get("headless", True),
-            max_retries=config.get("max_retries", 3)
+            max_retries=config.get("max_retries", 3),
+            shutdown_event=getattr(self, "shutdown_event", None)
         )
 
     def describe(self) -> str:

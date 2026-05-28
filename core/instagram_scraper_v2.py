@@ -31,10 +31,11 @@ class InstagramScraperV2:
     Implementa rotação de sessões, backoff exponencial e extração multi-camada.
     """
 
-    def __init__(self, headless: bool = True, max_retries: int = 3, db_client: Optional[Any] = None):
+    def __init__(self, headless: bool = True, max_retries: int = 3, db_client: Optional[Any] = None, shutdown_event: Optional[asyncio.Event] = None):
         self.headless = headless
         self.max_retries = max_retries
         self.db = db_client # Cliente Supabase para verificações inteligentes
+        self.shutdown_event = shutdown_event # PASA v85.0
         self.sessions: List[Session] = self._load_sessions()
         self.current_session_idx = 0
         self.captured_data: List[Dict[str, Any]] = []
@@ -279,6 +280,10 @@ class InstagramScraperV2:
                     consecutive_old_posts = 0
                     
                     for meta in post_metas:
+                        if self.shutdown_event and self.shutdown_event.is_set():
+                            logger.warning(f"🛑 [V2] Interrupção detectada! Abortando extração de @{username}...")
+                            break
+
                         if scraped_count >= max_posts:
                             break
                             
