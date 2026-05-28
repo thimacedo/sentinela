@@ -45,47 +45,49 @@ export default function NetworkTab() {
   });
 
   const handleUnlock = async () => {
-    if (balance < 150) {
-      alert("Aporte Insuficiente. Adquira mais Créditos de Inteligência (CI) para operar o Radar de Narrativas.");
-      router.push('/planos');
-      return;
-    }
-
-    const confirmUnlock = window.confirm("Revelar as redes de influência consumirá 150 CI da sua carteira (acesso por 24 horas). Confirmar operação?");
-    if (!confirmUnlock) return;
-
-    try {
-      setIsProcessing(true);
-      const userId = localStorage.getItem('sentinela_user_id');
-      
-      if (!userId) {
-        alert("Sessão inválida. Faça login.");
+    setTimeout(async () => {
+      if (balance < 150) {
+        alert("Aporte Insuficiente. Adquira mais Créditos de Inteligência (CI) para operar o Radar de Narrativas.");
+        router.push('/planos');
         return;
       }
 
-      const { data, error } = await supabase.rpc('process_stn_transaction', {
-        p_user_id: userId,
-        p_amount: -150,
-        p_type: 'CONSUMPTION',
-        p_session_id: null,
-        p_metadata: { action: 'unlock_radar' }
-      });
+      const confirmUnlock = window.confirm("Revelar as redes de influência consumirá 150 CI da sua carteira (acesso por 24 horas). Confirmar operação?");
+      if (!confirmUnlock) return;
 
-      if (error) throw error;
+      try {
+        setIsProcessing(true);
+        const userId = localStorage.getItem('sentinela_user_id');
+        
+        if (!userId) {
+          alert("Sessão inválida. Faça login.");
+          return;
+        }
 
-      if (data === true) {
-        setUnlocked(true);
-        localStorage.setItem('sentinela_radar_unlocked', JSON.stringify({ timestamp: new Date().getTime() }));
-        refreshBalance();
-      } else {
-        alert("Falha na transação. Saldo insuficiente.");
+        const { data, error } = await supabase.rpc('process_stn_transaction', {
+          p_user_id: userId,
+          p_amount: -150,
+          p_type: 'CONSUMPTION',
+          p_session_id: null,
+          p_metadata: { action: 'unlock_radar' }
+        });
+
+        if (error) throw error;
+
+        if (data === true) {
+          setUnlocked(true);
+          localStorage.setItem('sentinela_radar_unlocked', JSON.stringify({ timestamp: new Date().getTime() }));
+          refreshBalance();
+        } else {
+          alert("Falha na transação. Saldo insuficiente.");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Erro ao conectar com a malha neural de pagamentos.");
+      } finally {
+        setIsProcessing(false);
       }
-    } catch (err) {
-      console.error(err);
-      alert("Erro ao conectar com a malha neural de pagamentos.");
-    } finally {
-      setIsProcessing(false);
-    }
+    }, 0);
   };
 
   return (

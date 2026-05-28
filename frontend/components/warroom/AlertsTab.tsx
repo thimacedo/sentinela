@@ -87,47 +87,49 @@ export default function AlertsTab() {
   });
 
   const handleUnlock = async () => {
-    if (balance < 850) {
-      alert("Aporte Insuficiente. Adquira mais Créditos de Inteligência (CI) para operar o Feed de Alertas em Tempo Real.");
-      router.push('/planos');
-      return;
-    }
-
-    const confirmUnlock = window.confirm("Monitorar a rede em tempo real exige uma carga massiva de processamento. Deseja investir 850 CI para liberar o feed por 24 horas?");
-    if (!confirmUnlock) return;
-
-    try {
-      setIsProcessing(true);
-      const userId = localStorage.getItem('sentinela_user_id');
-      
-      if (!userId) {
-        alert("Sessão inválida. Faça login.");
+    setTimeout(async () => {
+      if (balance < 850) {
+        alert("Aporte Insuficiente. Adquira mais Créditos de Inteligência (CI) para operar o Feed de Alertas em Tempo Real.");
+        router.push('/planos');
         return;
       }
 
-      const { data, error } = await supabase.rpc('process_stn_transaction', {
-        p_user_id: userId,
-        p_amount: -850,
-        p_type: 'CONSUMPTION',
-        p_session_id: null,
-        p_metadata: { action: 'unlock_alerts' }
-      });
+      const confirmUnlock = window.confirm("Monitorar a rede em tempo real exige uma carga massiva de processamento. Deseja investir 850 CI para liberar o feed por 24 horas?");
+      if (!confirmUnlock) return;
 
-      if (error) throw error;
+      try {
+        setIsProcessing(true);
+        const userId = localStorage.getItem('sentinela_user_id');
+        
+        if (!userId) {
+          alert("Sessão inválida. Faça login.");
+          return;
+        }
 
-      if (data === true) {
-        setUnlocked(true);
-        localStorage.setItem('sentinela_alerts_unlocked', JSON.stringify({ timestamp: new Date().getTime() }));
-        refreshBalance();
-      } else {
-        alert("Falha na transação. Saldo insuficiente.");
+        const { data, error } = await supabase.rpc('process_stn_transaction', {
+          p_user_id: userId,
+          p_amount: -850,
+          p_type: 'CONSUMPTION',
+          p_session_id: null,
+          p_metadata: { action: 'unlock_alerts' }
+        });
+
+        if (error) throw error;
+
+        if (data === true) {
+          setUnlocked(true);
+          localStorage.setItem('sentinela_alerts_unlocked', JSON.stringify({ timestamp: new Date().getTime() }));
+          refreshBalance();
+        } else {
+          alert("Falha na transação. Saldo insuficiente.");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Erro ao processar transação.");
+      } finally {
+        setIsProcessing(false);
       }
-    } catch (err) {
-      console.error(err);
-      alert("Erro ao processar transação.");
-    } finally {
-      setIsProcessing(false);
-    }
+    }, 0);
   };
 
   // Se não estiver desbloqueado, simulamos o atraso filtrando itens recentes (ex: menos de 12h) para não mostrar

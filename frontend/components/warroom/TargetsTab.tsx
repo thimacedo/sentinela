@@ -61,60 +61,62 @@ export default function TargetsTab() {
   }, [filteredTargets.length]);
 
   const handleAddTarget = async () => {
-    if (balance < 500) {
-      alert("Aporte Insuficiente. Adquira mais Créditos de Inteligência (CI) para configurar a malha neural para novos perfis.");
-      router.push('/planos');
-      return;
-    }
-
-    const username = prompt("Digite o @ do Instagram do novo alvo (ex: jairbolsonaro):");
-    if (!username) return;
-
-    const cleanUsername = username.replace('@', '').trim().toLowerCase();
-
-    const confirmAdd = window.confirm(`Configurar nossa malha neural para monitoramento 24/7 de @${cleanUsername} exige um aporte de 500 CI. Autorizar?`);
-    if (!confirmAdd) return;
-
-    try {
-      setIsAdding(true);
-      const userId = localStorage.getItem('sentinela_user_id');
-      
-      if (!userId) {
-        alert("Sessão inválida. Faça login.");
+    setTimeout(async () => {
+      if (balance < 500) {
+        alert("Aporte Insuficiente. Adquira mais Créditos de Inteligência (CI) para configurar a malha neural para novos perfis.");
+        router.push('/planos');
         return;
       }
 
-      // Cobrança
-      const { data: rpcData, error: rpcError } = await supabase.rpc('process_stn_transaction', {
-        p_user_id: userId,
-        p_amount: -500,
-        p_type: 'CONSUMPTION',
-        p_session_id: null,
-        p_metadata: { action: 'add_target', target: cleanUsername }
-      });
+      const username = prompt("Digite o @ do Instagram do novo alvo (ex: jairbolsonaro):");
+      if (!username) return;
 
-      if (rpcError) throw rpcError;
+      const cleanUsername = username.replace('@', '').trim().toLowerCase();
 
-      if (rpcData === true) {
-        // Inserção do alvo
-        await supabase.from('candidatos').insert({
-          username: cleanUsername,
-          estado: 'BR',
-          status_monitoramento: 'Ativo'
+      const confirmAdd = window.confirm(`Configurar nossa malha neural para monitoramento 24/7 de @${cleanUsername} exige um aporte de 500 CI. Autorizar?`);
+      if (!confirmAdd) return;
+
+      try {
+        setIsAdding(true);
+        const userId = localStorage.getItem('sentinela_user_id');
+        
+        if (!userId) {
+          alert("Sessão inválida. Faça login.");
+          return;
+        }
+
+        // Cobrança
+        const { data: rpcData, error: rpcError } = await supabase.rpc('process_stn_transaction', {
+          p_user_id: userId,
+          p_amount: -500,
+          p_type: 'CONSUMPTION',
+          p_session_id: null,
+          p_metadata: { action: 'add_target', target: cleanUsername }
         });
 
-        refreshBalance();
-        refetch();
-        alert(`Alvo @${cleanUsername} injetado com sucesso na malha de coleta.`);
-      } else {
-        alert("Falha na transação. Saldo insuficiente.");
+        if (rpcError) throw rpcError;
+
+        if (rpcData === true) {
+          // Inserção do alvo
+          await supabase.from('candidatos').insert({
+            username: cleanUsername,
+            estado: 'BR',
+            status_monitoramento: 'Ativo'
+          });
+
+          refreshBalance();
+          refetch();
+          alert(`Alvo @${cleanUsername} injetado com sucesso na malha de coleta.`);
+        } else {
+          alert("Falha na transação. Saldo insuficiente.");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Erro ao injetar novo alvo.");
+      } finally {
+        setIsAdding(false);
       }
-    } catch (err) {
-      console.error(err);
-      alert("Erro ao injetar novo alvo.");
-    } finally {
-      setIsAdding(false);
-    }
+    }, 0);
   };
 
   return (

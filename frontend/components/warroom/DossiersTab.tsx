@@ -38,54 +38,56 @@ export default function DossiersTab() {
   });
 
   const handleUnlock = async (dossier: Dossier) => {
-    if (unlocked[dossier.id]) {
-      window.open(dossier.arquivo_path, '_blank');
-      return;
-    }
-
-    if (balance < 350) {
-      alert("Aporte Insuficiente. Recarregue seus Créditos de Inteligência (CI) para desbloquear este documento.");
-      router.push('/planos');
-      return;
-    }
-
-    const confirmUnlock = window.confirm("Desbloquear este Dossiê Analítico exigirá um aporte de 350 CI da sua carteira tática. Confirmar operação?");
-    if (!confirmUnlock) return;
-
-    try {
-      setProcessingId(dossier.id);
-      const userId = localStorage.getItem('sentinela_user_id');
-      
-      if (!userId) {
-        alert("Sessão inválida. Por favor, faça login novamente.");
+    setTimeout(async () => {
+      if (unlocked[dossier.id]) {
+        window.open(dossier.arquivo_path, '_blank');
         return;
       }
 
-      const { data, error } = await supabase.rpc('process_stn_transaction', {
-        p_user_id: userId,
-        p_amount: -350,
-        p_type: 'CONSUMPTION',
-        p_session_id: null,
-        p_metadata: { action: 'unlock_dossier', dossier_id: dossier.id, target: dossier.candidato_id }
-      });
-
-      if (error) throw error;
-
-      if (data === true) {
-        const newUnlocked = { ...unlocked, [dossier.id]: true };
-        setUnlocked(newUnlocked);
-        localStorage.setItem('sentinela_unlocked_dossiers', JSON.stringify(newUnlocked));
-        refreshBalance();
-        window.open(dossier.arquivo_path, '_blank');
-      } else {
-        alert("Falha na transação. Verifique se possui saldo suficiente e tente novamente.");
+      if (balance < 350) {
+        alert("Aporte Insuficiente. Recarregue seus Créditos de Inteligência (CI) para desbloquear este documento.");
+        router.push('/planos');
+        return;
       }
-    } catch (err) {
-      console.error(err);
-      alert("Erro de comunicação com o servidor financeiro.");
-    } finally {
-      setProcessingId(null);
-    }
+
+      const confirmUnlock = window.confirm("Desbloquear este Dossiê Analítico exigirá um aporte de 350 CI da sua carteira tática. Confirmar operação?");
+      if (!confirmUnlock) return;
+
+      try {
+        setProcessingId(dossier.id);
+        const userId = localStorage.getItem('sentinela_user_id');
+        
+        if (!userId) {
+          alert("Sessão inválida. Por favor, faça login novamente.");
+          return;
+        }
+
+        const { data, error } = await supabase.rpc('process_stn_transaction', {
+          p_user_id: userId,
+          p_amount: -350,
+          p_type: 'CONSUMPTION',
+          p_session_id: null,
+          p_metadata: { action: 'unlock_dossier', dossier_id: dossier.id, target: dossier.candidato_id }
+        });
+
+        if (error) throw error;
+
+        if (data === true) {
+          const newUnlocked = { ...unlocked, [dossier.id]: true };
+          setUnlocked(newUnlocked);
+          localStorage.setItem('sentinela_unlocked_dossiers', JSON.stringify(newUnlocked));
+          refreshBalance();
+          window.open(dossier.arquivo_path, '_blank');
+        } else {
+          alert("Falha na transação. Verifique se possui saldo suficiente e tente novamente.");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Erro de comunicação com o servidor financeiro.");
+      } finally {
+        setProcessingId(null);
+      }
+    }, 0);
   };
 
   return (
