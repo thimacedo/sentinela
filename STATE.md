@@ -22,7 +22,9 @@ _last_updated: 2026-05-28 | branch: main (Model: Gemini 3.5 Flash)_
   3. O serviço do Watchdog/Runner deve ser mantido ativo para processar a fila represada.
 
 ## Descobertas Tecnicas (2026-05-28)
-- **Recuperação de Sessão (v84.6)**: Sessões do Instagram restauradas via intervenção manual. Identificamos que a nova chave `INSTAGRAM_SESSIONID_VAL` é funcional, juntamente com `INSTAGRAM_SESSIONID_2`. O motor V2 foi testado e confirmou a capacidade de visualizar postagens, superando o bloqueio anterior.
+- **Expansão do Monitoramento (v84.7)**: Novo alvo `@rncomjorge` adicionado à base de dados com status `ATIVO` e agendamento imediato na `fila_coleta` com alta prioridade (10). Este alvo será processado no próximo ciclo do worker de Instagram para coleta de dados biográficos e comentários recentes.
+- **Recuperação de Sessão (v84.6)**: Sessões do Instagram restauradas via intervenção manual.
+ Identificamos que a nova chave `INSTAGRAM_SESSIONID_VAL` é funcional, juntamente com `INSTAGRAM_SESSIONID_2`. O motor V2 foi testado e confirmou a capacidade de visualizar postagens, superando o bloqueio anterior.
 - **Ativação da Fase 4 (AIAdvisor → Workers) (v84.5)**: Integrado o fluxo de auto-diagnóstico onde falhas críticas de coleta (como `junk_detected` ou `session_blocked`) acionam automaticamente o `AIAdvisor`. O advisor consulta o `DocFetcher` (cache local de documentação técnica) para gerar sugestões de correção em tempo real, que são persistidas para auditoria.
 
 ## Descobertas Tecnicas (2026-05-27)
