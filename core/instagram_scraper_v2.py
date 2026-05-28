@@ -397,11 +397,10 @@ class InstagramScraperV2:
         }
 
     async def open_post_modal(self, page: Page, shortcode: str) -> bool:
-        """Abre um post do Instagram via clique no elemento do grid (PASA v84.10).
+        """Abre um post do Instagram via clique no elemento do grid (PASA v84.11).
         
-        Estratégia principal: clique no seletor do grid — mais estável para hidratação
-        do modal e interceptação de JSONs de comentários.
-        Fallback: navegação direta via URL.
+        Estratégia principal: clique no seletor do grid com bypass de interceptação.
+        Fallback: navegação direta via URL com validação ampliada.
         """
         if page.is_closed():
             logger.warning("⚠️ [V2] Não é possível abrir o modal: a página está fechada.")
@@ -412,12 +411,13 @@ class InstagramScraperV2:
         try:
             post_element = await page.query_selector(selector)
             if post_element:
-                await post_element.click(timeout=10000)
+                # PASA v84.11: force=True para ignorar overlays transparentes que interceptam o clique
+                await post_element.click(timeout=12000, force=True)
                 await asyncio.sleep(random.uniform(3, 5))
                 # Verifica se o modal abriu (presença de article)
                 article = await page.query_selector("article")
                 if article:
-                    logger.debug(f"✅ [V2] Post {shortcode} aberto via clique no grid.")
+                    logger.debug(f"✅ [V2] Post {shortcode} aberto via clique forçado no grid.")
                     return True
         except Exception as e:
             logger.warning(f"⚠️ [V2] Falha ao abrir modal do post {shortcode} via clique: {e}")
@@ -427,10 +427,13 @@ class InstagramScraperV2:
             logger.info(f"🔄 [V2] Tentando fallback de navegação direta para {shortcode}...")
             post_url = f"https://www.instagram.com/p/{shortcode}/"
             await page.goto(post_url, wait_until="domcontentloaded", timeout=30000)
-            await asyncio.sleep(random.uniform(3, 5))
+            await asyncio.sleep(random.uniform(4, 6))
+            
+            # PASA v84.11: Aceita article ou section (comum em full page) para evitar retorno vazio
             article = await page.query_selector("article")
-            if article:
-                logger.debug(f"✅ [V2] Post {shortcode} aberto via navegação direta.")
+            sections = await page.query_selector_all("section")
+            if article or len(sections) > 0:
+                logger.debug(f"✅ [V2] Post {shortcode} carregado via URL (Artigo: {article is not None}, Sections: {len(sections)}).")
                 return True
         except Exception as e:
             logger.warning(f"❌ [V2] Falha total ao abrir post {shortcode}: {e}")
