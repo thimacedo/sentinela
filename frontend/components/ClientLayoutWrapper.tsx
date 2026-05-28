@@ -1,6 +1,5 @@
 'use client'
 
-import { useUIStore } from '@/src/store/useUIStore'
 import Sidebar from '@/components/Sidebar'
 import Providers from "@/components/Providers"
 

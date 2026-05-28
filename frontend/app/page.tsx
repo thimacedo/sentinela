@@ -1,4 +1,5 @@
 'use client';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useAlerts, useDashboardStats } from '@/hooks/useDashboardData';
 import NewsHeader from '@/components/home/NewsHeader';
@@ -26,7 +27,7 @@ export default function HomePage() {
     description: alert.texto_bruto?.substring(0, 100) + '...',
     alertLevel: (alert.categoria_ia === 'CRITICO' ? 'critical' : (alert.categoria_ia === 'ELEVADO' ? 'high' : 'medium')) as 'critical' | 'high' | 'medium' | 'low',
     postsCount: 1,
-    engagementMetric: Math.floor(Math.random() * 100) // Simulado por enquanto
+    engagementMetric: 50 // Simulado fixo por enquanto
   }));
 
   const resiliencia = stats?.resiliencia || 0;

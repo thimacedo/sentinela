@@ -1,7 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
 import ReportCard from '@/components/ReportCard';
-import BuyButton from '@/components/BuyButton';
 
 export interface Report {
   name: string;

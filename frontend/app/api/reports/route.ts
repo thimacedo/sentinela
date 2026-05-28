@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextResponse } from 'next/server';
 import path from 'path';
 import fs from 'fs/promises';

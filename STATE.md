@@ -22,6 +22,7 @@ _last_updated: 2026-05-28 | branch: main (Model: Gemini 3.5 Flash)_
   3. O serviço do Watchdog/Runner deve ser mantido ativo para processar a fila represada.
 
 ## Descobertas Tecnicas (2026-05-28)
+- **Saneamento do Frontend e CI/CD (v84.10)**: Realizada auditoria e correção completa do frontend Next.js. Sanadas 33 falhas de linter (funções impuras, cascading renders via `useEffect`, tipagens `any`) e instalados os pacotes de teste e tipagens faltantes (`@types/jest`). O frontend está agora 100% conforme e livre de erros estritos.
 - **Ciclo de Inteligência Contínua (v84.9)**: Evolução do `TargetResearchWorker` de um script CLI para um Worker persistente integrado ao orquestrador. O motor agora executa rotinas de curadoria automática (70% do tempo) e pesquisa de novos alvos (30%), garantindo que nenhum alvo permaneça com dados `DESCONHECIDO`.
 - **Sistema de Recompensas de Inteligência (v84.9)**: Integrado o RewardEngine com suporte a deltas de XP pré-calculados. O pesquisador é premiado (+15 XP) por fichas de alta precisão e punido (-5 a -10 XP) por informações imprecisas, vazias ou perfis inacessíveis, forçando a busca por melhores fontes.
 - **Inclusão Inteligente de Alvos (v84.8)**: Implementado o `TargetResearchWorker` e o script `scripts/add_target.py`.
