@@ -1,10 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import CheckoutModal from './CheckoutModal';
 import { Check, ShieldAlert, Zap, Timer } from 'lucide-react';
 
 export default function PricingGrid() {
   const [timeLeft, setTimeLeft] = useState(899); // 14:59
+  const [checkoutModal, setCheckoutModal] = useState<{isOpen: boolean, planName: string, ciAmount: string, price: string}>({
+    isOpen: false, planName: '', ciAmount: '', price: ''
+  });
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -19,14 +23,19 @@ export default function PricingGrid() {
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  const handleCheckout = (e: React.MouseEvent) => {
-    e.preventDefault();
-    // Preparação para integração (Stripe mock)
-    alert("Iniciando gateway de pagamento seguro... (Integração em desenvolvimento)");
+  const handleCheckout = (planName: string, ciAmount: string, price: string) => {
+    setCheckoutModal({ isOpen: true, planName, ciAmount, price });
   };
 
   return (
     <div className="w-full">
+      <CheckoutModal 
+        isOpen={checkoutModal.isOpen} 
+        onClose={() => setCheckoutModal({ ...checkoutModal, isOpen: false })} 
+        planName={checkoutModal.planName}
+        ciAmount={checkoutModal.ciAmount}
+        price={checkoutModal.price}
+      />
       {/* FOMO Banner */}
       <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3">
@@ -68,7 +77,7 @@ export default function PricingGrid() {
             </li>
           </ul>
 
-          <button onClick={handleCheckout} className="w-full py-4 rounded-xl border border-border-main bg-bg-main hover:bg-brand-primary/10 hover:border-brand-primary hover:text-brand-primary transition-colors text-sm font-black uppercase tracking-widest text-text-main">
+          <button onClick={() => handleCheckout('Operação Tática', '1.000', '497,00')} className="w-full py-4 rounded-xl border border-border-main bg-bg-main hover:bg-brand-primary/10 hover:border-brand-primary hover:text-brand-primary transition-colors text-sm font-black uppercase tracking-widest text-text-main">
             Liberar Acesso Tático
           </button>
         </div>
@@ -117,7 +126,7 @@ export default function PricingGrid() {
             </li>
           </ul>
 
-          <button onClick={handleCheckout} className="w-full py-4 rounded-xl bg-brand-primary text-white hover:bg-brand-primary/90 transition-all text-sm font-black uppercase tracking-widest shadow-lg shadow-brand-primary/20">
+          <button onClick={() => handleCheckout('War Room', '6.000', '1.997,00')} className="w-full py-4 rounded-xl bg-brand-primary text-white hover:bg-brand-primary/90 transition-all text-sm font-black uppercase tracking-widest shadow-lg shadow-brand-primary/20">
             Montar War Room
           </button>
           <p className="text-[9px] text-center text-text-muted mt-3 font-mono uppercase">Apenas 3 Vagas Restantes no Servidor</p>
@@ -149,7 +158,7 @@ export default function PricingGrid() {
             </li>
           </ul>
 
-          <button onClick={handleCheckout} className="w-full py-4 rounded-xl border border-border-main bg-bg-main hover:bg-brand-primary/10 hover:border-brand-primary hover:text-brand-primary transition-colors text-sm font-black uppercase tracking-widest text-text-main">
+          <button onClick={() => handleCheckout('Escala Nacional', '25.000', '7.997,00')} className="w-full py-4 rounded-xl border border-border-main bg-bg-main hover:bg-brand-primary/10 hover:border-brand-primary hover:text-brand-primary transition-colors text-sm font-black uppercase tracking-widest text-text-main">
             Consultar Disponibilidade
           </button>
         </div>
