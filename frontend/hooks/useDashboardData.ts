@@ -57,9 +57,9 @@ export function useTemporalSeries() {
 export function useGeoUf() {
   return useQuery({
     queryKey: ['geo-uf'],
-    queryFn: () => {
+    queryFn: async () => {
       // Importação tardia do gateway client
-      const { fetchApi } = require('@/lib/api');
+      const { fetchApi } = await import('@/lib/api');
       return fetchApi('/api/v1/geo/uf');
     },
     refetchInterval: 120000,

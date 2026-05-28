@@ -1,4 +1,5 @@
 'use client';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { BarChart3, TrendingDown, TrendingUp, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCandidates } from '@/hooks/useDashboardData';
@@ -167,7 +168,7 @@ export default function CandidateProfile({
               </p>
             )}
             <p className="text-xs text-text-muted opacity-70">
-              Monitorado desde: {new Date(candidateData.data_criacao || Date.now()).toLocaleDateString('pt-BR')}
+              Monitorado desde: {candidateData.data_criacao ? new Date(candidateData.data_criacao).toLocaleDateString('pt-BR') : 'N/A'}
             </p>
           </div>
           

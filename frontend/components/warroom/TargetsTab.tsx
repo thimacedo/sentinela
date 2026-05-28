@@ -39,10 +39,7 @@ export default function TargetsTab() {
     return matchesSearch && matchesRisk;
   });
 
-  // Reseta o visibleCount ao mudar os filtros
-  useEffect(() => {
-    setVisibleCount(5);
-  }, [searchQuery, riskFilter]);
+  // Reseta o visibleCount ao mudar os filtros tratado no onChange
 
   // Observer para o Wall Infinito
   useEffect(() => {
@@ -88,7 +85,10 @@ export default function TargetsTab() {
               type="text"
               placeholder="Ex: samia"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setVisibleCount(5);
+              }}
               className="w-full px-3 py-1.5 bg-bg-card border border-border-main rounded-lg text-xs text-text-main placeholder:text-text-muted focus:outline-none focus:border-brand-primary transition-colors"
             />
           </div>
@@ -96,7 +96,10 @@ export default function TargetsTab() {
             <label className="block text-[9px] font-bold text-text-muted uppercase tracking-wider mb-1.5">Nível de Risco</label>
             <select
               value={riskFilter}
-              onChange={(e) => setRiskFilter(e.target.value)}
+              onChange={(e) => {
+                setRiskFilter(e.target.value);
+                setVisibleCount(5);
+              }}
               className="w-full px-3 py-1.5 bg-bg-card border border-border-main rounded-lg text-xs text-text-main focus:outline-none focus:border-brand-primary transition-colors"
             >
               <option value="ALL">TODOS</option>

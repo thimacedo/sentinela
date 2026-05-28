@@ -73,7 +73,7 @@ export default function NetworkTab() {
                   {n.total_perfis}
                 </TableCell>
                 <TableCell className="text-center py-4 text-[10px] font-mono text-text-muted uppercase">
-                  {new Date(n.data_deteccao || Date.now()).toLocaleDateString('pt-BR')}
+                  {n.data_deteccao ? new Date(n.data_deteccao).toLocaleDateString('pt-BR') : 'N/A'}
                 </TableCell>
                 <TableCell className="text-right px-6 py-4">
                   <Badge className="bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20 text-[9px] font-black uppercase rounded-md shadow-none">
