@@ -73,23 +73,25 @@ export default function CandidateProfile({
     );
   }
 
+  // Fallback determinístico caso o backend não envie score_risco, derivado do nivel_risco
+  const baseScore = candidateData.score_risco 
+    ? Math.round(candidateData.score_risco * 100)
+    : (candidateData.nivel_risco === 'CRITICO' ? 95 
+      : candidateData.nivel_risco === 'ELEVADO' ? 75 
+      : candidateData.comentarios_odio_count > 0 ? 45 : 0);
+
   const metrics: CandidateMetric[] = [
     {
       label: 'Comentários',
       value: candidateData.comentarios_odio_count || 0,
-      trend: 'up',
-      trendValue: 15,
     },
     {
       label: 'Nível de Risco',
-      value: Math.round(candidateData.score_risco * 100) || 0,
-      trend: 'up',
-      trendValue: 8,
+      value: baseScore,
     },
     {
       label: 'Categorias',
       value: Object.keys(candidateData.breakdown || {}).length,
-      trend: 'stable',
     },
   ];
 
@@ -182,7 +184,7 @@ export default function CandidateProfile({
           <div className="bg-bg-main border border-border-main rounded-xl p-4 min-w-[120px] shadow-inner">
             <p className="text-[10px] text-text-muted mb-1 font-mono font-bold uppercase tracking-tighter">Score Risco</p>
             <p className="text-3xl font-black text-text-main">
-              {Math.round(candidateData.score_risco * 100) || 0}
+              {baseScore}
             </p>
           </div>
         </div>
