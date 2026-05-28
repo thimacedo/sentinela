@@ -135,11 +135,11 @@ class SentinelaOrchestrator:
 
         # --- GATILHO DE DIAGNÓSTICO (PASA v56.3) ---
         # Se o ciclo for vazio (extracted=0) ou degradado, acionamos o Advisor para buscar melhoria no processo.
-        is_empty = result.extracted == 0 and result.target is not None
+        is_empty = result.extracted == 0 and result.target is not None and result.error not in ["purged_by_governance", "no_tasks_available"]
         degraded = reward.score < 40 or reward.tier in ("critical", "db_failed")
-        
+
         if not result.simulated and (degraded or is_empty):
-            self.logger.info("[%s] 🧠 Acionando AIAdvisor para diagnóstico (motivo: %s)", 
+            self.logger.info("[%s] 🧠 Acionando AIAdvisor para diagnóstico (motivo: %s)",
                              result.worker_id, "vazio" if is_empty else "degradado")
             await self.ai_advisor.analyze_and_suggest(worker, result)
         elif not result.simulated:

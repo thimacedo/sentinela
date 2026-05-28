@@ -112,6 +112,11 @@ class RewardEngine:
 
         # Erros legítimos de dados vazios não devem ser tratados como falha crítica de sistema.
         # Falha de banco só é crítica se havia dados extraídos para persistir.
+        if result.error == "purged_by_governance":
+            return 5.0, "  - Status: 🧹 Alvo expurgado pela governança\n  - Delta: +5.0 XP"
+        if result.error == "no_tasks_available":
+            return 0.0, "  - Status: ⏳ Sem tarefas no momento (Idle)\n  - Delta: +0.0 XP"
+
         is_system_error = result.error and result.error != "no_comments_found"
         is_db_failure = not result.db_success and result.extracted > 0
         
