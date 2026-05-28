@@ -1,11 +1,12 @@
 # STATE.md — Sentinela Democratica (Fonte de Verdade)
-_last_updated: 2026-05-28 | branch: main (Model: Claude Sonnet 4.6)_
+_last_updated: 2026-05-28 | branch: main (Model: Gemini Pro)_
 
-## Status Operacional (v85.0 - Rocket Mode)
+## Status Operacional (v85.1 - Rocket Mode & Monetization E2E)
 
 | Subsistema | Status | Observacao |
 |---|---|---|
-| Frontend (nextjs) | Operacional | v84.1: Consolidação AdSense e injeção otimizada. |
+| Frontend (Gating) | Operacional | v85.1: Módulos Premium trancados por Catracas de CI. |
+| Pagamentos (Stripe)| Operacional | v85.1: Webhook Ativo com injeção automática de CI via RPC. |
 | Autopilot L3 | Operacional | v84.21: Diagnóstico técnico via chat_completion restaurado. |
 | Watchdog (Guardião) | Operacional | v84.17: Saneamento de codificação (Windows) e autocura absoluta. |
 | Coleta (Rocket Scraper) | Operacional | v85.0: Desacoplado da IA. Paralelismo assíncrono via Semaphore. |
@@ -15,7 +16,16 @@ _last_updated: 2026-05-28 | branch: main (Model: Claude Sonnet 4.6)_
 
 ## ✅ CONSOLIDAÇÃO DA RODADA (28/05/2026)
 
-### 1. Rocket Mode: Desacoplamento e Performance (v85.0)
+### 1. Monetização End-to-End (v85.1)
+- **Integração Híbrida de Pagamentos:** Checkout modal do frontend atualizado para suportar API da Stripe (SDK v15) conectada diretamente ao catálogo de preços oficial (`price_id`) e sistema PIX direto (com desconto tático de 5%).
+- **Webhooks & Entrega de Produto:** Backend configurado com endpoint `/api/v1/webhooks/stripe` protegido por `Stripe-Signature`. Valida os pagamentos em tempo real e entrega os **Créditos de Inteligência (CI)** invocando atomicamente a função SQL `process_stn_transaction`.
+- **Economia Tática (Gating):** 
+  - Catraca de 350 CI implantada no Módulo Dossiês (Desbloqueio de PDF).
+  - Catraca de 150 CI implantada no Radar de Tendências (Borramento / Blindagem).
+  - Catraca de 850 CI implantada no Live Feed de Alertas (Dados em tempo real vs Atraso induzido).
+  - Catraca de 500 CI para Injeção de Novos Alvos na Malha de Extração (Targeting).
+
+### 2. Rocket Mode: Desacoplamento e Performance (v85.0)
 - **Arquitetura Assíncrona**: O Sentinela agora opera como uma malha de workers independentes. Os coletores (Scrapers) focam exclusivamente em I/O, enquanto o `AIProcessorWorker` gerencia a perícia PASA em lote.
 - **Paralelismo Real**: O Orquestrador utiliza `asyncio.Semaphore` para permitir múltiplas coletas simultâneas, otimizando o tempo de atividade e a taxa de ingestão de dados.
 
