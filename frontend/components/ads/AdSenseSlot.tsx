@@ -74,6 +74,7 @@ export default function AdSenseSlot({ adSlot, format = 'auto' }: AdSenseSlotProp
         data-ad-slot={adSlot}
         data-ad-format={format}
         data-full-width-responsive="true"
+        data-adtest="on"
       />
     </div>
   );
