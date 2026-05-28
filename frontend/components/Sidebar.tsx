@@ -121,9 +121,26 @@ export default function Sidebar() {
           })}
         </nav>
 
-        {/* Footer Info */}
+        {/* Footer Info & Gamification */}
         {!isCollapsed && (
           <div className="p-4 border-t border-border-main bg-bg-card/50">
+            {/* Gamification Balance */}
+            <div className="mb-4 bg-bg-main border border-border-main rounded-lg p-3">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] font-mono text-text-muted uppercase tracking-widest">Saldo Atual</span>
+                <span className="text-xs font-black text-brand-primary font-mono">0 CI</span>
+              </div>
+              <div className="w-full bg-border-main rounded-full h-1 mb-3 overflow-hidden">
+                <div className="bg-brand-primary h-1" style={{ width: '0%' }}></div>
+              </div>
+              <button 
+                onClick={() => router.push('/planos')}
+                className="w-full py-1.5 bg-brand-primary/10 hover:bg-brand-primary hover:text-white text-brand-primary border border-brand-primary/20 rounded text-[10px] font-black uppercase tracking-widest transition-all"
+              >
+                Recarregar
+              </button>
+            </div>
+
             <div className="flex items-center gap-2 mb-2">
               <div className="w-2 h-2 bg-brand-primary rounded-full animate-pulse" />
               <span className="text-[10px] font-mono text-text-muted uppercase tracking-widest">

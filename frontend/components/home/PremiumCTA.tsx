@@ -15,11 +15,11 @@ export default function PremiumCTA() {
           Dossiês completos, análise de grafos de influência e relatórios em tempo real com validade técnica.
         </p>
         <div className="space-y-3">
-          <button className="w-full bg-brand-primary text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-brand-primary/10 hover:translate-y-[-2px] transition-all active:scale-95">
-            Ver Planos de Acesso
+          <button onClick={() => window.location.href='/planos'} className="w-full bg-brand-primary text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-brand-primary/10 hover:translate-y-[-2px] transition-all active:scale-95">
+            Adquirir Créditos de Inteligência
           </button>
           <p className="text-[9px] text-text-muted font-bold uppercase tracking-widest">
-            Apoie o observatório a partir de R$ 99/mês
+            Opere na rede a partir de 1.000 CI
           </p>
         </div>
       </div>
