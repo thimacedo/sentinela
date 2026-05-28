@@ -52,24 +52,14 @@ export default function NewsHeader({ todayHighlight }: NewsHeaderProps) {
   return (
     <div className="space-y-10">
       {/* Main Hero */}
-      <div className="border-b border-border-main pb-12">
-        <div className="flex flex-col md:flex-row items-start gap-8">
-          <div className="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gradient-to-br from-brand-primary/10 to-blue-500/10 border border-border-main flex items-center justify-center text-4xl shadow-sm">
-            📊
-          </div>
-          <div className="flex-1 space-y-5">
-            <div>
-              <p className="text-xs md:text-sm font-black text-brand-primary uppercase tracking-[0.25em] mb-3">
-                Observatório de Discurso Cívico
-              </p>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-text-main leading-tight tracking-tight uppercase">
-                Tendências no Discurso Político Brasileiro
-              </h1>
-            </div>
-            <p className="text-lg md:text-xl text-text-muted max-w-5xl leading-relaxed opacity-70 font-medium">
-              Acompanhe em tempo real os padrões de discurso de ódio e violência em redes sociais de candidatos e políticos monitorados. Transparência que alimenta a democracia.
-            </p>
-          </div>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+        <div>
+          <h1 className="text-2xl font-bold text-text-main tracking-tight uppercase">
+            Tendências no Discurso Político Brasileiro
+          </h1>
+          <p className="text-xs text-text-muted mt-1">
+            Observatório de Discurso Cívico. Acompanhe em tempo real os padrões de discurso monitorados.
+          </p>
         </div>
       </div>
 

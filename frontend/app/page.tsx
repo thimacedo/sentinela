@@ -35,7 +35,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-bg-main transition-colors duration-300">
       {/* Main Container */}
-      <main className="max-w-6xl mx-auto py-12 space-y-24">
+      <main className="max-w-6xl mx-auto py-6 space-y-12">
         {/* Section 1: News Header */}
         <NewsHeader
           todayHighlight={{
