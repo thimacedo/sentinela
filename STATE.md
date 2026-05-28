@@ -1,12 +1,12 @@
 # STATE.md — Sentinela Democratica (Fonte de Verdade)
-_last_updated: 2026-05-27 | branch: main (Model: Gemini 3.5 Flash)_
+_last_updated: 2026-05-28 | branch: main (Model: Gemini 3.5 Flash)_
 
-## Status Operacional (v84.3)
+## Status Operacional (v84.4)
 
 | Subsistema | Status | Observacao |
 |---|---|---|
 | Frontend (nextjs) | Operacional | v84.1: Consolidação da integração AdSense. Removidos todos os placeholders e otimizada a injeção não-bloqueante do script do AdSense com a estratégia afterInteractive no RootLayout. |
-| Autopilot L3 | Operacional | v80.0: Heartbeat e Polling de Comandos Cloud integrados à telemetria remota |
+| Autopilot L3 | Operacional | v84.4: Proteção anti-detecção com cooldown de 6h e cura preventiva estendida para 24h. |
 | Watchdog (Guardião) | Operacional | v61.7: Hot-Reload, Integração L3 Autopilot, Cleanup de Órfãos automático |
 | Coleta Independente (IGWorkerV2) | Operacional | Motor V2 v84.3: Navegacao direta por URL substituindo clique em modal (anti-timeout). Script de cookies blindado contra TargetClosedError do Playwright. |
 | Persistencia Supabase | OK | v80.0: Locking Atômico via RPC (`claim_fila_target`) e schema v80 integrado |
@@ -15,15 +15,16 @@ _last_updated: 2026-05-27 | branch: main (Model: Gemini 3.5 Flash)_
 | Relatórios Comerciais | Implementado | Geração diária, UI, API, visualizador e exportação a PDF client-side integrada (v83.6) |
 
 ## 🚨 INTERVENÇÃO MANUAL PENDENTE (Pós-Reset)
-- **Sessões do Instagram Bloqueadas**: A automação foi identificada pelo Instagram e ambas as sessões (`tempareiapodcast` e `monitoramento.discurso`) foram invalidadas (status: `Todas as sessões estão bloqueadas!`). A renovação automatizada falhou com desafio de segurança (CAPTCHA/2FA).
+- **Sessões do Instagram Bloqueadas**: A automação foi identificada pelo Instagram e ambas as sessões (`tempareiapodcast` e `monitoramento.discurso`) permanecem invalidadas. Tentativas automáticas de renovação resultam em bloqueio imediato.
 - **Ações Requeridas ao Reiniciar**:
   1. Fazer login manual nas duas contas usando um navegador real (não automatizado) no computador.
   2. Passar por qualquer verificação exigida (SMS, email, aprovação no app).
   3. Extrair manualmente os cookies `sessionid` de ambas as contas.
   4. Atualizar o arquivo `.env` com os novos valores para `INSTAGRAM_SESSIONID` e `INSTAGRAM_SESSIONID_2`.
-  5. **Reiniciar o serviço do Watchdog/Runner**: Isso garantirá que as melhorias mais recentes da versão v84.3 (navegação direta via URL em vez de cliques em modais, que mitigam os timeouts de `ElementHandle.click`) sejam carregadas na memória, substituindo o binário antigo (PID 18544).
+  5. **Reiniciar o serviço do Watchdog/Runner**: Confirmado em log (05:38 AM) que todas as sessões estão bloqueadas.
 
 ## Descobertas Tecnicas (2026-05-28)
+- **Ativação da Fase 4 (AIAdvisor → Workers) (v84.5)**: Integrado o fluxo de auto-diagnóstico onde falhas críticas de coleta (como `junk_detected` ou `session_blocked`) acionam automaticamente o `AIAdvisor`. O advisor consulta o `DocFetcher` (cache local de documentação técnica) para gerar sugestões de correção em tempo real, que são persistidas para auditoria. Identificada a necessidade de expandir a base de conhecimento do `DocFetcher` para incluir padrões de bypass de novos desafios do Instagram.
 - **Proteção Anti-Detecção no Autopilot (v84.4)**: Implementado cooldown mínimo de 6 horas entre acionamentos reativos do `SessionHealer` no `AutopilotManager`. Anteriormente, o Autopilot executava re-logins em cascata a cada detecção de sessão bloqueada, o que alertava os sistemas antifraude do Instagram e causava invalidação rápida dos cookies recém-gerados. O intervalo da cura preventiva também foi estendido de 12h para 24h para reduzir a frequência geral de autenticações automatizadas.
 
 ## Descobertas Tecnicas (2026-05-27)

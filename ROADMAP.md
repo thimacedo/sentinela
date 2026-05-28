@@ -21,9 +21,10 @@ _last_updated: 2026-05-24 | branch: main_
 
 ### Sessão e Escala
 - [ ] Implementar rotação de User-Agents dinâmica por ciclo para evitar detecção.
-- [ ] Worker dedicado para renovação automática de cookies via Playwright.
+- [x] **Worker de Renovação Automática**: Implementado (`export_playwright_cookies.py`), mas enfrentando bloqueios de CAPTCHA/2FA que requerem intervenção manual periódica.
 
 ### Expansão Analítica
+- [x] **Fase 4 Ativa**: Módulo `AIAdvisor` e `DocFetcher` integrados ao fluxo de erro dos workers para diagnóstico automático (v84.5).
 - [ ] Ativar paginação de posts adaptativa (max_posts dinâmico baseado no Termômetro).
 - [ ] Análise de "Shadowban" léxico: detectar quando a plataforma oculta termos específicos.
 
