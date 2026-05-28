@@ -49,18 +49,41 @@ export default function RelatoriosPage() {
   };
 
   return (
-    <div className="p-8 min-h-screen bg-gray-50">
-      <h1 className="text-3xl font-bold mb-6" style={{ fontFamily: 'Inter, sans-serif' }}>Relatórios Comerciais</h1>
-      <AdSenseSlot adSlot="2020882637" format="horizontal" />
-      {loading ? (
-        <p>Carregando...</p>
-      ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {reports.map((r) => (
-            <ReportCard key={r.name} report={r} onBuy={handleBuy} />
-          ))}
+    <div className="min-h-screen bg-bg-main p-6 md:p-12">
+      <div className="max-w-6xl mx-auto">
+        <div className="mb-12 border-b border-border-main pb-8">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-primary/10 text-brand-primary border border-brand-primary/20 rounded-full mb-6 text-[10px] font-black uppercase tracking-widest">
+            Arquivo Confidencial
+          </div>
+          <h1 className="text-3xl md:text-4xl font-black text-text-main tracking-tighter mb-4">
+            Dossiês de Inteligência
+          </h1>
+          <p className="text-sm text-text-muted max-w-2xl leading-relaxed">
+            Acesso aos relatórios periciais gerados pela plataforma. O desbloqueio de novos documentos consome Créditos de Inteligência (CI) devido ao uso intensivo de exportação e processamento forense.
+          </p>
         </div>
-      )}
+
+        <div className="mb-8">
+          <AdSenseSlot adSlot="2020882637" format="horizontal" />
+        </div>
+
+        {loading ? (
+          <div className="flex justify-center items-center py-20">
+            <div className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 bg-brand-primary rounded-full animate-bounce" />
+              <div className="w-1.5 h-1.5 bg-brand-primary rounded-full animate-bounce delay-100" />
+              <div className="w-1.5 h-1.5 bg-brand-primary rounded-full animate-bounce delay-200" />
+              <span className="text-[10px] font-black text-brand-primary uppercase tracking-widest ml-2">Acessando Servidor Seguro...</span>
+            </div>
+          </div>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {reports.map((r) => (
+              <ReportCard key={r.name} report={r} onBuy={handleBuy} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
