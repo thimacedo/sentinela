@@ -76,7 +76,7 @@ BEGIN
     IF p_amount < 0 THEN
         SELECT stn_tokens INTO v_current_balance FROM profiles WHERE id = p_user_id FOR UPDATE;
         IF v_current_balance < ABS(p_amount) THEN
-            RETURN FALSE; -- Saldo insuficiente
+            RAISE EXCEPTION 'INSUFFICIENT_FUNDS: Tentativa de fraude ou saldo insuficiente (Atual: %, Tentativa: %)', v_current_balance, ABS(p_amount);
         END IF;
     END IF;
 

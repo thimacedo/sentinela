@@ -196,11 +196,16 @@ class InstagramScraperV2:
                     # 🎭 ROTAÇÃO DE STEALTH AMPLIADA (PASA v83.6)
                     profile = self._generate_stealth_profile()
                     
-                    context = await browser.new_context(
-                        viewport={"width": profile["w"], "height": profile["h"]},
-                        user_agent=profile["ua"],
-                        extra_http_headers=profile["headers"]
-                    )
+                    proxy_url = os.getenv("PROXY_URL")
+                    context_kwargs = {
+                        "viewport": {"width": profile["w"], "height": profile["h"]},
+                        "user_agent": profile["ua"],
+                        "extra_http_headers": profile["headers"]
+                    }
+                    if proxy_url:
+                        context_kwargs["proxy"] = {"server": proxy_url}
+                        
+                    context = await browser.new_context(**context_kwargs)
                     
                     await context.add_cookies([{
                         'name': 'sessionid', 
@@ -212,7 +217,8 @@ class InstagramScraperV2:
                     page = await context.new_page()
                     page.on("response", self._handle_response)
                     
-                    logger.info(f"🎯 [V2] Scrape @{username} usando {session.label} | Profile: {profile['ua'][:30]}... (Tentativa {retry_count+1})")
+                    proxy_log = "com Proxy" if proxy_url else "sem Proxy"
+                    logger.info(f"🎯 [V2] Scrape @{username} usando {session.label} | Profile: {profile['ua'][:30]}... ({proxy_log}) (Tentativa {retry_count+1})")
                     
                     # 🛡️ VERIFICAÇÃO DE SESSÃO ATIVA (PASA v70.4)
                     if not await self._verify_session(page, session):
@@ -223,7 +229,15 @@ class InstagramScraperV2:
                         continue
 
                     # 1. Perfil
-                    await page.goto(f"https://www.instagram.com/{username}/", wait_until="domcontentloaded", timeout=60000)
+                    response = await page.goto(f"https://www.instagram.com/{username}/", wait_until="domcontentloaded", timeout=60000)
+                    
+                    # 🛡️ PROTEÇÃO CONTRA 429 (Proxy Rotation)
+                    if response and response.status == 429:
+                        logger.warning(f"⚠️ [V2] Erro 429 (Too Many Requests) detectado. Limpando cache e rotacionando IP/Proxy...")
+                        await context.clear_cookies()
+                        await browser.close()
+                        retry_count += 1
+                        continue
 
                     # Check imediato de erro 404 antes do sleep longo
                     try:

@@ -178,7 +178,11 @@ async def stripe_webhook(request: Request, supa: Client = Depends(get_supa)):
                 logger.error(f"❌ Webhook Falha Lógica: RPC retornou {res.data}")
                 
         except Exception as e:
-            logger.error(f"Erro na injeção de CI pelo Webhook: {e}")
+            error_msg = str(e)
+            if "INSUFFICIENT_FUNDS" in error_msg:
+                logger.critical(f"🚨 FRAUD ATTEMPT DETECTED: Saldo insuficiente ou Race Condition bloqueada para usuário {user_id}. Detalhes: {error_msg}")
+            else:
+                logger.error(f"Erro na injeção de CI pelo Webhook: {error_msg}")
             raise HTTPException(status_code=500, detail="Database RPC error")
 
     return {"status": "success"}
