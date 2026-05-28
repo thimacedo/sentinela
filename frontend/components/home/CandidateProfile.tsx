@@ -75,7 +75,7 @@ export default function CandidateProfile({
   } else if (candidateData.nivel_risco === 'ELEVADO') {
     baseScore = 75;
   } else if (candidateData.comentarios_odio_count > 0) {
-    baseScore = Math.min(98, 30 + (candidateData.comentarios_odio_count * 5));
+    baseScore = Math.min(98, 30 + candidateData.comentarios_odio_count);
   }
 
   const metrics = [
