@@ -73,7 +73,7 @@ class TargetResearchWorker(BaseWorker):
                 res = db_client.client.table('candidatos')\
                     .select('username')\
                     .or_('cargo.eq.DESCONHECIDO,cargo.is.null,partido.is.null,estado.is.null')\
-                    .order('atualizado_em', ascending=True)\
+                    .order('atualizado_em', desc=False)\
                     .limit(1)\
                     .execute()
                 
