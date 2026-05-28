@@ -58,6 +58,11 @@ class InstagramScraperV2:
             if sid:
                 sessions.append(Session(label=f"SESSION_{i}", session_id=sid))
         
+        # Opção 1.5: SessionID específico de validação (v84.6)
+        sid_val = os.getenv("INSTAGRAM_SESSIONID_VAL")
+        if sid_val:
+            sessions.append(Session(label="SESSION_VAL", session_id=sid_val))
+
         # Opção 2: Cookie completo (converte para sessionid se possível)
         cookie_full = os.getenv("INSTAGRAM_COOKIE_FULL")
         if cookie_full and "sessionid=" in cookie_full:
