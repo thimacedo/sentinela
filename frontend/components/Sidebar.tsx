@@ -52,9 +52,11 @@ const menuItems = [
 ]
 
 import { useUIStore } from '@/src/store/useUIStore'
+import { useWallet } from '@/hooks/useWallet'
 
 export default function Sidebar() {
   const { isCollapsed, setIsCollapsed, toggleSidebar } = useUIStore()
+  const { balance, loading } = useWallet()
   const pathname = usePathname()
   const router = useRouter()
 
@@ -127,17 +129,29 @@ export default function Sidebar() {
             {/* Gamification Balance */}
             <div className="mb-4 bg-bg-main border border-border-main rounded-lg p-3">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] font-mono text-text-muted uppercase tracking-widest">Saldo Atual</span>
-                <span className="text-xs font-black text-brand-primary font-mono">0 CI</span>
+                <span className="text-[10px] font-mono text-text-muted uppercase tracking-widest flex items-center gap-1">
+                  Aporte Tático
+                </span>
+                {loading ? (
+                  <span className="w-10 h-4 bg-border-main rounded animate-pulse"></span>
+                ) : (
+                  <span className={`text-xs font-black font-mono ${balance > 0 ? 'text-brand-primary' : 'text-red-500'}`}>
+                    ⚡ {balance.toLocaleString('pt-BR')} CI
+                  </span>
+                )}
               </div>
               <div className="w-full bg-border-main rounded-full h-1 mb-3 overflow-hidden">
-                <div className="bg-brand-primary h-1" style={{ width: '0%' }}></div>
+                <div className={`h-1 transition-all duration-1000 ${balance > 0 ? 'bg-brand-primary' : 'bg-red-500'}`} style={{ width: balance > 0 ? '100%' : '10%' }}></div>
               </div>
               <button 
                 onClick={() => router.push('/planos')}
-                className="w-full py-1.5 bg-brand-primary/10 hover:bg-brand-primary hover:text-white text-brand-primary border border-brand-primary/20 rounded text-[10px] font-black uppercase tracking-widest transition-all"
+                className={`w-full py-1.5 rounded text-[10px] font-black uppercase tracking-widest transition-all border ${
+                  balance === 0 
+                    ? 'bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500 hover:text-white' 
+                    : 'bg-brand-primary/10 text-brand-primary border-brand-primary/20 hover:bg-brand-primary hover:text-white'
+                }`}
               >
-                Recarregar
+                {balance === 0 ? 'Restaurar Aporte' : 'Aumentar Aporte'}
               </button>
             </div>
 
