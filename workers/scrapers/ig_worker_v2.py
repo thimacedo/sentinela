@@ -96,6 +96,24 @@ class IGWorkerV2(BaseWorker):
 
         self.logger.info(f"🔄 [V2] Ciclo {self.cycle} | Alvo: @{target.username}")
         
+        # 🧠 INTEGRAÇÃO DE INTELIGÊNCIA (v84.15): Pesquisa antes de coletar se for novo
+        try:
+            # Verifica se precisa de validação de identidade ou dados básicos
+            cand_check = self.db.table("candidatos").select("identidade_validada, cargo").eq("username", target.username).single().execute()
+            if cand_check.data and (cand_check.data.get("identidade_validada") is None or cand_check.data.get("cargo") == "ANALISE_SOLICITADA"):
+                from core.intelligence_service import intelligence_service
+                self.logger.info(f"🔎 [V2] Alvo novo/não validado. Acionando inteligência para @{target.username}...")
+                research_res = await intelligence_service.research_and_validate(target.username)
+                
+                if research_res and research_res.get("status_monitoramento") == "DESATIVADO":
+                    self.logger.warning(f"🚫 [V2] Alvo @{target.username} desativado pela governança: {research_res.get('motivo_desativacao')}")
+                    return CycleResult(
+                        worker_id=self.worker_id, cycle=self.cycle, target=target.username,
+                        source="v2_engine", extracted=0, error="purged_by_governance"
+                    )
+        except Exception as e_intel:
+            self.logger.warning(f"⚠️ [V2] Falha na integração de inteligência: {e_intel}")
+
         # Jitter inicial (PASA v52.0) para quebrar padrões
         import random
         jitter = random.uniform(5, 30)
