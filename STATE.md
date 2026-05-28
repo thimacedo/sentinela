@@ -22,7 +22,9 @@ _last_updated: 2026-05-28 | branch: main (Model: Gemini 3.5 Flash)_
   3. O serviço do Watchdog/Runner deve ser mantido ativo para processar a fila represada.
 
 ## Descobertas Tecnicas (2026-05-28)
-- **Inclusão Inteligente de Alvos (v84.8)**: Implementado o `TargetResearchWorker` e o script `scripts/add_target.py`. A rotina agora automatiza a pesquisa de dados biográficos no Instagram e o enriquecimento de informações políticas (Cargo, Partido, Estado, Ideologia) via IA (Mistral), consultando simuladamente fontes oficiais como TSE/TRE para garantir a integridade dos dados cadastrais.
+- **Ciclo de Inteligência Contínua (v84.9)**: Evolução do `TargetResearchWorker` de um script CLI para um Worker persistente integrado ao orquestrador. O motor agora executa rotinas de curadoria automática (70% do tempo) e pesquisa de novos alvos (30%), garantindo que nenhum alvo permaneça com dados `DESCONHECIDO`.
+- **Sistema de Recompensas de Inteligência (v84.9)**: Integrado o RewardEngine com suporte a deltas de XP pré-calculados. O pesquisador é premiado (+15 XP) por fichas de alta precisão e punido (-5 a -10 XP) por informações imprecisas, vazias ou perfis inacessíveis, forçando a busca por melhores fontes.
+- **Inclusão Inteligente de Alvos (v84.8)**: Implementado o `TargetResearchWorker` e o script `scripts/add_target.py`.
 - **Expansão do Monitoramento (v84.7)**: Novos alvos `@rncomjorge` e `@sirlenojr` adicionados à base de dados com status `ATIVO`.
 - **Recuperação de Sessão (v84.6)**: Sessões do Instagram restauradas via intervenção manual.
  Identificamos que a nova chave `INSTAGRAM_SESSIONID_VAL` é funcional, juntamente com `INSTAGRAM_SESSIONID_2`. O motor V2 foi testado e confirmou a capacidade de visualizar postagens, superando o bloqueio anterior.
