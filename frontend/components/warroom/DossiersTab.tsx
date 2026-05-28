@@ -1,10 +1,14 @@
 'use client';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Download, ShieldCheck } from 'lucide-react';
+import { FileText, Download, ShieldCheck, Lock, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 import { fetchApi } from '@/lib/api';
+import { supabase } from '@/lib/supabase';
+import { useWallet } from '@/hooks/useWallet';
 
 interface Dossier {
   id: string;
@@ -15,6 +19,16 @@ interface Dossier {
 }
 
 export default function DossiersTab() {
+  const router = useRouter();
+  const { balance, refreshBalance } = useWallet();
+  const [processingId, setProcessingId] = useState<string | null>(null);
+  const [unlocked, setUnlocked] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    const saved = localStorage.getItem('sentinela_unlocked_dossiers');
+    if (saved) setUnlocked(JSON.parse(saved));
+  }, []);
+
   const { data: dossiers = [], isLoading } = useQuery<Dossier[]>({
     queryKey: ['dossiers-list'],
     queryFn: async () => {
@@ -22,6 +36,57 @@ export default function DossiersTab() {
     },
     refetchInterval: 30000,
   });
+
+  const handleUnlock = async (dossier: Dossier) => {
+    if (unlocked[dossier.id]) {
+      window.open(dossier.arquivo_path, '_blank');
+      return;
+    }
+
+    if (balance < 350) {
+      alert("Aporte Insuficiente. Recarregue seus Créditos de Inteligência (CI) para desbloquear este documento.");
+      router.push('/planos');
+      return;
+    }
+
+    const confirmUnlock = window.confirm("Desbloquear este Dossiê Forense exigirá um aporte de 350 CI da sua carteira tática. Confirmar operação?");
+    if (!confirmUnlock) return;
+
+    try {
+      setProcessingId(dossier.id);
+      const userId = localStorage.getItem('sentinela_user_id');
+      
+      if (!userId) {
+        alert("Sessão inválida. Por favor, faça login novamente.");
+        return;
+      }
+
+      const { data, error } = await supabase.rpc('process_stn_transaction', {
+        p_user_id: userId,
+        p_amount: -350,
+        p_type: 'CONSUMPTION',
+        p_session_id: null,
+        p_metadata: { action: 'unlock_dossier', dossier_id: dossier.id, target: dossier.candidato_id }
+      });
+
+      if (error) throw error;
+
+      if (data === true) {
+        const newUnlocked = { ...unlocked, [dossier.id]: true };
+        setUnlocked(newUnlocked);
+        localStorage.setItem('sentinela_unlocked_dossiers', JSON.stringify(newUnlocked));
+        refreshBalance();
+        window.open(dossier.arquivo_path, '_blank');
+      } else {
+        alert("Falha na transação. Verifique se possui saldo suficiente e tente novamente.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Erro de comunicação com o servidor financeiro.");
+    } finally {
+      setProcessingId(null);
+    }
+  };
 
   return (
     <div className="bg-bg-card border border-border-main rounded-2xl shadow-sm overflow-hidden">
@@ -77,15 +142,24 @@ export default function DossiersTab() {
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right px-6 py-4">
-                  <a 
-                    href={d.arquivo_path} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-bg-card hover:bg-bg-main border border-border-main text-[10px] font-black uppercase text-brand-primary rounded-lg transition-all shadow-sm"
+                  <button 
+                    onClick={() => handleUnlock(d)}
+                    disabled={processingId === d.id}
+                    className={`inline-flex items-center gap-2 px-3 py-1.5 border text-[10px] font-black uppercase rounded-lg transition-all shadow-sm ${
+                      unlocked[d.id] 
+                        ? 'bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30 text-emerald-500' 
+                        : 'bg-brand-primary/10 hover:bg-brand-primary hover:text-white border-brand-primary/30 text-brand-primary'
+                    }`}
                   >
-                    <Download className="w-3.5 h-3.5" />
-                    Baixar PDF
-                  </a>
+                    {processingId === d.id ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : unlocked[d.id] ? (
+                      <Download className="w-3.5 h-3.5" />
+                    ) : (
+                      <Lock className="w-3.5 h-3.5" />
+                    )}
+                    {processingId === d.id ? 'Descriptografando...' : unlocked[d.id] ? 'Baixar PDF' : 'Desbloquear (350 CI)'}
+                  </button>
                 </TableCell>
               </TableRow>
             ))

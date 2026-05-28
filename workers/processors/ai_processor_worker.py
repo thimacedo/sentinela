@@ -51,15 +51,15 @@ class AIProcessorWorker(BaseWorker):
                 logger.info("✅ Fila de IA vazia. Aguardando novos dados.")
                 return CycleResult(
                     worker_id=self.worker_id, cycle=self.cycle,
-                    source="ai_processor", extracted=0, simulated=False, 
-                    error="queue_empty", duration=asyncio.get_event_loop().time() - start_time
+                    target="backlog_ia", source="ai_processor", extracted=0, simulated=False, 
+                    error="no_tasks_available", duration=asyncio.get_event_loop().time() - start_time
                 )
 
             logger.info(f"✨ [AI] Sucesso: {classified_count} comentários periciados.")
             
             return CycleResult(
                 worker_id=self.worker_id, cycle=self.cycle,
-                source="ai_processor",
+                target="backlog_ia", source="ai_processor",
                 extracted=classified_count, # Usamos extracted para representar o processamento
                 inserted=0,
                 duplicated=0,

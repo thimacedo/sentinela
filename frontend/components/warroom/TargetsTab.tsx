@@ -2,9 +2,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
-import { Users, Filter } from 'lucide-react';
+import { Users, Filter, Plus, ShieldCheck, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import AdSenseSlot from '@/components/ads/AdSenseSlot';
 import { fetchApi } from '@/lib/api';
+import { supabase } from '@/lib/supabase';
+import { useWallet } from '@/hooks/useWallet';
 
 interface Target {
   id: string;
@@ -19,13 +22,16 @@ interface Target {
 }
 
 export default function TargetsTab() {
+  const router = useRouter();
+  const { balance, refreshBalance } = useWallet();
+  const [isAdding, setIsAdding] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [riskFilter, setRiskFilter] = useState('ALL');
   const [visibleCount, setVisibleCount] = useState(5);
   const observerRef = useRef<HTMLDivElement>(null);
 
-  const { data: targets = [], isLoading } = useQuery<Target[]>({
+  const { data: targets = [], isLoading, refetch } = useQuery<Target[]>({
     queryKey: ['active-targets-enriched'],
     queryFn: async () => {
       return await fetchApi('/api/v1/targets');
@@ -38,8 +44,6 @@ export default function TargetsTab() {
     const matchesRisk = riskFilter === 'ALL' || t.nivel_risco === riskFilter;
     return matchesSearch && matchesRisk;
   });
-
-  // Reseta o visibleCount ao mudar os filtros tratado no onChange
 
   // Observer para o Wall Infinito
   useEffect(() => {
@@ -56,6 +60,63 @@ export default function TargetsTab() {
     return () => observer.disconnect();
   }, [filteredTargets.length]);
 
+  const handleAddTarget = async () => {
+    if (balance < 500) {
+      alert("Aporte Insuficiente. Adquira mais Créditos de Inteligência (CI) para configurar a malha neural para novos perfis.");
+      router.push('/planos');
+      return;
+    }
+
+    const username = prompt("Digite o @ do Instagram do novo alvo (ex: jairbolsonaro):");
+    if (!username) return;
+
+    const cleanUsername = username.replace('@', '').trim().toLowerCase();
+
+    const confirmAdd = window.confirm(`Configurar nossa malha neural para monitoramento 24/7 de @${cleanUsername} exige um aporte de 500 CI. Autorizar?`);
+    if (!confirmAdd) return;
+
+    try {
+      setIsAdding(true);
+      const userId = localStorage.getItem('sentinela_user_id');
+      
+      if (!userId) {
+        alert("Sessão inválida. Faça login.");
+        return;
+      }
+
+      // Cobrança
+      const { data: rpcData, error: rpcError } = await supabase.rpc('process_stn_transaction', {
+        p_user_id: userId,
+        p_amount: -500,
+        p_type: 'CONSUMPTION',
+        p_session_id: null,
+        p_metadata: { action: 'add_target', target: cleanUsername }
+      });
+
+      if (rpcError) throw rpcError;
+
+      if (rpcData === true) {
+        // Inserção do alvo
+        await supabase.from('candidatos').insert({
+          username: cleanUsername,
+          estado: 'BR',
+          status_monitoramento: 'Ativo'
+        });
+
+        refreshBalance();
+        refetch();
+        alert(`Alvo @${cleanUsername} injetado com sucesso na malha de coleta.`);
+      } else {
+        alert("Falha na transação. Saldo insuficiente.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao injetar novo alvo.");
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
   return (
     <div className="bg-bg-card border border-border-main rounded-2xl shadow-sm overflow-hidden">
       {/* Header */}
@@ -67,13 +128,23 @@ export default function TargetsTab() {
           </h2>
           <p className="text-xs text-text-muted font-medium uppercase tracking-widest mt-1">Radar de Severidade e Atividade</p>
         </div>
-        <button 
-          onClick={() => setShowFilters(!showFilters)}
-          className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg text-[10px] font-bold transition-colors uppercase ${showFilters ? 'bg-brand-primary/10 border-brand-primary text-brand-primary' : 'bg-bg-card border-border-main text-text-main hover:bg-bg-main'}`}
-        >
-          <Filter className="w-3 h-3" />
-          Filtrar
-        </button>
+        <div className="flex gap-2">
+          <button 
+            onClick={() => setShowFilters(!showFilters)}
+            className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg text-[10px] font-bold transition-colors uppercase ${showFilters ? 'bg-brand-primary/10 border-brand-primary text-brand-primary' : 'bg-bg-card border-border-main text-text-main hover:bg-bg-main'}`}
+          >
+            <Filter className="w-3 h-3" />
+            Filtrar
+          </button>
+          <button 
+            onClick={handleAddTarget}
+            disabled={isAdding}
+            className="flex items-center gap-2 px-3 py-1.5 bg-brand-primary/10 border border-brand-primary/30 text-brand-primary rounded-lg text-[10px] font-black hover:bg-brand-primary hover:text-white transition-all uppercase shadow-sm"
+          >
+            {isAdding ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
+            Injetar Novo Alvo (500 CI)
+          </button>
+        </div>
       </div>
 
       {/* Painel de Filtros */}

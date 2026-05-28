@@ -177,6 +177,31 @@ class QueueManager:
                 )
         except Exception as e:
             logger.error(f"❌ [Queue] Erro ao consultar rotação global: {e}")
+
+        # Fallback extremo (se a fila chegou ao final ou todos estão resfriados, volta para o início)
+        try:
+            res_fallback = self.db.table("candidatos")\
+                .select("id,username,termometro,last_scraped_at")\
+                .eq("status_monitoramento", "Ativo")\
+                .eq("identidade_validada", True)\
+                .order("last_scraped_at", desc=False)\
+                .limit(10).execute()
+
+            for cand in res_fallback.data or []:
+                username = cand["username"]
+                if username in blocked:
+                    continue
+                
+                logger.info(f"🔄 [Queue] Fallback extremo - Voltando ao início da fila: @{username}")
+                self._add_to_blocked(username, seen_targets, active_targets)
+                return Target(
+                    username=username,
+                    candidato_id=username,
+                    source="candidatos_fallback",
+                )
+        except Exception as e:
+            logger.error(f"❌ [Queue] Erro no fallback extremo da fila: {e}")
+
         return None
 
     def _add_to_blocked(self, username, seen_targets, active_targets):

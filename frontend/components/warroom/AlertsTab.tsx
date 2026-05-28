@@ -3,10 +3,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
-import { ShieldAlert, Zap, Calendar, ShieldCheck, EyeOff } from 'lucide-react';
+import { ShieldAlert, Zap, Calendar, ShieldCheck, EyeOff, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import AdSenseSlot from '@/components/ads/AdSenseSlot';
 import { fetchApi } from '@/lib/api';
 import { supabase } from '@/lib/supabase';
+import { useWallet } from '@/hooks/useWallet';
 
 interface Alert {
   id: string;
@@ -19,7 +21,12 @@ interface Alert {
 }
 
 export default function AlertsTab() {
+  const router = useRouter();
   const queryClient = useQueryClient();
+  const { balance, refreshBalance } = useWallet();
+  const [unlocked, setUnlocked] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+
   const [investigatingAlert, setInvestigatingAlert] = useState<Alert | null>(null);
   const [analiseTexto, setAnaliseTexto] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -28,6 +35,16 @@ export default function AlertsTab() {
   const [visibleCount, setVisibleCount] = useState(10);
   const [apiLimit, setApiLimit] = useState(50);
   const observerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const unlockData = localStorage.getItem('sentinela_alerts_unlocked');
+    if (unlockData) {
+      const parsed = JSON.parse(unlockData);
+      if (new Date().getTime() - parsed.timestamp < 24 * 60 * 60 * 1000) {
+        setUnlocked(true);
+      }
+    }
+  }, []);
 
   const { data: alerts = [], isLoading } = useQuery<Alert[]>({
     queryKey: ['active-alerts-list', apiLimit],
@@ -69,6 +86,55 @@ export default function AlertsTab() {
     refetchInterval: 10000,
   });
 
+  const handleUnlock = async () => {
+    if (balance < 850) {
+      alert("Aporte Insuficiente. Adquira mais Créditos de Inteligência (CI) para operar o Feed de Alertas em Tempo Real.");
+      router.push('/planos');
+      return;
+    }
+
+    const confirmUnlock = window.confirm("Monitorar a rede em tempo real exige uma carga massiva de processamento. Deseja investir 850 CI para liberar o feed por 24 horas?");
+    if (!confirmUnlock) return;
+
+    try {
+      setIsProcessing(true);
+      const userId = localStorage.getItem('sentinela_user_id');
+      
+      if (!userId) {
+        alert("Sessão inválida. Faça login.");
+        return;
+      }
+
+      const { data, error } = await supabase.rpc('process_stn_transaction', {
+        p_user_id: userId,
+        p_amount: -850,
+        p_type: 'CONSUMPTION',
+        p_session_id: null,
+        p_metadata: { action: 'unlock_alerts' }
+      });
+
+      if (error) throw error;
+
+      if (data === true) {
+        setUnlocked(true);
+        localStorage.setItem('sentinela_alerts_unlocked', JSON.stringify({ timestamp: new Date().getTime() }));
+        refreshBalance();
+      } else {
+        alert("Falha na transação. Saldo insuficiente.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao processar transação.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Se não estiver desbloqueado, simulamos o atraso filtrando itens recentes (ex: menos de 12h) para não mostrar
+  const displayAlerts = unlocked 
+    ? alerts 
+    : alerts.map(a => ({ ...a, texto_bruto: "Conteúdo defasado (Acesso Premium Necessário)", candidatos: { username: "oculto" } }));
+
   // Observer para Wall Infinito Híbrido
   useEffect(() => {
     if (!observerRef.current) return;
@@ -92,7 +158,7 @@ export default function AlertsTab() {
   }, [apiLimit, alerts.length]);
 
   return (
-    <div className="bg-bg-card border border-border-main rounded-2xl shadow-sm overflow-hidden">
+    <div className="bg-bg-card border border-border-main rounded-2xl shadow-sm overflow-hidden relative">
       {/* Header */}
       <div className="p-6 border-b border-border-main flex justify-between items-center bg-bg-main/50">
         <div>
@@ -102,99 +168,128 @@ export default function AlertsTab() {
           </h2>
           <p className="text-xs text-text-muted font-medium uppercase tracking-widest mt-1">Incidentes Críticos em Tempo Real</p>
         </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-red-500/10 border border-red-500/20 rounded-full">
-          <Zap className="w-3.5 h-3.5 text-red-500 fill-red-500" />
-          <span className="text-[10px] font-bold text-red-600 dark:text-red-400 uppercase">Live Monitor</span>
+        <div className={`flex items-center gap-2 px-3 py-1.5 border rounded-full transition-colors ${unlocked ? 'bg-red-500/10 border-red-500/20' : 'bg-bg-card border-border-main'}`}>
+          <Zap className={`w-3.5 h-3.5 ${unlocked ? 'text-red-500 fill-red-500' : 'text-text-muted'}`} />
+          <span className={`text-[10px] font-bold uppercase ${unlocked ? 'text-red-600 dark:text-red-400' : 'text-text-muted'}`}>
+            {unlocked ? 'Live Monitor' : 'Defasado (12h)'}
+          </span>
         </div>
       </div>
 
-      {/* Feed de Alertas (Rede Social) */}
-      <div className="p-6 space-y-6 bg-bg-main/10">
-        {isLoading && alerts.length === 0 ? (
-          <div className="text-center py-20 text-text-muted animate-pulse font-mono text-xs">
-            INTERCEPTANDO FREQUÊNCIAS DE ÓDIO...
-          </div>
-        ) : alerts.length === 0 ? (
-          <div className="text-center py-20 text-text-muted font-mono text-xs">
-            ESPECTRO LIMPO. NENHUM INCIDENTE ATIVO.
-          </div>
-        ) : (
-          <div className="flex flex-col gap-6 max-w-2xl mx-auto">
-            {alerts.slice(0, visibleCount).map((a, index) => (
-              <div key={a.id} className="w-full">
-                {/* Post Card Estilo Twitter/Rede Social */}
-                <div className="bg-bg-card border border-border-main rounded-2xl p-6 shadow-sm hover:border-red-500/20 transition-all duration-200">
-                  {/* Cabeçalho do Post */}
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center font-black text-red-600 text-sm">
-                        {a.candidatos?.username.substring(0, 2).toUpperCase()}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <span className="font-black text-text-main text-sm">@{a.candidatos?.username}</span>
-                          <span className="text-[10px] text-text-muted font-medium">• alvo afetado</span>
-                        </div>
-                        <div className="flex items-center gap-1 text-[10px] text-text-muted font-mono mt-0.5">
-                          <Calendar className="w-3 h-3" />
-                          {new Date(a.data_coleta).toLocaleString('pt-BR')}
-                        </div>
-                      </div>
-                    </div>
-                    <Badge className="bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 text-[8px] font-black uppercase rounded-sm h-4">
-                      {a.categoria_ia}
-                    </Badge>
-                  </div>
-
-                  {/* Conteúdo Central do Comentário */}
-                  <div className="mt-4 p-4 bg-bg-main/50 border border-border-main rounded-xl">
-                    <p className="text-sm text-text-main leading-relaxed italic">
-                      "{a.texto_bruto}"
-                    </p>
-                  </div>
-
-                  {/* Rodapé do Card */}
-                  <div className="mt-4 flex items-center justify-between gap-4 border-t border-border-main/50 pt-4">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider">Confiança da IA:</span>
-                      <span className="text-xs font-black text-text-main">{((a.confianca_ia || 0.95) * 100).toFixed(1)}%</span>
-                    </div>
-
-                    <button 
-                      onClick={() => {
-                        setInvestigatingAlert(a);
-                        setAnaliseTexto(a.analise_pericial || '');
-                      }}
-                      className="flex items-center gap-2 px-3 py-1.5 bg-bg-card hover:bg-bg-main border border-border-main text-[10px] font-black uppercase text-red-600 dark:text-red-400 rounded-lg transition-all shadow-sm"
-                    >
-                      <ShieldCheck className="w-3.5 h-3.5" />
-                      Investigar
-                    </button>
-                  </div>
-                </div>
-
-                {/* AdSense intercalado a cada 5 cards */}
-                {(index + 1) % 5 === 0 && (
-                  <div className="my-6 border border-border-main bg-bg-card rounded-2xl p-4 flex flex-col items-center shadow-sm">
-                    <span className="text-[8px] font-black text-text-muted uppercase tracking-widest mb-3">Publicidade Cívica Relacionada</span>
-                    <AdSenseSlot adSlot="2020882637" format="horizontal" />
-                  </div>
-                )}
+      <div className="relative">
+        <div className={!unlocked ? 'blur-sm pointer-events-none select-none opacity-50 transition-all duration-700' : ''}>
+          {/* Feed de Alertas (Rede Social) */}
+          <div className="p-6 space-y-6 bg-bg-main/10">
+            {isLoading && displayAlerts.length === 0 ? (
+              <div className="text-center py-20 text-text-muted animate-pulse font-mono text-xs">
+                INTERCEPTANDO FREQUÊNCIAS DE ÓDIO...
               </div>
-            ))}
-          </div>
-        )}
+            ) : displayAlerts.length === 0 ? (
+              <div className="text-center py-20 text-text-muted font-mono text-xs">
+                ESPECTRO LIMPO. NENHUM INCIDENTE ATIVO.
+              </div>
+            ) : (
+              <div className="flex flex-col gap-6 max-w-2xl mx-auto">
+                {displayAlerts.slice(0, visibleCount).map((a, index) => (
+                  <div key={a.id} className="w-full">
+                    {/* Post Card Estilo Twitter/Rede Social */}
+                    <div className="bg-bg-card border border-border-main rounded-2xl p-6 shadow-sm hover:border-red-500/20 transition-all duration-200">
+                      {/* Cabeçalho do Post */}
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center font-black text-red-600 text-sm">
+                            {a.candidatos?.username.substring(0, 2).toUpperCase()}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-black text-text-main text-sm">@{a.candidatos?.username}</span>
+                              <span className="text-[10px] text-text-muted font-medium">• alvo afetado</span>
+                            </div>
+                            <div className="flex items-center gap-1 text-[10px] text-text-muted font-mono mt-0.5">
+                              <Calendar className="w-3 h-3" />
+                              {new Date(a.data_coleta).toLocaleString('pt-BR')}
+                            </div>
+                          </div>
+                        </div>
+                        <Badge className="bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 text-[8px] font-black uppercase rounded-sm h-4">
+                          {a.categoria_ia}
+                        </Badge>
+                      </div>
 
-        {/* Div Sentinela para o Scroll Infinito */}
-        {alerts.length > visibleCount && (
-          <div ref={observerRef} className="py-8 flex justify-center items-center">
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-bounce" />
-              <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-bounce delay-100" />
-              <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-bounce delay-200" />
-              <span className="text-[10px] font-black text-red-600 dark:text-red-400 uppercase tracking-widest ml-2">
-                Carregando mais incidentes...
-              </span>
+                      {/* Conteúdo Central do Comentário */}
+                      <div className="mt-4 p-4 bg-bg-main/50 border border-border-main rounded-xl">
+                        <p className="text-sm text-text-main leading-relaxed italic">
+                          "{a.texto_bruto}"
+                        </p>
+                      </div>
+
+                      {/* Rodapé do Card */}
+                      <div className="mt-4 flex items-center justify-between gap-4 border-t border-border-main/50 pt-4">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider">Confiança da IA:</span>
+                          <span className="text-xs font-black text-text-main">{((a.confianca_ia || 0.95) * 100).toFixed(1)}%</span>
+                        </div>
+
+                        <button 
+                          onClick={() => {
+                            setInvestigatingAlert(a);
+                            setAnaliseTexto(a.analise_pericial || '');
+                          }}
+                          className="flex items-center gap-2 px-3 py-1.5 bg-bg-card hover:bg-bg-main border border-border-main text-[10px] font-black uppercase text-red-600 dark:text-red-400 rounded-lg transition-all shadow-sm"
+                        >
+                          <ShieldCheck className="w-3.5 h-3.5" />
+                          Investigar
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* AdSense intercalado a cada 5 cards */}
+                    {(index + 1) % 5 === 0 && (
+                      <div className="my-6 border border-border-main bg-bg-card rounded-2xl p-4 flex flex-col items-center shadow-sm">
+                        <span className="text-[8px] font-black text-text-muted uppercase tracking-widest mb-3">Publicidade Cívica Relacionada</span>
+                        <AdSenseSlot adSlot="2020882637" format="horizontal" />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Div Sentinela para o Scroll Infinito */}
+            {displayAlerts.length > visibleCount && (
+              <div ref={observerRef} className="py-8 flex justify-center items-center">
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-bounce" />
+                  <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-bounce delay-100" />
+                  <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-bounce delay-200" />
+                  <span className="text-[10px] font-black text-red-600 dark:text-red-400 uppercase tracking-widest ml-2">
+                    Carregando mais incidentes...
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Lock Overlay */}
+        {!unlocked && (
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-bg-card/30 backdrop-blur-[1px] mt-[80px]">
+            <div className="bg-bg-main border border-red-500/20 rounded-2xl p-8 max-w-md text-center shadow-2xl flex flex-col items-center animate-in slide-in-from-bottom-4 duration-500">
+              <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-6">
+                <ShieldAlert className="w-8 h-8 text-red-500" />
+              </div>
+              <h3 className="text-xl font-black text-text-main mb-2">Dados Defasados</h3>
+              <p className="text-sm text-text-muted mb-8 leading-relaxed">
+                Você está visualizando incidentes com 12 horas de atraso. Para reagir a crises rapidamente, libere o monitoramento em tempo real.
+              </p>
+              <button 
+                onClick={handleUnlock}
+                disabled={isProcessing}
+                className="w-full py-4 rounded-xl bg-red-600 text-white font-black uppercase tracking-widest text-[10px] hover:bg-red-700 transition-all shadow-lg shadow-red-500/20 flex items-center justify-center gap-2"
+              >
+                {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4 fill-white" />}
+                Liberar Feed em Tempo Real (850 CI)
+              </button>
             </div>
           </div>
         )}

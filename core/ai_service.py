@@ -138,8 +138,8 @@ class AIService:
         mistral_model = finetuned_model if finetuned_model else "open-mistral-nemo"
 
         self.providers = [
-            {"name": "litert", "client": self.litert_client, "model": "gemma3-1b-it", "timeout": 3.0},
-            {"name": "ollama", "client": self.ollama_client, "model": os.getenv("OLLAMA_MODEL", "gemma:2b"), "timeout": 10.0},
+            {"name": "litert", "client": self.litert_client, "model": "gemma3-1b-it", "timeout": 10.0},
+            {"name": "ollama", "client": self.ollama_client, "model": os.getenv("OLLAMA_MODEL", "gemma:2b"), "timeout": 60.0},
             {"name": "mistral", "client": self.mistral_client, "model": mistral_model, "timeout": 15.0},
             {"name": "groq", "client": self.groq_client, "model": "llama-3.3-70b-versatile", "timeout": 10.0},
             {"name": "openrouter", "client": self.openrouter_client, "model": "openrouter/free", "timeout": 20.0},
@@ -245,6 +245,7 @@ class AIService:
             ai_circuit_breaker.record_success(name)
             return result
         except Exception as e:
+            logger.error(f"⚠️ [AI] Provider {name} falhou em _call_provider: {e}")
             ai_circuit_breaker.record_failure(name, getattr(e, "status_code", None))
             return None
 
