@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { X, Copy, Check, QrCode, ShieldCheck, HelpCircle } from 'lucide-react';
-import Image from 'next/image';
+import { QRCodeSVG } from 'qrcode.react';
+import { generatePixPayload } from '@/lib/pix';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -14,12 +15,17 @@ interface CheckoutModalProps {
 
 export default function CheckoutModal({ isOpen, onClose, planName, ciAmount, price }: CheckoutModalProps) {
   const [copied, setCopied] = useState(false);
-  const pixKey = "809e630a-97b0-4bbe-902a-1ea5181235e0";
+  
+  const pixPayload = useMemo(() => {
+    const rawPrice = price.replace('.', '').replace(',', '.');
+    const numericPrice = parseFloat(rawPrice);
+    return generatePixPayload('809e630a-97b0-4bbe-902a-1ea5181235e0', numericPrice, 'SENTINELA', 'BRASILIA');
+  }, [price]);
 
   if (!isOpen) return null;
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(pixKey);
+    navigator.clipboard.writeText(pixPayload);
     setCopied(true);
     setTimeout(() => setCopied(false), 3000);
   };
@@ -72,13 +78,12 @@ export default function CheckoutModal({ isOpen, onClose, planName, ciAmount, pri
             <h4 className="text-sm font-bold text-text-main mb-4 uppercase tracking-widest">Escaneie o QR Code</h4>
             
             <div className="bg-white p-2 rounded-2xl mb-6 shadow-inner border-4 border-bg-main">
-              <div className="relative w-48 h-48 rounded-xl overflow-hidden">
-                <Image 
-                  src="/QR-CODE.png" 
-                  alt="QR Code PIX Nubank" 
-                  fill
-                  className="object-contain"
-                  unoptimized
+              <div className="relative w-48 h-48 flex items-center justify-center">
+                <QRCodeSVG 
+                  value={pixPayload} 
+                  size={192} 
+                  level="M"
+                  includeMargin={false}
                 />
               </div>
             </div>
@@ -95,8 +100,8 @@ export default function CheckoutModal({ isOpen, onClose, planName, ciAmount, pri
                 <input 
                   type="text" 
                   readOnly 
-                  value={pixKey}
-                  className="flex-1 bg-bg-main border border-border-main rounded-lg px-4 py-3 text-xs font-mono text-text-main focus:outline-none focus:border-brand-primary/50 text-center"
+                  value={pixPayload}
+                  className="flex-1 bg-bg-main border border-border-main rounded-lg px-4 py-3 text-xs font-mono text-text-main focus:outline-none focus:border-brand-primary/50 text-center truncate"
                 />
                 <button 
                   onClick={handleCopy}
