@@ -388,9 +388,14 @@ def pasa_breakdown(supa: Client = Depends(get_supa)):
 @app.post("/api/v1/checkout/create-session")
 def create_checkout(payload: CheckoutRequest):
     try:
-        stn_map = {"stn_starter": 50, "stn_squad": 250, "stn_warroom": 2500}
-        amount = stn_map.get(payload.package_slug, 50)
-        return {"url": payment_manager.create_checkout_session(payload.user_id, amount)}
+        # A lógica de mapeamento de CI e Price IDs foi movida para o PaymentManager.
+        # Agora ele aceita package_slug ("tatica", "warroom", "nacional").
+        # O user_id é mantido para que os webhooks creditem a conta certa depois.
+        session_url = payment_manager.create_checkout_session(
+            user_id=payload.user_id or "guest_user", 
+            package_type=payload.package_slug
+        )
+        return {"url": session_url}
     except Exception as e:
         logger.error(f"Checkout error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
