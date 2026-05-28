@@ -154,10 +154,11 @@ class QueueManager:
             from datetime import datetime, timedelta, timezone
             cold_threshold = (datetime.now(timezone.utc) - timedelta(hours=12)).isoformat()
 
-            # Query otimizada: Prioriza quem nunca foi coletado ou não é frio
+            # Query otimizada (v84.12): Alvos ATIVOS e VALIDADOS pelo Researcher
             res = self.db.table("candidatos")\
                 .select("id,username,termometro,last_scraped_at")\
                 .eq("status_monitoramento", "Ativo")\
+                .eq("identidade_validada", True)\
                 .or_(f"termometro.neq.FRIO,last_scraped_at.lt.{cold_threshold},last_scraped_at.is.null")\
                 .order("last_scraped_at", desc=False)\
                 .limit(15).execute()

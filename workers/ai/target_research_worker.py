@@ -17,8 +17,8 @@ logger = logging.getLogger("worker.researcher")
 
 class TargetResearchWorker(BaseWorker):
     """
-    Worker especializado em curadoria, pesquisa e manutenção de dados de alvos (PASA v84.9).
-    Implementa inteligência contínua para evitar dados ausentes ou incorretos.
+    Worker especializado em curadoria, pesquisa e manutenção de dados de alvos (PASA v84.12).
+    Implementa inteligência contínua e GOVERNANÇA de identidade.
     """
 
     def __init__(self, worker_id: str, config: dict):
@@ -28,10 +28,10 @@ class TargetResearchWorker(BaseWorker):
         self.total_xp = 0.0
 
     def describe(self) -> str:
-        return "Motor de Curadoria e Inteligência de Alvos"
+        return "Motor de Curadoria, Governança e Inteligência de Alvos"
 
     async def setup(self) -> None:
-        logger.info(f"🚀 {self.worker_id} pronto para curadoria.")
+        logger.info(f"🚀 {self.worker_id} pronto para curadoria e governança.")
 
     async def teardown(self) -> None:
         logger.info(f"🛑 {self.worker_id} encerrado.")
@@ -40,9 +40,8 @@ class TargetResearchWorker(BaseWorker):
         start_time = asyncio.get_event_loop().time()
         self.cycle += 1
         
-        # Estratégia: 30% tempo Pesquisa de Novos, 70% Curadoria de Existentes
+        # Estratégia: Prioriza validação de novos alvos (identidade_validada IS NULL)
         import random
-        mode = "research" if random.random() < 0.3 else "curation"
         
         target_username = None
         extracted = 0
@@ -50,54 +49,49 @@ class TargetResearchWorker(BaseWorker):
         quality_score = 0.0
         
         try:
-            if mode == "research":
-                # Busca alvos marcados para pesquisa inicial ou recém-adicionados sem dados
+            # 1. Busca alvos pendentes de validação de identidade (GOVERNANÇA)
+            res = db_client.client.table('candidatos')\
+                .select('username')\
+                .is_('identidade_validada', 'null')\
+                .limit(1)\
+                .execute()
+            
+            mode = "governance"
+            if not res.data:
+                # 2. Fallback para Curadoria de dados incompletos
+                mode = "curation"
                 res = db_client.client.table('candidatos')\
                     .select('username')\
-                    .or_('cargo.eq.ANALISE_SOLICITADA,nome_completo.is.null')\
-                    .limit(1)\
-                    .execute()
-                
-                if res.data:
-                    target_username = res.data[0]['username']
-                    logger.info(f"🔎 [{self.worker_id}] Iniciando pesquisa de novo alvo: @{target_username}")
-                    data = await self.research_target(target_username)
-                    if data:
-                        extracted = 1
-                        quality_score = data.get("_quality", 0.5)
-                else:
-                    mode = "curation" # Fallback se não houver novos
-
-            if mode == "curation":
-                # Busca alvos com dados possivelmente defasados ou incompletos
-                res = db_client.client.table('candidatos')\
-                    .select('username')\
-                    .or_('cargo.eq.DESCONHECIDO,cargo.is.null,partido.is.null,estado.is.null')\
+                    .or_('cargo.eq.DESCONHECIDO,partido.is.null,estado.is.null')\
+                    .eq('status_monitoramento', 'ATIVO')\
                     .order('atualizado_em', desc=False)\
                     .limit(1)\
                     .execute()
-                
-                if res.data:
-                    target_username = res.data[0]['username']
-                    logger.info(f"🧹 [{self.worker_id}] Executando curadoria: @{target_username}")
-                    data = await self.research_target(target_username)
-                    if data:
-                        extracted = 1
-                        quality_score = data.get("_quality", 0.5)
-                else:
-                    error = "no_tasks_available"
+
+            if res.data:
+                target_username = res.data[0]['username']
+                logger.info(f"🔎 [{self.worker_id}] Modo {mode.upper()}: @{target_username}")
+                data = await self.research_target(target_username)
+                if data:
+                    extracted = 1
+                    quality_score = data.get("_quality", 0.5)
+                    
+                    # Notificação de Purga no Log
+                    if data.get("status_monitoramento") == "DESATIVADO":
+                        logger.warning(f"🚫 [PURGA] Alvo @{target_username} foi desativado: {data.get('motivo_desativacao')}")
+            else:
+                error = "no_tasks_available"
 
         except Exception as e:
             logger.error(f"💥 Erro no ciclo de pesquisa: {e}")
             error = str(e)
 
-        # Cálculo de XP Customizado para Pesquisador
-        # Reward: +15 XP (Alta Qualidade), +5 XP (Básico), -10 XP (Erro/Inacessível)
+        # Recompensas
         xp_delta = 0.0
         if extracted > 0:
             if quality_score > 0.8: xp_delta = 15.0
             elif quality_score > 0.4: xp_delta = 5.0
-            else: xp_delta = -5.0 # Punição por imprecisão
+            else: xp_delta = -5.0
         elif error and error != "no_tasks_available":
             xp_delta = -10.0
 
@@ -116,20 +110,26 @@ class TargetResearchWorker(BaseWorker):
 
     async def research_target(self, username: str) -> Optional[Dict[str, Any]]:
         """
-        Executa a pesquisa profunda e enriquecimento.
+        Executa pesquisa profunda, enriquecimento e VALIDAÇÃO DE ESCOPO.
         """
         # 1. Coleta básica via Instagram
         ig_data = await self._fetch_ig_basic_info(username)
         if not ig_data:
+            # Se não acessa o perfil, não podemos validar a identidade ainda
             return None
 
-        # 2. Pesquisa em Fontes Oficiais (Simulada via IA de Busca)
+        # 2. Pesquisa em Fontes Oficiais
         official_data = await self._search_official_sources(username, ig_data.get("display_name"))
 
-        # 3. Consolidação e Validação
+        # 3. Consolidação e Validação de Escopo via IA
         enriched = await self._enrich_and_validate(username, ig_data, official_data)
         
-        # 4. Persistência
+        # 4. Decisão de Governança
+        is_valid = enriched.get("identidade_validada", False)
+        status = "ATIVO" if is_valid else "DESATIVADO"
+        motivo = enriched.get("motivo_rejeicao") if not is_valid else None
+
+        # 5. Consolidação dos Dados
         final_data = {
             "username": username,
             "nome_completo": enriched.get("nome_completo") or ig_data.get("display_name"),
@@ -139,11 +139,15 @@ class TargetResearchWorker(BaseWorker):
             "partido": enriched.get("partido"),
             "estado": enriched.get("estado"),
             "ideologia": enriched.get("ideologia"),
-            "status_monitoramento": "ATIVO",
+            "identidade_validada": is_valid,
+            "status_monitoramento": status,
+            "motivo_desativacao": motivo,
             "atualizado_em": datetime.now(timezone.utc).isoformat()
         }
 
+        # 6. Persistência (Upsert garantido pelo db_client)
         await db_client.upsert_candidate(final_data)
+        
         final_data["_quality"] = enriched.get("quality_confidence", 0.5)
         return final_data
 
@@ -171,7 +175,7 @@ class TargetResearchWorker(BaseWorker):
         return None
 
     async def _search_official_sources(self, username: str, name: str) -> Dict[str, Any]:
-        prompt = f"Pesquise dados oficiais (TSE/TRE/Wikipedia) para a figura pública: {name} (@{username}). Retorne JSON com nome_urna, cargo_eletivo, partido_atual, uf, nota_pesquisa."
+        prompt = f"Pesquise dados oficiais (TSE/TRE/Wikipedia/Notícias) para a figura pública: {name} (@{username}). Retorne JSON com nome_urna, cargo_eletivo, partido_atual, uf, nota_pesquisa."
         try:
             response = await ai_service.mistral_client.chat.completions.create(
                 model="open-mistral-nemo",
@@ -183,10 +187,31 @@ class TargetResearchWorker(BaseWorker):
         except: return {}
 
     async def _enrich_and_validate(self, username: str, ig_data: Dict[str, Any], official_data: Dict[str, Any]) -> Dict[str, Any]:
-        prompt = f"""Consolidador de Inteligência Sentinela.
-        IG={json.dumps(ig_data)}, OFICIAL={json.dumps(official_data)}. 
-        Retorne JSON com nome_completo, cargo, partido, estado, ideologia, quality_confidence (0.0-1.0). 
-        Seja rigoroso com a quality_confidence."""
+        prompt = f"""
+        Consolidador de Inteligência Sentinela. Analise a elegibilidade do alvo para monitoramento.
+        ESCOPO: Candidatos, Políticos, Jornalistas, Veículos de Notícia, Ativistas Políticos e Instituições de Poder.
+        
+        IG={json.dumps(ig_data)}
+        OFICIAL={json.dumps(official_data)}
+
+        MISSÃO:
+        1. Verificar se o perfil pertence ao escopo (Sim/Não).
+        2. Consolidar dados biográficos.
+        3. Atribuir 'identidade_validada' (boolean).
+        4. Se falso, explicar em 'motivo_rejeicao'.
+
+        Retorne JSON:
+        {{
+            "identidade_validada": boolean,
+            "motivo_rejeicao": "string ou null",
+            "nome_completo": "string",
+            "cargo": "string",
+            "partido": "string",
+            "estado": "string",
+            "ideologia": "DIREITA|ESQUERDA|CENTRO|DESCONHECIDO",
+            "quality_confidence": float (0.0-1.0)
+        }}
+        """
         try:
             response = await ai_service.mistral_client.chat.completions.create(
                 model="open-mistral-nemo",
@@ -195,7 +220,7 @@ class TargetResearchWorker(BaseWorker):
                 temperature=0.0
             )
             return json.loads(response.choices[0].message.content)
-        except: return {"quality_confidence": 0.0}
+        except: return {"identidade_validada": False, "motivo_rejeicao": "Erro no processamento de IA", "quality_confidence": 0.0}
 
     def _parse_followers(self, s: str) -> int:
         try:
