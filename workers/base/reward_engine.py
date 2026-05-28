@@ -95,9 +95,21 @@ class RewardEngine:
         """Calcula o delta de XP e gera um relatório detalhado do ciclo."""
         if result.simulated:
             return 0.0, "  - Status: Ciclo simulado (Dry-Run)\n  - Delta: +0.0 XP"
-        if not result.target:
+        if not result.target and not (result.metadata and "xp_delta" in result.metadata):
             return 0.0, "  - Status: Sem alvo (Ocioso/Idle)\n  - Delta: +0.0 XP"
             
+        # --- SUPORTE A XP MANUAL/METADATA (v84.9) ---
+        # Se o worker já calculou seu XP (comum para workers de inteligência/pesquisa)
+        if result.metadata and "xp_delta" in result.metadata:
+            delta = float(result.metadata["xp_delta"])
+            report = f"  - Inteligência: {result.source or 'worker'} finalizado\n"
+            if "quality" in result.metadata:
+                report += f"  - Qualidade: {result.metadata['quality']:.2f}/1.0\n"
+            if result.error:
+                report += f"  - Status: ⚠️ {result.error}\n"
+            report += f"  - Delta do Ciclo: {delta:+.1f} XP"
+            return delta, report
+
         # Erros legítimos de dados vazios não devem ser tratados como falha crítica de sistema.
         # Falha de banco só é crítica se havia dados extraídos para persistir.
         is_system_error = result.error and result.error != "no_comments_found"

@@ -65,6 +65,7 @@ from core.autopilot.cloud_listener import CloudListener, set_current_cycle
 
 # Workers disponíveis (PASA v52.0):
 from workers.scrapers.instagram_worker import InstagramWorker
+from workers.ai.target_research_worker import TargetResearchWorker
 
 
 def build_orchestrator() -> SentinelaOrchestrator:
@@ -83,6 +84,14 @@ def build_orchestrator() -> SentinelaOrchestrator:
             "max_comments_per_post": int(os.getenv("MAX_COMMENTS_PER_POST", "50")),
             "headless": os.getenv("PLAYWRIGHT_HEADLESS", "true").lower() == "true"
         },
+    ))
+
+    # Motor de Curadoria e Inteligência de Alvos (v84.9)
+    orch.register(TargetResearchWorker(
+        worker_id="researcher-01",
+        config={
+            "headless": True
+        }
     ))
 
     logger.info(f"[main_runner] Workers registrados: {orch.worker_ids}")
