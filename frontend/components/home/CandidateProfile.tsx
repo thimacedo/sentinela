@@ -88,7 +88,7 @@ export default function CandidateProfile({
       isScore: false,
     },
     {
-      label: 'Score de Ameaça', // Alterado para quebrar cache visual
+      label: 'Nível de Ameaça', // Força rebuild da Vercel
       value: baseScore,
       icon: Flame,
       context: 'índice de periculosidade',
