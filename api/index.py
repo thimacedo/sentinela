@@ -431,6 +431,46 @@ def mark_false_positive(payload: FalsePositiveRequest, supa: Client = Depends(ge
         logger.error(f"False Positive Critical Error: {e}\n{traceback.format_exc()}")
         raise HTTPException(status_code=500, detail={"error": str(e), "id": payload.id})
 
+@app.get("/api/v1/analytics/marketing-kpis")
+def get_marketing_kpis(supa: Client = Depends(get_supa)):
+    """Retorna KPIs estratégicos e dados para os gráficos de marketing (v86.1)."""
+    try:
+        from collections import Counter
+        
+        # O Iceberg (Visível vs Detectado)
+        # Estimativa baseada no volume total de dados e na taxa de detecção
+        total_comments = supa.table('comentarios').select('id', count='exact').limit(1).execute().count or 0
+        hate_comments = supa.table('comentarios').select('id', count='exact').eq('is_hate', True).limit(1).execute().count or 0
+        iceberg_data = {
+            "visible_neutral": total_comments - hate_comments,
+            "detected_hate": hate_comments,
+            "hidden_irony": int(hate_comments * 0.3) # Estimativa de ataques velados (ironia)
+        }
+
+        # Mapa de Vulnerabilidade (Distribuição Geral)
+        res_categories = supa.table('comentarios').select('categoria_ia').eq('is_hate', True).limit(5000).execute()
+        categories = [c['categoria_ia'] for c in (res_categories.data or []) if c.get('categoria_ia')]
+        vulnerability_map = dict(Counter(categories))
+
+        # Economia Tática
+        # Assumindo que 60% foi processado localmente e cada hora humana equivale a ~300 comentários
+        horas_humanas_poupadas = total_comments // 300
+        custo_humano_estimado = horas_humanas_poupadas * 150 # R$ 150/hora
+        economia_data = {
+            "horas_poupadas": horas_humanas_poupadas,
+            "custo_humano_brl": custo_humano_estimado,
+            "ci_investido": int((total_comments * 0.4) * 0.02) # Apenas 40% foram pra nuvem
+        }
+
+        return {
+            "iceberg": iceberg_data,
+            "vulnerability_map": vulnerability_map,
+            "roi": economia_data
+        }
+    except Exception as e:
+        logger.error(f"Marketing KPIs Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/api/v1/dossiers/generate")
 async def generate_dossier(payload: DossierGenerateRequest, supa: Client = Depends(get_supa)):
     """Gera um novo relatório estratégico com dedução de créditos (350 CI)."""
