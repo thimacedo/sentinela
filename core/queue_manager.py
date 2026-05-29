@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import logging
 import os
-from datetime import datetime, timezone
+import random
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from models.target import Target
@@ -33,7 +34,7 @@ class QueueManager:
         # 1. PRIORIDADE MÁXIMA: Alvo Manual
         manual_target = config.get("target") or os.getenv("TEST_TARGET_USERNAME")
         if manual_target:
-            username = manual_target.strip().lstrip("@")
+            username = manual_target.strip().lstrip("@").lower()
             if username not in blocked:
                 logger.info(f"[Manual] Selecionado: @{username}")
                 self._add_to_blocked(username, seen_targets, active_targets)
@@ -41,7 +42,6 @@ class QueueManager:
 
         # 2. DISTRIBUIÇÃO PONDERADA: fila_coleta vs Fallback
         # Mecanismo de Fairness: 25% de chance de priorizar a rotação global para evitar estagnação.
-        import random
         prefer_global_rotation = random.random() < 0.25
         
         target = None
@@ -66,14 +66,22 @@ class QueueManager:
             
             for item in pending.data or []:
                 queue_id = item["id"]
-                username = item.get("username") or item.get("candidato_id") or item.get("target_username")
+                target_val = item.get("username") or item.get("candidato_id") or item.get("target_username")
                 
-                # Resolução de ID para Username se necessário
-                if username and len(str(username)) > 30:
-                    cand = self.db.table("candidatos").select("username").eq("id", username).limit(1).execute()
+                if not target_val: continue
+
+                # Resolução inteligente de Identidade (PASA v85.6)
+                username = None
+                # Se for UUID, busca o username
+                if len(str(target_val)) > 30 and "-" in str(target_val):
+                    cand = self.db.table("candidatos").select("username").eq("id", target_val).limit(1).execute()
                     if cand.data: username = cand.data[0]["username"]
+                else:
+                    # Já é o username
+                    username = str(target_val)
                 
-                username = str(username).strip().lstrip("@")
+                if not username: continue
+                username = username.strip().lstrip("@").lower()
                 
                 if queue_id in seen_queue_ids or username in blocked:
                     continue
@@ -106,10 +114,10 @@ class QueueManager:
 
             logger.info(f"🔄 [Queue] Apenas {current_pending} itens pendentes. Repopulando fila...")
 
-            # Busca candidatos CONCLUIDO/SEM_DADOS_RECENTES mais antigos para reinserir
+            # Busca candidatos ativos mais antigos para reinserir
             candidatos_res = self.db.table("candidatos")\
                 .select("id,username,termometro")\
-                .eq("status_monitoramento", "Ativo")\
+                .filter("status_monitoramento", "ilike", "Ativo")\
                 .order("last_scraped_at", desc=False)\
                 .limit(20).execute()
 
@@ -121,17 +129,16 @@ class QueueManager:
                 # Verifica se já existe na fila como PENDENTE
                 check = self.db.table("fila_coleta")\
                     .select("id")\
-                    .eq("candidato_id", cand["id"])\
+                    .eq("candidato_id", cand["username"])\
                     .eq("status", "PENDENTE")\
                     .limit(1).execute()
                 if check.data:
-                    continue  # Já está pendente
+                    continue
 
-                # Determina prioridade pelo termômetro
                 termometro = cand.get("termometro", "MORNO")
                 prioridade = 1 if termometro == "QUENTE" else (5 if termometro == "FRIO" else 3)
 
-                # Reinserção via upsert (atualiza se existir, insere se não existir)
+                # Reinserção via upsert
                 self.db.table("fila_coleta").upsert({
                     "candidato_id": cand["username"],
                     "status": "PENDENTE",
@@ -148,23 +155,24 @@ class QueueManager:
             logger.error(f"❌ [Queue] Erro na auto-repopulação: {e}")
 
     def _get_from_global_rotation(self, blocked, seen_targets, active_targets) -> Optional[Target]:
-        """Garante que todos os candidatos ativos sejam processados circularmente com Smart Backoff (PASA v70.4)."""
+        """Garante que todos os candidatos ativos sejam processados circularmente com Smart Backoff (PASA v85.6)."""
         try:
             # ❄️ SMART BACKOFF: Pula alvos 'FRIO' que foram processados recentemente (< 12h)
-            from datetime import datetime, timedelta, timezone
             cold_threshold = (datetime.now(timezone.utc) - timedelta(hours=12)).isoformat()
+            # 🔥 TURBO BACKOFF: Alvos 'MORNO/QUENTE' têm cooldown reduzido (2h)
+            hot_threshold = (datetime.now(timezone.utc) - timedelta(hours=2)).isoformat()
 
-            # Query otimizada (v84.12): Alvos ATIVOS e VALIDADOS pelo Researcher
+            # Query otimizada (v85.6): Suporta Case Insensitive e Cooldown por Temperatura
+            # Pega alvos validados OU alvos que ainda não foram raspados (last_scraped_at is null)
             res = self.db.table("candidatos")\
                 .select("id,username,termometro,last_scraped_at")\
-                .eq("status_monitoramento", "Ativo")\
-                .eq("identidade_validada", True)\
-                .or_(f"termometro.neq.FRIO,last_scraped_at.lt.{cold_threshold},last_scraped_at.is.null")\
+                .filter("status_monitoramento", "ilike", "Ativo")\
+                .or_(f"last_scraped_at.is.null,and(termometro.eq.FRIO,last_scraped_at.lt.{cold_threshold}),and(termometro.neq.FRIO,last_scraped_at.lt.{hot_threshold})")\
                 .order("last_scraped_at", desc=False)\
-                .limit(15).execute()
+                .limit(20).execute()
                 
             for cand in res.data or []:
-                username = cand["username"]
+                username = cand["username"].lower()
                 if username in blocked:
                     continue
                 
@@ -178,21 +186,20 @@ class QueueManager:
         except Exception as e:
             logger.error(f"❌ [Queue] Erro ao consultar rotação global: {e}")
 
-        # Fallback extremo (se a fila chegou ao final ou todos estão resfriados, volta para o início)
+        # Fallback extremo (Fila Vazia)
         try:
             res_fallback = self.db.table("candidatos")\
                 .select("id,username,termometro,last_scraped_at")\
-                .eq("status_monitoramento", "Ativo")\
-                .eq("identidade_validada", True)\
+                .filter("status_monitoramento", "ilike", "Ativo")\
                 .order("last_scraped_at", desc=False)\
                 .limit(10).execute()
 
             for cand in res_fallback.data or []:
-                username = cand["username"]
+                username = cand["username"].lower()
                 if username in blocked:
                     continue
                 
-                logger.info(f"🔄 [Queue] Fallback extremo - Voltando ao início da fila: @{username}")
+                logger.info(f"🔄 [Queue] Fallback extremo (Fila Vazia): @{username}")
                 self._add_to_blocked(username, seen_targets, active_targets)
                 return Target(
                     username=username,
@@ -218,9 +225,7 @@ class QueueManager:
         now = datetime.now(timezone.utc)
         now_iso = now.isoformat()
         
-        # 1. Cálculo do Termômetro de Atividade (v84.18)
         frequencia = 0.0
-        # Alvos com erro de conteúdo vazio são resfriados imediatamente
         is_empty = hasattr(target, "error") and target.error in ["no_comments_found", "junk_detected"]
         
         post_metas = getattr(target, "post_metas", [])
@@ -232,25 +237,21 @@ class QueueManager:
                         valid_dates.append(datetime.fromisoformat(m["timestamp"].replace('Z', '+00:00')))
                     except: continue
         
-        # Lógica de Decisão de Temperatura:
         if is_empty or not valid_dates:
             termometro = "FRIO"
             frequencia = 0.0
         else:
-            # Verifica idade do post mais recente
             last_post_date = max(valid_dates)
             days_since_last_post = (now - last_post_date).days
             
             if len(valid_dates) >= 2:
                 delta_days = (max(valid_dates) - min(valid_dates)).days or 1
-                frequencia = round((len(valid_dates) / delta_days) * 7, 1) # Posts por semana
+                frequencia = round((len(valid_dates) / delta_days) * 7, 1)
             else:
-                # Apenas 1 post encontrado: frequência baseada na idade desse post
                 frequencia = round(7 / (days_since_last_post + 1), 1)
 
-            # Critérios de Reclassificação
             if days_since_last_post > 7:
-                termometro = "FRIO" # Post mais recente é muito antigo
+                termometro = "FRIO"
             elif frequencia >= 5:
                 termometro = "QUENTE"
             elif frequencia < 1:
@@ -258,7 +259,6 @@ class QueueManager:
             else:
                 termometro = "MORNO"
         
-        # 2. Atualiza tabela principal de candidatos
         update_data = {
             "last_scraped_at": now_iso,
             "posts_frequencia_semanal": frequencia,
@@ -266,7 +266,6 @@ class QueueManager:
         }
         self.db.table("candidatos").update(update_data).eq("username", target.username).execute()
 
-        # 3. Atualiza fila_coleta e Log Amigável
         if target.queue_id:
             nova_prioridade = 1 if termometro == "QUENTE" else (5 if termometro == "FRIO" else 3)
             self.db.table("fila_coleta").update({
@@ -276,6 +275,7 @@ class QueueManager:
             }).eq("id", target.queue_id).execute()
             
         logger.info(f"[Queue] @{target.username} -> {termometro} ({frequencia} posts/sem)")
+
     def mark_candidate_scraped(self, target: Target) -> None:
         """Update the last_scraped_at timestamp for the candidate."""
         if not target.username:
