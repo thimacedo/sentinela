@@ -344,15 +344,20 @@ def get_targets(request: Request, limit: int = 50, supa: Client = Depends(get_su
         org_id = request.headers.get("X-Organization-Id")
         
         # 1. Busca candidatos ativos escopados
-        query_cand = supa.table('candidatos').select('*').eq('status_monitoramento', 'Ativo')
+        query_cand = supa.table('candidatos').select('*').filter('status_monitoramento', 'ilike', 'Ativo').order('nota_relevancia', desc=True)
         if org_id:
             query_cand = query_cand.eq('organization_id', org_id)
         candidates_res = query_cand.execute()
         candidates = candidates_res.data or []
 
-        # 2. ALGORITMO DE VARIABILIDADE: Embaralha a lista para evitar repetições fixas no dashboard
+        # 2. ALGORITMO DE VARIABILIDADE: Mantém os Top 10 fixos e embaralha o restante
+        top_tier = [c for c in candidates if c.get('nota_relevancia', 0) >= 80]
+        others = [c for c in candidates if c.get('nota_relevancia', 0) < 80]
+        
         import random
-        random.shuffle(candidates)
+        random.shuffle(others)
+        
+        final_list = top_tier + others
         
         # 3. Busca ódio recente escopado para enriquecimento
         query_h = supa.table('comentarios').select('candidato_id, categoria_ia').eq('is_hate', True)
