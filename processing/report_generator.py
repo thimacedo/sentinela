@@ -77,12 +77,23 @@ class ReportGenerator(FPDF):
         self.ln(10)
         self.set_font('Helvetica', 'B', 12)
         self.set_text_color(30, 41, 59)
-        self.cell(0, 10, 'ÍNDICE DE SEVERIDADE', ln=True, align='C')
+        self.cell(0, 10, 'ÍNDICE DE SEVERIDADE JURÍDICA', ln=True, align='C')
         self.set_font('Helvetica', 'B', 20)
         self.set_text_color(*risk_color)
         self.cell(0, 12, f'{risk_label} ({risk_pct:.1f}%)', ln=True, align='C')
 
-        self.ln(30)
+        # BARRA DE PROGRESSO VISUAL (O "Gatilho de Crise")
+        self.set_y(self.get_y() + 5)
+        self.set_x(30)
+        # Fundo da barra
+        self.set_fill_color(226, 232, 240)
+        self.rect(30, self.get_y(), 150, 6, 'F')
+        # Progresso da barra
+        fill_width = min(150, (risk_pct / 30) * 150) if risk_pct > 0 else 5 # Cap at 30% for visual effect
+        self.set_fill_color(*risk_color)
+        self.rect(30, self.get_y(), fill_width, 6, 'F')
+        self.ln(15)
+
         self.set_font('Helvetica', 'B', 12)
         self.set_text_color(30, 41, 59)
         self.cell(0, 10, 'RESUMO DA AMOSTRAGEM', ln=True)
@@ -92,6 +103,58 @@ class ReportGenerator(FPDF):
             f"Foram identificados {total_hate} sinais de hostilidade validados por algoritmos de Processamento de Linguagem Natural (NLP) "
             f"conforme o Protocolo PASA v85.9."
         ))
+
+        # SELO DE ECONOMIA TÁTICA (O "Gatilho de Valor")
+        economia_horas = total_amostra // 300
+        if economia_horas > 0:
+            self.ln(5)
+            self.set_fill_color(241, 245, 249)
+            self.rect(10, self.get_y(), 190, 12, 'F')
+            self.set_xy(15, self.get_y() + 3)
+            self.set_font('Helvetica', 'B', 9)
+            self.set_text_color(*self.success_color)
+            self.cell(0, 6, f"ECONOMIA FORENSE: O uso de IA local poupou aproximadamente {economia_horas}h de auditoria humana nesta amostra.", align='C')
+            self.ln(15)
+
+        # ESPECTRO DE VULNERABILIDADE (Treemap Simplificado)
+        if total_hate > 0:
+            from collections import Counter
+            categorias = Counter([i.get('categoria_ia') for i in data if i.get('is_hate')])
+            
+            self.set_font('Helvetica', 'B', 12)
+            self.set_text_color(30, 41, 59)
+            self.cell(0, 10, 'VETORES DE ATAQUE (VULNERABILIDADE)', ln=True)
+            self.ln(2)
+            
+            start_x = 10
+            bar_width = 190
+            current_x = start_x
+            
+            # Draw proportional blocks
+            for cat, count in categorias.most_common(4):
+                pct = count / total_hate
+                w = max(15, int(pct * bar_width))
+                
+                # Alternate colors for blocks
+                if cat == "AMEACA": self.set_fill_color(249, 115, 22) # Orange
+                elif cat == "ATAQUE_INSTITUCIONAL": self.set_fill_color(139, 92, 246) # Purple
+                elif cat == "RIGOR_CRIMINAL": self.set_fill_color(6, 182, 212) # Cyan
+                else: self.set_fill_color(220, 38, 38) # Red
+                
+                if current_x + w > 200: w = 200 - current_x
+                if w <= 0: break
+                
+                self.rect(current_x, self.get_y(), w, 8, 'F')
+                
+                # Label
+                self.set_xy(current_x, self.get_y() + 9)
+                self.set_font('Helvetica', 'B', 6)
+                self.set_text_color(100, 116, 139)
+                self.cell(w, 4, f"{str(cat).split('_')[0][:10]} ({int(pct*100)}%)", align='C')
+                
+                current_x += w + 2
+                
+            self.set_y(self.get_y() + 10)
         
         # Rodapé da capa
         self.set_y(-50)
