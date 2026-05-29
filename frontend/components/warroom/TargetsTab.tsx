@@ -12,6 +12,10 @@ import { useWallet } from '@/hooks/useWallet';
 interface Target {
   id: string;
   username: string;
+  nome_completo?: string;
+  cargo?: string;
+  partido?: string;
+  estado?: string;
   status_monitoramento: string;
   tier: string;
   score_risco: number;
@@ -228,8 +232,23 @@ export default function TargetsTab() {
                           <div className="font-black text-text-main text-base tracking-tight hover:underline cursor-pointer">
                             @{t.username}
                           </div>
-                          <div className="text-[10px] text-text-muted font-mono mt-0.5 uppercase">
-                            ID: {t.id.substring(0, 8)}
+                          {t.nome_completo && (
+                            <div className="text-xs text-text-muted font-medium truncate max-w-[180px]">
+                              {t.nome_completo}
+                            </div>
+                          )}
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <span className="text-[9px] text-text-muted font-mono uppercase">
+                              ID: {t.id.substring(0, 8)}
+                            </span>
+                            {t.partido && (
+                              <>
+                                <span className="text-[9px] text-text-muted">•</span>
+                                <span className="text-[9px] text-brand-primary font-black uppercase tracking-widest">
+                                  {t.partido}
+                                </span>
+                              </>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -248,6 +267,11 @@ export default function TargetsTab() {
                             {t.nivel_risco}
                           </span>
                         </div>
+                        {t.cargo && (
+                          <div className="text-[8px] text-text-muted font-bold uppercase tracking-widest mt-0.5">
+                            {t.cargo} {t.estado ? `(${t.estado})` : ''}
+                          </div>
+                        )}
                       </div>
                     </div>
 
