@@ -196,16 +196,20 @@ def calculate_risk(item: Dict[str, Any]):
         totais = odio
 
     if totais == 0:
-        return 0, 'CONTROLADO', RISK_COLORS["CONTROLADO"]
+        if odio > 0:
+            score = min(100, 20 + (odio * 2))
+        else:
+            return 0, 'CONTROLADO', RISK_COLORS["CONTROLADO"]
+    else:
+        ratio = odio / totais
+        # Score ponderado: Densidade (ratio) + Volume absoluto (odio)
+        score = min(100, int(ratio * 250) + min(35, odio * 1.5))
     
-    ratio = odio / totais
-    score = min(100, int(ratio * 150) + min(50, odio))
-    
-    if score > 80 or ratio > 0.25:
+    if score >= 75:
         return score, 'CRITICO', RISK_COLORS["CRITICO"]
-    if score > 50 or ratio > 0.15:
+    if score >= 45:
         return score, 'ELEVADO', RISK_COLORS["ELEVADO"]
-    if score > 20 or ratio > 0.05:
+    if score >= 15:
         return score, 'MONITORANDO', RISK_COLORS["MONITORANDO"]
     return score, 'CONTROLADO', RISK_COLORS["CONTROLADO"]
 
