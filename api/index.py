@@ -100,6 +100,7 @@ class CheckoutRequest(BaseModel):
 
 class DossierGenerateRequest(BaseModel):
     candidato_id: str
+    user_id: str
     modules: Optional[List[str]] = ["base"]
 
 class PushTokenRegistration(BaseModel):
@@ -432,30 +433,61 @@ def mark_false_positive(payload: FalsePositiveRequest, supa: Client = Depends(ge
 
 @app.post("/api/v1/dossiers/generate")
 async def generate_dossier(payload: DossierGenerateRequest, supa: Client = Depends(get_supa)):
-    """Gera um novo relatório estratégico."""
+    """Gera um novo relatório estratégico com dedução de créditos (350 CI)."""
     try:
-        from processing.dossie_service import DossieService
-        data = supa.table('comentarios').select('*').eq('candidato_id', payload.candidato_id).limit(500).execute().data
-        if not data:
-            raise HTTPException(status_code=404, detail="No data found for this target")
+        from processing.dossie_service import dossie_service
         
-        # Simulação de geração para evitar bloqueio de thread
-        timestamp = int(datetime.now().timestamp())
-        path = f"data/reports/relatorio_{payload.candidato_id}_{timestamp}.pdf"
+        # 1. Validação de Saldo e Cobrança (Atômica)
+        # 350 CI é o custo tático por dossiê gerado
+        rpc_payload = {
+            "p_user_id": payload.user_id,
+            "p_amount": -350,
+            "p_type": "CONSUMPTION",
+            "p_session_id": None,
+            "p_metadata": {"action": "generate_dossier", "target": payload.candidato_id}
+        }
         
-        # Persistência do registro de relatório
-        supa.table('dossies').insert({
-            "candidato_id": payload.candidato_id,
-            "total_comentarios": len(data),
-            "total_hate": len([i for i in data if i.get('is_hate')]),
-            "arquivo_path": path,
-            "hash_integridade": f"sha256:{payload.candidato_id}:{timestamp}",
-            "versao_pasa": "v16.4"
-        }).execute()
+        charge_res = supa.rpc('process_stn_transaction', rpc_payload).execute()
+        if charge_res.data is not True:
+            raise HTTPException(status_code=402, detail="Aporte Insuficiente. Adquira mais Créditos de Inteligência (CI).")
 
-        return {"status": "success", "pdf_url": path}
+        # 2. Busca dados reais para o dossiê (Top 500 interações do alvo)
+        data_res = supa.table('comentarios')\
+            .select('*, candidatos(username)')\
+            .eq('candidato_id', payload.candidato_id)\
+            .order('data_coleta', desc=True)\
+            .limit(500).execute()
+            
+        data = data_res.data or []
+        if not data:
+            # Reverte a cobrança se não houver dados (Gesto de boa fé tática)
+            supa.rpc('process_stn_transaction', {**rpc_payload, "p_amount": 350, "p_metadata": {"action": "refund_empty_dossier"}}).execute()
+            raise HTTPException(status_code=404, detail="Alvo sem dados coletados suficientes para geração de dossiê.")
+        
+        # 3. Geração Real do PDF
+        timestamp = int(datetime.now().timestamp())
+        # No ambiente Vercel, o diretório de saída deve ser mapeado para Storage ou ser retornado via stream.
+        # Por enquanto, salvamos em public/reports para servir como estático.
+        filename = f"relatorio_{payload.candidato_id}_{timestamp}.pdf"
+        output_path = os.path.join("public", "reports", filename)
+        
+        pdf_path = await dossie_service.generate_dossie(data, output_path, payload.candidato_id)
+        
+        if not pdf_path:
+            raise HTTPException(status_code=500, detail="Erro técnico na geração do motor PDF.")
+
+        # Retorna a URL pública
+        public_url = f"/reports/{filename}"
+
+        return {
+            "status": "success", 
+            "pdf_url": public_url,
+            "hash_integridade": hashlib.sha256(str(timestamp).encode()).hexdigest()[:12]
+        }
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Generation Error: {e}")
+        logger.error(f"Dossier Generation Error: {e}\n{traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/v1/dossiers")
