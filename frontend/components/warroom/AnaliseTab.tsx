@@ -3,9 +3,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
-import { Search, ShieldCheck, Calendar } from 'lucide-react';
+import { Search, ShieldCheck, Calendar, Info } from 'lucide-react';
 import AdSenseSlot from '@/components/ads/AdSenseSlot';
 import { supabase } from '@/lib/supabase';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface Comment {
   id: string;
@@ -15,6 +17,7 @@ interface Comment {
   is_hate: boolean;
   data_coleta: string;
   username_alvo: string;
+  analise_pericial?: string;
 }
 
 export default function AnaliseTab() {
@@ -28,7 +31,7 @@ export default function AnaliseTab() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('comentarios')
-        .select('id, texto_bruto, categoria_ia, confianca_ia, is_hate, data_coleta, candidatos(username)')
+        .select('id, texto_bruto, categoria_ia, confianca_ia, is_hate, data_coleta, analise_pericial, candidatos(username)')
         .not('categoria_ia', 'is', null)
         .order('data_coleta', { ascending: false })
         .limit(apiLimit);
@@ -127,11 +130,24 @@ export default function AnaliseTab() {
                   </div>
 
                   {/* Conteúdo Central do Comentário */}
-                  <div className="mt-4 p-4 bg-bg-main/50 border border-border-main rounded-xl">
-                    <p className="text-sm text-text-main leading-relaxed italic">
-                      "{c.texto_bruto}"
-                    </p>
+                  <div className="mt-4 p-5 bg-bg-main/50 border border-border-main rounded-xl overflow-x-auto">
+                    <div className="prose prose-invert prose-sm max-w-none">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {c.texto_bruto}
+                      </ReactMarkdown>
+                    </div>
                   </div>
+
+                  {/* Detalhes Técnicos (Se houver perícia) */}
+                  {c.analise_pericial && (
+                    <div className="mt-3 flex items-start gap-2 p-3 bg-brand-primary/5 rounded-lg border border-brand-primary/10">
+                      <Info className="w-3.5 h-3.5 text-brand-primary shrink-0 mt-0.5" />
+                      <div className="text-[10px] text-text-muted italic leading-relaxed">
+                        <span className="font-bold text-brand-primary not-italic uppercase tracking-tighter mr-1">Parecer Técnico:</span>
+                        {c.analise_pericial}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Rodapé do Card */}
                   <div className="mt-4 flex items-center justify-between gap-4 border-t border-border-main/50 pt-4">
@@ -142,10 +158,13 @@ export default function AnaliseTab() {
                       </div>
                       <div className="flex-1 h-1.5 bg-bg-main rounded-full overflow-hidden">
                         <div 
-                          className="h-full bg-brand-primary transition-all duration-1000" 
+                          className={`h-full transition-all duration-1000 ${c.is_hate ? 'bg-brand-primary' : 'bg-emerald-500'}`} 
                           style={{ width: `${c.confianca_ia * 100}%` }}
                         />
                       </div>
+                    </div>
+                    <div className="text-[9px] font-mono text-text-muted opacity-50 uppercase">
+                      ID: {c.id.substring(0, 8)}
                     </div>
                   </div>
                 </div>
