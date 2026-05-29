@@ -3,11 +3,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
-import { Search, ShieldCheck, Calendar, Info } from 'lucide-react';
+import { Search, ShieldCheck, Calendar, Info, X } from 'lucide-react';
 import AdSenseSlot from '@/components/ads/AdSenseSlot';
 import { supabase } from '@/lib/supabase';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 interface Comment {
   id: string;
@@ -21,18 +22,28 @@ interface Comment {
 }
 
 export default function AnaliseTab() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const targetParam = searchParams.get('target');
+
   // Paginação e scroll infinito
   const [visibleCount, setVisibleCount] = useState(10);
   const [apiLimit, setApiLimit] = useState(50);
   const observerRef = useRef<HTMLDivElement>(null);
 
   const { data: comments = [], isLoading } = useQuery<Comment[]>({
-    queryKey: ['analise-comments', apiLimit],
+    queryKey: ['analise-comments', apiLimit, targetParam],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('comentarios')
-        .select('id, texto_bruto, categoria_ia, confianca_ia, is_hate, data_coleta, analise_pericial, candidatos(username)')
-        .not('categoria_ia', 'is', null)
+        .select('id, texto_bruto, categoria_ia, confianca_ia, is_hate, data_coleta, analise_pericial, candidatos!inner(username)')
+        .not('categoria_ia', 'is', null);
+
+      if (targetParam) {
+        query = query.eq('candidatos.username', targetParam);
+      }
+
+      const { data, error } = await query
         .order('data_coleta', { ascending: false })
         .limit(apiLimit);
 
@@ -74,6 +85,10 @@ export default function AnaliseTab() {
     return 'text-yellow-600 dark:text-yellow-400 border-yellow-200 dark:border-yellow-900 bg-yellow-50 dark:bg-yellow-900/10';
   };
 
+  const clearTargetFilter = () => {
+    router.push('/analise');
+  };
+
   return (
     <div className="bg-bg-card border border-border-main rounded-2xl shadow-sm overflow-hidden">
       {/* Header */}
@@ -84,6 +99,17 @@ export default function AnaliseTab() {
             Central de Análise
           </h2>
           <p className="text-xs text-text-muted font-medium uppercase tracking-widest mt-1">Análise Semântica MCA v2.2</p>
+          
+          {targetParam && (
+            <div className="mt-2 flex items-center gap-2">
+              <Badge className="bg-brand-primary/10 text-brand-primary border-brand-primary/20 flex items-center gap-1.5 px-2 py-0.5">
+                Filtrando: @{targetParam}
+                <button onClick={clearTargetFilter} className="hover:text-brand-primary/70 transition-colors">
+                  <X className="w-3 h-3" />
+                </button>
+              </Badge>
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-2 px-3 py-1.5 bg-brand-primary/10 border border-brand-primary/20 rounded-full">
           <ShieldCheck className="w-3.5 h-3.5 text-brand-primary" />
@@ -99,7 +125,9 @@ export default function AnaliseTab() {
           </div>
         ) : comments.length === 0 ? (
           <div className="text-center py-20 text-text-muted font-mono text-xs">
-            ESPECTRO LIMPO. NENHUMA DETECÇÃO NO PERÍODO.
+            {targetParam 
+              ? `NENHUMA DETECÇÃO LOCALIZADA PARA @${targetParam.toUpperCase()}.`
+              : 'ESPECTRO LIMPO. NENHUMA DETECÇÃO NO PERÍODO.'}
           </div>
         ) : (
           <div className="flex flex-col gap-6 max-w-2xl mx-auto">
