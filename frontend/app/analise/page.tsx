@@ -1,7 +1,9 @@
 'use client';
 
+import { Suspense } from "react";
 import AnaliseTab from "@/components/warroom/AnaliseTab";
 import AdSenseSlot from "@/components/ads/AdSenseSlot";
+import { Loader2 } from "lucide-react";
 
 export default function AnalisePage() {
   return (
@@ -16,7 +18,14 @@ export default function AnalisePage() {
       </div>
 
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <AnaliseTab />
+        <Suspense fallback={
+          <div className="flex flex-col items-center justify-center py-32 text-text-muted gap-4 bg-bg-card border border-border-main rounded-2xl">
+            <Loader2 className="w-8 h-8 animate-spin text-brand-primary" />
+            <span className="animate-pulse font-mono text-[10px] uppercase tracking-widest">Carregando Módulos de Análise...</span>
+          </div>
+        }>
+          <AnaliseTab />
+        </Suspense>
         <div className="mt-8">
           <AdSenseSlot adSlot="2020882637" format="horizontal" />
         </div>
