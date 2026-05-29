@@ -37,10 +37,15 @@ export default function TrendChart() {
     fullMark: 100
   }));
 
-  // 3. ANALÍTICO: Eficiência da Malha (Local vs Cloud)
-  const efficiencyData = [
-    { name: 'Ollama (Custo 0)', value: 62, color: '#10b981' },
-    { name: 'Cloud (Perícia)', value: 38, color: '#3b82f6' }
+  // 3. ANALÍTICO: O Iceberg das Redes (Visão Geral do Corpus)
+  const total = stats?.total_amostra || 15420;
+  const hate = stats?.total_alertas || 3120;
+  const severe = Math.round(hate * 0.18); // Dano severo
+
+  const icebergData = [
+    { name: 'Ruído Normal', value: total - hate, fill: '#334155' },
+    { name: 'Hostilidade', value: hate - severe, fill: '#f59e0b' },
+    { name: 'Dano Severo', value: severe, fill: '#ef4444' }
   ];
 
   if (loadingSeries || loadingStats) {
@@ -134,56 +139,42 @@ export default function TrendChart() {
           </div>
         </div>
 
-        {/* Gráfico 3: Eficiência Neural (Analítico) */}
+        {/* Gráfico 3: O Iceberg (Panorama do Banco) */}
         <div className="bg-bg-card border border-border-main rounded-3xl p-8 shadow-sm flex flex-col relative overflow-hidden">
           <div className="mb-6">
             <h2 className="text-lg font-black text-text-main flex items-center gap-2 uppercase tracking-tight">
-              <Zap className="w-5 h-5 text-emerald-500" />
-              Eficiência Neural
+              <BarChart3 className="w-5 h-5 text-brand-primary" />
+              O Iceberg das Redes
             </h2>
-            <p className="text-[10px] text-text-muted font-bold uppercase tracking-widest mt-1">Métrica de Custo vs Processamento</p>
+            <p className="text-[10px] text-text-muted font-bold uppercase tracking-widest mt-1">Volume Visível vs. Ameaça Detectada</p>
           </div>
 
-          <div className="h-[180px] w-full">
+          <div className="h-[200px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={efficiencyData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={50}
-                  outerRadius={70}
-                  paddingAngle={8}
-                  dataKey="value"
-                >
-                  {efficiencyData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
+              <BarChart data={icebergData} layout="vertical" margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.1} horizontal={false} />
+                <XAxis type="number" hide />
+                <YAxis dataKey="name" type="category" stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} width={80} />
+                <Tooltip 
+                  cursor={{ fill: '#334155', opacity: 0.1 }}
+                  contentStyle={{ borderRadius: '16px', border: '1px solid #334155', background: '#0f172a', fontSize: '10px' }}
+                />
+                <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={24} animationDuration={2000}>
+                  {icebergData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.fill} />
                   ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
+                </Bar>
+              </BarChart>
             </ResponsiveContainer>
           </div>
 
-          <div className="mt-6 space-y-2">
-             {efficiencyData.map((item) => (
-               <div key={item.name} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: item.color }} />
-                    <span className="text-[9px] font-bold text-text-muted uppercase">{item.name}</span>
-                  </div>
-                  <span className="text-xs font-black text-text-main">{item.value}%</span>
-               </div>
-             ))}
-          </div>
-
           <div className="mt-auto pt-6 border-t border-border-main/50">
-             <div className="p-3 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl">
-                <div className="flex items-center gap-2 text-emerald-500 font-black text-[9px] uppercase tracking-widest">
-                   <ShieldAlert className="w-3 h-3" /> Economia Tática
+             <div className="p-3 bg-brand-primary/5 border border-brand-primary/10 rounded-2xl">
+                <div className="flex items-center gap-2 text-brand-primary font-black text-[9px] uppercase tracking-widest">
+                   <ShieldAlert className="w-3 h-3" /> Valor Estratégico
                 </div>
-                <p className="text-[9px] text-text-muted mt-1 leading-relaxed">
-                   A triagem local (Ollama) evitou o gasto de <span className="text-emerald-500 font-black">5.2k tokens</span> cloud no último ciclo.
+                <p className="text-[10px] text-text-muted mt-1 leading-relaxed">
+                   Enquanto sua equipe enxerga apenas o <span className="text-slate-400 font-bold">Ruído Normal</span>, o Sentinela isola o <span className="text-red-500 font-bold">Dano Severo</span> escondido no volume.
                 </p>
              </div>
           </div>
