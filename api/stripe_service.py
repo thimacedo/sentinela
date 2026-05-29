@@ -2,6 +2,7 @@ import stripe
 import os
 from typing import Optional
 from fastapi import HTTPException
+from core.db import db_client # Adicionado para injetar CI no modo Mock
 
 # CONFIGURAÇÃO DE ELITE (Stripe SDK v15.x compatible)
 stripe.api_key = os.getenv("STRIPE_API_KEY")
@@ -31,8 +32,27 @@ class PaymentManager:
         }
 
         package_info = package_map.get(package_type)
-        if not package_info or not package_info["price_id"]:
-            raise HTTPException(status_code=400, detail=f"Pacote '{package_type}' inválido ou Price ID não configurado no servidor.")
+        
+        # --- MODO STRESS TEST / BETA (Mock Payment) ---
+        # Se as chaves do Stripe não estiverem configuradas, simula a compra com sucesso
+        if not stripe.api_key or not package_info.get("price_id"):
+            print(f"⚠️ [Stripe Service] Modo Mock ativado para pacote '{package_type}'. Chaves ausentes.")
+            if not package_info:
+                 raise HTTPException(status_code=400, detail=f"Pacote '{package_type}' inválido.")
+            
+            # Injeta o CI diretamente via RPC para simular o Webhook
+            try:
+                db_client.client.rpc('process_stn_transaction', {
+                    "p_user_id": user_id,
+                    "p_amount": package_info["ci_amount"],
+                    "p_type": "PURCHASE",
+                    "p_session_id": "mock_session_" + os.urandom(4).hex(),
+                    "p_metadata": {"action": "mock_purchase", "package": package_type}
+                }).execute()
+            except Exception as e:
+                print(f"❌ Erro no Mock Payment: {e}")
+                
+            return f"{os.getenv('FRONTEND_URL', 'http://localhost:3000')}/alvos?payment=success&mock=true"
 
         try:
             session = stripe.checkout.Session.create(
