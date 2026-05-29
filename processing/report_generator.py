@@ -77,7 +77,7 @@ class ReportGenerator(FPDF):
         self.ln(10)
         self.set_font('Helvetica', 'B', 12)
         self.set_text_color(30, 41, 59)
-        self.cell(0, 10, 'ÍNDICE DE SEVERIDADE JURÍDICA', ln=True, align='C')
+        self.cell(0, 10, 'ÍNDICE DE SEVERIDADE ANALÍTICA', ln=True, align='C')
         self.set_font('Helvetica', 'B', 20)
         self.set_text_color(*risk_color)
         self.cell(0, 12, f'{risk_label} ({risk_pct:.1f}%)', ln=True, align='C')
@@ -104,7 +104,7 @@ class ReportGenerator(FPDF):
             f"conforme o Protocolo PASA v85.9."
         ))
 
-        # MATRIZ DE RISCO JURÍDICO (Gatilho de Venda para o Jurídico)
+        # MATRIZ DE RISCO ANALÍTICO (Gatilho de Venda)
         crimes_imputados = len([i for i in data if i.get('categoria_ia') == 'RIGOR_CRIMINAL'])
         
         self.ln(5)
@@ -115,13 +115,13 @@ class ReportGenerator(FPDF):
         self.set_xy(15, self.get_y() + 3)
         self.set_font('Helvetica', 'B', 10)
         self.set_text_color(*self.danger_color)
-        self.cell(0, 6, "MATRIZ DE RISCO JURÍDICO", ln=True)
+        self.cell(0, 6, "MATRIZ DE RISCO ANALÍTICO", ln=True)
         
         self.set_x(15)
         self.set_font('Helvetica', '', 9)
         self.set_text_color(127, 29, 29) # Red 900
         if crimes_imputados > 0:
-            self.cell(0, 5, f"Alerta Crítico: Detectamos {crimes_imputados} interações com potenciais crimes contra a honra (Calúnia/Difamação).", ln=True)
+            self.cell(0, 5, f"Alerta Crítico: Detectamos {crimes_imputados} interações com potenciais imputações graves (Rigor Criminal).", ln=True)
         else:
             self.set_text_color(21, 128, 61) # Green 700
             self.set_fill_color(240, 253, 244) # Green 50
@@ -129,7 +129,7 @@ class ReportGenerator(FPDF):
             self.rect(10, self.get_y() - 9, 190, 18, 'DF')
             self.set_xy(15, self.get_y() - 6)
             self.set_text_color(22, 163, 74) # Green 600
-            self.cell(0, 6, "MATRIZ DE RISCO JURÍDICO", ln=True)
+            self.cell(0, 6, "MATRIZ DE RISCO ANALÍTICO", ln=True)
             self.set_x(15)
             self.set_text_color(20, 83, 45) # Green 900
             self.cell(0, 5, "Cenário favorável: Nenhuma imputação criminal direta detectada nesta amostragem.", ln=True)
