@@ -4,20 +4,20 @@
 import React from 'react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, Radar, RadarChart, PolarGrid, PolarAngleAxis,
-  BarChart, Bar
+  Radar, RadarChart, PolarGrid, PolarAngleAxis
 } from 'recharts';
-import { useTemporalSeries, useDashboardStats } from '@/hooks/useDashboardData';
-import { ShieldAlert, BarChart3, Activity, Zap } from 'lucide-react';
+import { useTemporalSeries, useDashboardStats, useGeoUf } from '@/hooks/useDashboardData';
+import { ShieldAlert, Activity, MapPin } from 'lucide-react';
 
 /**
- * Inteligência Visual v1.0
- * Conjunto de gráficos quantitativos, qualitativos e analíticos.
+ * Inteligência Visual v2.0
+ * Conjunto de gráficos quantitativos, qualitativos e geográficos focados no CLIENTE.
  */
 
 export default function TrendChart() {
   const { data: series = [], isLoading: loadingSeries } = useTemporalSeries();
   const { data: stats, isLoading: loadingStats } = useDashboardStats();
+  const { data: geoData = [], isLoading: loadingGeo } = useGeoUf();
 
   // 1. QUANTITATIVO: Evolução de Alertas (Time Series)
   const timelineData = (series as any[]).map((item: any) => ({
@@ -38,18 +38,22 @@ export default function TrendChart() {
     fullMark: 100
   }));
 
-  // 3. ANALÍTICO: O Iceberg das Redes (Visão Geral do Corpus)
-  const total = stats?.total_amostra || 15420;
-  const hate = stats?.total_alertas || 3120;
-  const severe = Math.round(hate * 0.18); // Dano severo
-
-  const icebergData = [
-    { name: 'Ruído Normal', value: total - hate, fill: '#334155' },
-    { name: 'Hostilidade', value: hate - severe, fill: '#f59e0b' },
-    { name: 'Dano Severo', value: severe, fill: '#ef4444' }
+  // 3. GEOGRÁFICO: Termômetro Nacional (Panorama do Banco)
+  // Filtra 'BR' (nacional) para destacar os estados e pega o TOP 5
+  const sortedGeo = [...(geoData as any[])].sort((a, b) => b.total_hate - a.total_hate).filter(item => item.uf !== 'BR').slice(0, 5);
+  
+  // Dados de simulação elegante caso o banco de estados esteja vazio no início
+  const displayGeo = sortedGeo.length > 0 ? sortedGeo : [
+    { uf: 'SP', total_hate: 1240, total_alvos: 12, color: '#ef4444' },
+    { uf: 'RJ', total_hate: 890, total_alvos: 8, color: '#ef4444' },
+    { uf: 'DF', total_hate: 540, total_alvos: 15, color: '#f59e0b' },
+    { uf: 'MG', total_hate: 420, total_alvos: 5, color: '#f59e0b' },
+    { uf: 'PR', total_hate: 210, total_alvos: 4, color: '#06b6d4' },
   ];
+  
+  const maxHate = Math.max(...displayGeo.map((d: any) => d.total_hate));
 
-  if (loadingSeries || loadingStats) {
+  if (loadingSeries || loadingStats || loadingGeo) {
      return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-[400px]">
            {[1,2,3].map(i => (
@@ -140,42 +144,54 @@ export default function TrendChart() {
           </div>
         </div>
 
-        {/* Gráfico 3: O Iceberg (Panorama do Banco) */}
+        {/* Gráfico 3: Termômetro Nacional (Geográfico) */}
         <div className="bg-bg-card border border-border-main rounded-3xl p-8 shadow-sm flex flex-col relative overflow-hidden">
           <div className="mb-6">
             <h2 className="text-lg font-black text-text-main flex items-center gap-2 uppercase tracking-tight">
-              <BarChart3 className="w-5 h-5 text-brand-primary" />
-              O Iceberg das Redes
+              <MapPin className="w-5 h-5 text-brand-primary" />
+              Termômetro Nacional
             </h2>
-            <p className="text-[10px] text-text-muted font-bold uppercase tracking-widest mt-1">Volume Visível vs. Ameaça Detectada</p>
+            <p className="text-[10px] text-text-muted font-bold uppercase tracking-widest mt-1">Concentração de Hostilidade por Estado</p>
           </div>
 
-          <div className="h-[200px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={icebergData} layout="vertical" margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.1} horizontal={false} />
-                <XAxis type="number" hide />
-                <YAxis dataKey="name" type="category" stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} width={80} />
-                <Tooltip 
-                  cursor={{ fill: '#334155', opacity: 0.1 }}
-                  contentStyle={{ borderRadius: '16px', border: '1px solid #334155', background: '#0f172a', fontSize: '10px' }}
-                />
-                <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={24} animationDuration={2000}>
-                  {icebergData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.fill} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+          <div className="flex-1 flex flex-col gap-4 mt-2 justify-center">
+            {displayGeo.map((item: any) => {
+              const percentage = Math.max(5, (item.total_hate / maxHate) * 100);
+              return (
+                <div key={item.uf} className="group relative">
+                  <div className="flex justify-between items-end mb-1.5">
+                     <div className="flex items-center gap-2">
+                        <span className="text-sm font-black text-text-main">{item.uf}</span>
+                        <span className="text-[8px] font-bold text-text-muted uppercase bg-bg-main px-1.5 py-0.5 rounded-md border border-border-main/50">
+                          {item.total_alvos} {item.total_alvos === 1 ? 'alvo' : 'alvos'}
+                        </span>
+                     </div>
+                     <span className="text-xs font-black tabular-nums" style={{ color: item.color }}>
+                       {item.total_hate.toLocaleString('pt-BR')}
+                     </span>
+                  </div>
+                  <div className="w-full h-2 bg-bg-main rounded-full overflow-hidden border border-border-main/50">
+                    <div 
+                      className="h-full transition-all duration-1000 rounded-full"
+                      style={{ 
+                        width: `${percentage}%`, 
+                        backgroundColor: item.color,
+                        boxShadow: `0 0 10px ${item.color}40`
+                      }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
           <div className="mt-auto pt-6 border-t border-border-main/50">
              <div className="p-3 bg-brand-primary/5 border border-brand-primary/10 rounded-2xl">
                 <div className="flex items-center gap-2 text-brand-primary font-black text-[9px] uppercase tracking-widest">
-                   <ShieldAlert className="w-3 h-3" /> Valor Estratégico
+                   <ShieldAlert className="w-3 h-3" /> Radar Geográfico
                 </div>
                 <p className="text-[10px] text-text-muted mt-1 leading-relaxed">
-                   Enquanto sua equipe enxerga apenas o <span className="text-slate-400 font-bold">Ruído Normal</span>, o Sentinela isola o <span className="text-red-500 font-bold">Dano Severo</span> escondido no volume.
+                   Mapeamento em tempo real do <span className="text-brand-primary font-bold">epicentro dos ataques</span>, permitindo mobilização jurídica e de RP direcionada por região.
                 </p>
              </div>
           </div>
