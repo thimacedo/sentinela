@@ -100,11 +100,15 @@ def build_orchestrator() -> SentinelaOrchestrator:
     try:
         from workers.processors.ai_processor_worker import AIProcessorWorker
         from workers.analytics.network_worker import NetworkMinerWorker
+        from workers.financial.treasurer_worker import TreasurerWorker
+        
         orch.register(AIProcessorWorker(worker_id="ai-processor-01", config={}))
         orch.register(NetworkMinerWorker(worker_id="network-miner-01", config={"lookback_days": 3}))
-        logger.info("[main_runner] Workers de Processamento/Rede registrados.")
+        orch.register(TreasurerWorker(worker_id="treasurer-01", config={}))
+        
+        logger.info("[main_runner] Workers de Processamento/Rede/Financeiro registrados.")
     except ImportError as e:
-        logger.warning(f"[main_runner] Erro ao registrar workers de analytics: {e}")
+        logger.warning(f"[main_runner] Erro ao registrar workers de analytics/financeiro: {e}")
 
     # Motor de Curadoria e Inteligência de Alvos (v84.9)
     orch.register(TargetResearchWorker(

@@ -194,7 +194,7 @@ class DatabaseClient:
             print(f"❌ [DB] Erro ao atualizar anúncio {ad_id}: {e}")
 
     async def persist_dossier(self, data: Dict[str, Any]):
-        """Salva metadados de um novo dossiê forense."""
+        """Persiste metadados de um dossiê gerado."""
         if not self.client: return
         try:
             res = self.client.table('dossies').insert(data).execute()
@@ -203,6 +203,34 @@ class DatabaseClient:
         except Exception as e:
             print(f"❌ [DB] Erro ao persistir dossiê: {e}")
             return None
+
+    # --- GOVERNANÇA FINANCEIRA (PASA v86.1) ---
+    async def process_ci_transaction(self, user_id: str, amount: int, type: str, metadata: dict = None):
+        """
+        Executa uma transação de Créditos de Inteligência (CI).
+        Utiliza a RPC legada process_stn_transaction para garantir atomicidade.
+        """
+        if not self.client: return False
+        try:
+            res = self.client.rpc('process_stn_transaction', {
+                "p_user_id": user_id,
+                "p_amount": amount,
+                "p_type": type,
+                "p_session_id": None,
+                "p_metadata": metadata or {}
+            }).execute()
+            return res.data
+        except Exception as e:
+            print(f"❌ [DB] Falha na transação CI: {e}")
+            return False
+
+    async def get_user_balance(self, user_id: str) -> int:
+        """Retorna o saldo atual de CI do usuário."""
+        if not self.client: return 0
+        try:
+            res = self.client.table('profiles').select('stn_tokens').eq('id', user_id).single().execute()
+            return res.data.get('stn_tokens', 0) if res.data else 0
+        except: return 0
 
     async def fetch_dossier_history(self, candidato_id: str, limit: int = 20) -> List[Dict[str, Any]]:
         """Recupera o histórico de dossiês estruturados de um candidato."""
