@@ -47,27 +47,36 @@ class AIProcessorWorker(BaseWorker):
             # O ai_service já gerencia a seleção de itens processado_ia=False
             classified_count = await ai_service.run_batch_classification(limit=self.batch_size)
             
+            # --- TAREFA DE UTILIDADE (PASA v85.12) ---
+            # Se não houver novos dados, aproveita o ciclo para RE-ANALISAR itens de baixa confiança (< 60%)
+            utility_count = 0
             if classified_count == 0:
-                logger.info("✅ Fila de IA vazia. Aguardando novos dados.")
+                logger.info(f"🧠 [AI] Fila primária vazia. Iniciando Re-análise de Baixa Confiança...")
+                utility_count = await ai_service.run_batch_reanalysis(limit=self.batch_size // 2, confidence_threshold=0.6)
+                if utility_count > 0:
+                    logger.info(f"✨ [AI] Sucesso: {utility_count} registros de baixa confiança refinados.")
+            
+            if classified_count == 0 and utility_count == 0:
+                logger.info("✅ Sem tarefas ou registros para refinar no momento.")
                 return CycleResult(
                     worker_id=self.worker_id, cycle=self.cycle,
                     target="backlog_ia", source="ai_processor", extracted=0, simulated=False, 
                     error="no_tasks_available", duration=asyncio.get_event_loop().time() - start_time
                 )
 
-            logger.info(f"✨ [AI] Sucesso: {classified_count} comentários periciados.")
-            
+            total_processed = classified_count + utility_count
             return CycleResult(
                 worker_id=self.worker_id, cycle=self.cycle,
                 target="backlog_ia", source="ai_processor",
-                extracted=classified_count, # Usamos extracted para representar o processamento
+                extracted=total_processed, 
                 inserted=0,
                 duplicated=0,
-                classified=classified_count,
+                classified=total_processed,
                 db_success=True,
                 classifier_success=True,
                 simulated=False,
-                duration=asyncio.get_event_loop().time() - start_time
+                duration=asyncio.get_event_loop().time() - start_time,
+                metadata={"utility_tasks": utility_count}
             )
 
         except Exception as e:

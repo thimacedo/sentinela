@@ -40,27 +40,36 @@ class TargetResearchWorker(BaseWorker):
         quality_score = 0.0
         
         try:
-            # 1. Busca alvos pendentes de validacao ou curadoria
+            # 1. PRIORIDADE 1: Busca alvos pendentes de validação CRÍTICA
             res = db_client.client.table('candidatos')\
                 .select('username')\
-                .or_('identidade_validada.is.null,cargo.eq.DESCONHECIDO,cargo.is.null')\
-                .eq('status_monitoramento', 'ATIVO')\
-                .order('atualizado_em', desc=False)\
+                .filter('status_monitoramento', 'ilike', 'Ativo')\
+                .is_('identidade_validada', 'null')\
+                .order('nota_relevancia', desc=True)\
                 .limit(1)\
                 .execute()
 
+            # 2. TAREFA DE UTILIDADE (PASA v85.12): Enriquecimento de Dados Faltantes
+            if not res.data:
+                self.logger.info(f"[Curador] Fila de validação vazia. Iniciando Enriquecimento de Metadados...")
+                res = db_client.client.table('candidatos')\
+                    .select('username')\
+                    .filter('status_monitoramento', 'ilike', 'Ativo')\
+                    .or_('bio.is.null,seguidores.eq.0')\
+                    .order('atualizado_em', desc=False)\
+                    .limit(1)\
+                    .execute()
+
             if res.data:
                 target_username = res.data[0]['username']
-                self.logger.info(f"[Curador] Processando: @{target_username}")
+                self.logger.info(f"[Curador] Processando (Utilidade/Validação): @{target_username}")
                 
-                # Executa inteligencia via servico unificado
+                # Executa inteligência via serviço unificado
                 data = await intelligence_service.research_and_validate(target_username)
                 
                 if data:
                     extracted = 1
                     quality_score = data.get("_quality", 0.5)
-                    if data.get("status_monitoramento") == "DESATIVADO":
-                        self.logger.warning(f"[Curador] @{target_username} desativado.")
             else:
                 error = "no_tasks_available"
 

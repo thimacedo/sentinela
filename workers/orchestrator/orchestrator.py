@@ -165,11 +165,52 @@ class SentinelaOrchestrator:
         
         async def _worker_loop(worker: BaseWorker):
             while True:
-                # O orquestrador limpa alvos ativos em run_all, mas agora cada worker tem seu loop.
-                # Para evitar conflitos, limpamos aqui se necessário ou deixamos o claim_lock gerenciar.
-                wait_time = await self.run_cycle_with_validation(worker)
-                logger.debug("[%s] Aguardando %.0fs de cooldown space.", worker.worker_id, wait_time)
-                await asyncio.sleep(wait_time)
+                result = await self.run_cycle_with_validation_v2(worker)
+                
+                # --- SMART WAIT (PASA v85.12) ---
+                # Se o worker ficou ocioso por falta de tarefas, dorme por mais tempo
+                # para evitar ciclos inúteis e economia de recursos.
+                if result.cycle_result.error == "no_tasks_available":
+                    idle_wait = 600.0 # 10 minutos de sono profundo
+                    logger.info("[%s] 💤 Fila vazia. Entrando em modo de espera (%.0fs).", worker.worker_id, idle_wait)
+                    await asyncio.sleep(idle_wait)
+                else:
+                    wait_time = float(self.reward_engine.get_interval(result.reward.tier))
+                    logger.debug("[%s] Aguardando %.0fs de cooldown space.", worker.worker_id, wait_time)
+                    await asyncio.sleep(wait_time)
+
+    async def run_cycle_with_validation_v2(self, worker: BaseWorker):
+        """Versão que retorna tanto o resultado quanto a recompensa para controle de fluxo."""
+        self._cycle_total += 1
+        if self._cycle_total % 10 == 0: self._perform_self_healing()
+        
+        worker.active_targets = self._active_targets
+        worker.claim_lock = self._claim_lock
+        worker.shutdown_event = getattr(self, "shutdown_event", None)
+
+        result = await worker.run_cycle()
+        reward = await self.reward_engine.process_result(result)
+        
+        # Log padrão mantido via helper interno se necessário, mas aqui emitimos o consolidado
+        db_status = "ok" if result.db_success else "falhou"
+        logger.info(
+            "[%s] ciclo #%s | target=%s | extraidos=%s | db=%s | score=%.1f | tier=%s | erro=%s",
+            result.worker_id, result.cycle, result.target or "N/A", 
+            result.extracted, db_status, reward.score, reward.tier, result.error or "nenhum"
+        )
+        
+        from dataclasses import dataclass
+        @dataclass
+        class CycleContext:
+            cycle_result: CycleResult
+            reward: Any
+
+        return CycleContext(cycle_result=result, reward=reward)
+
+    async def run_cycle_with_validation(self, worker: BaseWorker) -> float:
+        """Legado para compatibilidade se outros scripts chamarem."""
+        ctx = await self.run_cycle_with_validation_v2(worker)
+        return float(self.reward_engine.get_interval(ctx.reward.tier))
 
         # Roda todos em paralelo, cada um com seu próprio ritmo de cooldown
         await asyncio.gather(*(_worker_loop(w) for w in self._workers))

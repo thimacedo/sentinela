@@ -208,4 +208,48 @@ class AIService:
                 except: pass
             return {"is_hate": False, "categoria_ia": "NEUTRO", "confianca_ia": 0.5, "analise_pericial": "Erro parser."}
 
+    async def run_batch_reanalysis(self, limit: int = 20, confidence_threshold: float = 0.6) -> int:
+        """
+        Busca registros já processados mas com baixa confiança para re-análise profunda (PASA v85.12).
+        Utiliza apenas modelos Cloud para o refinamento.
+        """
+        try:
+            from core.db import db_client
+            # Busca itens com confiança abaixo do threshold
+            res = db_client.client.table('comentarios')\
+                .select('id, texto_bruto')\
+                .eq('processado_ia', True)\
+                .lt('confianca_ia', confidence_threshold)\
+                .order('data_coleta', desc=True)\
+                .limit(limit).execute()
+            
+            items = res.data or []
+            if not items: return 0
+            
+            count = 0
+            for item in items:
+                # Força uso de modelos Cloud para re-análise
+                # Remove modelos locais da lista temporariamente para esta chamada
+                original_providers = self.providers
+                self.providers = [p for p in original_providers if p["name"] not in ["litert", "ollama"]]
+                
+                try:
+                    res_ia = await self.classify_text(item["texto_bruto"], item["id"])
+                    if res_ia and res_ia.get("confianca_ia", 0) > 0.1:
+                        db_client.client.table('comentarios').update({
+                            "categoria_ia": res_ia["categoria_ia"],
+                            "confianca_ia": res_ia["confianca_ia"],
+                            "is_hate": res_ia["is_hate"],
+                            "analise_pericial": f"[RE-ANÁLISE] {res_ia.get('analise_pericial', '')}"
+                        }).eq("id", item["id"]).execute()
+                        count += 1
+                except: continue
+                finally:
+                    self.providers = original_providers
+                    
+            return count
+        except Exception as e:
+            logger.error(f"Error in batch reanalysis: {e}")
+            return 0
+
 ai_service = AIService()
