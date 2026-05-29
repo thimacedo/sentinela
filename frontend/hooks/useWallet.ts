@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase'; // Assuming standard setup, let's verify.
+import { supabase } from '@/lib/supabase';
+
+const BETA_TESTER_ID = '79c43352-0c67-430a-9cf5-087c49367a6f';
 
 export function useWallet() {
   const [balance, setBalance] = useState<number>(0);
@@ -11,13 +13,12 @@ export function useWallet() {
     try {
       if (typeof window === 'undefined') return;
       
-      const userId = localStorage.getItem('sentinela_user_id');
+      let userId = localStorage.getItem('sentinela_user_id');
       
-      // Fallback for demo/guest if no auth implemented yet, but we should fetch from Supabase if possible
-      if (!userId) {
-        setBalance(0);
-        setLoading(false);
-        return;
+      // Validação Simples (BETA): Atribui a conta de Teste de Estresse se não logado
+      if (!userId || userId === 'guest') {
+        userId = BETA_TESTER_ID;
+        localStorage.setItem('sentinela_user_id', userId);
       }
 
       // Supabase query to 'profiles' table
@@ -46,7 +47,6 @@ export function useWallet() {
     }, 0);
     
     return () => clearTimeout(timeout);
-    // Optional: Set up real-time subscription here later if needed
   }, []);
 
   return { balance, loading, refreshBalance: fetchBalance };

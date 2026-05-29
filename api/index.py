@@ -473,23 +473,21 @@ def get_marketing_kpis(supa: Client = Depends(get_supa)):
 
 @app.post("/api/v1/dossiers/generate")
 async def generate_dossier(payload: DossierGenerateRequest, supa: Client = Depends(get_supa)):
-    """Gera um novo relatório estratégico com dedução de créditos (350 CI)."""
+    """Gera um novo relatório estratégico (Gratuito durante o Beta/Stress Test)."""
     try:
         from processing.dossie_service import dossie_service
         
-        # 1. Validação de Saldo e Cobrança (Atômica)
-        # 350 CI é o custo tático por dossiê gerado
+        # 1. Validação de Saldo (Bypass no Free Tier v86.2)
         rpc_payload = {
             "p_user_id": payload.user_id,
-            "p_amount": -350,
+            "p_amount": 0, # Gratuito
             "p_type": "CONSUMPTION",
             "p_session_id": None,
-            "p_metadata": {"action": "generate_dossier", "target": payload.candidato_id}
+            "p_metadata": {"action": "generate_dossier_free_tier", "target": payload.candidato_id}
         }
         
-        charge_res = supa.rpc('process_stn_transaction', rpc_payload).execute()
-        if charge_res.data is not True:
-            raise HTTPException(status_code=402, detail="Aporte Insuficiente. Adquira mais Créditos de Inteligência (CI).")
+        # Registra a transação com custo zero para manter auditoria
+        supa.rpc('process_stn_transaction', rpc_payload).execute()
 
         # 2. Busca dados reais para o dossiê (Top 500 interações do alvo)
         data_res = supa.table('comentarios')\

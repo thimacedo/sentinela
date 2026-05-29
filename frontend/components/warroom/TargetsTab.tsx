@@ -75,52 +75,36 @@ export default function TargetsTab() {
 
   const handleAddTarget = async () => {
     setTimeout(async () => {
-      if (balance < 500) {
-        alert("Aporte Insuficiente. Adquira mais Créditos de Inteligência (CI) para configurar a malha neural para novos perfis.");
-        router.push('/planos');
-        return;
-      }
-
       const username = prompt("Digite o @ do Instagram do novo alvo (ex: jairbolsonaro):");
       if (!username) return;
 
       const cleanUsername = username.replace('@', '').trim().toLowerCase();
 
-      const confirmAdd = window.confirm(`Configurar nossa malha neural para monitoramento 24/7 de @${cleanUsername} exige um aporte de 500 CI. Autorizar?`);
+      const confirmAdd = window.confirm(`[BETA GRATUITO] Injetar @${cleanUsername} na malha neural para monitoramento 24/7? (Operação gratuita durante o stress test)`);
       if (!confirmAdd) return;
 
       try {
         setIsAdding(true);
-        const userId = localStorage.getItem('sentinela_user_id');
-        
-        if (!userId) {
-          alert("Sessão inválida. Faça login.");
-          return;
-        }
+        const userId = localStorage.getItem('sentinela_user_id') || 'guest';
 
-        const { data: rpcData, error: rpcError } = await supabase.rpc('process_stn_transaction', {
+        // Loga a injeção a custo zero
+        await supabase.rpc('process_stn_transaction', {
           p_user_id: userId,
-          p_amount: -500,
+          p_amount: 0,
           p_type: 'CONSUMPTION',
           p_session_id: null,
-          p_metadata: { action: 'add_target', target: cleanUsername }
+          p_metadata: { action: 'add_target_free_tier', target: cleanUsername }
         });
 
-        if (rpcError) throw rpcError;
+        await supabase.from('candidatos').insert({
+          username: cleanUsername,
+          estado: 'BR',
+          status_monitoramento: 'Ativo'
+        });
 
-        if (rpcData === true) {
-          await supabase.from('candidatos').insert({
-            username: cleanUsername,
-            estado: 'BR',
-            status_monitoramento: 'Ativo'
-          });
-
-          refreshBalance();
-          refetch();
-          alert(`Alvo @${cleanUsername} injetado com sucesso na malha de coleta.`);
-        } else {
-          alert("Falha na transação. Saldo insuficiente.");
-        }
+        refreshBalance();
+        refetch();
+        alert(`Alvo @${cleanUsername} injetado com sucesso na malha de coleta (Modo Gratuito).`);
       } catch (err) {
         console.error(err);
         alert("Erro ao injetar novo alvo.");
