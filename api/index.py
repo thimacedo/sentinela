@@ -352,14 +352,22 @@ def get_targets(request: Request, limit: int = 50, supa: Client = Depends(get_su
         
         # 3. Busca ódio recente escopado para enriquecimento
         query_h = supa.table('comentarios').select('candidato_id, categoria_ia').eq('is_hate', True)
+        query_all = supa.table('comentarios').select('candidato_id')
+        
         if org_id:
             query_h = query_h.eq('organization_id', org_id)
+            query_all = query_all.eq('organization_id', org_id)
         
-        # Pegamos uma amostra maior de ódio para garantir que o cruzamento funcione
+        # Pegamos amostras para garantir que o cruzamento funcione
         h_res = query_h.order('data_coleta', desc=True).limit(5000).execute()
-        h_data = h_res.data or []
+        all_res = query_all.order('data_coleta', desc=True).limit(5000).execute()
         
-        counts = Counter([h['candidato_id'] for h in h_data])
+        h_data = h_res.data or []
+        all_data = all_res.data or []
+        
+        counts_odio = Counter([h['candidato_id'] for h in h_data])
+        counts_totais = Counter([a['candidato_id'] for a in all_data])
+        
         breakdowns = {}
         for h in h_data:
             cid, cat = h['candidato_id'], h['categoria_ia'] or 'OUTROS'
@@ -369,15 +377,18 @@ def get_targets(request: Request, limit: int = 50, supa: Client = Depends(get_su
         
         enriched = []
         for item in candidates:
-            cid = item.get('id')
-            item['comentarios_odio_count'] = counts.get(cid, 0)
+            username = item.get('username')
+            # Atualiza contagens baseadas na amostra recente
+            item['comentarios_odio_count'] = counts_odio.get(username, 0)
+            item['comentarios_totais_count'] = counts_totais.get(username, 0)
+            
             score, nivel, color = calculate_risk(item)
             enriched.append({
                 **item, 
                 "score_risco": score, 
                 "nivel_risco": nivel, 
                 "color": color, 
-                "breakdown": dict(breakdowns.get(cid, {}))
+                "breakdown": dict(breakdowns.get(username, {}))
             })
             
         # Retorna os alvos processados respeitando o limite, mas já embaralhados
