@@ -4,7 +4,8 @@
 import React from 'react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, Radar, RadarChart, PolarGrid, PolarAngleAxis
+  PieChart, Pie, Cell, Radar, RadarChart, PolarGrid, PolarAngleAxis,
+  BarChart, Bar
 } from 'recharts';
 import { useTemporalSeries, useDashboardStats } from '@/hooks/useDashboardData';
 import { ShieldAlert, BarChart3, Activity, Zap } from 'lucide-react';
