@@ -44,7 +44,7 @@ PASA_CONFIG = {
     "AMEACA": {"label": "Ameaça", "color": "#f97316", "icon": "alert-octagon"},
     "INSULTO_AD_HOMINEM": {"label": "Insulto Ad Hominem", "color": "#f59e0b", "icon": "swords"},
     "ATAQUE_INSTITUCIONAL": {"label": "Ataque Institucional", "color": "#8b5cf6", "icon": "landmark"},
-    "RIGOR_CRIMINAL": {"label": "Rigor Criminal", "color": "#06b6d4", "icon": "scale"}
+    "DANO_A_IMAGEM": {"label": "Dano à Imagem", "color": "#06b6d4", "icon": "scale"}
 }
 RISK_COLORS = {"CRITICO": "#ef4444", "ELEVADO": "#f59e0b", "MONITORANDO": "#06b6d4", "CONTROLADO": "#10b981"}
 
