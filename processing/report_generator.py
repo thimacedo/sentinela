@@ -105,7 +105,7 @@ class ReportGenerator(FPDF):
         ))
 
         # MATRIZ DE RISCO ANALÍTICO (Gatilho de Venda)
-        crimes_imputados = len([i for i in data if i.get('categoria_ia') == 'RIGOR_CRIMINAL'])
+        imputacoes_graves = len([i for i in data if i.get('categoria_ia') == 'DANO_REPUTACIONAL_GRAVE' or i.get('categoria_ia') == 'RIGOR_CRIMINAL'])
         
         self.ln(5)
         self.set_fill_color(254, 242, 242) # Red 50
@@ -120,8 +120,8 @@ class ReportGenerator(FPDF):
         self.set_x(15)
         self.set_font('Helvetica', '', 9)
         self.set_text_color(127, 29, 29) # Red 900
-        if crimes_imputados > 0:
-            self.cell(0, 5, f"Alerta Crítico: Detectamos {crimes_imputados} interações com potenciais imputações graves (Rigor Criminal).", ln=True)
+        if imputacoes_graves > 0:
+            self.cell(0, 5, f"Alerta Crítico: Detectamos {imputacoes_graves} interações com potenciais imputações graves à reputação do alvo.", ln=True)
         else:
             self.set_text_color(21, 128, 61) # Green 700
             self.set_fill_color(240, 253, 244) # Green 50
@@ -132,7 +132,7 @@ class ReportGenerator(FPDF):
             self.cell(0, 6, "MATRIZ DE RISCO ANALÍTICO", ln=True)
             self.set_x(15)
             self.set_text_color(20, 83, 45) # Green 900
-            self.cell(0, 5, "Cenário favorável: Nenhuma imputação criminal direta detectada nesta amostragem.", ln=True)
+            self.cell(0, 5, "Cenário favorável: Nenhuma imputação severa direta detectada nesta amostragem.", ln=True)
             
         self.ln(10)
 
@@ -158,7 +158,7 @@ class ReportGenerator(FPDF):
                 # Alternate colors for blocks
                 if cat == "AMEACA": self.set_fill_color(249, 115, 22) # Orange
                 elif cat == "ATAQUE_INSTITUCIONAL": self.set_fill_color(139, 92, 246) # Purple
-                elif cat == "RIGOR_CRIMINAL": self.set_fill_color(6, 182, 212) # Cyan
+                elif cat == "DANO_REPUTACIONAL_GRAVE" or cat == "RIGOR_CRIMINAL": self.set_fill_color(6, 182, 212) # Cyan
                 else: self.set_fill_color(220, 38, 38) # Red
                 
                 if current_x + w > 200: w = 200 - current_x
