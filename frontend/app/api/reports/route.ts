@@ -39,12 +39,11 @@ export async function POST(request: Request) {
   }
 
   // 1. Catraca de Cobrança: Deduz 350 CIs do saldo do usuário antes de liberar
-  const { data: rpcData, error: rpcError } = await supabase.rpc('process_stn_transaction', {
+  const { data: rpcData, error: rpcError } = await supabase.rpc('process_ci_transaction', {
     p_user_id: userId,
     p_amount: -350,
     p_type: 'CONSUMPTION',
-    p_session_id: 'dossier_catraca',
-    p_metadata: { action: `Emissão de Dossiê: ${reportName}` }
+    p_description: `Emissão de Dossiê: ${reportName}`
   });
 
   if (rpcError || (rpcData && rpcData.success === false)) {
