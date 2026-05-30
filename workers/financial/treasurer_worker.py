@@ -50,15 +50,17 @@ class TreasurerWorker(BaseWorker):
             if anomalies > 0:
                 logger.warning(f"⚖️ [Treasurer] {anomalies} anomalias de saldo detectadas.")
             
-            # 2. Processamento de Fechamento Diário
+            # 2. Monitoramento de Gateway (Stripe Connection Check)
+            stripe_status = await self._check_stripe_connectivity()
+            
+            # 3. Processamento de Fechamento Diário
             now = datetime.now(timezone.utc)
             if not self.daily_report_last_run or self.daily_report_last_run.date() < now.date():
                 await self._generate_daily_financial_report()
                 self.daily_report_last_run = now
                 extracted += 1
             
-            # 3. Cálculo de Burn Rate Operacional (Custo de IA/Proxy)
-            # Simulado para esta versão inicial v86.1
+            # 4. Cálculo de Burn Rate Operacional (Custo de IA/Proxy)
             await self._compute_burn_rate()
             
             if extracted == 0 and anomalies == 0:
@@ -75,8 +77,27 @@ class TreasurerWorker(BaseWorker):
             extracted=extracted, failed=failed,
             db_success=error is None, classifier_success=True,
             duration=asyncio.get_event_loop().time() - start_time,
-            error=error
+            error=error,
+            metadata={"stripe_online": stripe_status}
         )
+
+    async def _check_stripe_connectivity(self) -> bool:
+        """Verifica se o gateway de pagamento está respondendo corretamente (v86.5)."""
+        import stripe
+        stripe.api_key = os.getenv("STRIPE_API_KEY")
+        if not stripe.api_key:
+            logger.info("ℹ️ [Treasurer] Stripe API Key ausente. Operando em modo Mock/Beta.")
+            return False
+        
+        try:
+            # Tenta listar o balanço básico para validar a chave
+            loop = asyncio.get_event_loop()
+            await loop.run_in_executor(None, stripe.Balance.retrieve)
+            logger.info("✅ [Treasurer] Conexão com Stripe estabelecida.")
+            return True
+        except Exception as e:
+            logger.error(f"❌ [Treasurer] Falha na conexão Stripe: {e}")
+            return False
 
     async def _audit_balances(self) -> int:
         """Verifica se existem perfis com saldo negativo."""
