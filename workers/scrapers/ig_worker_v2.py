@@ -150,17 +150,30 @@ class IGWorkerV2(BaseWorker):
                 from core.behavior_engine import behavior_engine
                 comments = behavior_engine.detect_coordinated_clusters(comments)
             
-        except ValueError as e:
-            if "invalid_target" in str(e):
+        except Exception as e:
+            self.consecutive_blocks += 1
+            if isinstance(e, ValueError) and "invalid_target" in str(e):
                 self.logger.error(f"🚫 [V2] Alvo @{target.username} marcado como INVÁLIDO (404/Privado/Mismatch).")
                 return CycleResult(
                     worker_id=self.worker_id, cycle=self.cycle, target=target.username,
                     source="v2_engine", extracted=0, simulated=False, 
-                    error=str(e), db_success=False # db_success=False garante score baixo
+                    error=str(e), db_success=False
                 )
-            # Outros ValueErrors (ex: bloqueio de sessão) incrementam bloqueios
-            self.consecutive_blocks += 1
-            raise e
+                
+            if "all_sessions_blocked" in str(e):
+                self.logger.error(f"🛑 [V2] Todas as sessões em cooldown! Retornando falha controlada para não quebrar o Orquestrador.")
+                return CycleResult(
+                    worker_id=self.worker_id, cycle=self.cycle, target=target.username,
+                    source="v2_engine", extracted=0, simulated=False, 
+                    error="all_sessions_blocked", db_success=False
+                )
+                
+            self.logger.error(f"⚠️ [V2] Erro inesperado na extração de @{target.username}: {e}")
+            return CycleResult(
+                worker_id=self.worker_id, cycle=self.cycle, target=target.username,
+                source="v2_engine", extracted=0, simulated=False, 
+                error=str(e), db_success=False
+            )
 
         try:
             stats = self.scraper.get_stats()
