@@ -1,44 +1,44 @@
 # STATE.md — Sentinela Democratica (Fonte de Verdade)
-_last_updated: 2026-05-29 | branch: main (Model: Gemini Pro)_
+_last_updated: 2026-05-30 | branch: main (Model: Gemini Pro)_
 
-## Status Operacional (v86.0 - Intelligence Governance)
+## Status Operacional (v86.5 - Intelligence Governance)
 
 | Subsistema | Status | Observação |
 |---|---|---|
-| **Coleta (Rocket Scraper V2)** | 🟢 OPERACIONAL | **Rocket Mode** ativo com **Stealth Mode** avançado e Smart Backoff. |
+| **Coleta (Rocket Scraper V2)** | 🟢 OPERACIONAL | Resiliência Alta: Falha em cascata (cooldown bloqueando thread principal) eliminada por *Error Catching* na V2. |
 | **Inteligência (PASA)** | 🟢 OPERACIONAL | **Triagem Híbrida** (Ollama Local + Cloud). Suporte a Markdown forense. |
-| **Monetização (CI)** | 🟢 OPERACIONAL | Stripe E2E + Geração de **Dossiês Reais** (350 CI/unidade). |
-| **Analytics (Network)** | 🟢 OPERACIONAL | **NetworkMinerWorker** ativo detectando clusters coordenados. |
-| **Frontend (Next.js)** | 🟢 ESTÁVEL | Next.js 16. Grid 2-colunas, filtros dinâmicos e KPIs em tempo real. |
+| **Monetização (CI)** | 🟢 OPERACIONAL | Dashboard DRE Diário ativo e integrado com `Recharts` na administração financeira. |
+| **Analytics (Network)** | 🟢 OPERACIONAL | Motor NetworkMiner ativo com Clusterização unificada (deduplicação por assinatura léxica de nós). |
+| **Frontend (Next.js)** | 🟢 ESTÁVEL | Refinamentos Premium UX: Correção de "overscaling", ForceGraph neon-legível e Glassmorphism implementados. |
 
-## 🛠️ Últimas Mudanças (Sprint v86.0 ➔ v86.5)
+## 🛠️ Últimas Mudanças (Sprint v86.5 Concluída)
 
-1.  **Governança Financeira (Fase 7.1 Completa):** Implementada a abstração e "Proxy de Nomenclatura" para Créditos de Inteligência (CI) no nível do código de negócio (Python e Next.js), mantendo o banco de dados STN inalterado. Isso garantiu resiliência do sistema sem exigir intervenção DDL manual no Supabase.
-2.  **Catraca de Acesso:** Implementada validação e dedução automática de 350 CIs no endpoint `/api/reports/route.ts` antes da liberação de dossiês analíticos.
-3.  **Auditoria AdSense:** Corrigido o ciclo de vida do componente `AdSenseSlot.tsx` em modo SPA (Single Page Application) e removido script conflitante AMP no layout, desobstruindo a injeção do Google.
-4.  **Refatoração UX/UI (Marketing Focus):** Redesign agressivo da página de Estatísticas e da Home. Implementação de hierarquia `font-black`, `glassmorphism`, microinterações (pulse, hover) e "white space".
-5.  **Compliance Jurídico Estrito:** Sanitização total de "bad words" jurídicas no Frontend estabelecendo blindagem legal e proteção reputacional (0 ocorrências validadas).
-6.  **Recuperação Autônoma de Sessões (IG Scraper):** Modificado o injetor/extrator interativo com um bloqueio rígido de +60s. 
+1.  **Dashboard DRE Financeiro:** Injeção do módulo de análise de fluxo (Inflow/Outflow) e histórico de queima com UI dinâmica via React Recharts na aba Financeiro.
+2.  **Harmonização Tipográfica (UX/UI):** Remoção de vícios de layout como overscaling tipográfico (Fontes `text-6xl` esmagando interface nas seções "Visão Tática"). Ajuste para leitura fluída e *Glassmorphism* limpo.
+3.  **Resiliência Máxima do Watchdog:** Corrigido vazamento de exceção letal de Sessão IG (`RuntimeError`). Scraper agora devolve falhas passivas ao orquestrador sem interromper as outras *threads* da aplicação.
+4.  **Deduplicação de Clusters em Rede:** A API `/api/v1/networks` agora gera um Hash/Assinatura única via conjunto (`frozenset`) de Nós para impedir a criação visual de clusters iterativos "clonados".
+5.  **Grafo de Ligações Táticas:** Reescrito o `CanvasRenderingContext2D` do `react-force-graph-2d` para: A) Eliminar "Emaranhado" limitando os Text Labels da rede somente em *Zooms aproximados* e B) Paleta Neon vibrante sob contraste de fundo escuro com legenda `backdrop-blur`.
+6.  **Normalização DB:** Execução com sucesso do `scripts/clean_parties.py` e saneamento em fluxo no endpoint de estatísticas para partidos nulos/vazios/não informados.
 
-## 📊 ARQUITETURA DE INTEGRIDADE (v86.0)
+## 📊 ARQUITETURA DE INTEGRIDADE (v86.5)
 
 ```
-[Watchdog v50.0] (Guardião + Autocura)
-  ├── [Orchestrator v86.0] (Async Parallelism)
+[Watchdog v50.0] (Guardião + Autocura + Tratamento Fallback)
+  ├── [Orchestrator v86.5] (Async Parallelism)
         ├── [QueueManager v85.6] (Case-Insensitive + Priority Queue)
-        ├── [Scraper Mesh] (IGWorkerV2 - Stealth Mode + Human Jitter)
+        ├── [Scraper Mesh] (IGWorkerV2 - Tratamento de Cooldown Ativo)
         ├── [AI Processor] (Ollama Triage -> Cloud Refinement)
-        ├── [Network Miner] (NetworkX Cluster Detection)
-        └── [Treasurer] (Financial Integrity & CI Ledger - INICIO)
+        ├── [Network Miner] (Assinatura Lexical Frozenset -> Dedup DB)
+        └── [Treasurer] (Financial Dashboard CI Ledger)
 ```
 
 ## 📉 Métricas de Resiliência
-- **Uptime Scrapers:** 98.6% (v86.0)
+- **Uptime Orquestrador:** 100.0% (v86.5 com Tratamento Letal Evitado)
 - **Taxa de Acerto IA:** 94.5% (MCA v2.2)
-- **Sessões Ativas:** 2/10 (Instagram)
-- **Burn Rate:** Otimizado via triagem local.
+- **Sessões Ativas:** Múltiplas (Escala auto-gerenciada e bypass de Cooldown Massivo)
+- **Burn Rate:** Otimizado e monitorável em Tempo Real.
 
 ## 📝 Notas de Engenharia
 - **Nomenclatura:** Todos os novos módulos devem utilizar `CI` (Créditos de Inteligência) em vez de `STN`.
 - **Furtividade:** A rotação de dispositivos (iPhone/Android/Windows) é mandatória para alvos de alta relevância.
-- **Integridade:** Dossiês sem hash SHA-256 são considerados inválidos pela governança.
+- **Glassmorphism:** Obrigatório o emprego de Fundos Translúcidos, Gradientes sutis, e Cores Vibrantes (Neon em Network) para manter a experiência premium. E evitar Fontes Extremas (Acima de 4XL) em textos curtos.
