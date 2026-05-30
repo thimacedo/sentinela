@@ -14,9 +14,24 @@ async def renew_account_cookies(browser, account: dict):
     
     print(f"\n[*] Iniciando renovação para conta: {user} (Destino: {sid_key})...")
     
-    context = await browser.new_context(
-        user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
-    )
+    proxy_url = os.getenv("PROXY_URL")
+    context_kwargs = {
+        "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        "viewport": {"width": 1280, "height": 800}
+    }
+    if proxy_url:
+        context_kwargs["proxy"] = {"server": proxy_url}
+        
+    context = await browser.new_context(**context_kwargs)
+    
+    # Evasão anti-detecção (PASA v85.10)
+    await context.add_init_script("""
+        Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+        Object.defineProperty(navigator, 'platform', { get: () => 'Win32' });
+        Object.defineProperty(navigator, 'vendor', { get: () => 'Google Inc.' });
+        Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3, 4, 5] });
+    """)
+    
     page = await context.new_page()
     page.set_default_timeout(45000)
 
@@ -105,9 +120,14 @@ async def renew_account_cookies(browser, account: dict):
             await page.type(password_selector, password, delay=150)
             
             # Clicar em entrar e esperar navegação
+            import random
             submit_btn = await page.query_selector('button[type="submit"]')
             if submit_btn:
-                await submit_btn.click()
+                box = await submit_btn.bounding_box()
+                if box:
+                    await page.mouse.move(box["x"] + box["width"]/2 + random.randint(-5, 5), box["y"] + box["height"]/2 + random.randint(-5, 5), steps=10)
+                    await page.wait_for_timeout(random.randint(150, 400))
+                await submit_btn.click(delay=random.uniform(80, 180))
             else:
                 await page.keyboard.press("Enter")
                 
@@ -265,7 +285,18 @@ async def export_cookies():
     print(f"Iniciando Playwright (headless={headless_mode}, interativo={interactive})...")
 
     async with async_playwright() as pw:
-        browser = await pw.chromium.launch(headless=headless_mode)
+        browser = await pw.chromium.launch(
+            headless=headless_mode,
+            args=[
+                "--disable-blink-features=AutomationControlled", 
+                "--no-sandbox",
+                "--disable-infobars",
+                "--window-position=0,0",
+                "--ignore-certificate-errors",
+                "--disable-extensions",
+                "--disable-notifications"
+            ]
+        )
         
         # Executa a renovação sequencialmente para cada conta
         for acc in accounts:
