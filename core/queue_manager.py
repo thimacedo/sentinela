@@ -218,16 +218,33 @@ class QueueManager:
             active_targets.add(username)
 
     def rotate_target(self, target: Target) -> None:
-        """Remove o item processado e reinsere no fim da fila com status e termômetro (v84.18)."""
+        """Remove o item processado e reinsere no fim da fila com status e termômetro (v86.3)."""
         if not target.username:
             return
 
         now = datetime.now(timezone.utc)
         now_iso = now.isoformat()
         
-        frequencia = 0.0
-        is_empty = hasattr(target, "error") and target.error in ["no_comments_found", "junk_detected"]
+        # PASA v86.3: Não pune o alvo se for um erro sistêmico do Scraper
+        # Apenas "no_comments_found" ou "junk_detected" justificam diminuir a temperatura
+        is_empty = hasattr(target, "error") and target.error in ["no_comments_found", "junk_detected", "invalid_target: 404_not_found"]
+        is_system_error = hasattr(target, "error") and target.error and not is_empty
         
+        # Se for um erro do sistema, atualizamos o last_scraped_at mas NÃO mudamos o termômetro
+        if is_system_error:
+            logger.warning(f"⚠️ [Queue] Erro sistêmico detectado para @{target.username} ({target.error}). Mantendo temperatura atual.")
+            self.db.table("candidatos").update({
+                "last_scraped_at": now_iso
+            }).eq("username", target.username).execute()
+            
+            if target.queue_id:
+                self.db.table("fila_coleta").update({
+                    "status": "FALHA_SISTEMICA",
+                    "updated_at": now_iso
+                }).eq("id", target.queue_id).execute()
+            return
+
+        frequencia = 0.0
         post_metas = getattr(target, "post_metas", [])
         valid_dates = []
         if post_metas:

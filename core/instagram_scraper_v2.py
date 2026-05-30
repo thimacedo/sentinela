@@ -531,11 +531,25 @@ class InstagramScraperV2:
         return comments
 
     async def _verify_session(self, page: Page, session: Session) -> bool:
+        """Verifica se a sessão ainda é válida navegando para o feed."""
         try:
-            await page.goto("https://www.instagram.com/", wait_until="domcontentloaded", timeout=25000)
-            await asyncio.sleep(3)
-            return "accounts/login" not in page.url
-        except: return False
+            # Tenta acessar uma URL protegida
+            await page.goto("https://www.instagram.com/", wait_until="domcontentloaded", timeout=30000)
+            await asyncio.sleep(random.uniform(2, 4))
+            
+            # Se redirecionar para login, a sessão caiu
+            if "accounts/login" in page.url:
+                return False
+                
+            # Verifica se o seletor de perfil (indicando logado) existe
+            profile_element = await page.query_selector('svg[aria-label="Perfil"], svg[aria-label="Profile"]')
+            return profile_element is not None
+        except:
+            return False
+
+    def get_stats(self) -> Dict[str, Any]:
+        """Retorna estatísticas acumuladas do scraper."""
+        return self.stats
 
     async def _take_screenshot(self, page: Page, name: str) -> None:
         try:
