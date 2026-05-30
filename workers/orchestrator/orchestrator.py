@@ -165,11 +165,12 @@ class SentinelaOrchestrator:
         
         async def _worker_loop(worker: BaseWorker):
             while True:
+                if getattr(self, "shutdown_event", None) and self.shutdown_event.is_set():
+                    logger.info("[%s] Shutdown detectado. Saindo do loop.", worker.worker_id)
+                    break
                 result = await self.run_cycle_with_validation_v2(worker)
                 
                 # --- SMART WAIT (PASA v85.12) ---
-                # Se o worker ficou ocioso por falta de tarefas, dorme por mais tempo
-                # para evitar ciclos inúteis e economia de recursos.
                 if result.cycle_result.error == "no_tasks_available":
                     idle_wait = 600.0 # 10 minutos de sono profundo
                     logger.info("[%s] 💤 Fila vazia. Entrando em modo de espera (%.0fs).", worker.worker_id, idle_wait)
@@ -178,6 +179,9 @@ class SentinelaOrchestrator:
                     wait_time = float(self.reward_engine.get_interval(result.reward.tier))
                     logger.debug("[%s] Aguardando %.0fs de cooldown space.", worker.worker_id, wait_time)
                     await asyncio.sleep(wait_time)
+
+        # Roda todos em paralelo, cada um com seu próprio ritmo de cooldown
+        await asyncio.gather(*(_worker_loop(w) for w in self._workers))
 
     async def run_cycle_with_validation_v2(self, worker: BaseWorker):
         """Versão que retorna tanto o resultado quanto a recompensa para controle de fluxo."""
@@ -191,7 +195,6 @@ class SentinelaOrchestrator:
         result = await worker.run_cycle()
         reward = await self.reward_engine.process_result(result)
         
-        # Log padrão mantido via helper interno se necessário, mas aqui emitimos o consolidado
         db_status = "ok" if result.db_success else "falhou"
         logger.info(
             "[%s] ciclo #%s | target=%s | extraidos=%s | db=%s | score=%.1f | tier=%s | erro=%s",
@@ -211,9 +214,6 @@ class SentinelaOrchestrator:
         """Legado para compatibilidade se outros scripts chamarem."""
         ctx = await self.run_cycle_with_validation_v2(worker)
         return float(self.reward_engine.get_interval(ctx.reward.tier))
-
-        # Roda todos em paralelo, cada um com seu próprio ritmo de cooldown
-        await asyncio.gather(*(_worker_loop(w) for w in self._workers))
 
     def stop_all(self) -> None:
         for w in self._workers:
