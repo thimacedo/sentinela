@@ -1,5 +1,5 @@
 # STATE.md — Sentinela Democratica (Fonte de Verdade)
-_last_updated: 2026-05-30 | branch: main (Model: Gemini Pro)_
+_last_updated: 2026-05-30 | branch: main (Model: Gemini 3.5 Flash)_
 
 ## Status Operacional (v86.5 - Intelligence Governance)
 
@@ -19,6 +19,7 @@ _last_updated: 2026-05-30 | branch: main (Model: Gemini Pro)_
 4.  **Deduplicação de Clusters em Rede:** A API `/api/v1/networks` agora gera um Hash/Assinatura única via conjunto (`frozenset`) de Nós para impedir a criação visual de clusters iterativos "clonados".
 5.  **Grafo de Ligações Táticas:** Reescrito o `CanvasRenderingContext2D` do `react-force-graph-2d` para: A) Eliminar "Emaranhado" limitando os Text Labels da rede somente em *Zooms aproximados* e B) Paleta Neon vibrante sob contraste de fundo escuro com legenda `backdrop-blur`.
 6.  **Normalização DB:** Execução com sucesso do `scripts/clean_parties.py` e saneamento em fluxo no endpoint de estatísticas para partidos nulos/vazios/não informados.
+7.  **Correção de Importação do InstagramWorker:** Corrigida a referência à classe do scraper em `instagram_worker.py` para `InstagramScraperWorker` (Fase 4 - Workers), sanando o loop de erro letal no Watchdog.
 
 ## 📊 ARQUITETURA DE INTEGRIDADE (v86.5)
 

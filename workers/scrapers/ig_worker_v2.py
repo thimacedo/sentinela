@@ -18,7 +18,7 @@ from core.process_cleaner import cleanup_orphans
 
 logger = logging.getLogger("worker.ig_v2")
 
-class IGWorkerV2(BaseWorker):
+class InstagramScraperWorker(BaseWorker):
     """
     Worker Instagram V2 (Independente).
     Implementa o fluxo completo de coleta e classificação usando o motor V2.
