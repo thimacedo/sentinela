@@ -11,11 +11,11 @@ _last_updated: 2026-05-29 | branch: main (Model: Gemini Pro)_
 | **Analytics (Network)** | 🟢 OPERACIONAL | **NetworkMinerWorker** ativo detectando clusters coordenados. |
 | **Frontend (Next.js)** | 🟢 ESTÁVEL | Next.js 16. Grid 2-colunas, filtros dinâmicos e KPIs em tempo real. |
 
-## 🛠️ Últimas Mudanças (Sprint v85.2 ➔ v86.1)
+## 🛠️ Últimas Mudanças (Sprint v85.2 ➔ v86.2)
 
-1.  **Correção Crítica (Scraper V2):** Corrigida regressão de indentação em `InstagramScraperV2` que impedia o acesso aos métodos `get_stats` e `_validate_target_identity`, restaurando a estabilidade dos workers de coleta e inteligência.
-2.  **Robustez de Diagnóstico:** Melhorado o logging de exceções no `IntelligenceService` e aumentada a precisão das mensagens de erro (truncamento de 50 para 100 caracteres).
-3.  **Motor de Coleta:** Implementado **Stealth Mode** com rotação de User-Agents/Viewports e bypass de fingerprint.
+1.  **Resiliência de Sessões (IG Scraper):** Implementado sistema de "Sticky Profiles" (perfil fixo por sessão) e "Session Cooldown" (bloqueio temporário de 30 min em caso de falha de verificação), reduzindo bloqueios permanentes e evasão de sessões.
+2.  **Correção Crítica (Scraper V2):** Corrigida regressão de indentação em `InstagramScraperV2`.
+3.  **Robustez de Diagnóstico:** Melhorado o logging de exceções no `IntelligenceService`.
 4.  **Inteligência Local:** Integrado **Ollama** para triagem inicial de custo zero. Redução de ~50% no consumo de APIs externas.
 5.  **Dossiês Forenses:** Ativada a geração real de PDFs via `DossieService` com assinatura **SHA-256** e selo de integridade.
 6.  **UX de Análise:** Implementada renderização **Markdown** nos cards e exibição do **Parecer Técnico** da IA.
