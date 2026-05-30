@@ -57,6 +57,7 @@ export default function AdSenseSlot({ adSlot, format = 'auto', layout, layoutKey
     >
       <ins
         ref={insRef}
+        key={pathname + '-' + adSlot}
         className="adsbygoogle z-10 w-full"
         style={{ display: 'block', ...style }}
         data-ad-client="ca-pub-1827611269042960"
