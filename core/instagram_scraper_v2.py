@@ -544,10 +544,14 @@ class InstagramScraperV2:
         try:
             await page.goto("https://www.instagram.com/", wait_until="domcontentloaded", timeout=30000)
             await asyncio.sleep(random.uniform(2, 4))
-            if "accounts/login" in page.url: return False
-            profile_element = await page.query_selector('svg[aria-label="Perfil"], svg[aria-label="Profile"]')
-            return profile_element is not None
-        except: return False
+            current_url = page.url
+            if "accounts/login" in current_url: 
+                return False
+            login_field = await page.query_selector('input[name="username"]')
+            return login_field is None
+        except Exception as e:
+            logger.warning(f"⚠️ [V2] Erro ao verificar sessão {session.label}: {e}")
+            return False
 
     def get_stats(self) -> Dict[str, Any]:
         """Retorna estatísticas acumuladas do scraper."""
