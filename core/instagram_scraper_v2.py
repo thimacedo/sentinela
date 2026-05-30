@@ -142,22 +142,6 @@ class InstagramScraperV2:
                 "h": 900,
                 "platform": "MacIntel",
                 "vendor": "Apple Computer, Inc."
-            },
-            # iPhone iOS Safari
-            {
-                "ua": f"Mozilla/5.0 (iPhone; CPU iPhone OS 17_{random.choice([3,4,5])} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/605.1",
-                "w": random.choice([390, 393, 428, 430]),
-                "h": random.choice([844, 852, 926, 932]),
-                "platform": "iPhone",
-                "vendor": "Apple Computer, Inc."
-            },
-            # Android Chrome
-            {
-                "ua": f"Mozilla/5.0 (Linux; Android 14; Pixel {random.choice([7, 8])}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{chrome_ver} Mobile Safari/537.36",
-                "w": 412,
-                "h": 915,
-                "platform": "Linux armv8l",
-                "vendor": "Google Inc."
             }
         ]
 
@@ -217,22 +201,12 @@ class InstagramScraperV2:
                     proxy_url = os.getenv("PROXY_URL")
                     context_kwargs = {
                         "viewport": {"width": profile["w"], "height": profile["h"]},
-                        "user_agent": profile["ua"],
-                        "extra_http_headers": profile["headers"],
-                        "device_scale_factor": random.choice([1, 2, 3]),
-                        "has_touch": "Mobile" in profile["ua"]
+                        "user_agent": profile["ua"]
                     }
                     if proxy_url:
                         context_kwargs["proxy"] = {"server": proxy_url}
                         
                     context = await browser.new_context(**context_kwargs)
-                    
-                    await context.add_init_script(f"""
-                        Object.defineProperty(navigator, 'webdriver', {{ get: () => undefined }});
-                        Object.defineProperty(navigator, 'platform', {{ get: () => '{profile["platform"]}' }});
-                        Object.defineProperty(navigator, 'vendor', {{ get: () => '{profile["vendor"]}' }});
-                        Object.defineProperty(navigator, 'plugins', {{ get: () => [1, 2, 3, 4, 5] }});
-                    """)
                     
                     await context.add_cookies([{
                         'name': 'sessionid', 
@@ -274,7 +248,12 @@ class InstagramScraperV2:
                     except ValueError as ve: raise ve
                     except: pass
 
-                    await asyncio.sleep(random.uniform(4, 8))
+                    try:
+                        await page.wait_for_selector("main, header", timeout=20000)
+                    except Exception as e_wait:
+                        logger.warning(f"⚠️ [V2] Timeout aguardando elementos principais do perfil: {e_wait}")
+
+                    await asyncio.sleep(random.uniform(3, 6))
 
                     if "login" in page.url:
                         logger.warning(f"⚠️ [V2] Login wall detectado para {session.label}")
@@ -285,6 +264,18 @@ class InstagramScraperV2:
 
                     post_metas = await self._extract_shortcodes(page, max_posts)
                     self.stats["posts_found"] = len(post_metas)
+                    
+                    if len(post_metas) == 0:
+                        logger.warning(f"⚠️ [V2] Nenhum post encontrado para @{username}. Salvando diagnóstico...")
+                        try:
+                            os.makedirs("scratch", exist_ok=True)
+                            await page.screenshot(path=f"scratch/scrape_empty_{username}.png")
+                            html_content = await page.content()
+                            with open(f"scratch/scrape_empty_{username}.html", "w", encoding="utf-8") as f:
+                                f.write(html_content)
+                            logger.info(f"💾 Diagnóstico salvo em scratch/scrape_empty_{username}.png e .html")
+                        except Exception as e_diag:
+                            logger.error(f"Falha ao salvar diagnóstico: {e_diag}")
                     
                     scraped_count = 0
                     consecutive_old_posts = 0
@@ -428,18 +419,34 @@ class InstagramScraperV2:
         return await page.evaluate(f"""
             () => {{
                 const results = [];
-                const posts = document.querySelectorAll('div._aabd, div._ac7v div');
-                posts.forEach(p => {{
-                    const link = p.querySelector('a[href*="/p/"], a[href*="/reel/"]');
-                    if (!link) return;
+                const links = Array.from(document.querySelectorAll('a[href*="/p/"], a[href*="/reel/"]'));
+                
+                links.forEach(link => {{
                     const match = link.href.match(/\\/(p|reel)\\/([^/]+)\\//);
                     if (!match) return;
                     const shortcode = match[2];
                     if (results.some(r => r.shortcode === shortcode)) return;
+                    
+                    let container = link.parentElement;
+                    let is_pinned = false;
+                    let timestamp = null;
+                    
+                    for (let i = 0; i < 5 && container; i++) {{
+                        const pin_icon = container.querySelector('svg[aria-label*="Pinned"], svg[aria-label*="Fixado"], svg[aria-label*="pinned"], svg[aria-label*="fixado"]');
+                        if (pin_icon) {{
+                            is_pinned = true;
+                        }}
+                        const time_el = container.querySelector('time');
+                        if (time_el) {{
+                            timestamp = time_el.getAttribute('datetime');
+                        }}
+                        container = container.parentElement;
+                    }}
+                    
                     results.push({{ 
                         shortcode, 
-                        is_pinned: !!p.querySelector('svg[aria-label*="Pinned"], svg[aria-label*="Fixado"]'),
-                        timestamp: p.querySelector('time')?.getAttribute('datetime') 
+                        is_pinned,
+                        timestamp 
                     }});
                 }});
                 return results.slice(0, {limit + 3});
@@ -468,25 +475,25 @@ class InstagramScraperV2:
 
     async def _extract_from_dom(self, page: Page, shortcode: str) -> List[Dict[str, Any]]:
         return await page.evaluate("""
-            () => {{
+            () => {
                 const results = [];
                 const h3s = Array.from(document.querySelectorAll('article h3'));
-                h3s.forEach(h => {{
+                h3s.forEach(h => {
                     const username = h.innerText.trim();
                     if (!username || username.includes(' ')) return;
                     let node = h;
-                    for(let i = 0; i < 6; i++) {{ if(node.parentElement) node = node.parentElement; }}
+                    for(let i = 0; i < 6; i++) { if(node.parentElement) node = node.parentElement; }
                     const spans = Array.from(node.querySelectorAll('span[dir="auto"]'));
-                    for(let span of spans) {{
+                    for(let span of spans) {
                         const txt = span.innerText.trim();
-                        if (txt && txt !== username && txt.length > 2) {{
-                            results.push({{ autor: username, texto: txt }});
+                        if (txt && txt !== username && txt.length > 2) {
+                            results.push({ autor: username, texto: txt });
                             break;
-                        }}
-                    }}
-                }});
+                        }
+                    }
+                });
                 return results;
-            }}
+            }
         """)
 
     def _recursive_find_comments(self, data: Any) -> List[Dict[str, Any]]:

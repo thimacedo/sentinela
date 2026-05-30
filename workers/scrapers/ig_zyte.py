@@ -173,8 +173,8 @@ class IGZyteWorker(BaseWorker):
         max_retries = 2
         for attempt in range(max_retries + 1):
             try:
-                async with httpx.AsyncClient(timeout=60.0) as client:
-                    response = await client.post(self.zyte_api_url, auth=(self.zyte_key, ""), json=payload)
+                async with httpx.AsyncClient(timeout=DEFAULT_TIMEOUT) as client:
+                    response = await client.post(self.zyte_api_url, auth=(self.zyte_key, ""), json=payload, timeout=DEFAULT_TIMEOUT)
 
                 if response.status_code in [401, 403]:
                     self.logger.warning("[Zyte] Auth error (HTTP %s) slot=%s", response.status_code, current_slot)

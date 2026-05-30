@@ -37,8 +37,13 @@ dist/
 # 3. Credenciais, Segredos e Sessoes (NUNCA COMMITAR)
 # -----------------------------------------------------------------
 .env
+.env.example
 .env.local
-.env.*
+
+# Ignore PDF bases
+bases_pdf/*.pdf
+bases_pdf/**/*.pdf
+
 .env.development.local
 .env.test.local
 .env.production.local

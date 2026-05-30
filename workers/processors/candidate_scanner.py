@@ -165,7 +165,7 @@ class CandidateScannerWorker(BaseWorker):
         self.logger.info(f"🔍 Buscando na web por: '{query}'...")
         try:
             async with httpx.AsyncClient() as client:
-                resp = await client.get(url, headers=headers, timeout=15.0)
+                resp = await client.get(url, headers=headers, timeout=DEFAULT_TIMEOUT)
                 if resp.status_code == 200:
                     # Encontra handles do instagram nos links de resultado
                     raw_handles = re.findall(r'instagram\.com/([a-zA-Z0-9_\.\-]+)', resp.text)
