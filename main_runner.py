@@ -30,25 +30,34 @@ os.makedirs("logs", exist_ok=True)
 os.makedirs("logs", exist_ok=True)
 WATCHDOG_ACTIVE = os.getenv("WATCHDOG_ACTIVE") == "true"
 
+# Root logger configuration
 root_logger = logging.getLogger()
-root_logger.setLevel(logging.WARNING) # Modo Quiet por padrão (v84.13)
+root_logger.setLevel(logging.WARNING)  # modo quiet por padrão
 root_logger.handlers.clear()
 
+# Console handler (minimal)
 console_handler = logging.StreamHandler(sys.stdout)
-if WATCHDOG_ACTIVE:
-    console_format = "%(message)s"
-else:
-    console_format = "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+console_format = "%(message)s" if not WATCHDOG_ACTIVE else "%(message)s"
 console_handler.setFormatter(logging.Formatter(console_format))
-
-from logging.handlers import RotatingFileHandler
-file_handler = RotatingFileHandler("logs/main_runner.log", maxBytes=5*1024*1024, backupCount=3, encoding="utf-8")
-file_handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
-
 root_logger.addHandler(console_handler)
+
+# File handler (JSON)
+from logging.handlers import RotatingFileHandler
+from pythonjsonlogger import jsonlogger
+file_handler = RotatingFileHandler(
+    "logs/main_runner.json",
+    maxBytes=5 * 1024 * 1024,
+    backupCount=3,
+    encoding="utf-8",
+)
+json_formatter = jsonlogger.JsonFormatter(
+    "%(asctime)s %(levelname)s %(name)s %(message)s",
+    timestamp=True,
+)
+file_handler.setFormatter(json_formatter)
 root_logger.addHandler(file_handler)
 
-# Habilitar INFO apenas para os logs operacionais essenciais
+# Enable INFO for principais loggers
 for important_logger in ["main_runner", "orchestrator", "queue_manager", "worker.ig_v2", "worker.researcher", "instagram_scraper_v2"]:
     logging.getLogger(important_logger).setLevel(logging.INFO)
 
