@@ -21,6 +21,8 @@ _last_updated: 2026-05-30 | branch: main (Model: Gemini 3.5 Flash)_
 6.  **Normalização DB:** Execução com sucesso do `scripts/clean_parties.py` e saneamento em fluxo no endpoint de estatísticas para partidos nulos/vazios/não informados.
 7.  **Correção de Importação do InstagramWorker:** Corrigida a referência à classe do scraper em `instagram_worker.py` para `InstagramScraperWorker` (Fase 4 - Workers), sanando o loop de erro letal no Watchdog.
 8.  **Validação Manual de Sessão Instagram:** Adicionado suporte ao argumento `--interactive` (ou `-i`) no script `export_playwright_cookies.py` para forçar a execução visual (não-headless) do Playwright. Otimizada a detecção do sucesso de login de forma reativa no loop para evitar esperas desnecessárias de 60s. Adicionados logs instrutivos ao operador no worker `ig_worker_v2.py` ao acusar que todas as sessões estão em cooldown/expiradas.
+9.  **Otimização e Dimensionamento da Fila de Coleta:** Aumentada a meta mínima de itens pendentes na fila (`min_pending`) de 5 (local) e 15 (nuvem) para 50, garantindo fila saudável para execuções duradouras. Corrigido o limite fixo de busca de candidatos no `QueueManager` para que o limite respeite a meta (`min_pending`). Corrigida a codificação do console no script `cloud_queue_refresh.py` para aceitar UTF-8 no Windows, evitando erros silenciosos de encode.
+
 
 
 ## 📊 ARQUITETURA DE INTEGRIDADE (v86.5)

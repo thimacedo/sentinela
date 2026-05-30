@@ -99,7 +99,7 @@ class QueueManager:
             logger.error(f"❌ [Queue] Erro ao consultar fila_coleta: {e}")
         return None
 
-    def _ensure_queue_populated(self, min_pending: int = 5) -> None:
+    def _ensure_queue_populated(self, min_pending: int = 50) -> None:
         """Repopula a fila_coleta automaticamente quando há poucos itens pendentes (v80.0)."""
         try:
             # Conta itens PENDENTE
@@ -119,7 +119,7 @@ class QueueManager:
                 .select("id,username,termometro")\
                 .filter("status_monitoramento", "ilike", "Ativo")\
                 .order("last_scraped_at", desc=False)\
-                .limit(20).execute()
+                .limit(min_pending).execute()
 
             reinseridos = 0
             for cand in (candidatos_res.data or []):

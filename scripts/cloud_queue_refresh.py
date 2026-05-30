@@ -9,6 +9,15 @@ import os
 import sys
 import logging
 
+# Força UTF-8 no Windows para evitar UnicodeEncodeError no console local
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding='utf-8', errors='backslashreplace')
+        sys.stderr.reconfigure(encoding='utf-8', errors='backslashreplace')
+    except AttributeError:
+        pass
+
+
 # --- Auto-Anchoring (PASA v80.1) ---
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
@@ -38,8 +47,8 @@ def main():
         
         manager = QueueManager(supabase)
         
-        # Garante pelo menos 15 itens pendentes na fila
-        min_pending = 15
+        # Garante pelo menos 50 itens pendentes na fila
+        min_pending = 50
         logger.info(f"Executando verificação de população da fila (meta mínima: {min_pending} pendentes)...")
         manager._ensure_queue_populated(min_pending=min_pending)
         
