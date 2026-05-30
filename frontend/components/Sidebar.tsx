@@ -145,7 +145,7 @@ export default function Sidebar() {
             <div className="mb-4 bg-bg-main border border-border-main rounded-lg p-3">
               <div className="flex items-center justify-between mb-1">
                 <span className="text-[10px] font-mono text-text-muted uppercase tracking-widest flex items-center gap-1">
-                  Aporte Tático
+                  Aporte de Inteligência
                 </span>
                 {walletLoading ? (
                   <span className="w-10 h-4 bg-border-main rounded animate-pulse"></span>
@@ -166,7 +166,7 @@ export default function Sidebar() {
                     : 'bg-brand-primary/10 text-brand-primary border-brand-primary/20 hover:bg-brand-primary hover:text-white'
                 }`}
               >
-                {balance === 0 ? 'Restaurar Aporte' : 'Aumentar Aporte'}
+                {balance === 0 ? 'Restaurar Aporte' : 'Aumentar Saldo CI'}
               </button>
             </div>
 

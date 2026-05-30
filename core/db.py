@@ -204,11 +204,11 @@ class DatabaseClient:
             print(f"❌ [DB] Erro ao persistir dossiê: {e}")
             return None
 
-    # --- GOVERNANÇA FINANCEIRA (PASA v86.1) ---
+    # --- GOVERNANÇA DE CRÉDITOS (CI - Créditos de Inteligência) ---
     async def process_ci_transaction(self, user_id: str, amount: int, type: str, metadata: dict = None):
         """
         Executa uma transação de Créditos de Inteligência (CI).
-        Utiliza a RPC legada process_stn_transaction para garantir atomicidade.
+        Mapeia para a RPC process_stn_transaction no Supabase.
         """
         if not self.client: return False
         try:
@@ -224,8 +224,8 @@ class DatabaseClient:
             print(f"❌ [DB] Falha na transação CI: {e}")
             return False
 
-    async def get_user_balance(self, user_id: str) -> int:
-        """Retorna o saldo atual de CI do usuário."""
+    async def get_user_ci_balance(self, user_id: str) -> int:
+        """Retorna o saldo atual de CI do usuário (mapeado de stn_tokens)."""
         if not self.client: return 0
         try:
             res = self.client.table('profiles').select('stn_tokens').eq('id', user_id).single().execute()
