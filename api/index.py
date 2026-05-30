@@ -330,28 +330,36 @@ def summary(request: Request, supa: Client = Depends(get_supa)):
 
 @app.get("/api/v1/networks")
 def get_networks(request: Request, supa: Client = Depends(get_supa)):
-    """Busca as redes coordenadas (clusters) mais recentes (PASA v86.2 Bypass Schema)."""
+    """Busca as redes coordenadas (clusters) mais recentes (PASA v86.2 Native Schema)."""
     try:
-        import json
         res = supa.table('redes_coordenadas').select('*').order('created_at', desc=True).limit(10).execute()
         
         parsed_networks = []
         for row in res.data or []:
-            try:
-                # O worker salva os dados complexos dentro do campo 'status' devido a restrições de DDL
-                payload = json.loads(row.get('status', '{}'))
-            except:
-                payload = {}
-                
+            nodes = row.get("nodes") or []
+            # Fallback para o schema antigo caso haja registros legados
+            if not row.get("nome_rede") and row.get("status"):
+                import json
+                try:
+                    payload = json.loads(row.get('status', '{}'))
+                    row["nome_rede"] = row.get("nome", "Cluster Oculto")
+                    row["tipo_coordenacao"] = payload.get("tipo_coordenacao", "DESCONHECIDO")
+                    row["nodes"] = payload.get("nodes", [])
+                    row["edges"] = payload.get("edges", [])
+                    row["estatisticas"] = payload.get("estatisticas", {})
+                    row["score_perigoso"] = row.get("severidade", 0)
+                    nodes = row["nodes"]
+                except: pass
+
             parsed_networks.append({
                 "id": row.get("id"),
-                "nome_rede": row.get("nome", "Cluster Oculto"),
-                "total_perfis": len(row.get("palavras_chave", [])),
-                "tipo_coordenacao": payload.get("tipo_coordenacao", "DESCONHECIDO"),
-                "nodes": payload.get("nodes", []),
-                "edges": payload.get("edges", []),
-                "estatisticas": payload.get("estatisticas", {}),
-                "score_perigoso": row.get("severidade", 0),
+                "nome_rede": row.get("nome_rede", "Cluster Oculto"),
+                "total_perfis": len(nodes),
+                "tipo_coordenacao": row.get("tipo_coordenacao", "DESCONHECIDO"),
+                "nodes": nodes,
+                "edges": row.get("edges", []),
+                "estatisticas": row.get("estatisticas", {}),
+                "score_perigoso": row.get("score_perigoso", 0),
                 "created_at": row.get("created_at")
             })
             

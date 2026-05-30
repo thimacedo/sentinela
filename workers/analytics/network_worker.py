@@ -115,25 +115,18 @@ class NetworkMinerWorker(BaseWorker):
             if Suspect_Clusters:
                 top_cluster = sorted(Suspect_Clusters, key=lambda x: x['score_perigoso'], reverse=True)[0]
                 
-                # Gera um ID compatível com UUID v4 para não quebrar a tipagem do banco
+                # Gera um ID compatível com UUID v4
                 raw_hash = hashlib.md5(top_cluster["nome_rede"].encode()).hexdigest()
                 uuid_str = f"{raw_hash[:8]}-{raw_hash[8:12]}-4{raw_hash[13:16]}-a{raw_hash[17:20]}-{raw_hash[20:32]}"
                 
-                # Payload completo JSONB embutido na coluna "status"
-                cluster_payload = {
+                db_client.client.table('redes_coordenadas').upsert({
+                    "id": uuid_str,
+                    "nome_rede": top_cluster["nome_rede"],
                     "tipo_coordenacao": top_cluster["tipo_coordenacao"],
                     "nodes": top_cluster["nodes"],
                     "edges": top_cluster["edges"],
-                    "estatisticas": top_cluster["estatisticas"]
-                }
-                
-                db_client.client.table('redes_coordenadas').upsert({
-                    "id": uuid_str,
-                    "nome": top_cluster["nome_rede"],
-                    "status": json.dumps(cluster_payload), # Hack para bypass de schema
-                    "eventos_count": top_cluster["estatisticas"]["total_interacoes"],
-                    "severidade": top_cluster["score_perigoso"],
-                    "palavras_chave": top_cluster["nodes"], # Array de strings
+                    "estatisticas": top_cluster["estatisticas"],
+                    "score_perigoso": top_cluster["score_perigoso"],
                     "created_at": now.isoformat()
                 }).execute()
                 
