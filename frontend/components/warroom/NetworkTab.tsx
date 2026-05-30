@@ -30,17 +30,12 @@ interface Network {
 export default function NetworkTab() {
   const router = useRouter();
   const { balance, refreshBalance } = useWallet();
-  const [unlocked, setUnlocked] = useState(false);
+  const [unlocked, setUnlocked] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedNetwork, setSelectedNetwork] = useState<Network | null>(null);
 
-  useEffect(() => {
-    // Modo Stress Test: Auto-unlock
-    setTimeout(() => {
-      setUnlocked(true);
-    }, 500);
-  }, []);
-
+  // Removida trava para o Stress Test v86.6
+  
   const { data: networks = [], isLoading } = useQuery<Network[]>({
     queryKey: ['networks-clusters'],
     queryFn: async () => {
