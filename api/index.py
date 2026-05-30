@@ -330,10 +330,32 @@ def summary(request: Request, supa: Client = Depends(get_supa)):
 
 @app.get("/api/v1/networks")
 def get_networks(request: Request, supa: Client = Depends(get_supa)):
-    """Busca as redes coordenadas (clusters) mais recentes."""
+    """Busca as redes coordenadas (clusters) mais recentes (PASA v86.2 Bypass Schema)."""
     try:
+        import json
         res = supa.table('redes_coordenadas').select('*').order('created_at', desc=True).limit(10).execute()
-        return res.data if res.data else []
+        
+        parsed_networks = []
+        for row in res.data or []:
+            try:
+                # O worker salva os dados complexos dentro do campo 'status' devido a restrições de DDL
+                payload = json.loads(row.get('status', '{}'))
+            except:
+                payload = {}
+                
+            parsed_networks.append({
+                "id": row.get("id"),
+                "nome_rede": row.get("nome", "Cluster Oculto"),
+                "total_perfis": len(row.get("palavras_chave", [])),
+                "tipo_coordenacao": payload.get("tipo_coordenacao", "DESCONHECIDO"),
+                "nodes": payload.get("nodes", []),
+                "edges": payload.get("edges", []),
+                "estatisticas": payload.get("estatisticas", {}),
+                "score_perigoso": row.get("severidade", 0),
+                "created_at": row.get("created_at")
+            })
+            
+        return parsed_networks
     except Exception as e:
         logger.error(f"Networks Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
