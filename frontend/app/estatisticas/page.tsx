@@ -97,16 +97,16 @@ export default function DemographicsMarketingPage() {
       
       {/* HEADER DE MARKETING (Autoridade & Problema/Solução) */}
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-8 border-b border-border-main pb-8">
-        <div className="max-w-3xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-500/10 text-red-500 rounded-full text-[10px] font-black uppercase tracking-widest mb-4 border border-red-500/20">
+        <div className="max-w-2xl">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-500/10 text-red-500 rounded-full text-[10px] font-bold uppercase tracking-widest mb-3 border border-red-500/20">
             <Activity className="w-3 h-3 animate-pulse" /> Monitoramento Ativo | Alerta de Volume
           </div>
-          <h1 className="text-4xl sm:text-5xl font-black text-text-main tracking-tight uppercase leading-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-text-main tracking-tight leading-snug">
             Radiografia do <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-pink-500">Ruído Oculto</span>
           </h1>
-          <p className="text-sm sm:text-base text-text-muted mt-4 font-medium leading-relaxed">
+          <p className="text-sm text-text-muted mt-3 font-medium leading-relaxed">
             As interações não são apenas orgânicas, há padrões de comportamento coordenado atuando contra sua imagem. 
-            Nossa Inteligência Analítica identifica as fontes. <strong>Transforme o ruído em um relatório técnico documentado</strong> com um clique.
+            Nossa Inteligência Analítica identifica as fontes para você transformar este ruído em um documento técnico e acionável.
           </p>
         </div>
         <div className="flex-shrink-0 flex flex-col gap-3">
