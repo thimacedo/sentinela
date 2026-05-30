@@ -57,13 +57,13 @@ export default function NewsHeader({ todayHighlight }: NewsHeaderProps) {
       {/* Main Hero */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-500/10 text-red-500 rounded-full text-[10px] font-black uppercase tracking-widest mb-4 border border-red-500/20">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-500/10 text-red-500 rounded-full text-[10px] font-bold uppercase tracking-widest mb-3 border border-red-500/20">
             <AlertTriangle className="w-3 h-3 animate-pulse" /> Status: Monitoramento Ativo
           </div>
-          <h1 className="text-4xl md:text-6xl font-black text-text-main tracking-tighter uppercase leading-none">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-text-main tracking-tight leading-snug">
             Visão <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-pink-500">Tática Global</span>
           </h1>
-          <p className="text-sm md:text-base text-text-muted mt-4 font-medium max-w-2xl leading-relaxed">
+          <p className="text-sm md:text-base text-text-muted mt-3 font-medium max-w-2xl leading-relaxed">
             Observatório de Discurso Cívico em tempo real. Padrões de comportamento anômalo e ações coordenadas detectadas via Protocolo PASA.
           </p>
         </div>
