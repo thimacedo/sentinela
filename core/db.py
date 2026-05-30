@@ -205,9 +205,7 @@ class DatabaseClient:
             return None
 
     # --- GOVERNANÇA DE CRÉDITOS (CI - Créditos de Inteligência) ---
-    async def process_ci_transaction(self, user_id: str, amount: int, type: str, metadata: dict = None):
-        """
-        def process_ci_transaction(self, user_id: str, amount: int, type_tx: str, description: str) -> dict:
+    async def process_ci_transaction(self, user_id: str, amount: int, type_tx: str, description: str) -> dict:
         """
         Mapeia para a RPC process_ci_transaction no Supabase.
         Retorna o dicionário/JSON.
@@ -216,12 +214,13 @@ class DatabaseClient:
             res = self.client.rpc('process_ci_transaction', {
                 "p_user_id": user_id,
                 "p_amount": amount,
-                "p_type": type,
-                "p_session_id": None,
-                "p_metadata": metadata or {}
+                "p_type": type_tx,
+                "p_description": description
             }).execute()
             return res.data
         except Exception as e:
+            import logging
+            logger = logging.getLogger("db")
             logger.error(f"[DB] Erro ao registrar transacao CI: {e}")
             return {'success': False, 'message': str(e)}
             
