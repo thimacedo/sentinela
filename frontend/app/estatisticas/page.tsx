@@ -6,7 +6,7 @@ import {
   PieChart, Pie, Sector, AreaChart, Area, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar
 } from 'recharts';
 import { useDemographics } from '@/hooks/useDashboardData';
-import { ShieldAlert, Crosshair, TrendingUp, Activity, Gavel, Users, Filter, BarChart3, AlertTriangle, Sparkles, MapPin, Target, EyeOff } from 'lucide-react';
+import { ShieldAlert, Crosshair, TrendingUp, Activity, FileText, Users, Filter, BarChart3, AlertTriangle, Sparkles, MapPin, Target, EyeOff } from 'lucide-react';
 import AdSenseSlot from '@/components/ads/AdSenseSlot';
 
 // --- MOCK DATA PARA OS NOVOS GRÁFICOS DE MARKETING (GATILHOS) ---
@@ -18,19 +18,19 @@ const trendData = [
 ];
 
 const radarData = [
-  { subject: 'Fake News', A: 120, fullMark: 150 },
+  { subject: 'Desinformação', A: 120, fullMark: 150 },
   { subject: 'Difamação', A: 98, fullMark: 150 },
-  { subject: 'Coordenação (Bots)', A: 140, fullMark: 150 },
-  { subject: 'Ataque Reputacional', A: 99, fullMark: 150 },
-  { subject: 'Ameaça Moral', A: 85, fullMark: 150 },
-  { subject: 'Engajamento Falso', A: 135, fullMark: 150 },
+  { subject: 'Ação Coordenada (Bots)', A: 140, fullMark: 150 },
+  { subject: 'Ataque à Reputação', A: 99, fullMark: 150 },
+  { subject: 'Hostilidade', A: 85, fullMark: 150 },
+  { subject: 'Engajamento Inautêntico', A: 135, fullMark: 150 },
 ];
 
-const crimesData = [
-  { name: 'Calúnia & Difamação', value: 450, fill: '#f43f5e' },
-  { name: 'Ameaça Iminente', value: 120, fill: '#ef4444' },
-  { name: 'Coordenação Ilegal', value: 890, fill: '#8b5cf6' },
-  { name: 'Falsidade Ideológica', value: 340, fill: '#3b82f6' },
+const indiciosData = [
+  { name: 'Danos à Imagem', value: 450, fill: '#f43f5e' },
+  { name: 'Hostilidade Percebida', value: 120, fill: '#ef4444' },
+  { name: 'Volume Coordenado', value: 890, fill: '#8b5cf6' },
+  { name: 'Perfis Inautênticos', value: 340, fill: '#3b82f6' },
 ];
 
 // --- COMPONENTES AUXILIARES ---
@@ -43,7 +43,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
           <div key={idx} className="flex items-center gap-3 mb-1 last:mb-0">
             <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color || item.payload.fill || '#10b981' }} />
             <p className="text-lg font-black text-text-main tabular-nums leading-none">
-              {item.value} <span className="text-[10px] text-text-muted font-normal uppercase">{item.name !== 'value' ? item.name : 'ocorrências'}</span>
+              {item.value} <span className="text-[10px] text-text-muted font-normal uppercase">{item.name !== 'value' ? item.name : 'registros'}</span>
             </p>
           </div>
         ))}
@@ -79,7 +79,7 @@ export default function DemographicsMarketingPage() {
         <div className="text-center py-32 flex flex-col items-center gap-4">
           <div className="w-10 h-10 border-4 border-red-500/30 border-t-red-500 rounded-full animate-spin" />
           <div className="text-text-main font-bold animate-pulse font-mono text-[12px] uppercase tracking-widest">
-            Auditando Redes Neurais e Extraindo Provas Forenses...
+            Mapeando Redes Neurais e Compilando Informações Analíticas...
           </div>
         </div>
       </div>
@@ -99,21 +99,21 @@ export default function DemographicsMarketingPage() {
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-8 border-b border-border-main pb-8">
         <div className="max-w-3xl">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-500/10 text-red-500 rounded-full text-[10px] font-black uppercase tracking-widest mb-4 border border-red-500/20">
-            <Activity className="w-3 h-3 animate-pulse" /> Inteligência Ativa | Risco Nível 5
+            <Activity className="w-3 h-3 animate-pulse" /> Monitoramento Ativo | Alerta de Volume
           </div>
           <h1 className="text-4xl sm:text-5xl font-black text-text-main tracking-tight uppercase leading-tight">
-            Radiografia da <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-pink-500">Ameaça Oculta</span>
+            Radiografia do <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-pink-500">Ruído Oculto</span>
           </h1>
           <p className="text-sm sm:text-base text-text-muted mt-4 font-medium leading-relaxed">
-            Seus adversários não estão apenas comentando, eles estão coordenando ataques de reputação. 
-            Nossa IA identificou padrões de milícias digitais. <strong>Transforme ódio em evidência processual</strong> com um clique.
+            As interações não são apenas orgânicas, há padrões de comportamento coordenado atuando contra sua imagem. 
+            Nossa Inteligência Analítica identifica as fontes. <strong>Transforme o ruído em um relatório técnico documentado</strong> com um clique.
           </p>
         </div>
         <div className="flex-shrink-0 flex flex-col gap-3">
           <button className="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-black uppercase tracking-widest px-8 py-4 rounded-xl shadow-[0_0_20px_rgba(220,38,38,0.3)] hover:shadow-[0_0_30px_rgba(220,38,38,0.5)] transition-all duration-300 hover:-translate-y-1 flex items-center justify-center gap-3">
-            <Gavel className="w-5 h-5" /> Gerar Dossiê Processual
+            <FileText className="w-5 h-5" /> Gerar Dossiê Analítico
           </button>
-          <p className="text-[10px] text-center text-text-muted font-bold uppercase tracking-widest">Apenas 350 CI por auditoria</p>
+          <p className="text-[10px] text-center text-text-muted font-bold uppercase tracking-widest">Apenas 350 CI por relatório</p>
         </div>
       </div>
 
@@ -130,18 +130,18 @@ export default function DemographicsMarketingPage() {
                 </div>
                 <div>
                   <div className="text-[9px] font-bold text-red-500 uppercase tracking-widest flex items-center gap-1.5 mb-0.5">
-                    <Crosshair className="w-3 h-3" /> Foco de Assinatura Bot
+                    <Crosshair className="w-3 h-3" /> Foco Inautêntico
                   </div>
                   <div className="font-black text-text-main text-xl tracking-tight">@{vip.name}</div>
                 </div>
              </div>
              <div className="flex items-end justify-between relative z-10 mt-4">
                <div>
-                 <div className="text-[10px] text-text-muted font-bold uppercase tracking-widest mb-1">Ataques Flagrados</div>
+                 <div className="text-[10px] text-text-muted font-bold uppercase tracking-widest mb-1">Registros de Origem</div>
                  <div className="text-4xl font-black text-text-main tabular-nums tracking-tighter">{vip.value}</div>
                </div>
                <div className="bg-red-500/10 text-red-500 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border border-red-500/20 flex items-center gap-1">
-                 <ShieldAlert className="w-3 h-3" /> Exposto
+                 <ShieldAlert className="w-3 h-3" /> Mapeado
                </div>
              </div>
           </div>
@@ -157,10 +157,10 @@ export default function DemographicsMarketingPage() {
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-purple-500/10 text-purple-500 rounded-full text-[10px] font-black uppercase tracking-widest mb-3">
               <EyeOff className="w-3 h-3" /> Identificação de Comportamento Inautêntico
             </div>
-            <h2 className="text-2xl font-black text-text-main uppercase tracking-tight">Crescimento da Milícia Digital (30 Dias)</h2>
+            <h2 className="text-2xl font-black text-text-main uppercase tracking-tight">Evolução do Volume Anômalo (30 Dias)</h2>
             <p className="text-xs text-text-muted mt-2 max-w-2xl">
-              Compare a atividade de usuários reais com o volume de engajamento inautêntico (bots/trolls). 
-              Picos de "Bots" indicam campanhas coordenadas de difamação prontas para criminalização.
+              Compare a atividade de interações regulares com o volume de engajamento inautêntico. 
+              Picos da linha roxa representam indícios de campanhas coordenadas prontas para serem mapeadas.
             </p>
           </div>
           <div className="h-[350px] w-full relative z-10">
@@ -179,8 +179,8 @@ export default function DemographicsMarketingPage() {
                 <XAxis dataKey="day" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} dy={10} fontWeight="bold" />
                 <YAxis hide />
                 <Tooltip content={<CustomTooltip />} />
-                <Area type="monotone" dataKey="organico" name="Interação Orgânica" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorOrg)" />
-                <Area type="monotone" dataKey="bot" name="Ataque de Bots Coordenados" stroke="#8b5cf6" strokeWidth={4} fillOpacity={1} fill="url(#colorBot)" activeDot={{ r: 8, fill: "#8b5cf6", stroke: "#fff", strokeWidth: 2 }} />
+                <Area type="monotone" dataKey="organico" name="Interação Regular" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorOrg)" />
+                <Area type="monotone" dataKey="bot" name="Volume Coordenado (Inautêntico)" stroke="#8b5cf6" strokeWidth={4} fillOpacity={1} fill="url(#colorBot)" activeDot={{ r: 8, fill: "#8b5cf6", stroke: "#fff", strokeWidth: 2 }} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -191,7 +191,7 @@ export default function DemographicsMarketingPage() {
           <div className="mb-4">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-orange-500/10 rounded-xl"><Target className="w-5 h-5 text-orange-500" /></div>
-              <h2 className="text-lg font-black text-text-main uppercase tracking-tight">Vetor de Vulnerabilidade</h2>
+              <h2 className="text-lg font-black text-text-main uppercase tracking-tight">Vetor de Incidência</h2>
             </div>
             <p className="text-[10px] text-text-muted mt-2 font-bold uppercase">Onde a narrativa adversária está focando</p>
           </div>
@@ -201,27 +201,27 @@ export default function DemographicsMarketingPage() {
                 <PolarGrid stroke="#334155" opacity={0.3} />
                 <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 'bold' }} />
                 <PolarRadiusAxis angle={30} domain={[0, 150]} tick={false} axisLine={false} />
-                <Radar name="Intensidade da Ameaça" dataKey="A" stroke="#f59e0b" strokeWidth={2} fill="#f59e0b" fillOpacity={0.3} />
+                <Radar name="Intensidade Analítica" dataKey="A" stroke="#f59e0b" strokeWidth={2} fill="#f59e0b" fillOpacity={0.3} />
                 <Tooltip content={<CustomTooltip />} />
               </RadarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* NOVO GRÁFICO: RESOLUÇÃO DE PROBLEMA (Materialidade Criminal) */}
+        {/* NOVO GRÁFICO: RESOLUÇÃO DE PROBLEMA (Materialidade Criminal -> Sistematização de Indícios) */}
         <div className="bg-bg-card border border-border-main rounded-3xl p-8 shadow-sm glass-card hover:shadow-md transition-shadow relative overflow-hidden">
           <div className="mb-4 relative z-10">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-red-500/10 rounded-xl"><Gavel className="w-5 h-5 text-red-500" /></div>
-              <h2 className="text-lg font-black text-text-main uppercase tracking-tight">Materialidade para Processo</h2>
+              <div className="p-2 bg-red-500/10 rounded-xl"><FileText className="w-5 h-5 text-red-500" /></div>
+              <h2 className="text-lg font-black text-text-main uppercase tracking-tight">Sistematização de Indícios</h2>
             </div>
-            <p className="text-[10px] text-text-muted mt-2 font-bold uppercase">Crimes tipificados prontos para Dossiê</p>
+            <p className="text-[10px] text-text-muted mt-2 font-bold uppercase">Apontamentos qualificados prontos para Dossiê</p>
           </div>
           <div className="h-[260px] w-full mt-4 relative z-10">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie data={crimesData} cx="50%" cy="50%" innerRadius={60} outerRadius={85} paddingAngle={5} dataKey="value" stroke="none" labelLine={false}>
-                  {crimesData.map((entry, index) => (
+                <Pie data={indiciosData} cx="50%" cy="50%" innerRadius={60} outerRadius={85} paddingAngle={5} dataKey="value" stroke="none" labelLine={false}>
+                  {indiciosData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.fill} className="hover:opacity-80 transition-opacity cursor-pointer" />
                   ))}
                 </Pie>
@@ -230,7 +230,7 @@ export default function DemographicsMarketingPage() {
             </ResponsiveContainer>
           </div>
           <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 mt-4 relative z-10">
-             {crimesData.map((entry: any) => (
+             {indiciosData.map((entry: any) => (
                <div key={entry.name} className="flex items-center gap-1.5">
                  <div className="w-2 h-2 rounded-full shadow-sm" style={{ backgroundColor: entry.fill }} />
                  <span className="text-[9px] font-bold text-text-main uppercase tracking-widest">{entry.name}</span>
@@ -251,7 +251,7 @@ export default function DemographicsMarketingPage() {
               </div>
               <div>
                 <h2 className="text-lg font-black text-text-main uppercase tracking-tight">Anatomia Ideológica</h2>
-                <p className="text-[10px] text-text-muted font-bold uppercase mt-1">Quem está motivando a narrativa</p>
+                <p className="text-[10px] text-text-muted font-bold uppercase mt-1">Perfil de interesse da rede</p>
               </div>
             </div>
           </div>
@@ -274,8 +274,8 @@ export default function DemographicsMarketingPage() {
               <Users className="w-5 h-5 text-pink-500" />
             </div>
             <div>
-              <h2 className="text-lg font-black text-text-main uppercase tracking-tight">Perfil do Ofensor (Gênero)</h2>
-              <p className="text-[10px] text-text-muted font-bold uppercase mt-1">Identificação biométrica digital</p>
+              <h2 className="text-lg font-black text-text-main uppercase tracking-tight">Segmentação (Gênero)</h2>
+              <p className="text-[10px] text-text-muted font-bold uppercase mt-1">Identificação estatística</p>
             </div>
           </div>
           <div className="h-[250px] w-full mt-6">
@@ -301,8 +301,8 @@ export default function DemographicsMarketingPage() {
           <div className="mb-6 flex items-center gap-3">
             <div className="p-2 bg-blue-500/10 rounded-xl"><BarChart3 className="w-5 h-5 text-blue-500" /></div>
             <div>
-              <h2 className="text-lg font-black text-text-main uppercase tracking-tight">Financiamento Partidário Oculto</h2>
-              <p className="text-[10px] text-text-muted font-bold uppercase mt-1">Pressão atrelada a partidos políticos</p>
+              <h2 className="text-lg font-black text-text-main uppercase tracking-tight">Correlação Partidária</h2>
+              <p className="text-[10px] text-text-muted font-bold uppercase mt-1">Interação por afinidade política</p>
             </div>
           </div>
           <div className="h-[280px] w-full mt-4">
@@ -328,7 +328,7 @@ export default function DemographicsMarketingPage() {
             <div className="p-2 bg-emerald-500/10 rounded-xl"><MapPin className="w-5 h-5 text-emerald-500" /></div>
             <div>
               <h2 className="text-lg font-black text-text-main uppercase tracking-tight">Zona de Impacto Geográfico</h2>
-              <p className="text-[10px] text-text-muted font-bold uppercase mt-1">Identificação da origem territorial do ataque</p>
+              <p className="text-[10px] text-text-muted font-bold uppercase mt-1">Identificação da origem territorial do fluxo</p>
             </div>
           </div>
           <div className="h-[280px] w-full mt-4">
@@ -362,14 +362,14 @@ export default function DemographicsMarketingPage() {
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-red-500 to-transparent opacity-80" />
         <ShieldAlert className="w-12 h-12 text-red-500 mb-6" />
         <h2 className="text-3xl font-black text-text-main uppercase tracking-tight mb-4">
-          Ataques isolados são apenas a ponta do iceberg
+          Ataques isolados não mapeiam a rede completa
         </h2>
         <p className="text-text-muted max-w-2xl mb-8 font-medium">
-          Ao solicitar o Dossiê Forense Completo, nossa IA extrai, certifica e gera material com validade judicial (Assinatura SHA-256). 
-          Proteja seu capital político e processe coordenadores de milícias digitais hoje.
+          Ao solicitar o Dossiê Analítico Completo, nossa IA extrai, certifica e gera material com consolidação rigorosa de informações (Assinatura SHA-256). 
+          Proteja sua reputação e mapeie clusters de atividades coordenadas.
         </p>
         <button className="bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-widest px-10 py-5 rounded-xl shadow-[0_0_30px_rgba(220,38,38,0.4)] hover:shadow-[0_0_50px_rgba(220,38,38,0.6)] transition-all duration-300 hover:-translate-y-1 flex items-center justify-center gap-3">
-          <Sparkles className="w-5 h-5" /> Emitir Dossiê Criptografado Agora
+          <Sparkles className="w-5 h-5" /> Emitir Dossiê Analítico Agora
         </button>
       </div>
 
