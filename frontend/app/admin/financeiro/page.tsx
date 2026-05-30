@@ -17,6 +17,24 @@ import {
 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
+
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-bg-card border border-border-main p-3 rounded-xl shadow-2xl glass-card">
+        <p className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-2">{label}</p>
+        {payload.map((entry: any) => (
+          <div key={entry.name} className="flex items-center justify-between gap-4 text-xs font-mono font-bold mb-1">
+            <span style={{ color: entry.color }} className="uppercase tracking-wider text-[10px]">{entry.name}:</span>
+            <span style={{ color: entry.color }}>{entry.value.toLocaleString()} CI</span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
 
 interface AdminDashboardData {
   kpis: {
@@ -134,6 +152,25 @@ export default function AdminFinanceiroPage() {
   // Calculate percentages for modules breakdown
   const totalBreakdown = Object.values(modules_breakdown).reduce((a, b) => a + b, 0);
 
+  // DRE Data processing
+  const dreData = React.useMemo(() => {
+    const dailyMap: Record<string, { date: string; Inflow: number; Outflow: number }> = {};
+    const txs = [...recent_transactions].reverse(); // cronológico
+    
+    txs.forEach(tx => {
+      const date = new Date(tx.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+      if (!dailyMap[date]) dailyMap[date] = { date, Inflow: 0, Outflow: 0 };
+      
+      if (tx.type === 'PURCHASE') {
+        dailyMap[date].Inflow += tx.amount;
+      } else if (tx.type === 'CONSUMPTION') {
+        dailyMap[date].Outflow += Math.abs(tx.amount);
+      }
+    });
+    
+    return Object.values(dailyMap);
+  }, [recent_transactions]);
+
   return (
     <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500 pb-12">
       {/* Header */}
@@ -199,6 +236,39 @@ export default function AdminFinanceiroPage() {
             <p className="text-3xl font-black text-text-main font-mono">{kpis.total_circulating.toLocaleString()}</p>
             <p className="text-xs text-text-muted mt-1">CIs parados nas carteiras ativas.</p>
           </div>
+        </div>
+      </div>
+
+      {/* Gráfico DRE */}
+      <div className="bg-bg-card border border-border-main rounded-2xl shadow-sm p-6 glass-card">
+        <div className="flex items-center gap-2 mb-6">
+          <Activity className="w-5 h-5 text-brand-primary" />
+          <div>
+            <h3 className="font-black text-text-main text-lg tracking-tight">DRE Diário (Volume de Transações)</h3>
+            <p className="text-[10px] text-text-muted font-bold uppercase tracking-widest mt-1">Inflow (Stripe) vs Outflow (Inteligência Artificial)</p>
+          </div>
+        </div>
+        <div className="h-[300px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={dreData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <defs>
+                <linearGradient id="colorInflow" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                </linearGradient>
+                <linearGradient id="colorOutflow" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#f97316" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} opacity={0.2} />
+              <XAxis dataKey="date" stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} fontWeight="bold" />
+              <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(val) => `${val}`} />
+              <RechartsTooltip content={<CustomTooltip />} />
+              <Area type="monotone" dataKey="Inflow" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorInflow)" animationDuration={1500} />
+              <Area type="monotone" dataKey="Outflow" stroke="#f97316" strokeWidth={3} fillOpacity={1} fill="url(#colorOutflow)" animationDuration={1500} />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
       </div>
 
