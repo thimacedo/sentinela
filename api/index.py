@@ -523,9 +523,18 @@ def get_demographics(supa: Client = Depends(get_supa)):
             c = item.get('candidatos')
             if not c: continue
             
+            # 1. Normalização do Partido
+            p_raw = str(c.get('partido') or '').strip()
+            p_upper = p_raw.upper().replace(' ', '')
+            
+            if p_upper in ['NÃOINFORMADO', 'NAOINFORMADO', 'SEMPARTIDO', 'N/A', 'NONE', 'NULL', '']:
+                partido = 'Sem Partido'
+            else:
+                partido = p_raw
+
             # Conta por atributos
             if c.get('sexo'): stats['sexo'][c['sexo']] += 1
-            if c.get('partido'): stats['partido'][c['partido']] += 1
+            if partido: stats['partido'][partido] += 1
             if c.get('estado'): stats['estado'][c['estado']] += 1
             if c.get('ideologia'): stats['ideologia'][c['ideologia']] += 1
             if c.get('username'): stats['top_alvos'][c['username']] += 1
