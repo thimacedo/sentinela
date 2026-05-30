@@ -10,6 +10,7 @@ _last_updated: 2026-05-29 | branch: main_
 - [x] **Network Miner**: Detecção de clusters coordenados e contas multi-target (v85.13).
 - [x] **Otimização de Ociosidade**: Smart Wait e Background Utility Tasks para re-análise automática (v85.12).
 - [x] **Frontend v86**: Grid 2-colunas, filtros dinâmicos de UF/Partido e transparência de IA (Parecer Técnico).
+- [x] **Governança Financeira e CI (Fase 7.1)**: Tesoureiro (Auditoria e DRE Automático) e Catraca no Supabase via proxy de CI.
 
 ### Infraestrutura e Monetização (Legado v48 - v64.0)
 - [x] **Motor Scraper V2**: Playwright independente sem Zyte.
@@ -20,12 +21,12 @@ _last_updated: 2026-05-29 | branch: main_
 
 ---
 
-## Em Andamento (Fase 7.1: Governança Financeira e CI)
+## Em Andamento (Fase 7.2: Dashboard e Analytics Web)
 
-### Gestão de Capital (Tesoureiro)
-- [ ] Implementar **`TreasurerWorker`** para auditoria de transações e ledger (PASA v86.1).
-- [ ] Padronização total de nomenclatura: **STN ➔ CI** (Créditos de Inteligência).
-- [ ] DRE Diário automatizado: Inflow (Stripe) vs Outflow (Burn Rate de IA).
+### Painel Administrativo de CIs
+- [ ] Interface gráfica de faturamento e consumo de CIs (`/admin/financeiro`).
+- [ ] Integração com Recharts para DRE diário (Inflow vs Outflow).
+- [ ] Tabelas tabular para rastrear a origem do gasto por usuário e perfil monitorado.
 
 ### Expansão Analítica
 - [ ] Análise de "Shadowban" léxico: detectar quando a plataforma oculta termos específicos.
@@ -36,6 +37,6 @@ _last_updated: 2026-05-29 | branch: main_
 
 ## Proximas Acoes Imediatas
 
-1. Implementar a classe base do `TreasurerWorker` e registrar no orquestrador.
-2. Refatorar `core/db.py` para suportar alias `saldo_ci` e transações atômicas de governança.
-3. Testar o fluxo de cobrança de 350 CI por dossiê com o novo motor de PDF.
+1. Refatorar o UI do dashboard em `frontend/app/admin/financeiro/page.tsx` aplicando estética de painel de controle tático.
+2. Integrar API global de estatísticas (`/api/v1/summary`) com gráficos interativos (Recharts).
+3. Garantir responsividade e uso do novo design system com Glassmorphism e microinterações.

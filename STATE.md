@@ -13,12 +13,12 @@ _last_updated: 2026-05-29 | branch: main (Model: Gemini Pro)_
 
 ## 🛠️ Últimas Mudanças (Sprint v86.0 ➔ v86.5)
 
-1.  **Refatoração UX/UI (Marketing Focus):** Redesign agressivo da página de Estatísticas e da Home. Implementação de hierarquia `font-black`, `glassmorphism`, microinterações (pulse, hover) e "white space" generoso para diminuição de fricção cognitiva e elevação da percepção de valor.
-2.  **Compliance Jurídico Estrito:** Sanitização total de "bad words" jurídicas no Frontend (Ex: "Crime", "Evidência", "Prova Forense" substituídos por "Engajamento Inautêntico", "Relatório Analítico", "Sistematização de Indícios"), estabelecendo blindagem legal e proteção reputacional para a plataforma Sentinela.
-3.  **Recuperação Autônoma de Sessões (IG Scraper):** Modificado o injetor/extrator interativo (`export_playwright_cookies.py`) com um bloqueio rígido de +60s. Permite a resolução manual limpa de CAPTCHAs/2FA, retroalimentando as contas bloqueadas no Supabase. O *Watchdog* e os Extratores retornaram à estabilidade 100%.
-4.  **Resiliência de Sessões (IG Scraper):** Implementado sistema de "Sticky Profiles" (perfil fixo por sessão) e "Session Cooldown" (bloqueio temporário de 30 min em caso de falha de verificação), reduzindo bloqueios permanentes e evasão de sessões.
-5.  **Correção Crítica (Frontend Vercel):** Corrigido erro de Type Mismatch do Typescript na build do componente Recharts da página de estatísticas.
-6.  **Governança Financeira:** Iniciada a preparação estrutural e migração semântica da moeda interna de **STN para CI (Créditos de Inteligência)**.
+1.  **Governança Financeira (Fase 7.1 Completa):** Implementada a abstração e "Proxy de Nomenclatura" para Créditos de Inteligência (CI) no nível do código de negócio (Python e Next.js), mantendo o banco de dados STN inalterado. Isso garantiu resiliência do sistema sem exigir intervenção DDL manual no Supabase.
+2.  **Catraca de Acesso:** Implementada validação e dedução automática de 350 CIs no endpoint `/api/reports/route.ts` antes da liberação de dossiês analíticos.
+3.  **Auditoria AdSense:** Corrigido o ciclo de vida do componente `AdSenseSlot.tsx` em modo SPA (Single Page Application) e removido script conflitante AMP no layout, desobstruindo a injeção do Google.
+4.  **Refatoração UX/UI (Marketing Focus):** Redesign agressivo da página de Estatísticas e da Home. Implementação de hierarquia `font-black`, `glassmorphism`, microinterações (pulse, hover) e "white space".
+5.  **Compliance Jurídico Estrito:** Sanitização total de "bad words" jurídicas no Frontend estabelecendo blindagem legal e proteção reputacional (0 ocorrências validadas).
+6.  **Recuperação Autônoma de Sessões (IG Scraper):** Modificado o injetor/extrator interativo com um bloqueio rígido de +60s. 
 
 ## 📊 ARQUITETURA DE INTEGRIDADE (v86.0)
 
