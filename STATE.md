@@ -11,16 +11,14 @@ _last_updated: 2026-05-29 | branch: main (Model: Gemini Pro)_
 | **Analytics (Network)** | 🟢 OPERACIONAL | **NetworkMinerWorker** ativo detectando clusters coordenados. |
 | **Frontend (Next.js)** | 🟢 ESTÁVEL | Next.js 16. Grid 2-colunas, filtros dinâmicos e KPIs em tempo real. |
 
-## 🛠️ Últimas Mudanças (Sprint v85.2 ➔ v86.2)
+## 🛠️ Últimas Mudanças (Sprint v86.0 ➔ v86.5)
 
-1.  **Resiliência de Sessões (IG Scraper):** Implementado sistema de "Sticky Profiles" (perfil fixo por sessão) e "Session Cooldown" (bloqueio temporário de 30 min em caso de falha de verificação), reduzindo bloqueios permanentes e evasão de sessões.
-2.  **Correção Crítica (Scraper V2):** Corrigida regressão de indentação em `InstagramScraperV2`.
-3.  **Robustez de Diagnóstico:** Melhorado o logging de exceções no `IntelligenceService`.
-4.  **Inteligência Local:** Integrado **Ollama** para triagem inicial de custo zero. Redução de ~50% no consumo de APIs externas.
-5.  **Dossiês Forenses:** Ativada a geração real de PDFs via `DossieService` com assinatura **SHA-256** e selo de integridade.
-6.  **UX de Análise:** Implementada renderização **Markdown** nos cards e exibição do **Parecer Técnico** da IA.
-7.  **Otimização Ociosa:** Implementado **Smart Wait** (10 min em idle) e **Background Utility Tasks** (re-análise automática).
-8.  **Governança Financeira:** Iniciada migração semântica de **STN para CI**.
+1.  **Refatoração UX/UI (Marketing Focus):** Redesign agressivo da página de Estatísticas e da Home. Implementação de hierarquia `font-black`, `glassmorphism`, microinterações (pulse, hover) e "white space" generoso para diminuição de fricção cognitiva e elevação da percepção de valor.
+2.  **Compliance Jurídico Estrito:** Sanitização total de "bad words" jurídicas no Frontend (Ex: "Crime", "Evidência", "Prova Forense" substituídos por "Engajamento Inautêntico", "Relatório Analítico", "Sistematização de Indícios"), estabelecendo blindagem legal e proteção reputacional para a plataforma Sentinela.
+3.  **Recuperação Autônoma de Sessões (IG Scraper):** Modificado o injetor/extrator interativo (`export_playwright_cookies.py`) com um bloqueio rígido de +60s. Permite a resolução manual limpa de CAPTCHAs/2FA, retroalimentando as contas bloqueadas no Supabase. O *Watchdog* e os Extratores retornaram à estabilidade 100%.
+4.  **Resiliência de Sessões (IG Scraper):** Implementado sistema de "Sticky Profiles" (perfil fixo por sessão) e "Session Cooldown" (bloqueio temporário de 30 min em caso de falha de verificação), reduzindo bloqueios permanentes e evasão de sessões.
+5.  **Correção Crítica (Frontend Vercel):** Corrigido erro de Type Mismatch do Typescript na build do componente Recharts da página de estatísticas.
+6.  **Governança Financeira:** Iniciada a preparação estrutural e migração semântica da moeda interna de **STN para CI (Créditos de Inteligência)**.
 
 ## 📊 ARQUITETURA DE INTEGRIDADE (v86.0)
 
