@@ -21,9 +21,10 @@ Sua missão é classificar comentários com realismo absoluto, seguindo a Metodo
 
 --- REGRAS DE OURO ---
 1. REALISMO: Não ignore ataques velados, ironias destrutivas ou acusações de corrupção/crime.
-2. DISTINÇÃO: Crítica política legítima foca em IDEIAS. Ataques focam em PESSOAS ou INSTITUIÇÕES.
-3. COMUNICAÇÃO: Você é um sistema de INFORMAÇÃO. Se detectar uma imputação de ato ilícito, você NÃO DEVE usar a palavra "crime" na sua classificação ou análise. Você deve rotular como dano à imagem.
-4. IDIOMA: Sua resposta (incluindo a analise_pericial) deve ser 100% em Português Brasileiro (pt-BR).
+2. FALSAS PERÍCIAS: O uso de jargão jurídico, citação de artigos penais (CP, CF, Leis) para "teorizar" ou acusar o alvo de traição, assassinato, genocídio ou crimes hediondos NÃO É crítica política legítima. É um ataque direto e deve ser classificado como DANO_A_IMAGEM.
+3. DISTINÇÃO: Crítica política legítima foca em IDEIAS. Ataques focam em PESSOAS ou INSTITUIÇÕES.
+4. COMUNICAÇÃO: Você é um sistema de INFORMAÇÃO. Se detectar uma imputação de ato ilícito, você NÃO DEVE usar a palavra "crime" na sua classificação ou análise. Você deve rotular como dano à imagem.
+5. IDIOMA: Sua resposta (incluindo a analise_pericial) deve ser 100% em Português Brasileiro (pt-BR).
 
 --- CATEGORIZAÇÃO (MCA v2.2) ---
 Se o comentário for classificado como hostil (is_hate: true), escolha obrigatoriamente uma das chaves exatas abaixo para "categoria_ia":
@@ -32,7 +33,7 @@ Se o comentário for classificado como hostil (is_hate: true), escolha obrigator
 - AMEACA: Incitação a dano físico, violência física ou morte.
 - INSULTO_AD_HOMINEM: Desumanização, baixo calão, ataques à honra, moral, aparência ou competência.
 - ATAQUE_INSTITUCIONAL: Deslegitimação de órgãos de Estado, governos ou do sistema democrático.
-- DANO_A_IMAGEM: Imputação direta de atos ilícitos, corrupção, roubo ou infrações graves. (IMPORTANTE: Use esta categoria para qualquer acusação que prejudique severamente a imagem do alvo, mas use APENAS este nome de categoria).
+- DANO_A_IMAGEM: Imputação direta ou uso de teorias jurídicas para acusar o alvo de atos ilícitos, corrupção, roubo ou infrações graves. (IMPORTANTE: Use esta categoria para qualquer acusação que prejudique severamente a imagem do alvo, mas use APENAS este nome de categoria).
 
 Se o comentário NÃO for hostil (is_hate: false), a "categoria_ia" deve ser obrigatoriamente:
 - NEUTRO: Expressões de engajamento legítimo, slogans ou críticas técnicas.
@@ -208,6 +209,37 @@ class AIService:
                 try: return json.loads(match.group(0))
                 except: pass
             return {"is_hate": False, "categoria_ia": "NEUTRO", "confianca_ia": 0.5, "analise_pericial": "Erro parser."}
+
+    async def run_batch_classification(self, limit: int = 50) -> int:
+        """Busca comentários não processados no banco e executa a classificação."""
+        try:
+            from core.db import db_client
+            res = db_client.client.table('comentarios')\
+                .select('id, texto_bruto')\
+                .eq('processado_ia', False)\
+                .limit(limit).execute()
+            
+            items = res.data or []
+            if not items: return 0
+            
+            count = 0
+            for item in items:
+                try:
+                    res_ia = await self.classify_text(item["texto_bruto"], item["id"])
+                    if res_ia:
+                        db_client.client.table('comentarios').update({
+                            "categoria_ia": res_ia["categoria_ia"],
+                            "confianca_ia": res_ia["confianca_ia"],
+                            "is_hate": res_ia["is_hate"],
+                            "analise_pericial": res_ia.get('analise_pericial', ''),
+                            "processado_ia": True
+                        }).eq("id", item["id"]).execute()
+                        count += 1
+                except: continue
+            return count
+        except Exception as e:
+            logger.error(f"Error in batch classification: {e}")
+            return 0
 
     async def run_batch_reanalysis(self, limit: int = 20, confidence_threshold: float = 0.6) -> int:
         """
