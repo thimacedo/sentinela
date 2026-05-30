@@ -258,6 +258,7 @@ export default function DemographicsMarketingPage() {
           <div className="h-[250px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
+                {/* @ts-ignore - Recharts prop typings for Pie activeIndex/activeShape are outdated */}
                 <Pie activeIndex={activeIndex} activeShape={renderActiveShape} data={ideologia} cx="50%" cy="50%" innerRadius={70} outerRadius={95} paddingAngle={5} dataKey="value" onMouseEnter={onPieEnter} stroke="none">
                   {ideologia.map((entry: any, index: number) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                 </Pie>
