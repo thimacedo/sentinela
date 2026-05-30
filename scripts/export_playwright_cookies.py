@@ -135,7 +135,8 @@ async def renew_account_cookies(browser, account: dict):
 
     # 3. Lidar com telas intermediárias
     if logged_in:
-        await page.wait_for_timeout(5000)
+        print("[*] Aguardando 60 segundos extras para resolução manual de Captchas/2FA caso o Instagram solicite...")
+        await page.wait_for_timeout(60000)
         
         # Fechar "Salvar informações de login"
         try:

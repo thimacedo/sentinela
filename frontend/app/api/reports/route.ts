@@ -37,13 +37,31 @@ export async function POST(request: Request) {
   if (!reportName || !userId) {
     return NextResponse.json({ error: 'Missing parameters' }, { status: 400 });
   }
-  // Registra compra (pay‑per‑use) na tabela "purchases"
+
+  // 1. Catraca de Cobrança: Deduz 350 CIs do saldo do usuário antes de liberar
+  const { data: rpcData, error: rpcError } = await supabase.rpc('process_ci_transaction', {
+    p_user_id: userId,
+    p_amount: -350,
+    p_type: 'CONSUMPTION',
+    p_description: `Emissão de Dossiê: ${reportName}`
+  });
+
+  if (rpcError || (rpcData && rpcData.success === false)) {
+    return NextResponse.json(
+      { error: rpcError?.message || rpcData?.message || 'Saldo de CIs insuficiente para emitir o Dossiê.' },
+      { status: 402 } // 402 Payment Required
+    );
+  }
+
+  // 2. Registra compra na tabela "purchases"
   const { data, error } = await supabase.from('purchases').insert({
     user_id: userId,
     report_name: reportName,
     purchased_at: new Date().toISOString(),
   });
   if (error) {
+    // Como os CIs já foram descontados, o ideal seria estornar ou logar falha, mas para V1 deixamos o log:
+    console.error("[Billing Error] Falha ao registrar purchase no ledger:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
   // URL assinada para download direto (bucket público)

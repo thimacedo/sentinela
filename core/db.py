@@ -207,12 +207,13 @@ class DatabaseClient:
     # --- GOVERNANÇA DE CRÉDITOS (CI - Créditos de Inteligência) ---
     async def process_ci_transaction(self, user_id: str, amount: int, type: str, metadata: dict = None):
         """
-        Executa uma transação de Créditos de Inteligência (CI).
-        Mapeia para a RPC process_stn_transaction no Supabase.
+        def process_ci_transaction(self, user_id: str, amount: int, type_tx: str, description: str) -> dict:
         """
-        if not self.client: return False
+        Mapeia para a RPC process_ci_transaction no Supabase.
+        Retorna o dicionário/JSON.
+        """
         try:
-            res = self.client.rpc('process_stn_transaction', {
+            res = self.client.rpc('process_ci_transaction', {
                 "p_user_id": user_id,
                 "p_amount": amount,
                 "p_type": type,
@@ -221,15 +222,14 @@ class DatabaseClient:
             }).execute()
             return res.data
         except Exception as e:
-            print(f"❌ [DB] Falha na transação CI: {e}")
-            return False
-
-    async def get_user_ci_balance(self, user_id: str) -> int:
-        """Retorna o saldo atual de CI do usuário (mapeado de stn_tokens)."""
-        if not self.client: return 0
+            logger.error(f"[DB] Erro ao registrar transacao CI: {e}")
+            return {'success': False, 'message': str(e)}
+            
+    def get_user_ci_balance(self, user_id: str) -> int:
+        """Retorna o saldo atual de CI do usuário."""
         try:
-            res = self.client.table('profiles').select('stn_tokens').eq('id', user_id).single().execute()
-            return res.data.get('stn_tokens', 0) if res.data else 0
+            res = self.client.table('profiles').select('saldo_ci').eq('id', user_id).single().execute()
+            return res.data.get('saldo_ci', 0) if res.data else 0
         except: return 0
 
     async def fetch_dossier_history(self, candidato_id: str, limit: int = 20) -> List[Dict[str, Any]]:

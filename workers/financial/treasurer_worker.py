@@ -103,11 +103,11 @@ class TreasurerWorker(BaseWorker):
     async def _audit_balances(self) -> int:
         """Verifica se existem perfis com saldo negativo."""
         try:
-            # stn_tokens ainda é o nome físico na migration v19.6
-            res = db_client.client.table('profiles').select('id, username, stn_tokens').lt('stn_tokens', 0).execute()
+            # Governança de CI (v28.0)
+            res = db_client.client.table('profiles').select('id, username, saldo_ci').lt('saldo_ci', 0).execute()
             negatives = res.data or []
             for n in negatives:
-                logger.error(f"🚨 [Auditoria] SALDO NEGATIVO: @{n.get('username')} ({n.get('stn_tokens')} CI)")
+                logger.error(f"🚨 [Auditoria] SALDO NEGATIVO: @{n.get('username')} ({n.get('saldo_ci')} CI)")
             return len(negatives)
         except: return 0
 
@@ -116,9 +116,9 @@ class TreasurerWorker(BaseWorker):
         yesterday = (datetime.now(timezone.utc) - timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
         try:
             # Entradas: PURCHASE (Vendas Stripe)
-            in_res = db_client.client.table('stn_transactions').select('amount').eq('type', 'PURCHASE').gte('created_at', yesterday.isoformat()).execute()
+            in_res = db_client.client.table('ci_transactions').select('amount').eq('type', 'PURCHASE').gte('created_at', yesterday.isoformat()).execute()
             # Saídas: CONSUMPTION (Dossiês, Alvos, etc)
-            out_res = db_client.client.table('stn_transactions').select('amount').eq('type', 'CONSUMPTION').gte('created_at', yesterday.isoformat()).execute()
+            out_res = db_client.client.table('ci_transactions').select('amount').eq('type', 'CONSUMPTION').gte('created_at', yesterday.isoformat()).execute()
             
             total_in = sum(t['amount'] for t in (in_res.data or []))
             total_out = abs(sum(t['amount'] for t in (out_res.data or [])))
