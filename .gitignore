@@ -126,3 +126,8 @@ Thumbs.db
 
 # 7. Rascunhos e Diagnostics
 scratch/
+
+# 8. Documentos e Pesquisas (NUNCA COMMITAR)
+*.pdf
+bases_pesquisas/
+
