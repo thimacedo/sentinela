@@ -46,8 +46,45 @@ export default function ForceGraphWrapper({ graphData, onNodeClick }: { graphDat
         nodeLabel="id"
         nodeColor={(node: any) => node.color || '#3b82f6'}
         nodeVal={(node: any) => node.val || 1}
-        linkColor={(link: any) => link.color || 'rgba(148, 163, 184, 0.2)'}
+        linkColor={(link: any) => link.color || 'rgba(255, 255, 255, 0.15)'}
         linkWidth={(link: any) => link.width || 1}
+        nodeCanvasObject={(node: any, ctx: CanvasRenderingContext2D, globalScale: number) => {
+          const label = node.id;
+          const fontSize = 12 / globalScale;
+          ctx.font = `bold ${fontSize}px Sans-Serif`;
+          const textWidth = ctx.measureText(label).width;
+          const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.4);
+
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.8)';
+          ctx.beginPath();
+          ctx.roundRect(
+            node.x - bckgDimensions[0] / 2, 
+            node.y - bckgDimensions[1] / 2, 
+            bckgDimensions[0], 
+            bckgDimensions[1], 
+            2
+          );
+          ctx.fill();
+
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillStyle = node.color || '#00e5ff';
+          ctx.fillText(label, node.x, node.y);
+          
+          node.__bckgDimensions = bckgDimensions; // para reusar no hover
+        }}
+        nodePointerAreaPaint={(node: any, color: string, ctx: CanvasRenderingContext2D) => {
+          ctx.fillStyle = color;
+          const bckgDimensions = node.__bckgDimensions;
+          if (bckgDimensions) {
+            ctx.fillRect(
+              node.x - bckgDimensions[0] / 2, 
+              node.y - bckgDimensions[1] / 2, 
+              bckgDimensions[0], 
+              bckgDimensions[1]
+            );
+          }
+        }}
         onNodeClick={onNodeClick}
         enableNodeDrag={true}
         enableZoomInteraction={true}

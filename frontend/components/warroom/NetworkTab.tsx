@@ -62,8 +62,8 @@ export default function NetworkTab() {
         id: nodeId,
         name: nodeId,
         // Destaque visual
-        val: isAttacker ? 2 : 5, 
-        color: isAttacker ? (multiAttackers > 0 ? '#ef4444' : '#f59e0b') : '#3b82f6',
+        val: isAttacker ? 4 : 8, 
+        color: isAttacker ? (multiAttackers > 0 ? '#ff0055' : '#ff9900') : '#00e5ff',
         isAttacker
       };
     });
@@ -73,8 +73,8 @@ export default function NetworkTab() {
       target: edge.to,
       weight: edge.weight,
       // Quanto maior o peso (repetição do ataque), mais grossa e vermelha a linha
-      width: Math.min(edge.weight || 1, 5),
-      color: (edge.weight || 1) > 2 ? 'rgba(239, 68, 68, 0.4)' : 'rgba(148, 163, 184, 0.2)'
+      width: Math.min(edge.weight || 1, 4),
+      color: (edge.weight || 1) > 2 ? 'rgba(255, 0, 85, 0.6)' : 'rgba(255, 255, 255, 0.15)'
     }));
 
     return { nodes, links };
@@ -167,15 +167,15 @@ export default function NetworkTab() {
                   <div className="text-[9px] text-slate-400 font-mono">Zoom habilitado • Arraste os nós para interagir</div>
                   <div className="mt-3 space-y-1.5">
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-[#ef4444]" />
+                      <div className="w-2 h-2 rounded-full bg-[#ff0055] shadow-[0_0_8px_#ff0055]" />
                       <span className="text-[8px] text-slate-300 uppercase font-bold">Atacante Multi-Alvo</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-[#f59e0b]" />
+                      <div className="w-2 h-2 rounded-full bg-[#ff9900] shadow-[0_0_8px_#ff9900]" />
                       <span className="text-[8px] text-slate-300 uppercase font-bold">Atacante Padrão</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-[#3b82f6]" />
+                      <div className="w-3 h-3 rounded-full bg-[#00e5ff] shadow-[0_0_10px_#00e5ff]" />
                       <span className="text-[8px] text-slate-300 uppercase font-bold">Alvo / Vítima</span>
                     </div>
                   </div>

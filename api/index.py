@@ -332,11 +332,14 @@ def summary(request: Request, supa: Client = Depends(get_supa)):
 def get_networks(request: Request, supa: Client = Depends(get_supa)):
     """Busca as redes coordenadas (clusters) mais recentes (PASA v86.2 Native Schema)."""
     try:
-        res = supa.table('redes_coordenadas').select('*').order('created_at', desc=True).limit(10).execute()
+        res = supa.table('redes_coordenadas').select('*').order('created_at', desc=True).limit(50).execute()
         
         parsed_networks = []
+        seen_names = set()
+        
         for row in res.data or []:
             nodes = row.get("nodes") or []
+            
             # Fallback para o schema antigo caso haja registros legados
             if not row.get("nome_rede") and row.get("status"):
                 import json
@@ -351,9 +354,14 @@ def get_networks(request: Request, supa: Client = Depends(get_supa)):
                     nodes = row["nodes"]
                 except: pass
 
+            nome_rede = row.get("nome_rede", "Cluster Oculto")
+            if nome_rede in seen_names:
+                continue
+            seen_names.add(nome_rede)
+
             parsed_networks.append({
                 "id": row.get("id"),
-                "nome_rede": row.get("nome_rede", "Cluster Oculto"),
+                "nome_rede": nome_rede,
                 "total_perfis": len(nodes),
                 "tipo_coordenacao": row.get("tipo_coordenacao", "DESCONHECIDO"),
                 "nodes": nodes,
@@ -362,6 +370,9 @@ def get_networks(request: Request, supa: Client = Depends(get_supa)):
                 "score_perigoso": row.get("score_perigoso", 0),
                 "created_at": row.get("created_at")
             })
+            
+            if len(parsed_networks) >= 10:
+                break
             
         return parsed_networks
     except Exception as e:
