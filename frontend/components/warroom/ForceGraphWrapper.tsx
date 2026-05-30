@@ -49,41 +49,54 @@ export default function ForceGraphWrapper({ graphData, onNodeClick }: { graphDat
         linkColor={(link: any) => link.color || 'rgba(255, 255, 255, 0.15)'}
         linkWidth={(link: any) => link.width || 1}
         nodeCanvasObject={(node: any, ctx: CanvasRenderingContext2D, globalScale: number) => {
-          const label = node.id;
-          const fontSize = 12 / globalScale;
-          ctx.font = `bold ${fontSize}px Sans-Serif`;
-          const textWidth = ctx.measureText(label).width;
-          const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.4);
-
-          ctx.fillStyle = 'rgba(15, 23, 42, 0.8)';
+          // Desenha o círculo/nó (Neon Glow se tiver val alto)
+          const nodeSize = node.val ? Math.sqrt(node.val) * 2.5 : 4;
+          
           ctx.beginPath();
-          ctx.roundRect(
-            node.x - bckgDimensions[0] / 2, 
-            node.y - bckgDimensions[1] / 2, 
-            bckgDimensions[0], 
-            bckgDimensions[1], 
-            2
-          );
+          ctx.arc(node.x, node.y, nodeSize, 0, 2 * Math.PI, false);
+          ctx.fillStyle = node.color || '#00e5ff';
           ctx.fill();
 
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillStyle = node.color || '#00e5ff';
-          ctx.fillText(label, node.x, node.y);
-          
-          node.__bckgDimensions = bckgDimensions; // para reusar no hover
+          // Desenha Glow Edge em nós de alto impacto
+          if (node.isAttacker) {
+            ctx.strokeStyle = 'rgba(255, 0, 85, 0.4)';
+            ctx.lineWidth = 2 / globalScale;
+            ctx.stroke();
+          }
+
+          // Se o zoom estiver distante, evitamos o emaranhado de texto
+          if (globalScale >= 2.0) {
+            const label = node.id;
+            const fontSize = 10 / globalScale;
+            ctx.font = `bold ${fontSize}px Sans-Serif`;
+            const textWidth = ctx.measureText(label).width;
+            
+            const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.2);
+
+            // Desenha um fundo escuro abaixo do nó para o texto aparecer limpo
+            const xPos = node.x - bckgDimensions[0] / 2;
+            const yPos = node.y + nodeSize + 1;
+            
+            ctx.fillStyle = 'rgba(2, 6, 23, 0.7)'; // escuro transparente
+            ctx.beginPath();
+            ctx.roundRect(xPos, yPos, bckgDimensions[0], bckgDimensions[1], 1);
+            ctx.fill();
+
+            // Escreve o nome
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            ctx.fillStyle = '#f8fafc'; // texto branco claro
+            ctx.fillText(label, node.x, yPos + (fontSize * 0.1));
+            
+            node.__bckgDimensions = bckgDimensions; 
+          }
         }}
         nodePointerAreaPaint={(node: any, color: string, ctx: CanvasRenderingContext2D) => {
           ctx.fillStyle = color;
-          const bckgDimensions = node.__bckgDimensions;
-          if (bckgDimensions) {
-            ctx.fillRect(
-              node.x - bckgDimensions[0] / 2, 
-              node.y - bckgDimensions[1] / 2, 
-              bckgDimensions[0], 
-              bckgDimensions[1]
-            );
-          }
+          const nodeSize = node.val ? Math.sqrt(node.val) * 2.5 : 4;
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, nodeSize + 2, 0, 2 * Math.PI, false);
+          ctx.fill();
         }}
         onNodeClick={onNodeClick}
         enableNodeDrag={true}

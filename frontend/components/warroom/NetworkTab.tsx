@@ -170,21 +170,21 @@ export default function NetworkTab() {
         <div className="w-full lg:w-2/3 h-[500px] border border-border-main rounded-xl relative overflow-hidden bg-[#0f172a] shadow-inner">
            {selectedNetwork ? (
              <>
-               <div className="absolute top-4 left-4 z-10 bg-bg-card/80 backdrop-blur border border-border-main p-3 rounded-lg pointer-events-none">
+               <div className="absolute top-4 left-4 z-10 bg-[#020617]/90 backdrop-blur-md border border-slate-700/50 p-4 rounded-xl shadow-2xl pointer-events-none">
                   <div className="text-xs font-black text-white uppercase tracking-wider mb-1">{selectedNetwork.nome_rede}</div>
                   <div className="text-[9px] text-slate-400 font-mono">Zoom habilitado • Arraste os nós para interagir</div>
-                  <div className="mt-3 space-y-1.5">
+                  <div className="mt-3 space-y-2">
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-[#ff0055] shadow-[0_0_8px_#ff0055]" />
-                      <span className="text-[8px] text-slate-300 uppercase font-bold">Atacante Multi-Alvo</span>
+                      <div className="w-2.5 h-2.5 rounded-full bg-[#ff0055] shadow-[0_0_8px_#ff0055]" />
+                      <span className="text-[9px] text-slate-200 uppercase font-bold tracking-wider">Atacante Multi-Alvo</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-[#ff9900] shadow-[0_0_8px_#ff9900]" />
-                      <span className="text-[8px] text-slate-300 uppercase font-bold">Atacante Padrão</span>
+                      <div className="w-2.5 h-2.5 rounded-full bg-[#ff9900] shadow-[0_0_8px_#ff9900]" />
+                      <span className="text-[9px] text-slate-200 uppercase font-bold tracking-wider">Atacante Padrão</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-[#00e5ff] shadow-[0_0_10px_#00e5ff]" />
-                      <span className="text-[8px] text-slate-300 uppercase font-bold">Alvo / Vítima</span>
+                      <div className="w-3.5 h-3.5 rounded-full bg-[#00e5ff] shadow-[0_0_10px_#00e5ff]" />
+                      <span className="text-[9px] text-slate-200 uppercase font-bold tracking-wider">Alvo / Vítima</span>
                     </div>
                   </div>
                </div>
