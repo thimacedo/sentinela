@@ -104,27 +104,27 @@ export default function HighlightCards({ stories: mockStories }: HighlightCardsP
             return (
               <article
                 key={story.id}
-                className={`rounded-lg border p-6 transition-all duration-200 hover:shadow-sm cursor-pointer ${getSeverityStyle(
+                className={`rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 cursor-pointer glass-card relative overflow-hidden group border ${getSeverityStyle(
                   story.severity
                 )}`}
               >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-bg-main border border-border-main flex items-center justify-center text-sm font-bold text-text-muted">
+                <div className="flex items-start justify-between mb-4 relative z-10">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-bg-main border border-border-main flex items-center justify-center text-sm font-black text-text-main shadow-inner group-hover:scale-105 transition-transform">
                       {story.candidate.substring(0, 2).toUpperCase()}
                     </div>
                     <div>
-                      <p className="text-sm text-text-main font-bold font-mono">{story.candidate}</p>
-                      <p className="text-xs text-text-muted">{story.timestamp}</p>
+                      <p className="text-sm text-text-main font-black font-mono tracking-tight uppercase">{story.candidate}</p>
+                      <p className="text-[10px] text-text-muted font-bold tracking-widest">{story.timestamp}</p>
                     </div>
                   </div>
-                  <span className={`px-2 py-1 rounded text-xs font-mono font-bold ${badge.color}`}>
+                  <span className={`px-3 py-1.5 rounded-lg text-[10px] font-mono font-black uppercase tracking-widest border border-current/20 ${badge.color}`}>
                     {badge.label}
                   </span>
                 </div>
 
-                <h3 className="text-lg font-bold text-text-main mb-2">{story.title}</h3>
-                <p className="text-text-muted text-sm mb-4 leading-relaxed">{story.summary}</p>
+                <h3 className="text-xl font-black text-text-main mb-3 tracking-tight relative z-10">{story.title}</h3>
+                <p className="text-text-muted text-sm mb-5 leading-relaxed relative z-10">{story.summary}</p>
 
                 <div className="flex flex-wrap gap-2 mb-4">
                   {story.topWords?.map((word, idx) => (
@@ -137,10 +137,10 @@ export default function HighlightCards({ stories: mockStories }: HighlightCardsP
                   ))}
                 </div>
 
-                <div className="flex items-center justify-between text-xs text-text-muted">
-                  <span className="font-mono">{story.alertCount} caso(s) identificado(s)</span>
-                  <Link href="/analise" className="text-brand-primary hover:underline font-mono font-bold">
-                    Explorar Análise →
+                <div className="flex items-center justify-between text-xs text-text-muted pt-4 border-t border-border-main/50 relative z-10">
+                  <span className="font-mono font-bold uppercase tracking-widest">{story.alertCount} Evento(s) Analisado(s)</span>
+                  <Link href="/analise" className="text-brand-primary hover:text-brand-primary/80 font-mono font-black uppercase tracking-widest transition-colors flex items-center gap-1">
+                    Explorar Dados <span className="text-lg leading-none">→</span>
                   </Link>
                 </div>
               </article>

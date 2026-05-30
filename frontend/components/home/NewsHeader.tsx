@@ -50,23 +50,29 @@ export default function NewsHeader({ todayHighlight }: NewsHeaderProps) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6 bg-gradient-to-br from-bg-card to-transparent border border-border-main p-8 md:p-10 rounded-3xl shadow-xl relative overflow-hidden glass-card">
+      <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 via-orange-500 to-transparent opacity-80" />
+
       {/* Main Hero */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
         <div>
-          <h1 className="text-2xl font-bold text-text-main tracking-tight uppercase">
-            Tendências no Discurso Político Brasileiro
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-500/10 text-red-500 rounded-full text-[10px] font-black uppercase tracking-widest mb-4 border border-red-500/20">
+            <AlertTriangle className="w-3 h-3 animate-pulse" /> Status: Monitoramento Ativo
+          </div>
+          <h1 className="text-4xl md:text-6xl font-black text-text-main tracking-tighter uppercase leading-none">
+            Visão <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-pink-500">Tática Global</span>
           </h1>
-          <p className="text-xs text-text-muted mt-1 font-medium">
-            Observatório de Discurso Cívico. Acompanhe em tempo real os padrões de discurso monitorados através do Protocolo PASA.
+          <p className="text-sm md:text-base text-text-muted mt-4 font-medium max-w-2xl leading-relaxed">
+            Observatório de Discurso Cívico em tempo real. Padrões de comportamento anômalo e ações coordenadas detectadas via Protocolo PASA.
           </p>
         </div>
       </div>
 
       {error && (
-        <div className="bg-red-500/10 border border-red-500/20 rounded p-3">
-          <p className="text-sm text-red-600 dark:text-red-400 font-mono">
-            Aviso: Alguns dados não puderam ser carregados. Verificando conectividade...
+        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 mt-6 relative z-10 backdrop-blur-sm">
+          <p className="text-sm text-red-600 dark:text-red-400 font-mono flex items-center gap-2 font-bold uppercase tracking-widest">
+            <AlertTriangle className="w-4 h-4" /> Falha de Conectividade Detectada.
           </p>
         </div>
       )}

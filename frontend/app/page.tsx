@@ -36,7 +36,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-bg-main transition-colors duration-300">
       {/* Main Container */}
-      <main className="max-w-6xl mx-auto py-6 space-y-12">
+      <main className="max-w-6xl mx-auto py-10 space-y-20 px-4 sm:px-6 lg:px-8">
         {/* Section 1: News Header */}
         <NewsHeader />
 
@@ -56,10 +56,11 @@ export default function HomePage() {
         <AdSenseSlot adSlot="2020882637" format="horizontal" />
 
         {/* Section 3: Insights & Trends */}
-        <div className="space-y-4">
-          <h2 className="text-2xl font-bold text-text-main border-b border-border-main pb-4">
-            🔬 Análises e Insights
-          </h2>
+        <div className="space-y-8">
+          <div className="flex items-center gap-3 border-b border-border-main pb-4">
+            <span className="text-3xl">🔬</span>
+            <h2 className="text-3xl font-black text-text-main tracking-tight uppercase">Análises e Insights</h2>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <InsightBox
               type="trend"
@@ -85,12 +86,13 @@ export default function HomePage() {
 
 
         {/* Section 5: Candidate Profiles */}
-        <div className="space-y-6">
+        <div className="space-y-8">
           <div className="flex items-center justify-between border-b border-border-main pb-4">
-            <h2 className="text-2xl font-bold text-text-main">
-              👤 Perfis em Destaque
-            </h2>
-            <p className="text-xs text-text-muted font-mono animate-pulse uppercase">
+            <div className="flex items-center gap-3">
+              <span className="text-3xl">👤</span>
+              <h2 className="text-3xl font-black text-text-main tracking-tight uppercase">Perfis em Destaque</h2>
+            </div>
+            <p className="text-[10px] text-text-muted font-mono font-bold animate-pulse uppercase tracking-widest hidden sm:block">
               Use as setas para explorar →
             </p>
           </div>

@@ -82,38 +82,40 @@ export default function InsightBox({
   }[type];
 
   return (
-    <div className={`rounded-xl border-2 p-6 transition-all ${style.bg} ${style.border}`}>
-      <div className="flex items-start gap-4">
+    <div className={`rounded-3xl border p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 glass-card relative overflow-hidden group ${style.bg} ${style.border}`}>
+      <div className="absolute top-0 right-0 w-32 h-32 bg-current opacity-[0.03] rounded-full -mr-16 -mt-16 blur-xl group-hover:opacity-[0.06] transition-opacity" />
+      
+      <div className="flex items-start gap-5 relative z-10">
         {/* Icon */}
-        <div className="flex-shrink-0 mt-1">
-          <Icon className={`w-6 h-6 ${style.accent}`} />
+        <div className="flex-shrink-0 mt-1 bg-bg-main p-3 rounded-2xl shadow-inner border border-border-main">
+          <Icon className={`w-7 h-7 ${style.accent}`} />
         </div>
 
         {/* Content */}
         <div className="flex-1">
           {/* Header */}
-          <div className="flex items-center gap-3 mb-3">
-            <h3 className="text-lg font-bold text-text-main">{title}</h3>
-            <span className={`px-2 py-1 rounded text-[10px] font-mono font-bold ${style.badge}`}>
+          <div className="flex items-center gap-3 mb-4">
+            <h3 className="text-xl font-black text-text-main tracking-tight uppercase">{title}</h3>
+            <span className={`px-2.5 py-1 rounded-lg text-[9px] font-mono font-black uppercase tracking-widest border border-current/20 ${style.badge}`}>
               {typeLabel}
             </span>
           </div>
 
           {/* Main Description */}
-          <p className="text-text-muted text-sm mb-4 leading-relaxed">{description}</p>
+          <p className="text-text-muted text-sm mb-6 leading-relaxed font-medium">{description}</p>
 
           {/* Metric Display */}
           {metric !== undefined && metricLabel && (
-            <div className="bg-bg-main border border-border-main rounded-lg p-4 mb-5">
-              <p className="text-[10px] text-text-muted mb-1 font-mono uppercase tracking-wider">📊 {metricLabel}</p>
-              <p className="text-3xl font-black text-text-main">{metric}%</p>
+            <div className="bg-bg-main/50 border border-border-main rounded-2xl p-5 mb-6 backdrop-blur-sm">
+              <p className="text-[9px] text-text-muted mb-2 font-black uppercase tracking-widest">📊 {metricLabel}</p>
+              <p className="text-4xl font-black text-text-main tabular-nums tracking-tighter">{metric}%</p>
             </div>
           )}
 
           {/* Insight Box */}
-          <div className="bg-bg-card border-l-4 border-brand-primary/40 pl-4 py-3 mb-5 rounded-r-lg">
+          <div className="bg-bg-card border-l-4 border-brand-primary/60 pl-5 py-4 mb-6 rounded-r-2xl shadow-sm">
             <p className="text-sm text-text-main italic leading-relaxed">
-              <strong className="text-brand-primary not-italic mr-1">💡 Insight:</strong> {insight}
+              <strong className="text-brand-primary not-italic mr-2 font-black uppercase tracking-widest text-[10px]">💡 Insight Analítico:</strong> {insight}
             </p>
           </div>
 
