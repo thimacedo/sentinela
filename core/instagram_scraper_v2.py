@@ -7,7 +7,7 @@ import os
 import random
 import re
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, List, Optional
 
 from playwright.async_api import Page, BrowserContext, async_playwright, Browser, TimeoutError as PlaywrightTimeoutError
@@ -20,9 +20,15 @@ logger = logging.getLogger("instagram_scraper_v2")
 class Session:
     label: str
     session_id: str
-    blocked: bool = False
+    blocked_until: Optional[datetime] = None
+    profile: Optional[Dict[str, Any]] = None
     error_count: int = 0
     last_used: Optional[datetime] = None
+
+    @property
+    def is_available(self) -> bool:
+        if not self.blocked_until: return True
+        return datetime.now(timezone.utc) > self.blocked_until
 
 class InstagramScraperV2:
     """
@@ -72,10 +78,10 @@ class InstagramScraperV2:
         return sessions
 
     def _get_next_session(self) -> Session:
-        """Rotaciona para a próxima sessão disponível."""
-        available = [s for s in self.sessions if not s.blocked]
+        """Rotaciona para a próxima sessão disponível (incluindo cooldown)."""
+        available = [s for s in self.sessions if s.is_available]
         if not available:
-            logger.error("❌ [V2] Todas as sessões estão bloqueadas!")
+            logger.error("❌ [V2] Todas as sessões estão bloqueadas (cooldown ativo)!")
             raise RuntimeError("all_sessions_blocked")
         
         session = available[self.current_session_idx % len(available)]
@@ -203,7 +209,10 @@ class InstagramScraperV2:
                         ]
                     )
                     
-                    profile = self._generate_stealth_profile()
+                    # 🎭 STEALTH PROFILE (Fixo por sessão para evitar suspeitas)
+                    if not session.profile:
+                        session.profile = self._generate_stealth_profile()
+                    profile = session.profile
                     
                     proxy_url = os.getenv("PROXY_URL")
                     context_kwargs = {
@@ -239,8 +248,8 @@ class InstagramScraperV2:
                     logger.info(f"🎯 [V2] Scrape @{username} usando {session.label} | Profile: {profile['platform']} | Res: {profile['w']}x{profile['h']} ({proxy_log})")
                     
                     if not await self._verify_session(page, session):
-                        logger.warning(f"⚠️ [V2] Sessão {session.label} expirada ou inválida. Rotacionando...")
-                        session.blocked = True
+                        logger.warning(f"⚠️ [V2] Sessão {session.label} expirada ou inválida. Cooldown 30min...")
+                        session.blocked_until = datetime.now(timezone.utc) + timedelta(minutes=30)
                         retry_count += 1
                         await browser.close()
                         continue
