@@ -13,6 +13,8 @@ import os
 import re
 import hashlib
 import asyncio
+import urllib.parse
+import httpx
 from datetime import datetime, UTC
 from pathlib import Path
 from typing import List, Dict
@@ -152,15 +154,55 @@ class CandidateScannerWorker(BaseWorker):
         if "senador" in context: return "Senador"
         return "Candidato"
 
+    async def _search_web_for_instagram(self, name: str, cargo: str) -> List[str]:
+        """Faz uma consulta ao DuckDuckGo HTML para encontrar possíveis handles do Instagram do político."""
+        query = f"{name} {cargo} instagram oficial"
+        url = f"https://html.duckduckgo.com/html/?q={urllib.parse.quote(query)}"
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        }
+        
+        self.logger.info(f"🔍 Buscando na web por: '{query}'...")
+        try:
+            async with httpx.AsyncClient() as client:
+                resp = await client.get(url, headers=headers, timeout=15.0)
+                if resp.status_code == 200:
+                    # Encontra handles do instagram nos links de resultado
+                    raw_handles = re.findall(r'instagram\.com/([a-zA-Z0-9_\.\-]+)', resp.text)
+                    
+                    # Filtra handles genéricos
+                    blacklist = ["p", "developer", "explore", "about", "legal", "terms", "directory", "accounts", "reels", "stories"]
+                    unique_handles = []
+                    for h in raw_handles:
+                        # Limpa o handle
+                        h_clean = h.lower().strip().replace("/", "").replace("?", "").replace("&", "")
+                        if h_clean and h_clean not in blacklist and len(h_clean) > 2:
+                            if h_clean not in unique_handles:
+                                unique_handles.append(h_clean)
+                    
+                    self.logger.info(f"🌐 Handles extraídos da web para '{name}': {unique_handles[:5]}")
+                    return unique_handles[:5]
+        except Exception as e:
+            self.logger.error(f"⚠️ Erro ao consultar DuckDuckGo para '{name}': {e}")
+        
+        return []
+
     async def _discover_official_instagram(self, name: str, cargo: str, file_name: str) -> str:
-        """Usa IA para descobrir o handle oficial do Instagram do candidato."""
+        """Usa IA combinada com busca na web (DuckDuckGo) para obter o handle oficial do Instagram do candidato."""
+        # 1. Faz busca ativa na web para coletar candidatos de handles reais
+        web_handles = await self._search_web_for_instagram(name, cargo)
+        
         prompt = f"""
         Identifique o nome de usuário (username/handle) oficial e correto no Instagram da seguinte figura pública brasileira citada em pesquisas eleitorais:
         Nome: {name}
         Cargo provável: {cargo}
         Contexto do arquivo de pesquisa: {file_name}
         
+        Resultados reais encontrados na busca web pelo perfil: {web_handles}
+        
         Instruções:
+        - Analise os resultados de busca e selecione o handle oficial mais adequado e verídico.
+        - Priorize perfis que pareçam claramente a conta oficial do político (evitando fã-clubes ou perfis secundários).
         - Responda obrigatoriamente em formato JSON.
         - Se souber o Instagram real e oficial, coloque no campo "username" (sem o caractere '@').
         - Se o político não possuir rede oficial confirmada ou você não souber, deixe o campo "username" vazio ("").
@@ -171,22 +213,27 @@ class CandidateScannerWorker(BaseWorker):
         }}
         """
         try:
-            self.logger.info(f"🔮 Consultando IA para descobrir Instagram de '{name}'...")
+            self.logger.info(f"🔮 Consultando IA para selecionar Instagram oficial de '{name}'...")
             res = await ai_service.chat_completion(
                 prompt=prompt,
-                system_prompt="Você é um assistente especializado em mapear perfis oficiais de políticos brasileiros nas redes sociais.",
+                system_prompt="Você é um assistente especializado em mapear perfis oficiais de políticos brasileiros nas redes sociais com base em buscas web.",
                 response_format="json_object"
             )
             if res and isinstance(res, dict) and "username" in res:
                 username = res["username"].lower().strip().replace("@", "")
                 if username and res.get("confianca", 0.0) >= 0.6:
-                    self.logger.info(f"🎯 IA encontrou o perfil @{username} para '{name}' com confiança {res.get('confianca')}.")
+                    self.logger.info(f"🎯 IA selecionou o perfil @{username} para '{name}' com confiança {res.get('confianca')}.")
                     return username
         except Exception as e:
             self.logger.error(f"⚠️ Erro ao descobrir Instagram por IA para {name}: {e}")
         
+        # Fallback se a IA falhar
         fallback = self._generate_handle(name)
-        self.logger.warning(f"⚠️ Usando fallback gerado automaticamente para '{name}': @{fallback}")
+        # Se houver resultados da web, prioriza o primeiro em vez do handle bruto gerado
+        if web_handles:
+            fallback = web_handles[0]
+            
+        self.logger.warning(f"⚠️ Usando fallback para '{name}': @{fallback}")
         return fallback
 
     async def _handle_candidate(self, info: Dict, pesquisa_id: str, file_name: str):
@@ -286,18 +333,8 @@ class CandidateScannerWorker(BaseWorker):
             is_temporary_error = True
             temporary_reason = "Falha de comunicação/timeout na validação"
 
-        if is_valid or is_temporary_error:
-            # Se for erro temporário, forçamos o cadastro como pendente de validação
-            status_mon = "Ativo"
-            val_identidade = None # Permite re-validação pelo TargetResearchWorker no futuro
-            
-            if is_temporary_error:
-                self.logger.warning(f"⚠️ Validação de @{username} falhou por erro temporário ({temporary_reason}). Salvando como pendente e prosseguindo para a fila.")
-            else:
-                status_mon = "Ativo"
-                val_identidade = True
-
-            # Insere/Upserta na tabela de candidatos garantindo status Ativo e atualizando metadados da pesquisa
+        if is_valid:
+            # 5. Se o perfil for válido, insere como Ativo e enfileira na fila_coleta imediata
             try:
                 db_client.client.table(self.candidate_table).upsert({
                     "username": username,
@@ -306,8 +343,8 @@ class CandidateScannerWorker(BaseWorker):
                     "intenção_voto": intencao,
                     "nota_relevancia": nota,
                     "ultima_pesquisa_id": pesquisa_id,
-                    "status_monitoramento": status_mon,
-                    "identidade_validada": val_identidade,
+                    "status_monitoramento": "Ativo",
+                    "identidade_validada": True,
                     "atualizado_em": datetime.now(UTC).isoformat()
                 }, on_conflict="username").execute()
             except Exception as e_up:
@@ -322,7 +359,6 @@ class CandidateScannerWorker(BaseWorker):
 
             self.logger.info(f"💎 Target: @{username} | Nota: {nota:.2f} | Prioridade: {prioridade}")
 
-            # 5. Inserir na fila de coleta com agendamento imediato para hoje
             try:
                 today = datetime.now(UTC).date().isoformat()
                 db_client.client.table(self.queue_table).upsert({
@@ -335,6 +371,24 @@ class CandidateScannerWorker(BaseWorker):
                 self.logger.info(f"🚀 Alvo @{username} inserido na fila de coleta imediata hoje.")
             except Exception as e_queue:
                 self.logger.error(f"❌ Erro ao inserir @{username} na fila de coleta: {e_queue}")
+        
+        elif is_temporary_error:
+            # 6. Se for erro temporário de validação, salva em status 'Observação' e NÃO enfileira
+            try:
+                db_client.client.table(self.candidate_table).upsert({
+                    "username": username,
+                    "nome_completo": nome,
+                    "cargo": cargo,
+                    "intenção_voto": intencao,
+                    "nota_relevancia": nota,
+                    "ultima_pesquisa_id": pesquisa_id,
+                    "status_monitoramento": "Observação",
+                    "identidade_validada": None,
+                    "atualizado_em": datetime.now(UTC).isoformat()
+                }, on_conflict="username").execute()
+                self.logger.warning(f"⚠️ Validação de @{username} falhou por erro temporário ({temporary_reason}). Alvo colocado em observação/curadoria.")
+            except Exception as e_up:
+                self.logger.warning(f"⚠️ Erro ao registrar alvo em observação @{username}: {e_up}")
         else:
             reason = research_res.get("motivo_desativacao") if research_res else "Validação falhou ou timeout"
             self.logger.warning(f"🚫 Alvo @{username} desconsiderado da fila imediata. Motivo: {reason}")
