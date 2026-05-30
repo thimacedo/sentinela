@@ -225,10 +225,13 @@ class QueueManager:
         now = datetime.now(timezone.utc)
         now_iso = now.isoformat()
         
-        # PASA v86.3: Não pune o alvo se for um erro sistêmico do Scraper
-        # Apenas "no_comments_found" ou "junk_detected" justificam diminuir a temperatura
-        is_empty = hasattr(target, "error") and target.error in ["no_comments_found", "junk_detected", "invalid_target: 404_not_found"]
-        is_system_error = hasattr(target, "error") and target.error and not is_empty
+        # PASA v86.3: Não pune o alvo se for um erro do Scraper
+        # Apenas "junk_detected" ou "invalid_target: 404_not_found" justificam diminuir a temperatura
+        # "no_comments_found" será tratado como falta de dados, mas não será classificado como FRIO
+        is_error = hasattr(target, "error") and target.error
+        is_no_comments = is_error and target.error == "no_comments_found"
+        is_empty = is_error and target.error in ["junk_detected", "invalid_target: 404_not_found"]
+        is_system_error = is_error and not is_empty and not is_no_comments
         
         # Se for um erro do sistema, atualizamos o last_scraped_at mas NÃO mudamos o termômetro
         if is_system_error:
@@ -254,8 +257,12 @@ class QueueManager:
                         valid_dates.append(datetime.fromisoformat(m["timestamp"].replace('Z', '+00:00')))
                     except: continue
         
-        if is_empty or not valid_dates:
+        if (is_empty or not valid_dates) and not is_no_comments:
             termometro = "FRIO"
+            frequencia = 0.0
+        elif is_no_comments or not valid_dates:
+            # Caso especial: nenhum comentário encontrado, mas ainda não há dados suficientes
+            termometro = "MORNO"
             frequencia = 0.0
         else:
             last_post_date = max(valid_dates)

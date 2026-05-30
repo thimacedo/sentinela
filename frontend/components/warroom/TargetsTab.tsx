@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { fetchApi } from '@/lib/api';
 import { supabase } from '@/lib/supabase';
 import { useWallet } from '@/hooks/useWallet';
-
+import Button from '@/components/Button';
 interface Target {
   id: string;
   username: string;
@@ -126,21 +126,21 @@ export default function TargetsTab() {
           <p className="text-xs text-text-muted font-medium uppercase tracking-widest mt-1">Inteligência Preditiva e Monitoramento de Hostilidade</p>
         </div>
         <div className="flex gap-2 w-full md:w-auto">
-          <button 
+          <Button
             onClick={() => setShowFilters(!showFilters)}
             className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 border rounded-xl text-[10px] font-bold transition-all uppercase ${showFilters ? 'bg-brand-primary/10 border-brand-primary text-brand-primary' : 'bg-bg-card border-border-main text-text-main hover:bg-bg-main shadow-sm'}`}
           >
             <Filter className="w-3 h-3" />
             {showFilters ? 'Fechar Filtros' : 'Filtrar Alvos'}
-          </button>
-          <button 
+          </Button>
+          <Button
             onClick={handleAddTarget}
             disabled={isAdding}
             className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-brand-primary text-white rounded-xl text-[10px] font-black hover:bg-brand-primary/90 transition-all uppercase shadow-lg shadow-brand-primary/20 disabled:opacity-50"
           >
             {isAdding ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
             Novo Alvo (500 CI)
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -208,7 +208,7 @@ export default function TargetsTab() {
             </select>
           </div>
           {(searchQuery || riskFilter !== 'ALL' || partyFilter !== 'ALL' || stateFilter !== 'ALL') && (
-            <button 
+            <Button
               onClick={() => {
                 setSearchQuery('');
                 setRiskFilter('ALL');
@@ -218,7 +218,7 @@ export default function TargetsTab() {
               className="sm:col-span-full md:col-span-4 text-[9px] font-black text-red-500 hover:text-red-600 transition-colors uppercase tracking-widest flex items-center justify-center gap-1 mt-2"
             >
               <X className="w-3 h-3" /> Limpar Filtros Avançados
-            </button>
+            </Button>
           )}
         </div>
       )}
