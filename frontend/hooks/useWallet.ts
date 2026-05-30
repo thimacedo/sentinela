@@ -24,24 +24,25 @@ export function useWallet() {
       // Supabase query to 'profiles' table
       const { data, error } = await supabase
         .from('profiles')
-        .select('saldo_ci')
+        .select('stn_tokens')
         .eq('id', userId)
         .single();
 
       if (error) throw error;
       
       if (data) {
-        const currentBalance = data.saldo_ci || 0;
+        const currentBalance = data.stn_tokens || 0;
         setBalance(currentBalance);
 
         // AUTO-REFILL (Stress Test v86.6): Garante fluidez total sem interrupções de saldo
         if (currentBalance < 5000 && userId === BETA_TESTER_ID) {
           console.log("⚡ [Wallet] Refil automático de CI ativado para Stress Test.");
-          await supabase.rpc('process_ci_transaction', {
+          await supabase.rpc('process_stn_transaction', {
             p_user_id: userId,
             p_amount: 1000000,
             p_type: 'BONUS',
-            p_description: 'Refil automático de Stress Test'
+            p_session_id: 'stress_test_refill',
+            p_metadata: { action: 'auto_refill_stress_test' }
           });
           setBalance(prev => prev + 1000000);
         }

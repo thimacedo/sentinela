@@ -28,7 +28,7 @@ interface AdminDashboardData {
   top_spenders: Array<{
     id: string;
     full_name: string;
-    saldo_ci: number;
+    stn_tokens: number;
     total_stn_spent: number;
   }>;
   modules_breakdown: Record<string, number>;
@@ -262,7 +262,7 @@ export default function AdminFinanceiroPage() {
                       <span className="block text-[10px] text-text-muted font-mono mt-0.5">{user.id}</span>
                     </TableCell>
                     <TableCell className="text-right font-mono text-xs font-bold text-emerald-500">
-                      {user.saldo_ci?.toLocaleString() || 0}
+                      {user.stn_tokens?.toLocaleString() || 0}
                     </TableCell>
                     <TableCell className="text-right font-mono text-xs font-black text-brand-primary">
                       {user.total_stn_spent?.toLocaleString() || 0}
