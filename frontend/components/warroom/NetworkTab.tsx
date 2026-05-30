@@ -129,28 +129,36 @@ export default function NetworkTab() {
                 <div 
                   key={n.id} 
                   onClick={() => setSelectedNetwork(n)}
-                  className={`p-4 rounded-xl border cursor-pointer transition-all ${selectedNetwork?.id === n.id ? 'bg-brand-primary/10 border-brand-primary/40' : 'bg-bg-card border-border-main hover:border-brand-primary/20'}`}
+                  className={`relative overflow-hidden p-4 rounded-2xl border cursor-pointer transition-all duration-300 ${selectedNetwork?.id === n.id ? 'bg-brand-primary/10 border-brand-primary/40 shadow-[0_0_15px_rgba(239,68,68,0.1)]' : 'bg-bg-main/30 border-border-main/50 hover:border-brand-primary/30 hover:bg-bg-card'}`}
                 >
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="font-black text-text-main text-sm tracking-tight">{n.nome_rede}</div>
-                    <Badge className="bg-red-500/10 text-red-500 border border-red-500/20 text-[8px] font-black uppercase shadow-none px-1.5 py-0">
+                  {selectedNetwork?.id === n.id && (
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-brand-primary to-orange-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]" />
+                  )}
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="font-extrabold text-text-main text-[13px] tracking-tight">{n.nome_rede}</div>
+                    <div className="px-2 py-0.5 bg-red-500/10 text-red-500 border border-red-500/20 text-[9px] font-black uppercase rounded shadow-inner">
                       Score: {n.score_perigoso || 0}
-                    </Badge>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-2 mt-3">
-                    <div className="flex items-center gap-1.5">
-                      <Users className="w-3 h-3 text-text-muted" />
-                      <span className="text-[10px] text-text-muted font-mono">{n.nodes?.length || 0} Nós</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <Globe className="w-3 h-3 text-text-muted" />
-                      <span className="text-[10px] text-text-muted font-mono">{n.tipo_coordenacao === 'MULTI_TARGET' ? 'Multi-Alvo' : 'Foco Único'}</span>
                     </div>
                   </div>
                   
-                  <div className="text-[8px] text-text-muted font-mono mt-3 uppercase tracking-wider opacity-60">
-                    Detectado: {new Date(n.created_at).toLocaleString('pt-BR')}
+                  <div className="flex items-center gap-4 mt-2">
+                    <div className="flex items-center gap-1.5">
+                      <Users className="w-3.5 h-3.5 text-slate-400" />
+                      <span className="text-[11px] text-slate-300 font-medium">{n.nodes?.length || 0} Nós</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Globe className="w-3.5 h-3.5 text-slate-400" />
+                      <span className="text-[11px] text-slate-300 font-medium">{n.tipo_coordenacao === 'MULTI_TARGET' ? 'Multi-Alvo' : 'Foco Único'}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4 pt-3 border-t border-border-main/40 flex justify-between items-center">
+                    <div className="text-[9px] text-slate-500 font-mono uppercase tracking-widest">
+                      Detectado
+                    </div>
+                    <div className="text-[10px] text-slate-400 font-mono tracking-tight">
+                      {new Date(n.created_at).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}
+                    </div>
                   </div>
                 </div>
               ))

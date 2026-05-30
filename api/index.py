@@ -355,16 +355,17 @@ def get_networks(request: Request, supa: Client = Depends(get_supa)):
                 except: pass
 
             nome_rede = row.get("nome_rede", "Cluster Oculto")
-            if nome_rede in seen_names:
+            signature = frozenset(nodes)
+            if signature in seen_names:
                 continue
-            seen_names.add(nome_rede)
+            seen_names.add(signature)
 
             parsed_networks.append({
                 "id": row.get("id"),
                 "nome_rede": nome_rede,
                 "total_perfis": len(nodes),
                 "tipo_coordenacao": row.get("tipo_coordenacao", "DESCONHECIDO"),
-                "nodes": nodes,
+                "nodes": list(nodes),
                 "edges": row.get("edges", []),
                 "estatisticas": row.get("estatisticas", {}),
                 "score_perigoso": row.get("score_perigoso", 0),
