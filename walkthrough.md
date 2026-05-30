@@ -13,7 +13,7 @@ Esta atualização marca a transição do Sentinela de um sistema de monitoramen
 
 ### 2. Inteligência Híbrida & Transparência (v85.11)
 - **Triagem Local com Ollama**: Integração do Ollama como primeira camada de análise. Dados neutros/lixo são filtrados localmente sem custo de API externa.
-- **Parecer Técnico IA**: Inclusão de um campo de justificativa técnica em cada comentário classificado, elevando a transparência forense.
+- **Parecer Técnico IA**: Inclusão de um campo de justificativa técnica em cada comentário classificado, elevando a transparência analítica.
 - **Renderização Markdown**: Cards de análise agora suportam tabelas, listas e formatação rica para exibir dossiês e perícias complexas de forma legível.
 - **Utility Tasks**: Workers aproveitam o tempo de ociosidade para re-analisar registros de baixa confiança (< 60%) e enriquecer metadados (bio/seguidores) de alvos estratégicos.
 

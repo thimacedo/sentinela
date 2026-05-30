@@ -6,7 +6,7 @@ _last_updated: 2026-05-30 | branch: main (Model: Gemini 3.5 Flash)_
 | Subsistema | Status | Observação |
 |---|---|---|
 | **Coleta (Rocket Scraper V2)** | 🟢 OPERACIONAL | Resiliência Alta: Falha em cascata (cooldown bloqueando thread principal) eliminada por *Error Catching* na V2. |
-| **Inteligência (PASA)** | 🟢 OPERACIONAL | **Triagem Híbrida** (Ollama Local + Cloud). Suporte a Markdown forense. |
+| **Inteligência (PASA)** | 🟢 OPERACIONAL | **Triagem Híbrida** (Ollama Local + Cloud). Suporte a Markdown analítico. |
 | **Monetização (CI)** | 🟢 OPERACIONAL | Dashboard DRE Diário ativo e integrado com `Recharts` na administração financeira. |
 | **Analytics (Network)** | 🟢 OPERACIONAL | Motor NetworkMiner ativo com Clusterização unificada (deduplicação por assinatura léxica de nós). |
 | **Frontend (Next.js)** | 🟢 ESTÁVEL | Refinamentos Premium UX: Correção de "overscaling", ForceGraph neon-legível e Glassmorphism implementados. |
