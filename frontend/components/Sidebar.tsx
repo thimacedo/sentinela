@@ -24,6 +24,12 @@ const menuItems = [
     id: 'analise',
     label: 'ANÁLISE',
     path: '/analise',
+    icon: Activity
+  },
+  {
+    id: 'estatisticas',
+    label: 'ESTATÍSTICAS',
+    path: '/estatisticas',
     icon: BarChart3
   },
   {
@@ -39,8 +45,8 @@ const menuItems = [
     icon: ShieldAlert
   },
   {
-    id: 'tendencias',
-    label: 'TENDÊNCIAS',
+    id: 'rede',
+    label: 'REDE',
     path: '/rede',
     icon: Globe
   },
@@ -54,7 +60,7 @@ const menuItems = [
     id: 'financeiro',
     label: 'GOD MODE',
     path: '/admin/financeiro',
-    icon: Activity
+    icon: ShieldAlert
   },
 ]
 
