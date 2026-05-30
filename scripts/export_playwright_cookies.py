@@ -155,15 +155,98 @@ async def renew_account_cookies(browser, account: dict):
 
     # 3. Lidar com telas intermediárias
     if logged_in:
-        print("[*] Aguardando resolução manual de Captchas/2FA caso o Instagram solicite (timeout max 60s)...")
-        for i in range(30):
+        print("[*] Injetando painel de controle de login no navegador...")
+        try:
+            await page.evaluate("""() => {
+                const old = document.getElementById('sentinela-container-botoes');
+                if (old) old.remove();
+                
+                const container = document.createElement('div');
+                container.id = 'sentinela-container-botoes';
+                container.style.position = 'fixed';
+                container.style.bottom = '30px';
+                container.style.left = '50%';
+                container.style.transform = 'translateX(-50%)';
+                container.style.zIndex = '2147483647';
+                container.style.display = 'flex';
+                container.style.gap = '15px';
+                container.style.backgroundColor = 'rgba(15, 23, 42, 0.95)';
+                container.style.padding = '12px 20px';
+                container.style.borderRadius = '16px';
+                container.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4)';
+                container.style.backdropFilter = 'blur(8px)';
+                container.style.border = '1px solid rgba(255, 255, 255, 0.1)';
+                container.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+                
+                // Botão Confirmar
+                const btnConfirm = document.createElement('button');
+                btnConfirm.innerHTML = '✅ Confirmar Sucesso';
+                btnConfirm.style.backgroundColor = '#10b981';
+                btnConfirm.style.color = 'white';
+                btnConfirm.style.padding = '12px 20px';
+                btnConfirm.style.border = 'none';
+                btnConfirm.style.borderRadius = '10px';
+                btnConfirm.style.cursor = 'pointer';
+                btnConfirm.style.fontWeight = '600';
+                btnConfirm.style.fontSize = '14px';
+                btnConfirm.style.transition = 'all 0.2s';
+                
+                btnConfirm.onmouseover = () => { btnConfirm.style.backgroundColor = '#059669'; };
+                btnConfirm.onmouseout = () => { btnConfirm.style.backgroundColor = '#10b981'; };
+                btnConfirm.onclick = () => { 
+                    window.sentinelaLoginStatus = 'SUCCESS';
+                    btnConfirm.innerHTML = 'Aguarde...';
+                };
+                
+                // Botão Cancelar
+                const btnCancel = document.createElement('button');
+                btnCancel.innerHTML = '❌ Sinalizar Falha / Abortar';
+                btnCancel.style.backgroundColor = '#ef4444';
+                btnCancel.style.color = 'white';
+                btnCancel.style.padding = '12px 20px';
+                btnCancel.style.border = 'none';
+                btnCancel.style.borderRadius = '10px';
+                btnCancel.style.cursor = 'pointer';
+                btnCancel.style.fontWeight = '600';
+                btnCancel.style.fontSize = '14px';
+                btnCancel.style.transition = 'all 0.2s';
+                
+                btnCancel.onmouseover = () => { btnCancel.style.backgroundColor = '#dc2626'; };
+                btnCancel.onmouseout = () => { btnCancel.style.backgroundColor = '#ef4444'; };
+                btnCancel.onclick = () => { 
+                    window.sentinelaLoginStatus = 'FAILED';
+                    btnCancel.innerHTML = 'Abortando...';
+                };
+                
+                container.appendChild(btnConfirm);
+                container.appendChild(btnCancel);
+                document.body.appendChild(container);
+            }""")
+        except Exception as e_btn:
+            print(f"[Aviso] Não foi possível injetar os botões de controle: {e_btn}")
+
+        print("[*] Aguardando sinalização manual através dos botões no navegador ou detecção de login automático (timeout max 5m)...")
+        for i in range(150):
             if page.is_closed():
                 break
+            
+            try:
+                status = await page.evaluate("() => window.sentinelaLoginStatus")
+                if status == 'SUCCESS':
+                    print("✅ [Status] Operador sinalizou SUCESSO no login! Prosseguindo...")
+                    break
+                elif status == 'FAILED':
+                    print("❌ [Status] Operador sinalizou FALHA no login. Abortando.")
+                    logged_in = False
+                    break
+            except:
+                pass
+                
             current_url = page.url
             if "accounts/login" not in current_url and "challenge" not in current_url:
                 profile_indicator = await page.query_selector('svg[aria-label="Perfil"], svg[aria-label="Profile"]')
                 if profile_indicator:
-                    print("✅ [Status] Login detectado com sucesso! Prosseguindo...")
+                    print("✅ [Status] Login detectado automaticamente com sucesso! Prosseguindo...")
                     break
             await page.wait_for_timeout(2000)
 
