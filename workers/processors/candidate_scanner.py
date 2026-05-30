@@ -3,6 +3,12 @@ Worker: CandidateScanner (Motor de Inteligência de Alvos)
 Finalidade: Monitorar a pasta de pesquisas, extrair candidatos, calcular relevância e agendar coleta.
 Protocolo Diamond: Herda de BaseWorker.
 """
+import sys
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+if hasattr(sys.stderr, 'reconfigure'):
+    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+
 import os
 import re
 import hashlib
@@ -16,6 +22,8 @@ import sys
 sys.path.append(r".")
 from workers.core.base_worker import BaseWorker
 from core.db import db_client
+from core.ai_service import ai_service
+from core.intelligence_service import intelligence_service
 
 try:
     from pypdf import PdfReader
@@ -63,29 +71,32 @@ class CandidateScannerWorker(BaseWorker):
             
             # 3. Detectar Candidatos e Intenções (%)
             candidates = self._extract_candidates(full_text)
-            self.logger.info(f"🎯 Detectados {len(candidates)} potenciaos alvos.")
+            self.logger.info(f"🎯 Detectados {len(candidates)} potenciais alvos.")
 
-            # 4. Salvar Registro da Pesquisa
-            res_pesquisa = db_client.client.table(self.processed_table).insert({
+            # 4. Salvar Registro da Pesquisa (usando upsert para idempotência)
+            res_pesquisa = db_client.client.table(self.processed_table).upsert({
                 "arquivo": file_name,
                 "hash_sha256": file_hash,
                 "candidatos_detectados": len(candidates),
                 "status": "PROCESSADO"
-            }).execute()
+            }, on_conflict="arquivo").execute()
             
             pesquisa_id = res_pesquisa.data[0]['id'] if res_pesquisa.data else None
 
             # 5. Processar cada candidato detectado
             for candidate in candidates:
-                await self._handle_candidate(candidate, pesquisa_id)
+                await self._handle_candidate(candidate, pesquisa_id, file_name)
 
         except Exception as e:
             self.logger.error(f"❌ Erro ao processar {file_name}: {e}")
-            db_client.client.table(self.processed_table).insert({
-                "arquivo": file_name,
-                "hash_sha256": file_hash,
-                "status": "ERRO"
-            }).execute()
+            try:
+                db_client.client.table(self.processed_table).upsert({
+                    "arquivo": file_name,
+                    "hash_sha256": file_hash,
+                    "status": "ERRO"
+                }, on_conflict="arquivo").execute()
+            except Exception as e_log:
+                self.logger.error(f"❌ Erro ao registrar status de falha para {file_name}: {e_log}")
 
     def _extract_candidates(self, text: str) -> List[Dict]:
         """
@@ -141,8 +152,45 @@ class CandidateScannerWorker(BaseWorker):
         if "senador" in context: return "Senador"
         return "Candidato"
 
-    async def _handle_candidate(self, info: Dict, pesquisa_id: str):
-        """Calcula prioridade, enriquece e salva."""
+    async def _discover_official_instagram(self, name: str, cargo: str, file_name: str) -> str:
+        """Usa IA para descobrir o handle oficial do Instagram do candidato."""
+        prompt = f"""
+        Identifique o nome de usuário (username/handle) oficial e correto no Instagram da seguinte figura pública brasileira citada em pesquisas eleitorais:
+        Nome: {name}
+        Cargo provável: {cargo}
+        Contexto do arquivo de pesquisa: {file_name}
+        
+        Instruções:
+        - Responda obrigatoriamente em formato JSON.
+        - Se souber o Instagram real e oficial, coloque no campo "username" (sem o caractere '@').
+        - Se o político não possuir rede oficial confirmada ou você não souber, deixe o campo "username" vazio ("").
+        - Retorne APENAS o JSON no formato:
+        {{
+            "username": "string_do_username_ou_vazio",
+            "confianca": float (de 0.0 a 1.0)
+        }}
+        """
+        try:
+            self.logger.info(f"🔮 Consultando IA para descobrir Instagram de '{name}'...")
+            res = await ai_service.chat_completion(
+                prompt=prompt,
+                system_prompt="Você é um assistente especializado em mapear perfis oficiais de políticos brasileiros nas redes sociais.",
+                response_format="json_object"
+            )
+            if res and isinstance(res, dict) and "username" in res:
+                username = res["username"].lower().strip().replace("@", "")
+                if username and res.get("confianca", 0.0) >= 0.6:
+                    self.logger.info(f"🎯 IA encontrou o perfil @{username} para '{name}' com confiança {res.get('confianca')}.")
+                    return username
+        except Exception as e:
+            self.logger.error(f"⚠️ Erro ao descobrir Instagram por IA para {name}: {e}")
+        
+        fallback = self._generate_handle(name)
+        self.logger.warning(f"⚠️ Usando fallback gerado automaticamente para '{name}': @{fallback}")
+        return fallback
+
+    async def _handle_candidate(self, info: Dict, pesquisa_id: str, file_name: str):
+        """Calcula prioridade, descobre a rede oficial, valida com o IntelligenceService e enfileira."""
         nome = info['nome']
         intencao = info['intencao']
         cargo = info['cargo']
@@ -151,32 +199,145 @@ class CandidateScannerWorker(BaseWorker):
         # Nota: (CargoWeight * 10) + Intencao
         cargo_weight = {"Presidente": 5, "Governador": 4, "Senador": 3, "Candidato": 1}
         nota = (cargo_weight.get(cargo, 1) * 10) + intencao
-        
-        # Determinar prioridade de coleta (1 a 5)
-        prioridade = 1
-        if intencao > 5 or cargo in ["Presidente", "Governador"]: prioridade = 3
-        if intencao > 15: prioridade = 4
-        if intencao > 30: prioridade = 5
 
-        # 2. Busca de Rede Social (Simulada via Nome)
-        username = self._generate_handle(nome)
+        # 2. Descobrir a rede social oficial usando IA
+        username = await self._discover_official_instagram(nome, cargo, file_name)
 
-        self.logger.info(f"💎 Target: @{username} | Nota: {nota:.2f} | Prioridade: {prioridade}")
+        # --- CURADORIA DE ALVOS EXISTENTES ---
+        try:
+            existing = db_client.client.table(self.candidate_table)\
+                .select("username, identidade_validada, status_monitoramento")\
+                .eq("username", username)\
+                .execute()
+            
+            if existing.data:
+                cand_data = existing.data[0]
+                status_mon = cand_data.get("status_monitoramento")
+                ident_val = cand_data.get("identidade_validada")
+                
+                # Se o alvo já foi desativado/rejeitado anteriormente (e não por erro temporário), pulamos
+                if status_mon == "DESATIVADO" or ident_val is False:
+                    self.logger.info(f"⏩ Alvo @{username} já rejeitado/desativado anteriormente no banco. Pulando.")
+                    return
+                
+                # Se o alvo já está ativo e validado, atualizamos as estatísticas e enfileiramos direto
+                if status_mon == "Ativo" or ident_val is True:
+                    self.logger.info(f"♻️ Alvo @{username} já existe e está ativo no banco. Atualizando estatísticas e enfileirando direto.")
+                    try:
+                        db_client.client.table(self.candidate_table).update({
+                            "intenção_voto": intencao,
+                            "nota_relevancia": nota,
+                            "ultima_pesquisa_id": pesquisa_id,
+                            "atualizado_em": datetime.now(UTC).isoformat()
+                        }).eq("username", username).execute()
+                    except Exception as e_up:
+                        self.logger.warning(f"⚠️ Erro ao atualizar estatísticas da pesquisa para @{username}: {e_up}")
 
-        # 3. Upsert no Supabase
-        db_client.client.table(self.candidate_table).upsert({
-            "username": username,
-            "nome_completo": nome,
-            "cargo": cargo,
-            "intenção_voto": intencao,
-            "nota_relevancia": nota,
-            "prioridade_coleta": prioridade,
-            "ultima_pesquisa_id": pesquisa_id,
-            "status_monitoramento": "Ativo" if prioridade >= 3 else "Observação",
-            "atualizado_em": datetime.now(UTC).isoformat()
-        }, on_conflict="username").execute()
+                    # Define a prioridade na fila (1 a 3) baseada na relevância/situação (fila imediata)
+                    prioridade = 3
+                    if cargo in ["Presidente", "Governador"] or intencao > 15:
+                        prioridade = 1
+                    elif intencao > 5:
+                        prioridade = 2
 
-        self.logger.info(f"✨ Alvo @{username} atualizado no banco de dados.")
+                    try:
+                        today = datetime.now(UTC).date().isoformat()
+                        db_client.client.table(self.queue_table).upsert({
+                            "candidato_id": username,
+                            "prioridade": prioridade,
+                            "status": "PENDENTE",
+                            "data_agendada": today,
+                            "updated_at": datetime.now(UTC).isoformat()
+                        }, on_conflict="candidato_id,data_agendada").execute()
+                        self.logger.info(f"🚀 Alvo @{username} inserido na fila de coleta imediata hoje.")
+                    except Exception as e_queue:
+                        self.logger.error(f"❌ Erro ao inserir @{username} na fila de coleta: {e_queue}")
+                    
+                    return # Fim do processamento deste candidato já conhecido
+        except Exception as e_check:
+            self.logger.error(f"⚠️ Erro ao consultar existência de @{username} no banco: {e_check}")
+
+        # 3. Validar a identidade do alvo através do IntelligenceService (Apenas para novos ou pendentes)
+        self.logger.info(f"🔎 Validando identidade de @{username} para o escopo do projeto...")
+        try:
+            research_res = await intelligence_service.research_and_validate(username)
+        except Exception as e_validate:
+            self.logger.error(f"❌ Erro ao validar @{username} via IntelligenceService: {e_validate}")
+            research_res = None
+
+        # 4. Decisão de inserção baseada na validação
+        is_valid = False
+        is_temporary_error = False
+        temporary_reason = None
+
+        if research_res:
+            is_valid = research_res.get("identidade_validada", False) or research_res.get("status_monitoramento") == "ATIVO"
+            motivo_desativacao = research_res.get("motivo_desativacao") or ""
+            
+            # Detecta se é erro temporário de sessão/scraping
+            if not is_valid:
+                for term in ["header_not_found", "exception", "timeout", "unknown_error", "Erro de IA"]:
+                    if term.lower() in motivo_desativacao.lower():
+                        is_temporary_error = True
+                        temporary_reason = term
+                        break
+        else:
+            # Se a chamada falhou completamente (None), tratamos como erro temporário
+            is_temporary_error = True
+            temporary_reason = "Falha de comunicação/timeout na validação"
+
+        if is_valid or is_temporary_error:
+            # Se for erro temporário, forçamos o cadastro como pendente de validação
+            status_mon = "Ativo"
+            val_identidade = None # Permite re-validação pelo TargetResearchWorker no futuro
+            
+            if is_temporary_error:
+                self.logger.warning(f"⚠️ Validação de @{username} falhou por erro temporário ({temporary_reason}). Salvando como pendente e prosseguindo para a fila.")
+            else:
+                status_mon = "Ativo"
+                val_identidade = True
+
+            # Insere/Upserta na tabela de candidatos garantindo status Ativo e atualizando metadados da pesquisa
+            try:
+                db_client.client.table(self.candidate_table).upsert({
+                    "username": username,
+                    "nome_completo": nome,
+                    "cargo": cargo,
+                    "intenção_voto": intencao,
+                    "nota_relevancia": nota,
+                    "ultima_pesquisa_id": pesquisa_id,
+                    "status_monitoramento": status_mon,
+                    "identidade_validada": val_identidade,
+                    "atualizado_em": datetime.now(UTC).isoformat()
+                }, on_conflict="username").execute()
+            except Exception as e_up:
+                self.logger.warning(f"⚠️ Erro ao atualizar estatísticas da pesquisa para @{username}: {e_up}")
+
+            # Define a prioridade na fila (1 a 3) baseada na relevância/situação (fila imediata)
+            prioridade = 3
+            if cargo in ["Presidente", "Governador"] or intencao > 15:
+                prioridade = 1
+            elif intencao > 5:
+                prioridade = 2
+
+            self.logger.info(f"💎 Target: @{username} | Nota: {nota:.2f} | Prioridade: {prioridade}")
+
+            # 5. Inserir na fila de coleta com agendamento imediato para hoje
+            try:
+                today = datetime.now(UTC).date().isoformat()
+                db_client.client.table(self.queue_table).upsert({
+                    "candidato_id": username,
+                    "prioridade": prioridade,
+                    "status": "PENDENTE",
+                    "data_agendada": today,
+                    "updated_at": datetime.now(UTC).isoformat()
+                }, on_conflict="candidato_id,data_agendada").execute()
+                self.logger.info(f"🚀 Alvo @{username} inserido na fila de coleta imediata hoje.")
+            except Exception as e_queue:
+                self.logger.error(f"❌ Erro ao inserir @{username} na fila de coleta: {e_queue}")
+        else:
+            reason = research_res.get("motivo_desativacao") if research_res else "Validação falhou ou timeout"
+            self.logger.warning(f"🚫 Alvo @{username} desconsiderado da fila imediata. Motivo: {reason}")
 
     def _generate_handle(self, nome: str) -> str:
         """Gera um handle provisório. Em produção, isso usaria uma busca real."""
