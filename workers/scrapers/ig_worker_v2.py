@@ -161,7 +161,9 @@ class InstagramScraperWorker(BaseWorker):
                 )
                 
             if "all_sessions_blocked" in str(e):
-                self.logger.error(f"🛑 [V2] Todas as sessões em cooldown! Retornando falha controlada para não quebrar o Orquestrador.")
+                self.logger.error(f"🛑 [V2] TODAS AS SESSÕES EM COOLDOWN OU EXPIRADAS!")
+                self.logger.error(f"👉 Se todas as sessões expiraram, execute o comando abaixo no terminal para renová-las de forma interativa:")
+                self.logger.error(f"   python scripts/export_playwright_cookies.py --force --interactive")
                 return CycleResult(
                     worker_id=self.worker_id, cycle=self.cycle, target=target.username,
                     source="v2_engine", extracted=0, simulated=False, 

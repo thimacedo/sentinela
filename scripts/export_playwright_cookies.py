@@ -135,8 +135,18 @@ async def renew_account_cookies(browser, account: dict):
 
     # 3. Lidar com telas intermediárias
     if logged_in:
-        print("[*] Aguardando 60 segundos extras para resolução manual de Captchas/2FA caso o Instagram solicite...")
-        await page.wait_for_timeout(60000)
+        print("[*] Aguardando resolução manual de Captchas/2FA caso o Instagram solicite (timeout max 60s)...")
+        for i in range(30):
+            if page.is_closed():
+                break
+            current_url = page.url
+            if "accounts/login" not in current_url and "challenge" not in current_url:
+                profile_indicator = await page.query_selector('svg[aria-label="Perfil"], svg[aria-label="Profile"]')
+                if profile_indicator:
+                    print("✅ [Status] Login detectado com sucesso! Prosseguindo...")
+                    break
+            await page.wait_for_timeout(2000)
+
         
         # Fechar "Salvar informações de login"
         try:
@@ -247,8 +257,12 @@ async def export_cookies():
 
     print(f"[*] Encontrada(s) {len(accounts)} conta(s) para renovação.")
     
+    import sys
+    interactive = "--interactive" in sys.argv or "-i" in sys.argv
     headless_mode = os.getenv('PLAYWRIGHT_HEADLESS', '1') == '1'
-    print(f"Iniciando Playwright (headless={headless_mode})...")
+    if interactive:
+        headless_mode = False
+    print(f"Iniciando Playwright (headless={headless_mode}, interativo={interactive})...")
 
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(headless=headless_mode)

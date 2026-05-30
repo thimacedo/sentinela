@@ -20,6 +20,8 @@ _last_updated: 2026-05-30 | branch: main (Model: Gemini 3.5 Flash)_
 5.  **Grafo de Ligações Táticas:** Reescrito o `CanvasRenderingContext2D` do `react-force-graph-2d` para: A) Eliminar "Emaranhado" limitando os Text Labels da rede somente em *Zooms aproximados* e B) Paleta Neon vibrante sob contraste de fundo escuro com legenda `backdrop-blur`.
 6.  **Normalização DB:** Execução com sucesso do `scripts/clean_parties.py` e saneamento em fluxo no endpoint de estatísticas para partidos nulos/vazios/não informados.
 7.  **Correção de Importação do InstagramWorker:** Corrigida a referência à classe do scraper em `instagram_worker.py` para `InstagramScraperWorker` (Fase 4 - Workers), sanando o loop de erro letal no Watchdog.
+8.  **Validação Manual de Sessão Instagram:** Adicionado suporte ao argumento `--interactive` (ou `-i`) no script `export_playwright_cookies.py` para forçar a execução visual (não-headless) do Playwright. Otimizada a detecção do sucesso de login de forma reativa no loop para evitar esperas desnecessárias de 60s. Adicionados logs instrutivos ao operador no worker `ig_worker_v2.py` ao acusar que todas as sessões estão em cooldown/expiradas.
+
 
 ## 📊 ARQUITETURA DE INTEGRIDADE (v86.5)
 
