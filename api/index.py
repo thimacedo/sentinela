@@ -493,6 +493,50 @@ def get_marketing_kpis(supa: Client = Depends(get_supa)):
         logger.error(f"Marketing KPIs Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/api/v1/analytics/demographics")
+def get_demographics(supa: Client = Depends(get_supa)):
+    """Retorna comparativos demográficos cruzando ódio e perfil do candidato (v86.3)."""
+    try:
+        from collections import defaultdict
+        
+        # Pega amostra de ódio recente
+        res = supa.table('comentarios').select('candidatos(username, sexo, partido, estado, ideologia)').eq('is_hate', True).order('data_coleta', desc=True).limit(5000).execute()
+        data = res.data or []
+        
+        stats = {
+            "sexo": defaultdict(int),
+            "partido": defaultdict(int),
+            "estado": defaultdict(int),
+            "ideologia": defaultdict(int),
+            "top_alvos": defaultdict(int)
+        }
+        
+        for item in data:
+            c = item.get('candidatos')
+            if not c: continue
+            
+            # Conta por atributos
+            if c.get('sexo'): stats['sexo'][c['sexo']] += 1
+            if c.get('partido'): stats['partido'][c['partido']] += 1
+            if c.get('estado'): stats['estado'][c['estado']] += 1
+            if c.get('ideologia'): stats['ideologia'][c['ideologia']] += 1
+            if c.get('username'): stats['top_alvos'][c['username']] += 1
+            
+        # Formata para facilitar renderização no frontend
+        def format_stat(d):
+            return [{"name": k, "value": v} for k, v in sorted(d.items(), key=lambda item: item[1], reverse=True)]
+            
+        return {
+            "sexo": format_stat(stats["sexo"]),
+            "partido": format_stat(stats["partido"])[:10],
+            "estado": format_stat(stats["estado"])[:10],
+            "ideologia": format_stat(stats["ideologia"]),
+            "top_alvos": format_stat(stats["top_alvos"])[:5]
+        }
+    except Exception as e:
+        logger.error(f"Demographics Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/api/v1/dossiers/generate")
 async def generate_dossier(payload: DossierGenerateRequest, supa: Client = Depends(get_supa)):
     """Gera um novo relatório estratégico (Gratuito durante o Beta/Stress Test)."""

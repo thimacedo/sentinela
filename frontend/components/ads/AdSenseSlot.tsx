@@ -7,15 +7,22 @@ import { usePathname } from 'next/navigation';
 type AdSenseSlotProps = {
   /** ID da unidade de anúncio criada no Google AdSense */
   adSlot: string;
-  /** Formato do bloco: horizontal (728×90), vertical (300×250) ou auto */
-  format?: 'horizontal' | 'vertical' | 'auto';
+  /** Formato do bloco */
+  format?: 'horizontal' | 'vertical' | 'auto' | 'fluid' | 'autorelaxed';
+  /** Layout para anúncios in-article ou específicos */
+  layout?: 'in-article' | string;
+  /** Layout key para anúncios in-feed nativos */
+  layoutKey?: string;
+  /** Estilos inline customizados */
+  style?: React.CSSProperties;
 };
 
 /**
  * Componente reutilizável que renderiza um bloco de anúncios do Google AdSense.
  * Altamente resiliente a transições de páginas em Next.js (SPA) e StrictMode do React.
+ * Suporta Native, In-Feed, In-Article e Multiplex.
  */
-export default function AdSenseSlot({ adSlot, format = 'auto' }: AdSenseSlotProps) {
+export default function AdSenseSlot({ adSlot, format = 'auto', layout, layoutKey, style }: AdSenseSlotProps) {
   const insRef = useRef<HTMLModElement>(null);
   const pathname = usePathname();
 
@@ -23,58 +30,41 @@ export default function AdSenseSlot({ adSlot, format = 'auto' }: AdSenseSlotProp
     const loadAd = () => {
       try {
         if (typeof window !== 'undefined') {
-          // Inicializa a fila global do AdSense se necessário
           (window as any).adsbygoogle = (window as any).adsbygoogle || [];
           
-          // Verifica se o elemento ins atual existe e ainda não foi processado pelo AdSense
           if (insRef.current && !insRef.current.hasAttribute('data-adsbygoogle-status')) {
             (window as any).adsbygoogle.push({});
           }
         }
       } catch (err) {
-        console.warn("⚠️ AdSense injeção falhou silenciosamente (esperado em ambiente de dev):", err);
+        console.warn("⚠️ AdSense injeção falhou silenciosamente:", err);
       }
     };
 
-    // Pequeno atraso para garantir o desenho do DOM antes do cálculo do layout pelo AdSense
     const timer = setTimeout(loadAd, 200);
     return () => clearTimeout(timer);
-  }, [pathname, adSlot]); // Recarrega se mudar a rota ou o slot do bloco
+  }, [pathname, adSlot]);
 
-  // Dimensões padrão baseadas no formato escolhido
-  const dimensions =
-    format === 'horizontal'
-      ? { width: 728, height: 90 }
-      : format === 'vertical'
-      ? { width: 300, height: 250 }
-      : { width: 'auto', height: 'auto' };
-
-  const minHeight = format === 'horizontal' ? 90 : format === 'vertical' ? 250 : 100;
+  // Se format for fluid ou autorelaxed (nativo), não fixamos altura para evitar distorções
+  const isNative = format === 'fluid' || format === 'autorelaxed';
+  const minHeight = isNative ? undefined : (format === 'horizontal' ? 90 : format === 'vertical' ? 250 : 100);
 
   return (
     <div 
-      className="my-6 w-full flex items-center justify-center bg-bg-card/30 border border-border-main/50 rounded-lg relative overflow-hidden transition-colors hover:border-border-main/80"
-      style={{ minHeight: `${minHeight}px` }}
+      className="my-6 w-full flex items-center justify-center bg-transparent relative transition-colors"
+      style={{ minHeight: minHeight ? `${minHeight}px` : 'auto' }}
       aria-label="Espaço Publicitário"
     >
-      <span className="absolute text-[10px] uppercase font-mono text-text-muted opacity-40 select-none tracking-widest z-0 flex items-center gap-2">
-        <span className="w-2 h-2 bg-text-muted/20 rounded-full animate-pulse" />
-        Publicidade
-      </span>
       <ins
         ref={insRef}
         className="adsbygoogle z-10 w-full"
-        style={{
-          display: 'block',
-          width: dimensions.width === 'auto' ? '100%' : (dimensions.width as any),
-          height: dimensions.height === 'auto' ? '100%' : (dimensions.height as any),
-          margin: '0 auto',
-        }}
+        style={{ display: 'block', ...style }}
         data-ad-client="ca-pub-1827611269042960"
         data-ad-slot={adSlot}
         data-ad-format={format}
-        data-full-width-responsive="true"
-        data-adtest="on"
+        data-ad-layout={layout}
+        data-ad-layout-key={layoutKey}
+        data-full-width-responsive={isNative ? undefined : "true"}
       />
     </div>
   );

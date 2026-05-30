@@ -58,9 +58,20 @@ export function useGeoUf() {
   return useQuery({
     queryKey: ['geo-uf'],
     queryFn: async () => {
-      // Importação tardia do gateway client
       const { fetchApi } = await import('@/lib/api');
       return fetchApi('/api/v1/geo/uf');
+    },
+    refetchInterval: 120000,
+    staleTime: 60000,
+  });
+}
+
+export function useDemographics() {
+  return useQuery({
+    queryKey: ['demographics'],
+    queryFn: async () => {
+      const { fetchApi } = await import('@/lib/api');
+      return fetchApi('/api/v1/analytics/demographics');
     },
     refetchInterval: 120000,
     staleTime: 60000,
