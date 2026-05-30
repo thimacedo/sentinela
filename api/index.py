@@ -170,8 +170,8 @@ async def stripe_webhook(request: Request, supa: Client = Depends(get_supa)):
                 "p_metadata": metadata
             }
             
-            # Utiliza a RPC que já está implementada na infraestrutura STN
-            res = supa.rpc('process_stn_transaction', rpc_payload).execute()
+            # Utiliza a RPC que já está implementada na infraestrutura de CIs
+            res = supa.rpc('process_ci_transaction', rpc_payload).execute()
             
             if res.data is True:
                 logger.info(f"✅ Webhook Sucesso: {ci_amount} CI injetados para o usuário {user_id}")
@@ -221,10 +221,10 @@ def get_finance_dashboard(supa: Client = Depends(get_supa)):
     """Retorna dados agregados do faturamento e consumo de CI (GOD Mode)."""
     try:
         # 1. Total CI e Receita (baseado na tabela profiles para performance na MVP)
-        profiles_res = supa.table('profiles').select('id, full_name, stn_tokens, total_stn_spent').execute()
+        profiles_res = supa.table('profiles').select('id, full_name, saldo_ci, total_stn_spent').execute()
         profiles = profiles_res.data or []
         
-        total_circulating = sum(p.get('stn_tokens', 0) for p in profiles)
+        total_circulating = sum(p.get('saldo_ci', 0) for p in profiles)
         total_spent = sum(p.get('total_stn_spent', 0) for p in profiles)
         total_purchased = total_circulating + total_spent
         
@@ -234,8 +234,8 @@ def get_finance_dashboard(supa: Client = Depends(get_supa)):
         # Top 5 usuários por consumo
         top_spenders = sorted(profiles, key=lambda x: x.get('total_stn_spent', 0), reverse=True)[:5]
         
-        # 2. Distribuição de Consumo (busca as transações recentes)
-        tx_res = supa.table('stn_transactions').select('metadata, amount').eq('type', 'CONSUMPTION').order('created_at', desc=True).limit(5000).execute()
+        # 2. Transações de CI/STN
+        tx_res = supa.table('ci_transactions').select('description, amount').eq('type', 'CONSUMPTION').order('created_at', desc=True).limit(5000).execute()
         transactions = tx_res.data or []
         
         modules_breakdown = {
@@ -261,7 +261,7 @@ def get_finance_dashboard(supa: Client = Depends(get_supa)):
             modules_breakdown[label] += amt
 
         # 3. Transações Recentes
-        recent_tx_res = supa.table('stn_transactions').select('id, type, amount, created_at, user_id, metadata').order('created_at', desc=True).limit(10).execute()
+        recent_tx_res = supa.table('ci_transactions').select('id, type, amount, created_at, user_id, description').order('created_at', desc=True).limit(10).execute()
         recent_tx = recent_tx_res.data or []
 
         return {
@@ -561,7 +561,7 @@ async def generate_dossier(payload: DossierGenerateRequest, supa: Client = Depen
         }
         
         # Registra a transação com custo zero para manter auditoria
-        supa.rpc('process_stn_transaction', rpc_payload).execute()
+        supa.rpc('process_ci_transaction', rpc_payload).execute()
 
         # 2. Busca dados reais para o dossiê (Top 500 interações do alvo)
         data_res = supa.table('comentarios')\
@@ -573,7 +573,7 @@ async def generate_dossier(payload: DossierGenerateRequest, supa: Client = Depen
         data = data_res.data or []
         if not data:
             # Reverte a cobrança se não houver dados (Gesto de boa fé tática)
-            supa.rpc('process_stn_transaction', {**rpc_payload, "p_amount": 350, "p_metadata": {"action": "refund_empty_dossier"}}).execute()
+            supa.rpc('process_ci_transaction', {**rpc_payload, "p_amount": 350, "p_description": "Estorno por Dossiê vazio"}).execute()
             raise HTTPException(status_code=404, detail="Alvo sem dados coletados suficientes para geração de dossiê.")
         
         # 3. Geração Real do PDF
