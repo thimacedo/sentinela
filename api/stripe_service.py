@@ -5,6 +5,8 @@ from fastapi import HTTPException
 from core.db import db_client # Adicionado para injetar CI no modo Mock
 
 # CONFIGURAÇÃO DE ELITE (Stripe SDK v15.x compatible)
+# Chaves devem ser injetadas exclusivamente via Variáveis de Ambiente (Vercel/Local .env)
+# O hardcoding de chaves Live é proibido por protocolos de segurança.
 stripe.api_key = os.getenv("STRIPE_API_KEY")
 WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
 
@@ -15,18 +17,18 @@ class PaymentManager:
     def create_checkout_session(user_id: str, package_type: str):
         """Cria uma sessão de checkout para compra de pacotes de CI."""
         
-        # Mapeia o tipo de pacote para o respectivo Stripe Price ID do catálogo
+        # Mapeia o tipo de pacote para o respectivo Stripe Price ID do catálogo oficial (PASA v86.6)
         package_map = {
             "tatica": {
-                "price_id": os.getenv("STRIPE_STARTER_PRICE_ID"),
+                "price_id": os.getenv("STRIPE_STARTER_PRICE_ID") or "price_1Tc8IeE7CwDepeQsPQJP9oej",
                 "ci_amount": 1000
             },
             "warroom": {
-                "price_id": os.getenv("STRIPE_SQUAD_PRICE_ID"),
+                "price_id": os.getenv("STRIPE_SQUAD_PRICE_ID") or "price_1Tc8IeE7CwDepeQsi9KcTFzL",
                 "ci_amount": 6000 # 5k + 1k bonus
             },
             "nacional": {
-                "price_id": os.getenv("STRIPE_WARROOM_PRICE_ID"),
+                "price_id": os.getenv("STRIPE_WARROOM_PRICE_ID") or "price_1Tc8IfE7CwDepeQs6rVZZJXb",
                 "ci_amount": 25000
             }
         }
