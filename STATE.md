@@ -11,14 +11,16 @@ _last_updated: 2026-05-29 | branch: main (Model: Gemini Pro)_
 | **Analytics (Network)** | 🟢 OPERACIONAL | **NetworkMinerWorker** ativo detectando clusters coordenados. |
 | **Frontend (Next.js)** | 🟢 ESTÁVEL | Next.js 16. Grid 2-colunas, filtros dinâmicos e KPIs em tempo real. |
 
-## 🛠️ Últimas Mudanças (Sprint v85.2 ➔ v86.0)
+## 🛠️ Últimas Mudanças (Sprint v85.2 ➔ v86.1)
 
-1.  **Motor de Coleta:** Implementado **Stealth Mode** com rotação de User-Agents/Viewports e bypass de fingerprint. Fim da trava de validação para novos alvos.
-2.  **Inteligência Local:** Integrado **Ollama** para triagem inicial de custo zero. Redução de ~50% no consumo de APIs externas.
-3.  **Dossiês Forenses:** Ativada a geração real de PDFs via `DossieService` com assinatura **SHA-256** e selo de integridade.
-4.  **UX de Análise:** Implementada renderização **Markdown** nos cards e exibição do **Parecer Técnico** da IA. Correção de filtro dinâmico por URL.
-5.  **Otimização Ociosa:** Implementado **Smart Wait** (10 min em idle) e **Background Utility Tasks** (re-análise automática).
-6.  **Governança Financeira:** Iniciada migração semântica de **STN para CI (Créditos de Inteligência)**.
+1.  **Correção Crítica (Scraper V2):** Corrigida regressão de indentação em `InstagramScraperV2` que impedia o acesso aos métodos `get_stats` e `_validate_target_identity`, restaurando a estabilidade dos workers de coleta e inteligência.
+2.  **Robustez de Diagnóstico:** Melhorado o logging de exceções no `IntelligenceService` e aumentada a precisão das mensagens de erro (truncamento de 50 para 100 caracteres).
+3.  **Motor de Coleta:** Implementado **Stealth Mode** com rotação de User-Agents/Viewports e bypass de fingerprint.
+4.  **Inteligência Local:** Integrado **Ollama** para triagem inicial de custo zero. Redução de ~50% no consumo de APIs externas.
+5.  **Dossiês Forenses:** Ativada a geração real de PDFs via `DossieService` com assinatura **SHA-256** e selo de integridade.
+6.  **UX de Análise:** Implementada renderização **Markdown** nos cards e exibição do **Parecer Técnico** da IA.
+7.  **Otimização Ociosa:** Implementado **Smart Wait** (10 min em idle) e **Background Utility Tasks** (re-análise automática).
+8.  **Governança Financeira:** Iniciada migração semântica de **STN para CI**.
 
 ## 📊 ARQUITETURA DE INTEGRIDADE (v86.0)
 

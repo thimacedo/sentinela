@@ -105,7 +105,8 @@ class IntelligenceService:
                 
                 return validation
         except Exception as e:
-            return {"valid": False, "reason": f"exception: {str(e)[:50]}"}
+            logger.error(f"Erro ao capturar info básica de @{username}: {e}", exc_info=True)
+            return {"valid": False, "reason": f"exception: {str(e)[:100]}"}
         return None
 
     async def _search_official_sources(self, username: str, name: str) -> Dict[str, Any]:

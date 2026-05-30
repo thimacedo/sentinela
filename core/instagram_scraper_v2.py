@@ -102,7 +102,6 @@ class InstagramScraperV2:
         chrome_patch = random.randint(100, 200)
         chrome_ver = f"{chrome_major}.0.{chrome_build}.{chrome_patch}"
 
-        firefox_ver = f"{random.choice([124, 125, 126])}.0"
         safari_ver = f"17.{random.choice([3, 4, 5])}"
 
         os_templates = [
@@ -204,7 +203,6 @@ class InstagramScraperV2:
                         ]
                     )
                     
-                    # 🎭 ROTAÇÃO DE STEALTH AMPLIADA (PASA v85.10)
                     profile = self._generate_stealth_profile()
                     
                     proxy_url = os.getenv("PROXY_URL")
@@ -220,12 +218,10 @@ class InstagramScraperV2:
                         
                     context = await browser.new_context(**context_kwargs)
                     
-                    # 🧪 INJEÇÃO DE STEALTH SCRIPTS (Fingerprint Bypass)
                     await context.add_init_script(f"""
                         Object.defineProperty(navigator, 'webdriver', {{ get: () => undefined }});
                         Object.defineProperty(navigator, 'platform', {{ get: () => '{profile["platform"]}' }});
                         Object.defineProperty(navigator, 'vendor', {{ get: () => '{profile["vendor"]}' }});
-                        // Emula Plugins
                         Object.defineProperty(navigator, 'plugins', {{ get: () => [1, 2, 3, 4, 5] }});
                     """)
                     
@@ -242,7 +238,6 @@ class InstagramScraperV2:
                     proxy_log = "com Proxy" if proxy_url else "sem Proxy"
                     logger.info(f"🎯 [V2] Scrape @{username} usando {session.label} | Profile: {profile['platform']} | Res: {profile['w']}x{profile['h']} ({proxy_log})")
                     
-                    # 🛡️ VERIFICAÇÃO DE SESSÃO ATIVA (PASA v70.4)
                     if not await self._verify_session(page, session):
                         logger.warning(f"⚠️ [V2] Sessão {session.label} expirada ou inválida. Rotacionando...")
                         session.blocked = True
@@ -250,10 +245,8 @@ class InstagramScraperV2:
                         await browser.close()
                         continue
 
-                    # 1. Navega para o Perfil
                     response = await page.goto(f"https://www.instagram.com/{username}/", wait_until="domcontentloaded", timeout=60000)
                     
-                    # 🛡️ PROTEÇÃO CONTRA 429
                     if response and response.status == 429:
                         logger.warning(f"⚠️ [V2] Erro 429 detectado. Rotacionando IP/Sessão...")
                         await context.clear_cookies()
@@ -261,7 +254,6 @@ class InstagramScraperV2:
                         retry_count += 1
                         continue
 
-                    # Check 404
                     try:
                         error_header = await page.query_selector("h2")
                         if error_header:
@@ -273,7 +265,6 @@ class InstagramScraperV2:
                     except ValueError as ve: raise ve
                     except: pass
 
-                    # Jitter de navegação inicial
                     await asyncio.sleep(random.uniform(4, 8))
 
                     if "login" in page.url:
@@ -283,7 +274,6 @@ class InstagramScraperV2:
                         await browser.close()
                         continue
 
-                    # Extrai metadados dos posts
                     post_metas = await self._extract_shortcodes(page, max_posts)
                     self.stats["posts_found"] = len(post_metas)
                     
@@ -308,7 +298,6 @@ class InstagramScraperV2:
                             logger.info(f"⏭️ [V2] Post {shortcode} FAST-SKIP (Fixado).")
                             continue
 
-                        # Fast-Skip Temporal
                         if post_timestamp:
                             try:
                                 post_dt = datetime.fromisoformat(post_timestamp.replace('Z', '+00:00'))
@@ -329,7 +318,6 @@ class InstagramScraperV2:
                             all_comments.extend(post_comments)
                             scraped_count += 1
                             self.stats["posts_scraped"] += 1
-                            # Jitter entre posts (Simulação Humana)
                             await asyncio.sleep(random.uniform(6, 18))
                         else:
                             logger.info(f"⏭️ [V2] Post {shortcode} ignorado.")
@@ -350,9 +338,7 @@ class InstagramScraperV2:
         return {"comments": all_comments, "post_metas": []}
 
     async def open_post_modal(self, page: Page, shortcode: str) -> bool:
-        """Abre um post com bypass de interceptação."""
         if page.is_closed(): return False
-        
         selector = f'a[href*="/{shortcode}/"]'
         try:
             post_element = await page.query_selector(selector)
@@ -361,8 +347,6 @@ class InstagramScraperV2:
                 await asyncio.sleep(random.uniform(4, 7))
                 if await page.query_selector("article"): return True
         except: pass
-
-        # Fallback URL
         try:
             logger.info(f"🔄 [V2] Fallback URL para {shortcode}...")
             await page.goto(f"https://www.instagram.com/p/{shortcode}/", wait_until="domcontentloaded", timeout=30000)
@@ -370,18 +354,14 @@ class InstagramScraperV2:
             if await page.query_selector("article") or len(await page.query_selector_all("section")) > 0:
                 return True
         except: pass
-        
         return False
 
     async def scroll_comment_column(self, page: Page, scroll_amount: int = 800) -> None:
-        """Emula scroll de mouse realista."""
-        # Move para o lado direito do modal onde os comentários geralmente ficam
         await page.mouse.move(random.randint(800, 1200), random.randint(300, 600))
         await page.mouse.wheel(0, scroll_amount + random.randint(-100, 100))
         await asyncio.sleep(random.uniform(2, 4))
 
     async def close_post_modal(self, page: Page) -> None:
-        """Fecha o modal de forma limpa."""
         if page.is_closed(): return
         try:
             await page.keyboard.press("Escape")
@@ -391,12 +371,10 @@ class InstagramScraperV2:
         except: pass
 
     async def _scrape_post(self, page: Page, shortcode: str, username: str, candidato_id: str, max_comments: int, max_age_days: int) -> List[Dict[str, Any]]:
-        """Extrai comentários de um post."""
         self.captured_data = []
         if page.is_closed(): return []
         if not await self.open_post_modal(page, shortcode): return []
 
-        # Verificação de Idade
         post_date_iso = await page.evaluate("() => document.querySelector('article time')?.getAttribute('datetime')")
         if post_date_iso:
             post_dt = datetime.fromisoformat(post_date_iso.replace('Z', '+00:00'))
@@ -404,7 +382,6 @@ class InstagramScraperV2:
                 await self.close_post_modal(page)
                 return []
 
-        # Scrolls Realistas
         for _ in range(random.randint(2, 4)):
             await self.scroll_comment_column(page, scroll_amount=random.randint(1000, 1500))
         
@@ -439,7 +416,6 @@ class InstagramScraperV2:
         return normalized
 
     async def _extract_shortcodes(self, page: Page, limit: int) -> List[Dict[str, Any]]:
-        """Extrai shortcodes do grid."""
         return await page.evaluate(f"""
             () => {{
                 const results = [];
@@ -482,27 +458,26 @@ class InstagramScraperV2:
         return comments
 
     async def _extract_from_dom(self, page: Page, shortcode: str) -> List[Dict[str, Any]]:
-        """Heurística baseada em h3 (estilo moderno IG)."""
         return await page.evaluate("""
-            () => {
+            () => {{
                 const results = [];
                 const h3s = Array.from(document.querySelectorAll('article h3'));
-                h3s.forEach(h => {
+                h3s.forEach(h => {{
                     const username = h.innerText.trim();
                     if (!username || username.includes(' ')) return;
                     let node = h;
-                    for(let i = 0; i < 6; i++) { if(node.parentElement) node = node.parentElement; }
+                    for(let i = 0; i < 6; i++) {{ if(node.parentElement) node = node.parentElement; }}
                     const spans = Array.from(node.querySelectorAll('span[dir="auto"]'));
-                    for(let span of spans) {
+                    for(let span of spans) {{
                         const txt = span.innerText.trim();
-                        if (txt && txt !== username && txt.length > 2) {
-                            results.push({ autor: username, texto: txt });
+                        if (txt && txt !== username && txt.length > 2) {{
+                            results.push({{ autor: username, texto: txt }});
                             break;
-                        }
-                    }
-                });
+                        }}
+                    }}
+                }});
                 return results;
-            }
+            }}
         """)
 
     def _recursive_find_comments(self, data: Any) -> List[Dict[str, Any]]:
@@ -530,22 +505,40 @@ class InstagramScraperV2:
             for item in data: comments.extend(self._recursive_find_comments(item))
         return comments
 
-    async def _verify_session(self, page: Page, session: Session) -> bool:
-        """Verifica se a sessão ainda é válida navegando para o feed."""
+    async def _validate_target_identity(self, page: Page, username: str) -> Dict[str, Any]:
+        """Extrai metadados biográficos para validar se o alvo é de interesse."""
         try:
-            # Tenta acessar uma URL protegida
+            header_selector = "header section, main header"
+            header = await page.query_selector(header_selector)
+            if not header:
+                return {"valid": False, "reason": "header_not_found"}
+
+            is_private = await page.query_selector("svg[aria-label*='Privada'], svg[aria-label*='Private']")
+            if is_private:
+                return {"valid": False, "reason": "account_private"}
+
+            display_name = await page.evaluate("() => document.querySelector('header h2')?.innerText")
+            biography = await page.evaluate("() => document.querySelector('header div._ap30')?.innerText || document.querySelector('main header section div:last-child')?.innerText")
+            followers = await page.evaluate("() => Array.from(document.querySelectorAll('header span')).find(s => s.innerText.includes('seguidores') || s.innerText.includes('followers'))?.innerText")
+
+            return {
+                "valid": True,
+                "username": username,
+                "display_name": display_name,
+                "biography": biography,
+                "followers": followers
+            }
+        except Exception as e:
+            return {"valid": False, "reason": f"exception: {str(e)[:50]}"}
+
+    async def _verify_session(self, page: Page, session: Session) -> bool:
+        try:
             await page.goto("https://www.instagram.com/", wait_until="domcontentloaded", timeout=30000)
             await asyncio.sleep(random.uniform(2, 4))
-            
-            # Se redirecionar para login, a sessão caiu
-            if "accounts/login" in page.url:
-                return False
-                
-            # Verifica se o seletor de perfil (indicando logado) existe
+            if "accounts/login" in page.url: return False
             profile_element = await page.query_selector('svg[aria-label="Perfil"], svg[aria-label="Profile"]')
             return profile_element is not None
-        except:
-            return False
+        except: return False
 
     def get_stats(self) -> Dict[str, Any]:
         """Retorna estatísticas acumuladas do scraper."""
