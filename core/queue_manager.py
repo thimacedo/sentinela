@@ -10,6 +10,26 @@ from models.target import Target
 
 logger = logging.getLogger("queue_manager")
 
+# Helper para converter timestamps armazenados sem fuso para o horário local (UTC‑3)
+def _parse_local_timestamp(ts: str) -> datetime:
+    """Parse ISO8601 timestamp (possivelmente sem zona) assumindo horário local UTC‑3.
+    Retorna um objeto datetime em UTC para comparações consistentes.
+    """
+    try:
+        dt = datetime.fromisoformat(ts.replace('Z', '+00:00'))
+    except Exception:
+        # fallback simples
+        dt = datetime.strptime(ts, "%Y-%m-%dT%H:%M:%S")
+    # Se o datetime não tem tzinfo, atribui o fuso local (UTC‑3)
+    local_tz = timezone(timedelta(hours=-3))
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=local_tz)
+    else:
+        dt = dt.astimezone(local_tz)
+    # Converte para UTC
+    return dt.astimezone(timezone.utc)
+
+
 
 class QueueManager:
     def __init__(self, db_client):
@@ -136,7 +156,7 @@ class QueueManager:
                     continue
 
                 termometro = cand.get("termometro", "MORNO")
-                prioridade = 1 if termometro == "QUENTE" else (5 if termometro == "FRIO" else 3)
+                prioridade = 1 if termometro == "QUENTE" else (5 if termometro in ("FRIO", "MORNO") else 3)
 
                 # Reinserção via upsert
                 self.db.table("fila_coleta").upsert({
@@ -222,7 +242,9 @@ class QueueManager:
         if not target.username:
             return
 
-        now = datetime.now(timezone.utc)
+        # Use horário local (UTC‑3) como referência de tempo
+        LOCAL_TZ = timezone(timedelta(hours=-3))
+        now = datetime.now(LOCAL_TZ)
         now_iso = now.isoformat()
         
         # PASA v86.3: Não pune o alvo se for um erro do Scraper
@@ -257,11 +279,13 @@ class QueueManager:
             for m in post_metas:
                 if m.get("timestamp"):
                     try:
-                        valid_dates.append(datetime.fromisoformat(m["timestamp"].replace('Z', '+00:00')))
-                    except: continue
+                        # Usa horário local (UTC-3) para normalizar timestamps armazenados sem zona
+                        valid_dates.append(_parse_local_timestamp(m["timestamp"]))
+                    except Exception:
+                        continue
         
         if (is_empty or not valid_dates) and not is_no_comments:
-            termometro = "FRIO"
+            termometro = "MORNO"
             frequencia = 0.0
         elif is_no_comments or not valid_dates:
             # Caso especial: nenhum comentário encontrado, mas ainda não há dados suficientes
@@ -277,12 +301,13 @@ class QueueManager:
             else:
                 frequencia = round(7 / (days_since_last_post + 1), 1)
 
-            if days_since_last_post > 7:
-                termometro = "FRIO"
-            elif frequencia >= 5:
+            # Prioridade: frequência alta → QUENTE, caso contrário verifica tempo desde o último post
+            if frequencia >= 5:
                 termometro = "QUENTE"
-            elif frequencia < 1:
+            elif days_since_last_post > 7:
                 termometro = "FRIO"
+            elif frequencia < 1:
+                termometro = "MORNO"
             else:
                 termometro = "MORNO"
         
@@ -294,7 +319,7 @@ class QueueManager:
         self.db.table("candidatos").update(update_data).eq("username", target.username).execute()
 
         if target.queue_id:
-            nova_prioridade = 1 if termometro == "QUENTE" else (5 if termometro == "FRIO" else 3)
+            nova_prioridade = 1 if termometro == "QUENTE" else (5 if termometro in ("FRIO", "MORNO") else 3)
             self.db.table("fila_coleta").update({
                 "status": "SEM_DADOS_RECENTES" if is_empty else "CONCLUIDO",
                 "prioridade": nova_prioridade,

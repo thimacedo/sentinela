@@ -179,25 +179,7 @@ class AIService:
 
         return local_result or {"is_hate": False, "categoria_ia": "ERRO", "confianca_ia": 0.0, "analise_pericial": "Falha total."}
 
-    async def _call_provider(self, provider: Dict[str, Any], text: str, comment_id: str) -> Optional[Dict[str, Any]]:
-        name = provider["name"]
-        is_local = name in ["litert", "ollama"]
-        system_prompt = LOCAL_SYSTEM_PROMPT if is_local else SYSTEM_PROMPT
-        try:
-            response = await provider["client"].chat.completions.create(
-                model=provider["model"],
-                messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": f"Texto: \"{text}\""}],
-                response_format={"type": "json_object"},
-                temperature=0.0,
-                timeout=provider.get("timeout", 15.0)
-            )
-            result = self._parse_json_response(response.choices[0].message.content)
-            result["name"] = name
-            ai_circuit_breaker.record_success(name)
-            return result
-        except Exception as e:
-            ai_circuit_breaker.record_failure(name)
-            return None
+
 
     def _parse_json_response(self, content: str) -> Dict[str, Any]:
         try:
@@ -267,10 +249,6 @@ class AIService:
                 self.providers = [p for p in original_providers if p["name"] not in ["litert", "ollama"]]
                 
                 try:
-                    res_ia = await self.classify_text(item["texto_bruto"], item["id"])
-                    if res_ia and res_ia.get("confianca_ia", 0) > 0.1:
-                        db_client.client.table('comentarios').update({
-                            "categoria_ia": res_ia["categoria_ia"],
                             "confianca_ia": res_ia["confianca_ia"],
                             "is_hate": res_ia["is_hate"],
                             "analise_pericial": f"[RE-ANÁLISE] {res_ia.get('analise_pericial', '')}"
