@@ -1,7 +1,7 @@
 # STATE.md — Sentinela Democratica (Fonte de Verdade)
 _last_updated: 2026-05-31 | branch: main (Model: Gemini 3.1 Pro (High))_
 
-## Status Operacional (v86.6 - Intelligence Governance)
+## Status Operacional (v86.7 - Intelligence Governance)
 
 | Subsistema | Status | Observação |
 |---|---|---|
@@ -11,7 +11,7 @@ _last_updated: 2026-05-31 | branch: main (Model: Gemini 3.1 Pro (High))_
 | **Analytics (Network)** | 🟢 OPERACIONAL | Motor NetworkMiner ativo com Clusterização unificada (deduplicação por assinatura lexical de nós). |
 | **Frontend (Next.js)** | 🟢 ESTÁVEL | Refinamentos Premium UX: Correção de "overscaling", ForceGraph neon-legível e Glassmorphism implementados. |
 
-## 🛠️ Últimas Mudanças (Sprint v86.6 Concluída)
+## 🛠️ Últimas Mudanças (Sprint v86.7 Concluída)
 
 1.  **Dashboard DRE Financeiro:** Injeção do módulo de análise de fluxo (Inflow/Outflow) e histórico de queima com UI dinâmica via React Recharts na aba Financeiro.
 2.  **Harmonização Tipográfica (UX/UI):** Remoção de vícios de layout como overscaling tipográfico (Fontes `text-6xl` esmagando interface nas seções "Visão Tática"). Ajuste para leitura fluída e *Glassmorphism* limpo.
@@ -24,12 +24,13 @@ _last_updated: 2026-05-31 | branch: main (Model: Gemini 3.1 Pro (High))_
 9.  **Otimização e Dimensionamento da Fila de Coleta:** Aumentada a meta mínima de itens pendentes na fila (`min_pending`) de 5 (local) e 15 (nuvem) para 50, garantindo fila saudável para execuções duradouras. Corrigido o limite fixo de busca de candidatos no `QueueManager` para que o limite respeite a meta (`min_pending`). Corrigida a codificação do console no script `cloud_queue_refresh.py` para aceitar UTF-8 no Windows, evitando erros silenciosos de encode.
 10. **Scanner de Candidatos e Enfileiramento de Pesquisas (PASA v50.1):** Refatoração do `candidate_scanner.py` com suporte a descoberta inteligente de perfis oficiais do Instagram via IA (com base no nome, cargo e contexto do arquivo). Adicionado motor de curadoria prévia que verifica a existência de alvos ativos/inativos no banco de dados para evitar re-validação e desperdício de Playwright (ganho de 10x em performance).
 11. **Busca Ativa na Web e Observação de Candidatos (PASA v50.1):** Integrado motor de busca ativa na web via requisições HTTP para a versão HTML do DuckDuckGo no `candidate_scanner.py`, permitindo extrair os links de resultados reais do Instagram. A IA agora atua selecionando o handle oficial correto dentro do contexto de links reais, obtendo 100% de assertividade (ex: corrigindo `@jairbolsonaro` para `@jairmessiasbolsonaro` e `@romeuzema` para `@romeuzemaoficial`). Implementado o tratamento de falhas técnicas temporárias de validação (`header_not_found`, timeout, exceptions) para salvar o candidato no status `'Observação'` e `identidade_validada = None` sem enfileirá-lo de imediato. Criada a ferramenta [curate_candidates.py](file:///C:/Projetos/sentinela/tools/curate_candidates.py) que permite varrer, re-pesquisar via IA/web e liberar os alvos em observação para coleta ativa.
+12. **Correção do Termômetro do Candidato (PASA v86.7):** Corrigido o bug em que alvos recém-raspados eram incorretamente classificados como 'FRIO' com '0.0 posts/sem'. O scraper agora propaga o timestamp real do post extraído a partir do modal para o `post_metas`, alimentando corretamente a fila com a frequência de posts real.
 
-## 📊 ARQUITETURA DE INTEGRIDADE (v86.6)
+## 📊 ARQUITETURA DE INTEGRIDADE (v86.7)
 
 ```
 [Watchdog v50.0] (Guardião + Autocura + Tratamento Fallback)
-  ├── [Orchestrator v86.6] (Async Parallelism)
+  ├── [Orchestrator v86.7] (Async Parallelism)
         ├── [QueueManager v85.6] (Case-Insensitive + Priority Queue)
         ├── [Scraper Mesh] (IGWorkerV2 - Tratamento de Cooldown Ativo)
         ├── [AI Processor] (Ollama Triage -> Cloud Refinement - Fallback Mistral Ativo)
@@ -38,7 +39,7 @@ _last_updated: 2026-05-31 | branch: main (Model: Gemini 3.1 Pro (High))_
 ```
 
 ## 📉 Métricas de Resiliência
-- **Uptime Orquestrador:** 100.0% (v86.6 com Tratamento Letal Evitado)
+- **Uptime Orquestrador:** 100.0% (v86.7 com Tratamento Letal Evitado)
 - **Taxa de Acerto IA:** 94.5% (MCA v2.2)
 - **Sessões Ativas:** Múltiplas (Escala auto-gerenciada e bypass de Cooldown Massivo)
 - **Burn Rate:** Otimizado e monitorável em Tempo Real.
