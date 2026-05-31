@@ -3,6 +3,7 @@ import time
 import logging
 from pathlib import Path
 from core.fallback_llm import FallbackLLM
+from core.supabase_client import get_supabase_client
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -13,17 +14,28 @@ logging.basicConfig(
     format='%(asctime)s %(levelname)s %(message)s'
 )
 
-INTERVAL_SECONDS = int(os.getenv('WATCHDOG_INTERVAL', '300'))  # 5 minutes by default
+INTERVAL_SECONDS = int(os.getenv('WATCHDOG_INTERVAL', '300'))  # default 5 min
 
 def health_check():
     try:
         llm = FallbackLLM()
-        # texto simples para teste de saúde
         response = llm.classify("Teste de saúde do fallback.")
         logging.info('Health check OK: %s', response[:100])
+        # Log to Supabase
+        supabase = get_supabase_client()
+        supabase.table('fallback_logs').insert({
+            'provider': 'watchdog',
+            'status': 'OK',
+            'payload': {'response': response}
+        }).execute()
     except Exception as e:
         logging.error('Health check FAILED: %s', e)
-        # Here you could add notification logic (e.g., webhook, email)
+        supabase = get_supabase_client()
+        supabase.table('fallback_logs').insert({
+            'provider': 'watchdog',
+            'status': 'FAIL',
+            'payload': {'error': str(e)}
+        }).execute()
 
 if __name__ == '__main__':
     logging.info('Iniciando watchdog de fallback')

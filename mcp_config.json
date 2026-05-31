@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "supabase": {
+      "url": "https://mcpserverhub.com/servers/supabase"
+    },
+    "github": {
+      "url": "https://mcpserverhub.com/servers/github"
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    }
+  }
+}
