@@ -1,15 +1,9 @@
-# PASA v52.4.8: Requirements Otimizado para Vercel (API Only)
-# Remove dependências pesadas (Playwright, Scrapy) para manter bundle < 500MB
-fastapi>=0.115.0
-uvicorn[standard]>=0.30.0
-supabase>=2.11.0
-python-dotenv>=1.0.1
-httpx>=0.25.0,<0.28.0
-stripe>=8.5.0
-pydantic>=2.10.0
-pydantic-settings>=2.4.0
-traceback-with-variables==2.0.4
-mangum==0.17.0
 openai>=1.0.0
-python-json-logger>=2.0.7
-colorama>=0.4.6
+anthropic>=0.3.0
+cohere>=5.0.0
+fireworks-sdk>=0.12.0
+deepseek>=0.2.0
+google-generativeai>=0.4.0
+groq>=0.1.0
+ai21>=1.0.0
+python-dotenv>=1.0.0

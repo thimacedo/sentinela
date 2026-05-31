@@ -128,6 +128,37 @@ class FallbackLLM:
         data = resp.json()
         return data.get("choices", [{}])[0].get("text", "")
 
+    def _call_openai(self, text: str, api_key: str) -> str:
+        url = "https://api.openai.com/v1/chat/completions"
+        payload = {"model": "gpt-4o", "messages": [{"role": "user", "content": text}]}
+        headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+        resp = requests.post(url, json=payload, headers=headers, timeout=15)
+        resp.raise_for_status()
+        return resp.json()["choices"][0]["message"]["content"]
+
+    def _call_anthropic(self, text: str, api_key: str) -> str:
+        url = "https://api.anthropic.com/v1/messages"
+        payload = {"model": "claude-3-5-sonnet-20240620", "max_tokens": 1024, "messages": [{"role": "user", "content": text}]}
+        headers = {"x-api-key": api_key, "anthropic-version": "2023-06-01", "Content-Type": "application/json"}
+        resp = requests.post(url, json=payload, headers=headers, timeout=15)
+        resp.raise_for_status()
+        return resp.json()["content"][0]["text"]
+
+    def _call_gemini(self, text: str, api_key: str) -> str:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+        payload = {"contents": [{"parts": [{"text": text}]}]}
+        resp = requests.post(url, json=payload, timeout=15)
+        resp.raise_for_status()
+        return resp.json()["candidates"][0]["content"]["parts"][0]["text"]
+
+    def _call_groq(self, text: str, api_key: str) -> str:
+        url = "https://api.groq.com/openai/v1/chat/completions"
+        payload = {"model": "llama3-8b-8192", "messages": [{"role": "user", "content": text}]}
+        headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+        resp = requests.post(url, json=payload, headers=headers, timeout=15)
+        resp.raise_for_status()
+        return resp.json()["choices"][0]["message"]["content"]
+
     def _call_llama2(self, text: str) -> str:
         # Como fallback simples, retornamos o texto original marcado.
         return f"[LLAMA2] {text}"
@@ -169,6 +200,23 @@ class FallbackLLM:
                     return self._call_fireworks(text, api_key)
                 if name == "llama2":
                     return self._call_llama2(text)
+                # New providers
+                if name == "openai_gpt35":
+                    return self._call_openai(text, api_key)
+                if name == "anthropic_claude_instant":
+                    return self._call_anthropic(text, api_key)
+                if name == "google_gemini":
+                    return self._call_gemini(text, api_key)
+                if name == "groq_llama3":
+                    return self._call_groq(text, api_key)
+                if name == "cohere_command":
+                    return self._call_cohere(text, api_key)
+                if name == "fireworks_ai":
+                    return self._call_fireworks(text, api_key)
+                if name == "deepseek_chat":
+                    return self._call_deepseek(text, api_key)
+                if name == "ai21_j2ultra":
+                    return self._call_ai21(text, api_key)
                 logger.warning(f"Implementação para provider '{name}' não encontrada; retornando dummy.")
                 return f"[DUMMY-{name.upper()}] {text}"
             except Exception as exc:
