@@ -463,7 +463,7 @@ class InstagramScraperV2:
                         timestamp 
                     }});
                 }});
-                return results.slice(0, {{limit + 3}});
+                return results.slice(0, {limit + 3});
             }}
         """)
 
