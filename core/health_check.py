@@ -1,0 +1,77 @@
+import os
+import subprocess
+import httpx
+from pathlib import Path
+
+"""Módulo de verificação de saúde para serviços críticos do Sentinela.
+Inclui verificações das credenciais do Instagram e garantias de que os
+provedores de IA locais (Ollama e LiteRT) estejam em execução.
+"""
+
+def check_instagram_accounts():
+    """Verifica se as variáveis de ambiente de contas Instagram estão definidas.
+    Retorna um dicionário com status para cada credencial.
+    """
+    accounts = {
+        "IG_USER": os.getenv("IG_USER"),
+        "IG_PASS": os.getenv("IG_PASS"),
+        "IG_USER_1": os.getenv("IG_USER_1"),
+        "IG_PASS_1": os.getenv("IG_PASS_1"),
+    }
+    status = {}
+    for key, value in accounts.items():
+        if value and value.strip():
+            status[key] = "OK"
+        else:
+            status[key] = "MISSING (ação manual requerida)"
+    return status
+
+def _start_service(name: str, command: list[str]):
+    """Inicia um serviço local em background via subprocess.Popen.
+    Não verifica se já está rodando; essa responsabilidade cabe ao
+    chamador que pode fazer ping ao endpoint de saúde antes.
+    """
+    try:
+        subprocess.Popen(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        print(f"[🛠] Serviço {name} iniciado: {' '.join(command)}")
+    except Exception as e:
+        print(f"[⚠️] Falha ao iniciar {name}: {e}")
+
+def ensure_ollama_running():
+    base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+    health_url = f"{base_url}/api/tags"
+    try:
+        resp = httpx.get(health_url, timeout=2.0)
+        if resp.status_code == 200:
+            print("[✅] Ollama já está ativo.")
+            return True
+    except Exception:
+        pass
+    print("[⚠️] Ollama não respondendo, iniciando serviço...")
+    _start_service("Ollama", ["ollama", "serve"])
+    return False
+
+def ensure_litert_running():
+    health_url = "http://127.0.0.1:8001/health"
+    try:
+        resp = httpx.get(health_url, timeout=2.0)
+        if resp.status_code == 200:
+            print("[✅] LiteRT já está ativo.")
+            return True
+    except Exception:
+        pass
+    print("[⚠️] LiteRT não respondendo, iniciando serviço...")
+    _start_service("LiteRT", ["litert", "--serve"])
+    return False
+
+def run_startup_health_checks():
+    """Executa verificações de saúde na inicialização do Sentinela.
+    - Avalia credenciais Instagram.
+    - Garante que Ollama e LiteRT estejam operacionais.
+    """
+    print("🔍 Executando verificações de saúde na inicialização...")
+    ig_status = check_instagram_accounts()
+    for acc, st in ig_status.items():
+        print(f"[IG] {acc}: {st}")
+    ensure_ollama_running()
+    ensure_litert_running()

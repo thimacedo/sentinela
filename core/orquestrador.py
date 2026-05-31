@@ -19,6 +19,7 @@ from processing.data_miner import DataMiner
 from processing.report_generator import ReportGenerator
 from tools.target_manager import TargetManager
 import json
+from core.health_check import run_startup_health_checks
 
 class Orchestrator:
     def __init__(self):
@@ -222,6 +223,7 @@ class Orchestrator:
         print(f"📅 Data: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}")
         print(f"🧠 Intelligence: Provider={settings.IA_PROVIDER} (Cascade={ai_service.cascade_order})")
         print("="*50 + "\n")
+        run_startup_health_checks()
         
         if settings.IA_PROVIDER == "ollama":
             print(f"📡 Local AI: Verificando Ollama em {settings.OLLAMA_BASE_URL}...")
