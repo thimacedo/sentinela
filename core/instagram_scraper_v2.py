@@ -418,13 +418,17 @@ class InstagramScraperV2:
     async def _extract_shortcodes(self, page: Page, limit: int) -> List[Dict[str, Any]]:
         return await page.evaluate(f"""
             () => {{
+                const getShortcode = (url) => {{
+                    const m = url.match(/\\/(p|reel)\\/([^/\\?#]+)/);
+                    return m ? m[2] : null;
+                }};
+
                 const results = [];
                 const links = Array.from(document.querySelectorAll('a[href*="/p/"], a[href*="/reel/"]'));
                 
                 links.forEach(link => {{
-                    const match = link.href.match(/\\/(p|reel)\\/([^/]+)\\//);
-                    if (!match) return;
-                    const shortcode = match[2];
+                    const shortcode = getShortcode(link.href);
+                    if (!shortcode) return;
                     if (results.some(r => r.shortcode === shortcode)) return;
                     
                     let container = link.parentElement;
@@ -432,6 +436,16 @@ class InstagramScraperV2:
                     let timestamp = null;
                     
                     for (let i = 0; i < 5 && container; i++) {{
+                        const otherLinks = Array.from(container.querySelectorAll('a[href*="/p/"], a[href*="/reel/"]'));
+                        const uniqueShortcodes = new Set();
+                        otherLinks.forEach(l => {{
+                            const sc = getShortcode(l.href);
+                            if (sc) uniqueShortcodes.add(sc);
+                        }});
+                        if (uniqueShortcodes.size > 1) {{
+                            break;
+                        }}
+
                         const pin_icon = container.querySelector('svg[aria-label*="Pinned"], svg[aria-label*="Fixado"], svg[aria-label*="pinned"], svg[aria-label*="fixado"]');
                         if (pin_icon) {{
                             is_pinned = true;
@@ -449,7 +463,7 @@ class InstagramScraperV2:
                         timestamp 
                     }});
                 }});
-                return results.slice(0, {limit + 3});
+                return results.slice(0, {{limit + 3}});
             }}
         """)
 
