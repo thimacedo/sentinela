@@ -66,9 +66,9 @@ class DatabaseClient:
         try:
             # O upsert no Supabase funciona como merge se o id_externo estiver presente
             self.client.table('comentarios').upsert(updates, on_conflict='id_externo').execute()
-            print(f"✅ [DB] {len(updates)} comentários atualizados em lote.")
+            print(f"[DB] {len(updates)} comentarios atualizados em lote.")
         except Exception as e:
-            print(f"❌ [DB] Erro no batch_update_comments: {e}")
+            print(f"[DB] Erro no batch_update_comments: {e}")
 
     async def batch_update_ad_classification(self, updates: List[Dict[str, Any]]):
         """
@@ -80,9 +80,9 @@ class DatabaseClient:
 
         try:
             self.client.table('anuncios').upsert(updates).execute()
-            print(f"✅ [DB] {len(updates)} anúncios atualizados em lote.")
+            print(f"[DB] {len(updates)} anuncios atualizados em lote.")
         except Exception as e:
-            print(f"❌ [DB] Erro no batch_update_ad_classification: {e}")
+            print(f"[DB] Erro no batch_update_ad_classification: {e}")
 
     async def upsert_daily_metrics(self, payload: Dict[str, Any]):
         """Salva ou atualiza métricas diárias via RPC."""
@@ -92,7 +92,7 @@ class DatabaseClient:
                 resp = await client.post(url, json=payload, headers=self.headers)
                 return resp.status_code in [200, 201, 204]
             except Exception as e:
-                print(f"⚠️ Erro RPC metrics: {e}")
+                print(f"[DB] Erro RPC metrics: {e}")
                 return False
 
     async def persist_coordinated_network(self, payload: Dict[str, Any]):
@@ -122,7 +122,7 @@ class DatabaseClient:
     async def reset_target_comments(self, username: str):
         """Reseta o status de processamento de todos os comentários de um alvo."""
         if not self.client: return
-        print(f"🔄 [DB] Resetando comentários para @{username}...")
+        print(f"[DB] Resetando comentarios para @{username}...")
         
         try:
             # Busca IDs dos comentários do alvo
@@ -130,7 +130,7 @@ class DatabaseClient:
             comment_ids = [c['id'] for c in res.data]
             
             if not comment_ids:
-                print(f"⚠️ [DB] Nenhum comentário para @{username}.")
+                print(f"[DB] Nenhum comentario para @{username}.")
                 return
 
             # Reset em blocos para performance e segurança
@@ -144,9 +144,9 @@ class DatabaseClient:
                     'is_hate': False
                 }).in_('id', batch).execute()
             
-            print(f"✅ [DB] {len(comment_ids)} comentários resetados para @{username}.")
+            print(f"[DB] {len(comment_ids)} comentarios resetados para @{username}.")
         except Exception as e:
-            print(f"❌ [DB] Erro ao resetar comentários: {e}")
+            print(f"[DB] Erro ao resetar comentarios: {e}")
 
     async def mark_repericia_complete(self, username: str):
         """Desmarca o flag de re-perícia para o alvo."""
@@ -154,7 +154,7 @@ class DatabaseClient:
         try:
             self.client.table('candidatos').update({'needs_re_pericia': False}).eq('username', username).execute()
         except Exception as e:
-            print(f"⚠️ Erro ao desmarcar re-perícia para @{username}: {e}")
+            print(f"[DB] Erro ao desmarcar re-pericia para @{username}: {e}")
 
     async def persist_ad(self, data: Dict[str, Any]):
         """Persiste um anúncio extraído da Meta Ad Library."""
@@ -163,7 +163,7 @@ class DatabaseClient:
             # Usa upsert baseado no ad_id (id_externo no contexto Meta)
             self.client.table('anuncios').upsert(data, on_conflict='ad_id').execute()
         except Exception as e:
-            print(f"❌ [DB] Erro ao persistir anúncio {data.get('ad_id')}: {e}")
+            print(f"[DB] Erro ao persistir anuncio {data.get('ad_id')}: {e}")
 
     async def persist_ads_batch(self, ads: List[Dict[str, Any]]):
         """Persiste múltiplos anúncios em lote."""
@@ -171,9 +171,9 @@ class DatabaseClient:
         try:
             # Supabase permite upsert de lista
             self.client.table('anuncios').upsert(ads, on_conflict='ad_id').execute()
-            print(f"✅ [DB] {len(ads)} anúncios processados em lote.")
+            print(f"[DB] {len(ads)} anuncios processados em lote.")
         except Exception as e:
-            print(f"❌ [DB] Erro ao persistir lote de anúncios: {e}")
+            print(f"[DB] Erro ao persistir lote de anuncios: {e}")
 
     async def fetch_unprocessed_ads(self, limit: int = 50) -> List[Dict[str, Any]]:
         """Busca anúncios que ainda não foram processados pela IA."""
@@ -182,7 +182,7 @@ class DatabaseClient:
             res = self.client.table('anuncios').select('*').eq('processado_ia', False).limit(limit).execute()
             return res.data
         except Exception as e:
-            print(f"❌ [DB] Erro ao buscar anúncios não processados: {e}")
+            print(f"[DB] Erro ao buscar anuncios nao processados: {e}")
             return []
 
     async def update_ad_classification(self, ad_id: str, data: Dict[str, Any]):
@@ -191,17 +191,17 @@ class DatabaseClient:
         try:
             self.client.table('anuncios').update(data).eq('id', ad_id).execute()
         except Exception as e:
-            print(f"❌ [DB] Erro ao atualizar anúncio {ad_id}: {e}")
+            print(f"[DB] Erro ao atualizar anuncio {ad_id}: {e}")
 
     async def persist_dossier(self, data: Dict[str, Any]):
         """Persiste metadados de um dossiê gerado."""
         if not self.client: return
         try:
             res = self.client.table('dossies').insert(data).execute()
-            print(f"✅ [DB] Dossiê persistido: {data.get('hash_integridade')[:10]}...")
+            print(f"[DB] Dossie persistido: {data.get('hash_integridade')[:10]}...")
             return res.data
         except Exception as e:
-            print(f"❌ [DB] Erro ao persistir dossiê: {e}")
+            print(f"[DB] Erro ao persistir dossie: {e}")
             return None
 
     # --- GOVERNANÇA DE CRÉDITOS (CI - Créditos de Inteligência) ---
@@ -243,7 +243,7 @@ class DatabaseClient:
                 .execute()
             return res.data
         except Exception as e:
-            print(f"❌ [DB] Erro ao buscar histórico de dossiês: {e}")
+            print(f"[DB] Erro ao buscar historico de dossies: {e}")
             return []
 
     async def fetch_unmined_comments(self, limit: int = 100) -> List[Dict[str, Any]]:
@@ -258,7 +258,7 @@ class DatabaseClient:
                 # Fallback se a coluna não existir ainda
                 res = self.client.table('comentarios').select('*').eq('processado_ia', True).limit(limit).execute()
                 return res.data
-            print(f"❌ [DB] Erro ao buscar comentários não minerados: {e}")
+            print(f"[DB] Erro ao buscar comentarios nao minerados: {e}")
             return []
 
     async def fetch_unmined_ads(self, limit: int = 100) -> List[Dict[str, Any]]:
@@ -271,7 +271,7 @@ class DatabaseClient:
             if "column" in str(e) and "mined" in str(e):
                 res = self.client.table('anuncios').select('*').eq('processado_ia', True).limit(limit).execute()
                 return res.data
-            print(f"❌ [DB] Erro ao buscar anúncios não minerados: {e}")
+            print(f"[DB] Erro ao buscar anuncios nao minerados: {e}")
             return []
 
     async def upsert_candidate(self, data: Dict[str, Any]):
@@ -283,10 +283,10 @@ class DatabaseClient:
                 data['username'] = str(data['username']).lower().strip().replace('@', '')
             
             res = self.client.table('candidatos').upsert(data, on_conflict='username').execute()
-            print(f"✅ [DB] Alvo @{data.get('username')} persistido com sucesso.")
+            print(f"[DB] Alvo @{data.get('username')} persistido com sucesso.")
             return res.data
         except Exception as e:
-            print(f"❌ [DB] Erro ao persistir alvo: {e}")
+            print(f"[DB] Erro ao persistir alvo: {e}")
             return None
 
 db_client = DatabaseClient()

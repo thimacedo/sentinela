@@ -94,6 +94,7 @@ class TreasurerWorker(BaseWorker):
             # Tenta listar o balanço básico para validar a chave
             loop = asyncio.get_event_loop()
             await loop.run_in_executor(None, stripe.Balance.retrieve)
+
             logger.info("✅ [Treasurer] Conexão com Stripe estabelecida.")
             return True
         except Exception as e:
@@ -104,10 +105,10 @@ class TreasurerWorker(BaseWorker):
         """Verifica se existem perfis com saldo negativo."""
         try:
             # Governança de CI (v28.0)
-            res = db_client.client.table('profiles').select('id, username, saldo_ci').lt('saldo_ci', 0).execute()
+            res = db_client.client.table('profiles').select('id, saldo_ci').lt('saldo_ci', 0).execute()
             negatives = res.data or []
             for n in negatives:
-                logger.error(f"🚨 [Auditoria] SALDO NEGATIVO: @{n.get('username')} ({n.get('saldo_ci')} CI)")
+                logger.error(f"🚨 [Auditoria] SALDO NEGATIVO: ID {n.get('id')} ({n.get('saldo_ci')} CI)")
             return len(negatives)
         except: return 0
 
