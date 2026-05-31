@@ -32,8 +32,9 @@ Esta atualização marca a transição do Sentinela de um sistema de monitoramen
 - **Filtros Avançados**: Adicionada filtragem dinâmica por **Partido**, **Estado (UF)** e **Nível de Risco** em tempo real.
 - **Sincronia de URL**: Implementado filtro via Query String (`?target=...`) na página de análise com suporte a redirecionamento automático a partir dos cards de alvos.
 
-### 6. Correção do Scraper (v86.2)
+### 6. Correções de Scraper e Watchdog (v86.2)
 - **Correção da Detecção de Fixados (`is_pinned`)**: Corrigido bug crítico em [instagram_scraper_v2.py](file:///c:/Projetos/sentinela/core/instagram_scraper_v2.py) que usava `container.querySelector` indiscriminadamente ao subir a árvore de elementos DOM. Quando o container subia até o nível da grid (linha de posts), todos os posts subsequentes eram falsamente identificados como "Fixado" (FAST-SKIP) devido à presença do ícone de pin do primeiro post. A busca do pin_icon e time_el agora é isolada estritamente para a célula do respectivo post, interrompendo a subida da árvore se outros shortcodes forem encontrados no container.
+- **Correção de Métricas do Watchdog (`sys.path`)**: Adicionado `PROJECT_ROOT` ao `sys.path` no arquivo [watchdog/__init__.py](file:///c:/Projetos/sentinela/watchdog/__init__.py) para resolver o erro `No module named 'workers'` na thread do FastAPI, permitindo a leitura correta das métricas do `MemoryStore`.
 
 ---
 
