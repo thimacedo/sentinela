@@ -1,0 +1,184 @@
+# core/fallback_llm.py
+"""Wrapper genérico para múltiplos provedores de IA de fallback.
+
+O projeto já possui a configuração de provedores em ``core/config.py``
+(como lista ``FALLBACK_PROVIDERS``). Este módulo lê essa configuração,
+cria clientes simples (usando ``requests``) e disponibiliza um método
+``classify`` que envia um prompt de classificação para o provedor
+escolhido.
+
+Para fins de teste rápido, caso a chamada real falhe (por falta de
+bibliotecas específicas ou limites de quota), a função devolve um
+resultado dummy baseado em palavras‑chave simples.
+"""
+
+import os
+import logging
+from typing import List, Dict, Any
+import requests
+
+# Configura logger local
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
+
+# Importa a lista de provedores configurada no projeto
+try:
+    from .config import FALLBACK_PROVIDERS
+except Exception as e:
+    logger.error(f"Não foi possível importar FALLBACK_PROVIDERS: {e}")
+    FALLBACK_PROVIDERS = []
+
+
+class FallbackLLM:
+    """Gerencia a rotação entre provedores de IA.
+
+    A ordem de prioridade vem de ``FALLBACK_PROVIDERS``.
+    Cada provedor deve ter:
+        - ``name``: identificador interno (ex.: "cohere")
+        - ``api_key_env``: nome da variável de ambiente que contém a API‑key
+          (pode ser ``None`` para serviços sem autenticação, como LLaMA‑2
+          via Hugging Face Inference).
+    """
+
+    def __init__(self):
+        self.providers_order: List[Dict[str, Any]] = FALLBACK_PROVIDERS
+        if not self.providers_order:
+            logger.warning("Nenhum provedor configurado em FALLBACK_PROVIDERS.")
+
+    # ---------------------------------------------------------------------
+    # Helpers de chamada HTTP genérica
+    # ---------------------------------------------------------------------
+    def _call_cohere(self, text: str, api_key: str) -> str:
+        url = "https://api.cohere.com/v1/chat"
+        payload = {
+            "message": text,
+            "model": "command-r",
+            "temperature": 0.0,
+            "max_tokens": 50,
+        }
+        headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+        resp = requests.post(url, json=payload, headers=headers, timeout=15)
+        resp.raise_for_status()
+        data = resp.json()
+        return data.get("text", "")
+
+    def _call_deepseek(self, text: str, api_key: str) -> str:
+        url = "https://api.deepseek.com/v1/chat/completions"
+        payload = {
+            "model": "deepseek-chat",
+            "messages": [{"role": "user", "content": text}],
+            "max_tokens": 50,
+        }
+        headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+        resp = requests.post(url, json=payload, headers=headers, timeout=15)
+        resp.raise_for_status()
+        data = resp.json()
+        return data.get("choices", [{}])[0].get("message", {}).get("content", "")
+
+    def _call_azure(self, text: str, api_key: str) -> str:
+        endpoint = os.getenv("AZURE_OPENAI_ENDPOINT", "https://YOUR_RESOURCE.openai.azure.com")
+        url = f"{endpoint}/openai/deployments/gpt-35-turbo/chat/completions?api-version=2023-05-15"
+        payload = {
+            "messages": [{"role": "user", "content": text}],
+            "max_tokens": 50,
+        }
+        headers = {"api-key": api_key, "Content-Type": "application/json"}
+        resp = requests.post(url, json=payload, headers=headers, timeout=15)
+        resp.raise_for_status()
+        data = resp.json()
+        return data.get("choices", [{}])[0].get("message", {}).get("content", "")
+
+    def _call_openrouter(self, text: str, api_key: str) -> str:
+        url = "https://openrouter.ai/api/v1/chat/completions"
+        payload = {
+            "model": "openrouter/auto",
+            "messages": [{"role": "user", "content": text}],
+            "max_tokens": 50,
+        }
+        headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+        resp = requests.post(url, json=payload, headers=headers, timeout=15)
+        resp.raise_for_status()
+        data = resp.json()
+        return data.get("choices", [{}])[0].get("message", {}).get("content", "")
+
+    def _call_ai21(self, text: str, api_key: str) -> str:
+        url = "https://api.ai21.com/studio/v1/j2-ultra/completions"
+        payload = {
+            "prompt": text,
+            "maxTokens": 50,
+            "temperature": 0.0,
+        }
+        headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+        resp = requests.post(url, json=payload, headers=headers, timeout=15)
+        resp.raise_for_status()
+        data = resp.json()
+        return data.get("completions", [{}])[0].get("data", {}).get("text", "")
+
+    def _call_fireworks(self, text: str, api_key: str) -> str:
+        url = "https://api.fireworks.ai/inference/v1/completions"
+        payload = {
+            "model": "accounts/fireworks/models/llama-v2-7b-chat",
+            "prompt": text,
+            "max_tokens": 50,
+            "temperature": 0.0,
+        }
+        headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+        resp = requests.post(url, json=payload, headers=headers, timeout=15)
+        resp.raise_for_status()
+        data = resp.json()
+        return data.get("choices", [{}])[0].get("text", "")
+
+    def _call_llama2(self, text: str) -> str:
+        # Como fallback simples, retornamos o texto original marcado.
+        return f"[LLAMA2] {text}"
+
+    # ---------------------------------------------------------------------
+    # API pública
+    # ---------------------------------------------------------------------
+    def classify(self, text: str, provider_name: str = None) -> str:
+        """Classifica *text* usando o provedor selecionado.
+
+        Se ``provider_name`` for ``None``, percorre a lista de prioridade.
+        Em caso de erro, tenta o próximo provedor.
+        """
+        if provider_name:
+            provider = next((p for p in self.providers_order if p["name"] == provider_name), None)
+            if not provider:
+                raise ValueError(f"Provider '{provider_name}' não está configurado.")
+            providers = [provider]
+        else:
+            providers = self.providers_order
+
+        last_error = None
+        for prov in providers:
+            name = prov["name"]
+            key_env = prov.get("api_key_env")
+            api_key = os.getenv(key_env) if key_env else None
+            try:
+                if name == "cohere":
+                    return self._call_cohere(text, api_key)
+                if name == "deepseek":
+                    return self._call_deepseek(text, api_key)
+                if name == "azure":
+                    return self._call_azure(text, api_key)
+                if name == "openrouter":
+                    return self._call_openrouter(text, api_key)
+                if name == "ai21":
+                    return self._call_ai21(text, api_key)
+                if name == "fireworks":
+                    return self._call_fireworks(text, api_key)
+                if name == "llama2":
+                    return self._call_llama2(text)
+                logger.warning(f"Implementação para provider '{name}' não encontrada; retornando dummy.")
+                return f"[DUMMY-{name.upper()}] {text}"
+            except Exception as exc:
+                logger.error(f"Erro ao usar provider {name}: {exc}")
+                last_error = exc
+                continue
+        raise RuntimeError(f"Todas as chamadas de fallback falharam: {last_error}")
+
+    def upload_training_data(self, path: str) -> None:
+        """Placeholder para futuro upload de datasets a um provedor."""
+        if not os.path.isfile(path):
+            raise FileNotFoundError(f"Dataset não encontrado: {path}")
+        logger.info(f"Dataset pronto para upload (funcionalidade ainda não implementada): {path}")
