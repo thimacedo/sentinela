@@ -105,10 +105,11 @@ class InstagramScraperWorker(BaseWorker):
                 
                 if research_res and research_res.get("status_monitoramento") == "DESATIVADO":
                     self.logger.warning(f"🚫 [V2] Alvo @{target.username} desativado pela governança: {research_res.get('motivo_desativacao')}")
-                    return CycleResult(
+                    result = CycleResult(
                         worker_id=self.worker_id, cycle=self.cycle, target=target.username,
                         source="v2_engine", extracted=0, error="purged_by_governance"
                     )
+                    return result
         except Exception as e_intel:
             self.logger.warning(f"⚠️ [V2] Falha na integração de inteligência: {e_intel}")
 
@@ -154,28 +155,31 @@ class InstagramScraperWorker(BaseWorker):
             self.consecutive_blocks += 1
             if isinstance(e, ValueError) and "invalid_target" in str(e):
                 self.logger.error(f"🚫 [V2] Alvo @{target.username} marcado como INVÁLIDO (404/Privado/Mismatch).")
-                return CycleResult(
+                result = CycleResult(
                     worker_id=self.worker_id, cycle=self.cycle, target=target.username,
                     source="v2_engine", extracted=0, simulated=False, 
                     error=str(e), db_success=False
                 )
+                return result
                 
             if "all_sessions_blocked" in str(e):
                 self.logger.error(f"🛑 [V2] TODAS AS SESSÕES EM COOLDOWN OU EXPIRADAS!")
                 self.logger.error(f"👉 Se todas as sessões expiraram, execute o comando abaixo no terminal para renová-las de forma interativa:")
                 self.logger.error(f"   python scripts/export_playwright_cookies.py --force --interactive")
-                return CycleResult(
+                result = CycleResult(
                     worker_id=self.worker_id, cycle=self.cycle, target=target.username,
                     source="v2_engine", extracted=0, simulated=False, 
                     error="all_sessions_blocked", db_success=False
                 )
+                return result
                 
             self.logger.error(f"⚠️ [V2] Erro inesperado na extração de @{target.username}: {e}")
-            return CycleResult(
+            result = CycleResult(
                 worker_id=self.worker_id, cycle=self.cycle, target=target.username,
                 source="v2_engine", extracted=0, simulated=False, 
                 error=str(e), db_success=False
             )
+            return result
 
         try:
             stats = self.scraper.get_stats()
@@ -183,15 +187,17 @@ class InstagramScraperWorker(BaseWorker):
             if not comments:
                 if stats.get("junk_detected", 0) > 0:
                     self.logger.warning(f"⚠️ [V2] Apenas lixo detectado para @{target.username}. Sinalizando falha de extração.")
-                    return CycleResult(
+                    result = CycleResult(
                         worker_id=self.worker_id, cycle=self.cycle, target=target.username,
                         source="v2_engine", extracted=0, simulated=False, error="junk_detected"
                     )
+                    return result
                 # Se o scraper retornou vazio mas não levantou erro, pode ser apenas falta de conteúdo
-                return CycleResult(
+                result = CycleResult(
                     worker_id=self.worker_id, cycle=self.cycle, target=target.username,
                     source="v2_engine", extracted=0, simulated=False, error="no_comments_found"
                 )
+                return result
 
             # 2. Persistência com Resiliência de Schema (v58.3)
             inserted = 0
@@ -280,13 +286,14 @@ class InstagramScraperWorker(BaseWorker):
             
             if final_extracted <= 0 and stats.get("junk_detected", 0) > 0:
                 self.logger.warning(f"⚠️ [V2] Todo o conteúdo extraído de @{target.username} era LIXO. Sinalizando falha e anulando recompensas.")
-                return CycleResult(
+                result = CycleResult(
                     worker_id=self.worker_id, cycle=self.cycle, target=target.username,
                     source="v2_engine", extracted=0, inserted=0, simulated=False, error="junk_detected",
                     duration=asyncio.get_event_loop().time() - start_time
                 )
+                return result
 
-            return CycleResult(
+            result = CycleResult(
                 worker_id=self.worker_id, cycle=self.cycle, target=target.username,
                 source="v2_engine",
                 extracted=final_extracted,
@@ -296,14 +303,16 @@ class InstagramScraperWorker(BaseWorker):
                 simulated=False,
                 duration=asyncio.get_event_loop().time() - start_time
             )
+            return result
 
         except Exception as e:
             self.logger.error(f"💥 Erro crítico no ciclo V2: {e}")
-            return CycleResult(
+            result = CycleResult(
                 worker_id=self.worker_id, cycle=self.cycle, target=target.username,
                 failed=1, error=str(e)[:200], simulated=False,
                 duration=asyncio.get_event_loop().time() - start_time
             )
+            return result
         finally:
             # PASA v58.2: Injeta erro no alvo para que o rotate_target decida pela hibernação
             if isinstance(result, dict) and result.get("error"):

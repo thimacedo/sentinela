@@ -143,11 +143,23 @@ def setup_signal_handlers(
         shutdown_event.set()
         orch.stop_all()
 
-    for sig in (signal.SIGINT, signal.SIGTERM):
-        try:
-            loop.add_signal_handler(sig, lambda s=sig.name: _shutdown(s))
-        except NotImplementedError:
-            pass
+    if sys.platform.startswith("win"):
+        # No Windows, loop.add_signal_handler não é implementado. Usamos o signal clássico.
+        def handle_win_signal(signum, frame):
+            sig_name = "SIGINT" if signum == signal.SIGINT else "SIGTERM"
+            loop.call_soon_threadsafe(lambda: _shutdown(sig_name))
+        
+        for sig in (signal.SIGINT, signal.SIGTERM):
+            try:
+                signal.signal(sig, handle_win_signal)
+            except Exception:
+                pass
+    else:
+        for sig in (signal.SIGINT, signal.SIGTERM):
+            try:
+                loop.add_signal_handler(sig, lambda s=sig.name: _shutdown(s))
+            except NotImplementedError:
+                pass
 
 
 async def main() -> None:

@@ -378,7 +378,20 @@ class InstagramScraperV2:
         if page.is_closed(): return [], None
         if not await self.open_post_modal(page, shortcode): return [], None
 
-        post_date_iso = await page.evaluate("() => document.querySelector('article time')?.getAttribute('datetime')")
+        post_date_iso = None
+        for _ in range(5):
+            if page.is_closed(): break
+            post_date_iso = await page.evaluate("""() => {
+                let el = document.querySelector('article a[href*="/p/"] time, article a[href*="/reel/"] time, article a time');
+                if (!el) {
+                    el = document.querySelector('article time');
+                }
+                return el ? el.getAttribute('datetime') : null;
+            }""")
+            if post_date_iso:
+                break
+            await asyncio.sleep(1)
+
         if post_date_iso:
             post_dt = datetime.fromisoformat(post_date_iso.replace('Z', '+00:00'))
             if (datetime.now(timezone.utc) - post_dt).days > max_age_days:
