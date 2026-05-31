@@ -8,7 +8,7 @@ import random
 import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone, timedelta
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from playwright.async_api import Page, BrowserContext, async_playwright, Browser, TimeoutError as PlaywrightTimeoutError
 
@@ -312,8 +312,11 @@ class InstagramScraperV2:
                             except: pass
 
                         logger.info(f"📄 [V2] Verificando post {shortcode}...")
-                        post_comments = await self._scrape_post(page, shortcode, username, candidato_id, max_comments_per_post, max_age_days)
+                        post_comments, post_timestamp = await self._scrape_post(page, shortcode, username, candidato_id, max_comments_per_post, max_age_days)
                         
+                        if post_timestamp:
+                            meta["timestamp"] = post_timestamp
+
                         if post_comments:
                             all_comments.extend(post_comments)
                             scraped_count += 1
@@ -370,17 +373,17 @@ class InstagramScraperV2:
                 await page.go_back(wait_until="domcontentloaded", timeout=10000)
         except: pass
 
-    async def _scrape_post(self, page: Page, shortcode: str, username: str, candidato_id: str, max_comments: int, max_age_days: int) -> List[Dict[str, Any]]:
+    async def _scrape_post(self, page: Page, shortcode: str, username: str, candidato_id: str, max_comments: int, max_age_days: int) -> Tuple[List[Dict[str, Any]], Optional[str]]:
         self.captured_data = []
-        if page.is_closed(): return []
-        if not await self.open_post_modal(page, shortcode): return []
+        if page.is_closed(): return [], None
+        if not await self.open_post_modal(page, shortcode): return [], None
 
         post_date_iso = await page.evaluate("() => document.querySelector('article time')?.getAttribute('datetime')")
         if post_date_iso:
             post_dt = datetime.fromisoformat(post_date_iso.replace('Z', '+00:00'))
             if (datetime.now(timezone.utc) - post_dt).days > max_age_days:
                 await self.close_post_modal(page)
-                return []
+                return [], post_date_iso
 
         for _ in range(random.randint(2, 4)):
             await self.scroll_comment_column(page, scroll_amount=random.randint(1000, 1500))
@@ -413,7 +416,7 @@ class InstagramScraperV2:
                 "tier_used": 2
             })
         
-        return normalized
+        return normalized, post_date_iso
 
     async def _extract_shortcodes(self, page: Page, limit: int) -> List[Dict[str, Any]]:
         return await page.evaluate(f"""
