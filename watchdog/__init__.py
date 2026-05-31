@@ -17,6 +17,7 @@ import time
 import subprocess
 import requests
 import json
+from core.health_check import check_instagram_accounts
 import asyncio
 from threading import Thread, Lock
 from typing import Tuple, Dict, Any, Optional
@@ -204,7 +205,7 @@ async def stream(request: Request):
 
 @app.get("/api/metrics")
 async def get_metrics():
-    """Endpoint para métricas atualizadas via Supabase (v55.3)."""
+    """Endpoint para métricas atualizadas via Supabase (v55.3) + indicadores de Instagram e IA."""
     worker_metrics = {"queue_size": 0, "cycle": 0, "level": 1, "trust": 0.0, "tier": "silver", "score": 0.0}
     try:
         from workers.base.memory_store import MemoryStore
@@ -222,7 +223,17 @@ async def get_metrics():
             }
     except Exception as e:
         state.add_log("dim", f"[Watchdog] Erro ao carregar métricas Supabase: {e}")
-    
+    # Instagram accounts status
+    ig_status = check_instagram_accounts()
+    # IA services health checks (não iniciam serviços)
+    def _service_status(url: str) -> str:
+        try:
+            resp = httpx.get(url, timeout=2.0)
+            return "OK" if resp.status_code == 200 else "DOWN"
+        except Exception:
+            return "DOWN"
+    ollama_status = _service_status(os.getenv("OLLAMA_BASE_URL", "http://localhost:11434") + "/api/tags")
+    litert_status = _service_status("http://127.0.0.1:8001/health")
     with state.lock:
         return {
             "restarts": state.restarts,
@@ -231,6 +242,11 @@ async def get_metrics():
             "status": state.status,
             "fast_crashes": state.fast_crashes,
             "db_status": "OPERACIONAL",
+            "instagram_accounts": ig_status,
+            "ai_services": {
+                "ollama": ollama_status,
+                "litert": litert_status
+            },
             **worker_metrics
         }
 
@@ -342,6 +358,9 @@ def heal_runtime_error(reason: str) -> str:
     return "restart"
 
 def guard():
+    # Garantir que serviços de IA estejam operacionais antes de iniciar o ciclo
+    from core.health_check import run_startup_health_checks
+    run_startup_health_checks()
     python_exe = get_python_executable()
     consecutive_code_errors = 0
 
@@ -459,6 +478,17 @@ def guard():
         delay = RESTART_DELAY * min(consecutive_code_errors + 1, 5)
         state.add_log("dim", f"[Watchdog] Aguardando {delay}s antes do próximo ciclo...")
         time.sleep(delay)
+
+        # Executa reanálise de comentários de baixa confiança durante o cooldown,
+        # desde que não haja múltiplas falhas críticas (code ou runtime) acumuladas.
+        if state.fast_crashes == 0 and consecutive_code_errors == 0:
+            try:
+                from core.ai_service import ai_service
+                # Executa de forma assíncrona, limitando a 20 itens por ciclo.
+                asyncio.run(ai_service.run_batch_reanalysis(limit=20))
+                state.add_log("info", "[Watchdog] Reanálise de IA concluída durante cooldown.")
+            except Exception as e:
+                state.add_log("warn", f"[Watchdog] Falha ao executar reanálise de IA: {e}")
 
 if __name__ == "__main__":
     os.chdir(os.path.dirname(os.path.abspath(__file__)))

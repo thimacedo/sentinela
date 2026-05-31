@@ -249,11 +249,15 @@ class AIService:
                 self.providers = [p for p in original_providers if p["name"] not in ["litert", "ollama"]]
                 
                 try:
-                            "confianca_ia": res_ia["confianca_ia"],
-                            "is_hate": res_ia["is_hate"],
-                            "analise_pericial": f"[RE-ANÁLISE] {res_ia.get('analise_pericial', '')}"
-                        }).eq("id", item["id"]).execute()
-                        count += 1
+                    # Reclassifica usando apenas provedores Cloud
+                    res_ia = await self.classify_text(item["texto_bruto"], item["id"])
+                    db_client.client.table('comentarios').update({
+                        "categoria_ia": res_ia["categoria_ia"],
+                        "confianca_ia": res_ia["confianca_ia"],
+                        "is_hate": res_ia["is_hate"],
+                        "analise_pericial": f"[RE-ANÁLISE] {res_ia.get('analise_pericial', '')}"
+                    }).eq("id", item["id"]).execute()
+                    count += 1
                 except: continue
                 finally:
                     self.providers = original_providers
