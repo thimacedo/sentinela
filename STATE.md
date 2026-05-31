@@ -1,5 +1,5 @@
 # STATE.md — Sentinela Democratica (Fonte de Verdade)
-_last_updated: 2026-05-31 | branch: main (Model: Gemini 3.1 Pro (High))_
+_last_updated: 2026-05-31 | branch: main (Model: Claude 3.5 Sonnet / Gemini 3.1 Pro)_
 
 ## Status Operacional (v86.7 - Intelligence Governance)
 
@@ -25,6 +25,8 @@ _last_updated: 2026-05-31 | branch: main (Model: Gemini 3.1 Pro (High))_
 10. **Scanner de Candidatos e Enfileiramento de Pesquisas (PASA v50.1):** Refatoração do `candidate_scanner.py` com suporte a descoberta inteligente de perfis oficiais do Instagram via IA (com base no nome, cargo e contexto do arquivo). Adicionado motor de curadoria prévia que verifica a existência de alvos ativos/inativos no banco de dados para evitar re-validação e desperdício de Playwright (ganho de 10x em performance).
 11. **Busca Ativa na Web e Observação de Candidatos (PASA v50.1):** Integrado motor de busca ativa na web via requisições HTTP para a versão HTML do DuckDuckGo no `candidate_scanner.py`, permitindo extrair os links de resultados reais do Instagram. A IA agora atua selecionando o handle oficial correto dentro do contexto de links reais, obtendo 100% de assertividade (ex: corrigindo `@jairbolsonaro` para `@jairmessiasbolsonaro` e `@romeuzema` para `@romeuzemaoficial`). Implementado o tratamento de falhas técnicas temporárias de validação (`header_not_found`, timeout, exceptions) para salvar o candidato no status `'Observação'` e `identidade_validada = None` sem enfileirá-lo de imediato. Criada a ferramenta [curate_candidates.py](file:///C:/Projetos/sentinela/tools/curate_candidates.py) que permite varrer, re-pesquisar via IA/web e liberar os alvos em observação para coleta ativa.
 12. **Correção do Termômetro do Candidato (PASA v86.7):** Corrigido o bug em que alvos recém-raspados eram incorretamente classificados como 'FRIO' com '0.0 posts/sem'. O scraper agora propaga o timestamp real do post extraído a partir do modal para o `post_metas`, alimentando corretamente a fila com a frequência de posts real.
+13. **Resiliência de Sinais no Windows e Termômetro (PASA v86.7):** Correção do bug de signal handler que gerava `NotImplementedError` no Windows, travando o depurador do VS Code (agora usando `signal.signal` nativo no Windows). Correção do bug em `ig_worker_v2.py` que não atribuía o resultado do ciclo à variável `result` (o que impedia o bloco `finally` de ler os status e classificar erros como `no_comments_found` e `junk_detected` corretamente). Implementado também um loop resiliente com retentativas de 5s e seletores refinados de link do post em `instagram_scraper_v2.py` para obter a data correta da publicação no modal de forma robusta.
+
 
 ## 📊 ARQUITETURA DE INTEGRIDADE (v86.7)
 
