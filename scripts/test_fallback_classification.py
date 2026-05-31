@@ -12,6 +12,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Importa o wrapper (presumindo que core/fallback_llm.py existe)
+import sys, os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 try:
     from core.fallback_llm import FallbackLLM
 except ImportError as e:

@@ -1,0 +1,29 @@
+fallback_providers:
+  - name: openai_gpt35
+    api_key_env: OPENAI_API_KEY
+    model: gpt-3.5-turbo
+  - name: anthropic_claude_instant
+    api_key_env: ANTHROPIC_API_KEY
+    model: claude-instant-1.2
+  - name: cohere_command
+    api_key_env: COHERE_API_KEY
+    model: command
+  - name: fireworks_ai
+    api_key_env: FIREWORKS_API_KEY
+    model: accounts/fireworks/models/mixtral-8b-instruct
+  - name: openrouter
+    api_key_env: OPENROUTER_API_KEY
+    model: openrouter/mistralai/mistral-7b-instruct
+  - name: deepseek_chat
+    api_key_env: DEEPSEEK_API_KEY
+    model: deepseek-chat
+  - name: google_gemini
+    api_key_env: GEMINI_API_KEY
+    model: gemini-1.5-flash
+  - name: groq_llama3
+    api_key_env: GROQ_API_KEY
+    model: llama-3.1-8b
+
+  - name: ai21_j2ultra
+    api_key_env: AI21_API_KEY
+    model: j2-ultra
