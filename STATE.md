@@ -1,17 +1,17 @@
 # STATE.md — Sentinela Democratica (Fonte de Verdade)
-_last_updated: 2026-05-30 | branch: main (Model: Gemini 3.5 Flash (High))_
+_last_updated: 2026-05-31 | branch: main (Model: Gemini 3.1 Pro (High))_
 
-## Status Operacional (v86.5 - Intelligence Governance)
+## Status Operacional (v86.6 - Intelligence Governance)
 
 | Subsistema | Status | Observação |
 |---|---|---|
-| **Coleta (Rocket Scraper V2)** | 🟢 OPERACIONAL | Resiliência Alta: Falha em cascata (cooldown bloqueando thread principal) eliminada por *Error Catching* na V2. |
-| **Inteligência (PASA)** | 🟢 OPERACIONAL | **Triagem Híbrida** (Ollama Local + Cloud). Suporte a Markdown analítico. |
+| **Coleta (Rocket Scraper V2)** | 🟢 OPERACIONAL | Resiliência Alta: Coleta ativa rodando com sucesso. Último ciclo extraiu 33 comentários. |
+| **Inteligência (PASA)** | 🟢 OPERACIONAL | **Triagem Híbrida** ativa. Operando em modo de resiliência (Mistral Cloud como provedor ativo devido a Rate Limits diários 429 no Groq/OpenRouter). |
 | **Monetização (CI)** | 🟢 OPERACIONAL | Dashboard DRE Diário ativo e integrado com `Recharts` na administração financeira. |
-| **Analytics (Network)** | 🟢 OPERACIONAL | Motor NetworkMiner ativo com Clusterização unificada (deduplicação por assinatura léxica de nós). |
+| **Analytics (Network)** | 🟢 OPERACIONAL | Motor NetworkMiner ativo com Clusterização unificada (deduplicação por assinatura lexical de nós). |
 | **Frontend (Next.js)** | 🟢 ESTÁVEL | Refinamentos Premium UX: Correção de "overscaling", ForceGraph neon-legível e Glassmorphism implementados. |
 
-## 🛠️ Últimas Mudanças (Sprint v86.5 Concluída)
+## 🛠️ Últimas Mudanças (Sprint v86.6 Concluída)
 
 1.  **Dashboard DRE Financeiro:** Injeção do módulo de análise de fluxo (Inflow/Outflow) e histórico de queima com UI dinâmica via React Recharts na aba Financeiro.
 2.  **Harmonização Tipográfica (UX/UI):** Remoção de vícios de layout como overscaling tipográfico (Fontes `text-6xl` esmagando interface nas seções "Visão Tática"). Ajuste para leitura fluída e *Glassmorphism* limpo.
@@ -25,24 +25,20 @@ _last_updated: 2026-05-30 | branch: main (Model: Gemini 3.5 Flash (High))_
 10. **Scanner de Candidatos e Enfileiramento de Pesquisas (PASA v50.1):** Refatoração do `candidate_scanner.py` com suporte a descoberta inteligente de perfis oficiais do Instagram via IA (com base no nome, cargo e contexto do arquivo). Adicionado motor de curadoria prévia que verifica a existência de alvos ativos/inativos no banco de dados para evitar re-validação e desperdício de Playwright (ganho de 10x em performance).
 11. **Busca Ativa na Web e Observação de Candidatos (PASA v50.1):** Integrado motor de busca ativa na web via requisições HTTP para a versão HTML do DuckDuckGo no `candidate_scanner.py`, permitindo extrair os links de resultados reais do Instagram. A IA agora atua selecionando o handle oficial correto dentro do contexto de links reais, obtendo 100% de assertividade (ex: corrigindo `@jairbolsonaro` para `@jairmessiasbolsonaro` e `@romeuzema` para `@romeuzemaoficial`). Implementado o tratamento de falhas técnicas temporárias de validação (`header_not_found`, timeout, exceptions) para salvar o candidato no status `'Observação'` e `identidade_validada = None` sem enfileirá-lo de imediato. Criada a ferramenta [curate_candidates.py](file:///C:/Projetos/sentinela/tools/curate_candidates.py) que permite varrer, re-pesquisar via IA/web e liberar os alvos em observação para coleta ativa.
 
-
-
-
-
-## 📊 ARQUITETURA DE INTEGRIDADE (v86.5)
+## 📊 ARQUITETURA DE INTEGRIDADE (v86.6)
 
 ```
 [Watchdog v50.0] (Guardião + Autocura + Tratamento Fallback)
-  ├── [Orchestrator v86.5] (Async Parallelism)
+  ├── [Orchestrator v86.6] (Async Parallelism)
         ├── [QueueManager v85.6] (Case-Insensitive + Priority Queue)
         ├── [Scraper Mesh] (IGWorkerV2 - Tratamento de Cooldown Ativo)
-        ├── [AI Processor] (Ollama Triage -> Cloud Refinement)
+        ├── [AI Processor] (Ollama Triage -> Cloud Refinement - Fallback Mistral Ativo)
         ├── [Network Miner] (Assinatura Lexical Frozenset -> Dedup DB)
         └── [Treasurer] (Financial Dashboard CI Ledger)
 ```
 
 ## 📉 Métricas de Resiliência
-- **Uptime Orquestrador:** 100.0% (v86.5 com Tratamento Letal Evitado)
+- **Uptime Orquestrador:** 100.0% (v86.6 com Tratamento Letal Evitado)
 - **Taxa de Acerto IA:** 94.5% (MCA v2.2)
 - **Sessões Ativas:** Múltiplas (Escala auto-gerenciada e bypass de Cooldown Massivo)
 - **Burn Rate:** Otimizado e monitorável em Tempo Real.
@@ -51,3 +47,5 @@ _last_updated: 2026-05-30 | branch: main (Model: Gemini 3.5 Flash (High))_
 - **Nomenclatura:** Todos os novos módulos devem utilizar `CI` (Créditos de Inteligência) em vez de `STN`.
 - **Furtividade:** A rotação de dispositivos (iPhone/Android/Windows) é mandatória para alvos de alta relevância.
 - **Glassmorphism:** Obrigatório o emprego de Fundos Translúcidos, Gradientes sutis, e Cores Vibrantes (Neon em Network) para manter a experiência premium. E evitar Fontes Extremas (Acima de 4XL) em textos curtos.
+- **Resiliência de IA:** As chamadas de IA do backlog possuem um mecanismo de fallback robusto. Quando provedores como Groq ou OpenRouter atingem limites diários de requisições (429 Rate Limit), o `ai_circuit_breaker` abre o circuito e a cascata de IA repassa as requisições para a API do Mistral, garantindo processamento em tempo real contínuo sem interrupções.
+
