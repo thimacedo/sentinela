@@ -231,11 +231,14 @@ class QueueManager:
         is_error = hasattr(target, "error") and target.error
         is_no_comments = is_error and target.error == "no_comments_found"
         is_empty = is_error and target.error in ["junk_detected", "invalid_target: 404_not_found"]
-        is_system_error = is_error and not is_empty and not is_no_comments
+        # Detecta erros de sessão ou bloqueio (ex: cookies expirados, 429, captcha, login wall)
+        session_terms = ["session", "blocked", "429", "login wall", "captcha"]
+        is_session_error = is_error and any(term in str(target.error).lower() for term in session_terms)
+        is_system_error = is_error and not is_empty and not is_no_comments and not is_session_error
         
-        # Se for um erro do sistema, atualizamos o last_scraped_at mas NÃO mudamos o termômetro
-        if is_system_error:
-            logger.warning(f"⚠️ [Queue] Erro sistêmico detectado para @{target.username} ({target.error}). Mantendo temperatura atual.")
+        # Se for um erro do sistema ou sessão, atualizamos o last_scraped_at mas NÃO mudamos o termômetro
+        if is_system_error or is_session_error:
+            logger.warning(f"⚠️ [Queue] Erro sistêmico/sessão detectado para @{target.username} ({target.error}). Mantendo temperatura atual.")
             self.db.table("candidatos").update({
                 "last_scraped_at": now_iso
             }).eq("username", target.username).execute()

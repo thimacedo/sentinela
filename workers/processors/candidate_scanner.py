@@ -14,6 +14,7 @@ import re
 import hashlib
 import asyncio
 import urllib.parse
+from core.constants import DEFAULT_TIMEOUT
 import httpx
 from datetime import datetime, UTC
 from pathlib import Path
@@ -187,8 +188,22 @@ class CandidateScannerWorker(BaseWorker):
         
         return []
 
+    # Mapeamento de aliases de handles incorretos conhecidos
+    HANDLE_ALIASES = {
+        "jairbolsonaro": "jairmessiasbolsonaro",
+        # Adicione outros mapeamentos aqui conforme necessário
+    }
+
+    def _apply_handle_alias(self, username: str) -> str:
+        """Normaliza o username aplicando aliases conhecidos.
+        Se o username estiver no dicionário de aliases, substitui pelo valor correto.
+        """
+        return self.HANDLE_ALIASES.get(username.lower(), username)
+
     async def _discover_official_instagram(self, name: str, cargo: str, file_name: str) -> str:
-        """Usa IA combinada com busca na web (DuckDuckGo) para obter o handle oficial do Instagram do candidato."""
+        """Usa IA combinada com busca na web (DuckDuckGo) para obter o handle oficial do Instagram do candidato.
+        Aplica alias de curadoria antes de efetuar a validação.
+        """
         # 1. Faz busca ativa na web para coletar candidatos de handles reais
         web_handles = await self._search_web_for_instagram(name, cargo)
         
@@ -220,7 +235,7 @@ class CandidateScannerWorker(BaseWorker):
                 response_format="json_object"
             )
             if res and isinstance(res, dict) and "username" in res:
-                username = res["username"].lower().strip().replace("@", "")
+                username = self._apply_handle_alias(res["username"]).lower().strip().replace("@", "")
                 if username and res.get("confianca", 0.0) >= 0.6:
                     self.logger.info(f"🎯 IA selecionou o perfil @{username} para '{name}' com confiança {res.get('confianca')}.")
                     return username
@@ -228,9 +243,11 @@ class CandidateScannerWorker(BaseWorker):
             self.logger.error(f"⚠️ Erro ao descobrir Instagram por IA para {name}: {e}")
         
         # Fallback se a IA falhar
-        fallback = self._generate_handle(name)
+        fallback = self._apply_handle_alias(self._generate_handle(name))
         # Se houver resultados da web, prioriza o primeiro em vez do handle bruto gerado
         if web_handles:
+            # Aplica alias nos resultados da web antes de usar como fallback
+            web_handles = [self._apply_handle_alias(h) for h in web_handles]
             fallback = web_handles[0]
             
         self.logger.warning(f"⚠️ Usando fallback para '{name}': @{fallback}")
@@ -249,6 +266,8 @@ class CandidateScannerWorker(BaseWorker):
 
         # 2. Descobrir a rede social oficial usando IA
         username = await self._discover_official_instagram(nome, cargo, file_name)
+        # Garante que o username está normalizado conforme aliases
+        username = self._apply_handle_alias(username)
 
         # --- CURADORIA DE ALVOS EXISTENTES ---
         try:
