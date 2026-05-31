@@ -333,36 +333,45 @@
                     filterTargets(); // Renderiza usando a busca atual se houver
                 }
 
-                // D. Execuções Recentes (Runs)
+                // D. Execuções Recentes (Worker Rewards)
                 const { data: runs, error: runsError } = await db
-                    .from('worker_runs')
-                    .select('*')
-                    .eq('worker_name', 'InstagramWorker')
-                    .order('created_at', { ascending: false })
+                    .from('worker_rewards')
+                    .select('worker_id, cycle, score, tier, delta, badges, timestamp')
+                    .order('timestamp', { ascending: false })
                     .limit(12);
 
                 if (!runsError && runs) {
                     document.getElementById('runs-feed').innerHTML = runs.map(run => {
-                        const statusColor = run.status === 'success' ? 'text-emerald-400 bg-emerald-950/20 border-emerald-900/40' : 'text-rose-400 bg-rose-950/20 border-rose-900/40';
+                        const isCritical = run.tier === 'critical' || run.tier === 'db_failed';
+                        const isGold = run.tier === 'gold';
+                        const isSilver = run.tier === 'silver';
+                        
+                        let tierBadge = 'text-blue-450 bg-blue-500/10 border-blue-500/30';
+                        if (isGold) tierBadge = 'text-amber-450 bg-amber-500/10 border-amber-500/30';
+                        else if (isSilver) tierBadge = 'text-slate-400 bg-slate-500/10 border-slate-500/30';
+                        else if (isCritical) tierBadge = 'text-rose-450 bg-rose-500/10 border-rose-500/30';
+                        
+                        const deltaVal = run.delta || 0;
+                        const deltaText = deltaVal >= 0 ? `+${deltaVal.toFixed(1)} XP` : `${deltaVal.toFixed(1)} XP`;
+                        const deltaColor = deltaVal >= 0 ? 'text-emerald-450' : 'text-rose-450';
+
                         return `
                             <div class="bg-slate-900/35 border border-slate-850 rounded-xl p-3.5 flex flex-col gap-2">
                                 <div class="flex justify-between items-center">
-                                    <span class="font-bold text-white text-xs">@${escapeHTML(run.target || 'Desconhecido')}</span>
-                                    <span class="text-[9px] font-mono text-slate-500">${timeAgo(run.created_at)}</span>
+                                    <span class="font-bold text-white text-xs">${escapeHTML(run.worker_id)}</span>
+                                    <span class="text-[9px] font-mono text-slate-500">${timeAgo(run.timestamp)}</span>
                                 </div>
-                                <div class="grid grid-cols-2 gap-2 text-[10px] mt-1">
-                                    <div class="bg-slate-950/40 border border-slate-850 p-2 rounded text-center">
-                                        <span class="block text-slate-500 uppercase tracking-wider text-[8px] font-semibold">Status</span>
-                                        <span class="font-bold ${statusColor.split(' ')[0]}">${run.status}</span>
-                                    </div>
-                                    <div class="bg-slate-950/40 border border-slate-850 p-2 rounded text-center">
-                                        <span class="block text-slate-500 uppercase tracking-wider text-[8px] font-semibold">Items</span>
-                                        <span class="font-bold text-slate-100">${run.items_processed || 0}</span>
-                                    </div>
+                                <div class="flex justify-between items-center text-[10px]">
+                                    <span class="text-slate-400">Ciclo #${run.cycle || 0}</span>
+                                    <span class="text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider ${tierBadge}">${run.tier || 'silver'}</span>
                                 </div>
-                                ${run.error_message ? `
-                                    <div class="text-rose-400 text-[10px] font-mono mt-1 bg-rose-950/25 border border-rose-900/40 p-2 rounded max-h-16 overflow-y-auto custom-scrollbar">
-                                        <b>Erro:</b> ${escapeHTML(run.error_message)}
+                                <div class="flex justify-between items-center text-[10px] border-t border-slate-900/60 pt-2">
+                                    <span>Score: <b class="text-slate-200 font-mono">${(run.score || 0).toFixed(1)}</b></span>
+                                    <span class="${deltaColor} font-bold font-mono">${deltaText}</span>
+                                </div>
+                                ${run.badges && run.badges.length > 0 ? `
+                                    <div class="flex flex-wrap gap-1 mt-1">
+                                        ${run.badges.map(b => `<span class="text-[8px] bg-slate-950/40 border border-slate-850 text-slate-400 px-1 py-0.5 rounded">${escapeHTML(b)}</span>`).join('')}
                                     </div>
                                 ` : ''}
                             </div>
