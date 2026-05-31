@@ -243,15 +243,16 @@ class CandidateScannerWorker(BaseWorker):
             self.logger.error(f"⚠️ Erro ao descobrir Instagram por IA para {name}: {e}")
         
         # Fallback se a IA falhar
-        fallback = self._apply_handle_alias(self._generate_handle(name))
         # Se houver resultados da web, prioriza o primeiro em vez do handle bruto gerado
         if web_handles:
             # Aplica alias nos resultados da web antes de usar como fallback
             web_handles = [self._apply_handle_alias(h) for h in web_handles]
             fallback = web_handles[0]
-            
-        self.logger.warning(f"⚠️ Usando fallback para '{name}': @{fallback}")
-        return fallback
+            self.logger.info(f"🔎 Handle oficial encontrado via DuckDuckGo: @{fallback}")
+            return fallback
+        # Nenhum handle encontrado; retorna None para indicar erro temporário
+        self.logger.warning(f"⚠️ Nenhum handle oficial encontrado para '{name}'. Marcando como observação.")
+        return None
 
     async def _handle_candidate(self, info: Dict, pesquisa_id: str, file_name: str):
         """Calcula prioridade, descobre a rede oficial, valida com o IntelligenceService e enfileira."""
@@ -264,11 +265,30 @@ class CandidateScannerWorker(BaseWorker):
         cargo_weight = {"Presidente": 5, "Governador": 4, "Senador": 3, "Candidato": 1}
         nota = (cargo_weight.get(cargo, 1) * 10) + intencao
 
-        # 2. Descobrir a rede social oficial usando IA
+        # 2. Descobrir a rede social oficial usando IA e DuckDuckGo
         username = await self._discover_official_instagram(nome, cargo, file_name)
+        if not username:
+            # Nenhum handle encontrado; registra como observação e encerra
+            self.logger.warning(f"⚠️ Nenhum handle oficial detectado para '{nome}'. Registrando como observação.")
+            # Salva como observação sem enfileirar
+            try:
+                db_client.client.table(self.candidate_table).upsert({
+                    "username": self._generate_handle(nome),  # fallback genérico
+                    "nome_completo": nome,
+                    "cargo": cargo,
+                    "intenção_voto": intencao,
+                    "nota_relevancia": nota,
+                    "ultima_pesquisa_id": pesquisa_id,
+                    "status_monitoramento": "Observação",
+                    "identidade_validada": None,
+                    "atualizado_em": datetime.now(UTC).isoformat()
+                }, on_conflict="username").execute()
+            except Exception as e_up:
+                self.logger.error(f"❌ Erro ao registrar alvo em observação (no handle) @{nome}: {e_up}")
+            return
         # Garante que o username está normalizado conforme aliases
         username = self._apply_handle_alias(username)
-
+        
         # --- CURADORIA DE ALVOS EXISTENTES ---
         try:
             existing = db_client.client.table(self.candidate_table)\
