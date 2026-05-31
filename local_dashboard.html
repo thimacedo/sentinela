@@ -3,147 +3,418 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sentinela - Painel Local de Inspeção</title>
+    <title>Sentinela - Centro de Governança de Inteligência</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.04) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(168, 85, 247, 0.04) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(244, 63, 94, 0.01) 0%, transparent 50%);
+        }
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.3);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(51, 65, 85, 0.5);
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(71, 85, 105, 0.8);
+        }
+        .glow-green {
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.2);
+        }
+        .glow-red {
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
+        }
+        .glow-purple {
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.2);
+        }
+    </style>
 </head>
-<body class="bg-slate-950 text-white font-sans p-8">
-    <div class="flex justify-between items-center mb-8 border-b border-slate-700 pb-4">
-        <div>
-            <h1 class="text-2xl font-black tracking-tight">🔍 Painel de Inspeção Local</h1>
-            <p class="text-slate-400 text-sm">Resumo detalhado da raspagem e classificação em tempo real</p>
-        </div>
-        <button onclick="fetchData()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-bold text-sm transition-colors">Atualizar Dados</button>
-    </div>
+<body class="bg-[#030712] text-slate-100 min-h-screen p-6 flex flex-col gap-6">
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Coluna 1: Resumo de Raspagem -->
-        <div>
-            <h2 class="text-lg font-bold text-slate-300 mb-4 flex items-center gap-2">
-                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Últimas Raspagens (Runs)
-            </h2>
-            <div id="runs-feed" class="space-y-4 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
-                <p class="text-slate-500 text-sm">Carregando runs...</p>
+    <!-- Header Panel -->
+    <header class="bg-slate-900/30 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-2xl">
+        <div class="flex items-center gap-4">
+            <div class="bg-gradient-to-tr from-indigo-600 to-violet-500 p-3 rounded-2xl shadow-lg shadow-indigo-500/20">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                </svg>
+            </div>
+            <div>
+                <h1 class="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent flex items-center gap-2">
+                    SENTINELA <span class="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">DEMOCRÁTICA</span>
+                </h1>
+                <p class="text-slate-400 text-xs mt-0.5">Centro de Governança de Inteligência & Inspeção em Tempo Real</p>
             </div>
         </div>
 
-        <!-- Coluna 2: Últimos Classificados -->
-        <div>
-            <h2 class="text-lg font-bold text-slate-300 mb-4 flex items-center gap-2">
-                <span class="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></span> Últimos Classificados pela IA
-            </h2>
-            <div id="classified-feed" class="space-y-4 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
-                <p class="text-slate-500 text-sm">Carregando classificações...</p>
+        <div class="flex flex-wrap items-center gap-3">
+            <div id="watchdog-badge" class="bg-slate-950/60 border border-slate-800 rounded-xl px-4 py-2 flex items-center gap-3">
+                <span class="relative flex h-3 w-3">
+                    <span id="ping-pulse" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span id="ping-dot" class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                </span>
+                <div>
+                    <span class="block text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Watchdog Status</span>
+                    <span id="watchdog-status-text" class="text-xs font-bold text-emerald-400">OPERACIONAL</span>
+                </div>
             </div>
+
+            <button onclick="fetchData()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-slate-600 text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.2"/>
+                </svg>
+                Atualizar Painel
+            </button>
+        </div>
+    </header>
+
+    <!-- KPI Summary Row -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- KPI 1 -->
+        <div class="bg-slate-900/30 border border-slate-850 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
+            <div class="absolute -right-4 -bottom-4 text-slate-900/30 opacity-20 pointer-events-none group-hover:scale-110 transition-transform">
+                <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
+            </div>
+            <span class="block text-xs font-semibold text-slate-400">Comentários Mapeados</span>
+            <span id="kpi-total-comments" class="block text-2xl font-black text-white mt-1 mono">---</span>
+            <span class="text-[10px] text-slate-500 block mt-1">Total acumulado no Supabase</span>
+        </div>
+        <!-- KPI 2 -->
+        <div class="bg-slate-900/30 border border-slate-850 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
+            <div class="absolute -right-4 -bottom-4 text-rose-500/10 opacity-20 pointer-events-none group-hover:scale-110 transition-transform">
+                <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+            </div>
+            <span class="block text-xs font-semibold text-slate-400">Discursos Críticos (Ódio)</span>
+            <span id="kpi-hate-comments" class="block text-2xl font-black text-rose-450 mt-1 mono">---</span>
+            <span class="text-[10px] text-rose-550/70 block mt-1">Indícios graves sob monitoramento</span>
+        </div>
+        <!-- KPI 3 -->
+        <div class="bg-slate-900/30 border border-slate-850 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
+            <div class="absolute -right-4 -bottom-4 text-emerald-500/10 opacity-20 pointer-events-none group-hover:scale-110 transition-transform">
+                <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 8 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+            </div>
+            <span class="block text-xs font-semibold text-slate-400">Alvos Ativos</span>
+            <span id="kpi-active-targets" class="block text-2xl font-black text-emerald-450 mt-1 mono">---</span>
+            <span class="text-[10px] text-slate-500 block mt-1">Perfis de interesse ativos</span>
+        </div>
+        <!-- KPI 4 -->
+        <div class="bg-slate-900/30 border border-slate-850 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
+            <div class="absolute -right-4 -bottom-4 text-violet-500/10 opacity-20 pointer-events-none group-hover:scale-110 transition-transform">
+                <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm4.2 14.2L11 13V7h1.5v5.2l4.5 2.7-.8 1.3z"/></svg>
+            </div>
+            <span class="block text-xs font-semibold text-slate-400">Ciclos / Restarts</span>
+            <span id="kpi-restars" class="block text-2xl font-black text-violet-400 mt-1 mono">---</span>
+            <span class="text-[10px] text-slate-500 block mt-1">Execuções e reinícios automáticos</span>
         </div>
     </div>
 
+    <!-- Main Workspace Layout -->
+    <div class="grid grid-cols-1 xl:grid-cols-4 gap-6 items-start">
+        
+        <!-- Column 1: Radar de Alvos (1/4 Width) -->
+        <div class="xl:col-span-1 bg-slate-900/20 backdrop-blur-xl border border-slate-850 rounded-2xl p-5 flex flex-col gap-4 shadow-xl">
+            <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+                <h2 class="text-sm font-bold text-slate-300 flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 bg-indigo-500 rounded-full"></span> Radar de Alvos
+                </h2>
+                <span id="targets-count-badge" class="text-[10px] font-bold bg-slate-850 border border-slate-800 text-slate-400 px-2 py-0.5 rounded-full mono">0/0</span>
+            </div>
+
+            <!-- Search Target Input -->
+            <div class="relative">
+                <input type="text" id="target-search" oninput="filterTargets()" placeholder="Buscar handle..." class="w-full bg-slate-950/85 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-505 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 transition-all">
+                <div class="absolute right-3 top-2.5 text-slate-650">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </div>
+            </div>
+
+            <!-- Candidates Feed List -->
+            <div id="targets-feed" class="space-y-2.5 max-h-[62vh] overflow-y-auto pr-1.5 custom-scrollbar">
+                <p class="text-slate-500 text-xs italic">Carregando alvos...</p>
+            </div>
+        </div>
+
+        <!-- Column 2: Monitor de Discurso (1/2 Width) -->
+        <div class="xl:col-span-2 bg-slate-900/20 backdrop-blur-xl border border-slate-850 rounded-2xl p-5 flex flex-col gap-4 shadow-xl">
+            <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+                <h2 class="text-sm font-bold text-slate-300 flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 bg-rose-500 rounded-full animate-pulse"></span> Monitor de Discurso (IA)
+                </h2>
+                <div class="flex gap-2">
+                    <span class="text-[10px] font-bold bg-rose-950/30 border border-rose-900/40 text-rose-450 px-2.5 py-0.5 rounded-full">LIVE FEED</span>
+                </div>
+            </div>
+
+            <!-- Speech/Comments Feed -->
+            <div id="classified-feed" class="space-y-4 max-h-[67vh] overflow-y-auto pr-2 custom-scrollbar">
+                <p class="text-slate-500 text-xs italic">Carregando discursos...</p>
+            </div>
+        </div>
+
+        <!-- Column 3: Últimas Execuções / Runs (1/4 Width) -->
+        <div class="xl:col-span-1 bg-slate-900/20 backdrop-blur-xl border border-slate-850 rounded-2xl p-5 flex flex-col gap-4 shadow-xl">
+            <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+                <h2 class="text-sm font-bold text-slate-300 flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full"></span> Telemetria (Runs)
+                </h2>
+            </div>
+
+            <!-- Runs list -->
+            <div id="runs-feed" class="space-y-3.5 max-h-[67vh] overflow-y-auto pr-1.5 custom-scrollbar">
+                <p class="text-slate-500 text-xs italic">Carregando histórico...</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Script de Integração e Logica UI -->
     <script>
-        // Silencia o warning do Tailwind CDN em ambiente de desenvolvimento
+        // Silencia warnings chatos do Tailwind no console
         const originalWarn = console.warn;
         console.warn = function(...args) {
             if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com')) return;
             originalWarn.apply(console, args);
         };
 
-        // Configuração direta do Supabase (renomeadas para evitar colisão com window.URL)
+        // Chaves de conexão Supabase
         const supabaseUrl = 'https://vhamejkldzxbeibqeqpk.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoYW1lamtsZHp4YmVpYnFlcXBrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjQ4ODEyNSwiZXhwIjoyMDkyMDY0MTI1fQ.GfvAI7rV8isgdhVeJp4mOUscWpdOqOuBoURGm82VdtY';
         
         let db;
         try {
             db = supabase.createClient(supabaseUrl, supabaseKey);
-        } catch(e) { console.error(e); }
+        } catch(e) { 
+            console.error("Supabase init error:", e); 
+        }
 
-        async function fetchData() {
-            if (!db) {
-                document.getElementById('runs-feed').innerHTML = '<p class="text-red-400">Erro ao inicializar cliente Supabase.</p>';
+        // Armazenamento local dos alvos para filtro instantâneo
+        let localCandidatesList = [];
+
+        function escapeHTML(str) {
+            if (!str) return '';
+            return str.replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
+
+        function timeAgo(dateString) {
+            if (!dateString) return 'Nunca';
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffSec = Math.floor(diffMs / 1000);
+            const diffMin = Math.floor(diffSec / 60);
+            const diffHr = Math.floor(diffMin / 60);
+            const diffDays = Math.floor(diffHr / 24);
+
+            if (diffSec < 60) return 'Agora';
+            if (diffMin < 60) return `há ${diffMin}m`;
+            if (diffHr < 24) return `há ${diffHr}h`;
+            return `há ${diffDays}d`;
+        }
+
+        // Função de filtro instantâneo no cliente
+        function filterTargets() {
+            const term = document.getElementById('target-search').value.toLowerCase().trim();
+            const feed = document.getElementById('targets-feed');
+            
+            const filtered = localCandidatesList.filter(c => 
+                c.username.toLowerCase().includes(term) || 
+                (c.nome_completo && c.nome_completo.toLowerCase().includes(term))
+            );
+
+            if (filtered.length === 0) {
+                feed.innerHTML = '<p class="text-slate-500 text-xs italic p-4 text-center">Nenhum alvo corresponde à busca</p>';
                 return;
             }
 
+            renderTargets(filtered);
+        }
+
+        function renderTargets(list) {
+            const feed = document.getElementById('targets-feed');
+            feed.innerHTML = list.map(c => {
+                let badgeClass = 'text-blue-450 bg-blue-500/10 border-blue-500/30';
+                if (c.termometro === 'QUENTE') badgeClass = 'text-rose-450 bg-rose-500/10 border-rose-500/30';
+                else if (c.termometro === 'MORNO') badgeClass = 'text-amber-450 bg-amber-500/10 border-amber-500/30';
+
+                const formattedTime = timeAgo(c.last_scraped_at);
+                const hasTime = c.last_scraped_at ? 'text-slate-400' : 'text-slate-600';
+
+                return `
+                    <div class="bg-slate-900/40 border border-slate-850 hover:border-slate-750 transition-all rounded-xl p-3.5 flex flex-col gap-2">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-white text-xs hover:text-indigo-400 transition-colors cursor-pointer">@${escapeHTML(c.username)}</span>
+                            <span class="text-[9px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider ${badgeClass}">${c.termometro || 'MORNO'}</span>
+                        </div>
+                        <div class="flex justify-between items-center text-[10px]">
+                            <span class="text-slate-400 max-w-[130px] truncate">${escapeHTML(c.nome_completo || 'Sem nome')}</span>
+                            <span class="${hasTime} flex items-center gap-1 font-semibold">
+                                <svg class="w-3.5 h-3.5 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                ${formattedTime}
+                            </span>
+                        </div>
+                        <div class="flex gap-2 text-[9px] border-t border-slate-900/60 pt-2 text-slate-500">
+                            <span>Partido: <b class="text-slate-350">${c.partido || '---'}</b></span>
+                            <span>UF: <b class="text-slate-350">${c.estado || '---'}</b></span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function fetchData() {
+            if (!db) return;
+
             try {
-                // 1. Busca Runs Recentes
+                // A. Busca Métricas Locais via API do Watchdog (Fila / Autocura)
+                try {
+                    const resp = await fetch('/api/metrics');
+                    if (resp.ok) {
+                        const m = await resp.json();
+                        
+                        // Atualiza status do badge
+                        const isOk = m.status === 'OPERACIONAL';
+                        const dot = document.getElementById('ping-dot');
+                        const pulse = document.getElementById('ping-pulse');
+                        const txt = document.getElementById('watchdog-status-text');
+
+                        if (isOk) {
+                            dot.className = 'relative inline-flex rounded-full h-3 w-3 bg-emerald-500';
+                            pulse.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75';
+                            txt.className = 'text-xs font-bold text-emerald-400';
+                            txt.innerText = 'OPERACIONAL';
+                        } else {
+                            dot.className = 'relative inline-flex rounded-full h-3 w-3 bg-rose-500';
+                            pulse.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-450 opacity-75';
+                            txt.className = 'text-xs font-bold text-rose-450';
+                            txt.innerText = m.status;
+                        }
+
+                        document.getElementById('kpi-restars').innerText = `${m.cycle || 0} / ${m.restarts || 0}`;
+                    }
+                } catch(e_met) {
+                    console.log("Servidor local não retornou métricas (Watchdog offline ou standalone mode).");
+                }
+
+                // B. Estatísticas do Supabase (KPIs usando HEAD requests eficientes)
+                const { count: commentsCount } = await db.from('comentarios').select('*', { count: 'exact', head: true });
+                const { count: hateCount } = await db.from('comentarios').select('*', { count: 'exact', head: true }).eq('is_hate', true);
+                const { count: candidatesCount } = await db.from('candidatos').select('*', { count: 'exact', head: true }).eq('status_monitoramento', 'ATIVO');
+
+                if (commentsCount !== null) document.getElementById('kpi-total-comments').innerText = commentsCount.toLocaleString();
+                if (hateCount !== null) document.getElementById('kpi-hate-comments').innerText = hateCount.toLocaleString();
+                if (candidatesCount !== null) document.getElementById('kpi-active-targets').innerText = candidatesCount.toLocaleString();
+
+                // C. Listagem de Candidatos Monitorados
+                const { data: candidates, error: candErr } = await db
+                    .from('candidatos')
+                    .select('username, nome_completo, termometro, last_scraped_at, partido, estado')
+                    .eq('status_monitoramento', 'ATIVO')
+                    .order('last_scraped_at', { ascending: false, nullsFirst: false });
+
+                if (!candErr && candidates) {
+                    localCandidatesList = candidates;
+                    document.getElementById('targets-count-badge').innerText = `${candidates.length}/${candidates.length}`;
+                    filterTargets(); // Renderiza usando a busca atual se houver
+                }
+
+                // D. Execuções Recentes (Runs)
                 const { data: runs, error: runsError } = await db
                     .from('worker_runs')
                     .select('*')
                     .eq('worker_name', 'InstagramWorker')
                     .order('created_at', { ascending: false })
-                    .limit(15);
+                    .limit(12);
 
                 if (!runsError && runs) {
-                    document.getElementById('runs-feed').innerHTML = runs.map(run => `
-                        <div class="bg-slate-900 border border-slate-700 rounded-lg p-4 shadow-sm">
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="font-bold text-white"> @${run.target || 'Desconhecido'}</span>
-                                <span class="text-[10px] font-mono text-slate-500">${new Date(run.created_at).toLocaleString()}</span>
+                    document.getElementById('runs-feed').innerHTML = runs.map(run => {
+                        const statusColor = run.status === 'success' ? 'text-emerald-400 bg-emerald-950/20 border-emerald-900/40' : 'text-rose-400 bg-rose-950/20 border-rose-900/40';
+                        return `
+                            <div class="bg-slate-900/35 border border-slate-850 rounded-xl p-3.5 flex flex-col gap-2">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-bold text-white text-xs">@${escapeHTML(run.target || 'Desconhecido')}</span>
+                                    <span class="text-[9px] font-mono text-slate-500">${timeAgo(run.created_at)}</span>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2 text-[10px] mt-1">
+                                    <div class="bg-slate-950/40 border border-slate-850 p-2 rounded text-center">
+                                        <span class="block text-slate-500 uppercase tracking-wider text-[8px] font-semibold">Status</span>
+                                        <span class="font-bold ${statusColor.split(' ')[0]}">${run.status}</span>
+                                    </div>
+                                    <div class="bg-slate-950/40 border border-slate-850 p-2 rounded text-center">
+                                        <span class="block text-slate-500 uppercase tracking-wider text-[8px] font-semibold">Items</span>
+                                        <span class="font-bold text-slate-100">${run.items_processed || 0}</span>
+                                    </div>
+                                </div>
+                                ${run.error_message ? `
+                                    <div class="text-rose-400 text-[10px] font-mono mt-1 bg-rose-950/25 border border-rose-900/40 p-2 rounded max-h-16 overflow-y-auto custom-scrollbar">
+                                        <b>Erro:</b> ${escapeHTML(run.error_message)}
+                                    </div>
+                                ` : ''}
                             </div>
-                            <div class="grid grid-cols-3 gap-2 text-xs">
-                                <div class="bg-slate-800 p-2 rounded text-center">
-                                    <span class="block text-slate-400">Status</span>
-                                    <span class="font-bold ${run.status === 'success' ? 'text-green-400' : 'text-red-400'}">${run.status}</span>
-                                </div>
-                                <div class="bg-slate-800 p-2 rounded text-center">
-                                    <span class="block text-slate-400">XP Ganho</span>
-                                    <span class="font-bold text-blue-400">${run.xp_gained || 0}</span>
-                                </div>
-                                <div class="bg-slate-800 p-2 rounded text-center">
-                                    <span class="block text-slate-400">Items</span>
-                                    <span class="font-bold text-white">${run.items_processed || 0}</span>
-                                </div>
-                            </div>
-                            ${run.error_message ? `<p class="text-red-400 text-[10px] mt-2 bg-red-900/50 p-1 rounded">Erro: ${run.error_message}</p>` : ''}
-                        </div>
-                    `).join('');
-                } else if (runsError) {
-                    console.error("Erro ao buscar runs:", runsError);
+                        `;
+                    }).join('');
                 }
 
-                // 2. Busca Últimos Classificados
+                // E. Últimos Discursos / Comentários Classificados pela IA
                 const { data: comments, error: commentsError } = await db
                     .from('comentarios')
-                    .select('id, autor_username, texto_limpo, candidato_id, is_hate, categoria_ia, confianca_ia, direcao_odio, data_coleta')
+                    .select('id, autor_username, texto_limpo, texto_bruto, candidato_id, is_hate, categoria_ia, confianca_ia, direcao_odio, data_coleta')
                     .not('categoria_ia', 'is', null)
                     .order('data_coleta', { ascending: false })
-                    .limit(20);
+                    .limit(15);
 
                 if (!commentsError && comments) {
                     document.getElementById('classified-feed').innerHTML = comments.map(c => {
                         const isHate = c.is_hate === true;
-                        const catColor = isHate ? 'text-red-400 bg-red-900/30 border-red-700' : 'text-emerald-400 bg-emerald-900/30 border-emerald-700';
+                        const catColor = isHate ? 'text-rose-455 bg-rose-500/10 border-rose-500/30' : 'text-emerald-450 bg-emerald-500/10 border-emerald-500/30';
+                        const textContent = c.texto_limpo || c.texto_bruto || "(Sem conteúdo)";
                         
                         return `
-                        <div class="bg-slate-900 border ${isHate ? 'border-red-800' : 'border-slate-700'} rounded-lg p-4 shadow-sm">
-                            <div class="flex justify-between items-start mb-2">
-                                <div>
-                                    <span class="font-bold text-white text-xs"> @${c.autor_username}</span>
-                                    <span class="text-[10px] text-slate-500 ml-2">em @${c.candidato_id}</span>
+                        <div class="bg-slate-900/35 border ${isHate ? 'border-rose-900/50 glow-red' : 'border-slate-850'} rounded-xl p-4 shadow-sm hover:border-slate-750 transition-all flex flex-col gap-2.5">
+                            <div class="flex justify-between items-start">
+                                <div class="flex flex-col">
+                                    <span class="font-extrabold text-white text-xs">@${escapeHTML(c.autor_username)}</span>
+                                    <span class="text-[9px] text-slate-450 mt-0.5">comentou em <b class="text-slate-300">@${escapeHTML(c.candidato_id)}</b></span>
                                 </div>
-                                <span class="text-[10px] font-bold ${catColor} px-2 py-0.5 rounded border">${c.categoria_ia}</span>
+                                <span class="text-[9px] font-bold ${catColor} px-2 py-0.5 rounded border tracking-wider">${c.categoria_ia}</span>
                             </div>
-                            <p class="text-sm text-slate-300 italic mb-3 line-clamp-3">"${c.texto_limpo}"</p>
-                            <div class="flex gap-3 text-[10px] text-slate-500 font-mono border-t border-slate-700 pt-2">
+                            
+                            <p class="text-xs text-slate-350 italic font-medium leading-relaxed bg-slate-950/40 p-3 rounded-lg border border-slate-900">
+                                "${escapeHTML(textContent)}"
+                            </p>
+                            
+                            <div class="flex justify-between items-center text-[10px] text-slate-500 font-mono border-t border-slate-850/80 pt-2">
                                 <span>Confiança: <b class="text-white">${(c.confianca_ia * 100).toFixed(1)}%</b></span>
-                                ${c.direcao_odio ? `<span>Alvo: <b class="text-red-400">${c.direcao_odio}</b></span>` : ''}
+                                ${c.direcao_odio ? `<span>Alvo: <b class="text-rose-400 font-bold">${c.direcao_odio}</b></span>` : ''}
+                                <span>${timeAgo(c.data_coleta)}</span>
                             </div>
                         </div>
-                    `}).join('');
-                } else if (commentsError) {
-                    console.error("Erro ao buscar comentários:", commentsError);
+                        `;
+                    }).join('');
                 }
             } catch (err) {
-                console.error("Erro na busca de dados:", err);
+                console.error("Geral fetching error:", err);
             }
         }
 
-        // Auto-refresh a cada 15 segundos
-        setInterval(fetchData, 15000);
+        // Auto-refresh a cada 10 segundos para feedback ágil
+        setInterval(fetchData, 10000);
         fetchData();
     </script>
-    <style>
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #0f172a; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
-    </style>
 </body>
 </html>
