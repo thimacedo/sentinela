@@ -67,7 +67,7 @@
                 const { data: runs, error: runsError } = await db
                     .from('worker_runs')
                     .select('*')
-                    .eq('worker_id', 'InstagramWorker')
+                    .eq('worker_name', 'InstagramWorker')
                     .order('created_at', { ascending: false })
                     .limit(15);
 
