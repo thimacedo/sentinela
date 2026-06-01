@@ -1,5 +1,5 @@
 # STATE.md — Sentinela Democratica (Fonte de Verdade)
-_last_updated: 2026-05-31 | branch: main (Model: Claude 3.5 Sonnet / Gemini 3.1 Pro)_
+_last_updated: 2026-06-01 | branch: main (Model: Gemini 3.5 Flash)_
 
 ## Status Operacional (v86.7 - Intelligence Governance)
 
@@ -62,3 +62,14 @@ _last_updated: 2026-05-31 | branch: main (Model: Claude 3.5 Sonnet / Gemini 3.1 
 - **Próximos passos sugeridos:**
   - Incorporar métricas de desempenho no dashboard.
   - Revisar persistência técnica de logs.
+
+## Registro da Rodada 01/06/2026
+- **Data/Hora:** 01/06/2026 14:02 (GMT‑3)
+- **Objetivo:** Corrigir erros de classificação de IA e lentidão na fila de processamento.
+- **Ações realizadas:**
+  - Restaurado o método `_call_provider` ausente em `core/ai_service.py` que impedia o funcionamento da inteligência.
+  - Configurados timeouts de conexão agressivos de 1.5s e desativação de retentativas internas do OpenAI (`max_retries=0`) nos provedores locais.
+  - Implementada a abertura imediata do circuit breaker para erros de conexão locais físicos, evitando latência no processamento em cascata.
+  - Criado e executado o script `scripts/reset_failed_classifications.py` para redefinir e devolver 3.962 comentários marcados como `ERRO` para a fila de classificação.
+- **Próximos passos sugeridos:**
+  - Monitorar a fila através do `AIProcessorWorker` para atestar a vazão ideal.
