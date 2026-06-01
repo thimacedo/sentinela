@@ -22,7 +22,7 @@ if sys.platform.startswith("win"):
 
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 os.makedirs("logs", exist_ok=True)
 

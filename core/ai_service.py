@@ -211,33 +211,63 @@ class AIService:
             ai_circuit_breaker.record_success(name)
             return result
         except Exception as e:
-            # Se for falha de conexão física/rede no serviço local, abre o circuito imediatamente (cooldown/503)
             import httpx
+            import openai
+            
+            is_local = name in ["litert", "ollama"]
             status_code = None
-            if name in ["litert", "ollama"] and isinstance(e, (httpx.ConnectError, httpx.ConnectTimeout)):
-                status_code = 503
-                logger.warning(f"⚠️ [AI] Provedor local '{name}' indisponível/offline. Abrindo disjuntor imediatamente.")
-            elif hasattr(e, "status_code"):
+            
+            if hasattr(e, "status_code"):
                 status_code = getattr(e, "status_code")
+            elif hasattr(e, "code"):
+                try:
+                    status_code = int(getattr(e, "code"))
+                except:
+                    pass
+
+            is_connect_error = isinstance(e, (httpx.ConnectError, httpx.ConnectTimeout))
+            is_read_timeout = isinstance(e, (httpx.ReadTimeout, openai.APITimeoutError)) or "timeout" in str(e).lower()
+            
+            if is_local and is_connect_error:
+                status_code = 503
+                logger.warning(f"⚠️ [AI] Provedor local '{name}' indisponível/offline (falha de conexão). Abrindo disjuntor imediatamente.")
             
             ai_circuit_breaker.record_failure(name, status_code=status_code)
             
-            # Controle dinâmico de falhas consecutivas
-            self.consecutive_failures[name] = self.consecutive_failures.get(name, 0) + 1
+            should_remove = False
             
-            if self.consecutive_failures[name] >= 3:
-                # Remove permanentemente do fallback ativo e avisa no log
+            if is_local:
+                if is_connect_error:
+                    self.consecutive_failures[name] = self.consecutive_failures.get(name, 0) + 1
+                    if self.consecutive_failures[name] >= 3:
+                        should_remove = True
+                else:
+                    # Timeout de leitura ou outro erro local temporário: apenas rotaciona
+                    pass
+            else:
+                # Provedor Cloud: descartar se erro de autenticação (401/403)
+                if status_code in [401, 403]:
+                    should_remove = True
+                    logger.error(f"❌ [AI] Provedor Cloud '{name}' retornou erro de credenciais ({status_code}).")
+                else:
+                    # Outros erros de nuvem (como 429 ou 5xx): apenas rotaciona
+                    pass
+
+            if should_remove:
                 prov = next((p for p in self.providers if p["name"] == name), None)
                 if prov:
                     self.providers.remove(prov)
-                    logger.warning(f"🚨 [AI] Provedor '{name}' removido do fallback ativo após {self.consecutive_failures[name]} falhas consecutivas!")
+                    logger.warning(f"🚨 [AI] Provedor '{name}' REMOVIDO permanentemente do fallback ativo devido a erro grave ou consecutivas falhas físicas!")
             else:
-                # Joga para o fim da fila de prioridade
                 prov = next((p for p in self.providers if p["name"] == name), None)
                 if prov:
                     self.providers.remove(prov)
                     self.providers.append(prov)
-                    logger.info(f"🔄 [AI] Provedor '{name}' falhou. Movido para o fim da fila de prioridade para as próximas chamadas.")
+                    if is_local and is_read_timeout:
+                        logger.info(f"🔄 [AI] Provedor local '{name}' sofreu timeout de geração. Movido para o fim da fila (preservado).")
+                    else:
+                        logger.info(f"🔄 [AI] Provedor '{name}' falhou temporariamente. Movido para o fim da fila de prioridade para as próximas chamadas.")
+            
             return None
 
     def _parse_json_response(self, content: str) -> Dict[str, Any]:

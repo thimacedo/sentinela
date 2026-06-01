@@ -25,7 +25,7 @@ from typing import Tuple, Dict, Any, Optional
 # Carrega variáveis do arquivo .env local do projeto
 try:
     from dotenv import load_dotenv
-    load_dotenv(os.path.join(PROJECT_ROOT, ".env"))
+    load_dotenv(os.path.join(PROJECT_ROOT, ".env"), override=True)
 except ImportError:
     pass
 

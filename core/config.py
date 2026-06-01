@@ -2,7 +2,7 @@ import os
 import yaml
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 class Settings:
     PROJECT_NAME: str = "Sentinela Democrática"

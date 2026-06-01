@@ -7,7 +7,7 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(PROJECT_ROOT)
 
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(override=True)
 
 async def main():
     try:

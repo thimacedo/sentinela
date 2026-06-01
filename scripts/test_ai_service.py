@@ -6,6 +6,9 @@ import sys
 # Adiciona o diretório raiz ao PYTHONPATH
 sys.path.append(os.getcwd())
 
+from dotenv import load_dotenv
+load_dotenv(override=True)
+
 from core.ai_service import AIService
 
 # Configuração de logging
