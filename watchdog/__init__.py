@@ -381,6 +381,8 @@ def guard():
             ENV_WITH_WATCHDOG["PYTHONUNBUFFERED"] = "1"
 
             project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            # Inicia o script principal sem abrir janela de console (Windows)
+            creationflags = 0x08000000  # CREATE_NO_WINDOW
             process = subprocess.Popen(
                 [python_exe, "-u", SERVER_SCRIPT],
                 env=ENV_WITH_WATCHDOG,
@@ -391,6 +393,7 @@ def guard():
                 errors="replace",
                 bufsize=1,
                 cwd=project_root,
+                creationflags=creationflags,
             )
             
             def pipe_reader(pipe, level):

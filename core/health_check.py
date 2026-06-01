@@ -33,9 +33,9 @@ def _start_service(name: str, command: list[str]):
     """
     try:
         subprocess.Popen(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        print(f"[🛠] Serviço {name} iniciado: {' '.join(command)}")
+        print("[TOOL] Serviço {} iniciado: {}".format(name, ' '.join(command)))
     except Exception as e:
-        print(f"[⚠️] Falha ao iniciar {name}: {e}")
+        print(f"[WARN] Falha ao iniciar {name}: {e}")
 
 def ensure_ollama_running():
     base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
@@ -43,11 +43,11 @@ def ensure_ollama_running():
     try:
         resp = httpx.get(health_url, timeout=2.0)
         if resp.status_code == 200:
-            print("[✅] Ollama já está ativo.")
+            print("[OK] Ollama já está ativo.")
             return True
     except Exception:
         pass
-    print("[⚠️] Ollama não respondendo, iniciando serviço...")
+    print("[WARN] Ollama não respondendo, iniciando serviço...")
     _start_service("Ollama", ["ollama", "serve"])
     return False
 
@@ -56,11 +56,11 @@ def ensure_litert_running():
     try:
         resp = httpx.get(health_url, timeout=2.0)
         if resp.status_code == 200:
-            print("[✅] LiteRT já está ativo.")
+            print("[OK] LiteRT já está ativo.")
             return True
     except Exception:
         pass
-    print("[⚠️] LiteRT não respondendo, iniciando serviço...")
+    print("[WARN] LiteRT não respondendo, iniciando serviço...")
     _start_service("LiteRT", ["litert", "--serve"])
     return False
 
@@ -69,7 +69,7 @@ def run_startup_health_checks():
     - Avalia credenciais Instagram.
     - Garante que Ollama e LiteRT estejam operacionais.
     """
-    print("🔍 Executando verificações de saúde na inicialização...")
+    print("Executando verificações de saúde na inicialização...")
     ig_status = check_instagram_accounts()
     for acc, st in ig_status.items():
         print(f"[IG] {acc}: {st}")

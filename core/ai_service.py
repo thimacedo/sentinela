@@ -89,25 +89,37 @@ def clean_null_chars(data: Any) -> Any:
 
 class AIService:
     def __init__(self):
+        import httpx
         self.litert_client = AsyncOpenAI(
             api_key="litert",
-            base_url=os.getenv("LITERT_BASE_URL", "http://localhost:9379/v1")
+            base_url=os.getenv("LITERT_BASE_URL", "http://localhost:9379/v1"),
+            max_retries=0,
+            http_client=httpx.AsyncClient(
+                timeout=httpx.Timeout(timeout=10.0, connect=1.5)
+            )
         )
         self.ollama_client = AsyncOpenAI(
             api_key="ollama",
-            base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
+            base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1"),
+            max_retries=0,
+            http_client=httpx.AsyncClient(
+                timeout=httpx.Timeout(timeout=45.0, connect=1.5)
+            )
         )
         self.mistral_client = AsyncOpenAI(
             api_key=os.getenv("MISTRAL_API_KEY") or "dummy-mistral-key",
-            base_url="https://api.mistral.ai/v1"
+            base_url="https://api.mistral.ai/v1",
+            max_retries=0
         )
         self.groq_client = AsyncOpenAI(
             api_key=os.getenv("GROQ_API_KEY") or "dummy-groq-key",
-            base_url="https://api.groq.com/openai/v1"
+            base_url="https://api.groq.com/openai/v1",
+            max_retries=0
         )
         self.openrouter_client = AsyncOpenAI(
             api_key=os.getenv("OPENROUTER_API_KEY") or "dummy-openrouter-key",
-            base_url="https://openrouter.ai/api/v1"
+            base_url="https://openrouter.ai/api/v1",
+            max_retries=0
         )
 
         finetuned_model = os.getenv('FINETUNED_MODEL_NAME')
@@ -179,7 +191,34 @@ class AIService:
 
         return local_result or {"is_hate": False, "categoria_ia": "ERRO", "confianca_ia": 0.0, "analise_pericial": "Falha total."}
 
-
+    async def _call_provider(self, provider: Dict[str, Any], text: str, comment_id: str) -> Optional[Dict[str, Any]]:
+        name = provider["name"]
+        is_local = name in ["litert", "ollama"]
+        system_prompt = LOCAL_SYSTEM_PROMPT if is_local else SYSTEM_PROMPT
+        try:
+            response = await provider["client"].chat.completions.create(
+                model=provider["model"],
+                messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": f"Texto: \"{text}\""}],
+                response_format={"type": "json_object"},
+                temperature=0.0,
+                timeout=provider.get("timeout", 15.0)
+            )
+            result = self._parse_json_response(response.choices[0].message.content)
+            result["name"] = name
+            ai_circuit_breaker.record_success(name)
+            return result
+        except Exception as e:
+            # Se for falha de conexão física/rede no serviço local, abre o circuito imediatamente (cooldown/503)
+            import httpx
+            status_code = None
+            if name in ["litert", "ollama"] and isinstance(e, (httpx.ConnectError, httpx.ConnectTimeout)):
+                status_code = 503
+                logger.warning(f"⚠️ [AI] Provedor local '{name}' indisponível/offline. Abrindo disjuntor imediatamente.")
+            elif hasattr(e, "status_code"):
+                status_code = getattr(e, "status_code")
+            
+            ai_circuit_breaker.record_failure(name, status_code=status_code)
+            return None
 
     def _parse_json_response(self, content: str) -> Dict[str, Any]:
         try:
