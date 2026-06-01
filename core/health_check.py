@@ -37,9 +37,23 @@ def _start_service(name: str, command: list[str]):
     except Exception as e:
         print(f"[WARN] Falha ao iniciar {name}: {e}")
 
+from urllib.parse import urlparse
+
+def _get_health_url(base_url: str, default_origin: str, path: str) -> str:
+    try:
+        clean_url = base_url.strip('"\'')
+        url_parsed = urlparse(clean_url)
+        if url_parsed.scheme and url_parsed.netloc:
+            origin = f"{url_parsed.scheme}://{url_parsed.netloc}"
+        else:
+            origin = default_origin
+        return f"{origin}{path}"
+    except Exception:
+        return f"{default_origin}{path}"
+
 def ensure_ollama_running():
     base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-    health_url = f"{base_url}/api/tags"
+    health_url = _get_health_url(base_url, "http://localhost:11434", "/api/tags")
     try:
         resp = httpx.get(health_url, timeout=2.0)
         if resp.status_code == 200:
@@ -52,7 +66,8 @@ def ensure_ollama_running():
     return False
 
 def ensure_litert_running():
-    health_url = "http://127.0.0.1:8001/health"
+    base_url = os.getenv("LITERT_BASE_URL", "http://localhost:9379")
+    health_url = _get_health_url(base_url, "http://localhost:9379", "/v1/models")
     try:
         resp = httpx.get(health_url, timeout=2.0)
         if resp.status_code == 200:

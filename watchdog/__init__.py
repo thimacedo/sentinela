@@ -226,14 +226,33 @@ async def get_metrics():
     # Instagram accounts status
     ig_status = check_instagram_accounts()
     # IA services health checks (não iniciam serviços)
+    from urllib.parse import urlparse
+    import httpx
+
+    def _get_health_url(base_url: str, default_origin: str, path: str) -> str:
+        try:
+            clean_url = base_url.strip('"\'')
+            url_parsed = urlparse(clean_url)
+            if url_parsed.scheme and url_parsed.netloc:
+                origin = f"{url_parsed.scheme}://{url_parsed.netloc}"
+            else:
+                origin = default_origin
+            return f"{origin}{path}"
+        except Exception:
+            return f"{default_origin}{path}"
+
     def _service_status(url: str) -> str:
         try:
             resp = httpx.get(url, timeout=2.0)
             return "OK" if resp.status_code == 200 else "DOWN"
         except Exception:
             return "DOWN"
-    ollama_status = _service_status(os.getenv("OLLAMA_BASE_URL", "http://localhost:11434") + "/api/tags")
-    litert_status = _service_status("http://127.0.0.1:8001/health")
+
+    ollama_health = _get_health_url(os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"), "http://localhost:11434", "/api/tags")
+    litert_health = _get_health_url(os.getenv("LITERT_BASE_URL", "http://localhost:9379"), "http://localhost:9379", "/v1/models")
+
+    ollama_status = _service_status(ollama_health)
+    litert_status = _service_status(litert_health)
     with state.lock:
         return {
             "restarts": state.restarts,
