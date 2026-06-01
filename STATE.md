@@ -64,12 +64,13 @@ _last_updated: 2026-06-01 | branch: main (Model: Gemini 3.5 Flash)_
   - Revisar persistência técnica de logs.
 
 ## Registro da Rodada 01/06/2026
-- **Data/Hora:** 01/06/2026 14:02 (GMT‑3)
-- **Objetivo:** Corrigir erros de classificação de IA e lentidão na fila de processamento.
+- **Data/Hora:** 01/06/2026 14:10 (GMT‑3)
+- **Objetivo:** Corrigir erros de classificação de IA, lentidão na fila de processamento e implementar lógica rotativa de fallback.
 - **Ações realizadas:**
   - Restaurado o método `_call_provider` ausente em `core/ai_service.py` que impedia o funcionamento da inteligência.
   - Configurados timeouts de conexão agressivos de 1.5s e desativação de retentativas internas do OpenAI (`max_retries=0`) nos provedores locais.
   - Implementada a abertura imediata do circuit breaker para erros de conexão locais físicos, evitando latência no processamento em cascata.
   - Criado e executado o script `scripts/reset_failed_classifications.py` para redefinir e devolver 3.962 comentários marcados como `ERRO` para a fila de classificação.
+  - Implementada a inteligência circular de fallback: provedores indisponíveis temporariamente são jogados para o final da fila de prioridade para a próxima chamada, e provedores que falham consecutivamente 3 ou mais vezes são descartados do fallback com alerta de log.
 - **Próximos passos sugeridos:**
   - Monitorar a fila através do `AIProcessorWorker` para atestar a vazão ideal.

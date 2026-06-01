@@ -133,6 +133,7 @@ class AIService:
             {"name": "groq", "client": self.groq_client, "model": "llama-3.3-70b-versatile", "timeout": 10.0},
             {"name": "openrouter", "client": self.openrouter_client, "model": "openrouter/free", "timeout": 20.0},
         ]
+        self.consecutive_failures: Dict[str, int] = {}
 
     async def classify(self, text: str, comment_id: str = "N/A") -> Dict[str, Any]:
         return await self.classify_text(text, comment_id)
@@ -160,11 +161,12 @@ class AIService:
         if lexical_filter.is_junk(text):
             return {"is_hate": False, "categoria_ia": "NEUTRO", "confianca_ia": 1.0, "analise_pericial": "Filtro léxico."}
 
-        self.providers.sort(key=lambda p: ai_circuit_breaker.failures.get(p["name"], 0))
         local_result = None
+        # Cria cópia estática para evitar bugs ao alterar a lista self.providers concorrentemente/durante o loop
+        active_providers = list(self.providers)
         
         # CAMADA 1: FILTRAGEM LOCAL (OLLAMA/LITERT)
-        for provider in self.providers:
+        for provider in active_providers:
             if provider["name"] not in ["litert", "ollama"] or not ai_circuit_breaker.can_execute(provider["name"]):
                 continue
             try:
@@ -179,7 +181,7 @@ class AIService:
             except: continue
 
         # CAMADA 2: PERÍCIA CLOUD (MISTRAL/GROQ) - Só se local for SUSPEITO ou incerto
-        for provider in self.providers:
+        for provider in active_providers:
             if provider["name"] in ["litert", "ollama"] or not ai_circuit_breaker.can_execute(provider["name"]):
                 continue
             try:
@@ -205,6 +207,7 @@ class AIService:
             )
             result = self._parse_json_response(response.choices[0].message.content)
             result["name"] = name
+            self.consecutive_failures[name] = 0
             ai_circuit_breaker.record_success(name)
             return result
         except Exception as e:
@@ -218,6 +221,23 @@ class AIService:
                 status_code = getattr(e, "status_code")
             
             ai_circuit_breaker.record_failure(name, status_code=status_code)
+            
+            # Controle dinâmico de falhas consecutivas
+            self.consecutive_failures[name] = self.consecutive_failures.get(name, 0) + 1
+            
+            if self.consecutive_failures[name] >= 3:
+                # Remove permanentemente do fallback ativo e avisa no log
+                prov = next((p for p in self.providers if p["name"] == name), None)
+                if prov:
+                    self.providers.remove(prov)
+                    logger.warning(f"🚨 [AI] Provedor '{name}' removido do fallback ativo após {self.consecutive_failures[name]} falhas consecutivas!")
+            else:
+                # Joga para o fim da fila de prioridade
+                prov = next((p for p in self.providers if p["name"] == name), None)
+                if prov:
+                    self.providers.remove(prov)
+                    self.providers.append(prov)
+                    logger.info(f"🔄 [AI] Provedor '{name}' falhou. Movido para o fim da fila de prioridade para as próximas chamadas.")
             return None
 
     def _parse_json_response(self, content: str) -> Dict[str, Any]:
