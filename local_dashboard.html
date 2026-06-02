@@ -106,7 +106,7 @@
             <span class="text-[9px] text-rose-400 block">Média por dia: <span id="kpi-avg-hate-day">-</span></span>
             <span class="text-[9px] text-rose-400 block">Média por hora: <span id="kpi-avg-hate-hour">-</span></span>
         </div>
-        <!-- KPI 3 -->
+        <!-- KPI 3: Alvos Ativos -->
         <div class="bg-slate-900/30 border border-slate-850 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
             <div class="absolute -right-4 -bottom-4 text-emerald-500/10 opacity-20 pointer-events-none group-hover:scale-110 transition-transform">
                 <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 8 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
@@ -114,9 +114,13 @@
             <span class="block text-xs font-semibold text-slate-400">Alvos Ativos</span>
             <span id="kpi-active-targets" class="block text-2xl font-black text-emerald-450 mt-1 mono">---</span>
             <span class="text-[10px] text-slate-500 block mt-1">Perfis de interesse ativos</span>
-            <div id="kpi-active-breakdown" class="text-[9px] text-slate-400 mt-1">—</div>
+            <div id="kpi-active-breakdown" class="text-[9px] text-slate-500 mt-1.5 flex gap-2">
+                <span>Pausados: <b id="kpi-paused-targets" class="text-amber-400 font-mono">-</b></span>
+                <span class="text-slate-700">·</span>
+                <span>Excluídos: <b id="kpi-excluded-targets" class="text-rose-400 font-mono">-</b></span>
+            </div>
         </div>
-        <!-- KPI 4 -->
+        <!-- KPI 4: Ciclos / Restarts -->
         <div class="bg-slate-900/30 border border-slate-850 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
             <div class="absolute -right-4 -bottom-4 text-violet-500/10 opacity-20 pointer-events-none group-hover:scale-110 transition-transform">
                 <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm4.2 14.2L11 13V7h1.5v5.2l4.5 2.7-.8 1.3z"/></svg>
@@ -124,16 +128,19 @@
             <span class="block text-xs font-semibold text-slate-400">Ciclos / Restarts</span>
             <span id="kpi-restars" class="block text-2xl font-black text-violet-400 mt-1 mono">---</span>
             <span class="text-[10px] text-slate-500 block mt-1">Execuções e reinícios automáticos</span>
-        </div>
-            <!-- KPI 5 -->
-            <div class="bg-slate-900/30 border border-slate-850 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
-                <span class="block text-xs font-semibold text-slate-400">Contas Instagram</span>
-                <div id="kpi-instagram" class="block text-sm mt-1 mono">---</div>
+            <div class="text-[9px] text-slate-500 mt-1.5">
+                Reanalisados: <b id="kpi-reclassified" class="text-indigo-400 font-mono">-</b>
             </div>
-            <!-- KPI 6 -->
+        </div>
+            <!-- KPI 5: Contas Instagram -->
             <div class="bg-slate-900/30 border border-slate-850 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
-                <span class="block text-xs font-semibold text-slate-400">Serviços IA</span>
-                <div id="kpi-ai-services" class="block text-sm mt-1 mono">---</div>
+                <span class="block text-xs font-semibold text-slate-400 mb-3">Contas Instagram</span>
+                <div id="kpi-instagram" class="flex flex-col gap-2 mt-1">---</div>
+            </div>
+            <!-- KPI 6: Serviços IA -->
+            <div class="bg-slate-900/30 border border-slate-850 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
+                <span class="block text-xs font-semibold text-slate-400 mb-3">Serviços IA</span>
+                <div id="kpi-ai-services" class="flex flex-col gap-2 mt-1">---</div>
             </div>
     </div>
 
@@ -292,29 +299,33 @@
             }).join('');
         }
 
-        async function startService(name, event) {
+        // startService precisa estar no escopo global para funcionar em onclick inline
+        window.startService = async function startService(name, event) {
             if (event) {
+                event.preventDefault();
                 event.stopPropagation();
-                const btn = event.target;
-                if (btn) {
-                    btn.disabled = true;
-                    btn.innerText = 'Ativando...';
-                }
+            }
+            // Feedback visual imediato na bolinha
+            const dot = document.getElementById(`ai-dot-${name}`);
+            if (dot) {
+                dot.style.opacity = '0.4';
+                dot.title = 'Ativando...';
             }
             try {
                 const resp = await fetch(`/api/services/${name}/start`, { method: 'POST' });
-                const res = await resp.json();
+                const res = await resp.json().catch(() => ({}));
                 if (resp.ok) {
-                    alert(`Serviço ${name} iniciado: ${res.message}`);
+                    console.log(`Serviço ${name} iniciado:`, res.message);
                 } else {
-                    alert(`Erro ao iniciar ${name}: ${res.detail || res.message || 'Erro desconhecido'}`);
+                    console.warn(`Erro ao iniciar ${name}:`, res.detail || res.message || 'Erro desconhecido');
                 }
             } catch (err) {
-                alert(`Erro de conexão: ${err.message}`);
+                console.warn(`Erro de conexão ao iniciar ${name}:`, err.message);
             } finally {
-                fetchData();
+                // Recarrega os dados para refletir o novo status
+                setTimeout(fetchData, 1500);
             }
-        }
+        };
 
         async function fetchData() {
             if (!db) return;
@@ -345,22 +356,70 @@
                         }
 
                         document.getElementById('kpi-restars').innerText = `${m.cycle || 0} / ${m.restarts || 0}`;
-                // Instagram accounts status
-                const igDiv = document.getElementById('kpi-instagram');
-                if (igDiv) {
-                    const igStatus = m.instagram_accounts || {};
-                    igDiv.innerHTML = Object.entries(igStatus).map(([acc, st]) => `<span class="${st==='OK' ? 'text-emerald-400' : 'text-rose-400'}">${acc}: ${st}</span>`).join(' | ');
-                }
-                // AI services status
-                const aiDiv = document.getElementById('kpi-ai-services');
-                if (aiDiv) {
-                    const aiStatus = m.ai_services || {};
-                    aiDiv.innerHTML = `<div class="flex flex-wrap items-center gap-2">` + Object.entries(aiStatus).map(([svc, st]) => {
-                        const colorClass = st === 'OK' ? 'text-emerald-400' : 'text-rose-450';
-                        const actionBtn = st === 'DOWN' ? `<button onclick="startService('${svc}', event)" class="px-1.5 py-0.5 text-[9px] font-bold bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white rounded transition-all uppercase leading-none">Ativar</button>` : '';
-                        return `<div class="flex items-center gap-1.5"><span class="${colorClass}">${svc}: ${st}</span>${actionBtn}</div>`;
-                    }).join('<span class="text-slate-800">|</span>') + `</div>`;
-                }
+
+                        // Comentários reanalisados
+                        const reclEl = document.getElementById('kpi-reclassified');
+                        if (reclEl) reclEl.innerText = (m.reclassified || 0).toLocaleString();
+
+                        // Contas Instagram — IG 1 / IG 2 com bolinha colorida
+                        const igDiv = document.getElementById('kpi-instagram');
+                        if (igDiv) {
+                            const igStatus = m.instagram_accounts || {};
+                            const entries = Object.entries(igStatus);
+                            // Agrupa pares USER/PASS em contas numeradas: IG 1, IG 2, ...
+                            const accounts = {};
+                            entries.forEach(([acc, st]) => {
+                                // chaves: IG_USER, IG_PASS, IG_USER_1, IG_PASS_1 …
+                                const match = acc.match(/IG_(?:USER|PASS)(?:_?(\d+))?$/i);
+                                if (match) {
+                                    const idx = match[1] ? parseInt(match[1]) : 0;
+                                    if (!accounts[idx]) accounts[idx] = [];
+                                    accounts[idx].push(st);
+                                }
+                            });
+                            const sortedKeys = Object.keys(accounts).sort((a, b) => a - b);
+                            igDiv.innerHTML = sortedKeys.map((idx, i) => {
+                                const sts = accounts[idx];
+                                const isOk = sts.every(s => s === 'OK');
+                                const colorDot = isOk ? 'bg-emerald-500 shadow-[0_0_6px_rgba(34,197,94,0.7)]' : 'bg-rose-500 shadow-[0_0_6px_rgba(239,68,68,0.7)]';
+                                const label = `IG ${i + 1}`;
+                                return `<div class="flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full flex-shrink-0 ${colorDot}"></span>
+                                    <span class="text-xs font-semibold text-slate-300 mono">${label}</span>
+                                </div>`;
+                            }).join('');
+                            // Fallback se não reconheceu o padrão
+                            if (sortedKeys.length === 0) {
+                                igDiv.innerHTML = entries.map(([acc, st]) => {
+                                    const isOk = st === 'OK';
+                                    const colorDot = isOk ? 'bg-emerald-500' : 'bg-rose-500';
+                                    return `<div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full ${colorDot}"></span><span class="text-xs font-semibold text-slate-300 mono">${acc}</span></div>`;
+                                }).join('');
+                            }
+                        }
+
+                        // Serviços IA — bolinha colorida clicável como botão de ativação
+                        const aiDiv = document.getElementById('kpi-ai-services');
+                        if (aiDiv) {
+                            const aiStatus = m.ai_services || {};
+                            aiDiv.innerHTML = Object.entries(aiStatus).map(([svc, st]) => {
+                                const isOk = st === 'OK';
+                                const dotColor = isOk
+                                    ? 'bg-emerald-500 shadow-[0_0_6px_rgba(34,197,94,0.7)] cursor-default'
+                                    : 'bg-rose-500 shadow-[0_0_6px_rgba(239,68,68,0.7)] cursor-pointer hover:scale-125 active:scale-95';
+                                const onclick = !isOk ? `onclick="window.startService('${svc}', event)"` : '';
+                                const title = isOk ? `${svc}: operacional` : `${svc}: offline — clique para ativar`;
+                                return `<div class="flex items-center gap-2">
+                                    <span
+                                        id="ai-dot-${svc}"
+                                        ${onclick}
+                                        title="${title}"
+                                        class="w-2.5 h-2.5 rounded-full flex-shrink-0 transition-transform duration-150 ${dotColor}"
+                                    ></span>
+                                    <span class="text-xs font-semibold text-slate-300 mono">${svc}</span>
+                                </div>`;
+                            }).join('');
+                        }
                     }
                 } catch(e_met) {
                     console.log("Servidor local não retornou métricas (Watchdog offline ou standalone mode).");
@@ -369,11 +428,15 @@
                 // B. Estatísticas do Supabase (KPIs usando HEAD requests eficientes)
                 const { count: commentsCount } = await db.from('comentarios').select('*', { count: 'exact', head: true });
                 const { count: hateCount } = await db.from('comentarios').select('*', { count: 'exact', head: true }).eq('is_hate', true);
-                const { count: candidatesCount } = await db.from('candidatos').select('*', { count: 'exact', head: true }).eq('status_monitoramento', 'ATIVO');
+                const { count: candidatesCount }  = await db.from('candidatos').select('*', { count: 'exact', head: true }).eq('status_monitoramento', 'ATIVO');
+                const { count: pausedCount }        = await db.from('candidatos').select('*', { count: 'exact', head: true }).eq('status_monitoramento', 'PAUSADO');
+                const { count: excludedCount }      = await db.from('candidatos').select('*', { count: 'exact', head: true }).eq('status_monitoramento', 'EXCLUIDO');
 
-                if (commentsCount !== null) document.getElementById('kpi-total-comments').innerText = commentsCount.toLocaleString();
-                if (hateCount !== null) document.getElementById('kpi-hate-comments').innerText = hateCount.toLocaleString();
+                if (commentsCount !== null)  document.getElementById('kpi-total-comments').innerText  = commentsCount.toLocaleString();
+                if (hateCount !== null)      document.getElementById('kpi-hate-comments').innerText   = hateCount.toLocaleString();
                 if (candidatesCount !== null) document.getElementById('kpi-active-targets').innerText = candidatesCount.toLocaleString();
+                if (pausedCount !== null)   { const el = document.getElementById('kpi-paused-targets');   if (el) el.innerText = pausedCount.toLocaleString(); }
+                if (excludedCount !== null) { const el = document.getElementById('kpi-excluded-targets'); if (el) el.innerText = excludedCount.toLocaleString(); }
                 // Compute average comments per day/hour
                 const now = new Date();
                 (async () => {
