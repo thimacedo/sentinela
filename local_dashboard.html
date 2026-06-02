@@ -398,27 +398,50 @@
                             }
                         }
 
-                        // Serviços IA — bolinha colorida clicável como botão de ativação
+                        // Serviços IA — bolinha clicável via event delegation (fix onclick inline)
                         const aiDiv = document.getElementById('kpi-ai-services');
                         if (aiDiv) {
                             const aiStatus = m.ai_services || {};
-                            aiDiv.innerHTML = Object.entries(aiStatus).map(([svc, st]) => {
+                            // Remove listener antigo para evitar duplicatas a cada fetchData()
+                            const newAiDiv = aiDiv.cloneNode(false);
+                            aiDiv.parentNode.replaceChild(newAiDiv, aiDiv);
+
+                            newAiDiv.innerHTML = Object.entries(aiStatus).map(([svc, st]) => {
                                 const isOk = st === 'OK';
                                 const dotColor = isOk
-                                    ? 'bg-emerald-500 shadow-[0_0_6px_rgba(34,197,94,0.7)] cursor-default'
-                                    : 'bg-rose-500 shadow-[0_0_6px_rgba(239,68,68,0.7)] cursor-pointer hover:scale-125 active:scale-95';
-                                const onclick = !isOk ? `onclick="window.startService('${svc}', event)"` : '';
+                                    ? 'bg-emerald-500 shadow-[0_0_6px_rgba(34,197,94,0.7)]'
+                                    : 'bg-rose-500 shadow-[0_0_6px_rgba(239,68,68,0.7)]';
+                                const cursorClass = isOk ? 'cursor-default' : 'cursor-pointer hover:scale-125 active:scale-95';
                                 const title = isOk ? `${svc}: operacional` : `${svc}: offline — clique para ativar`;
                                 return `<div class="flex items-center gap-2">
                                     <span
                                         id="ai-dot-${svc}"
-                                        ${onclick}
+                                        data-svc="${svc}"
+                                        data-ok="${isOk}"
                                         title="${title}"
-                                        class="w-2.5 h-2.5 rounded-full flex-shrink-0 transition-transform duration-150 ${dotColor}"
+                                        class="w-2.5 h-2.5 rounded-full flex-shrink-0 transition-transform duration-150 ${dotColor} ${cursorClass}"
                                     ></span>
                                     <span class="text-xs font-semibold text-slate-300 mono">${svc}</span>
                                 </div>`;
                             }).join('');
+
+                            // Event delegation: um único listener no container detecta cliques nas bolinhas
+                            newAiDiv.addEventListener('click', function(e) {
+                                const dot = e.target.closest('[data-svc]');
+                                if (!dot) return;
+                                const svc = dot.dataset.svc;
+                                const alreadyOk = dot.dataset.ok === 'true';
+                                if (alreadyOk) return;
+                                // Feedback visual imediato
+                                dot.style.opacity = '0.4';
+                                dot.title = 'Ativando...';
+                                // Chama a API sem depender do event inline
+                                fetch(`/api/services/${svc}/start`, { method: 'POST' })
+                                    .then(r => r.json().catch(() => ({})))
+                                    .then(res => console.log(`[IA] ${svc} iniciado:`, res.message || res))
+                                    .catch(err => console.warn(`[IA] Erro ao iniciar ${svc}:`, err.message))
+                                    .finally(() => setTimeout(fetchData, 1500));
+                            });
                         }
                     }
                 } catch(e_met) {
