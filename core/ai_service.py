@@ -193,10 +193,58 @@ class AIService:
 
         return local_result or {"is_hate": False, "categoria_ia": "ERRO", "confianca_ia": 0.0, "analise_pericial": "Falha total."}
 
+    def _enrich_prompt(self, is_local: bool) -> str:
+        base_prompt = LOCAL_SYSTEM_PROMPT if is_local else SYSTEM_PROMPT
+        # Busca config/custom_rules.json na raiz do projeto
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        config_path = os.path.join(base_dir, "config", "custom_rules.json")
+        
+        if not os.path.exists(config_path):
+            config_path = "config/custom_rules.json"
+            
+        if not os.path.exists(config_path):
+            return base_prompt
+
+        try:
+            with open(config_path, "r", encoding="utf-8") as f:
+                rules = json.load(f)
+            
+            enrichment = "\n\n--- DIRETRIZES ADICIONAIS DE PESQUISA (PASA EXTRA) ---\n"
+            has_enrichment = False
+            
+            if "additional_rules" in rules and rules["additional_rules"]:
+                enrichment += "Regras Adicionais de Classificação:\n"
+                for r in rules["additional_rules"]:
+                    enrichment += f"- {r}\n"
+                has_enrichment = True
+                
+            if "mitigate_false_positives" in rules and rules["mitigate_false_positives"]:
+                enrichment += "Blindagem Extra contra Falsos Positivos:\n"
+                for r in rules["mitigate_false_positives"]:
+                    enrichment += f"- {r}\n"
+                has_enrichment = True
+                
+            if "custom_keywords" in rules and rules["custom_keywords"]:
+                enrichment += "Dicionário Léxico Customizado por Categoria:\n"
+                for cat, kw_list in rules["custom_keywords"].items():
+                    enrichment += f"- Categoria {cat}: {', '.join(kw_list)}\n"
+                has_enrichment = True
+                
+            if has_enrichment:
+                if "--- FORMATO DE RESPOSTA (JSON APENAS) ---" in base_prompt:
+                    parts = base_prompt.split("--- FORMATO DE RESPOSTA (JSON APENAS) ---")
+                    return parts[0] + enrichment + "\n--- FORMATO DE RESPOSTA (JSON APENAS) ---" + parts[1]
+                else:
+                    return base_prompt + enrichment
+        except Exception as e:
+            logger.warning(f"Falha ao carregar regras customizadas em {config_path}: {e}")
+            
+        return base_prompt
+
     async def _call_provider(self, provider: Dict[str, Any], text: str, comment_id: str) -> Optional[Dict[str, Any]]:
         name = provider["name"]
         is_local = name in ["litert", "ollama"]
-        system_prompt = LOCAL_SYSTEM_PROMPT if is_local else SYSTEM_PROMPT
+        system_prompt = self._enrich_prompt(is_local)
         try:
             response = await provider["client"].chat.completions.create(
                 model=provider["model"],

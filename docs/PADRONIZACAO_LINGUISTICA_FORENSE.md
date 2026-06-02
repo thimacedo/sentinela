@@ -58,3 +58,27 @@ Todos os Workers de inteligência (Ollama, Gemini, Groq) DEVEM retornar este for
 
 ---
 *Documento de uso restrito do Ecossistema Sentinela Democrática.*
+
+## 6. Critérios Enriquecidos via Pesquisa Automatizada
+_Última atualização: 02/06/2026_
+
+### Regras Linguísticas Adicionais:
+- Considerar contexto cultural e social para evitar falsos positivos em ofensas raciais e religiosas
+- Analisar a intenção por trás das palavras para diferenciar insultos ad hominem de críticas construtivas
+- Considerar contexto cultural e histórico para evitar falsos positivos em 'VIOLENCIA_GENERO'
+- Desconsiderar expressões de opinião política como 'ATAQUE_INSTITUCIONAL'
+
+### Regras de Mitigação de Falsos Positivos:
+- Evitar marcação de expressões comuns em comunidades específicas como ofensivas sem contexto
+- Considerar o tom e a intenção por trás das palavras para evitar marcação de expressões inofensivas como ameaças
+- Evitar marcar como 'AMEACA' expressões comuns como 'vamos esmagá-los' em contexto esportivo
+- Não marcar como 'DANO_A_IMAGEM' críticas construtivas
+
+### Marcadores Léxico-Semânticos Adicionais:
+- **ODIO_IDENTITARIO**: racista, xenofobia, homofobia, transfobia, racismo
+- **VIOLENCIA_GENERO**: machista, sexista, misoginia, machismo, sexismo, abuso
+- **AMEACA**: morte, violência, ameaça, matar, atacar, destruir
+- **INSULTO_AD_HOMINEM**: idiota, imbecil, estúpido, incompetente
+- **ATAQUE_INSTITUCIONAL**: corrupto, incompetente, deslegitimar, corrupção
+- **DANO_A_IMAGEM**: crime, corrupção, desvios de conduta
+

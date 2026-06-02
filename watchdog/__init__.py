@@ -244,7 +244,7 @@ async def get_metrics():
     def _service_status(url: str) -> str:
         try:
             resp = httpx.get(url, timeout=2.0)
-            return "OK" if resp.status_code == 200 else "DOWN"
+            return "OK" if resp.status_code in [200, 404, 401, 405] else "DOWN"
         except Exception:
             return "DOWN"
 
@@ -268,6 +268,32 @@ async def get_metrics():
             },
             **worker_metrics
         }
+
+@app.post("/api/services/{name}/start")
+async def start_service_endpoint(name: str):
+    """Endpoint para inicialização manual sob demanda de Ollama ou LiteRT."""
+    from fastapi import HTTPException
+    
+    if name == "ollama":
+        try:
+            from core.health_check import ensure_ollama_running
+            if ensure_ollama_running():
+                return {"status": "success", "message": "Ollama já está operacional."}
+            return {"status": "success", "message": "Comando de inicialização do Ollama enviado."}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Erro ao iniciar Ollama: {str(e)}")
+            
+    elif name == "litert":
+        try:
+            from core.health_check import ensure_litert_running
+            if ensure_litert_running():
+                return {"status": "success", "message": "LiteRT já está operacional."}
+            return {"status": "success", "message": "Comando de inicialização do LiteRT enviado."}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Erro ao iniciar LiteRT: {str(e)}")
+            
+    else:
+        raise HTTPException(status_code=400, detail=f"Serviço desconhecido: {name}")
 
 def run_web_server():
     import uvicorn
@@ -501,16 +527,32 @@ def guard():
         state.add_log("dim", f"[Watchdog] Aguardando {delay}s antes do próximo ciclo...")
         time.sleep(delay)
 
-        # Executa reanálise de comentários de baixa confiança durante o cooldown,
-        # desde que não haja múltiplas falhas críticas (code ou runtime) acumuladas.
+        # Executa classificação de novos comentários pendentes e reanálise durante o cooldown,
+        # eliminando todas as pendências de IA enquanto as raspagens descansam.
         if state.fast_crashes == 0 and consecutive_code_errors == 0:
             try:
                 from core.ai_service import ai_service
-                # Executa de forma assíncrona, limitando a 20 itens por ciclo.
-                asyncio.run(ai_service.run_batch_reanalysis(limit=20))
-                state.add_log("info", "[Watchdog] Reanálise de IA concluída durante cooldown.")
+                
+                # 1. Processar todas as classificações normais pendentes na fila
+                state.add_log("info", "[Watchdog] Processando fila de novas classificações pendentes...")
+                total_classified = 0
+                while True:
+                    processed = asyncio.run(ai_service.run_batch_classification(limit=100))
+                    if processed == 0:
+                        break
+                    total_classified += processed
+                if total_classified > 0:
+                    state.add_log("info", f"[Watchdog] Classificados {total_classified} comentários pendentes durante o descanso.")
+                
+                # 2. Executa reanálise de comentários de baixa confiança
+                state.add_log("info", "[Watchdog] Processando reanálise de comentários de baixa confiança...")
+                reanalyzed = asyncio.run(ai_service.run_batch_reanalysis(limit=100))
+                if reanalyzed > 0:
+                    state.add_log("info", f"[Watchdog] Reanalisados {reanalyzed} comentários com baixa confiança durante o descanso.")
+                
+                state.add_log("info", "[Watchdog] Manutenção de IA concluída com sucesso durante o descanso.")
             except Exception as e:
-                state.add_log("warn", f"[Watchdog] Falha ao executar reanálise de IA: {e}")
+                state.add_log("warn", f"[Watchdog] Falha ao executar manutenção de IA no cooldown: {e}")
 
 if __name__ == "__main__":
     os.chdir(os.path.dirname(os.path.abspath(__file__)))

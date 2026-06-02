@@ -28,7 +28,6 @@
       "systemPromptConfig":  {
         "includeSections":  [
           "user_information",
-          "mcp_servers",
           "skills",
           "subagent_reminder",
           "messaging",

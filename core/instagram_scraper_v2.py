@@ -360,8 +360,35 @@ class InstagramScraperV2:
         return False
 
     async def scroll_comment_column(self, page: Page, scroll_amount: int = 800) -> None:
-        await page.mouse.move(random.randint(800, 1200), random.randint(300, 600))
-        await page.mouse.wheel(0, scroll_amount + random.randint(-100, 100))
+        # Tenta rolar usando Javascript direto no DOM para maior precisão (independente de resolução/mouse)
+        scrolled = await page.evaluate("""() => {
+            // Seletores conhecidos para o modal/coluna de comentários do Instagram desktop
+            const selectors = [
+                'article ul.x5yr21d',
+                'div.x5yr21d',
+                'article ul[class*="x5yr21d"]',
+                'div[class*="x5yr21d"]',
+                'article ul'
+            ];
+            
+            for (let sel of selectors) {
+                const el = document.querySelector(sel);
+                if (el && el.scrollHeight > el.clientHeight) {
+                    el.scrollTop = el.scrollHeight;
+                    return true;
+                }
+            }
+            return false;
+        }""")
+        
+        if scrolled:
+            logger.debug("📜 [V2] Scroll via JS executado no container de comentários.")
+        else:
+            # Fallback para mouse.wheel se nenhum container for detectado
+            logger.debug("🖱️ [V2] Nenhum container com scroll ativo encontrado. Aplicando fallback de mouse wheel.")
+            await page.mouse.move(random.randint(800, 1200), random.randint(300, 600))
+            await page.mouse.wheel(0, scroll_amount + random.randint(-100, 100))
+            
         await asyncio.sleep(random.uniform(2, 4))
 
     async def close_post_modal(self, page: Page) -> None:
@@ -579,16 +606,28 @@ class InstagramScraperV2:
 
     async def _verify_session(self, page: Page, session: Session) -> bool:
         try:
+            # Tenta carregar a home
             await page.goto("https://www.instagram.com/", wait_until="domcontentloaded", timeout=30000)
             await asyncio.sleep(random.uniform(2, 4))
+            
             current_url = page.url
-            if "accounts/login" in current_url: 
+            if "accounts/login" in current_url:
+                logger.warning(f"⚠️ [V2] Redirecionamento de login detectado para {session.label}.")
                 return False
+                
+            # Verifica a presença explícita do formulário de login no DOM
             login_field = await page.query_selector('input[name="username"]')
-            return login_field is None
-        except Exception as e:
-            logger.warning(f"⚠️ [V2] Erro ao verificar sessão {session.label}: {e}")
-            return False
+            if login_field:
+                logger.warning(f"⚠️ [V2] Campos de credenciais visíveis no DOM para {session.label}.")
+                return False
+                
+            # Se não há redirect de login nem inputs, a sessão é válida
+            return True
+        except (PlaywrightTimeoutError, Exception) as e:
+            # Erros de rede, timeouts ou oscilação do proxy não invalidam o cookie!
+            logger.error(f"⚠️ [V2] Erro temporário de rede ao verificar sessão {session.label}: {e}")
+            # Propaga o erro para que a tentativa sofra retry sem banir a sessão do pool
+            raise RuntimeError(f"session_network_error: {e}")
 
     def get_stats(self) -> Dict[str, Any]:
         """Retorna estatísticas acumuladas do scraper."""

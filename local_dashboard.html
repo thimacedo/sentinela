@@ -292,6 +292,30 @@
             }).join('');
         }
 
+        async function startService(name, event) {
+            if (event) {
+                event.stopPropagation();
+                const btn = event.target;
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerText = 'Ativando...';
+                }
+            }
+            try {
+                const resp = await fetch(`/api/services/${name}/start`, { method: 'POST' });
+                const res = await resp.json();
+                if (resp.ok) {
+                    alert(`Serviço ${name} iniciado: ${res.message}`);
+                } else {
+                    alert(`Erro ao iniciar ${name}: ${res.detail || res.message || 'Erro desconhecido'}`);
+                }
+            } catch (err) {
+                alert(`Erro de conexão: ${err.message}`);
+            } finally {
+                fetchData();
+            }
+        }
+
         async function fetchData() {
             if (!db) return;
 
@@ -331,7 +355,11 @@
                 const aiDiv = document.getElementById('kpi-ai-services');
                 if (aiDiv) {
                     const aiStatus = m.ai_services || {};
-                    aiDiv.innerHTML = Object.entries(aiStatus).map(([svc, st]) => `<span class="${st==='OK' ? 'text-emerald-400' : 'text-rose-400'}">${svc}: ${st}</span>`).join(' | ');
+                    aiDiv.innerHTML = `<div class="flex flex-wrap items-center gap-2">` + Object.entries(aiStatus).map(([svc, st]) => {
+                        const colorClass = st === 'OK' ? 'text-emerald-400' : 'text-rose-450';
+                        const actionBtn = st === 'DOWN' ? `<button onclick="startService('${svc}', event)" class="px-1.5 py-0.5 text-[9px] font-bold bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white rounded transition-all uppercase leading-none">Ativar</button>` : '';
+                        return `<div class="flex items-center gap-1.5"><span class="${colorClass}">${svc}: ${st}</span>${actionBtn}</div>`;
+                    }).join('<span class="text-slate-800">|</span>') + `</div>`;
                 }
                     }
                 } catch(e_met) {
