@@ -1,7 +1,7 @@
 # STATE.md — Sentinela Democratica (Fonte de Verdade)
-_last_updated: 2026-06-02 | branch: main (Model: Gemini 3.5 Flash)_
+_last_updated: 2026-06-02 | branch: main (Model: Claude Sonnet 4.6 Thinking)_
 
-## Status Operacional (v86.7 - Intelligence Governance)
+## Status Operacional (v86.8 - Sub-Agentes e Resiliência de Reclassificação)
 
 | Subsistema | Status | Observação |
 |---|---|---|
@@ -79,3 +79,19 @@ _last_updated: 2026-06-02 | branch: main (Model: Gemini 3.5 Flash)_
   - Corrigido o diagnóstico e monitoramento de saúde do Ollama (porta 11434, /api/tags) e LiteRT (porta 9379, /v1/models) no watchdog e no `core/health_check.py`, limpando aspas/paths do `.env` e garantindo status real (OK/DOWN) no painel.
 - **Próximos passos sugeridos:**
   - Iniciar a execução de produção do orquestrador via `main_runner.py` e monitorar a vazão de processamento do lote.
+
+## Registro da Rodada 02/06/2026
+- **Data/Hora:** 02/06/2026 14:47 (GMT‑3)
+- **Modelo Ativo:** Claude Sonnet 4.6 (Thinking)
+- **Objetivo:** Documentar tudo nos arquivos oficiais após sessão de sub-agentes e resiliência de reclassificação.
+- **Ações realizadas:**
+  - **Sub-agente `reclassify_agent`**: Definido e operacional. Script `scripts/reclassify_low_confidence.py` varre comentários com confiança ≤ 50% e os reclassifica via provedores Cloud (Groq → OpenRouter → Mistral).
+  - **Fallback local do Reclassificador**: Adicionado fallback automático para LiteRT/Ollama local em caso de indisponibilidade da nuvem. Backoff dinâmico de 5s entre tentativas para evitar sobrecarga das cotas de API.
+  - **Sub-agente `researcher_agent`**: Definido e operacional. Script `scripts/research_pdf_criteria.py` analisa PDFs/MDs em `bases_pdf/`, extrai heurísticas semânticas via `pypdf` e consolida em `config/custom_rules.json` (injetado no `SYSTEM_PROMPT` do `core/ai_service.py`).
+  - **Atualização do `PADRONIZACAO_LINGUISTICA_FORENSE.md`**: Novas heurísticas do pesquisador são incorporadas automaticamente ao documento de padronização léxica.
+  - **Documentação oficial atualizada**: STATE.md, ROADMAP.md, walkthrough.md e task.md sincronizados com o estado real do sistema.
+- **Próximos passos sugeridos:**
+  - Executar `scripts/reclassify_low_confidence.py` em modo produção e monitorar a taxa de acerto pós-reclassificação.
+  - Avaliar implementação do Plano Fase 8: desacoplamento Scraping/IA com `asyncio.Semaphore(3)` no Orchestrator.
+  - Integrar PGMQ (arquivo `pgmq_setup.sql` já presente) para travas atômicas na `fila_coleta` e suporte a cluster horizontal.
+  - Expandir Circuit Breaker (`core/circuit_breaker.py`) para cobrir Supabase e Scraping (além da IA).

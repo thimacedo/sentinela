@@ -1,24 +1,37 @@
-# Checklist de Correções operacionais e Relatórios (v83.7)
+# Checklist da Sessão 02/06/2026 (v86.8)
 
-- `[x]` Passo 1: Estabilidade & Rotação de Sessões (Backend/Coleta):
-  - `[x]` Automação de Renovação de Cookies: Atualizar `SessionHealer` para rodar `export_playwright_cookies.py` assincronamente.
-  - `[x]` Checagem preventiva: Configurar no `AutopilotManager` a cura preventiva periódica de cookies a cada 12 horas.
-  - `[x]` Cura sob demanda: Acionar re-login forçado (`force=True`) se for detectado `SESSION_EXPIRED` pela IA.
-  - `[x]` Rotação Stealth Ampliada: Criar catálogo dinâmico de User-Agents Chrome/Firefox/Safari.
-  - `[x]` Injeção de cabeçalhos consistentes: Configurar cabeçalhos HTTP realistas (`Accept-Language` multilíngue) sem conflito de `Sec-Fetch-*`.
-  - `[x]` Validar a integridade das melhorias do scraper com testes de sucesso local.
-- `[x]` Mitigar os 13 alertas de erros operacionais no `core/instagram_scraper_v2.py`:
-  - `[x]` Adicionar verificação contínua de `page.is_closed()` nos loops de posts.
-  - `[x]` Implementar `try-except` com timeout de clique explícito de 10s em `open_post_modal`.
-  - `[x]` Evitar screenshots redundantes e chamadas em páginas ou browsers já fechados.
-  - `[x]` Validar a compilação do scraper e rodar testes de integridade localmente.
-- `[x]` Refinar a experiência e integração dos Relatórios Comerciais:
-  - `[x]` Exportar interface `Report` no Next.js `/relatorios/page.tsx` para suporte TypeScript.
-  - `[x]` Integrar o componente `BuyButton` em `ReportCard.tsx`.
-  - `[x]` Criar visualizador de markdown `/relatorios/visualizar` compatível com exportação estática Next.js.
-  - `[x]` Viabilizar exportação a PDF client-side integrada através de `window.print()` estilizado.
-  - `[x]` Resolver erro de tipagem no componente global do AdSense (`AdSenseSlot.tsx`) para sucesso no build.
-  - `[x]` Configurar exportação estática (`force-static` e mock 200 no GET) na API route para passar na compilação SSG.
-- `[x]` Validar build do frontend em produção (`npm run build`) -> Build concluído com sucesso.
-- `[x]` Registrar descobertas técnicas e status atualizado em `STATE.md`.
-- `[x]` Realizar commit e push imediato no branch ativo.
+## Documentação Oficial
+
+- `[x]` Ler STATE.md e ROADMAP.md antes de propor mudanças (Protocolo Diamond).
+- `[x]` Atualizar STATE.md para v86.8 com registro da rodada de 02/06/2026.
+- `[x]` Atualizar ROADMAP.md: marcar Fase 7.2 parcialmente concluída e definir Fase 8.
+- `[x]` Atualizar walkthrough.md com entregas das rodadas 01/06 e 02/06/2026.
+- `[x]` Atualizar task.md com checklist desta sessão.
+- `[x]` Commit e push imediato com Conventional Commits.
+
+## Entregas Validadas (Commits Anteriores)
+
+- `[x]` Sub-agente `reclassify_agent` definido e operacional.
+  - `[x]` Script `scripts/reclassify_low_confidence.py` implementado.
+  - `[x]` Fallback local (LiteRT/Ollama) adicionado ao reclassificador.
+  - `[x]` Backoff dinâmico de 5s entre tentativas de API.
+- `[x]` Sub-agente `researcher_agent` definido e operacional.
+  - `[x]` Script `scripts/research_pdf_criteria.py` implementado.
+  - `[x]` Consolidação em `config/custom_rules.json` e injeção no `SYSTEM_PROMPT`.
+- `[x]` Método `_call_provider` restaurado em `core/ai_service.py`.
+- `[x]` Rotação circular de fallback de IA implementada.
+- `[x]` Credenciais forçadas via `load_dotenv(override=True)`.
+- `[x]` Monitoramento de saúde do Ollama (11434) e LiteRT (9379) corrigido.
+- `[x]` 6.760 comentários com ERRO devolvidos à fila de classificação.
+
+## Próximas Tarefas (Fase 8)
+
+- `[ ]` 8.1 — Desacoplar `IGWorkerV2` em `InstagramScraperWorker` + `AIClassificationWorker`.
+- `[ ]` 8.2 — Implementar `asyncio.Semaphore(3)` no Orchestrator.
+- `[ ]` 8.3 — Integrar PGMQ para travas atômicas na `fila_coleta`.
+- `[ ]` 8.4 — Acoplar rotação de proxies ao `new_context` do Playwright.
+- `[ ]` 8.5 — Checkpoint SQLite por lote no `IGWorkerV2` (graceful shutdown).
+- `[ ]` 8.6 — Expandir `core/circuit_breaker.py` para Supabase e Scraping.
+- `[ ]` Tabelas tabulares de gasto por usuário/perfil em `/admin/financeiro`.
+- `[ ]` Análise de "Shadowban" léxico para termos ocultos pela plataforma.
+- `[ ]` Exportação de Dossiês em lote para contas de agências.

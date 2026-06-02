@@ -1,47 +1,91 @@
-# Walkthrough — Inteligência Governança, Furtividade e Controle Financeiro (v86.0)
+# Walkthrough — Sub-Agentes, Resiliência de Reclassificação e Governança de IA (v86.8)
 
-Esta atualização marca a transição do Sentinela de um sistema de monitoramento para uma **Plataforma de Governança de Inteligência**. Foram implementadas camadas de furtividade profunda, triagem local de IA, detecção de redes coordenadas e controle financeiro atômico.
+Esta versão consolida as entregas das rodadas de **01/06** e **02/06/2026**, elevando a capacidade de auto-melhoria da IA e a resiliência operacional do Sentinela.
 
-## Alterações Realizadas
+---
 
-### 1. Governança Financeira & CI (v86.1)
-- **Implementação do `TreasurerWorker`**: Um novo worker dedicado à integridade financeira e auditoria de saldos.
-- **Transição STN ➔ CI**: O sistema agora utiliza semanticamente **Créditos de Inteligência (CI)** em vez de STN.
-- **DRE Diário**: Fechamento automático de caixa (Inflow vs Outflow) gerado a cada 24h.
-- **Auditoria de Saldos**: Varredura automática para detectar anomalias ou discrepâncias entre o histórico de transações e o saldo atual do perfil.
-- **Catraca de Consumo**: Cobrança obrigatória de **350 CI** por Dossiê Gerado e **500 CI** por Injeção de Alvo, validada via RPC atômica.
+## Rodada 02/06/2026 — Sub-Agentes e Reclassificação Resiliente
 
-### 2. Inteligência Híbrida & Transparência (v85.11)
-- **Triagem Local com Ollama**: Integração do Ollama como primeira camada de análise. Dados neutros/lixo são filtrados localmente sem custo de API externa.
-- **Parecer Técnico IA**: Inclusão de um campo de justificativa técnica em cada comentário classificado, elevando a transparência analítica.
-- **Renderização Markdown**: Cards de análise agora suportam tabelas, listas e formatação rica para exibir dossiês e perícias complexas de forma legível.
-- **Utility Tasks**: Workers aproveitam o tempo de ociosidade para re-analisar registros de baixa confiança (< 60%) e enriquecer metadados (bio/seguidores) de alvos estratégicos.
+### 1. Sub-agente `reclassify_agent`
 
-### 3. Furtividade Avançada (Stealth Mode v85.10)
-- **Fingerprinting Dinâmico**: O scraper agora rotaciona identidades de dispositivos (Windows, macOS, iPhone, Android) e cabeçalhos HTTP (`Sec-Ch-Ua`) a cada ciclo.
-- **Viewports Variáveis**: Removida a resolução fixa; o sistema agora simula telas de diversos tamanhos e densidades de pixel.
-- **Simulação Humana**: Implementação de Jitter (atrasos aleatórios) e movimentos de mouse não-lineares para mitigar a detecção por algoritmos anti-bot do Instagram.
+- **Definição**: Sub-agente especializado em reclassificação de comentários de baixa confiança (≤ 50%).
+- **Script**: [`scripts/reclassify_low_confidence.py`](file:///c:/Projetos/sentinela/scripts/reclassify_low_confidence.py)
+- **Fluxo**: Varredura do banco → Reclassificação via Cloud (Groq → OpenRouter → Mistral) → Fallback automático para LiteRT/Ollama local em caso de indisponibilidade.
+- **Resiliência**: Backoff dinâmico de 5s entre tentativas para evitar sobrecarga das cotas de API.
 
-### 4. Analytics & Redes (v85.13)
-- **NetworkMinerWorker**: Ativação da detecção de clusters coordenados utilizando NetworkX.
-- **Mapeamento de Clusters**: Identificação automática de comunidades de ataque e contas "Multi-Target".
-- **Grafos de Influência**: Alimentação da tabela `redes_coordenadas` para visualização estratégica no frontend.
+### 2. Sub-agente `researcher_agent`
 
-### 5. Melhorias de UI e UX (v86.0)
-- **Radar Grid 2-Colunas**: Refatoração da página de alvos para uma visualização compacta e comparativa.
-- **Filtros Avançados**: Adicionada filtragem dinâmica por **Partido**, **Estado (UF)** e **Nível de Risco** em tempo real.
-- **Sincronia de URL**: Implementado filtro via Query String (`?target=...`) na página de análise com suporte a redirecionamento automático a partir dos cards de alvos.
+- **Definição**: Sub-agente pesquisador de critérios semânticos de classificação a partir de bases documentais.
+- **Script**: [`scripts/research_pdf_criteria.py`](file:///c:/Projetos/sentinela/scripts/research_pdf_criteria.py)
+- **Fluxo**: Análise de PDFs/MDs em `bases_pdf/` via `pypdf` → Extração de heurísticas semânticas → Consolidação em [`config/custom_rules.json`](file:///c:/Projetos/sentinela/config/custom_rules.json) → Injeção dinâmica no `SYSTEM_PROMPT` do [`core/ai_service.py`](file:///c:/Projetos/sentinela/core/ai_service.py).
+- **Artefato vivo**: `PADRONIZACAO_LINGUISTICA_FORENSE.md` atualizado automaticamente com novas heurísticas descobertas.
 
-### 6. Correções de Scraper e Watchdog (v86.2)
-- **Correção da Detecção de Fixados (`is_pinned`)**: Corrigido bug crítico em [instagram_scraper_v2.py](file:///c:/Projetos/sentinela/core/instagram_scraper_v2.py) que usava `container.querySelector` indiscriminadamente ao subir a árvore de elementos DOM. Quando o container subia até o nível da grid (linha de posts), todos os posts subsequentes eram falsamente identificados como "Fixado" (FAST-SKIP) devido à presença do ícone de pin do primeiro post. A busca do pin_icon e time_el agora é isolada estritamente para a célula do respectivo post, interrompendo a subida da árvore se outros shortcodes forem encontrados no container.
-- **Correção de Métricas do Watchdog (`sys.path`)**: Adicionado `PROJECT_ROOT` ao `sys.path` no arquivo [watchdog/__init__.py](file:///c:/Projetos/sentinela/watchdog/__init__.py) para resolver o erro `No module named 'workers'` na thread do FastAPI, permitindo a leitura correta das métricas do `MemoryStore`.
+---
+
+## Rodada 01/06/2026 — Correções de IA e Infraestrutura
+
+### 3. Restauração do Método `_call_provider`
+
+- Método ausente em `core/ai_service.py` foi restaurado, desbloqueando o pipeline de inteligência.
+- Timeouts agressivos (1.5s) e `max_retries=0` configurados nos provedores locais para resposta imediata em caso de falha.
+
+### 4. Rotação Circular de Fallback de IA
+
+- Provedores indisponíveis temporariamente são movidos para o **final da fila** de prioridade (rotação circular).
+- Provedores locais (`litert`/`ollama`): descarte permanente apenas após **3 falhas físicas consecutivas**.
+- Provedores Cloud: descarte permanente apenas em erros graves de autenticação (`401`/`403`).
+
+### 5. Reinjeção de Credenciais Locais
+
+- `load_dotenv(override=True)` forçado em `main_runner.py`, `watchdog/__init__.py`, `core/config.py` e scripts auxiliares.
+- Elimina erros `401 Unauthorized` causados por chaves globais expiradas no Windows sobrescrevendo o `.env` correto.
+
+### 6. Monitoramento de Saúde do Ollama e LiteRT
+
+- **Ollama**: porta `11434`, endpoint `/api/tags`.
+- **LiteRT**: porta `9379`, endpoint `/v1/models`.
+- Corrigido em `watchdog/__init__.py` e [`core/health_check.py`](file:///c:/Projetos/sentinela/core/health_check.py): limpeza de aspas/paths do `.env`, status real (OK/DOWN) refletido no painel.
+
+### 7. Saneamento de Comentários com ERRO
+
+- Script `scripts/reset_failed_classifications.py` executado: **6.760 comentários** devolvidos à fila de classificação (3.962 + 2.798 em dois ciclos).
+
+---
+
+## Rodada v86.7 (anteriores) — Referência
+
+| Entrega | Status |
+|---|---|
+| Dashboard DRE Financeiro (Recharts) | ✅ Entregue |
+| Harmonização Tipográfica / Glassmorphism | ✅ Entregue |
+| Resiliência do Watchdog (RuntimeError IG) | ✅ Entregue |
+| Deduplicação de Clusters (frozenset) | ✅ Entregue |
+| Grafo de Ligações Táticas (CanvasRenderingContext2D) | ✅ Entregue |
+| Normalização DB de Partidos | ✅ Entregue |
+| Termômetro de Candidatos (timestamp real) | ✅ Entregue |
+| Signal Handler Windows (SIGTERM/SIGINT) | ✅ Entregue |
+| Scanner de Candidatos com IA + DuckDuckGo | ✅ Entregue |
+| Validação Manual de Sessão IG (--interactive) | ✅ Entregue |
 
 ---
 
 ## Verificação e Resultados
 
-1. **Dossiês Reais Ativos**: O `DossieService` gera agora PDFs reais com selo de integridade **SHA-256**. Testado e validado com cobrança de 350 CI por unidade.
-2. **Triagem de Custo Zero**: O Ollama está processando ~55% dos comentários capturados, reduzindo drasticamente o burn rate de créditos Mistral/Groq.
-3. **Estabilidade de Build**: Corrigidos erros críticos de compilação no Vercel relacionados ao hook `useState` e ao `Suspense boundary` necessário para o `useSearchParams`.
-4. **Alvos VIP Priorizados**: Perfis estratégicos (Lula, Bolsonaro, Nikolas, Erika, Malafaia) foram promovidos a relevância 100.0 e aparecem fixados no topo do radar.
-5. **Autopilot Reativado**: Corrigido o bug de "No Target" causado pela trava de validação de identidade. O sistema agora rotaciona todos os ~400 alvos ativos circularmente.
+1. **Reclassificador Operacional**: Pipeline Groq → Mistral → Ollama funcional com fallback automático.
+2. **Pesquisador de Critérios**: `custom_rules.json` alimentado com heurísticas extraídas dos PDFs de base.
+3. **Infraestrutura de IA Estável**: Circuit breaker ativo, rotação circular de provedores sem descarte precoce.
+4. **Commits Rastreáveis**: Todas as entregas registradas com Conventional Commits e push imediato ao `main`.
+5. **Documentação Sincronizada**: STATE.md (v86.8), ROADMAP.md (Fase 8 definida), walkthrough.md e task.md atualizados.
+
+---
+
+## Próximos Marcos (Fase 8)
+
+| # | Ação | Impacto Esperado |
+|---|---|---|
+| 8.1 | Desacoplar `IGWorkerV2` → `ScraperWorker` + `AIWorker` | Memória ↓ 40%, throughput ↑ |
+| 8.2 | `asyncio.Semaphore(3)` no Orchestrator | 3x taxa de ingestão |
+| 8.3 | PGMQ na `fila_coleta` | Suporte a cluster multi-servidor |
+| 8.4 | Rotação de proxies no Playwright | Anti-shadowban grau Extremo |
+| 8.5 | Checkpoint SQLite no IGWorker | Zero-loss em reinicializações |
+| 8.6 | Circuit Breaker para Supabase + Scraping | Proteção global de infraestrutura |
