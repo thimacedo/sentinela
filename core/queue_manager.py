@@ -285,11 +285,13 @@ class QueueManager:
                         continue
         
         if (is_empty or not valid_dates) and not is_no_comments:
-            termometro = "MORNO"
+            # Tenta manter a temperatura atual se possível, senão MORNO
+            termometro = getattr(target, "termometro", "MORNO")
             frequencia = 0.0
         elif is_no_comments or not valid_dates:
             # Caso especial: nenhum comentário encontrado, mas ainda não há dados suficientes
-            termometro = "MORNO"
+            # Tenta manter a temperatura atual
+            termometro = getattr(target, "termometro", "MORNO")
             frequencia = 0.0
         else:
             last_post_date = max(valid_dates)
@@ -306,8 +308,6 @@ class QueueManager:
                 termometro = "QUENTE"
             elif days_since_last_post > 7:
                 termometro = "FRIO"
-            elif frequencia < 1:
-                termometro = "MORNO"
             else:
                 termometro = "MORNO"
         

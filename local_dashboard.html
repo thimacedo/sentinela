@@ -8,39 +8,40 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.04) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(168, 85, 247, 0.04) 0%, transparent 40%),
-                radial-gradient(circle at 50% 50%, rgba(244, 63, 94, 0.01) 0%, transparent 50%);
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-image: radial-gradient(circle at 10% 20%, rgba(99,102,241,0.04) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(168,85,247,0.04) 0%, transparent 40%), radial-gradient(circle at 50% 50%, rgba(244,63,94,0.01) 0%, transparent 50%); }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(15,23,42,0.3); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(51,65,85,0.5); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(71,85,105,0.8); }
+        .glow-green { box-shadow: 0 0 15px rgba(34,197,94,0.2); }
+        .glow-red   { box-shadow: 0 0 15px rgba(239,68,68,0.2); }
+        .glow-purple{ box-shadow: 0 0 15px rgba(168,85,247,0.2); }
+
+        /* ── Skeleton loader ── */
+        @keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
+        .skeleton {
+            background: linear-gradient(90deg, rgba(30,41,59,0.6) 25%, rgba(51,65,85,0.4) 50%, rgba(30,41,59,0.6) 75%);
+            background-size: 800px 100%;
+            animation: shimmer 1.4s infinite linear;
+            border-radius: 6px;
         }
-        .mono {
-            font-family: 'JetBrains Mono', monospace;
-        }
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 4px;
-            height: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: rgba(15, 23, 42, 0.3);
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: rgba(51, 65, 85, 0.5);
-            border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: rgba(71, 85, 105, 0.8);
-        }
-        .glow-green {
-            box-shadow: 0 0 15px rgba(34, 197, 94, 0.2);
-        }
-        .glow-red {
-            box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
-        }
-        .glow-purple {
-            box-shadow: 0 0 15px rgba(168, 85, 247, 0.2);
-        }
+
+        /* ── Barra de confiança ── */
+        .conf-bar { height: 3px; border-radius: 2px; transition: width 0.4s ease; }
+
+        /* ── Pulsação ativando ── */
+        @keyframes activating { 0%,100%{opacity:1} 50%{opacity:0.35} }
+        .dot-activating { animation: activating 0.7s infinite ease-in-out; }
+
+        /* ── Filtros termômetro ── */
+        .thermo-btn { transition: all 0.15s; }
+        .thermo-btn.active { opacity: 1; }
+        .thermo-btn:not(.active) { opacity: 0.45; }
+
+        /* ── Copy feedback ── */
+        @keyframes copyPop { 0%{transform:scale(1)} 40%{transform:scale(1.15)} 100%{transform:scale(1)} }
+        .copy-pop { animation: copyPop 0.25s ease; }
     </style>
 </head>
 <body class="bg-[#030712] text-slate-100 min-h-screen p-6 flex flex-col gap-6">
@@ -57,11 +58,18 @@
                 <h1 class="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent flex items-center gap-2">
                     SENTINELA <span class="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">DEMOCRÁTICA</span>
                 </h1>
-                <p class="text-slate-400 text-xs mt-0.5">Centro de Governança de Inteligência & Inspeção em Tempo Real</p>
+                <p class="text-slate-400 text-xs mt-0.5">Centro de Governança de Inteligência &amp; Inspeção em Tempo Real</p>
             </div>
         </div>
 
         <div class="flex flex-wrap items-center gap-3">
+            <!-- [3] Relógio de última atualização -->
+            <div class="bg-slate-950/40 border border-slate-800/60 rounded-xl px-3 py-2 flex items-center gap-2">
+                <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Atualizado</span>
+                <span id="last-update-clock" class="text-[10px] font-bold text-slate-300 mono">—</span>
+            </div>
+
             <div id="watchdog-badge" class="bg-slate-950/60 border border-slate-800 rounded-xl px-4 py-2 flex items-center gap-3">
                 <span class="relative flex h-3 w-3">
                     <span id="ping-pulse" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -73,18 +81,19 @@
                 </div>
             </div>
 
-            <button onclick="fetchData()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-slate-600 text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center gap-2">
+            <!-- [11] Atalho R visível no botão -->
+            <button id="btn-refresh" onclick="fetchData()" title="Atualizar painel (tecla R)" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-slate-600 text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.2"/>
                 </svg>
-                Atualizar Painel
+                Atualizar <kbd class="ml-1 text-[9px] bg-slate-700 border border-slate-600 text-slate-400 px-1 py-0.5 rounded font-mono">R</kbd>
             </button>
         </div>
     </header>
 
     <!-- KPI Summary Row -->
     <div class="grid grid-cols-2 lg:grid-cols-6 gap-4">
-        <!-- KPI 1 -->
+        <!-- KPI 1: Comentários -->
         <div class="bg-slate-900/30 border border-slate-850 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
             <div class="absolute -right-4 -bottom-4 text-slate-900/30 opacity-20 pointer-events-none group-hover:scale-110 transition-transform">
                 <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
@@ -95,7 +104,8 @@
             <span class="text-[9px] text-slate-400 block">Média por dia: <span id="kpi-avg-comments-day">-</span></span>
             <span class="text-[9px] text-slate-400 block">Média por hora: <span id="kpi-avg-comments-hour">-</span></span>
         </div>
-        <!-- KPI 2 -->
+
+        <!-- KPI 2: Discursos + [5] badge % ódio -->
         <div class="bg-slate-900/30 border border-slate-850 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
             <div class="absolute -right-4 -bottom-4 text-rose-500/10 opacity-20 pointer-events-none group-hover:scale-110 transition-transform">
                 <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
@@ -104,8 +114,13 @@
             <span id="kpi-hate-comments" class="block text-2xl font-black text-rose-450 mt-1 mono">---</span>
             <span class="text-[10px] text-rose-550/70 block mt-1">Indícios graves sob monitoramento</span>
             <span class="text-[9px] text-rose-400 block">Média por dia: <span id="kpi-avg-hate-day">-</span></span>
-            <span class="text-[9px] text-rose-400 block">Média por hora: <span id="kpi-avg-hate-hour">-</span></span>
+            <!-- [5] % de ódio -->
+            <div class="mt-1.5 flex items-center gap-1.5">
+                <span class="text-[9px] text-slate-500">Proporção:</span>
+                <span id="kpi-hate-pct" class="text-[9px] font-bold text-rose-400 mono">--%</span>
+            </div>
         </div>
+
         <!-- KPI 3: Alvos Ativos -->
         <div class="bg-slate-900/30 border border-slate-850 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
             <div class="absolute -right-4 -bottom-4 text-emerald-500/10 opacity-20 pointer-events-none group-hover:scale-110 transition-transform">
@@ -120,6 +135,7 @@
                 <span>Excluídos: <b id="kpi-excluded-targets" class="text-rose-400 font-mono">-</b></span>
             </div>
         </div>
+
         <!-- KPI 4: Ciclos / Restarts -->
         <div class="bg-slate-900/30 border border-slate-850 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
             <div class="absolute -right-4 -bottom-4 text-violet-500/10 opacity-20 pointer-events-none group-hover:scale-110 transition-transform">
@@ -132,22 +148,24 @@
                 Reanalisados: <b id="kpi-reclassified" class="text-indigo-400 font-mono">-</b>
             </div>
         </div>
-            <!-- KPI 5: Contas Instagram -->
-            <div class="bg-slate-900/30 border border-slate-850 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
-                <span class="block text-xs font-semibold text-slate-400 mb-3">Contas Instagram</span>
-                <div id="kpi-instagram" class="flex flex-col gap-2 mt-1">---</div>
-            </div>
-            <!-- KPI 6: Serviços IA -->
-            <div class="bg-slate-900/30 border border-slate-850 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
-                <span class="block text-xs font-semibold text-slate-400 mb-3">Serviços IA</span>
-                <div id="kpi-ai-services" class="flex flex-col gap-2 mt-1">---</div>
-            </div>
+
+        <!-- KPI 5: Contas Instagram -->
+        <div class="bg-slate-900/30 border border-slate-850 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
+            <span class="block text-xs font-semibold text-slate-400 mb-3">Contas Instagram</span>
+            <div id="kpi-instagram" class="flex flex-col gap-2 mt-1">---</div>
+        </div>
+
+        <!-- KPI 6: Serviços IA -->
+        <div class="bg-slate-900/30 border border-slate-850 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
+            <span class="block text-xs font-semibold text-slate-400 mb-3">Serviços IA</span>
+            <div id="kpi-ai-services" class="flex flex-col gap-2 mt-1">---</div>
+        </div>
     </div>
 
     <!-- Main Workspace Layout -->
     <div class="grid grid-cols-1 xl:grid-cols-4 gap-6 items-start">
         
-        <!-- Column 1: Radar de Alvos (1/4 Width) -->
+        <!-- Column 1: Radar de Alvos -->
         <div class="xl:col-span-1 bg-slate-900/20 backdrop-blur-xl border border-slate-850 rounded-2xl p-5 flex flex-col gap-4 shadow-xl">
             <div class="flex justify-between items-center pb-2 border-b border-slate-800">
                 <h2 class="text-sm font-bold text-slate-300 flex items-center gap-2">
@@ -156,38 +174,54 @@
                 <span id="targets-count-badge" class="text-[10px] font-bold bg-slate-850 border border-slate-800 text-slate-400 px-2 py-0.5 rounded-full mono">0/0</span>
             </div>
 
-            <!-- Search Target Input -->
+            <!-- Search -->
             <div class="relative">
-                <input type="text" id="target-search" oninput="filterTargets()" placeholder="Buscar handle..." class="w-full bg-slate-950/85 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-505 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 transition-all">
-                <div class="absolute right-3 top-2.5 text-slate-650">
+                <input type="text" id="target-search" oninput="filterTargets()" placeholder="Buscar handle... (Esc limpa)" class="w-full bg-slate-950/85 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 transition-all">
+                <div class="absolute right-3 top-2.5 text-slate-600">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </div>
             </div>
 
-            <!-- Candidates Feed List -->
-            <div id="targets-feed" class="space-y-2.5 max-h-[62vh] overflow-y-auto pr-1.5 custom-scrollbar">
-                <p class="text-slate-500 text-xs italic">Carregando alvos...</p>
+            <!-- [6] Filtros Termômetro -->
+            <div class="flex gap-1.5" id="thermo-filters">
+                <button data-filter="ALL"    class="thermo-btn active flex-1 text-[9px] font-bold py-1 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 uppercase tracking-wide">Todos</button>
+                <button data-filter="QUENTE" class="thermo-btn flex-1 text-[9px] font-bold py-1 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400 uppercase tracking-wide">🔥 Quente</button>
+                <button data-filter="MORNO"  class="thermo-btn flex-1 text-[9px] font-bold py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 uppercase tracking-wide">🌡 Morno</button>
+                <button data-filter="FRIO"   class="thermo-btn flex-1 text-[9px] font-bold py-1 rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-400 uppercase tracking-wide">❄ Frio</button>
+            </div>
+
+            <!-- [8] Skeleton loader do Radar -->
+            <div id="targets-feed" class="space-y-2.5 max-h-[58vh] overflow-y-auto pr-1.5 custom-scrollbar">
+                <div class="skeleton h-16 w-full"></div>
+                <div class="skeleton h-16 w-full"></div>
+                <div class="skeleton h-16 w-full"></div>
             </div>
         </div>
 
-        <!-- Column 2: Monitor de Discurso (1/2 Width) -->
+        <!-- Column 2: Monitor de Discurso -->
         <div class="xl:col-span-2 bg-slate-900/20 backdrop-blur-xl border border-slate-850 rounded-2xl p-5 flex flex-col gap-4 shadow-xl">
             <div class="flex justify-between items-center pb-2 border-b border-slate-800">
                 <h2 class="text-sm font-bold text-slate-300 flex items-center gap-2">
                     <span class="w-2.5 h-2.5 bg-rose-500 rounded-full animate-pulse"></span> Monitor de Discurso (IA)
                 </h2>
-                <div class="flex gap-2">
+                <div class="flex items-center gap-2">
                     <span class="text-[10px] font-bold bg-rose-950/30 border border-rose-900/40 text-rose-450 px-2.5 py-0.5 rounded-full">LIVE FEED</span>
+                    <!-- [12] Toggle Mostrar só Ódio -->
+                    <button id="btn-hate-only" onclick="toggleHateOnly()" title="Mostrar apenas discursos de ódio" class="text-[9px] font-bold px-2 py-0.5 rounded-lg border transition-all bg-slate-800/60 border-slate-700 text-slate-400 hover:border-rose-500/50 hover:text-rose-400">
+                        Só Ódio
+                    </button>
                 </div>
             </div>
 
-            <!-- Speech/Comments Feed -->
+            <!-- [8] Skeleton loader dos comentários -->
             <div id="classified-feed" class="space-y-4 max-h-[67vh] overflow-y-auto pr-2 custom-scrollbar">
-                <p class="text-slate-500 text-xs italic">Carregando discursos...</p>
+                <div class="skeleton h-24 w-full rounded-xl"></div>
+                <div class="skeleton h-24 w-full rounded-xl"></div>
+                <div class="skeleton h-24 w-full rounded-xl"></div>
             </div>
         </div>
 
-        <!-- Column 3: Últimas Execuções / Runs (1/4 Width) -->
+        <!-- Column 3: Telemetria / Runs -->
         <div class="xl:col-span-1 bg-slate-900/20 backdrop-blur-xl border border-slate-850 rounded-2xl p-5 flex flex-col gap-4 shadow-xl">
             <div class="flex justify-between items-center pb-2 border-b border-slate-800">
                 <h2 class="text-sm font-bold text-slate-300 flex items-center gap-2">
@@ -195,181 +229,270 @@
                 </h2>
             </div>
 
-            <!-- Runs list -->
+            <!-- [8] Skeleton loader dos runs -->
             <div id="runs-feed" class="space-y-3.5 max-h-[67vh] overflow-y-auto pr-1.5 custom-scrollbar">
-                <p class="text-slate-500 text-xs italic">Carregando histórico...</p>
+                <div class="skeleton h-20 w-full rounded-xl"></div>
+                <div class="skeleton h-20 w-full rounded-xl"></div>
+                <div class="skeleton h-20 w-full rounded-xl"></div>
             </div>
         </div>
 
     </div>
 
-    <!-- Script de Integração e Logica UI -->
+    <!-- Script Principal -->
     <script>
-        // Silencia warnings chatos do Tailwind no console
-        const originalWarn = console.warn;
-        console.warn = function(...args) {
-            if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com')) return;
-            originalWarn.apply(console, args);
-        };
+        // Silencia warnings do Tailwind CDN
+        const _warn = console.warn;
+        console.warn = function(...a) { if (a[0]?.includes?.('cdn.tailwindcss.com')) return; _warn(...a); };
 
-        // Chaves de conexão Supabase
+        // Supabase
         const supabaseUrl = 'https://vhamejkldzxbeibqeqpk.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoYW1lamtsZHp4YmVpYnFlcXBrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjQ4ODEyNSwiZXhwIjoyMDkyMDY0MTI1fQ.GfvAI7rV8isgdhVeJp4mOUscWpdOqOuBoURGm82VdtY';
-        
         let db;
-        try {
-            db = supabase.createClient(supabaseUrl, supabaseKey);
-        } catch(e) { 
-            console.error("Supabase init error:", e); 
-        }
+        try { db = supabase.createClient(supabaseUrl, supabaseKey); } catch(e) { console.error('Supabase init:', e); }
 
-        // Armazenamento local dos alvos para filtro instantâneo
+        // Estado local
         let localCandidatesList = [];
+        let activeThermo = 'ALL';
+        let hateOnly = false;
+        let lastComments = [];
+
+        // ── Utilitários ──────────────────────────────────────────
 
         function escapeHTML(str) {
             if (!str) return '';
-            return str.replace(/[&<>'"]/g, 
-                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
-            );
+            return str.replace(/[&<>'"]/g, t => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t]||t));
         }
 
-        function timeAgo(dateString) {
-            if (!dateString) return 'Nunca';
-            const date = new Date(dateString);
+        function timeAgo(d) {
+            if (!d) return 'Nunca';
+            const s = Math.floor((Date.now() - new Date(d)) / 1000);
+            if (s < 60) return 'Agora';
+            if (s < 3600) return `há ${Math.floor(s/60)}m`;
+            if (s < 86400) return `há ${Math.floor(s/3600)}h`;
+            return `há ${Math.floor(s/86400)}d`;
+        }
+
+        // [3] Relógio de última atualização
+        function updateClock() {
+            const el = document.getElementById('last-update-clock');
+            if (!el) return;
             const now = new Date();
-            const diffMs = now - date;
-            const diffSec = Math.floor(diffMs / 1000);
-            const diffMin = Math.floor(diffSec / 60);
-            const diffHr = Math.floor(diffMin / 60);
-            const diffDays = Math.floor(diffHr / 24);
-
-            if (diffSec < 60) return 'Agora';
-            if (diffMin < 60) return `há ${diffMin}m`;
-            if (diffHr < 24) return `há ${diffHr}h`;
-            return `há ${diffDays}d`;
+            el.innerText = now.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
         }
 
-        // Função de filtro instantâneo no cliente
-        function filterTargets() {
-            const term = document.getElementById('target-search').value.toLowerCase().trim();
-            const feed = document.getElementById('targets-feed');
-            
-            const filtered = localCandidatesList.filter(c => 
-                c.username.toLowerCase().includes(term) || 
-                (c.nome_completo && c.nome_completo.toLowerCase().includes(term))
-            );
+        // [7] Click-to-copy no handle
+        function copyHandle(username) {
+            navigator.clipboard.writeText('@' + username).catch(() => {});
+            // Feedback visual
+            const el = document.getElementById(`handle-${username}`);
+            if (el) {
+                el.classList.add('copy-pop', 'text-indigo-400');
+                el.innerText = '✓ copiado';
+                setTimeout(() => {
+                    el.classList.remove('copy-pop', 'text-indigo-400');
+                    el.innerText = '@' + username;
+                }, 1200);
+            }
+        }
 
-            if (filtered.length === 0) {
-                feed.innerHTML = '<p class="text-slate-500 text-xs italic p-4 text-center">Nenhum alvo corresponde à busca</p>';
+        // [12] Toggle Mostrar só Ódio
+        function toggleHateOnly() {
+            hateOnly = !hateOnly;
+            const btn = document.getElementById('btn-hate-only');
+            if (hateOnly) {
+                btn.className = 'text-[9px] font-bold px-2 py-0.5 rounded-lg border transition-all bg-rose-500/15 border-rose-500/50 text-rose-400';
+            } else {
+                btn.className = 'text-[9px] font-bold px-2 py-0.5 rounded-lg border transition-all bg-slate-800/60 border-slate-700 text-slate-400 hover:border-rose-500/50 hover:text-rose-400';
+            }
+            renderComments(lastComments);
+        }
+
+        // [11] Atalhos de teclado
+        document.addEventListener('keydown', e => {
+            // Ignora quando está digitando num input
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                if (e.key === 'Escape') {
+                    // [11] Esc limpa busca
+                    const inp = document.getElementById('target-search');
+                    if (inp) { inp.value = ''; filterTargets(); inp.blur(); }
+                }
                 return;
             }
+            if (e.key === 'r' || e.key === 'R') {
+                // [11] R para refresh
+                const btn = document.getElementById('btn-refresh');
+                if (btn) { btn.classList.add('scale-95'); setTimeout(() => btn.classList.remove('scale-95'), 150); }
+                fetchData();
+            }
+        });
 
-            renderTargets(filtered);
+        // [6] Filtros Termômetro
+        document.getElementById('thermo-filters').addEventListener('click', e => {
+            const btn = e.target.closest('[data-filter]');
+            if (!btn) return;
+            activeThermo = btn.dataset.filter;
+            document.querySelectorAll('.thermo-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            filterTargets();
+        });
+
+        // ── Radar de Alvos ───────────────────────────────────────
+
+        function filterTargets() {
+            const term = document.getElementById('target-search').value.toLowerCase().trim();
+            let list = localCandidatesList;
+            if (activeThermo !== 'ALL') list = list.filter(c => (c.termometro || 'FRIO') === activeThermo);
+            if (term) list = list.filter(c => c.username.toLowerCase().includes(term) || (c.nome_completo?.toLowerCase().includes(term)));
+            if (list.length === 0) {
+                document.getElementById('targets-feed').innerHTML = '<p class="text-slate-500 text-xs italic p-4 text-center">Nenhum alvo corresponde</p>';
+                return;
+            }
+            renderTargets(list);
         }
 
         function renderTargets(list) {
             const feed = document.getElementById('targets-feed');
             feed.innerHTML = list.map(c => {
-                let badgeClass = 'text-blue-450 bg-blue-500/10 border-blue-500/30';
-                if (c.termometro === 'QUENTE') badgeClass = 'text-rose-450 bg-rose-500/10 border-rose-500/30';
-                else if (c.termometro === 'MORNO') badgeClass = 'text-amber-450 bg-amber-500/10 border-amber-500/30';
-
-                const formattedTime = timeAgo(c.last_scraped_at);
+                let badgeClass = 'text-blue-400 bg-blue-500/10 border-blue-500/30';
+                if (c.termometro === 'QUENTE') badgeClass = 'text-rose-400 bg-rose-500/10 border-rose-500/30';
+                else if (c.termometro === 'MORNO') badgeClass = 'text-amber-400 bg-amber-500/10 border-amber-500/30';
                 const hasTime = c.last_scraped_at ? 'text-slate-400' : 'text-slate-600';
 
                 return `
-                    <div class="bg-slate-900/40 border border-slate-850 hover:border-slate-750 transition-all rounded-xl p-3.5 flex flex-col gap-2">
-                        <div class="flex justify-between items-center">
-                            <span class="font-bold text-white text-xs hover:text-indigo-400 transition-colors cursor-pointer">@${escapeHTML(c.username)}</span>
-                            <span class="text-[9px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider ${badgeClass}">${c.termometro || 'MORNO'}</span>
-                        </div>
-                        <div class="flex justify-between items-center text-[10px]">
-                            <span class="text-slate-400 max-w-[130px] truncate">${escapeHTML(c.nome_completo || 'Sem nome')}</span>
-                            <span class="${hasTime} flex items-center gap-1 font-semibold">
-                                <svg class="w-3.5 h-3.5 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                ${formattedTime}
-                            </span>
-                        </div>
-                        <div class="flex gap-2 text-[9px] border-t border-slate-900/60 pt-2 text-slate-500">
-                            <span>Partido: <b class="text-slate-350">${c.partido || '---'}</b></span>
-                            <span>UF: <b class="text-slate-350">${c.estado || '---'}</b></span>
-                        </div>
+                <div class="bg-slate-900/40 border border-slate-800/60 hover:border-slate-700 transition-all rounded-xl p-3.5 flex flex-col gap-2">
+                    <div class="flex justify-between items-center">
+                        <!-- [7] Click-to-copy -->
+                        <span id="handle-${escapeHTML(c.username)}"
+                              onclick="copyHandle('${escapeHTML(c.username)}')"
+                              title="Clique para copiar @${escapeHTML(c.username)}"
+                              class="font-bold text-white text-xs hover:text-indigo-400 transition-colors cursor-pointer select-none">
+                            @${escapeHTML(c.username)}
+                        </span>
+                        <span class="text-[9px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider ${badgeClass}">${c.termometro || 'FRIO'}</span>
                     </div>
-                `;
+                    <div class="flex justify-between items-center text-[10px]">
+                        <span class="text-slate-400 max-w-[130px] truncate">${escapeHTML(c.nome_completo || 'Sem nome')}</span>
+                        <span class="${hasTime} flex items-center gap-1 font-semibold">
+                            <svg class="w-3.5 h-3.5 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            ${timeAgo(c.last_scraped_at)}
+                        </span>
+                    </div>
+                    <div class="flex gap-2 text-[9px] border-t border-slate-900/60 pt-2 text-slate-500">
+                        <span>Partido: <b class="text-slate-300">${c.partido || '---'}</b></span>
+                        <span>UF: <b class="text-slate-300">${c.estado || '---'}</b></span>
+                    </div>
+                </div>`;
             }).join('');
         }
 
-        // startService precisa estar no escopo global para funcionar em onclick inline
-        window.startService = async function startService(name, event) {
-            if (event) {
-                event.preventDefault();
-                event.stopPropagation();
+        // ── Comentários ──────────────────────────────────────────
+
+        function renderComments(comments) {
+            lastComments = comments;
+            const list = hateOnly ? comments.filter(c => c.is_hate === true) : comments;
+            const feed = document.getElementById('classified-feed');
+
+            if (list.length === 0) {
+                feed.innerHTML = '<p class="text-slate-500 text-xs italic p-6 text-center">Nenhum discurso encontrado</p>';
+                return;
             }
-            // Feedback visual imediato na bolinha
+
+            feed.innerHTML = list.map(c => {
+                const isHate = c.is_hate === true;
+                const catColor = isHate ? 'text-rose-400 bg-rose-500/10 border-rose-500/30' : 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30';
+                const text = c.texto_limpo || c.texto_bruto || '(Sem conteúdo)';
+
+                // [10] Barra de confiança colorida
+                const conf = (c.confianca_ia || 0);
+                const confPct = (conf * 100).toFixed(1);
+                const barWidth = Math.round(conf * 100);
+                const barColor = conf >= 0.8 ? 'bg-emerald-500' : conf >= 0.5 ? 'bg-amber-500' : 'bg-rose-500';
+                const confTextColor = conf >= 0.8 ? 'text-emerald-400' : conf >= 0.5 ? 'text-amber-400' : 'text-rose-400';
+
+                return `
+                <div class="bg-slate-900/35 border ${isHate ? 'border-rose-900/50 glow-red' : 'border-slate-800/60'} rounded-xl p-4 shadow-sm hover:border-slate-700 transition-all flex flex-col gap-2.5">
+                    <div class="flex justify-between items-start">
+                        <div class="flex flex-col">
+                            <span class="font-extrabold text-white text-xs">@${escapeHTML(c.autor_username)}</span>
+                            <span class="text-[9px] text-slate-500 mt-0.5">comentou em <b class="text-slate-300">@${escapeHTML(c.candidato_id)}</b></span>
+                        </div>
+                        <span class="text-[9px] font-bold ${catColor} px-2 py-0.5 rounded border tracking-wider">${c.categoria_ia}</span>
+                    </div>
+
+                    <p class="text-xs text-slate-300 italic font-medium leading-relaxed bg-slate-950/40 p-3 rounded-lg border border-slate-900">
+                        "${escapeHTML(text)}"
+                    </p>
+
+                    <!-- [10] Barra de confiança -->
+                    <div class="flex flex-col gap-1">
+                        <div class="flex justify-between items-center text-[9px] font-mono">
+                            <span class="text-slate-500">Confiança IA</span>
+                            <span class="${confTextColor} font-bold">${confPct}%</span>
+                        </div>
+                        <div class="w-full bg-slate-800 rounded-full h-[3px]">
+                            <div class="conf-bar ${barColor}" style="width:${barWidth}%"></div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center text-[9px] text-slate-500 font-mono border-t border-slate-850/80 pt-2">
+                        ${c.direcao_odio ? `<span>Alvo: <b class="text-rose-400 font-bold">${c.direcao_odio}</b></span>` : '<span></span>'}
+                        <span>${timeAgo(c.data_coleta)}</span>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // ── startService (escopo global, event delegation) ───────
+
+        window.startService = async function(name) {
             const dot = document.getElementById(`ai-dot-${name}`);
             if (dot) {
-                dot.style.opacity = '0.4';
+                // [9] Pulsação visual enquanto ativa
+                dot.classList.add('dot-activating');
                 dot.title = 'Ativando...';
             }
             try {
                 const resp = await fetch(`/api/services/${name}/start`, { method: 'POST' });
-                const res = await resp.json().catch(() => ({}));
-                if (resp.ok) {
-                    console.log(`Serviço ${name} iniciado:`, res.message);
-                } else {
-                    console.warn(`Erro ao iniciar ${name}:`, res.detail || res.message || 'Erro desconhecido');
-                }
+                const res  = await resp.json().catch(() => ({}));
+                console.log(`[IA] ${name}:`, res.message || res);
             } catch (err) {
-                console.warn(`Erro de conexão ao iniciar ${name}:`, err.message);
+                console.warn(`[IA] Erro ao iniciar ${name}:`, err.message);
             } finally {
-                // Recarrega os dados para refletir o novo status
                 setTimeout(fetchData, 1500);
             }
         };
 
+        // ── fetchData ────────────────────────────────────────────
+
         async function fetchData() {
             if (!db) return;
-
             try {
-                // A. Busca Métricas Locais via API do Watchdog (Fila / Autocura)
+                // A. Métricas do Watchdog
                 try {
                     const resp = await fetch('/api/metrics');
                     if (resp.ok) {
                         const m = await resp.json();
-                        
-                        // Atualiza status do badge
-                        const isOk = m.status === 'OPERACIONAL';
-                        const dot = document.getElementById('ping-dot');
-                        const pulse = document.getElementById('ping-pulse');
-                        const txt = document.getElementById('watchdog-status-text');
 
-                        if (isOk) {
-                            dot.className = 'relative inline-flex rounded-full h-3 w-3 bg-emerald-500';
-                            pulse.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75';
-                            txt.className = 'text-xs font-bold text-emerald-400';
-                            txt.innerText = 'OPERACIONAL';
-                        } else {
-                            dot.className = 'relative inline-flex rounded-full h-3 w-3 bg-rose-500';
-                            pulse.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-450 opacity-75';
-                            txt.className = 'text-xs font-bold text-rose-450';
-                            txt.innerText = m.status;
-                        }
+                        // Watchdog badge
+                        const isOk = m.status === 'OPERACIONAL';
+                        document.getElementById('ping-dot').className   = `relative inline-flex rounded-full h-3 w-3 ${isOk ? 'bg-emerald-500' : 'bg-rose-500'}`;
+                        document.getElementById('ping-pulse').className = `animate-ping absolute inline-flex h-full w-full rounded-full ${isOk ? 'bg-emerald-400' : 'bg-rose-400'} opacity-75`;
+                        const txt = document.getElementById('watchdog-status-text');
+                        txt.className  = `text-xs font-bold ${isOk ? 'text-emerald-400' : 'text-rose-400'}`;
+                        txt.innerText  = m.status;
 
                         document.getElementById('kpi-restars').innerText = `${m.cycle || 0} / ${m.restarts || 0}`;
-
-                        // Comentários reanalisados
                         const reclEl = document.getElementById('kpi-reclassified');
                         if (reclEl) reclEl.innerText = (m.reclassified || 0).toLocaleString();
 
-                        // Contas Instagram — IG 1 / IG 2 com bolinha colorida
+                        // Contas Instagram — IG 1 / IG 2
                         const igDiv = document.getElementById('kpi-instagram');
                         if (igDiv) {
                             const igStatus = m.instagram_accounts || {};
-                            const entries = Object.entries(igStatus);
-                            // Agrupa pares USER/PASS em contas numeradas: IG 1, IG 2, ...
+                            const entries  = Object.entries(igStatus);
                             const accounts = {};
                             entries.forEach(([acc, st]) => {
-                                // chaves: IG_USER, IG_PASS, IG_USER_1, IG_PASS_1 …
                                 const match = acc.match(/IG_(?:USER|PASS)(?:_?(\d+))?$/i);
                                 if (match) {
                                     const idx = match[1] ? parseInt(match[1]) : 0;
@@ -377,220 +500,164 @@
                                     accounts[idx].push(st);
                                 }
                             });
-                            const sortedKeys = Object.keys(accounts).sort((a, b) => a - b);
-                            igDiv.innerHTML = sortedKeys.map((idx, i) => {
-                                const sts = accounts[idx];
-                                const isOk = sts.every(s => s === 'OK');
-                                const colorDot = isOk ? 'bg-emerald-500 shadow-[0_0_6px_rgba(34,197,94,0.7)]' : 'bg-rose-500 shadow-[0_0_6px_rgba(239,68,68,0.7)]';
-                                const label = `IG ${i + 1}`;
-                                return `<div class="flex items-center gap-2">
-                                    <span class="w-2.5 h-2.5 rounded-full flex-shrink-0 ${colorDot}"></span>
-                                    <span class="text-xs font-semibold text-slate-300 mono">${label}</span>
-                                </div>`;
+                            const sortedKeys = Object.keys(accounts).sort((a,b) => a - b);
+                            igDiv.innerHTML = (sortedKeys.length > 0 ? sortedKeys : ['fallback']).map((idx, i) => {
+                                const sts   = sortedKeys.length > 0 ? accounts[idx] : entries.map(([,s]) => s);
+                                const isOkA = sts.every(s => s === 'OK');
+                                const dot   = isOkA ? 'bg-emerald-500 shadow-[0_0_6px_rgba(34,197,94,0.7)]' : 'bg-rose-500 shadow-[0_0_6px_rgba(239,68,68,0.7)]';
+                                const lbl   = sortedKeys.length > 0 ? `IG ${i + 1}` : entries[i]?.[0] || `IG ${i+1}`;
+                                return `<div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full flex-shrink-0 ${dot}"></span><span class="text-xs font-semibold text-slate-300 mono">${lbl}</span></div>`;
                             }).join('');
-                            // Fallback se não reconheceu o padrão
-                            if (sortedKeys.length === 0) {
-                                igDiv.innerHTML = entries.map(([acc, st]) => {
-                                    const isOk = st === 'OK';
-                                    const colorDot = isOk ? 'bg-emerald-500' : 'bg-rose-500';
-                                    return `<div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full ${colorDot}"></span><span class="text-xs font-semibold text-slate-300 mono">${acc}</span></div>`;
-                                }).join('');
-                            }
                         }
 
-                        // Serviços IA — bolinha clicável via event delegation (fix onclick inline)
-                        const aiDiv = document.getElementById('kpi-ai-services');
-                        if (aiDiv) {
+                        // Serviços IA — event delegation
+                        const aiDivOld = document.getElementById('kpi-ai-services');
+                        if (aiDivOld) {
                             const aiStatus = m.ai_services || {};
-                            // Remove listener antigo para evitar duplicatas a cada fetchData()
-                            const newAiDiv = aiDiv.cloneNode(false);
-                            aiDiv.parentNode.replaceChild(newAiDiv, aiDiv);
+                            const aiDivNew = aiDivOld.cloneNode(false);
+                            aiDivOld.parentNode.replaceChild(aiDivNew, aiDivOld);
 
-                            newAiDiv.innerHTML = Object.entries(aiStatus).map(([svc, st]) => {
-                                const isOk = st === 'OK';
-                                const dotColor = isOk
-                                    ? 'bg-emerald-500 shadow-[0_0_6px_rgba(34,197,94,0.7)]'
-                                    : 'bg-rose-500 shadow-[0_0_6px_rgba(239,68,68,0.7)]';
-                                const cursorClass = isOk ? 'cursor-default' : 'cursor-pointer hover:scale-125 active:scale-95';
-                                const title = isOk ? `${svc}: operacional` : `${svc}: offline — clique para ativar`;
+                            aiDivNew.innerHTML = Object.entries(aiStatus).map(([svc, st]) => {
+                                const ok        = st === 'OK';
+                                const dotColor  = ok ? 'bg-emerald-500 shadow-[0_0_6px_rgba(34,197,94,0.7)]' : 'bg-rose-500 shadow-[0_0_6px_rgba(239,68,68,0.7)]';
+                                const cursor    = ok ? 'cursor-default' : 'cursor-pointer hover:scale-125 active:scale-95';
+                                const title     = ok ? `${svc}: operacional` : `${svc}: offline — clique para ativar`;
                                 return `<div class="flex items-center gap-2">
-                                    <span
-                                        id="ai-dot-${svc}"
-                                        data-svc="${svc}"
-                                        data-ok="${isOk}"
-                                        title="${title}"
-                                        class="w-2.5 h-2.5 rounded-full flex-shrink-0 transition-transform duration-150 ${dotColor} ${cursorClass}"
-                                    ></span>
+                                    <span id="ai-dot-${svc}" data-svc="${svc}" data-ok="${ok}"
+                                          title="${title}"
+                                          class="w-2.5 h-2.5 rounded-full flex-shrink-0 transition-transform duration-150 ${dotColor} ${cursor}"></span>
                                     <span class="text-xs font-semibold text-slate-300 mono">${svc}</span>
                                 </div>`;
                             }).join('');
 
-                            // Event delegation: um único listener no container detecta cliques nas bolinhas
-                            newAiDiv.addEventListener('click', function(e) {
+                            aiDivNew.addEventListener('click', e => {
                                 const dot = e.target.closest('[data-svc]');
-                                if (!dot) return;
-                                const svc = dot.dataset.svc;
-                                const alreadyOk = dot.dataset.ok === 'true';
-                                if (alreadyOk) return;
-                                // Feedback visual imediato
-                                dot.style.opacity = '0.4';
-                                dot.title = 'Ativando...';
-                                // Chama a API sem depender do event inline
-                                fetch(`/api/services/${svc}/start`, { method: 'POST' })
-                                    .then(r => r.json().catch(() => ({})))
-                                    .then(res => console.log(`[IA] ${svc} iniciado:`, res.message || res))
-                                    .catch(err => console.warn(`[IA] Erro ao iniciar ${svc}:`, err.message))
-                                    .finally(() => setTimeout(fetchData, 1500));
+                                if (!dot || dot.dataset.ok === 'true') return;
+                                window.startService(dot.dataset.svc);
                             });
                         }
                     }
-                } catch(e_met) {
-                    console.log("Servidor local não retornou métricas (Watchdog offline ou standalone mode).");
+                } catch(e) { /* Watchdog offline — modo standalone */ }
+
+                // B. KPIs Supabase
+                const [
+                    { count: commentsCount },
+                    { count: hateCount },
+                    { count: candidatesCount },
+                    { count: pausedCount },
+                    { count: excludedCount }
+                ] = await Promise.all([
+                    db.from('comentarios').select('*', { count:'exact', head:true }),
+                    db.from('comentarios').select('*', { count:'exact', head:true }).eq('is_hate', true),
+                    db.from('candidatos').select('*',  { count:'exact', head:true }).eq('status_monitoramento', 'ATIVO'),
+                    db.from('candidatos').select('*',  { count:'exact', head:true }).eq('status_monitoramento', 'PAUSADO'),
+                    db.from('candidatos').select('*',  { count:'exact', head:true }).eq('status_monitoramento', 'EXCLUIDO'),
+                ]);
+
+                if (commentsCount  !== null) document.getElementById('kpi-total-comments').innerText  = commentsCount.toLocaleString();
+                if (hateCount      !== null) document.getElementById('kpi-hate-comments').innerText   = hateCount.toLocaleString();
+                if (candidatesCount!== null) document.getElementById('kpi-active-targets').innerText  = candidatesCount.toLocaleString();
+                if (pausedCount    !== null) { const e = document.getElementById('kpi-paused-targets');   if (e) e.innerText = pausedCount.toLocaleString(); }
+                if (excludedCount  !== null) { const e = document.getElementById('kpi-excluded-targets'); if (e) e.innerText = excludedCount.toLocaleString(); }
+
+                // [5] % de ódio
+                if (commentsCount > 0 && hateCount !== null) {
+                    const pct = ((hateCount / commentsCount) * 100).toFixed(2);
+                    const el = document.getElementById('kpi-hate-pct');
+                    if (el) el.innerText = `${pct}%`;
                 }
 
-                // B. Estatísticas do Supabase (KPIs usando HEAD requests eficientes)
-                const { count: commentsCount } = await db.from('comentarios').select('*', { count: 'exact', head: true });
-                const { count: hateCount } = await db.from('comentarios').select('*', { count: 'exact', head: true }).eq('is_hate', true);
-                const { count: candidatesCount }  = await db.from('candidatos').select('*', { count: 'exact', head: true }).eq('status_monitoramento', 'ATIVO');
-                const { count: pausedCount }        = await db.from('candidatos').select('*', { count: 'exact', head: true }).eq('status_monitoramento', 'PAUSADO');
-                const { count: excludedCount }      = await db.from('candidatos').select('*', { count: 'exact', head: true }).eq('status_monitoramento', 'EXCLUIDO');
-
-                if (commentsCount !== null)  document.getElementById('kpi-total-comments').innerText  = commentsCount.toLocaleString();
-                if (hateCount !== null)      document.getElementById('kpi-hate-comments').innerText   = hateCount.toLocaleString();
-                if (candidatesCount !== null) document.getElementById('kpi-active-targets').innerText = candidatesCount.toLocaleString();
-                if (pausedCount !== null)   { const el = document.getElementById('kpi-paused-targets');   if (el) el.innerText = pausedCount.toLocaleString(); }
-                if (excludedCount !== null) { const el = document.getElementById('kpi-excluded-targets'); if (el) el.innerText = excludedCount.toLocaleString(); }
-                // Compute average comments per day/hour
+                // Médias
                 const now = new Date();
                 (async () => {
                     try {
-                        const { data: firstArr, error: firstErr } = await db.from('comentarios').select('data_coleta').order('data_coleta', { ascending: true }).limit(1);
-                        if (!firstErr && firstArr && firstArr.length) {
-                            const firstDate = new Date(firstArr[0].data_coleta);
-                            const diffMs = now - firstDate;
-                            const diffDays = diffMs / (1000 * 60 * 60 * 24);
-                            const avgDay = diffDays > 0 ? (commentsCount / diffDays) : commentsCount;
-                            const avgHour = diffDays > 0 ? (commentsCount / (diffDays * 24)) : commentsCount;
-                            document.getElementById('kpi-avg-comments-day').innerText = avgDay.toFixed(1);
-                            document.getElementById('kpi-avg-comments-hour').innerText = avgHour.toFixed(1);
+                        const { data: firstArr } = await db.from('comentarios').select('data_coleta').order('data_coleta', { ascending: true }).limit(1);
+                        if (firstArr?.length) {
+                            const diffDays = (now - new Date(firstArr[0].data_coleta)) / 86400000;
+                            document.getElementById('kpi-avg-comments-day').innerText  = diffDays > 0 ? (commentsCount / diffDays).toFixed(1) : commentsCount;
+                            document.getElementById('kpi-avg-comments-hour').innerText = diffDays > 0 ? (commentsCount / (diffDays * 24)).toFixed(1) : commentsCount;
                         }
-                    } catch (e) { console.error('Avg comments error', e); }
+                    } catch(_) {}
                     try {
-                        const { data: firstHateArr, error: firstHateErr } = await db.from('comentarios').select('data_coleta').eq('is_hate', true).order('data_coleta', { ascending: true }).limit(1);
-                        if (!firstHateErr && firstHateArr && firstHateArr.length) {
-                            const firstHateDate = new Date(firstHateArr[0].data_coleta);
-                            const diffMsH = now - firstHateDate;
-                            const diffDaysH = diffMsH / (1000 * 60 * 60 * 24);
-                            const avgHateDay = diffDaysH > 0 ? (hateCount / diffDaysH) : hateCount;
-                            const avgHateHour = diffDaysH > 0 ? (hateCount / (diffDaysH * 24)) : hateCount;
-                            document.getElementById('kpi-avg-hate-day').innerText = avgHateDay.toFixed(1);
-                            document.getElementById('kpi-avg-hate-hour').innerText = avgHateHour.toFixed(1);
+                        const { data: firstHate } = await db.from('comentarios').select('data_coleta').eq('is_hate', true).order('data_coleta', { ascending: true }).limit(1);
+                        if (firstHate?.length) {
+                            const diffDays = (now - new Date(firstHate[0].data_coleta)) / 86400000;
+                            document.getElementById('kpi-avg-hate-day').innerText  = diffDays > 0 ? (hateCount / diffDays).toFixed(1) : hateCount;
+                            document.getElementById('kpi-avg-hate-hour').innerText = diffDays > 0 ? (hateCount / (diffDays * 24)).toFixed(1) : hateCount;
                         }
-                    } catch (e) { console.error('Avg hate error', e); }
+                    } catch(_) {}
                 })();
 
-                // C. Listagem de Candidatos Monitorados
-                const { data: candidates, error: candErr } = await db
+                // C. Radar de Alvos
+                const { data: candidates } = await db
                     .from('candidatos')
                     .select('username, nome_completo, termometro, last_scraped_at, partido, estado')
                     .eq('status_monitoramento', 'ATIVO')
                     .order('last_scraped_at', { ascending: false, nullsFirst: false });
 
-                if (!candErr && candidates) {
+                if (candidates) {
                     localCandidatesList = candidates;
                     document.getElementById('targets-count-badge').innerText = `${candidates.length}/${candidates.length}`;
-                    filterTargets(); // Renderiza usando a busca atual se houver
+                    filterTargets();
                 }
 
-                // D. Execuções Recentes (Worker Rewards)
-                const { data: runs, error: runsError } = await db
+                // D. Telemetria / Runs
+                const { data: runs } = await db
                     .from('worker_rewards')
                     .select('worker_id, cycle, score, tier, delta, badges, timestamp')
                     .order('timestamp', { ascending: false })
                     .limit(12);
 
-                if (!runsError && runs) {
+                if (runs) {
                     document.getElementById('runs-feed').innerHTML = runs.map(run => {
-                        const isCritical = run.tier === 'critical' || run.tier === 'db_failed';
+                        const isCritical = ['critical','db_failed'].includes(run.tier);
                         const isGold = run.tier === 'gold';
-                        const isSilver = run.tier === 'silver';
-                        
-                        let tierBadge = 'text-blue-450 bg-blue-500/10 border-blue-500/30';
-                        if (isGold) tierBadge = 'text-amber-450 bg-amber-500/10 border-amber-500/30';
-                        else if (isSilver) tierBadge = 'text-slate-400 bg-slate-500/10 border-slate-500/30';
-                        else if (isCritical) tierBadge = 'text-rose-450 bg-rose-500/10 border-rose-500/30';
-                        
-                        const deltaVal = run.delta || 0;
-                        const deltaText = deltaVal >= 0 ? `+${deltaVal.toFixed(1)} XP` : `${deltaVal.toFixed(1)} XP`;
-                        const deltaColor = deltaVal >= 0 ? 'text-emerald-450' : 'text-rose-450';
+                        let tierBadge = 'text-blue-400 bg-blue-500/10 border-blue-500/30';
+                        if (isGold)     tierBadge = 'text-amber-400 bg-amber-500/10 border-amber-500/30';
+                        if (isCritical) tierBadge = 'text-rose-400 bg-rose-500/10 border-rose-500/30';
+                        if (run.tier === 'silver') tierBadge = 'text-slate-400 bg-slate-500/10 border-slate-500/30';
+                        const delta = run.delta || 0;
+                        const deltaText = delta >= 0 ? `+${delta.toFixed(1)} XP` : `${delta.toFixed(1)} XP`;
+                        const deltaColor = delta >= 0 ? 'text-emerald-400' : 'text-rose-400';
 
                         return `
-                            <div class="bg-slate-900/35 border border-slate-850 rounded-xl p-3.5 flex flex-col gap-2">
-                                <div class="flex justify-between items-center">
-                                    <span class="font-bold text-white text-xs">${escapeHTML(run.worker_id)}</span>
-                                    <span class="text-[9px] font-mono text-slate-500">${timeAgo(run.timestamp)}</span>
-                                </div>
-                                <div class="flex justify-between items-center text-[10px]">
-                                    <span class="text-slate-400">Ciclo #${run.cycle || 0}</span>
-                                    <span class="text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider ${tierBadge}">${run.tier || 'silver'}</span>
-                                </div>
-                                <div class="flex justify-between items-center text-[10px] border-t border-slate-900/60 pt-2">
-                                    <span>Score: <b class="text-slate-200 font-mono">${(run.score || 0).toFixed(1)}</b></span>
-                                    <span class="${deltaColor} font-bold font-mono">${deltaText}</span>
-                                </div>
-                                ${run.badges && run.badges.length > 0 ? `
-                                    <div class="flex flex-wrap gap-1 mt-1">
-                                        ${run.badges.map(b => `<span class="text-[8px] bg-slate-950/40 border border-slate-850 text-slate-400 px-1 py-0.5 rounded">${escapeHTML(b)}</span>`).join('')}
-                                    </div>
-                                ` : ''}
+                        <div class="bg-slate-900/35 border border-slate-800/60 rounded-xl p-3.5 flex flex-col gap-2">
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-white text-xs">${escapeHTML(run.worker_id)}</span>
+                                <span class="text-[9px] font-mono text-slate-500">${timeAgo(run.timestamp)}</span>
                             </div>
-                        `;
+                            <div class="flex justify-between items-center text-[10px]">
+                                <span class="text-slate-400">Ciclo #${run.cycle || 0}</span>
+                                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider ${tierBadge}">${run.tier || 'silver'}</span>
+                            </div>
+                            <div class="flex justify-between items-center text-[10px] border-t border-slate-900/60 pt-2">
+                                <span>Score: <b class="text-slate-200 font-mono">${(run.score || 0).toFixed(1)}</b></span>
+                                <span class="${deltaColor} font-bold font-mono">${deltaText}</span>
+                            </div>
+                            ${run.badges?.length ? `<div class="flex flex-wrap gap-1 mt-1">${run.badges.map(b => `<span class="text-[8px] bg-slate-950/40 border border-slate-800 text-slate-400 px-1 py-0.5 rounded">${escapeHTML(b)}</span>`).join('')}</div>` : ''}
+                        </div>`;
                     }).join('');
                 }
 
-                // E. Últimos Discursos / Comentários Classificados pela IA
-                const { data: comments, error: commentsError } = await db
+                // E. Comentários classificados
+                const { data: comments } = await db
                     .from('comentarios')
                     .select('id, autor_username, texto_limpo, texto_bruto, candidato_id, is_hate, categoria_ia, confianca_ia, direcao_odio, data_coleta')
                     .not('categoria_ia', 'is', null)
                     .order('data_coleta', { ascending: false })
-                    .limit(15);
+                    .limit(30);
 
-                if (!commentsError && comments) {
-                    document.getElementById('classified-feed').innerHTML = comments.map(c => {
-                        const isHate = c.is_hate === true;
-                        const catColor = isHate ? 'text-rose-455 bg-rose-500/10 border-rose-500/30' : 'text-emerald-450 bg-emerald-500/10 border-emerald-500/30';
-                        const textContent = c.texto_limpo || c.texto_bruto || "(Sem conteúdo)";
-                        
-                        return `
-                        <div class="bg-slate-900/35 border ${isHate ? 'border-rose-900/50 glow-red' : 'border-slate-850'} rounded-xl p-4 shadow-sm hover:border-slate-750 transition-all flex flex-col gap-2.5">
-                            <div class="flex justify-between items-start">
-                                <div class="flex flex-col">
-                                    <span class="font-extrabold text-white text-xs">@${escapeHTML(c.autor_username)}</span>
-                                    <span class="text-[9px] text-slate-450 mt-0.5">comentou em <b class="text-slate-300">@${escapeHTML(c.candidato_id)}</b></span>
-                                </div>
-                                <span class="text-[9px] font-bold ${catColor} px-2 py-0.5 rounded border tracking-wider">${c.categoria_ia}</span>
-                            </div>
-                            
-                            <p class="text-xs text-slate-350 italic font-medium leading-relaxed bg-slate-950/40 p-3 rounded-lg border border-slate-900">
-                                "${escapeHTML(textContent)}"
-                            </p>
-                            
-                            <div class="flex justify-between items-center text-[10px] text-slate-500 font-mono border-t border-slate-850/80 pt-2">
-                                <span>Confiança: <b class="text-white">${(c.confianca_ia * 100).toFixed(1)}%</b></span>
-                                ${c.direcao_odio ? `<span>Alvo: <b class="text-rose-400 font-bold">${c.direcao_odio}</b></span>` : ''}
-                                <span>${timeAgo(c.data_coleta)}</span>
-                            </div>
-                        </div>
-                        `;
-                    }).join('');
-                }
-            } catch (err) {
-                console.error("Geral fetching error:", err);
+                if (comments) renderComments(comments);
+
+                // [3] Atualiza relógio após sucesso
+                updateClock();
+
+            } catch(err) {
+                console.error('fetchData error:', err);
             }
         }
 
-        // Auto-refresh a cada 10 segundos para feedback ágil
+        // Auto-refresh a cada 10s
         setInterval(fetchData, 10000);
         fetchData();
     </script>

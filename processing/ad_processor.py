@@ -50,7 +50,7 @@ class AdProcessor(BaseWorker):
                 updates.append({
                     "id": ad_id,
                     "categoria_ia": classification.get('categoria_ia', 'NEUTRO'),
-                    "confianza_ia": classification.get('confianca_ia', 0.0),
+                    "confianca_ia": classification.get('confianca_ia', 0.0),
                     "is_hate": classification['is_hate'],
                     "processado_ia": True if classification.get('engine') != 'fail' else False
                 })

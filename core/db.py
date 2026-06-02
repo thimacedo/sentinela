@@ -140,7 +140,7 @@ class DatabaseClient:
                 self.client.table('comentarios').update({
                     'processado_ia': False,
                     'categoria_ia': None,
-                    'confianza_ia': 0,
+                    'confianca_ia': 0,
                     'is_hate': False
                 }).in_('id', batch).execute()
             

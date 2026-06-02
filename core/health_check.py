@@ -32,7 +32,9 @@ def _start_service(name: str, command: list[str]):
     chamador que pode fazer ping ao endpoint de saúde antes.
     """
     try:
-        subprocess.Popen(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        # v50.1: Usando shell=True no Windows para maior resiliência com scripts/batch files
+        is_windows = os.name == 'nt'
+        subprocess.Popen(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=is_windows)
         print("[TOOL] Serviço {} iniciado: {}".format(name, ' '.join(command)))
     except Exception as e:
         print(f"[WARN] Falha ao iniciar {name}: {e}")
