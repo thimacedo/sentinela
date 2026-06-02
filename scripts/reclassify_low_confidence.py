@@ -63,11 +63,30 @@ async def reclassify_comments(limit: int, cloud_only: bool, confidence_threshold
             try:
                 res_ia = await ai_service.classify_text(text, cid)
                 
+                # Se falhar e estava no modo cloud_only, tenta o fallback local
+                if (not res_ia or res_ia.get("categoria_ia") == "ERRO") and cloud_only:
+                    logger.warning(f"  ⚠️ Falha na perícia Cloud para {cid}. Ativando fallback local temporário...")
+                    
+                    # Restaura os provedores locais temporariamente para esta tentativa
+                    ai_service.providers = original_providers
+                    try:
+                        res_ia = await ai_service.classify_text(text, cid)
+                    finally:
+                        # Restaura o modo cloud_only para os próximos
+                        ai_service.providers = [p for p in original_providers if p["name"] not in ["litert", "ollama"]]
+                        
+                    if res_ia and res_ia.get("categoria_ia") != "ERRO":
+                        logger.info(f"  ✅ Fallback local com sucesso (Provedor: {res_ia.get('name', 'N/A')})")
+                        res_ia["is_fallback"] = True
+                    else:
+                        res_ia = None
+                
                 if res_ia and res_ia.get("categoria_ia") != "ERRO":
                     new_cat = res_ia["categoria_ia"]
                     new_conf = res_ia["confianca_ia"]
                     new_hate = res_ia["is_hate"]
                     new_analise = res_ia.get("analise_pericial", "")
+                    is_fallback = res_ia.get("is_fallback", False)
                     
                     changed = (old_cat != new_cat) or (old_hate != new_hate)
                     if changed:
@@ -76,7 +95,7 @@ async def reclassify_comments(limit: int, cloud_only: bool, confidence_threshold
                     else:
                         logger.info(f"  ✅ MANTIDO: '{old_cat}' (Nova Confiança: {new_conf:.2f})")
                         
-                    tag = "[RECLASSIFICADO] "
+                    tag = "[RECLASSIFICADO - FALLBACK] " if is_fallback else "[RECLASSIFICADO] "
                     orig_analise = item.get("analise_pericial") or ""
                     if tag not in orig_analise:
                         analise_final = f"{tag}{new_analise}"
@@ -92,12 +111,13 @@ async def reclassify_comments(limit: int, cloud_only: bool, confidence_threshold
                     }).eq("id", cid).execute()
                     
                     reclassified_count += 1
+                    await asyncio.sleep(0.5)
                 else:
-                    logger.warning(f"  ⚠️ Falha ao obter reclassificação válida para {cid}")
+                    logger.warning(f"  ❌ Falha total ao obter reclassificação para {cid}. Aplicando backoff de 5s...")
+                    await asyncio.sleep(5.0)
             except Exception as ex:
-                logger.error(f"  ❌ Erro ao reclassificar item {cid}: {ex}")
-                
-            await asyncio.sleep(0.5)
+                logger.error(f"  ❌ Erro crítico ao reclassificar item {cid}: {ex}")
+                await asyncio.sleep(2.0)
             
     finally:
         # Restaura os provedores originais

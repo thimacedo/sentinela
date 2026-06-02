@@ -3,13 +3,31 @@
     "Considerar contexto cultural e social para evitar falsos positivos em ofensas raciais e religiosas",
     "Analisar a intenção por trás das palavras para diferenciar insultos ad hominem de críticas construtivas",
     "Considerar contexto cultural e histórico para evitar falsos positivos em 'VIOLENCIA_GENERO'",
-    "Desconsiderar expressões de opinião política como 'ATAQUE_INSTITUCIONAL'"
+    "Desconsiderar expressões de opinião política como 'ATAQUE_INSTITUCIONAL'",
+    "Considerar contexto cultural e histórico para entender o uso de linguagem ofensiva",
+    "Analisar relações de poder e dinâmicas entre produtores, receptores e percebedores de linguagem ofensiva",
+    "Considerar contexto cultural e histórico para entender preconceitos raciais e religiosos",
+    "Verificar se ofensas a mulheres são específicas de gênero ou generalizadas",
+    "Considerar contexto para evitar falsos positivos em 'AMEACA'",
+    "Usar recursos de NLP para identificar ironia em 'INSULTO_AD_HOMINEM'",
+    "Considerar contexto para diferenciar entre ironia e hostilidade",
+    "Analisar a intenção por trás das palavras"
   ],
   "mitigate_false_positives": [
     "Evitar marcação de expressões comuns em comunidades específicas como ofensivas sem contexto",
     "Considerar o tom e a intenção por trás das palavras para evitar marcação de expressões inofensivas como ameaças",
     "Evitar marcar como 'AMEACA' expressões comuns como 'vamos esmagá-los' em contexto esportivo",
-    "Não marcar como 'DANO_A_IMAGEM' críticas construtivas"
+    "Não marcar como 'DANO_A_IMAGEM' críticas construtivas",
+    "Evitar classificar linguagem reappropriada como ofensiva em contextos específicos da comunidade marginalizada",
+    "Não classificar linguagem que visa desafiar estruturas sociais existentes como ofensiva",
+    "Evitar marcar como 'DANO_A_IMAGEM' quando a acusação for feita por uma fonte confiável",
+    "Não marcar como 'INSULTO_AD_HOMINEM' se a crítica for construtiva",
+    "Evitar classificar expressões de opinião política como ameaças",
+    "Não considerar insultos leves como ataques à honra",
+    "Evitar marcar como 'VIOLENCIA_GENERO' quando a mulher é mencionada como exemplo genérico",
+    "Não marcar como 'ATAQUE_INSTITUCIONAL' quando a crítica é construtiva",
+    "Evitar classificar expressões de opinião fortes como hostilidade",
+    "Considerar o tom de voz e emoção por trás das palavras"
   ],
   "custom_keywords": {
     "ODIO_IDENTITARIO": [
@@ -17,7 +35,15 @@
       "xenofobia",
       "homofobia",
       "transfobia",
-      "racismo"
+      "racismo",
+      "racial slur",
+      "homophobic slur",
+      "xenophobic term",
+      "regionalismo",
+      "islamofobia",
+      "raça",
+      "religião",
+      "orientação sexual"
     ],
     "VIOLENCIA_GENERO": [
       "machista",
@@ -25,7 +51,11 @@
       "misoginia",
       "machismo",
       "sexismo",
-      "abuso"
+      "abuso",
+      "misogynistic slur",
+      "sexist term",
+      "violência de gênero",
+      "mulheres"
     ],
     "AMEACA": [
       "morte",
@@ -33,24 +63,54 @@
       "ameaça",
       "matar",
       "atacar",
-      "destruir"
+      "destruir",
+      "threat",
+      "violence",
+      "kill",
+      "ataque",
+      "ameaça de morte"
     ],
     "INSULTO_AD_HOMINEM": [
       "idiota",
       "imbecil",
       "estúpido",
-      "incompetente"
+      "incompetente",
+      "insult",
+      "attack",
+      "offensive slur",
+      "insulto",
+      "ofensa",
+      "calúnia",
+      "covarde",
+      "mentiroso",
+      "honra",
+      "competência",
+      "aparência"
     ],
     "ATAQUE_INSTITUCIONAL": [
       "corrupto",
       "incompetente",
       "deslegitimar",
-      "corrupção"
+      "corrupção",
+      "institutional attack",
+      "electoral system attack",
+      "deslegitimação",
+      "crime",
+      "sistema",
+      "sistema político",
+      "governo",
+      "órgãos de Estado",
+      "sistema eleitoral"
     ],
     "DANO_A_IMAGEM": [
       "crime",
       "corrupção",
-      "desvios de conduta"
+      "desvios de conduta",
+      "theorize crime",
+      "impute grave misconduct",
+      "corruption",
+      "crimes",
+      "desvios de conduta grave"
     ]
   }
 }
