@@ -4,6 +4,7 @@ import json
 import logging
 from datetime import datetime, timezone
 from typing import List, Dict, Any
+import uuid
 
 logger = logging.getLogger("core.local_buffer")
 
@@ -41,6 +42,7 @@ class LocalBuffer:
                     candidato_id TEXT,
                     post_shortcode TEXT,
                     data_json TEXT,
+                    trace_id TEXT,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     UNIQUE(id_externo, candidato_id, post_shortcode)
                 )
@@ -48,7 +50,11 @@ class LocalBuffer:
             conn.commit()
 
     def save(self, comments: List[Dict[str, Any]]):
-        """Salva uma lista de comentários no buffer local."""
+        """Salva uma lista de comentários no buffer local com Trace ID."""
+        for c in comments:
+            if not c.get("trace_id"):
+                c["trace_id"] = str(uuid.uuid4())
+                
         if self.is_cloud:
             self._memory_buffer.extend(comments)
             logger.debug(f"💾 [Buffer] {len(comments)} registros no buffer em memória (cloud).")
@@ -59,8 +65,8 @@ class LocalBuffer:
             for c in comments:
                 try:
                     conn.execute(
-                        "INSERT INTO pending_comments (id_externo, candidato_id, post_shortcode, data_json) VALUES (?, ?, ?, ?)",
-                        (c.get("id_externo"), c.get("candidato_id"), c.get("post_shortcode"), json.dumps(c, ensure_ascii=False))
+                        "INSERT INTO pending_comments (id_externo, candidato_id, post_shortcode, data_json, trace_id) VALUES (?, ?, ?, ?, ?)",
+                        (c.get("id_externo"), c.get("candidato_id"), c.get("post_shortcode"), json.dumps(c, ensure_ascii=False), c.get("trace_id"))
                     )
                     inserted += 1
                 except sqlite3.IntegrityError:
@@ -75,9 +81,16 @@ class LocalBuffer:
             return [{"buffer_id": i, **c} for i, c in enumerate(self._memory_buffer[:limit])]
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
-            cursor = conn.execute("SELECT id, data_json FROM pending_comments ORDER BY created_at ASC LIMIT ?", (limit,))
+            cursor = conn.execute("SELECT id, data_json, trace_id FROM pending_comments ORDER BY created_at ASC LIMIT ?", (limit,))
             rows = cursor.fetchall()
-            return [{"buffer_id": row["id"], **json.loads(row["data_json"])} for row in rows]
+            
+            result = []
+            for row in rows:
+                data = json.loads(row["data_json"])
+                if row["trace_id"] and "trace_id" not in data:
+                    data["trace_id"] = row["trace_id"]
+                result.append({"buffer_id": row["id"], **data})
+            return result
 
     def delete_many(self, ids: List[int]):
         """Remove registros do buffer após sucesso no upload."""

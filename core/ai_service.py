@@ -147,7 +147,7 @@ class AIService:
             except: continue
         return None
 
-    async def classify_text(self, text: str, comment_id: str = "N/A") -> Dict[str, Any]:
+    async def classify_text(self, text: str, comment_id: str = "N/A", trace_id: str = None) -> Dict[str, Any]:
         from core.lexical_filter import lexical_filter
         if lexical_filter.is_junk(text):
             return {"is_hate": False, "categoria_ia": "NEUTRO", "confianca_ia": 1.0, "analise_pericial": "Filtro léxico.", "name": "lexical"}
@@ -166,7 +166,8 @@ class AIService:
                     local_result = res
                     # Se for Neutro ou Lixo com confiança decente, encerra aqui (Custo Zero)
                     if res.get("confianca_ia", 0) >= 0.7 and res.get("categoria_ia") in ["NEUTRO", "LIXO"]:
-                        logger.info(f"🟢 [AI] {provider['name'].upper():<10} | ID: {comment_id:<36} | {res['categoria_ia']:<20} | (Triagem Local)")
+                        trace_log = f" | Trace: {trace_id}" if trace_id else ""
+                        logger.info(f"🟢 [AI] {provider['name'].upper():<10} | ID: {comment_id:<36}{trace_log} | {res['categoria_ia']:<20} | (Triagem Local)")
                         return res
                     continue
             except: continue
@@ -178,7 +179,8 @@ class AIService:
             try:
                 res = await self._call_provider(provider, text, comment_id)
                 if res:
-                    logger.info(f"🔍 [AI] {provider['name'].upper():<10} | ID: {comment_id:<36} | {res['categoria_ia']:<20} | (Refinado)")
+                    trace_log = f" | Trace: {trace_id}" if trace_id else ""
+                    logger.info(f"🔍 [AI] {provider['name'].upper():<10} | ID: {comment_id:<36}{trace_log} | {res['categoria_ia']:<20} | (Refinado)")
                     return res
             except: continue
 
@@ -194,7 +196,8 @@ class AIService:
             
             res = self._parse_json_response(raw_response)
             res["name"] = "fallback_llm"
-            logger.info(f"🟢 [AI] FALLBACK_LLM | ID: {comment_id:<36} | {res.get('categoria_ia', 'ERRO'):<20} | (Recuperação de Desastre)")
+            trace_log = f" | Trace: {trace_id}" if trace_id else ""
+            logger.info(f"🟢 [AI] FALLBACK_LLM | ID: {comment_id:<36}{trace_log} | {res.get('categoria_ia', 'ERRO'):<20} | (Recuperação de Desastre)")
             return res
         except Exception as e:
             logger.error(f"❌ [AI] FallbackLLM falhou após colapso dos primários: {e}")
@@ -339,7 +342,7 @@ class AIService:
         try:
             from core.db import db_client
             res = db_client.client.table('comentarios')\
-                .select('id, texto_bruto')\
+                .select('id, texto_bruto, trace_id')\
                 .eq('processado_ia', False)\
                 .limit(limit).execute()
             
@@ -349,7 +352,7 @@ class AIService:
             count = 0
             for item in items:
                 try:
-                    res_ia = await self.classify_text(item["texto_bruto"], item["id"])
+                    res_ia = await self.classify_text(item["texto_bruto"], item["id"], trace_id=item.get("trace_id"))
                     if res_ia:
                         engine_name = res_ia.get("name", "unknown").upper()
                         analise = f"[{engine_name}] {res_ia.get('analise_pericial', '')}"
@@ -376,7 +379,7 @@ class AIService:
             from core.db import db_client
             # Busca itens com confiança abaixo do threshold
             res = db_client.client.table('comentarios')\
-                .select('id, texto_bruto')\
+                .select('id, texto_bruto, trace_id')\
                 .eq('processado_ia', True)\
                 .lt('confianca_ia', confidence_threshold)\
                 .not_.eq('categoria_ia', 'ERRO')\
@@ -393,7 +396,7 @@ class AIService:
                 self.providers = [p for p in original_providers if p["name"] not in ["ollama"]]
                 
                 try:
-                    res_ia = await self.classify_text(item["texto_bruto"], item["id"])
+                    res_ia = await self.classify_text(item["texto_bruto"], item["id"], trace_id=item.get("trace_id"))
                     # PASA v86.10: Se a re-análise falhou ou deu ERRO, mantemos o resultado anterior
                     if res_ia and res_ia.get("categoria_ia") != "ERRO":
                         engine_name = res_ia.get("name", "unknown").upper()
