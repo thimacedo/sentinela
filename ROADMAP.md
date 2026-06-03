@@ -38,29 +38,29 @@ _last_updated: 2026-06-02 | branch: main_
 ## Próxima Fase (Fase 8: Escalabilidade, Desacoplamento e Resiliência)
 
 ### 8.1 — Desacoplamento Scraping / IA
-- [ ] Transformar `IGWorkerV2` em `InstagramScraperWorker` (somente coleta).
-- [ ] Criar `AIClassificationWorker` independente para processar o backlog.
-- [ ] Liberar o contexto Playwright imediatamente após a coleta, reduzindo uso de memória.
+- [x] Transformar `IGWorkerV2` em `InstagramScraperWorker` (somente coleta).
+- [x] Criar `AIClassificationWorker` independente para processar o backlog.
+- [x] Liberar o contexto Playwright imediatamente após a coleta, reduzindo uso de memória.
 
 ### 8.2 — Paralelismo Assíncrono
-- [ ] Implementar `asyncio.Semaphore(3)` no loop de processamento de alvos do Orchestrator.
-- [ ] Multiplicar a taxa de ingestão sem aumentar a carga no Supabase.
+- [x] Implementar `asyncio.Semaphore(3)` no loop de processamento de alvos do Orchestrator (Auditado: superado pelo design multi-worker de produção).
+- [x] Multiplicar a taxa de ingestão sem aumentar a carga no Supabase.
 
 ### 8.3 — Fila Distribuída (PGMQ)
 - [ ] Integrar PGMQ (`pgmq_setup.sql` já disponível) para travas atômicas no `claim_next_target`.
 - [ ] Habilitar execução multi-servidor (Cluster de Sentinelas) sem colisões de fila.
 
 ### 8.4 — Rotação de Proxies
-- [ ] Acoplar provedor de proxy (Bright Data / Oxylabs / ProxyRack) ao `new_context` do Playwright.
-- [ ] Elevar resiliência anti-Shadowban de “Médio” para “Extremo”.
+- [c] Acoplar provedor de proxy (Bright Data / Oxylabs / ProxyRack) ao `new_context` do Playwright (Parcial: proxy estático via `.env` integrado).
+- [ ] Elevar resiliência anti-Shadowban de “Médio” para “Extremo” (implementar lista de proxies rotativos).
 
 ### 8.5 — Graceful Shutdown com Checkpoint
-- [ ] Implementar checkpoint de comentários processados no `local_buffer` (SQLite) a cada lote.
-- [ ] Garantir que reinicializções do servidor não percam dados parcialmente coletados.
+- [c] Implementar checkpoint de comentários processados no `local_buffer` (SQLite) a cada lote (Parcial: buffer SQLite ativo no final do ciclo).
+- [ ] Garantir que reinicializações do servidor não percam dados parcialmente coletados (implementar checkpoint intermediário a cada post raspado).
 
 ### 8.6 — Circuit Breaker Global
-- [ ] Expandir `core/circuit_breaker.py` para cobrir o Supabase e o Scraping (além da IA).
-- [ ] Proteção total contra instabilidade externa em toda a infraestrutura.
+- [x] Expandir `core/circuit_breaker.py` para cobrir o Supabase e o Scraping (além da IA) (Auditado: `db_circuit_breaker` ativo).
+- [x] Proteção total contra instabilidade externa em toda a infraestrutura.
 
 ---
 
@@ -80,13 +80,13 @@ _last_updated: 2026-06-02 | branch: main_
   - Incorporar métricas de desempenho no dashboard.
   - Revisar persistência técnica de logs.
 
-## Registro da Rodada 02/06/2026
-- **Data/Hora:** 02/06/2026 14:47 (GMT‑3)
-- **Objetivo:** Documentação oficial pós-entrega dos sub-agentes de reclassificação e pesquisa de critérios.
+## Registro da Rodada 03/06/2026
+- **Data/Hora:** 03/06/2026 09:40 (GMT-3)
+- **Objetivo:** Auditar a implementação do Watchdog local, verificar frentes implementadas e lacunas, e implementar terminal de logs e controle remoto no dashboard.
 - **Ações realizadas:**
-  - `reclassify_agent` e `researcher_agent` definidos e validados.
-  - Fallback local (Ollama/LiteRT) adicionado ao reclassificador.
-  - Backoff de 5s implementado para proteção das cotas de API.
-  - Documentação sincronizada em todos os arquivos oficiais.
+  - Auditamos frentes da Fase 8: confirmamos que o desacoplamento de Scraping/IA (8.1) e o Circuit Breaker global (8.6) estão totalmente operacionais. Rotação de proxies (8.4) e Zero-Loss Buffer (8.5) estão parcialmente em vigor.
+  - Implementamos abas de navegação no painel central do `local_dashboard.html` ("Monitor de Discurso" e "Console de Logs") e conectamos via EventSource ao SSE `/api/stream` do Watchdog, transmitindo logs técnicos do `main_runner.py` em tempo real.
+  - Adicionamos botões de controle de execução no Header do dashboard local (Play, Stop, Restart) e gatilho de inicialização manual de Ollama/LiteRT quando inativos.
 - **Próximos passos sugeridos:**
-  - Iniciar Fase 8 com desacoplamento Scraping/IA e paralelismo no Orchestrator.
+  - Implementar checkpoints intermediários intra-cycle (a cada post raspado) no loop do `InstagramScraperWorker` para salvar o estado antes do final do perfil completo (Fase 8.5).
+  - Implementar suporte para travas atômicas na `fila_coleta` via `SELECT FOR UPDATE SKIP LOCKED` ou com fila PGMQ no Supabase para suportar clusters horizontais de múltiplos servidores (Fase 8.3).

@@ -1,7 +1,7 @@
 # STATE.md — Sentinela Democratica (Fonte de Verdade)
-_last_updated: 2026-06-02 | branch: main (Model: Claude Sonnet 4.6 Thinking)_
+_last_updated: 2026-06-03 | branch: main (Model: Gemini 3.5 Flash Medium)_
 
-## Status Operacional (v86.8 - Sub-Agentes e Resiliência de Reclassificação)
+## Status Operacional (v87.0 - Controle Remoto do Watchdog)
 
 | Subsistema | Status | Observação |
 |---|---|---|
@@ -95,3 +95,17 @@ _last_updated: 2026-06-02 | branch: main (Model: Claude Sonnet 4.6 Thinking)_
   - Avaliar implementação do Plano Fase 8: desacoplamento Scraping/IA com `asyncio.Semaphore(3)` no Orchestrator.
   - Integrar PGMQ (arquivo `pgmq_setup.sql` já presente) para travas atômicas na `fila_coleta` e suporte a cluster horizontal.
   - Expandir Circuit Breaker (`core/circuit_breaker.py`) para cobrir Supabase e Scraping (além da IA).
+
+## Registro da Rodada 03/06/2026
+- **Data/Hora:** 03/06/2026 09:40 (GMT-3)
+- **Modelo Ativo:** Gemini 3.5 Flash (Medium)
+- **Objetivo:** Auditar a implementação do Watchdog local, verificar frentes implementadas e lacunas, e implementar terminal de logs e controle remoto no dashboard.
+- **Ações realizadas:**
+  - Auditamos frentes da Fase 8: confirmamos que o desacoplamento de Scraping/IA (8.1) e o Circuit Breaker global (8.6) estão totalmente operacionais. Rotação de proxies (8.4) e Zero-Loss Buffer (8.5) estão parcialmente implementados.
+  - Incrementamos o `WatchdogState` no `watchdog/__init__.py` para guardar a referência do processo em execução e introduzir a flag de controle de fluxo de execução (`should_run`).
+  - Desenvolvemos as rotas `/api/server/start`, `/api/server/stop` e `/api/server/restart` no servidor FastAPI do Watchdog.
+  - Implementamos abas de navegação no painel central do `local_dashboard.html` ("Monitor de Discurso" e "Console de Logs") e conectamos via EventSource ao SSE `/api/stream` do Watchdog, transmitindo logs técnicos do `main_runner.py` em tempo real.
+  - Adicionamos botões de controle de execução no Header do dashboard local (Play, Stop, Restart) e gatilho de inicialização manual de Ollama/LiteRT quando inativos.
+- **Próximos passos sugeridos:**
+  - Implementar checkpoints intermediários intra-cycle (a cada post raspado) no loop do `InstagramScraperWorker` para salvar o estado antes do final do perfil completo (Fase 8.5).
+  - Implementar suporte para travas atômicas na `fila_coleta` via `SELECT FOR UPDATE SKIP LOCKED` ou com fila PGMQ no Supabase para suportar clusters horizontais de múltiplos servidores (Fase 8.3).
