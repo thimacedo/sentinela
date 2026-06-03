@@ -170,8 +170,10 @@ async def evaluate_ia(data: dict):
         entry = {
             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
             "comment_id": data.get("id"),
+            "trace_id": data.get("trace_id"),
             "engine": data.get("engine"),
-            "is_correct": data.get("is_correct"),
+            "feedback_type": data.get("feedback_type"),
+            "is_correct": data.get("is_correct"), # maintain for legacy compatibility
             "category_assigned": data.get("category"),
             "text_snippet": data.get("text")[:100] if data.get("text") else ""
         }

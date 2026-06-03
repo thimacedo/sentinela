@@ -237,17 +237,25 @@
             }).join('');
         }
 
-        async function evaluateIA(commentId, engine, isCorrect, category, text) {
+        async function evaluateIA(commentId, traceId, engine, feedbackType, category, text) {
             try {
+                // feedbackType: VALIDADO, FALSO_POSITIVO, FALSO_NEGATIVO
+                let isCorrect = (feedbackType === 'VALIDADO');
                 const resp = await fetch('/api/evaluate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: commentId, engine, is_correct: isCorrect, category, text })
+                    body: JSON.stringify({ id: commentId, trace_id: traceId, engine, feedback_type: feedbackType, is_correct: isCorrect, category, text })
                 });
                 const res = await resp.json();
                 if(res.success) {
                     const btnContainer = document.getElementById(`eval-btns-${commentId}`);
-                    if(btnContainer) btnContainer.innerHTML = `<span class="text-[8px] font-black uppercase ${isCorrect ? 'text-emerald-500' : 'text-rose-500'} tracking-tighter">${isCorrect ? '✓ Validado' : '✗ Errado'}</span>`;
+                    let feedbackLabel = '';
+                    let color = '';
+                    if (feedbackType === 'VALIDADO') { feedbackLabel = '✓ Validado'; color = 'text-emerald-500'; }
+                    else if (feedbackType === 'FALSO_POSITIVO') { feedbackLabel = '⚠️ Falso Positivo'; color = 'text-amber-500'; }
+                    else if (feedbackType === 'FALSO_NEGATIVO') { feedbackLabel = '🚨 Falso Negativo'; color = 'text-rose-500'; }
+                    
+                    if(btnContainer) btnContainer.innerHTML = `<span class="text-[8px] font-black uppercase ${color} tracking-tighter">${feedbackLabel}</span>`;
                 }
             } catch(e) { console.error("Eval error:", e); }
         }
@@ -294,11 +302,14 @@
                     <div class="flex justify-between items-center border-t border-slate-800/50 pt-2">
                         <div class="flex items-center gap-3">
                             <div id="eval-btns-${c.id}" class="flex items-center gap-1.5">
-                                <button onclick="evaluateIA('${c.id}', '${engine}', true, '${c.categoria_ia}', '${escapeHTML(c.texto_limpo || c.texto_bruto)}')" class="text-slate-600 hover:text-emerald-400 transition-colors" title="Classificação Correta">
+                                <button onclick="evaluateIA('${c.id}', '${c.trace_id}', '${engine}', 'VALIDADO', '${c.categoria_ia}', '${escapeHTML(c.texto_limpo || c.texto_bruto)}')" class="text-slate-600 hover:text-emerald-400 transition-colors" title="Correto / Validado">
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                                 </button>
-                                <button onclick="evaluateIA('${c.id}', '${engine}', false, '${c.categoria_ia}', '${escapeHTML(c.texto_limpo || c.texto_bruto)}')" class="text-slate-600 hover:text-rose-400 transition-colors" title="Classificação Incorreta">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                <button onclick="evaluateIA('${c.id}', '${c.trace_id}', '${engine}', 'FALSO_POSITIVO', '${c.categoria_ia}', '${escapeHTML(c.texto_limpo || c.texto_bruto)}')" class="text-slate-600 hover:text-amber-400 transition-colors" title="Falso Positivo (Inocente)">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                </button>
+                                <button onclick="evaluateIA('${c.id}', '${c.trace_id}', '${engine}', 'FALSO_NEGATIVO', '${c.categoria_ia}', '${escapeHTML(c.texto_limpo || c.texto_bruto)}')" class="text-slate-600 hover:text-rose-400 transition-colors" title="Falso Negativo (Ódio Passou)">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                 </button>
                             </div>
                             <span class="text-[9px] text-slate-500 font-mono">${c.direcao_odio ? `Alvo: <b class="text-rose-400">${c.direcao_odio}</b>` : ''}</span>
