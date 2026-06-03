@@ -177,7 +177,7 @@ class AIService:
                     if res.get("confianca_ia", 0) >= 0.7 and res.get("categoria_ia") in ["NEUTRO", "LIXO"]:
                         logger.info(f"🟢 [AI] {provider['name'].upper():<10} | ID: {comment_id:<36} | {res['categoria_ia']:<20} | (Triagem Local)")
                         return res
-                    break
+                    continue
             except: continue
 
         # CAMADA 2: PERÍCIA CLOUD (MISTRAL/GROQ) - Só se local for SUSPEITO ou incerto
@@ -289,32 +289,15 @@ class AIService:
                     self.consecutive_failures[name] = self.consecutive_failures.get(name, 0) + 1
                     if self.consecutive_failures[name] >= 3:
                         should_remove = True
-                else:
-                    # Timeout de leitura ou outro erro local temporário: apenas rotaciona
-                    pass
             else:
-                # Provedor Cloud: descartar se erro de autenticação (401/403)
                 if status_code in [401, 403]:
                     should_remove = True
                     logger.error(f"❌ [AI] Provedor Cloud '{name}' retornou erro de credenciais ({status_code}).")
-                else:
-                    # Outros erros de nuvem (como 429 ou 5xx): apenas rotaciona
-                    pass
 
             if should_remove:
-                prov = next((p for p in self.providers if p["name"] == name), None)
-                if prov:
-                    self.providers.remove(prov)
-                    logger.warning(f"🚨 [AI] Provedor '{name}' REMOVIDO permanentemente do fallback ativo devido a erro grave ou consecutivas falhas físicas!")
+                self._remove_provider(name, f"Erro grave ou falhas consecutivas (status {status_code})")
             else:
-                prov = next((p for p in self.providers if p["name"] == name), None)
-                if prov:
-                    self.providers.remove(prov)
-                    self.providers.append(prov)
-                    if is_local and is_read_timeout:
-                        logger.info(f"🔄 [AI] Provedor local '{name}' sofreu timeout de geração. Movido para o fim da fila (preservado).")
-                    else:
-                        logger.info(f"🔄 [AI] Provedor '{name}' falhou temporariamente. Movido para o fim da fila de prioridade para as próximas chamadas.")
+                self._rotate_provider(name, "Falha temporária")
             
             return None
 
@@ -328,6 +311,21 @@ class AIService:
                 try: return json.loads(match.group(0))
                 except: pass
             return {"is_hate": False, "categoria_ia": "NEUTRO", "confianca_ia": 0.5, "analise_pericial": "Erro parser."}
+
+    def _rotate_provider(self, name: str, reason: str = "") -> None:
+        """Move provider to end of rotation queue, preserving order."""
+        prov = next((p for p in self.providers if p["name"] == name), None)
+        if prov:
+            self.providers.remove(prov)
+            self.providers.append(prov)
+            logger.info(f"🔄 [AI] Provedor '{name}' rotacionado. {reason}")
+
+    def _remove_provider(self, name: str, reason: str = "") -> None:
+        """Remove provider permanently from active list."""
+        prov = next((p for p in self.providers if p["name"] == name), None)
+        if prov:
+            self.providers.remove(prov)
+            logger.warning(f"🚨 [AI] Provedor '{name}' REMOVIDO permanentemente. {reason}")
 
     async def run_batch_classification(self, limit: int = 50) -> int:
         """Busca comentários não processados no banco e executa a classificação."""

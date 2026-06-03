@@ -3,7 +3,8 @@ import sys
 # Ensure the project root (one level up) is in PYTHONPATH so that 'watchdog' package can be imported
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from watchdog import state
-import sys
+
+from watchdog_duplicate_killer import main as kill_duplicate_main
 import subprocess
 import threading
 import time
@@ -26,6 +27,12 @@ watchdog_process = None
 def start_watchdog_hidden():
     """Start the watchdog in a hidden console window (Windows only)."""
     global watchdog_process
+    # Primeiro, eliminar processos duplicados de main_runner
+    try:
+        kill_duplicate_main()
+    except Exception as e:
+        print(f"[Tray] Erro ao limpar processos duplicados: {e}")
+    # Duplicated block removed
     # CREATE_NO_WINDOW hides console; DETACHED_PROCESS + CREATE_NEW_PROCESS_GROUP keep watchdog alive after parent exit
     # 0x08000000 = CREATE_NO_WINDOW, 0x00000008 = DETACHED_PROCESS, 0x00000200 = CREATE_NEW_PROCESS_GROUP
     creationflags = 0x08000000 | 0x00000008 | 0x00000200

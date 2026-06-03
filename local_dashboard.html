@@ -287,18 +287,42 @@
 
         async function setupRealtime() {
             if(realtimeSubscription) return;
-            realtimeSubscription = db.channel('db-changes').on('postgres_changes', { event: '*', schema: 'public', table: 'comentarios' }, p => {
-                if(p.eventType === 'INSERT') {
-                    lastComments = [p.new, ...lastComments].slice(0, 40);
-                    renderComments(lastComments);
-                    const dot = document.getElementById('live-indicator');
-                    if(dot) { dot.classList.remove('hidden'); setTimeout(()=>dot.classList.add('hidden'), 2000); }
-                    fetchKPIs();
-                } else if(p.eventType === 'UPDATE') {
-                    const idx = lastComments.findIndex(c => c.id === p.new.id);
-                    if(idx !== -1) { lastComments[idx] = p.new; renderComments(lastComments); }
-                }
-            }).subscribe();
+            
+            console.log("⚡ [Realtime] Iniciando conexão...");
+            realtimeSubscription = db
+                .channel('room-1')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'comentarios' }, payload => {
+                    console.log("🔥 [Realtime Event]", payload.eventType, payload.new?.autor_username);
+                    
+                    if(payload.eventType === 'INSERT') {
+                        lastComments = [payload.new, ...lastComments].slice(0, 40);
+                        renderComments(lastComments);
+                        
+                        const dot = document.getElementById('live-indicator');
+                        if(dot) { 
+                            dot.classList.remove('hidden'); 
+                            setTimeout(()=>dot.classList.add('hidden'), 2000); 
+                        }
+                        fetchKPIs();
+                    } else if(payload.eventType === 'UPDATE') {
+                        const idx = lastComments.findIndex(c => c.id === payload.new.id);
+                        if(idx !== -1) { 
+                            lastComments[idx] = payload.new; 
+                            renderComments(lastComments); 
+                        }
+                    }
+                })
+                .subscribe((status) => {
+                    console.log("📡 [Realtime Status]", status);
+                    if (status === 'SUBSCRIBED') {
+                        console.log("✅ [Realtime] Dashboard sincronizado via WebSocket.");
+                    }
+                    if (status === 'CHANNEL_ERROR' || status === 'CLOSED') {
+                        console.warn("⚠️ [Realtime] Falha na conexão. Tentando reconectar em 5s...");
+                        realtimeSubscription = null;
+                        setTimeout(setupRealtime, 5000);
+                    }
+                });
         }
 
         async function fetchKPIs() {
