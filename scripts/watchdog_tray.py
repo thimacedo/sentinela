@@ -100,7 +100,7 @@ def run_audit_agent():
     """Dispara o sub-agente de auditoria cruzada em uma janela de console visível."""
     try:
         subprocess.Popen(
-            [sys.executable, str(AUDIT_SCRIPT), "--sample-size", "15"],
+            ["cmd", "/k", sys.executable, str(AUDIT_SCRIPT), "--sample-size", "15"],
             cwd=str(PROJECT_ROOT),
             creationflags=subprocess.CREATE_NEW_CONSOLE,
         )
@@ -115,7 +115,7 @@ def run_dossier_agent():
         return
     try:
         subprocess.Popen(
-            [sys.executable, str(DOSSIER_SCRIPT)],
+            ["cmd", "/k", sys.executable, str(DOSSIER_SCRIPT)],
             cwd=str(PROJECT_ROOT),
             creationflags=subprocess.CREATE_NEW_CONSOLE,
         )
@@ -127,7 +127,7 @@ def run_scanner_agent():
     """Dispara o sub-agente de escaneamento de candidatos em console visível."""
     try:
         subprocess.Popen(
-            [sys.executable, str(SCANNER_SCRIPT), '--once'],
+            ["cmd", "/k", sys.executable, str(SCANNER_SCRIPT), '--once'],
             cwd=str(PROJECT_ROOT),
             creationflags=subprocess.CREATE_NEW_CONSOLE,
         )
