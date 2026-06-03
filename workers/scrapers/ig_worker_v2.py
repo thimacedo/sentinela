@@ -375,7 +375,7 @@ class InstagramScraperWorker(BaseWorker):
                     elif err in ('all_sessions_blocked', 'shutdown_requested'):
                         final_status = 'PENDENTE'  # Recoloca na fila para reprocessar
                     else:
-                        final_status = 'FALHA_SISTEMICA'
+                        final_status = 'FALHA'
                 try:
                     self.queue.release_atomic(target.queue_id, final_status, self.worker_id)
                 except Exception as e_rel:

@@ -378,7 +378,7 @@ class QueueManager:
             
             if target.queue_id:
                 self.db.table("fila_coleta").update({
-                    "status": "FALHA_SISTEMICA",
+                    "status": "FALHA",
                     "updated_at": now_iso
                 }).eq("id", target.queue_id).execute()
             return
