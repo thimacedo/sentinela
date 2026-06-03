@@ -179,59 +179,89 @@ class FallbackLLM:
         Se ``provider_name`` for ``None``, percorre a lista de prioridade.
         Em caso de erro, tenta o próximo provedor.
         """
+        from core.circuit_breaker import ai_circuit_breaker
+
         if provider_name:
             provider = next((p for p in self.providers_order if p["name"] == provider_name), None)
             if not provider:
                 raise ValueError(f"Provider '{provider_name}' não está configurado.")
             providers = [provider]
         else:
-            providers = self.providers_order
+            providers = self.providers_order[:]
 
         last_error = None
         for prov in providers:
             name = prov["name"]
+            
+            if not ai_circuit_breaker.can_execute(f"fallback_{name}"):
+                continue
+
             key_env = prov.get("api_key_env")
             model_name = prov.get("model")
             api_key = os.getenv(key_env) if key_env else None
             try:
+                res = ""
                 if name == "cohere":
-                    return self._call_cohere(text, api_key)
-                if name == "deepseek":
-                    return self._call_deepseek(text, api_key)
-                if name == "azure":
-                    return self._call_azure(text, api_key)
-                if name == "openrouter":
-                    return self._call_openrouter(text, api_key)
-                if name == "ai21":
-                    return self._call_ai21(text, api_key)
-                if name == "fireworks":
-                    return self._call_fireworks(text, api_key)
-                if name == "llama2":
-                    return self._call_llama2(text)
-                # New providers
-                if name == "openai_gpt35":
-                    return self._call_openai(text, api_key)
-                if name == "anthropic_claude_instant":
-                    return self._call_anthropic(text, api_key)
-                if name == "google_gemini":
-                    return self._call_gemini(text, api_key, model_name)
-                if name == "groq_llama3":
-                    return self._call_groq(text, api_key, model_name)
-                if name == "cohere_command":
-                    return self._call_cohere(text, api_key)
-                if name == "fireworks_ai":
-                    return self._call_fireworks(text, api_key)
-                if name == "deepseek_chat":
-                    return self._call_deepseek(text, api_key)
-                if name == "ai21_j2ultra":
-                    return self._call_ai21(text, api_key)
-                logger.warning(f"Implementação para provider '{name}' não encontrada; retornando dummy.")
-                return f"[DUMMY-{name.upper()}] {text}"
-            except Exception as exc:
-                logger.error(f"Erro ao usar provider {name}: {exc}")
+                    res = self._call_cohere(text, api_key)
+                elif name == "deepseek":
+                    res = self._call_deepseek(text, api_key)
+                elif name == "azure":
+                    res = self._call_azure(text, api_key)
+                elif name == "openrouter":
+                    res = self._call_openrouter(text, api_key)
+                elif name == "ai21":
+                    res = self._call_ai21(text, api_key)
+                elif name == "fireworks":
+                    res = self._call_fireworks(text, api_key)
+                elif name == "llama2":
+                    res = self._call_llama2(text)
+                elif name == "openai_gpt35":
+                    res = self._call_openai(text, api_key)
+                elif name == "anthropic_claude_instant":
+                    res = self._call_anthropic(text, api_key)
+                elif name == "google_gemini":
+                    res = self._call_gemini(text, api_key, model_name)
+                elif name == "groq_llama3":
+                    res = self._call_groq(text, api_key, model_name)
+                elif name == "cohere_command":
+                    res = self._call_cohere(text, api_key)
+                elif name == "fireworks_ai":
+                    res = self._call_fireworks(text, api_key)
+                elif name == "deepseek_chat":
+                    res = self._call_deepseek(text, api_key)
+                elif name == "ai21_j2ultra":
+                    res = self._call_ai21(text, api_key)
+                else:
+                    logger.warning(f"Implementação para provider '{name}' não encontrada; retornando dummy.")
+                    res = f"[DUMMY-{name.upper()}] {text}"
+                
+                ai_circuit_breaker.record_success(f"fallback_{name}")
+                return res
+
+            except requests.exceptions.HTTPError as exc:
+                status_code = exc.response.status_code
+                logger.error(f"Erro HTTP {status_code} no provider {name}: {exc}")
+                ai_circuit_breaker.record_failure(f"fallback_{name}", status_code)
+                
+                # Hard limit: remove provider from rotation
+                if status_code in [401, 402, 403, 404]:
+                    logger.warning(f"🚨 [AI] Provider '{name}' com restrição permanente/gratuita esgotada ({status_code}). Removendo do fallback.")
+                    if prov in self.providers_order:
+                        self.providers_order.remove(prov)
                 last_error = exc
                 continue
-        raise RuntimeError(f"Todas as chamadas de fallback falharam: {last_error}")
+            except Exception as exc:
+                logger.error(f"Erro ao usar provider {name}: {exc}")
+                ai_circuit_breaker.record_failure(f"fallback_{name}")
+                
+                # Config error: remove provider
+                if "ausente" in str(exc).lower():
+                    logger.warning(f"🚨 [AI] Provider '{name}' sem API Key configurada. Removendo do fallback.")
+                    if prov in self.providers_order:
+                        self.providers_order.remove(prov)
+                last_error = exc
+                continue
+        raise RuntimeError(f"Todas as chamadas de fallback falharam. Último erro: {last_error}")
 
     def upload_training_data(self, path: str) -> None:
         """Placeholder para futuro upload de datasets a um provedor."""

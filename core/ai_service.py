@@ -201,7 +201,7 @@ class AIService:
             return res
         except Exception as e:
             logger.error(f"❌ [AI] FallbackLLM falhou após colapso dos primários: {e}")
-            return local_result or {"is_hate": False, "categoria_ia": "ERRO", "confianca_ia": 0.0, "analise_pericial": "Colapso total de todas as APIs de IA (incluindo Fallback).", "name": "system"}
+            raise RuntimeError("Colapso total das APIs de Inteligência Artificial")
 
     def _enrich_prompt(self, is_local: bool) -> str:
         base_prompt = LOCAL_SYSTEM_PROMPT if is_local else SYSTEM_PROMPT
@@ -364,11 +364,15 @@ class AIService:
                             "processado_ia": True
                         }).eq("id", item["id"]).execute()
                         count += 1
-                except: continue
+                except Exception as e:
+                    if "Colapso total" in str(e):
+                        logger.error("🛑 [AI] Colapso detectado nas APIs. Abortando lote para preservar fila.")
+                        raise e # Repassa para o Worker entrar em modo de falha (circuit breaker)
+                    continue
             return count
         except Exception as e:
             logger.error(f"Error in batch classification: {e}")
-            return 0
+            raise e # Repassa para o Worker registrar falha e não mascarar erro
 
     async def run_batch_reanalysis(self, limit: int = 20, confidence_threshold: float = 0.6) -> int:
         """
