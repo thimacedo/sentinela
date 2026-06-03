@@ -181,7 +181,21 @@ async def evaluate_ia(data: dict):
         with open(eval_file, "a", encoding="utf-8") as f:
             f.write(json.dumps(entry, ensure_ascii=False) + "\n")
             
-        return {"success": True, "message": "Avaliação registrada."}
+        # Dispara para reclassificação se for um falso positivo ou negativo
+        if data.get("feedback_type") in ["FALSO_POSITIVO", "FALSO_NEGATIVO"] and data.get("id"):
+            try:
+                from core.supabase_service import get_supabase_client
+                db = get_supabase_client()
+                db.client.table("comentarios").update({
+                    "processado_ia": False,
+                    "confianca_ia": 0.0,
+                    "analise_pericial": f"[RE-ANÁLISE SOLICITADA] {data.get('feedback_type')}",
+                    "prioridade": 99
+                }).eq("id", data.get("id")).execute()
+            except Exception as e:
+                print(f"[Watchdog] Erro ao engatilhar reclassificacao: {e}")
+                
+        return {"success": True, "message": "Avaliação registrada e reclassificação engatilhada."}
     except Exception as e:
         return {"success": False, "message": str(e)}
 
