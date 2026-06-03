@@ -86,9 +86,9 @@ _last_updated: 2026-06-03 | branch: main (Model: Gemini 3.5 Flash Medium)_
 - **Objetivo:** Documentar tudo nos arquivos oficiais após sessão de sub-agentes e resiliência de reclassificação.
 - **Ações realizadas:**
 # STATE.md — Sentinela Democratica (Fonte de Verdade)
-_last_updated: 2026-06-03 | branch: main (Model: Gemini 3.5 Flash Medium)_
+_last_updated: 2026-06-03 | branch: main (Model: Claude Sonnet 4.6 Thinking)_
 
-## Status Operacional (v87.0 - Controle Remoto do Watchdog)
+## Status Operacional (v88.0 - Sub-agentes Especializados)
 
 | Subsistema | Status | Observação |
 |---|---|---|
@@ -201,3 +201,19 @@ _last_updated: 2026-06-03 | branch: main (Model: Gemini 3.5 Flash Medium)_
 - **Próximos passos sugeridos:**
   - Implementar checkpoints intermediários intra-cycle (a cada post raspado) no loop do `InstagramScraperWorker` para salvar o estado antes do final do perfil completo (Fase 8.5).
   - Implementar suporte para travas atômicas na `fila_coleta` via `SELECT FOR UPDATE SKIP LOCKED` ou com fila PGMQ no Supabase para suportar clusters horizontais de múltiplos servidores (Fase 8.3).
+
+## Registro da Rodada 03/06/2026 (Tarde)
+- **Data/Hora:** 03/06/2026 13:29 (GMT-3)
+- **Modelo Ativo:** Claude Sonnet 4.6 (Thinking)
+- **Objetivo:** Refatorar workers em sub-agentes especializados com ciclo de vida gerenciado.
+- **Ações realizadas:**
+  - **Fase A — `audit_agent`**: Refatorado `workers/audit_worker.py` de script standalone para `AuditWorker(BaseWorker)` com `run_cycle()` → `CycleResult`, backoff 429 Groq, detecção de drift e shutdown graceful. Criado `scripts/run_audit_agent.py` com CLI completa (`--sample-size`, `--cycles`, `--loop`, `--dry-run`).
+  - **Fase B — `dossier_agent`**: Refatorado `workers/processors/dossier_worker.py` eliminando o anti-pattern `while True + sleep(10)`. Substituído por `DossierWorker(BaseWorker)` com geração de PDF em `asyncio.run_in_executor` para não bloquear o event loop. Criado `scripts/run_dossier_agent.py`.
+  - **Fase C — `monitor_agent`**: Migrada herança do `AlertWorker` de `workers.core.base_worker` (legado) para `workers.base.worker_base` (PASA v85+). Adaptado `_run()` → `run_cycle()` retornando `CycleResult` com telemetria de anomalias/alertas disparados. Retrocompatibilidade mantida.
+  - **Fase D — Consolidação**: Adicionado aviso `DEPRECATED` em `classifier_worker.py`. Documentado `ai_processor_worker.py` como único classificador oficial com cascata completa de IA.
+  - **Tray Menu**: Adicionados itens "▶ Rodar Auditoria IA" e "▶ Rodar DossierAgent" no `watchdog_tray.py` com `CREATE_NEW_CONSOLE` para visibilidade do progresso.
+  - **Validação**: Todos os workers importam corretamente e herdam de `workers.base.worker_base.BaseWorker`.
+- **Próximos passos sugeridos:**
+  - Executar `run_audit_agent.py --dry-run` para validar conexão Groq.
+  - Implementar `scanner_agent` (Fase A-3): desacoplar `CandidateScannerWorker` do loop principal (maior impacto de performance).
+  - Integrar PGMQ para travas atômicas na `fila_coleta` (Fase 8.3).
