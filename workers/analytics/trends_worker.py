@@ -48,7 +48,7 @@ def generate_trends(days: int = 7) -> str:
         "period_days": days,
         "counts": counts,
     }
-    reports_dir = Path(__file__).resolve().parents[3] / "frontend" / "public" / "reports"
+    reports_dir = Path(__file__).resolve().parents[2] / "frontend" / "public" / "reports"
     reports_dir.mkdir(parents=True, exist_ok=True)
     filename = f"trends_{end_date.isoformat()}.json"
     out_path = reports_dir / filename

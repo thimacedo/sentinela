@@ -86,10 +86,11 @@ class ReportWorker(BaseWorker):
             f"| {ajustes} ajustes de prioridade"
         )
         trend_path = generate_trends()
-network_path = generate_network()
-self.logger.info(f"✅ Trends generated at {trend_path}")
-self.logger.info(f"✅ Network generated at {network_path}")
-return relatorio  # BaseWorker usa len() para registrar items_processed
+        network_path = generate_network()
+        self.logger.info(f"✅ Trends generated at {trend_path}")
+        self.logger.info(f"✅ Network generated at {network_path}")
+        return relatorio  # BaseWorker usa len() para registrar items_processed
+
 
 
 if __name__ == "__main__":

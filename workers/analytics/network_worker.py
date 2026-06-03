@@ -149,3 +149,49 @@ class NetworkMinerWorker(BaseWorker):
                 failed=1, error=str(e)[:200], simulated=False,
                 duration=asyncio.get_event_loop().time() - start_time
             )
+
+
+def generate_network() -> str:
+    """Busca o cluster de rede coordenada mais recente e gera o relatório correspondente."""
+    from pathlib import Path
+    db = db_client
+    end_date = datetime.utcnow().date()
+    
+    try:
+        # Pega a rede coordenada mais recente do Supabase
+        res = db.client.table('redes_coordenadas')\
+            .select('*')\
+            .order('created_at', desc=True)\
+            .limit(1).execute()
+        
+        network_data = res.data[0] if res.data else {}
+    except Exception as e:
+        print(f"❌ Erro ao buscar rede no Supabase: {e}")
+        network_data = {}
+        
+    reports_dir = Path(__file__).resolve().parents[2] / "frontend" / "public" / "reports"
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    
+    filename = f"network_{end_date.isoformat()}.json"
+    out_path = reports_dir / filename
+    
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(network_data, f, ensure_ascii=False, indent=2)
+        
+    # Gera um markdown básico para acompanhamento
+    lines = [
+        "# Relatório de Redes Coordenadas",
+        f"Gerado em: {datetime.utcnow().isoformat()}Z\n",
+        f"## Nome da Rede: {network_data.get('nome_rede', 'N/A')}",
+        f"- **Tipo de Coordenação:** {network_data.get('tipo_coordenacao', 'N/A')}",
+        f"- **Score de Perigo:** {network_data.get('score_perigoso', 0)}",
+        f"- **Nós envolvidos:** {len(network_data.get('nodes', []))} contas",
+        f"- **Arestas (ligações):** {len(network_data.get('edges', []))} conexões"
+    ]
+    
+    md_path = reports_dir / f"network_{end_date.isoformat()}.md"
+    with open(md_path, "w", encoding="utf-8") as f_md:
+        f_md.write("\n".join(lines))
+        
+    return str(out_path)
+
