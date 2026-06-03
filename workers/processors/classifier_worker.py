@@ -1,4 +1,14 @@
 # workers/processors/classifier_worker.py
+# ╔══════════════════════════════════════════════════════════════════════╗
+# ║  ⚠️  DEPRECADO — PASA v88.0                                          ║
+# ║  Este worker foi substituído por AIProcessorWorker.                  ║
+# ║  Use: workers/processors/ai_processor_worker.py                      ║
+# ║  Razão: ClassifierWorker usa Gemini diretamente (sem cascata de IA,  ║
+# ║  sem circuit breaker e sem fallback). O AIProcessorWorker integra a  ║
+# ║  cascata completa de provedores via core/ai_service.py.              ║
+# ║  Será removido após validação de que nenhum módulo de produção       ║
+# ║  o importa diretamente (ver: tests/sandbox_full_cycle.py).           ║
+# ╚══════════════════════════════════════════════════════════════════════╝
 from __future__ import annotations
 import asyncio
 import json

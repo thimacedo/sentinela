@@ -9,9 +9,21 @@ logger = logging.getLogger("worker.ai_processor")
 
 class AIProcessorWorker(BaseWorker):
     """
-    Worker: AIProcessor (Perícia PASA Assíncrona)
-    Finalidade: Consumir o backlog de comentários não processados pela IA.
-    Desacopla a coleta (Scraping) da análise (IA).
+    Worker: AIProcessor — Classificador Oficial do Pipeline PASA (PASA v88.0)
+    ══════════════════════════════════════════════════════════════════════════
+    ÚNICO classificador ativo em produção. O ClassifierWorker (Gemini direto)
+    foi DEPRECIADO em v88.0 por não integrar a cascata de resiliência.
+
+    Responsabilidades:
+      1. Consumir o backlog de comentários não processados (processado_ia=False)
+         via core/ai_service.py (cascata: Ollama → Groq → OpenRouter → Mistral).
+      2. Re-analisar itens de baixa confiança (< 60%) quando a fila primária
+         está vazia — tarefa de utilidade para qualidade contínua.
+
+    Integra:
+      - Cascata de provedores de IA com circuit breaker e fallback automático.
+      - Detecção de shutdown via shutdown_event para parada graceful.
+      - CycleResult completo para telemetria via RewardEngine.
     """
 
     def __init__(self, worker_id: str, config: dict):

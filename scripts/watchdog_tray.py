@@ -78,12 +78,42 @@ def restart_watchdog():
     start_watchdog_hidden()
     print("[Tray] Watchdog reiniciado")
 
+AUDIT_SCRIPT = PROJECT_ROOT / "scripts" / "run_audit_agent.py"
+DOSSIER_SCRIPT = PROJECT_ROOT / "scripts" / "run_dossier_agent.py"
+
 def open_dashboard():
     try:
         subprocess.Popen(["cmd", "/c", "start", "", DASHBOARD_URL], shell=True)
         print("[Tray] Dashboard opened")
     except Exception as e:
         print(f"[Tray] Failed to open dashboard: {e}")
+
+def run_audit_agent():
+    """Dispara o sub-agente de auditoria cruzada em uma janela de console visível."""
+    try:
+        subprocess.Popen(
+            [sys.executable, str(AUDIT_SCRIPT), "--sample-size", "15"],
+            cwd=str(PROJECT_ROOT),
+            creationflags=subprocess.CREATE_NEW_CONSOLE,
+        )
+        print("[Tray] AuditAgent disparado (sample=15)")
+    except Exception as e:
+        print(f"[Tray] Erro ao disparar AuditAgent: {e}")
+
+def run_dossier_agent():
+    """Dispara o sub-agente de geração de dossiês em uma janela de console visível."""
+    if not DOSSIER_SCRIPT.exists():
+        print("[Tray] DossierAgent ainda não implementado.")
+        return
+    try:
+        subprocess.Popen(
+            [sys.executable, str(DOSSIER_SCRIPT)],
+            cwd=str(PROJECT_ROOT),
+            creationflags=subprocess.CREATE_NEW_CONSOLE,
+        )
+        print("[Tray] DossierAgent disparado")
+    except Exception as e:
+        print(f"[Tray] Erro ao disparar DossierAgent: {e}")
 
 def quit_tray(icon, item):
     stop_watchdog()
@@ -121,6 +151,10 @@ def setup_tray():
         item('Iniciar Watchdog', lambda i: start_watchdog_menu()),
         item('Parar Watchdog', lambda i: stop_watchdog()),
         item('Reiniciar Watchdog', lambda i: restart_watchdog()),
+        pystray.Menu.SEPARATOR,
+        item('▶ Rodar Auditoria IA', lambda i: run_audit_agent()),
+        item('▶ Rodar DossierAgent', lambda i: run_dossier_agent()),
+        pystray.Menu.SEPARATOR,
         item('Sair', quit_tray),
     )
     icon = pystray.Icon("sentinela_watchdog", image, "Sentinela Watchdog", menu)

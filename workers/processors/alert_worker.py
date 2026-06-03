@@ -14,7 +14,9 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from workers.core.base_worker import BaseWorker
+# Migrado de workers.core.base_worker (legado) → workers.base.worker_base (PASA v88.0)
+from workers.base.worker_base import BaseWorker
+from workers.base.cycle_result import CycleResult
 from core.supabase_service import get_supabase_client
 
 # Firebase Admin para FCM
@@ -28,8 +30,11 @@ except ImportError:
 
 class AlertWorker(BaseWorker):
     """
-    Observa a saúde do sistema e dispara notificações FCM
-    quando detecta anomalias. Roda a cada 5 minutos via Main Runner.
+    Sub-agente de monitoramento e alertas.
+    Observa a saúde do sistema e dispara notificações FCM/Webhook
+    quando detecta anomalias. Roda a cada 5 minutos via Tray ou Main Runner.
+
+    Migrado para BaseWorker moderno (PASA v88.0) — usa run_cycle() + CycleResult.
     """
 
     SEVERITY_EMOJI = {
@@ -38,8 +43,9 @@ class AlertWorker(BaseWorker):
         "info":     "ℹ️",
     }
 
-    def __init__(self):
-        super().__init__(name="AlertWorker", max_retries=1)
+    def __init__(self, worker_id: str = "alert_worker", config: dict = None):
+        super().__init__(worker_id, config or {})
+        self.cycle = 0
         self.db = get_supabase_client()
         self._init_firebase()
 
@@ -67,17 +73,40 @@ class AlertWorker(BaseWorker):
             self.logger.error(f"Falha ao inicializar Firebase: {exc}")
             self.fcm_enabled = False
 
-    async def _run(self, payload: dict) -> list:
+    def describe(self) -> str:
+        return "AlertWorker — Monitor de Anomalias e Notificações FCM/Webhook"
+
+    async def setup(self) -> None:
+        self.logger.info("✅ [AlertWorker] Inicializado. FCM=%s", self.fcm_enabled)
+
+    async def teardown(self) -> None:
+        self.logger.info("🛑 [AlertWorker] Encerrado.")
+
+    async def run_cycle(self) -> CycleResult:
+        """Ciclo principal: detecta anomalias e dispara alertas."""
+        import asyncio as _aio
+        start = _aio.get_event_loop().time()
+        self.cycle += 1
+
+        if self.shutdown_event and self.shutdown_event.is_set():
+            return CycleResult(
+                worker_id=self.worker_id, cycle=self.cycle,
+                source="alert", error="shutdown_requested",
+                duration=_aio.get_event_loop().time() - start,
+            )
+
         # 1. Detecta anomalias via SQL
         anomalies = self._detect_anomalies()
 
         if not anomalies:
-            self.logger.info("✅ Sistema saudável. Nenhuma anomalia detectada.")
-            return []
+            self.logger.info("✅ [AlertWorker] Sistema saudável. Nenhuma anomalia detectada.")
+            return CycleResult(
+                worker_id=self.worker_id, cycle=self.cycle,
+                source="alert", error="no_tasks_available",
+                duration=_aio.get_event_loop().time() - start,
+            )
 
-        self.logger.warning(
-            f"⚠️ {len(anomalies)} anomalia(s) detectada(s)."
-        )
+        self.logger.warning("⚠️ [AlertWorker] %d anomalia(s) detectada(s).", len(anomalies))
 
         # 2. Para cada anomalia, decide se notifica
         fired = []
@@ -90,7 +119,21 @@ class AlertWorker(BaseWorker):
         # 3. Resolve alertas antigos que se normalizaram
         self._resolve_stale_alerts(anomalies)
 
-        return fired
+        return CycleResult(
+            worker_id=self.worker_id, cycle=self.cycle,
+            source="alert",
+            extracted=len(anomalies),
+            inserted=len(fired),
+            db_success=True,
+            simulated=False,
+            duration=_aio.get_event_loop().time() - start,
+            metadata={"anomalies": len(anomalies), "fired": len(fired)},
+        )
+
+    async def _run(self, payload: dict) -> list:
+        """Mantido para retrocompatibilidade com chamadas legadas (workers.core.BaseWorker)."""
+        result = await self.run_cycle()
+        return result.metadata.get("fired", [])
 
     def _detect_anomalies(self) -> list[dict]:
         try:
