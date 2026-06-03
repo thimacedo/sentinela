@@ -184,6 +184,22 @@ class FallbackLLM:
         resp.raise_for_status()
         return resp.json()["choices"][0]["message"]["content"]
 
+    def _call_edenai(self, text: str, api_key: str, provider: str) -> str:
+        url = "https://api.edenai.run/v2/text/chat"
+        provider = provider or "openai"
+        payload = {
+            "providers": provider,
+            "text": text,
+            "chatbot_global_action": "You are a helpful assistant.",
+            "temperature": 0.0,
+            "max_tokens": 1000
+        }
+        headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+        resp = requests.post(url, json=payload, headers=headers, timeout=20)
+        resp.raise_for_status()
+        data = resp.json()
+        return data.get(provider, {}).get("generated_text", "")
+
     def _call_llama2(self, text: str) -> str:
         # Como fallback simples, retornamos o texto original marcado.
         return f"[LLAMA2] {text}"
@@ -245,6 +261,8 @@ class FallbackLLM:
                     res = self._call_zhipu(text, api_key, model_name)
                 elif name == "cerebras_llama3":
                     res = self._call_cerebras(text, api_key, model_name)
+                elif name == "eden_ai":
+                    res = self._call_edenai(text, api_key, model_name)
                 elif name == "cohere_command":
                     res = self._call_cohere(text, api_key)
                 elif name == "fireworks_ai":
