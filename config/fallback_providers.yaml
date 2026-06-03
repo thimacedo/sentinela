@@ -11,7 +11,5 @@ fallback_providers:
   - name: deepseek_chat
     api_key_env: DEEPSEEK_API_KEY
     model: deepseek-chat
-  - name: ai21_j2ultra
-    api_key_env: AI21_API_KEY
-    model: j2-ultra
+
 
