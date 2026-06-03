@@ -175,6 +175,15 @@ class FallbackLLM:
         resp.raise_for_status()
         return resp.json()["choices"][0]["message"]["content"]
 
+    def _call_cerebras(self, text: str, api_key: str, model: str) -> str:
+        url = "https://api.cerebras.ai/v1/chat/completions"
+        model = model or "llama3.1-8b"
+        payload = {"model": model, "messages": [{"role": "user", "content": text}]}
+        headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+        resp = requests.post(url, json=payload, headers=headers, timeout=15)
+        resp.raise_for_status()
+        return resp.json()["choices"][0]["message"]["content"]
+
     def _call_llama2(self, text: str) -> str:
         # Como fallback simples, retornamos o texto original marcado.
         return f"[LLAMA2] {text}"
@@ -234,6 +243,8 @@ class FallbackLLM:
                     res = self._call_groq(text, api_key, model_name)
                 elif name == "zhipu_glm4":
                     res = self._call_zhipu(text, api_key, model_name)
+                elif name == "cerebras_llama3":
+                    res = self._call_cerebras(text, api_key, model_name)
                 elif name == "cohere_command":
                     res = self._call_cohere(text, api_key)
                 elif name == "fireworks_ai":

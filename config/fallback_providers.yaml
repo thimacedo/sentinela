@@ -2,6 +2,9 @@ fallback_providers:
 - name: groq_llama3
   api_key_env: GROQ_API_KEY
   model: llama-3.1-8b-instant
+- name: cerebras_llama3
+  api_key_env: CEREBRAS_API_KEY
+  model: llama3.1-8b
 - name: zhipu_glm4
   api_key_env: ZHIPU_API_KEY
   model: glm-4-flash
