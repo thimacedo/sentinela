@@ -191,7 +191,23 @@ class AIService:
                     return res
             except: continue
 
-        return local_result or {"is_hate": False, "categoria_ia": "ERRO", "confianca_ia": 0.0, "analise_pericial": "Falha total.", "name": "system"}
+        # CAMADA 3: FALLBACK PROFUNDO (FALLBACK_LLM)
+        try:
+            from core.fallback_llm import FallbackLLM
+            fallback = FallbackLLM()
+            logger.warning(f"🚨 [AI] ID: {comment_id:<36} | Todos os provedores primários/cloud estão indisponíveis. Acionando FallbackLLM...")
+            
+            # Como FallbackLLM não aceita system_prompt, injetamos a regra no próprio texto
+            fallback_text = f"{text}\n\nResponda APENAS com um JSON estrito no formato: {{\"is_hate\": boolean, \"categoria_ia\": \"NEUTRO|LIXO|SUSPEITO|ERRO\", \"confianca_ia\": float, \"analise_pericial\": \"motivo\"}}"
+            raw_response = fallback.classify(fallback_text)
+            
+            res = self._parse_json_response(raw_response)
+            res["name"] = "fallback_llm"
+            logger.info(f"🟢 [AI] FALLBACK_LLM | ID: {comment_id:<36} | {res.get('categoria_ia', 'ERRO'):<20} | (Recuperação de Desastre)")
+            return res
+        except Exception as e:
+            logger.error(f"❌ [AI] FallbackLLM falhou após colapso dos primários: {e}")
+            return local_result or {"is_hate": False, "categoria_ia": "ERRO", "confianca_ia": 0.0, "analise_pericial": "Colapso total de todas as APIs de IA (incluindo Fallback).", "name": "system"}
 
     def _enrich_prompt(self, is_local: bool) -> str:
         base_prompt = LOCAL_SYSTEM_PROMPT if is_local else SYSTEM_PROMPT
