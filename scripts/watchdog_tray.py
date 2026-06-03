@@ -63,6 +63,13 @@ def stop_watchdog():
     else:
         print("[Tray] No active watchdog process")
     watchdog_process = None
+    
+    # Garante que ao parar o watchdog, a gente mata também o main_runner.py que ficou orfão
+    try:
+        kill_duplicate_main()
+        print("[Tray] Processos orfãos de main_runner.py terminados.")
+    except Exception as e:
+        print(f"[Tray] Erro ao limpar orfãos de main_runner: {e}")
 
 def start_watchdog_menu():
     """Inicia o watchdog se ainda não estiver rodando (usado a partir do tray)."""
