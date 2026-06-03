@@ -1,15 +1,16 @@
 fallback_providers:
-  - name: groq_llama3
-    api_key_env: GROQ_API_KEY
-    model: llama-3.1-8b-instant
-  - name: google_gemini
-    api_key_env: GEMINI_API_KEY
-    model: gemini-1.5-flash
-  - name: openrouter
-    api_key_env: OPENROUTER_API_KEY
-    model: openrouter/mistralai/mistral-7b-instruct
-  - name: deepseek_chat
-    api_key_env: DEEPSEEK_API_KEY
-    model: deepseek-chat
-
-
+- name: groq_llama3
+  api_key_env: GROQ_API_KEY
+  model: llama-3.1-8b-instant
+- name: zhipu_glm4
+  api_key_env: ZHIPU_API_KEY
+  model: glm-4-flash
+- name: google_gemini
+  api_key_env: GEMINI_API_KEY
+  model: gemini-1.5-flash
+- name: openrouter
+  api_key_env: OPENROUTER_API_KEY
+  model: openrouter/mistralai/mistral-7b-instruct
+- name: deepseek_chat
+  api_key_env: DEEPSEEK_API_KEY
+  model: deepseek-chat
