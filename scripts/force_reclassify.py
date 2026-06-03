@@ -21,9 +21,9 @@ async def main():
     print(f"Texto original encontrado ({len(texto_bruto)} caracteres).")
     
     # 2. Força a classificação utilizando os modelos Cloud de alta fidelidade
-    # Removendo o Ollama/LiteRT da lista de providers temporariamente
-    original_providers = ai_service.providers
-    ai_service.providers = [p for p in original_providers if p["name"] not in ["litert", "ollama"]]
+    # Removendo o Ollama da lista de providers temporariamente
+    original_providers = list(ai_service.providers)
+    ai_service.providers = [p for p in original_providers if p["name"] not in ["ollama"]]
     
     try:
         print("Iniciando classificação pericial (Cloud)...")

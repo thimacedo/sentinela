@@ -90,14 +90,6 @@ def clean_null_chars(data: Any) -> Any:
 class AIService:
     def __init__(self):
         import httpx
-        self.litert_client = AsyncOpenAI(
-            api_key="litert",
-            base_url=os.getenv("LITERT_BASE_URL", "http://localhost:9379/v1"),
-            max_retries=0,
-            http_client=httpx.AsyncClient(
-                timeout=httpx.Timeout(timeout=10.0, connect=1.5)
-            )
-        )
         self.ollama_client = AsyncOpenAI(
             api_key="ollama",
             base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1"),
@@ -127,7 +119,6 @@ class AIService:
 
         # Tenta Qwen2.5 se disponível no Ollama, senão Gemma:2b
         self.providers = [
-            {"name": "litert", "client": self.litert_client, "model": "gemma3-1b-it", "timeout": 10.0},
             {"name": "ollama", "client": self.ollama_client, "model": os.getenv("OLLAMA_MODEL", "qwen2.5-coder:3b"), "timeout": 45.0},
             {"name": "mistral", "client": self.mistral_client, "model": mistral_model, "timeout": 15.0},
             {"name": "groq", "client": self.groq_client, "model": "llama-3.3-70b-versatile", "timeout": 10.0},
@@ -139,7 +130,7 @@ class AIService:
         return await self.classify_text(text, comment_id)
 
     async def chat_completion(self, prompt: str, system_prompt: str = "Você é um assistente técnico especializado no sistema Sentinela.", response_format: str = "json_object") -> Optional[Dict[str, Any]]:
-        providers = [p for p in self.providers if p["name"] not in ["litert", "ollama"]]
+        providers = [p for p in self.providers if p["name"] not in ["ollama"]]
         if not providers: providers = self.providers
         for provider in providers:
             if not ai_circuit_breaker.can_execute(provider["name"]): continue
@@ -165,9 +156,9 @@ class AIService:
         # Cria cópia estática para evitar bugs ao alterar a lista self.providers concorrentemente/durante o loop
         active_providers = list(self.providers)
         
-        # CAMADA 1: FILTRAGEM LOCAL (OLLAMA/LITERT)
+        # CAMADA 1: FILTRAGEM LOCAL (OLLAMA)
         for provider in active_providers:
-            if provider["name"] not in ["litert", "ollama"] or not ai_circuit_breaker.can_execute(provider["name"]):
+            if provider["name"] not in ["ollama"] or not ai_circuit_breaker.can_execute(provider["name"]):
                 continue
             try:
                 res = await self._call_provider(provider, text, comment_id)
@@ -182,7 +173,7 @@ class AIService:
 
         # CAMADA 2: PERÍCIA CLOUD (MISTRAL/GROQ) - Só se local for SUSPEITO ou incerto
         for provider in active_providers:
-            if provider["name"] in ["litert", "ollama"] or not ai_circuit_breaker.can_execute(provider["name"]):
+            if provider["name"] in ["ollama"] or not ai_circuit_breaker.can_execute(provider["name"]):
                 continue
             try:
                 res = await self._call_provider(provider, text, comment_id)
@@ -259,7 +250,7 @@ class AIService:
 
     async def _call_provider(self, provider: Dict[str, Any], text: str, comment_id: str) -> Optional[Dict[str, Any]]:
         name = provider["name"]
-        is_local = name in ["litert", "ollama"]
+        is_local = name in ["ollama"]
         system_prompt = self._enrich_prompt(is_local)
         try:
             response = await provider["client"].chat.completions.create(
@@ -278,7 +269,7 @@ class AIService:
             import httpx
             import openai
             
-            is_local = name in ["litert", "ollama"]
+            is_local = name in ["ollama"]
             status_code = None
             
             if hasattr(e, "status_code"):
@@ -399,7 +390,7 @@ class AIService:
             for item in items:
                 # Força uso de modelos Cloud para re-análise
                 original_providers = list(self.providers)
-                self.providers = [p for p in original_providers if p["name"] not in ["litert", "ollama"]]
+                self.providers = [p for p in original_providers if p["name"] not in ["ollama"]]
                 
                 try:
                     res_ia = await self.classify_text(item["texto_bruto"], item["id"])

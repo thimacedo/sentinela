@@ -70,31 +70,13 @@ def ensure_ollama_running():
     _start_service("Ollama", cmd)
     return False
 
-def ensure_litert_running():
-    base_url = os.getenv("LITERT_BASE_URL", "http://localhost:9379")
-    health_url = _get_health_url(base_url, "http://localhost:9379", "/v1/models")
-    try:
-        resp = httpx.get(health_url, timeout=2.0)
-        if resp.status_code in [200, 404, 401, 405]:
-            print("[OK] LiteRT já está ativo.")
-            return True
-    except Exception:
-        pass
-    print("[WARN] LiteRT não respondendo, iniciando serviço...")
-    cmd_str = os.getenv("LITERT_COMMAND", "litert --serve")
-    import shlex
-    cmd = shlex.split(cmd_str)
-    _start_service("LiteRT", cmd)
-    return False
-
 def run_startup_health_checks():
     """Executa verificações de saúde na inicialização do Sentinela.
     - Avalia credenciais Instagram.
-    - Garante que Ollama e LiteRT estejam operacionais.
+    - Garante que Ollama esteja operacional.
     """
     print("Executando verificações de saúde na inicialização...")
     ig_status = check_instagram_accounts()
     for acc, st in ig_status.items():
         print(f"[IG] {acc}: {st}")
     ensure_ollama_running()
-    ensure_litert_running()

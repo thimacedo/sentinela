@@ -277,10 +277,8 @@ async def get_metrics():
             return "DOWN"
 
     ollama_health = _get_health_url(os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"), "http://localhost:11434", "/api/tags")
-    litert_health = _get_health_url(os.getenv("LITERT_BASE_URL", "http://localhost:9379"), "http://localhost:9379", "/v1/models")
 
     ollama_status = _service_status(ollama_health)
-    litert_status = _service_status(litert_health)
     with state.lock:
         return {
             "restarts": state.restarts,
@@ -291,15 +289,14 @@ async def get_metrics():
             "db_status": "OPERACIONAL",
             "instagram_accounts": ig_status,
             "ai_services": {
-                "ollama": ollama_status,
-                "litert": litert_status
+                "ollama": ollama_status
             },
             **worker_metrics
         }
 
 @app.post("/api/services/{name}/start")
 async def start_service_endpoint(name: str):
-    """Endpoint para inicialização manual sob demanda de Ollama ou LiteRT."""
+    """Endpoint para inicialização manual sob demanda de Ollama."""
     from fastapi import HTTPException
     
     if name == "ollama":
@@ -310,15 +307,6 @@ async def start_service_endpoint(name: str):
             return {"status": "success", "message": "Comando de inicialização do Ollama enviado."}
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Erro ao iniciar Ollama: {str(e)}")
-            
-    elif name == "litert":
-        try:
-            from core.health_check import ensure_litert_running
-            if ensure_litert_running():
-                return {"status": "success", "message": "LiteRT já está operacional."}
-            return {"status": "success", "message": "Comando de inicialização do LiteRT enviado."}
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Erro ao iniciar LiteRT: {str(e)}")
             
     else:
         raise HTTPException(status_code=400, detail=f"Serviço desconhecido: {name}")

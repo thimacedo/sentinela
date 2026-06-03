@@ -47,7 +47,7 @@ async def reclassify_comments(limit: int, cloud_only: bool, confidence_threshold
     original_providers = list(ai_service.providers)
     if cloud_only:
         # Filtra para usar apenas provedores cloud
-        ai_service.providers = [p for p in original_providers if p["name"] not in ["litert", "ollama"]]
+        ai_service.providers = [p for p in original_providers if p["name"] not in ["ollama"]]
         logger.info("Utilizando apenas provedores Cloud para reclassificação profunda.")
         
     try:
@@ -73,7 +73,7 @@ async def reclassify_comments(limit: int, cloud_only: bool, confidence_threshold
                         res_ia = await ai_service.classify_text(text, cid)
                     finally:
                         # Restaura o modo cloud_only para os próximos
-                        ai_service.providers = [p for p in original_providers if p["name"] not in ["litert", "ollama"]]
+                        ai_service.providers = [p for p in original_providers if p["name"] not in ["ollama"]]
                         
                     if res_ia and res_ia.get("categoria_ia") != "ERRO":
                         logger.info(f"  ✅ Fallback local com sucesso (Provedor: {res_ia.get('name', 'N/A')})")
