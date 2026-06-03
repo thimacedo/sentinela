@@ -21,7 +21,7 @@ Sua missão é classificar comentários com realismo absoluto, seguindo a Metodo
 
 --- REGRAS DE OURO ---
 1. REALISMO: Não ignore ataques velados, ironias destrutivas ou acusações de corrupção/crime.
-2. FALSAS PERÍCIAS: O uso de jargão jurídico, citação de artigos penais (CP, CF, Leis) para "teorizar" ou acusar o alvo de traição, assassinato, genocídio ou crimes hediondos NÃO É crítica política legítima. É um ataque direto e deve ser classificado como DANO_A_IMAGEM.
+2. FALSAS PERÍCIAS: O uso de jargão jurídico, citação de artigos penais (CP, CF, Leis) para "teorizar" ou acusar o alvo de traição, assassininato, genocídio ou crimes hediondos NÃO É crítica política legítima. É um ataque direto e deve ser classificado como DANO_A_IMAGEM.
 3. DISTINÇÃO: Crítica política legítima foca em IDEIAS. Ataques focam em PESSOAS ou INSTITUIÇÕES.
 4. COMUNICAÇÃO: Você é um sistema de INFORMAÇÃO. Se detectar uma imputação de ato ilícito, você NÃO DEVE usar a palavra "crime" na sua classificação ou análise. Você deve rotular como dano à imagem.
 5. IDIOMA: Sua resposta (incluindo a analise_pericial) deve ser 100% em Português Brasileiro (pt-BR).
@@ -159,7 +159,7 @@ class AIService:
     async def classify_text(self, text: str, comment_id: str = "N/A") -> Dict[str, Any]:
         from core.lexical_filter import lexical_filter
         if lexical_filter.is_junk(text):
-            return {"is_hate": False, "categoria_ia": "NEUTRO", "confianca_ia": 1.0, "analise_pericial": "Filtro léxico."}
+            return {"is_hate": False, "categoria_ia": "NEUTRO", "confianca_ia": 1.0, "analise_pericial": "Filtro léxico.", "name": "lexical"}
 
         local_result = None
         # Cria cópia estática para evitar bugs ao alterar a lista self.providers concorrentemente/durante o loop
@@ -191,7 +191,7 @@ class AIService:
                     return res
             except: continue
 
-        return local_result or {"is_hate": False, "categoria_ia": "ERRO", "confianca_ia": 0.0, "analise_pericial": "Falha total."}
+        return local_result or {"is_hate": False, "categoria_ia": "ERRO", "confianca_ia": 0.0, "analise_pericial": "Falha total.", "name": "system"}
 
     def _enrich_prompt(self, is_local: bool) -> str:
         base_prompt = LOCAL_SYSTEM_PROMPT if is_local else SYSTEM_PROMPT
@@ -346,11 +346,13 @@ class AIService:
                 try:
                     res_ia = await self.classify_text(item["texto_bruto"], item["id"])
                     if res_ia:
+                        engine_name = res_ia.get("name", "unknown").upper()
+                        analise = f"[{engine_name}] {res_ia.get('analise_pericial', '')}"
                         db_client.client.table('comentarios').update({
                             "categoria_ia": res_ia["categoria_ia"],
                             "confianca_ia": res_ia["confianca_ia"],
                             "is_hate": res_ia["is_hate"],
-                            "analise_pericial": res_ia.get('analise_pericial', ''),
+                            "analise_pericial": analise,
                             "processado_ia": True
                         }).eq("id", item["id"]).execute()
                         count += 1
@@ -372,6 +374,7 @@ class AIService:
                 .select('id, texto_bruto')\
                 .eq('processado_ia', True)\
                 .lt('confianca_ia', confidence_threshold)\
+                .not_.eq('categoria_ia', 'ERRO')\
                 .order('data_coleta', desc=True)\
                 .limit(limit).execute()
             
@@ -381,20 +384,22 @@ class AIService:
             count = 0
             for item in items:
                 # Força uso de modelos Cloud para re-análise
-                # Remove modelos locais da lista temporariamente para esta chamada
-                original_providers = self.providers
+                original_providers = list(self.providers)
                 self.providers = [p for p in original_providers if p["name"] not in ["litert", "ollama"]]
                 
                 try:
-                    # Reclassifica usando apenas provedores Cloud
                     res_ia = await self.classify_text(item["texto_bruto"], item["id"])
-                    db_client.client.table('comentarios').update({
-                        "categoria_ia": res_ia["categoria_ia"],
-                        "confianca_ia": res_ia["confianca_ia"],
-                        "is_hate": res_ia["is_hate"],
-                        "analise_pericial": f"[RE-ANÁLISE] {res_ia.get('analise_pericial', '')}"
-                    }).eq("id", item["id"]).execute()
-                    count += 1
+                    # PASA v86.10: Se a re-análise falhou ou deu ERRO, mantemos o resultado anterior
+                    if res_ia and res_ia.get("categoria_ia") != "ERRO":
+                        engine_name = res_ia.get("name", "unknown").upper()
+                        analise = f"[RE-ANÁLISE:{engine_name}] {res_ia.get('analise_pericial', '')}"
+                        db_client.client.table('comentarios').update({
+                            "categoria_ia": res_ia["categoria_ia"],
+                            "confianca_ia": res_ia["confianca_ia"],
+                            "is_hate": res_ia["is_hate"],
+                            "analise_pericial": analise
+                        }).eq("id", item["id"]).execute()
+                        count += 1
                 except: continue
                 finally:
                     self.providers = original_providers

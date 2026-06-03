@@ -45,10 +45,14 @@ class TargetNormalizer:
                 .select('username, nome_completo, seguidores, status_monitoramento') \
                 .order('seguidores', desc=True).execute()
             
+            # Lista de handles genéricos protegidos (nunca devem ser usados como alvo automático por nome parcial)
+            PROTECTED_HANDLES = ["alexandre", "joao", "maria", "paulo"]
+
             for item in resp.data:
                 user = self._clean(item.get('username'))
                 nome = self._clean(item.get('nome_completo'))
                 if not user or len(user) <= 2: continue
+                if user in PROTECTED_HANDLES: continue
 
                 # Mapeia o próprio username
                 self._cache.setdefault(user, user)

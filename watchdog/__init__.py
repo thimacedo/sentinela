@@ -155,6 +155,32 @@ async def favicon():
     from fastapi.responses import Response
     return Response(status_code=204)
 
+@app.post("/api/evaluate")
+async def evaluate_ia(data: dict):
+    """
+    Recebe avaliação de uma classificação de IA.
+    Salva localmente para análise de performance por modelo.
+    """
+    try:
+        eval_file = os.path.join(PROJECT_ROOT, "data", "ia_evaluations.jsonl")
+        os.makedirs(os.path.dirname(eval_file), exist_ok=True)
+        
+        entry = {
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "comment_id": data.get("id"),
+            "engine": data.get("engine"),
+            "is_correct": data.get("is_correct"),
+            "category_assigned": data.get("category"),
+            "text_snippet": data.get("text")[:100] if data.get("text") else ""
+        }
+        
+        with open(eval_file, "a", encoding="utf-8") as f:
+            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+            
+        return {"success": True, "message": "Avaliação registrada."}
+    except Exception as e:
+        return {"success": False, "message": str(e)}
+
 @app.get("/api/stream")
 async def stream(request: Request):
     """Server-Sent Events para logs em tempo real com MIME Type corrigido."""

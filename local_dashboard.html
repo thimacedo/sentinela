@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sentinela - Centro de Governança de Inteligência</title>
+    <title>Sentinela - War Room de Inteligência</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -14,40 +14,20 @@
         .custom-scrollbar::-webkit-scrollbar-track { background: rgba(15,23,42,0.3); }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(51,65,85,0.5); border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(71,85,105,0.8); }
-        .glow-green { box-shadow: 0 0 15px rgba(34,197,94,0.2); }
-        .glow-red   { box-shadow: 0 0 15px rgba(239,68,68,0.2); }
-        .glow-purple{ box-shadow: 0 0 15px rgba(168,85,247,0.2); }
-
-        /* ── Skeleton loader ── */
-        @keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
-        .skeleton {
-            background: linear-gradient(90deg, rgba(30,41,59,0.6) 25%, rgba(51,65,85,0.4) 50%, rgba(30,41,59,0.6) 75%);
-            background-size: 800px 100%;
-            animation: shimmer 1.4s infinite linear;
-            border-radius: 6px;
-        }
-
-        /* ── Barra de confiança ── */
+        .glow-red { box-shadow: 0 0 15px rgba(239,68,68,0.15); }
         .conf-bar { height: 3px; border-radius: 2px; transition: width 0.4s ease; }
-
-        /* ── Pulsação ativando ── */
-        @keyframes activating { 0%,100%{opacity:1} 50%{opacity:0.35} }
-        .dot-activating { animation: activating 0.7s infinite ease-in-out; }
-
-        /* ── Filtros termômetro ── */
-        .thermo-btn { transition: all 0.15s; }
-        .thermo-btn.active { opacity: 1; }
-        .thermo-btn:not(.active) { opacity: 0.45; }
-
-        /* ── Copy feedback ── */
-        @keyframes copyPop { 0%{transform:scale(1)} 40%{transform:scale(1.15)} 100%{transform:scale(1)} }
-        .copy-pop { animation: copyPop 0.25s ease; }
+        @keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
+        .skeleton { background: linear-gradient(90deg, rgba(30,41,59,0.6) 25%, rgba(51,65,85,0.4) 50%, rgba(30,41,59,0.6) 75%); background-size: 800px 100%; animation: shimmer 1.4s infinite linear; border-radius: 6px; }
+        .thermo-btn.active { opacity: 1; border-color: rgba(99,102,241,0.5); background-color: rgba(99,102,241,0.1); color: white; }
+        .thermo-btn:not(.active) { opacity: 0.5; }
+        @keyframes copyPop { 0%{transform:scale(1)} 40%{transform:scale(1.1)} 100%{transform:scale(1)} }
+        .copy-pop { animation: copyPop 0.2s ease; }
     </style>
 </head>
-<body class="bg-[#030712] text-slate-100 min-h-screen p-6 flex flex-col gap-6">
+<body class="bg-[#030712] text-slate-100 min-h-screen p-6 flex flex-col gap-6 select-none">
 
     <!-- Header Panel -->
-    <header class="bg-slate-900/30 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-2xl">
+    <header class="bg-slate-900/40 backdrop-blur-2xl border border-slate-800/80 rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-2xl sticky top-0 z-50">
         <div class="flex items-center gap-4">
             <div class="bg-gradient-to-tr from-indigo-600 to-violet-500 p-3 rounded-2xl shadow-lg shadow-indigo-500/20">
                 <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -56,610 +36,364 @@
             </div>
             <div>
                 <h1 class="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent flex items-center gap-2">
-                    SENTINELA <span class="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">DEMOCRÁTICA</span>
+                    SENTINELA <span class="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">WAR ROOM</span>
                 </h1>
-                <p class="text-slate-400 text-xs mt-0.5">Centro de Governança de Inteligência &amp; Inspeção em Tempo Real</p>
+                <p class="text-slate-400 text-xs mt-0.5">Centro de Governança de Inteligência & Inspeção Real-Time</p>
             </div>
         </div>
 
         <div class="flex flex-wrap items-center gap-3">
-            <!-- [3] Relógio de última atualização -->
-            <div class="bg-slate-950/40 border border-slate-800/60 rounded-xl px-3 py-2 flex items-center gap-2">
-                <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                <span class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Atualizado</span>
-                <span id="last-update-clock" class="text-[10px] font-bold text-slate-300 mono">—</span>
+            <div id="live-indicator" class="hidden flex items-center gap-2 px-3 py-1.5 rounded-xl bg-rose-500/10 border border-rose-500/30">
+                <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                <span class="text-[10px] font-black text-rose-400 uppercase tracking-widest">LIVE DATA</span>
             </div>
 
-            <div id="watchdog-badge" class="bg-slate-950/60 border border-slate-800 rounded-xl px-4 py-2 flex items-center gap-3">
+            <div class="bg-slate-950/40 border border-slate-800/60 rounded-xl px-4 py-2 flex items-center gap-3">
                 <span class="relative flex h-3 w-3">
                     <span id="ping-pulse" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                     <span id="ping-dot" class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
                 </span>
-                <div>
-                    <span class="block text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Watchdog Status</span>
-                    <span id="watchdog-status-text" class="text-xs font-bold text-emerald-400">OPERACIONAL</span>
+                <div class="flex flex-col">
+                    <span class="text-[9px] text-slate-500 uppercase font-bold">Watchdog Status</span>
+                    <span id="watchdog-status-text" class="text-xs font-black text-emerald-400">OPERACIONAL</span>
                 </div>
             </div>
 
-            <!-- [11] Atalho R visível no botão -->
-            <button id="btn-refresh" onclick="fetchData()" title="Atualizar painel (tecla R)" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-slate-600 text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.2"/>
-                </svg>
-                Atualizar <kbd class="ml-1 text-[9px] bg-slate-700 border border-slate-600 text-slate-400 px-1 py-0.5 rounded font-mono">R</kbd>
+            <button id="btn-refresh" onclick="fetchData()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center gap-2 active:scale-95">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.2"/></svg>
+                Sync <kbd class="ml-1 text-[9px] bg-slate-700 px-1 py-0.5 rounded font-mono">R</kbd>
             </button>
         </div>
     </header>
 
-    <!-- KPI Summary Row -->
-    <div class="grid grid-cols-2 lg:grid-cols-6 gap-4">
-        <!-- KPI 1: Comentários -->
-        <div class="bg-slate-900/30 border border-slate-850 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
-            <div class="absolute -right-4 -bottom-4 text-slate-900/30 opacity-20 pointer-events-none group-hover:scale-110 transition-transform">
-                <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
-            </div>
-            <span class="block text-xs font-semibold text-slate-400">Comentários Mapeados</span>
+    <!-- KPI Row -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-slate-900/30 border border-slate-800/60 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
+            <span class="block text-xs font-semibold text-slate-400">Total Comentários</span>
             <span id="kpi-total-comments" class="block text-2xl font-black text-white mt-1 mono">---</span>
-            <span class="text-[10px] text-slate-500 block mt-1">Total acumulado no Supabase</span>
-            <span class="text-[9px] text-slate-400 block">Média por dia: <span id="kpi-avg-comments-day">-</span></span>
-            <span class="text-[9px] text-slate-400 block">Média por hora: <span id="kpi-avg-comments-hour">-</span></span>
+            <span id="kpi-avg-comments-day" class="text-[10px] text-slate-500 block mt-1">Média: --/dia</span>
         </div>
-
-        <!-- KPI 2: Discursos + [5] badge % ódio -->
-        <div class="bg-slate-900/30 border border-slate-850 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
-            <div class="absolute -right-4 -bottom-4 text-rose-500/10 opacity-20 pointer-events-none group-hover:scale-110 transition-transform">
-                <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-            </div>
-            <span class="block text-xs font-semibold text-slate-400">Discursos Críticos (Ódio)</span>
-            <span id="kpi-hate-comments" class="block text-2xl font-black text-rose-450 mt-1 mono">---</span>
-            <span class="text-[10px] text-rose-550/70 block mt-1">Indícios graves sob monitoramento</span>
-            <span class="text-[9px] text-rose-400 block">Média por dia: <span id="kpi-avg-hate-day">-</span></span>
-            <!-- [5] % de ódio -->
-            <div class="mt-1.5 flex items-center gap-1.5">
-                <span class="text-[9px] text-slate-500">Proporção:</span>
-                <span id="kpi-hate-pct" class="text-[9px] font-bold text-rose-400 mono">--%</span>
+        <div class="bg-slate-900/30 border border-slate-800/60 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
+            <span class="block text-xs font-semibold text-slate-400">Discursos Críticos</span>
+            <span id="kpi-hate-comments" class="block text-2xl font-black text-rose-500 mt-1 mono">---</span>
+            <span id="kpi-hate-pct" class="text-[10px] text-rose-400 font-bold block mt-1">--% de ódio</span>
+        </div>
+        <div class="bg-slate-900/30 border border-slate-800/60 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
+            <span class="block text-xs font-semibold text-slate-400">Alvos Monitorados</span>
+            <span id="kpi-active-targets" class="block text-2xl font-black text-emerald-400 mt-1 mono">---</span>
+            <div class="flex gap-2 text-[10px] text-slate-500 mt-1">
+                <span>P: <b id="kpi-paused-targets" class="text-amber-400">--</b></span>
+                <span>E: <b id="kpi-excluded-targets" class="text-rose-400">--</b></span>
             </div>
         </div>
-
-        <!-- KPI 3: Alvos Ativos -->
-        <div class="bg-slate-900/30 border border-slate-850 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
-            <div class="absolute -right-4 -bottom-4 text-emerald-500/10 opacity-20 pointer-events-none group-hover:scale-110 transition-transform">
-                <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 8 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
-            </div>
-            <span class="block text-xs font-semibold text-slate-400">Alvos Ativos</span>
-            <span id="kpi-active-targets" class="block text-2xl font-black text-emerald-450 mt-1 mono">---</span>
-            <span class="text-[10px] text-slate-500 block mt-1">Perfis de interesse ativos</span>
-            <div id="kpi-active-breakdown" class="text-[9px] text-slate-500 mt-1.5 flex gap-2">
-                <span>Pausados: <b id="kpi-paused-targets" class="text-amber-400 font-mono">-</b></span>
-                <span class="text-slate-700">·</span>
-                <span>Excluídos: <b id="kpi-excluded-targets" class="text-rose-400 font-mono">-</b></span>
-            </div>
-        </div>
-
-        <!-- KPI 4: Ciclos / Restarts -->
-        <div class="bg-slate-900/30 border border-slate-850 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
-            <div class="absolute -right-4 -bottom-4 text-violet-500/10 opacity-20 pointer-events-none group-hover:scale-110 transition-transform">
-                <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm4.2 14.2L11 13V7h1.5v5.2l4.5 2.7-.8 1.3z"/></svg>
-            </div>
-            <span class="block text-xs font-semibold text-slate-400">Ciclos / Restarts</span>
+        <div class="bg-slate-900/30 border border-slate-800/60 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
+            <span class="block text-xs font-semibold text-slate-400">Ciclos do Sistema</span>
             <span id="kpi-restars" class="block text-2xl font-black text-violet-400 mt-1 mono">---</span>
-            <span class="text-[10px] text-slate-500 block mt-1">Execuções e reinícios automáticos</span>
-            <div class="text-[9px] text-slate-500 mt-1.5">
-                Reanalisados: <b id="kpi-reclassified" class="text-indigo-400 font-mono">-</b>
-            </div>
-        </div>
-
-        <!-- KPI 5: Contas Instagram -->
-        <div class="bg-slate-900/30 border border-slate-850 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
-            <span class="block text-xs font-semibold text-slate-400 mb-3">Contas Instagram</span>
-            <div id="kpi-instagram" class="flex flex-col gap-2 mt-1">---</div>
-        </div>
-
-        <!-- KPI 6: Serviços IA -->
-        <div class="bg-slate-900/30 border border-slate-850 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
-            <span class="block text-xs font-semibold text-slate-400 mb-3">Serviços IA</span>
-            <div id="kpi-ai-services" class="flex flex-col gap-2 mt-1">---</div>
+            <span class="text-[10px] text-slate-500 block mt-1">Reclassificados: <b id="kpi-reclassified" class="text-indigo-400">--</b></span>
         </div>
     </div>
 
-    <!-- Main Workspace Layout -->
-    <div class="grid grid-cols-1 xl:grid-cols-4 gap-6 items-start">
-        
-        <!-- Column 1: Radar de Alvos -->
-        <div class="xl:col-span-1 bg-slate-900/20 backdrop-blur-xl border border-slate-850 rounded-2xl p-5 flex flex-col gap-4 shadow-xl">
-            <div class="flex justify-between items-center pb-2 border-b border-slate-800">
-                <h2 class="text-sm font-bold text-slate-300 flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 bg-indigo-500 rounded-full"></span> Radar de Alvos
-                </h2>
-                <span id="targets-count-badge" class="text-[10px] font-bold bg-slate-850 border border-slate-800 text-slate-400 px-2 py-0.5 rounded-full mono">0/0</span>
+    <!-- Main Content -->
+    <main class="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 min-h-0 overflow-hidden">
+        <!-- Radar (Left) -->
+        <aside class="lg:col-span-3 flex flex-col gap-4 h-[calc(100vh-280px)] min-h-0 bg-slate-900/20 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-4 shadow-xl">
+            <div class="flex justify-between items-center pb-3 border-b border-slate-800">
+                <h2 class="text-xs font-black uppercase tracking-widest text-slate-400">Radar de Alvos</h2>
+                <span id="targets-count-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 mono">--/--</span>
             </div>
-
-            <!-- Search -->
             <div class="relative">
-                <input type="text" id="target-search" oninput="filterTargets()" placeholder="Buscar handle... (Esc limpa)" class="w-full bg-slate-950/85 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 transition-all">
-                <div class="absolute right-3 top-2.5 text-slate-600">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" id="target-search" oninput="filterTargets()" placeholder="Buscar @username..." class="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-indigo-500/50 transition-all text-slate-200">
+                <svg class="w-3.5 h-3.5 text-slate-500 absolute right-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </div>
+            <div id="thermo-filters" class="flex gap-1 overflow-x-auto pb-1 custom-scrollbar">
+                <button data-filter="ALL" class="thermo-btn active text-[9px] font-bold px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-800 text-slate-400">TUDO</button>
+                <button data-filter="QUENTE" class="thermo-btn text-[9px] font-bold px-2.5 py-1 rounded-lg border border-rose-900/50 bg-rose-500/10 text-rose-400">QUENTE</button>
+                <button data-filter="MORNO" class="thermo-btn text-[9px] font-bold px-2.5 py-1 rounded-lg border border-amber-900/50 bg-amber-500/10 text-amber-400">MORNO</button>
+                <button data-filter="FRIO" class="thermo-btn text-[9px] font-bold px-2.5 py-1 rounded-lg border border-blue-900/50 bg-blue-500/10 text-blue-400">FRIO</button>
+            </div>
+            <div id="targets-feed" class="flex-1 overflow-y-auto pr-1 flex flex-col gap-2.5 custom-scrollbar">
+                <div class="skeleton h-20 w-full opacity-20"></div>
+                <div class="skeleton h-20 w-full opacity-10"></div>
+            </div>
+        </aside>
+
+        <!-- Monitor (Center) -->
+        <section class="lg:col-span-6 flex flex-col gap-4 h-[calc(100vh-280px)] min-h-0 bg-slate-900/30 border border-slate-800/80 rounded-2xl shadow-2xl overflow-hidden">
+            <div class="p-5 border-b border-slate-800/80 flex justify-between items-center bg-slate-900/20 backdrop-blur-md sticky top-0 z-10">
+                <div class="flex items-center gap-3">
+                    <h2 class="text-xs font-black uppercase tracking-widest text-slate-400">Monitor de Discurso (IA)</h2>
+                    <div id="live-dot" class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30">
+                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                         <span class="text-[9px] font-black text-emerald-400">LIVE</span>
+                    </div>
                 </div>
+                <button id="btn-hate-only" onclick="toggleHateOnly()" class="text-[9px] font-bold px-3 py-1 rounded-lg border border-slate-700 bg-slate-800 text-slate-400 hover:border-rose-500/50 transition-all">SÓ ÓDIO</button>
             </div>
-
-            <!-- [6] Filtros Termômetro -->
-            <div class="flex gap-1.5" id="thermo-filters">
-                <button data-filter="ALL"    class="thermo-btn active flex-1 text-[9px] font-bold py-1 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 uppercase tracking-wide">Todos</button>
-                <button data-filter="QUENTE" class="thermo-btn flex-1 text-[9px] font-bold py-1 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400 uppercase tracking-wide">🔥 Quente</button>
-                <button data-filter="MORNO"  class="thermo-btn flex-1 text-[9px] font-bold py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 uppercase tracking-wide">🌡 Morno</button>
-                <button data-filter="FRIO"   class="thermo-btn flex-1 text-[9px] font-bold py-1 rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-400 uppercase tracking-wide">❄ Frio</button>
+            <div id="classified-feed" class="flex-1 overflow-y-auto p-5 flex flex-col gap-4 custom-scrollbar">
+                <div class="skeleton h-32 w-full opacity-30"></div>
+                <div class="skeleton h-32 w-full opacity-20"></div>
+                <div class="skeleton h-32 w-full opacity-10"></div>
             </div>
+        </section>
 
-            <!-- [8] Skeleton loader do Radar -->
-            <div id="targets-feed" class="space-y-2.5 max-h-[58vh] overflow-y-auto pr-1.5 custom-scrollbar">
-                <div class="skeleton h-16 w-full"></div>
-                <div class="skeleton h-16 w-full"></div>
-                <div class="skeleton h-16 w-full"></div>
+        <!-- Status (Right) -->
+        <aside class="lg:col-span-3 flex flex-col gap-4 h-[calc(100vh-280px)] min-h-0 overflow-hidden">
+            <div class="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-5 shadow-xl">
+                <h2 class="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">Serviços Locais</h2>
+                <div id="kpi-ai-services" class="flex flex-col gap-3"></div>
             </div>
-        </div>
-
-        <!-- Column 2: Monitor de Discurso -->
-        <div class="xl:col-span-2 bg-slate-900/20 backdrop-blur-xl border border-slate-850 rounded-2xl p-5 flex flex-col gap-4 shadow-xl">
-            <div class="flex justify-between items-center pb-2 border-b border-slate-800">
-                <h2 class="text-sm font-bold text-slate-300 flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 bg-rose-500 rounded-full animate-pulse"></span> Monitor de Discurso (IA)
-                </h2>
-                <div class="flex items-center gap-2">
-                    <span class="text-[10px] font-bold bg-rose-950/30 border border-rose-900/40 text-rose-450 px-2.5 py-0.5 rounded-full">LIVE FEED</span>
-                    <!-- [12] Toggle Mostrar só Ódio -->
-                    <button id="btn-hate-only" onclick="toggleHateOnly()" title="Mostrar apenas discursos de ódio" class="text-[9px] font-bold px-2 py-0.5 rounded-lg border transition-all bg-slate-800/60 border-slate-700 text-slate-400 hover:border-rose-500/50 hover:text-rose-400">
-                        Só Ódio
-                    </button>
-                </div>
+            <div class="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-5 shadow-xl">
+                <h2 class="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">Nós de Coleta</h2>
+                <div id="kpi-instagram" class="flex flex-col gap-3"></div>
             </div>
-
-            <!-- [8] Skeleton loader dos comentários -->
-            <div id="classified-feed" class="space-y-4 max-h-[67vh] overflow-y-auto pr-2 custom-scrollbar">
-                <div class="skeleton h-24 w-full rounded-xl"></div>
-                <div class="skeleton h-24 w-full rounded-xl"></div>
-                <div class="skeleton h-24 w-full rounded-xl"></div>
+            <div class="bg-slate-900/40 border border-slate-800/80 rounded-2xl flex-1 flex flex-col min-h-0 shadow-xl overflow-hidden">
+                <div class="p-4 border-b border-slate-800"><h2 class="text-xs font-black uppercase tracking-widest text-slate-400">Telemetria</h2></div>
+                <div id="runs-feed" class="flex-1 overflow-y-auto p-4 flex flex-col gap-3 custom-scrollbar"></div>
             </div>
-        </div>
+        </aside>
+    </main>
 
-        <!-- Column 3: Telemetria / Runs -->
-        <div class="xl:col-span-1 bg-slate-900/20 backdrop-blur-xl border border-slate-850 rounded-2xl p-5 flex flex-col gap-4 shadow-xl">
-            <div class="flex justify-between items-center pb-2 border-b border-slate-800">
-                <h2 class="text-sm font-bold text-slate-300 flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full"></span> Telemetria (Runs)
-                </h2>
-            </div>
-
-            <!-- [8] Skeleton loader dos runs -->
-            <div id="runs-feed" class="space-y-3.5 max-h-[67vh] overflow-y-auto pr-1.5 custom-scrollbar">
-                <div class="skeleton h-20 w-full rounded-xl"></div>
-                <div class="skeleton h-20 w-full rounded-xl"></div>
-                <div class="skeleton h-20 w-full rounded-xl"></div>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- Script Principal -->
     <script>
-        // Silencia warnings do Tailwind CDN
-        const _warn = console.warn;
-        console.warn = function(...a) { if (a[0]?.includes?.('cdn.tailwindcss.com')) return; _warn(...a); };
+        const SUPABASE_URL = 'https://vhamejkldzxbeibqeqpk.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoYW1lamtsZHp4YmVpYnFlcXBrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjQ4ODEyNSwiZXhwIjoyMDkyMDY0MTI1fQ.GfvAI7rV8isgdhVeJp4mOUscWpdOqOuBoURGm82VdtY';
+        const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Supabase
-        const supabaseUrl = 'https://vhamejkldzxbeibqeqpk.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoYW1lamtsZHp4YmVpYnFlcXBrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjQ4ODEyNSwiZXhwIjoyMDkyMDY0MTI1fQ.GfvAI7rV8isgdhVeJp4mOUscWpdOqOuBoURGm82VdtY';
-        let db;
-        try { db = supabase.createClient(supabaseUrl, supabaseKey); } catch(e) { console.error('Supabase init:', e); }
-
-        // Estado local
         let localCandidatesList = [];
+        let lastComments = [];
         let activeThermo = 'ALL';
         let hateOnly = false;
-        let lastComments = [];
+        let realtimeSubscription = null;
 
-        // ── Utilitários ──────────────────────────────────────────
-
-        function escapeHTML(str) {
-            if (!str) return '';
-            return str.replace(/[&<>'"]/g, t => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t]||t));
-        }
-
+        function escapeHTML(str) { return str ? str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])) : ''; }
         function timeAgo(d) {
-            if (!d) return 'Nunca';
-            const s = Math.floor((Date.now() - new Date(d)) / 1000);
-            if (s < 60) return 'Agora';
-            if (s < 3600) return `há ${Math.floor(s/60)}m`;
-            if (s < 86400) return `há ${Math.floor(s/3600)}h`;
-            return `há ${Math.floor(s/86400)}d`;
+            if(!d) return '---';
+            const s = Math.floor((new Date() - new Date(d)) / 1000);
+            if(s < 60) return 'agora';
+            if(s < 3600) return `há ${Math.floor(s/60)}m`;
+            if(s < 86400) return `há ${Math.floor(s/3600)}h`;
+            return new Date(d).toLocaleDateString();
         }
 
-        // [3] Relógio de última atualização
-        function updateClock() {
-            const el = document.getElementById('last-update-clock');
-            if (!el) return;
-            const now = new Date();
-            el.innerText = now.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+        async function forceScrape(user) {
+            const btn = document.getElementById(`btn-scr-${user}`);
+            if(btn) btn.classList.add('animate-spin', 'text-indigo-400');
+            try {
+                await db.from('fila_coleta').upsert({ candidato_id: user, status: 'PENDENTE', prioridade: 1, data_agendada: new Date().toISOString() }, { on_conflict: 'candidato_id,data_agendada' });
+                console.log(`[Queue] Manual: @${user}`);
+            } catch(e) {}
+            setTimeout(() => { if(btn) btn.classList.remove('animate-spin', 'text-indigo-400'); }, 1500);
         }
-
-        // [7] Click-to-copy no handle
-        function copyHandle(username) {
-            navigator.clipboard.writeText('@' + username).catch(() => {});
-            // Feedback visual
-            const el = document.getElementById(`handle-${username}`);
-            if (el) {
-                el.classList.add('copy-pop', 'text-indigo-400');
-                el.innerText = '✓ copiado';
-                setTimeout(() => {
-                    el.classList.remove('copy-pop', 'text-indigo-400');
-                    el.innerText = '@' + username;
-                }, 1200);
-            }
-        }
-
-        // [12] Toggle Mostrar só Ódio
-        function toggleHateOnly() {
-            hateOnly = !hateOnly;
-            const btn = document.getElementById('btn-hate-only');
-            if (hateOnly) {
-                btn.className = 'text-[9px] font-bold px-2 py-0.5 rounded-lg border transition-all bg-rose-500/15 border-rose-500/50 text-rose-400';
-            } else {
-                btn.className = 'text-[9px] font-bold px-2 py-0.5 rounded-lg border transition-all bg-slate-800/60 border-slate-700 text-slate-400 hover:border-rose-500/50 hover:text-rose-400';
-            }
-            renderComments(lastComments);
-        }
-
-        // [11] Atalhos de teclado
-        document.addEventListener('keydown', e => {
-            // Ignora quando está digitando num input
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-                if (e.key === 'Escape') {
-                    // [11] Esc limpa busca
-                    const inp = document.getElementById('target-search');
-                    if (inp) { inp.value = ''; filterTargets(); inp.blur(); }
-                }
-                return;
-            }
-            if (e.key === 'r' || e.key === 'R') {
-                // [11] R para refresh
-                const btn = document.getElementById('btn-refresh');
-                if (btn) { btn.classList.add('scale-95'); setTimeout(() => btn.classList.remove('scale-95'), 150); }
-                fetchData();
-            }
-        });
-
-        // [6] Filtros Termômetro
-        document.getElementById('thermo-filters').addEventListener('click', e => {
-            const btn = e.target.closest('[data-filter]');
-            if (!btn) return;
-            activeThermo = btn.dataset.filter;
-            document.querySelectorAll('.thermo-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            filterTargets();
-        });
-
-        // ── Radar de Alvos ───────────────────────────────────────
 
         function filterTargets() {
             const term = document.getElementById('target-search').value.toLowerCase().trim();
             let list = localCandidatesList;
             if (activeThermo !== 'ALL') list = list.filter(c => (c.termometro || 'FRIO') === activeThermo);
             if (term) list = list.filter(c => c.username.toLowerCase().includes(term) || (c.nome_completo?.toLowerCase().includes(term)));
-            if (list.length === 0) {
-                document.getElementById('targets-feed').innerHTML = '<p class="text-slate-500 text-xs italic p-4 text-center">Nenhum alvo corresponde</p>';
-                return;
-            }
             renderTargets(list);
         }
 
         function renderTargets(list) {
             const feed = document.getElementById('targets-feed');
             feed.innerHTML = list.map(c => {
-                let badgeClass = 'text-blue-400 bg-blue-500/10 border-blue-500/30';
-                if (c.termometro === 'QUENTE') badgeClass = 'text-rose-400 bg-rose-500/10 border-rose-500/30';
-                else if (c.termometro === 'MORNO') badgeClass = 'text-amber-400 bg-amber-500/10 border-amber-500/30';
-                const hasTime = c.last_scraped_at ? 'text-slate-400' : 'text-slate-600';
-
+                const color = c.termometro === 'QUENTE' ? 'text-rose-400 border-rose-900/50 bg-rose-500/10' : (c.termometro === 'MORNO' ? 'text-amber-400 border-amber-900/50 bg-amber-500/10' : 'text-blue-400 border-blue-900/50 bg-blue-500/10');
                 return `
-                <div class="bg-slate-900/40 border border-slate-800/60 hover:border-slate-700 transition-all rounded-xl p-3.5 flex flex-col gap-2">
+                <div class="bg-slate-900/40 border border-slate-800/60 p-3 rounded-xl flex flex-col gap-2 group relative hover:border-slate-700 transition-all">
                     <div class="flex justify-between items-center">
-                        <!-- [7] Click-to-copy -->
-                        <span id="handle-${escapeHTML(c.username)}"
-                              onclick="copyHandle('${escapeHTML(c.username)}')"
-                              title="Clique para copiar @${escapeHTML(c.username)}"
-                              class="font-bold text-white text-xs hover:text-indigo-400 transition-colors cursor-pointer select-none">
-                            @${escapeHTML(c.username)}
-                        </span>
-                        <span class="text-[9px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider ${badgeClass}">${c.termometro || 'FRIO'}</span>
+                        <span class="font-bold text-white text-xs cursor-pointer hover:text-indigo-400" onclick="navigator.clipboard.writeText('@${c.username}'); this.classList.add('text-indigo-400'); setTimeout(()=>this.classList.remove('text-indigo-400'),1000)">@${escapeHTML(c.username)}</span>
+                        <div class="flex items-center gap-2">
+                            <button id="btn-scr-${escapeHTML(c.username)}" onclick="forceScrape('${escapeHTML(c.username)}')" class="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-indigo-400 transition-all"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path></svg></button>
+                            <span class="text-[8px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider ${color}">${c.termometro || 'FRIO'}</span>
+                        </div>
                     </div>
-                    <div class="flex justify-between items-center text-[10px]">
-                        <span class="text-slate-400 max-w-[130px] truncate">${escapeHTML(c.nome_completo || 'Sem nome')}</span>
-                        <span class="${hasTime} flex items-center gap-1 font-semibold">
-                            <svg class="w-3.5 h-3.5 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            ${timeAgo(c.last_scraped_at)}
-                        </span>
-                    </div>
-                    <div class="flex gap-2 text-[9px] border-t border-slate-900/60 pt-2 text-slate-500">
-                        <span>Partido: <b class="text-slate-300">${c.partido || '---'}</b></span>
-                        <span>UF: <b class="text-slate-300">${c.estado || '---'}</b></span>
+                    <div class="flex justify-between text-[10px] text-slate-500">
+                        <span class="truncate max-w-[120px]">${escapeHTML(c.nome_completo || 'Sem nome')}</span>
+                        <span class="font-mono text-[9px]">${timeAgo(c.last_scraped_at)}</span>
                     </div>
                 </div>`;
             }).join('');
         }
 
-        // ── Comentários ──────────────────────────────────────────
+        async function evaluateIA(commentId, engine, isCorrect, category, text) {
+            try {
+                const resp = await fetch('/api/evaluate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: commentId, engine, is_correct: isCorrect, category, text })
+                });
+                const res = await resp.json();
+                if(res.success) {
+                    const btnContainer = document.getElementById(`eval-btns-${commentId}`);
+                    if(btnContainer) btnContainer.innerHTML = `<span class="text-[8px] font-black uppercase ${isCorrect ? 'text-emerald-500' : 'text-rose-500'} tracking-tighter">${isCorrect ? '✓ Validado' : '✗ Errado'}</span>`;
+                }
+            } catch(e) { console.error("Eval error:", e); }
+        }
 
         function renderComments(comments) {
             lastComments = comments;
-            const list = hateOnly ? comments.filter(c => c.is_hate === true) : comments;
+            const list = hateOnly ? comments.filter(c => c.is_hate) : comments;
             const feed = document.getElementById('classified-feed');
-
-            if (list.length === 0) {
-                feed.innerHTML = '<p class="text-slate-500 text-xs italic p-6 text-center">Nenhum discurso encontrado</p>';
-                return;
-            }
-
+            if(!list.length) { feed.innerHTML = '<p class="text-slate-600 text-xs italic text-center p-10">Vazio...</p>'; return; }
             feed.innerHTML = list.map(c => {
+                const isProcessed = c.processado_ia === true;
+                const conf = c.confianca_ia || 0;
+                const displayConf = isProcessed ? `${(conf * 100).toFixed(1)}%` : 'FILTRANDO...';
+                const barColor = !isProcessed ? 'bg-slate-800' : (conf >= 0.8 ? 'bg-emerald-500' : (conf >= 0.4 ? 'bg-amber-500' : 'bg-slate-700'));
                 const isHate = c.is_hate === true;
-                const catColor = isHate ? 'text-rose-400 bg-rose-500/10 border-rose-500/30' : 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30';
-                const text = c.texto_limpo || c.texto_bruto || '(Sem conteúdo)';
-
-                // [10] Barra de confiança colorida
-                const conf = (c.confianca_ia || 0);
-                const confPct = (conf * 100).toFixed(1);
-                const barWidth = Math.round(conf * 100);
-                const barColor = conf >= 0.8 ? 'bg-emerald-500' : conf >= 0.5 ? 'bg-amber-500' : 'bg-rose-500';
-                const confTextColor = conf >= 0.8 ? 'text-emerald-400' : conf >= 0.5 ? 'text-amber-400' : 'text-rose-400';
+                
+                // Extrai motor da analise_pericial (ex: [GROQ] ...)
+                let engine = isProcessed ? 'N/A' : 'LEXICAL';
+                if(c.analise_pericial && c.analise_pericial.startsWith('[')) {
+                    const match = c.analise_pericial.match(/^\[([^\]:]+)/);
+                    if(match) engine = match[1];
+                }
 
                 return `
-                <div class="bg-slate-900/35 border ${isHate ? 'border-rose-900/50 glow-red' : 'border-slate-800/60'} rounded-xl p-4 shadow-sm hover:border-slate-700 transition-all flex flex-col gap-2.5">
+                <div class="bg-slate-900/40 border ${isHate ? 'border-rose-900/50 glow-red' : 'border-slate-800/60'} rounded-xl p-4 flex flex-col gap-3 transition-all hover:bg-slate-900/60">
                     <div class="flex justify-between items-start">
-                        <div class="flex flex-col">
-                            <span class="font-extrabold text-white text-xs">@${escapeHTML(c.autor_username)}</span>
-                            <span class="text-[9px] text-slate-500 mt-0.5">comentou em <b class="text-slate-300">@${escapeHTML(c.candidato_id)}</b></span>
+                        <div>
+                            <div class="font-black text-white text-xs">@${escapeHTML(c.autor_username)}</div>
+                            <div class="text-[9px] text-slate-500 mt-1">em <b class="text-slate-300">@${escapeHTML(c.candidato_id)}</b></div>
                         </div>
-                        <span class="text-[9px] font-bold ${catColor} px-2 py-0.5 rounded border tracking-wider">${c.categoria_ia}</span>
-                    </div>
-
-                    <p class="text-xs text-slate-300 italic font-medium leading-relaxed bg-slate-950/40 p-3 rounded-lg border border-slate-900">
-                        "${escapeHTML(text)}"
-                    </p>
-
-                    <!-- [10] Barra de confiança -->
-                    <div class="flex flex-col gap-1">
-                        <div class="flex justify-between items-center text-[9px] font-mono">
-                            <span class="text-slate-500">Confiança IA</span>
-                            <span class="${confTextColor} font-bold">${confPct}%</span>
-                        </div>
-                        <div class="w-full bg-slate-800 rounded-full h-[3px]">
-                            <div class="conf-bar ${barColor}" style="width:${barWidth}%"></div>
+                        <div class="flex flex-col items-end gap-1">
+                            <span class="text-[8px] font-black px-2 py-0.5 rounded border ${isHate ? 'text-rose-400 bg-rose-500/10 border-rose-500/30' : 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30'} uppercase tracking-widest">${c.categoria_ia}</span>
+                            <span class="text-[7px] font-mono text-slate-600 uppercase tracking-tighter">AI: ${engine}</span>
                         </div>
                     </div>
-
-                    <div class="flex justify-between items-center text-[9px] text-slate-500 font-mono border-t border-slate-850/80 pt-2">
-                        ${c.direcao_odio ? `<span>Alvo: <b class="text-rose-400 font-bold">${c.direcao_odio}</b></span>` : '<span></span>'}
-                        <span>${timeAgo(c.data_coleta)}</span>
+                    <p class="text-xs text-slate-200 leading-relaxed font-medium bg-slate-950/40 p-3 rounded-lg border border-slate-800/50 italic">"${escapeHTML(c.texto_limpo || c.texto_bruto)}"</p>
+                    <div class="flex flex-col gap-1.5">
+                        <div class="flex justify-between text-[8px] font-black tracking-widest text-slate-500 uppercase">
+                            <span>Confiança IA <b class="ml-1 text-slate-600">${engine}</b></span>
+                            <span class="${conf >= 0.4 ? 'text-slate-200' : ''}">${displayConf}</span>
+                        </div>
+                        <div class="w-full bg-slate-800 rounded-full h-[3px] overflow-hidden"><div class="conf-bar ${barColor}" style="width:${conf*100}%"></div></div>
+                    </div>
+                    <div class="flex justify-between items-center border-t border-slate-800/50 pt-2">
+                        <div class="flex items-center gap-3">
+                            <div id="eval-btns-${c.id}" class="flex items-center gap-1.5">
+                                <button onclick="evaluateIA('${c.id}', '${engine}', true, '${c.categoria_ia}', '${escapeHTML(c.texto_limpo || c.texto_bruto)}')" class="text-slate-600 hover:text-emerald-400 transition-colors" title="Classificação Correta">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                </button>
+                                <button onclick="evaluateIA('${c.id}', '${engine}', false, '${c.categoria_ia}', '${escapeHTML(c.texto_limpo || c.texto_bruto)}')" class="text-slate-600 hover:text-rose-400 transition-colors" title="Classificação Incorreta">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                </button>
+                            </div>
+                            <span class="text-[9px] text-slate-500 font-mono">${c.direcao_odio ? `Alvo: <b class="text-rose-400">${c.direcao_odio}</b>` : ''}</span>
+                        </div>
+                        <span class="text-[9px] text-slate-500 font-mono">${timeAgo(c.data_coleta)}</span>
                     </div>
                 </div>`;
             }).join('');
         }
 
-        // ── startService (escopo global, event delegation) ───────
+        async function setupRealtime() {
+            if(realtimeSubscription) return;
+            realtimeSubscription = db.channel('db-changes').on('postgres_changes', { event: '*', schema: 'public', table: 'comentarios' }, p => {
+                if(p.eventType === 'INSERT') {
+                    lastComments = [p.new, ...lastComments].slice(0, 40);
+                    renderComments(lastComments);
+                    const dot = document.getElementById('live-indicator');
+                    if(dot) { dot.classList.remove('hidden'); setTimeout(()=>dot.classList.add('hidden'), 2000); }
+                    fetchKPIs();
+                } else if(p.eventType === 'UPDATE') {
+                    const idx = lastComments.findIndex(c => c.id === p.new.id);
+                    if(idx !== -1) { lastComments[idx] = p.new; renderComments(lastComments); }
+                }
+            }).subscribe();
+        }
 
-        window.startService = async function(name) {
-            const dot = document.getElementById(`ai-dot-${name}`);
-            if (dot) {
-                // [9] Pulsação visual enquanto ativa
-                dot.classList.add('dot-activating');
-                dot.title = 'Ativando...';
-            }
+        async function fetchKPIs() {
             try {
-                const resp = await fetch(`/api/services/${name}/start`, { method: 'POST' });
-                const res  = await resp.json().catch(() => ({}));
-                console.log(`[IA] ${name}:`, res.message || res);
-            } catch (err) {
-                console.warn(`[IA] Erro ao iniciar ${name}:`, err.message);
-            } finally {
-                setTimeout(fetchData, 1500);
-            }
-        };
-
-        // ── fetchData ────────────────────────────────────────────
-
-        async function fetchData() {
-            if (!db) return;
-            try {
-                // A. Métricas do Watchdog
-                try {
-                    const resp = await fetch('/api/metrics');
-                    if (resp.ok) {
-                        const m = await resp.json();
-
-                        // Watchdog badge
-                        const isOk = m.status === 'OPERACIONAL';
-                        document.getElementById('ping-dot').className   = `relative inline-flex rounded-full h-3 w-3 ${isOk ? 'bg-emerald-500' : 'bg-rose-500'}`;
-                        document.getElementById('ping-pulse').className = `animate-ping absolute inline-flex h-full w-full rounded-full ${isOk ? 'bg-emerald-400' : 'bg-rose-400'} opacity-75`;
-                        const txt = document.getElementById('watchdog-status-text');
-                        txt.className  = `text-xs font-bold ${isOk ? 'text-emerald-400' : 'text-rose-400'}`;
-                        txt.innerText  = m.status;
-
-                        document.getElementById('kpi-restars').innerText = `${m.cycle || 0} / ${m.restarts || 0}`;
-                        const reclEl = document.getElementById('kpi-reclassified');
-                        if (reclEl) reclEl.innerText = (m.reclassified || 0).toLocaleString();
-
-                        // Contas Instagram — IG 1 / IG 2
-                        const igDiv = document.getElementById('kpi-instagram');
-                        if (igDiv) {
-                            const igStatus = m.instagram_accounts || {};
-                            const entries  = Object.entries(igStatus);
-                            const accounts = {};
-                            entries.forEach(([acc, st]) => {
-                                const match = acc.match(/IG_(?:USER|PASS)(?:_?(\d+))?$/i);
-                                if (match) {
-                                    const idx = match[1] ? parseInt(match[1]) : 0;
-                                    if (!accounts[idx]) accounts[idx] = [];
-                                    accounts[idx].push(st);
-                                }
-                            });
-                            const sortedKeys = Object.keys(accounts).sort((a,b) => a - b);
-                            igDiv.innerHTML = (sortedKeys.length > 0 ? sortedKeys : ['fallback']).map((idx, i) => {
-                                const sts   = sortedKeys.length > 0 ? accounts[idx] : entries.map(([,s]) => s);
-                                const isOkA = sts.every(s => s === 'OK');
-                                const dot   = isOkA ? 'bg-emerald-500 shadow-[0_0_6px_rgba(34,197,94,0.7)]' : 'bg-rose-500 shadow-[0_0_6px_rgba(239,68,68,0.7)]';
-                                const lbl   = sortedKeys.length > 0 ? `IG ${i + 1}` : entries[i]?.[0] || `IG ${i+1}`;
-                                return `<div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full flex-shrink-0 ${dot}"></span><span class="text-xs font-semibold text-slate-300 mono">${lbl}</span></div>`;
-                            }).join('');
-                        }
-
-                        // Serviços IA — event delegation
-                        const aiDivOld = document.getElementById('kpi-ai-services');
-                        if (aiDivOld) {
-                            const aiStatus = m.ai_services || {};
-                            const aiDivNew = aiDivOld.cloneNode(false);
-                            aiDivOld.parentNode.replaceChild(aiDivNew, aiDivOld);
-
-                            aiDivNew.innerHTML = Object.entries(aiStatus).map(([svc, st]) => {
-                                const ok        = st === 'OK';
-                                const dotColor  = ok ? 'bg-emerald-500 shadow-[0_0_6px_rgba(34,197,94,0.7)]' : 'bg-rose-500 shadow-[0_0_6px_rgba(239,68,68,0.7)]';
-                                const cursor    = ok ? 'cursor-default' : 'cursor-pointer hover:scale-125 active:scale-95';
-                                const title     = ok ? `${svc}: operacional` : `${svc}: offline — clique para ativar`;
-                                return `<div class="flex items-center gap-2">
-                                    <span id="ai-dot-${svc}" data-svc="${svc}" data-ok="${ok}"
-                                          title="${title}"
-                                          class="w-2.5 h-2.5 rounded-full flex-shrink-0 transition-transform duration-150 ${dotColor} ${cursor}"></span>
-                                    <span class="text-xs font-semibold text-slate-300 mono">${svc}</span>
-                                </div>`;
-                            }).join('');
-
-                            aiDivNew.addEventListener('click', e => {
-                                const dot = e.target.closest('[data-svc]');
-                                if (!dot || dot.dataset.ok === 'true') return;
-                                window.startService(dot.dataset.svc);
-                            });
-                        }
-                    }
-                } catch(e) { /* Watchdog offline — modo standalone */ }
-
-                // B. KPIs Supabase
                 const [
-                    { count: commentsCount },
-                    { count: hateCount },
-                    { count: candidatesCount },
-                    { count: pausedCount },
-                    { count: excludedCount }
+                    { count: cCount }, 
+                    { count: hCount }, 
+                    { count: aCount }, 
+                    { count: pCount }, 
+                    { count: eCount },
+                    { data: firstComm },
+                    { count: rCount }
                 ] = await Promise.all([
                     db.from('comentarios').select('*', { count:'exact', head:true }),
                     db.from('comentarios').select('*', { count:'exact', head:true }).eq('is_hate', true),
-                    db.from('candidatos').select('*',  { count:'exact', head:true }).eq('status_monitoramento', 'ATIVO'),
-                    db.from('candidatos').select('*',  { count:'exact', head:true }).eq('status_monitoramento', 'PAUSADO'),
-                    db.from('candidatos').select('*',  { count:'exact', head:true }).eq('status_monitoramento', 'EXCLUIDO'),
+                    db.from('candidatos').select('*',  { count:'exact', head:true }).ilike('status_monitoramento', 'ATIVO'),
+                    db.from('candidatos').select('*',  { count:'exact', head:true }).ilike('status_monitoramento', 'PAUSADO'),
+                    db.from('candidatos').select('*',  { count:'exact', head:true }).or('status_monitoramento.ilike.EXCLUIDO,status_monitoramento.ilike.DESATIVADO,status_monitoramento.ilike.Inativo'),
+                    db.from('comentarios').select('data_coleta').order('data_coleta', { ascending: true }).limit(1),
+                    db.from('comentarios').select('*', { count:'exact', head:true }).ilike('analise_pericial', '%RE-ANÁLISE%')
                 ]);
 
-                if (commentsCount  !== null) document.getElementById('kpi-total-comments').innerText  = commentsCount.toLocaleString();
-                if (hateCount      !== null) document.getElementById('kpi-hate-comments').innerText   = hateCount.toLocaleString();
-                if (candidatesCount!== null) document.getElementById('kpi-active-targets').innerText  = candidatesCount.toLocaleString();
-                if (pausedCount    !== null) { const e = document.getElementById('kpi-paused-targets');   if (e) e.innerText = pausedCount.toLocaleString(); }
-                if (excludedCount  !== null) { const e = document.getElementById('kpi-excluded-targets'); if (e) e.innerText = excludedCount.toLocaleString(); }
-
-                // [5] % de ódio
-                if (commentsCount > 0 && hateCount !== null) {
-                    const pct = ((hateCount / commentsCount) * 100).toFixed(2);
-                    const el = document.getElementById('kpi-hate-pct');
-                    if (el) el.innerText = `${pct}%`;
+                document.getElementById('kpi-total-comments').innerText = (cCount || 0).toLocaleString();
+                document.getElementById('kpi-hate-comments').innerText = (hCount || 0).toLocaleString();
+                
+                const pct = cCount > 0 ? ((hCount / cCount) * 100).toFixed(2) : "0.00";
+                document.getElementById('kpi-hate-pct').innerText = `${pct}% de ódio`;
+                
+                document.getElementById('kpi-active-targets').innerText = (aCount || 0).toLocaleString();
+                document.getElementById('kpi-paused-targets').innerText = (pCount || 0).toLocaleString();
+                document.getElementById('kpi-excluded-targets').innerText = (eCount || 0).toLocaleString();
+                
+                if (document.getElementById('kpi-reclassified')) {
+                    document.getElementById('kpi-reclassified').innerText = (rCount || 0).toLocaleString();
                 }
 
-                // Médias
-                const now = new Date();
-                (async () => {
-                    try {
-                        const { data: firstArr } = await db.from('comentarios').select('data_coleta').order('data_coleta', { ascending: true }).limit(1);
-                        if (firstArr?.length) {
-                            const diffDays = (now - new Date(firstArr[0].data_coleta)) / 86400000;
-                            document.getElementById('kpi-avg-comments-day').innerText  = diffDays > 0 ? (commentsCount / diffDays).toFixed(1) : commentsCount;
-                            document.getElementById('kpi-avg-comments-hour').innerText = diffDays > 0 ? (commentsCount / (diffDays * 24)).toFixed(1) : commentsCount;
-                        }
-                    } catch(_) {}
-                    try {
-                        const { data: firstHate } = await db.from('comentarios').select('data_coleta').eq('is_hate', true).order('data_coleta', { ascending: true }).limit(1);
-                        if (firstHate?.length) {
-                            const diffDays = (now - new Date(firstHate[0].data_coleta)) / 86400000;
-                            document.getElementById('kpi-avg-hate-day').innerText  = diffDays > 0 ? (hateCount / diffDays).toFixed(1) : hateCount;
-                            document.getElementById('kpi-avg-hate-hour').innerText = diffDays > 0 ? (hateCount / (diffDays * 24)).toFixed(1) : hateCount;
-                        }
-                    } catch(_) {}
-                })();
-
-                // C. Radar de Alvos
-                const { data: candidates } = await db
-                    .from('candidatos')
-                    .select('username, nome_completo, termometro, last_scraped_at, partido, estado')
-                    .eq('status_monitoramento', 'ATIVO')
-                    .order('last_scraped_at', { ascending: false, nullsFirst: false });
-
-                if (candidates) {
-                    localCandidatesList = candidates;
-                    document.getElementById('targets-count-badge').innerText = `${candidates.length}/${candidates.length}`;
-                    filterTargets();
+                if (firstComm && firstComm.length > 0 && cCount > 0) {
+                    const firstDate = new Date(firstComm[0].data_coleta);
+                    const diffDays = Math.max(1, Math.ceil((new Date() - firstDate) / 86400000));
+                    document.getElementById('kpi-avg-comments-day').innerText = `Média: ${(cCount / diffDays).toFixed(1)}/dia`;
                 }
-
-                // D. Telemetria / Runs
-                const { data: runs } = await db
-                    .from('worker_rewards')
-                    .select('worker_id, cycle, score, tier, delta, badges, timestamp')
-                    .order('timestamp', { ascending: false })
-                    .limit(12);
-
-                if (runs) {
-                    document.getElementById('runs-feed').innerHTML = runs.map(run => {
-                        const isCritical = ['critical','db_failed'].includes(run.tier);
-                        const isGold = run.tier === 'gold';
-                        let tierBadge = 'text-blue-400 bg-blue-500/10 border-blue-500/30';
-                        if (isGold)     tierBadge = 'text-amber-400 bg-amber-500/10 border-amber-500/30';
-                        if (isCritical) tierBadge = 'text-rose-400 bg-rose-500/10 border-rose-500/30';
-                        if (run.tier === 'silver') tierBadge = 'text-slate-400 bg-slate-500/10 border-slate-500/30';
-                        const delta = run.delta || 0;
-                        const deltaText = delta >= 0 ? `+${delta.toFixed(1)} XP` : `${delta.toFixed(1)} XP`;
-                        const deltaColor = delta >= 0 ? 'text-emerald-400' : 'text-rose-400';
-
-                        return `
-                        <div class="bg-slate-900/35 border border-slate-800/60 rounded-xl p-3.5 flex flex-col gap-2">
-                            <div class="flex justify-between items-center">
-                                <span class="font-bold text-white text-xs">${escapeHTML(run.worker_id)}</span>
-                                <span class="text-[9px] font-mono text-slate-500">${timeAgo(run.timestamp)}</span>
-                            </div>
-                            <div class="flex justify-between items-center text-[10px]">
-                                <span class="text-slate-400">Ciclo #${run.cycle || 0}</span>
-                                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider ${tierBadge}">${run.tier || 'silver'}</span>
-                            </div>
-                            <div class="flex justify-between items-center text-[10px] border-t border-slate-900/60 pt-2">
-                                <span>Score: <b class="text-slate-200 font-mono">${(run.score || 0).toFixed(1)}</b></span>
-                                <span class="${deltaColor} font-bold font-mono">${deltaText}</span>
-                            </div>
-                            ${run.badges?.length ? `<div class="flex flex-wrap gap-1 mt-1">${run.badges.map(b => `<span class="text-[8px] bg-slate-950/40 border border-slate-800 text-slate-400 px-1 py-0.5 rounded">${escapeHTML(b)}</span>`).join('')}</div>` : ''}
-                        </div>`;
-                    }).join('');
-                }
-
-                // E. Comentários classificados
-                const { data: comments } = await db
-                    .from('comentarios')
-                    .select('id, autor_username, texto_limpo, texto_bruto, candidato_id, is_hate, categoria_ia, confianca_ia, direcao_odio, data_coleta')
-                    .not('categoria_ia', 'is', null)
-                    .order('data_coleta', { ascending: false })
-                    .limit(30);
-
-                if (comments) renderComments(comments);
-
-                // [3] Atualiza relógio após sucesso
-                updateClock();
-
-            } catch(err) {
-                console.error('fetchData error:', err);
-            }
+            } catch (e) { console.error("KPI Error:", e); }
         }
 
-        // Auto-refresh a cada 10s
-        setInterval(fetchData, 10000);
+        async function fetchData() {
+            try {
+                const r = await fetch('/api/metrics');
+                if(r.ok) {
+                    const m = await r.json();
+                    document.getElementById('watchdog-status-text').innerText = m.status;
+                    document.getElementById('kpi-restars').innerText = `${m.cycle || 0} / ${m.restarts || 0}`;
+                    if(m.ai_services) document.getElementById('kpi-ai-services').innerHTML = Object.entries(m.ai_services).map(([s,st])=>`<div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full ${st==='OK'?'bg-emerald-500':'bg-rose-500'}"></span><span class="text-[10px] font-mono text-slate-300">${s}</span></div>`).join('');
+                    if(m.instagram_accounts) {
+                        const accs = {};
+                        Object.entries(m.instagram_accounts).forEach(([k, st]) => {
+                            const idx = k.match(/\d+$/) ? k.match(/\d+$/)[0] : '0';
+                            if(!accs[idx]) accs[idx] = [];
+                            accs[idx].push(st);
+                        });
+                        document.getElementById('kpi-instagram').innerHTML = Object.entries(accs).map(([idx, sts]) => {
+                            const ok = sts.every(s => s === 'OK');
+                            const label = idx === '0' ? 'Principal' : `Backup ${idx}`;
+                            return `<div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full ${ok ? 'bg-emerald-500' : 'bg-rose-500'}"></span><span class="text-[10px] font-mono text-slate-300">${label}</span></div>`;
+                        }).join('');
+                    }
+                }
+            } catch(e) {}
+            await fetchKPIs();
+            const [{data:cands}, {data:runs}, {data:coms}] = await Promise.all([
+                db.from('candidatos').select('*').ilike('status_monitoramento', 'ATIVO').order('last_scraped_at', { ascending: false, nullsFirst: false }),
+                db.from('worker_rewards').select('*').order('timestamp', { ascending: false }).limit(10),
+                db.from('comentarios').select('*').order('data_coleta', { ascending: false }).limit(40)
+            ]);
+            if(cands) { localCandidatesList = cands; document.getElementById('targets-count-badge').innerText = `${cands.length}/${cands.length}`; filterTargets(); }
+            if(runs) document.getElementById('runs-feed').innerHTML = runs.map(r => `<div class="bg-slate-900/35 border border-slate-800/60 p-3 rounded-xl flex flex-col gap-1.5"><div class="flex justify-between text-[10px]"><span class="font-bold text-slate-300">${r.worker_id}</span><span class="text-slate-500">${timeAgo(r.timestamp)}</span></div><div class="flex justify-between items-center"><span class="text-[8px] font-black px-1.5 py-0.5 rounded border border-slate-700 bg-slate-800 text-slate-400 uppercase tracking-widest">${r.tier || 'silver'}</span><span class="text-[10px] font-black text-emerald-400">+${(r.delta || 0).toFixed(1)} XP</span></div></div>`).join('');
+            if(coms) renderComments(coms);
+            setupRealtime();
+        }
+
+        function toggleHateOnly() {
+            hateOnly = !hateOnly;
+            const b = document.getElementById('btn-hate-only');
+            b.classList.toggle('bg-rose-500/20'); b.classList.toggle('border-rose-500/50'); b.classList.toggle('text-rose-400');
+            renderComments(lastComments);
+        }
+
+        document.getElementById('thermo-filters').addEventListener('click', e => {
+            const b = e.target.closest('[data-filter]'); if(!b) return;
+            activeThermo = b.dataset.filter;
+            document.querySelectorAll('.thermo-btn').forEach(btn => btn.classList.remove('active'));
+            b.classList.add('active'); filterTargets();
+        });
+
         fetchData();
+        setInterval(fetchKPIs, 60000);
     </script>
 </body>
 </html>
