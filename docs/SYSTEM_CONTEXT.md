@@ -21,7 +21,7 @@ O Sentinela é uma plataforma de monitoramento político com foco em:
               ├── AIProcessorWorker
               ├── NetworkMinerWorker
               ├── TreasurerWorker
-              └── ResearcherWorker
+              └── TargetResearchWorker (opcional por RESEARCHER_MODE)
 
 [Supabase / PostgreSQL]
   ├── candidatos
@@ -48,6 +48,28 @@ O Sentinela é uma plataforma de monitoramento político com foco em:
 6. mineração de rede
 7. atualização de métricas financeiras e telemetria
 
+## 3.1 Estado atual dos workers
+
+Contrato oficial:
+
+- `workers/base/worker_base.py`
+- `workers/base/cycle_result.py`
+
+Workers ativos observados no runtime:
+
+- `InstagramScraperWorker`
+- `AIProcessorWorker`
+- `NetworkMinerWorker`
+- `TreasurerWorker`
+- `TargetResearchWorker` quando habilitado
+
+Mudanças já aplicadas:
+
+- remoção dos contratos legados em `workers/core/`
+- remoção de entrypoints legados paralelos ao runtime moderno
+- alinhamento de scripts operacionais com `main_runner.py`
+- `TargetResearchWorker` agora nasce desabilitado por padrão
+
 ## 4. Camada de IA em produção
 
 O pipeline ativo identificado no código é:
@@ -68,7 +90,7 @@ O estado real do código mostra:
 
 - trava atômica com `SELECT FOR UPDATE SKIP LOCKED`
 - suporte a release de locks expirados
-- fallback para claim legado quando RPC/migração não está disponível
+- fallback compatível quando RPC/migração não está disponível
 
 Portanto, a fila distribuída via lock atômico já está operacional em nível de código.
 PGMQ permanece como alternativa futura, não como dependência atual.
@@ -102,6 +124,9 @@ Os itens abaixo aparecem em documentos antigos, mas não representam a verdade o
 - Zyte como eixo principal da coleta
 - PGMQ como mecanismo já implantado
 - Gemini como classificador oficial principal
+- `core/orquestrador.py` como entrypoint válido
+- `ClassifierWorker` como worker suportado
+- `official_solenya_daemon.py` como daemon ativo
 
 ## 9. Fontes de verdade
 

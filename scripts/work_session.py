@@ -89,9 +89,9 @@ def run_routine():
     """Executa a sequência de tarefas da rotina diária."""
     scripts_to_run = [
         ("Limpeza", "python tools/cleanup_ghosts.py"),
-        ("Raspagem", "python core/orquestrador.py"),
+        ("Raspagem", "python main_runner.py"),
         ("IA / Classificação", "python tools/process_backlog.py"),
-        ("Dashboards / KPIs", "python scripts/update_kpis.py")
+        ("Scanner Documental", "python scripts/run_scanner_agent.py --once")
     ]
     
     for name, cmd in scripts_to_run:

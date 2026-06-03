@@ -11,7 +11,7 @@ Este documento resume apenas o que continua válido após auditoria do código.
 - `AIProcessorWorker` classifica backlog e reanalisa baixa confiança
 - `NetworkMiner` consolida rede
 - `Treasurer` calcula indicadores
-- `ResearcherWorker` extrai heurísticas documentais
+- `TargetResearchWorker` só entra no runtime quando `RESEARCHER_MODE` estiver habilitado
 
 ## 2. IA ativa
 
@@ -45,7 +45,21 @@ O script `scripts/reclassify_low_confidence.py`:
 - pode permitir fallback local com `ollama`
 - não deve mais ser descrito como fluxo LiteRT/Ollama
 
-## 6. Uso recomendado
+## 6. Estado da refatoração de workers
+
+Já foi concluído:
+
+- expurgo dos entrypoints e contratos legados que competiam com o runtime moderno
+- absorção da lógica útil do antigo `ClassifierWorker` em `core/ai_service.py`
+- atualização dos scripts operacionais auxiliares
+- desativação padrão do `researcher-01`
+
+Ainda pendente:
+
+- simplificar `workers/orchestrator/orchestrator.py`
+- padronizar semântica de idle e `CycleResult`
+
+## 7. Uso recomendado
 
 Para iniciar trabalho novo:
 

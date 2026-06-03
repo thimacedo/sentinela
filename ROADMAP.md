@@ -11,7 +11,10 @@ _last_updated: 2026-06-03 | branch: main_
 - [x] Fallback profundo com `FallbackLLM`
 - [x] `NetworkMiner` com deduplicação por assinatura lexical
 - [x] `Treasurer` com telemetria financeira
-- [x] `researcher_agent` com atualização de heurísticas em `config/custom_rules.json`
+- [x] `TargetResearchWorker` com ativação controlada por `RESEARCHER_MODE`
+- [x] Expurgo dos entrypoints e contratos legados paralelos ao runtime oficial
+- [x] Absorção do padrão ouro legado em `core/ai_service.py`
+- [x] Atualização dos scripts operacionais para o runtime moderno
 
 ### Escalabilidade e resiliência
 - [x] Claim atômico da `fila_coleta`
@@ -40,6 +43,12 @@ _last_updated: 2026-06-03 | branch: main_
 - [ ] remover referências residuais a LiteRT do código e da operação
 - [ ] calibrar reanálise de baixa confiança com menor ruído de fallback
 
+### Workers e orquestração
+- [ ] simplificar `workers/orchestrator/orchestrator.py`
+- [ ] unificar semântica de `no_tasks_available` entre workers ativos
+- [ ] reduzir duplicidade de logging, cooldown e fluxo entre ciclos
+- [ ] revisar se `TargetResearchWorker` deve permanecer em `workers/ai/` ou migrar para domínio próprio
+
 ### Administração e analytics
 - [ ] tabelas tabulares de gasto por usuário e por perfil monitorado
 - [ ] shadowban léxico
@@ -66,3 +75,5 @@ _last_updated: 2026-06-03 | branch: main_
 - LiteRT não compõe mais o pipeline de processamento ativo
 - `frontend/` é o frontend oficial
 - `STATE.md` é a fonte de verdade operacional
+- o runtime oficial de workers usa `workers/base/worker_base.py`
+- entrypoints paralelos legados não devem ser reintroduzidos

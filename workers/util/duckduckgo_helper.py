@@ -7,12 +7,11 @@ handles (max 5) after filtering generic terms.
 """
 import urllib.parse
 import re
+import logging
 import httpx
 from core.constants import DEFAULT_TIMEOUT
-from workers.core.base_worker import BaseWorker
 
-# Reuse logger via a temporary BaseWorker instance (lightweight)
-_logger = BaseWorker("DuckDuckGoHelper").logger
+_logger = logging.getLogger("worker.duckduckgo_helper")
 
 async def search_instagram(name: str, cargo: str) -> list:
     """Search DuckDuckGo HTML for Instagram handles related to a public figure.

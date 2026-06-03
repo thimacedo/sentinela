@@ -63,6 +63,8 @@ Estes conteúdos não devem guiar trabalho novo sem validação direta no códig
 - o fallback profundo existe em `core/fallback_llm.py`
 - a fila atômica com `SELECT FOR UPDATE SKIP LOCKED` já existe em `core/queue_manager.py`
 - o watchdog expõe SSE e controle remoto do runner
+- o contrato oficial de worker está em `workers/base/worker_base.py`
+- `TargetResearchWorker` ficou opcional e controlado por `RESEARCHER_MODE`
 
 ### Errado na documentação antiga
 
@@ -70,6 +72,9 @@ Estes conteúdos não devem guiar trabalho novo sem validação direta no códig
 - PGMQ como base já operacional
 - `proposta_frontend/` como diretório oficial
 - Zyte como centro da estratégia atual
+- `ClassifierWorker` como classificador ativo
+- `core/orquestrador.py` como entrypoint operacional
+- `official_solenya_daemon.py` como daemon suportado
 
 ### Ainda serve
 
@@ -82,6 +87,14 @@ Estes conteúdos não devem guiar trabalho novo sem validação direta no códig
 - specs antigas tratadas como se fossem estado atual
 - textos duplicados/corrompidos em `STATE.md` anterior
 - checklists antigos usados como arquitetura
+- entrypoints paralelos legados competindo com `main_runner.py`
+
+## 5.1 Refatorações de workers já documentadas
+
+- expurgo dos contratos e entrypoints legados que conflitam com o runtime oficial
+- absorção de lógica útil do legado em componentes modernos, sem preservar os entrypoints antigos
+- alinhamento dos scripts de operação noturna e work session com o fluxo oficial
+- desligamento padrão do `researcher-01` para impedir ciclos vazios sem backlog real
 
 ## 6. Regra de manutenção daqui para frente
 

@@ -5,7 +5,7 @@ _last_updated: 2026-06-03 | branch: main_
 
 | Subsistema | Status | Observação |
 |---|---|---|
-| Coleta | 🟢 Operacional | Scraper V2 ativo, com fila atômica e fallback legado |
+| Coleta | 🟢 Operacional | Scraper V2 ativo, com fila atômica e fallback compatível quando RPC não existe |
 | Inteligência | 🟡 Operacional com degradação | `ollama` ativo localmente; cloud sujeito a 429/quota; fallback profundo existe mas precisa saneamento de providers |
 | Analytics de Rede | 🟢 Operacional | `network-miner` em execução |
 | Financeiro | 🟢 Operacional | `treasurer` ativo |
@@ -34,8 +34,24 @@ _last_updated: 2026-06-03 | branch: main_
 - watchdog com start/stop/restart e SSE
 - `ollama` ativo
 - `AIProcessorWorker` como classificador central
-- `researcher_agent` e `scripts/research_pdf_criteria.py`
+- `TargetResearchWorker` com ativação controlada por `RESEARCHER_MODE`
 - `queue_manager` com claim atômico
+
+### Refatorações de workers já concluídas
+
+- `ClassifierWorker` foi removido do runtime e sua lógica útil de padrão ouro foi absorvida por `core/ai_service.py`
+- entrypoints legados paralelos foram expurgados:
+  - `core/orquestrador.py`
+  - `workers/core/base_worker.py`
+  - `workers/processors/queue_manager.py`
+  - `workers/processors/search_watcher.py`
+  - `workers/processors/cleanup_worker.py`
+  - `workers/analytics/report_worker.py`
+  - `workers/official_solenya_daemon.py`
+  - `workers/orchestrator_long_run.py`
+  - `workers/schedule_long_scrape.py`
+- `researcher-01` não sobe mais por padrão sem backlog real
+- `scripts/work_session.py` e `scripts/night_watch_pipeline.sh` foram alinhados ao runtime moderno
 
 ### Errado nos documentos antigos
 
@@ -74,7 +90,7 @@ O principal risco operacional hoje não é ausência de pipeline, e sim degrada�
 - claim atômico
 - release atômico
 - stale lock release
-- fallback legado quando RPC não existe
+- fallback compatível quando RPC não existe
 
 ### Implicação
 
@@ -99,6 +115,6 @@ PGMQ deve aparecer apenas como hipótese futura.
 ## Próximos passos recomendados
 
 1. sanear `config/fallback_providers.yaml`
-2. remover referências residuais a LiteRT do código e da UI operacional
-3. revisar docs metodológicas antigas para reduzir contradição
-4. corrigir itens sensíveis remanescentes do dashboard local
+2. simplificar `workers/orchestrator/orchestrator.py` removendo duplicidade entre `run_cycle_with_validation` e `run_cycle_with_validation_v2`
+3. padronizar semântica de idle e `CycleResult` entre workers ativos
+4. revisar docs metodológicas antigas para reduzir contradição

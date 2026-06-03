@@ -120,12 +120,18 @@ def build_orchestrator() -> SentinelaOrchestrator:
         logger.warning(f"[main_runner] Erro ao registrar workers de analytics/financeiro: {e}")
 
     # Motor de Curadoria e Inteligência de Alvos (v84.9)
-    orch.register(TargetResearchWorker(
-        worker_id="researcher-01",
-        config={
-            "headless": True
-        }
-    ))
+    researcher_mode = os.getenv("RESEARCHER_MODE", "disabled").strip().lower()
+    if researcher_mode != "disabled":
+        orch.register(TargetResearchWorker(
+            worker_id="researcher-01",
+            config={
+                "headless": True,
+                "mode": researcher_mode,
+            }
+        ))
+        logger.info(f"[main_runner] Researcher registrado em modo: {researcher_mode}")
+    else:
+        logger.info("[main_runner] Researcher desabilitado (RESEARCHER_MODE=disabled).")
 
     logger.info(f"[main_runner] Workers registrados: {orch.worker_ids}")
     return orch

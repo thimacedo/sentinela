@@ -1,6 +1,6 @@
 """
 PASA v52.3 - AI Service: Motor de Inteligência Resiliente (Hybrid Cascade)
-Roteamento dinâmico: LiteRT (Local) -> Ollama (Local) -> Mistral -> Groq -> OpenRouter.
+Roteamento dinâmico: Ollama (Local) -> Mistral -> Groq -> OpenRouter.
 """
 import os
 import json
@@ -15,6 +15,11 @@ from core.circuit_breaker import ai_circuit_breaker
 logger = logging.getLogger("AIService")
 
 CONFIDENCE_THRESHOLD = float(os.getenv('CONFIDENCE_THRESHOLD', '0.5'))
+GOLD_DATASET_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "data",
+    "classifier_gold_dataset.json",
+)
 # MCA v2.2 Protocol - Calibragem Forense Crítica (v85.11)
 SYSTEM_PROMPT = """Você é um perito em Linguística Forense Digital especializado em ataques coordenados e hostilidade política.
 Sua missão é classificar comentários com realismo absoluto, seguindo a Metodologia de Classificação de Ataques (MCA v2.2) e as Diretrizes do Protocolo PASA v16.4.
@@ -250,8 +255,41 @@ class AIService:
                     return base_prompt + enrichment
         except Exception as e:
             logger.warning(f"Falha ao carregar regras customizadas em {config_path}: {e}")
-            
+
+        gold_enrichment = self._build_gold_dataset_enrichment(is_local)
+        if gold_enrichment:
+            if "--- FORMATO DE RESPOSTA (JSON APENAS) ---" in base_prompt:
+                parts = base_prompt.split("--- FORMATO DE RESPOSTA (JSON APENAS) ---")
+                return parts[0] + gold_enrichment + "\n--- FORMATO DE RESPOSTA (JSON APENAS) ---" + parts[1]
+            return base_prompt + gold_enrichment
+
         return base_prompt
+
+    def _build_gold_dataset_enrichment(self, is_local: bool) -> str:
+        if is_local or not os.path.exists(GOLD_DATASET_PATH):
+            return ""
+
+        try:
+            with open(GOLD_DATASET_PATH, "r", encoding="utf-8") as f:
+                gold_data = json.load(f)
+        except Exception as e:
+            logger.warning(f"Falha ao carregar padrão ouro em {GOLD_DATASET_PATH}: {e}")
+            return ""
+
+        if not isinstance(gold_data, list) or not gold_data:
+            return ""
+
+        examples = []
+        for item in gold_data[-10:]:
+            text = str(item.get("text", "")).strip()
+            label = str(item.get("label", "")).strip().upper()
+            if text and label:
+                examples.append(f"- Texto: \"{text[:240]}\" -> Categoria: {label}")
+
+        if not examples:
+            return ""
+
+        return "\n\n--- PADRÃO OURO AUDITADO ---\nUse estes exemplos auditados como referência adicional de calibração:\n" + "\n".join(examples) + "\n"
 
     async def _call_provider(self, provider: Dict[str, Any], text: str, comment_id: str) -> Optional[Dict[str, Any]]:
         name = provider["name"]

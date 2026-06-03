@@ -1,32 +1,71 @@
-# Arquitetura de Workers (Sentinela Democrática)
+# Arquitetura de Workers — Sentinela
 
-Este diretório contém a infraestrutura de processamento assíncrono e tarefas em background do Sentinela Democrática.
+Este diretório contém os workers e utilitários do runtime moderno do Sentinela.
 
-## 💎 Design Pattern: Protocolo Diamond
-Esta arquitetura segue o princípio Open/Closed. Todos os workers devem estender a classe `BaseWorker` localizada em `core/base_worker.py`.
+## Contrato oficial
 
-### Estrutura de Diretórios
+O contrato atual fica em:
 
-- `core/`: Contém contratos (Interfaces/Abstract Base Classes) e utilitários globais (`common.py`). Modifique com cuidado, pois é o contrato principal.
-- `scrapers/`: Workers dedicados EXCLUSIVAMENTE a extrair dados da web (Ex: Instagram, Meta Ads).
-- `processors/`: Workers dedicados EXCLUSIVAMENTE a processamento (Ex: Análise PASA com LLMs, limpeza de dados).
-- `main_orchestrator.py`: O cron/daemon principal responsável por instanciar os workers ou delegar tarefas e persistir estados no Git/Supabase.
+- `workers/base/worker_base.py`
+- `workers/base/cycle_result.py`
 
-### Como criar um novo Worker
+Todo worker novo deve:
 
-1. Crie o arquivo no diretório apropriado (ex: `scrapers/tiktok_scraper.py`).
-2. Importe e herde de `BaseWorker`.
-3. Implemente o método `async def _run(self, *args, **kwargs)`.
-4. (Opcional) Sobrescreva `def handle_failure(self, exception)`.
+1. herdar de `workers.base.worker_base.BaseWorker`
+2. implementar `setup()`, `run_cycle()`, `teardown()` e `describe()`
+3. retornar `CycleResult`
+4. evitar loops próprios quando o orquestrador já controla o ciclo
 
-Exemplo:
-```python
-from workers.core.base_worker import BaseWorker
+## Estrutura atual
 
-class MyNewWorker(BaseWorker):
-    def __init__(self):
-        super().__init__("MyNewWorker")
-        
-    async def _run(self, data):
-        print(f"Processando {data}")
-```
+- `workers/scrapers/` — coleta
+- `workers/processors/` — processamento e subagentes
+- `workers/analytics/` — analytics derivados
+- `workers/financial/` — telemetria financeira
+- `workers/ai/` — workers auxiliares de inteligência e pesquisa
+- `workers/orchestrator/` — coordenação do runtime moderno
+- `workers/base/` — contrato oficial, reputação e memória
+
+## O que foi removido
+
+Os entrypoints e contratos legados que competiam com o runtime oficial foram expurgados:
+
+- `core/orquestrador.py`
+- `workers/core/base_worker.py`
+- `workers/processors/classifier_worker.py`
+- `workers/processors/queue_manager.py`
+- `workers/processors/search_watcher.py`
+- `workers/processors/cleanup_worker.py`
+- `workers/analytics/report_worker.py`
+- `workers/official_solenya_daemon.py`
+- `workers/orchestrator_long_run.py`
+- `workers/schedule_long_scrape.py`
+
+## O que foi reaproveitado
+
+Parte da lógica útil do legado foi preservada no runtime moderno:
+
+- injeção de exemplos de padrão ouro incorporada a `core/ai_service.py`
+- scanner documental mantido em `workers/processors/candidate_scanner.py`
+- scripts auxiliares realinhados para o fluxo oficial
+- `workers/official_solenya_daemon.py`
+- `workers/orchestrator_long_run.py`
+- `workers/schedule_long_scrape.py`
+
+## O que foi reaproveitado
+
+Parte da lógica útil do legado foi preservada no runtime moderno:
+
+- injeção de exemplos de padrão ouro incorporada a `core/ai_service.py`
+- scanner documental mantido em `workers/processors/candidate_scanner.py`
+- scripts auxiliares realinhados para o fluxo oficial
+
+## Regra prática
+
+Se um fluxo precisar de:
+
+- ciclo contínuo supervisionado, use `main_runner.py`
+- observabilidade e controle operacional, use `watchdog`
+- scanner documental, use `scripts/run_scanner_agent.py`
+
+Não reintroduza entrypoints paralelos legados.

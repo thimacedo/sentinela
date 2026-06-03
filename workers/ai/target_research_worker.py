@@ -1,6 +1,7 @@
 from __future__ import annotations
 import asyncio
 import logging
+import os
 from workers.base.worker_base import BaseWorker
 from workers.base.cycle_result import CycleResult
 from core.intelligence_service import intelligence_service
@@ -18,6 +19,7 @@ class TargetResearchWorker(BaseWorker):
     def __init__(self, worker_id: str, config: dict):
         super().__init__(worker_id, config)
         self.cycle = 0
+        self.mode = config.get("mode", os.getenv("RESEARCHER_MODE", "disabled")).strip().lower()
 
     def describe(self) -> str:
         return "Motor de Curadoria e Inteligencia de Alvos"
@@ -40,6 +42,17 @@ class TargetResearchWorker(BaseWorker):
         quality_score = 0.0
         
         try:
+            if self.mode == "disabled":
+                return CycleResult(
+                    worker_id=self.worker_id,
+                    cycle=self.cycle,
+                    source="intelligence_curation",
+                    simulated=True,
+                    error="disabled",
+                    duration=asyncio.get_event_loop().time() - start_time,
+                    metadata={"reason": "researcher_disabled"},
+                )
+
             # 1. PRIORIDADE 1: Busca alvos pendentes de validação CRÍTICA
             res = db_client.client.table('candidatos')\
                 .select('username')\
@@ -50,7 +63,7 @@ class TargetResearchWorker(BaseWorker):
                 .execute()
 
             # 2. TAREFA DE UTILIDADE (PASA v85.12): Enriquecimento de Dados Faltantes
-            if not res.data:
+            if not res.data and self.mode == "utility":
                 self.logger.info(f"[Curador] Fila de validação vazia. Iniciando Enriquecimento de Metadados...")
                 res = db_client.client.table('candidatos')\
                     .select('username')\

@@ -27,6 +27,24 @@ O fluxo atual observado no código é:
 7. `treasurer` atualiza indicadores financeiros
 8. `researcher` atualiza heurísticas semânticas a partir das bases documentais
 
+## Estado atual dos workers
+
+Workers ativos no runtime moderno:
+
+- `workers/scrapers/ig_worker_v2.py` — coleta Instagram com fila atômica
+- `workers/processors/ai_processor_worker.py` — classificador oficial e reanálise de baixa confiança
+- `workers/analytics/network_worker.py` — mineração de rede e clusters
+- `workers/financial/treasurer_worker.py` — auditoria e telemetria financeira
+- `workers/ai/target_research_worker.py` — curadoria de alvos, agora controlado por modo explícito
+- `workers/orchestrator/orchestrator.py` — coordenação do runtime moderno
+
+Refatorações já concluídas nesta frente:
+
+- expurgo dos entrypoints e contratos legados que competiam com o runtime oficial
+- absorção da lógica útil de padrão ouro do antigo `ClassifierWorker` para `core/ai_service.py`
+- desativação padrão do `researcher-01` com `RESEARCHER_MODE=disabled`
+- atualização dos scripts auxiliares para apontar para `main_runner.py` e `scripts/run_scanner_agent.py`
+
 ## Entrada oficial
 
 ```bash
