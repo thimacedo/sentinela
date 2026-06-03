@@ -16,6 +16,9 @@ import os
 import logging
 from typing import List, Dict, Any
 import requests
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Configura logger local
 logger = logging.getLogger(__name__)
@@ -144,16 +147,20 @@ class FallbackLLM:
         resp.raise_for_status()
         return resp.json()["content"][0]["text"]
 
-    def _call_gemini(self, text: str, api_key: str) -> str:
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+    def _call_gemini(self, text: str, api_key: str, model: str) -> str:
+        if not api_key:
+            raise ValueError("GEMINI_API_KEY ausente.")
+        model = model or "gemini-1.5-flash"
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
         payload = {"contents": [{"parts": [{"text": text}]}]}
         resp = requests.post(url, json=payload, timeout=15)
         resp.raise_for_status()
         return resp.json()["candidates"][0]["content"]["parts"][0]["text"]
 
-    def _call_groq(self, text: str, api_key: str) -> str:
+    def _call_groq(self, text: str, api_key: str, model: str) -> str:
         url = "https://api.groq.com/openai/v1/chat/completions"
-        payload = {"model": "llama3-8b-8192", "messages": [{"role": "user", "content": text}]}
+        model = model or "llama-3.1-8b-instant" # updated groq model
+        payload = {"model": model, "messages": [{"role": "user", "content": text}]}
         headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
         resp = requests.post(url, json=payload, headers=headers, timeout=15)
         resp.raise_for_status()
@@ -184,6 +191,7 @@ class FallbackLLM:
         for prov in providers:
             name = prov["name"]
             key_env = prov.get("api_key_env")
+            model_name = prov.get("model")
             api_key = os.getenv(key_env) if key_env else None
             try:
                 if name == "cohere":
@@ -206,9 +214,9 @@ class FallbackLLM:
                 if name == "anthropic_claude_instant":
                     return self._call_anthropic(text, api_key)
                 if name == "google_gemini":
-                    return self._call_gemini(text, api_key)
+                    return self._call_gemini(text, api_key, model_name)
                 if name == "groq_llama3":
-                    return self._call_groq(text, api_key)
+                    return self._call_groq(text, api_key, model_name)
                 if name == "cohere_command":
                     return self._call_cohere(text, api_key)
                 if name == "fireworks_ai":
