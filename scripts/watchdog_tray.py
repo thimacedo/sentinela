@@ -80,6 +80,7 @@ def restart_watchdog():
 
 AUDIT_SCRIPT = PROJECT_ROOT / "scripts" / "run_audit_agent.py"
 DOSSIER_SCRIPT = PROJECT_ROOT / "scripts" / "run_dossier_agent.py"
+SCANNER_SCRIPT = PROJECT_ROOT / "scripts" / "run_scanner_agent.py"
 
 def open_dashboard():
     try:
@@ -114,6 +115,18 @@ def run_dossier_agent():
         print("[Tray] DossierAgent disparado")
     except Exception as e:
         print(f"[Tray] Erro ao disparar DossierAgent: {e}")
+
+def run_scanner_agent():
+    """Dispara o sub-agente de escaneamento de candidatos em console visível."""
+    try:
+        subprocess.Popen(
+            [sys.executable, str(SCANNER_SCRIPT), '--once'],
+            cwd=str(PROJECT_ROOT),
+            creationflags=subprocess.CREATE_NEW_CONSOLE,
+        )
+        print('[Tray] ScannerAgent disparado')
+    except Exception as e:
+        print(f'[Tray] Erro ao disparar ScannerAgent: {e}')
 
 def quit_tray(icon, item):
     stop_watchdog()
@@ -154,6 +167,7 @@ def setup_tray():
         pystray.Menu.SEPARATOR,
         item('▶ Rodar Auditoria IA', lambda i: run_audit_agent()),
         item('▶ Rodar DossierAgent', lambda i: run_dossier_agent()),
+        item('▶ Rodar ScannerAgent', lambda i: run_scanner_agent()),
         pystray.Menu.SEPARATOR,
         item('Sair', quit_tray),
     )

@@ -1,8 +1,9 @@
 """
 Worker: CandidateScanner (Motor de Inteligência de Alvos)
 Finalidade: Monitorar a pasta de pesquisas, extrair candidatos, calcular relevância e agendar coleta.
-Protocolo Diamond: Herda de BaseWorker.
+Protocolo Diamond v88.0: Herda de workers.base.worker_base.BaseWorker (moderno).
 """
+from __future__ import annotations
 import sys
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -18,42 +19,128 @@ from core.constants import DEFAULT_TIMEOUT
 import httpx
 from datetime import datetime, UTC
 from pathlib import Path
-from typing import List, Dict
+from typing import List, Dict, Optional
 
-# Import do contrato BaseWorker e DB
-import sys
-sys.path.append(r".")
-from workers.core.base_worker import BaseWorker
+from workers.base.worker_base import BaseWorker
+from workers.base.cycle_result import CycleResult
 from core.db import db_client
 from core.ai_service import ai_service
 from core.intelligence_service import intelligence_service
+from workers.util.duckduckgo_helper import search_instagram
 
 try:
     from pypdf import PdfReader
 except ImportError:
     PdfReader = None
 
+
 class CandidateScannerWorker(BaseWorker):
-    def __init__(self):
-        super().__init__("CandidateScanner")
-        self.base_path = Path(r".\bases_pesquisas")
-        self.processed_table = "pesquisas_processadas"
-        self.candidate_table = "candidatos"
-        self.queue_table = "fila_coleta"
+    """
+    Sub-agente de escaneamento de candidatos.
+    Monitora a pasta de pesquisas em PDF, extrai candidatos e os enfileira para coleta.
+    """
 
-    async def _run(self, *args, **kwargs):
+    # Mapeamento de aliases de handles incorretos conhecidos
+    HANDLE_ALIASES: Dict[str, str] = {
+        "jairbolsonaro": "jairmessiasbolsonaro",
+        # Adicione outros mapeamentos aqui conforme necessário
+    }
+
+    def __init__(self, worker_id: str, config: dict):
+        super().__init__(worker_id, config)
+        self.cycle = 0
+        self.base_path = Path(config.get('base_path', r'.\bases_pesquisas'))
+        self.processed_table = 'pesquisas_processadas'
+        self.candidate_table = 'candidatos'
+        self.queue_table = 'fila_coleta'
+
+    def describe(self) -> str:
+        return (
+            f"CandidateScannerWorker | "
+            f"Monitora PDFs em '{self.base_path}', extrai candidatos e enfileira para coleta."
+        )
+
+    async def setup(self) -> None:
+        """Verifica dependências e loga inicialização."""
         if not PdfReader:
-            self.logger.error("Biblioteca 'pypdf' não encontrada. Execute 'pip install pypdf'.")
-            return
+            self.logger.error(
+                "Biblioteca 'pypdf' não encontrada. Execute 'pip install pypdf'."
+            )
+        self.logger.info(f"[{self.worker_id}] Setup concluído. Base path: {self.base_path}")
 
-        self.logger.info(f"🔍 Escaneando diretório: {self.base_path}")
+    async def teardown(self) -> None:
+        """Loga encerramento graceful."""
+        self.logger.info(f"[{self.worker_id}] Encerramento concluído.")
+
+    async def run_cycle(self) -> CycleResult:
+        """
+        Escaneia PDFs novos na pasta base_path.
+        - extracted: total de candidatos detectados em todos os PDFs
+        - inserted:  total de candidatos enfileirados com sucesso
+        - failed:    erros durante o processamento
+        Retorna error='no_tasks_available' se nenhum PDF novo for encontrado.
+        """
+        self.cycle += 1
+        result = CycleResult(worker_id=self.worker_id, cycle=self.cycle)
+
+        if not PdfReader:
+            result.error = 'pypdf_not_installed'
+            result.failed = 1
+            return result
+
+        self.logger.info(f"🔍 [{self.worker_id}] Ciclo #{self.cycle} | Escaneando: {self.base_path}")
+
+        # Verifica se o diretório existe
+        if not self.base_path.exists():
+            self.logger.warning(f"⚠️ Diretório não encontrado: {self.base_path}")
+            result.error = 'no_tasks_available'
+            return result
+
         files = list(self.base_path.glob("*.pdf"))
-        
-        for file_path in files:
-            await self._process_file(file_path)
+        if not files:
+            self.logger.info("📂 Nenhum PDF encontrado na pasta de pesquisas.")
+            result.error = 'no_tasks_available'
+            return result
 
-    async def _process_file(self, file_path: Path):
+        total_extracted = 0
+        total_inserted = 0
+        total_failed = 0
+
+        for file_path in files:
+            # Parada graceful entre arquivos
+            if self.shutdown_event and self.shutdown_event.is_set():
+                self.logger.info(f"[{self.worker_id}] Shutdown detectado. Interrompendo ciclo.")
+                break
+
+            extracted, inserted, failed = await self._process_file(file_path)
+            total_extracted += extracted
+            total_inserted += inserted
+            total_failed += failed
+
+        result.extracted = total_extracted
+        result.inserted = total_inserted
+        result.failed = total_failed
+        result.db_success = total_inserted > 0
+
+        if total_extracted == 0 and total_failed == 0:
+            result.error = 'no_tasks_available'
+
+        self.logger.info(
+            f"✅ [{self.worker_id}] Ciclo #{self.cycle} concluído | "
+            f"detectados={total_extracted} enfileirados={total_inserted} falhas={total_failed}"
+        )
+        return result
+
+    async def _process_file(self, file_path: Path) -> tuple[int, int, int]:
+        """
+        Processa um único PDF de pesquisa.
+        Retorna (extracted, inserted, failed).
+        """
         file_name = file_path.name
+        extracted = 0
+        inserted = 0
+        failed = 0
+
         self.logger.info(f"📄 Analisando arquivo: {file_name}")
 
         # 1. Verificar se já foi processado (Hash)
@@ -62,8 +149,8 @@ class CandidateScannerWorker(BaseWorker):
 
         existing = db_client.client.table(self.processed_table).select("id").eq("hash_sha256", file_hash).execute()
         if existing.data:
-            self.logger.info(f"⏩ Arquivo já processado anteriormente. Pulando.")
-            return
+            self.logger.info(f"⏩ Arquivo '{file_name}' já processado anteriormente. Pulando.")
+            return 0, 0, 0
 
         # 2. Extrair Texto do PDF
         try:
@@ -71,27 +158,34 @@ class CandidateScannerWorker(BaseWorker):
             full_text = ""
             for page in reader.pages:
                 full_text += page.extract_text() + "\n"
-            
+
             # 3. Detectar Candidatos e Intenções (%)
             candidates = self._extract_candidates(full_text)
-            self.logger.info(f"🎯 Detectados {len(candidates)} potenciais alvos.")
+            extracted = len(candidates)
+            self.logger.info(f"🎯 Detectados {extracted} potenciais alvos em '{file_name}'.")
 
-            # 4. Salvar Registro da Pesquisa (usando upsert para idempotência)
+            # 4. Salvar Registro da Pesquisa (upsert para idempotência)
             res_pesquisa = db_client.client.table(self.processed_table).upsert({
                 "arquivo": file_name,
                 "hash_sha256": file_hash,
-                "candidatos_detectados": len(candidates),
+                "candidatos_detectados": extracted,
                 "status": "PROCESSADO"
             }, on_conflict="arquivo").execute()
-            
+
             pesquisa_id = res_pesquisa.data[0]['id'] if res_pesquisa.data else None
 
             # 5. Processar cada candidato detectado
             for candidate in candidates:
-                await self._handle_candidate(candidate, pesquisa_id, file_name)
+                success = await self._handle_candidate(candidate, pesquisa_id, file_name)
+                if success:
+                    inserted += 1
+                else:
+                    # Candidatos em observação ou rejeitados não contam como falha técnica
+                    pass
 
         except Exception as e:
-            self.logger.error(f"❌ Erro ao processar {file_name}: {e}")
+            self.logger.error(f"❌ Erro ao processar '{file_name}': {e}")
+            failed += 1
             try:
                 db_client.client.table(self.processed_table).upsert({
                     "arquivo": file_name,
@@ -99,7 +193,9 @@ class CandidateScannerWorker(BaseWorker):
                     "status": "ERRO"
                 }, on_conflict="arquivo").execute()
             except Exception as e_log:
-                self.logger.error(f"❌ Erro ao registrar status de falha para {file_name}: {e_log}")
+                self.logger.error(f"❌ Erro ao registrar status de falha para '{file_name}': {e_log}")
+
+        return extracted, inserted, failed
 
     def _extract_candidates(self, text: str) -> List[Dict]:
         """
@@ -119,51 +215,48 @@ class CandidateScannerWorker(BaseWorker):
             "Anos", "Analfabeto", "Superior", "Fundamental", "Médio", "Entrevistados", "Válidos", "Nível",
             "Instrução", "Região", "Capital", "Interior", "Pública", "Privada", "Renda Familiar", "Salário"
         ]
-        
+
         for name, value in matches:
             clean_name = name.replace('\n', ' ')
             clean_name = re.sub(r'\s+', ' ', clean_name).strip()
-            
+
             words = clean_name.split()
             if len(words) < 2 or len(words) > 5:
                 continue
-                
+
             is_noise = any(sw.lower() in clean_name.lower() for sw in blacklist)
             if is_noise:
                 continue
-            
+
             val_float = float(value.replace(",", "."))
             results.append({
                 "nome": clean_name,
                 "intencao": val_float,
                 "cargo": self._infer_cargo(text, clean_name)
             })
-        
+
         # Remove duplicatas mantendo o maior valor
-        unique_candidates = {}
+        unique_candidates: Dict[str, Dict] = {}
         for r in results:
             if r['nome'] not in unique_candidates or r['intencao'] > unique_candidates[r['nome']]['intencao']:
                 unique_candidates[r['nome']] = r
-                
+
         return list(unique_candidates.values())
 
     def _infer_cargo(self, text: str, name: str) -> str:
         """Tenta inferir o cargo baseado no contexto do PDF."""
         context = text.lower()
-        if "presidente" in context: return "Presidente"
-        if "governador" in context: return "Governador"
-        if "senador" in context: return "Senador"
+        if "presidente" in context:
+            return "Presidente"
+        if "governador" in context:
+            return "Governador"
+        if "senador" in context:
+            return "Senador"
         return "Candidato"
 
     async def _search_web_for_instagram(self, name: str, cargo: str) -> List[str]:
-        """Search DuckDuckGo for Instagram handles."""
+        """Search DuckDuckGo for Instagram handles (delega para duckduckgo_helper)."""
         return await search_instagram(name, cargo)
-
-    # Mapeamento de aliases de handles incorretos conhecidos
-    HANDLE_ALIASES = {
-        "jairbolsonaro": "jairmessiasbolsonaro",
-        # Adicione outros mapeamentos aqui conforme necessário
-    }
 
     def _apply_handle_alias(self, username: str) -> str:
         """Normaliza o username aplicando aliases conhecidos.
@@ -171,21 +264,21 @@ class CandidateScannerWorker(BaseWorker):
         """
         return self.HANDLE_ALIASES.get(username.lower(), username)
 
-    async def _discover_official_instagram(self, name: str, cargo: str, file_name: str) -> str:
+    async def _discover_official_instagram(self, name: str, cargo: str, file_name: str) -> Optional[str]:
         """Usa IA combinada com busca na web (DuckDuckGo) para obter o handle oficial do Instagram do candidato.
         Aplica alias de curadoria antes de efetuar a validação.
         """
         # 1. Faz busca ativa na web para coletar candidatos de handles reais
         web_handles = await self._search_web_for_instagram(name, cargo)
-        
+
         prompt = f"""
         Identifique o nome de usuário (username/handle) oficial e correto no Instagram da seguinte figura pública brasileira citada em pesquisas eleitorais:
         Nome: {name}
         Cargo provável: {cargo}
         Contexto do arquivo de pesquisa: {file_name}
-        
+
         Resultados reais encontrados na busca web pelo perfil: {web_handles}
-        
+
         Instruções:
         - Analise os resultados de busca e selecione o handle oficial mais adequado e verídico.
         - Priorize perfis que pareçam claramente a conta oficial do político (evitando fã-clubes ou perfis secundários).
@@ -212,7 +305,7 @@ class CandidateScannerWorker(BaseWorker):
                     return username
         except Exception as e:
             self.logger.error(f"⚠️ Erro ao descobrir Instagram por IA para {name}: {e}")
-        
+
         # Fallback se a IA falhar
         # Se houver resultados da web, prioriza o primeiro em vez do handle bruto gerado
         if web_handles:
@@ -221,16 +314,20 @@ class CandidateScannerWorker(BaseWorker):
             fallback = web_handles[0]
             self.logger.info(f"🔎 Handle oficial encontrado via DuckDuckGo: @{fallback}")
             return fallback
+
         # Nenhum handle encontrado; retorna None para indicar erro temporário
         self.logger.warning(f"⚠️ Nenhum handle oficial encontrado para '{name}'. Marcando como observação.")
         return None
 
-    async def _handle_candidate(self, info: Dict, pesquisa_id: str, file_name: str):
-        """Calcula prioridade, descobre a rede oficial, valida com o IntelligenceService e enfileira."""
+    async def _handle_candidate(self, info: Dict, pesquisa_id: Optional[str], file_name: str) -> bool:
+        """
+        Calcula prioridade, descobre a rede oficial, valida com o IntelligenceService e enfileira.
+        Retorna True se o candidato foi enfileirado com sucesso.
+        """
         nome = info['nome']
         intencao = info['intencao']
         cargo = info['cargo']
-        
+
         # 1. Cálculo de Relevância (Sistema de Recompensas do Motor)
         # Nota: (CargoWeight * 10) + Intencao
         cargo_weight = {"Presidente": 5, "Governador": 4, "Senador": 3, "Candidato": 1}
@@ -241,7 +338,6 @@ class CandidateScannerWorker(BaseWorker):
         if not username:
             # Nenhum handle encontrado; registra como observação e encerra
             self.logger.warning(f"⚠️ Nenhum handle oficial detectado para '{nome}'. Registrando como observação.")
-            # Salva como observação sem enfileirar
             try:
                 db_client.client.table(self.candidate_table).upsert({
                     "username": self._generate_handle(nome),  # fallback genérico
@@ -256,27 +352,28 @@ class CandidateScannerWorker(BaseWorker):
                 }, on_conflict="username").execute()
             except Exception as e_up:
                 self.logger.error(f"❌ Erro ao registrar alvo em observação (no handle) @{nome}: {e_up}")
-            return
+            return False
+
         # Garante que o username está normalizado conforme aliases
         username = self._apply_handle_alias(username)
-        
+
         # --- CURADORIA DE ALVOS EXISTENTES ---
         try:
             existing = db_client.client.table(self.candidate_table)\
                 .select("username, identidade_validada, status_monitoramento")\
                 .eq("username", username)\
                 .execute()
-            
+
             if existing.data:
                 cand_data = existing.data[0]
                 status_mon = cand_data.get("status_monitoramento")
                 ident_val = cand_data.get("identidade_validada")
-                
+
                 # Se o alvo já foi desativado/rejeitado anteriormente (e não por erro temporário), pulamos
                 if status_mon == "DESATIVADO" or ident_val is False:
                     self.logger.info(f"⏩ Alvo @{username} já rejeitado/desativado anteriormente no banco. Pulando.")
-                    return
-                
+                    return False
+
                 # Se o alvo já está ativo e validado, atualizamos as estatísticas e enfileiramos direto
                 if status_mon == "Ativo" or ident_val is True:
                     self.logger.info(f"♻️ Alvo @{username} já existe e está ativo no banco. Atualizando estatísticas e enfileirando direto.")
@@ -290,7 +387,7 @@ class CandidateScannerWorker(BaseWorker):
                     except Exception as e_up:
                         self.logger.warning(f"⚠️ Erro ao atualizar estatísticas da pesquisa para @{username}: {e_up}")
 
-                    # Define a prioridade na fila (1 a 3) baseada na relevância/situação (fila imediata)
+                    # Define a prioridade na fila (1 a 3) baseada na relevância/situação
                     prioridade = 3
                     if cargo in ["Presidente", "Governador"] or intencao > 15:
                         prioridade = 1
@@ -307,10 +404,11 @@ class CandidateScannerWorker(BaseWorker):
                             "updated_at": datetime.now(UTC).isoformat()
                         }, on_conflict="candidato_id,data_agendada").execute()
                         self.logger.info(f"🚀 Alvo @{username} inserido na fila de coleta imediata hoje.")
+                        return True
                     except Exception as e_queue:
                         self.logger.error(f"❌ Erro ao inserir @{username} na fila de coleta: {e_queue}")
-                    
-                    return # Fim do processamento deste candidato já conhecido
+                        return False
+
         except Exception as e_check:
             self.logger.error(f"⚠️ Erro ao consultar existência de @{username} no banco: {e_check}")
 
@@ -330,7 +428,7 @@ class CandidateScannerWorker(BaseWorker):
         if research_res:
             is_valid = research_res.get("identidade_validada", False) or research_res.get("status_monitoramento") == "ATIVO"
             motivo_desativacao = research_res.get("motivo_desativacao") or ""
-            
+
             # Detecta se é erro temporário de sessão/scraping
             if not is_valid:
                 for term in ["header_not_found", "exception", "timeout", "unknown_error", "Erro de IA"]:
@@ -360,7 +458,7 @@ class CandidateScannerWorker(BaseWorker):
             except Exception as e_up:
                 self.logger.warning(f"⚠️ Erro ao atualizar estatísticas da pesquisa para @{username}: {e_up}")
 
-            # Define a prioridade na fila (1 a 3) baseada na relevância/situação (fila imediata)
+            # Define a prioridade na fila (1 a 3) baseada na relevância/situação
             prioridade = 3
             if cargo in ["Presidente", "Governador"] or intencao > 15:
                 prioridade = 1
@@ -379,9 +477,11 @@ class CandidateScannerWorker(BaseWorker):
                     "updated_at": datetime.now(UTC).isoformat()
                 }, on_conflict="candidato_id,data_agendada").execute()
                 self.logger.info(f"🚀 Alvo @{username} inserido na fila de coleta imediata hoje.")
+                return True
             except Exception as e_queue:
                 self.logger.error(f"❌ Erro ao inserir @{username} na fila de coleta: {e_queue}")
-        
+                return False
+
         elif is_temporary_error:
             # 6. Se for erro temporário de validação, salva em status 'Observação' e NÃO enfileira
             try:
@@ -403,11 +503,9 @@ class CandidateScannerWorker(BaseWorker):
             reason = research_res.get("motivo_desativacao") if research_res else "Validação falhou ou timeout"
             self.logger.warning(f"🚫 Alvo @{username} desconsiderado da fila imediata. Motivo: {reason}")
 
+        return False
+
     def _generate_handle(self, nome: str) -> str:
-        """Gera um handle provisório. Em produção, isso usaria uma busca real."""
+        """Gera um handle provisório a partir do nome."""
         clean = re.sub(r'[^a-zA-Z0-9]', '', nome.lower())
         return clean
-
-if __name__ == "__main__":
-    worker = CandidateScannerWorker()
-    asyncio.run(worker.execute())

@@ -73,6 +73,117 @@ class QueueManager:
             
         return target
 
+    # ── Travas Atômicas PASA v88.0 (Fase 8.3) ─────────────────────────────────
+
+    def claim_next_target_atomic(
+        self,
+        worker_id: str,
+        seen_targets: Optional[set] = None,
+        active_targets: Optional[set] = None,
+        max_prioridade: int = 10,
+    ) -> Optional["Target"]:
+        """
+        Versão atômica de claim usando SELECT FOR UPDATE SKIP LOCKED.
+        Segura para múltiplos workers em paralelo (cluster horizontal).
+
+        Usa a função SQL `fila_coleta_claim_next` que:
+          1. Seleciona o próximo PENDENTE com prioridade mais alta.
+          2. Marca atomicamente como EM_CURSO + locked_by.
+          3. Retorna a linha — sem possibilidade de dois workers pegarem o mesmo item.
+
+        Fallback: se a função SQL não existir, delega para claim_next_target() legado.
+        """
+        blocked = (seen_targets or set()) | (active_targets or set())
+
+        try:
+            # Chama função SQL atômica
+            res = self.db.rpc("fila_coleta_claim_next", {
+                "p_worker_id": worker_id,
+                "p_max_prioridade": max_prioridade,
+            }).execute()
+
+            if not res.data:
+                # Fila vazia — tenta rotação global como fallback
+                return self._get_from_global_rotation(blocked, seen_targets or set(), active_targets)
+
+            row = res.data[0]
+            username = row.get("candidato_id", "").strip().lstrip("@").lower()
+
+            if not username or username in blocked:
+                # Item claimado mas bloqueado localmente — libera e retorna None
+                self._release_atomic(row["id"], "PENDENTE", worker_id)
+                return None
+
+            self._add_to_blocked(username, seen_targets or set(), active_targets)
+            logger.info(
+                "[Queue:atomic] Claim atômico OK | @%s | queue_id=%s | prioridade=%s",
+                username, row["id"], row.get("prioridade"),
+            )
+            return Target(
+                username=username,
+                candidato_id=username,
+                queue_id=row["id"],
+                source="fila_coleta_atomic",
+            )
+
+        except Exception as e:
+            if "fila_coleta_claim_next" in str(e) or "function" in str(e).lower():
+                logger.warning(
+                    "[Queue:atomic] Função SQL não encontrada. "
+                    "Execute migrations/add_queue_skip_locked.sql no Supabase. "
+                    "Usando claim legado como fallback."
+                )
+            else:
+                logger.error("[Queue:atomic] Erro no claim atômico: %s", e)
+            # Fallback para o método legado
+            return self.claim_next_target(
+                {}, seen_targets or set(), set(), active_targets
+            )
+
+    def release_atomic(self, queue_id, status: str, worker_id: str) -> None:
+        """Libera o item da fila após processamento via função SQL atômica."""
+        self._release_atomic(queue_id, status, worker_id)
+
+    def _release_atomic(self, queue_id, status: str, worker_id: str) -> None:
+        """Implementação interna do release atômico."""
+        try:
+            self.db.rpc("fila_coleta_release", {
+                "p_queue_id": str(queue_id),
+                "p_status": status,
+                "p_worker_id": worker_id,
+            }).execute()
+        except Exception as e:
+            logger.warning("[Queue:atomic] Falha no release atômico (queue_id=%s): %s", queue_id, e)
+            # Fallback: atualiza status diretamente
+            try:
+                self.db.table("fila_coleta").update({
+                    "status": status,
+                    "locked_by": None,
+                    "locked_at": None,
+                }).eq("id", str(queue_id)).execute()
+            except Exception as e2:
+                logger.error("[Queue:atomic] Fallback de release também falhou: %s", e2)
+
+    def release_stale_locks(self, timeout_minutes: int = 30) -> int:
+        """
+        Auto-desbloqueio de locks expirados (worker crashou sem liberar).
+        Deve ser chamado periodicamente pelo orquestrador (ex: a cada 10 ciclos).
+        Retorna quantos itens foram desbloqueados.
+        """
+        try:
+            res = self.db.rpc("fila_coleta_release_stale", {
+                "p_timeout_minutes": timeout_minutes,
+            }).execute()
+            count = res.data[0] if res.data else 0
+            if count:
+                logger.info("[Queue:atomic] %d lock(s) expirado(s) liberado(s) (timeout=%dmin).", count, timeout_minutes)
+            return count
+        except Exception as e:
+            logger.debug("[Queue:atomic] release_stale_locks indisponível (migração pendente): %s", e)
+            return 0
+
+    # ── Fim das Travas Atômicas ────────────────────────────────────────────────
+
     def _get_from_fila_coleta(self, blocked, seen_queue_ids, seen_targets, active_targets) -> Optional[Target]:
         """Busca alvos na fila de prioridade, ordenados por nível de importância."""
         try:

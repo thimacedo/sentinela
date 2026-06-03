@@ -168,11 +168,26 @@ class InstagramScraperV2:
             "headers": headers
         }
 
-    async def scrape_profile(self, username: str, candidato_id: str, max_posts: int = 3, max_comments_per_post: int = 50, max_age_days: int = 7) -> List[Dict[str, Any]]:
-        """Extrai comentários de um perfil com retry e rotação."""
+    async def scrape_profile(
+        self,
+        username: str,
+        candidato_id: str,
+        max_posts: int = 3,
+        max_comments_per_post: int = 50,
+        max_age_days: int = 7,
+        resume_after_shortcode: str = None,
+    ) -> List[Dict[str, Any]]:
+        """
+        Extrai comentários de um perfil com retry e rotação.
+
+        Parâmetro `resume_after_shortcode` (PASA v88.0 - Fase 8.5):
+            Se fornecido, o scraper pula todos os posts cujo shortcode é anterior
+            ao checkpoint, evitando reprocessamento após crash.
+        """
         all_comments = []
         retry_count = 0
-        
+        _resume_done = resume_after_shortcode is None  # True se sem checkpoint
+
         while retry_count < self.max_retries:
             session = self._get_next_session()
             if not session:
@@ -290,6 +305,19 @@ class InstagramScraperV2:
                             
                         shortcode = meta["shortcode"]
                         if page.is_closed(): break
+
+                        # 💾 CHECKPOINT RESUME (PASA v88.0 - Fase 8.5)
+                        # Pula posts anteriores ao checkpoint sem processar.
+                        if not _resume_done:
+                            if shortcode == resume_after_shortcode:
+                                _resume_done = True  # Este post já foi salvo; próximo será processado
+                                logger.info(
+                                    "⏩ [V2] Checkpoint atingido (%s). Retomando a partir do próximo post.",
+                                    shortcode
+                                )
+                            else:
+                                logger.debug("[V2] Pulando post %s (antes do checkpoint).", shortcode)
+                            continue
 
                         is_pinned = meta["is_pinned"]
                         post_timestamp = meta.get("timestamp")

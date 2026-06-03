@@ -15,6 +15,7 @@ from core.instagram_scraper_v2 import InstagramScraperV2
 from core.local_buffer import local_buffer
 from core.lexical_filter import lexical_filter
 from core.process_cleaner import cleanup_orphans
+from core.checkpoint_manager import CheckpointManager
 
 logger = logging.getLogger("worker.ig_v2")
 
@@ -72,24 +73,35 @@ class InstagramScraperWorker(BaseWorker):
         self.seen_queue_ids.clear()
         result = None # Inicializa para o finally
 
-        # 🛡️ SELEÇÃO ATÔMICA (PASA v55.1)
+        # 🗡️ SELEÇÃO ATÔMICA (PASA v88.0 - Fase 8.3)
+        # Usa SELECT FOR UPDATE SKIP LOCKED quando disponível para suporte horizontal.
+        # Fallback automático para o método legado se a migração SQL ainda não foi aplicada.
         target = None
-        if hasattr(self, "claim_lock"):
-            async with self.claim_lock:
+        use_atomic = getattr(self.queue, 'claim_next_target_atomic', None) is not None
+
+        if use_atomic:
+            target = self.queue.claim_next_target_atomic(
+                worker_id=self.worker_id,
+                seen_targets=self.seen_targets,
+                active_targets=getattr(self, 'active_targets', None),
+            )
+        else:
+            if hasattr(self, "claim_lock"):
+                async with self.claim_lock:
+                    target = self.queue.claim_next_target(
+                        self.config, self.seen_queue_ids, self.seen_targets,
+                        active_targets=getattr(self, "active_targets", None),
+                    )
+            else:
                 target = self.queue.claim_next_target(
                     self.config, self.seen_queue_ids, self.seen_targets,
                     active_targets=getattr(self, "active_targets", None),
                 )
-        else:
-            target = self.queue.claim_next_target(
-                self.config, self.seen_queue_ids, self.seen_targets,
-                active_targets=getattr(self, "active_targets", None),
-            )
 
         if not target:
             return CycleResult(
                 worker_id=self.worker_id, cycle=self.cycle,
-                source="no_target", simulated=False, error="no_target"
+                source="no_target", simulated=False, error="no_tasks_available"
             )
 
         self.logger.info(f"🔄 [V2] Ciclo {self.cycle} | Alvo: @{target.username}")
@@ -121,13 +133,29 @@ class InstagramScraperWorker(BaseWorker):
 
         self.queue.mark_candidate_scraped(target)
 
+        # 💾 CHECKPOINT INTRA-CYCLE (PASA v88.0 - Fase 8.5)
+        # Carrega checkpoint existente para retomar do último post após crash.
+        checkpoint = CheckpointManager(
+            db_client=self.db,
+            worker_id=self.worker_id,
+            candidato_id=target.username,
+        )
+        previous_cp = checkpoint.load()
+        resume_from_shortcode = previous_cp.get('last_shortcode') if previous_cp else None
+        if resume_from_shortcode:
+            self.logger.info(
+                "🔃 [V2] Retomando ciclo de @%s a partir do post %s (checkpoint encontrado).",
+                target.username, resume_from_shortcode,
+            )
+
         try:
             # 1. Scraping (v61.2: Robusto contra retornos de lista ou dict)
             scrape_data = await self.scraper.scrape_profile(
                 username=target.username,
                 candidato_id=target.candidato_id,
-                max_posts=self.config.get("max_posts", 3),
-                max_comments_per_post=100
+                max_posts=self.config.get('max_posts', 3),
+                max_comments_per_post=100,
+                resume_after_shortcode=resume_from_shortcode,  # Fase 8.5: retomada
             )
             
             # Sucesso técnico no scrape -> Reseta contador de bloqueios
@@ -293,6 +321,20 @@ class InstagramScraperWorker(BaseWorker):
                 )
                 return result
 
+            # 💾 SALVAMENTO DE CHECKPOINT POR POST (Fase 8.5)
+            # Salva o progresso parcial após cada bloco de inserção.
+            # O scraper retorna `post_metas` com os shortcodes processados.
+            last_saved_shortcode = None
+            if getattr(target, 'post_metas', None):
+                successful_metas = [m for m in target.post_metas if m.get('shortcode')]
+                if successful_metas:
+                    last_saved_shortcode = successful_metas[-1]['shortcode']
+                    checkpoint.save(
+                        last_shortcode=last_saved_shortcode,
+                        posts_done=len(successful_metas),
+                        comments_done=inserted,
+                    )
+
             result = CycleResult(
                 worker_id=self.worker_id, cycle=self.cycle, target=target.username,
                 source="v2_engine",
@@ -303,6 +345,9 @@ class InstagramScraperWorker(BaseWorker):
                 simulated=False,
                 duration=asyncio.get_event_loop().time() - start_time
             )
+
+            # Ciclo completo com sucesso: limpa checkpoint
+            checkpoint.clear()
             return result
 
         except Exception as e:
@@ -319,4 +364,22 @@ class InstagramScraperWorker(BaseWorker):
                 target.error = result.get("error")
             elif hasattr(result, "error") and result.error:
                 target.error = result.error
-            self.queue.rotate_target(target)
+
+            # PASA v88.0 (Fase 8.3): Release atômico do lock se foi claimado atomicamente
+            if target and getattr(target, 'source', '') == 'fila_coleta_atomic' and target.queue_id:
+                final_status = "CONCLUIDO"
+                if hasattr(result, 'error') and result.error:
+                    err = result.error
+                    if err in ('junk_detected', 'invalid_target: 404_not_found'):
+                        final_status = 'SEM_DADOS_RECENTES'
+                    elif err in ('all_sessions_blocked', 'shutdown_requested'):
+                        final_status = 'PENDENTE'  # Recoloca na fila para reprocessar
+                    else:
+                        final_status = 'FALHA_SISTEMICA'
+                try:
+                    self.queue.release_atomic(target.queue_id, final_status, self.worker_id)
+                except Exception as e_rel:
+                    logger.warning("[V2] Falha no release atômico: %s", e_rel)
+            else:
+                # Legado: usa rotate_target para atualizar o status
+                self.queue.rotate_target(target)
