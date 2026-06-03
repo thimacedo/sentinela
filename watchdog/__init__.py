@@ -94,6 +94,8 @@ class WatchdogState:
         self.logs = []
         self.clients = []
         self.fast_crashes = 0
+        self.process = None
+        self.should_run = True
         
     def add_log(self, level: str, message: str):
         prefix = "" if level == "dim" else f"[{level.upper()}] "
@@ -321,6 +323,35 @@ async def start_service_endpoint(name: str):
     else:
         raise HTTPException(status_code=400, detail=f"Serviço desconhecido: {name}")
 
+@app.post("/api/server/start")
+async def start_server():
+    if state.should_run and state.process and state.process.poll() is None:
+        return {"success": False, "message": "Servidor já está rodando."}
+    state.should_run = True
+    state.add_log("info", "[Watchdog] Sinal de inicialização recebido via API.")
+    return {"success": True, "message": "Sinal de inicialização enviado."}
+
+@app.post("/api/server/stop")
+async def stop_server():
+    state.should_run = False
+    if state.process and state.process.poll() is None:
+        state.add_log("warn", "[Watchdog] Sinal de parada recebido via API. Finalizando processo...")
+        state.process.terminate()
+        return {"success": True, "message": "Sinal de parada enviado. Processo sendo encerrado."}
+    state.add_log("info", "[Watchdog] Servidor já estava parado.")
+    return {"success": True, "message": "Servidor parado."}
+
+@app.post("/api/server/restart")
+async def restart_server():
+    if state.process and state.process.poll() is None:
+        state.add_log("warn", "[Watchdog] Sinal de reinício recebido via API. Reiniciando processo...")
+        state.process.terminate()
+        return {"success": True, "message": "Reiniciando servidor..."}
+    else:
+        state.should_run = True
+        state.add_log("info", "[Watchdog] Sinal de reinício recebido com servidor parado. Iniciando...")
+        return {"success": True, "message": "Iniciando servidor..."}
+
 def run_web_server():
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8001, log_level="warning")  
@@ -436,6 +467,14 @@ def guard():
     consecutive_code_errors = 0
 
     while True:
+        # Checa se deve rodar o processo. Se não, fica em loop de espera
+        if not state.should_run:
+            state.update_metrics(status="PARADO")
+            state.process = None
+            while not state.should_run:
+                time.sleep(1)
+            state.update_metrics(status="OPERACIONAL")
+
         # 1. Auto Update
         try:
             if check_for_updates():
@@ -466,6 +505,7 @@ def guard():
                 cwd=project_root,
                 creationflags=creationflags,
             )
+            state.process = process
             
             def pipe_reader(pipe, level):
                 NOISY_PATTERNS = ["HTTP Request:", "HTTP/2 200 OK", "HTTP/2 201 Created"]
