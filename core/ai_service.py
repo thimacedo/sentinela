@@ -412,13 +412,17 @@ class AIService:
                             "analise_pericial": analise
                         }).eq("id", item["id"]).execute()
                         count += 1
-                except: continue
+                except Exception as e:
+                    if "Colapso total" in str(e):
+                        logger.error("🛑 [AI] Colapso detectado nas APIs durante re-análise. Abortando lote.")
+                        raise e
+                    continue
                 finally:
                     self.providers = original_providers
                     
             return count
         except Exception as e:
             logger.error(f"Error in batch reanalysis: {e}")
-            return 0
+            raise e
 
 ai_service = AIService()
