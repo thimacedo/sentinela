@@ -44,7 +44,7 @@ class FallbackLLM:
     """
 
     def __init__(self):
-        self.providers_order: List[Dict[str, Any]] = FALLBACK_PROVIDERS
+        self.providers_order: List[Dict[str, Any]] = [dict(provider) for provider in FALLBACK_PROVIDERS]
         if not self.providers_order:
             logger.warning("Nenhum provedor configurado em FALLBACK_PROVIDERS.")
 
@@ -223,12 +223,19 @@ class FallbackLLM:
         else:
             providers = self.providers_order[:]
 
+        if not providers:
+            raise RuntimeError("Nenhum provider de fallback configurado.")
+
+        available_providers = [
+            provider for provider in providers
+            if ai_circuit_breaker.can_execute(f"fallback_{provider['name']}")
+        ]
+        if not available_providers:
+            raise RuntimeError("Nenhum provider de fallback disponível no momento (todos em circuito aberto ou removidos).")
+
         last_error = None
-        for prov in providers:
+        for prov in available_providers:
             name = prov["name"]
-            
-            if not ai_circuit_breaker.can_execute(f"fallback_{name}"):
-                continue
 
             key_env = prov.get("api_key_env")
             model_name = prov.get("model")

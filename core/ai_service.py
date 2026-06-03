@@ -125,6 +125,7 @@ class AIService:
             {"name": "openrouter", "client": self.openrouter_client, "model": "openrouter/free", "timeout": 20.0},
         ]
         self.consecutive_failures: Dict[str, int] = {}
+        self.fallback_llm = None
 
     async def classify(self, text: str, comment_id: str = "N/A") -> Dict[str, Any]:
         return await self.classify_text(text, comment_id)
@@ -186,13 +187,14 @@ class AIService:
 
         # CAMADA 3: FALLBACK PROFUNDO (FALLBACK_LLM)
         try:
-            from core.fallback_llm import FallbackLLM
-            fallback = FallbackLLM()
+            if self.fallback_llm is None:
+                from core.fallback_llm import FallbackLLM
+                self.fallback_llm = FallbackLLM()
             logger.warning(f"🚨 [AI] ID: {comment_id:<36} | Todos os provedores primários/cloud estão indisponíveis. Acionando FallbackLLM...")
             
             # Como FallbackLLM não aceita system_prompt, injetamos a regra no próprio texto
             fallback_text = f"{text}\n\nResponda APENAS com um JSON estrito no formato: {{\"is_hate\": boolean, \"categoria_ia\": \"NEUTRO|LIXO|SUSPEITO|ERRO\", \"confianca_ia\": float, \"analise_pericial\": \"motivo\"}}"
-            raw_response = fallback.classify(fallback_text)
+            raw_response = self.fallback_llm.classify(fallback_text)
             
             res = self._parse_json_response(raw_response)
             res["name"] = "fallback_llm"

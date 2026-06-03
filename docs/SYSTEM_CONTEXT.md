@@ -1,89 +1,110 @@
-# Sentinela — Referencia Arquitetural (PASA v50.1)
-_last_updated: 2026-05-21_
+# Sentinela — Contexto do Sistema
+_last_updated: 2026-06-03_
 
-## 1. Missao
+## 1. Missão
 
-Plataforma de inteligencia politica para deteccao automatizada de discurso de odio, desinformacao e atividade de milicia digital no Instagram brasileiro. Foco nas eleicoes de 2026.
+O Sentinela é uma plataforma de monitoramento político com foco em:
 
-## 2. Topologia de Infraestrutura
+- coleta automatizada de conteúdo público
+- classificação de hostilidade e risco informacional
+- mineração de redes e sinais coordenados
+- produção de relatórios e dossiês
+- operação supervisionada por watchdog local
 
+## 2. Topologia atual
+
+```text
+[Watchdog Local]
+  └── main_runner.py
+        └── Orquestrador
+              ├── InstagramScraperWorker
+              ├── AIProcessorWorker
+              ├── NetworkMinerWorker
+              ├── TreasurerWorker
+              └── ResearcherWorker
+
+[Supabase / PostgreSQL]
+  ├── candidatos
+  ├── comentarios
+  ├── fila_coleta
+  ├── worker_rewards
+  ├── worker_suggestions
+  └── demais tabelas analíticas
+
+[Frontend oficial]
+  └── frontend/ (Next.js)
+
+[Dashboard local]
+  └── local_dashboard.html + SSE do Watchdog
 ```
-[Local / Render]
-  watchdog.py
-    └── main_runner.py
-          └── SentinelaOrchestrator
-                ├── IGZyteWorker      (Zyte API — Tier 3)
-                └── IGHeadlessWorker  (Playwright — Tier 2)
 
-[Vercel]
-  proposta_frontend/   →  /api/*  →  api/index.py (FastAPI)
-  supabase/functions/mcp-proxy/  (Edge Function — SQL semantico)
+## 3. Pipeline atual de inteligência
 
-[Supabase]
-  PostgreSQL + RLS
-  Tables: candidatos, comentarios, fila_coleta, worker_rewards,
-          worker_suggestions, worker_sessions, dossies, threat_alerts
-```
+1. claim atômico da fila em `core/queue_manager.py`
+2. coleta de comentários com scraper V2
+3. persistência no banco
+4. classificação do backlog via `core/ai_service.py`
+5. reanálise de baixa confiança como tarefa de utilidade
+6. mineração de rede
+7. atualização de métricas financeiras e telemetria
 
-## 3. Protocolo PASA v50.1
+## 4. Camada de IA em produção
 
-Todo comentario coletado passa pelo pipeline:
+O pipeline ativo identificado no código é:
 
-1. **Coleta** — Zyte API (JSON) → Browser Rendering → DOM fallback → Playwright
-2. **Normalizacao** — `core/normalizer.py`
-3. **Persistencia** — upsert `id_externo` (idempotente)
-4. **Classificacao** — `AIService.classify_text()` cascade Groq → Mistral → OpenRouter
-5. **Auditoria** — `pasa_auditor.py` + `AIAdvisor` (condicional, score<40)
-6. **Alertas** — `AlertManager` → WhatsApp / Firebase
+- triagem local: `ollama`
+- refino cloud: `mistral`, `groq`, `openrouter`
+- fallback profundo: `core/fallback_llm.py`
 
-Categorias PASA: `NEUTRO`, `XENOFOBIA_REGIONAL`, `RACISMO_RELIGIOSO`, `VIOLENCIA_GENERO`, `MILICIA_DIGITAL`, `RACISMO_ESTRUTURAL`, `MISOGINIA_POLITICA`
+Observações:
 
-## 4. Resiliencia Operacional
+- LiteRT não integra mais o processamento ativo.
+- O reclassificador `scripts/reclassify_low_confidence.py` usa cloud-first e pode permitir fallback local com `ollama`.
+- O `FallbackLLM` depende de `config/fallback_providers.yaml`, mas parte dessa malha está sujeita a indisponibilidade de quota/configuração.
 
-- **Circuit Breaker** — por provider de IA e por Zyte API (falhas fatais abrem por 1h, rate limit por 5min)
-- **Watchdog** — monitora main_runner.py, reinicia em caso de crash
-- **rotate_target idempotente** — upsert com on_conflict, nunca derruba por 23505
-- **Blacklist de slots** — slots com login wall bloqueados no ciclo atual
-- **Fallback em cascata** — Zyte JSON → Zyte Browser → Playwright headless
-- **active_targets** — workers paralelos nunca processam o mesmo alvo
+## 5. Fila e concorrência
 
-## 5. Estrategia de Coleta
+O estado real do código mostra:
 
-- **Fila primaria**: `fila_coleta` (status=PENDENTE)
-- **Fallback**: `candidatos` (order by last_scraped_at ASC)
-- **Cooldown**: `last_scraped_at` atualizado apos coleta bem-sucedida
-- **Paginacao**: `next_min_id` ate `max_comments_per_post=100` por post
-- **Limite IA**: 10 classificacoes por ciclo para preservar circuit breakers
+- trava atômica com `SELECT FOR UPDATE SKIP LOCKED`
+- suporte a release de locks expirados
+- fallback para claim legado quando RPC/migração não está disponível
 
-## 6. Seguranca
+Portanto, a fila distribuída via lock atômico já está operacional em nível de código.
+PGMQ permanece como alternativa futura, não como dependência atual.
 
-- SQL arbitrario bloqueado na Edge Function — apenas `{ action }` aceito
-- `SUPABASE_SERVICE_KEY` exclusivo do backend
-- `configs/instagram_storage_state.json` no .gitignore e .vercelignore
-- AIAdvisor: apenas sugestoes com `status=pending_review` — nunca auto-aplica
-- Sem hardcoding de credenciais — tudo via variaveis de ambiente
+## 6. Watchdog e operação local
 
-## 7. Frontend
+O Watchdog atual:
 
-- **Oficial**: `proposta_frontend/` — Next.js 16, React 19, Tailwind v4, shadcn/ui
-- **Deploy**: Vercel (`Root Directory=proposta_frontend`)
-- **Comunicacao**: `/api/*` FastAPI — sem SQL direto, sem chaves expostas
-- **Tabs**: War Room, Analise Forense, Alvos, Dossies, Alertas, Rede, Fila de Coleta
+- sobe o dashboard local
+- expõe SSE em `/api/stream`
+- possui rotas de controle `/api/server/start`, `/api/server/stop` e `/api/server/restart`
+- registra métricas e feedback humano de classificação
+- verifica credenciais do Instagram
+- garante disponibilidade do Ollama
 
-## 8. SOP de Troubleshooting
+## 7. Frontends
 
-| Sintoma | Acao |
-|---|---|
-| Login Wall Zyte slot=X | Renovar INSTAGRAM_SESSIONID_X |
-| circuit_open zyte_api | Aguardar 10min ou verificar ZYTE_API_KEY |
-| no_target_available | Normal — seen_targets limpo a cada ciclo |
-| duplicate key fila_coleta | Corrigido — rotate_target em finally |
-| IA classificados=0 | Verificar GROQ/MISTRAL/OPENROUTER API keys |
-| score=0 tier=dry_run | Worker sem sessao valida ou sem target |
-| Supabase offline | Verificar RLS policies e SUPABASE_URL/KEY |
+Há dois contextos distintos:
 
-## 9. Legado
+- `frontend/` é o frontend oficial
+- `local_dashboard.html` é o painel operacional local do watchdog
 
-- `archive_v17_2026/` — nao importar
-- `.legacy_frontend/` — nao usar
-- `src/` (Dashboard.jsx vanilla) — nao deployado, substituido por proposta_frontend
+Esses papéis não devem ser confundidos.
+
+## 8. O que não é mais contrato atual
+
+Os itens abaixo aparecem em documentos antigos, mas não representam a verdade operacional atual:
+
+- LiteRT como etapa padrão do pipeline
+- `proposta_frontend/` como frontend oficial
+- Zyte como eixo principal da coleta
+- PGMQ como mecanismo já implantado
+- Gemini como classificador oficial principal
+
+## 9. Fontes de verdade
+
+- operação: `STATE.md`
+- planejamento: `ROADMAP.md`
+- auditoria documental: `docs/DOCUMENTATION_AUDIT.md`

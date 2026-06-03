@@ -1,92 +1,68 @@
-# ROADMAP.md — Sentinela Democratica
-_last_updated: 2026-06-02 | branch: main_
+# ROADMAP.md — Sentinela
+_last_updated: 2026-06-03 | branch: main_
 
-## Concluido
+## Concluído
 
-### Inteligência e Coleta Industrial (v65 - v86.0)
-- [x] **Stealth Mode**: Rotação dinâmica de User-Agents, Viewports e injeção anti-fingerprint (v85.10).
-- [x] **Triagem Local (Ollama)**: Integração com IA local para redução de custos em 50% (v85.11).
-- [x] **Dossiês Analíticos Reais**: Motor PDF v85.9 com assinatura SHA-256 e selo de integridade.
-- [x] **Network Miner**: Detecção de clusters coordenados e contas multi-target (v85.13).
-- [x] **Otimização de Ociosidade**: Smart Wait e Background Utility Tasks para re-análise automática (v85.12).
-- [x] **Frontend v86**: Grid 2-colunas, filtros dinâmicos de UF/Partido e transparência de IA (Parecer Técnico).
-- [x] **Governança Financeira e CI (Fase 7.1)**: Tesoureiro (Auditoria e DRE Automático) e Catraca no Supabase via proxy de CI.
+### Núcleo operacional
+- [x] Watchdog local com stream de logs via SSE
+- [x] Controle remoto do runner com start, stop e restart
+- [x] `AIProcessorWorker` como classificador oficial do pipeline
+- [x] Triagem local com `ollama`
+- [x] Fallback profundo com `FallbackLLM`
+- [x] `NetworkMiner` com deduplicação por assinatura lexical
+- [x] `Treasurer` com telemetria financeira
+- [x] `researcher_agent` com atualização de heurísticas em `config/custom_rules.json`
 
-### Infraestrutura e Monetização (Legado v48 - v64.0)
-- [x] **Motor Scraper V2**: Playwright independente sem Zyte.
-- [x] **Integridade Analítica**: Validação biográfica via IA (v64.0).
-- [x] **Frontend Next.js 16**: App Router + Tailwind v4 + Stripe E2E.
-- [x] **Fila Inteligente**: Prioridade Dinâmica (Termômetro) e Hibernação de alvos ociosos.
-- [x] **Resiliencia de Dados**: Buffer de emergência Zero-Loss e fallback de schema mismatch.
+### Escalabilidade e resiliência
+- [x] Claim atômico da `fila_coleta`
+- [x] Suporte a `SELECT FOR UPDATE SKIP LOCKED`
+- [x] Release de locks expirados
+- [x] Circuit breaker para IA
+- [x] `db_circuit_breaker` para Supabase
+- [x] buffer/checkpoint de scraping em estágio operacional
 
----
-
-## Em Andamento (Fase 7.2: Dashboard e Analytics Web)
-
-### Painel Administrativo de CIs
-- [x] Interface gráfica de faturamento e consumo de CIs (`/admin/financeiro`) — DRE Recharts integrado.
-- [x] Integração com Recharts para DRE diário (Inflow vs Outflow) — entregue na v86.7.
-- [ ] Tabelas tabulares para rastrear origem do gasto por usuário e perfil monitorado.
-
-### Expansão Analítica
-- [ ] Análise de "Shadowban" léxico: detectar quando a plataforma oculta termos específicos.
-- [ ] Exportação de Dossiês em lote para contas de agências.
-- [ ] Dashboard Financeiro Admin para monitoramento de custos por alvo.
+### UX e operação
+- [x] `local_dashboard.html` com tabs de monitor e logs
+- [x] frontend oficial em `frontend/`
+- [x] dashboard financeiro com Recharts
 
 ---
 
-## Próxima Fase (Fase 8: Escalabilidade, Desacoplamento e Resiliência)
+## Em andamento
 
-### 8.1 — Desacoplamento Scraping / IA
-- [x] Transformar `IGWorkerV2` em `InstagramScraperWorker` (somente coleta).
-- [x] Criar `AIClassificationWorker` independente para processar o backlog.
-- [x] Liberar o contexto Playwright imediatamente após a coleta, reduzindo uso de memória.
+### Coleta e scraping
+- [ ] checkpoint intermediário por post raspado
+- [ ] rotação real de proxies no Playwright
+- [ ] redução de ciclos com `no_comments_found`
 
-### 8.2 — Paralelismo Assíncrono
-- [x] Implementar `asyncio.Semaphore(3)` no loop de processamento de alvos do Orchestrator (Auditado: superado pelo design multi-worker de produção).
-- [x] Multiplicar a taxa de ingestão sem aumentar a carga no Supabase.
+### Inteligência
+- [ ] saneamento da malha de providers em `config/fallback_providers.yaml`
+- [ ] remover referências residuais a LiteRT do código e da operação
+- [ ] calibrar reanálise de baixa confiança com menor ruído de fallback
 
-### 8.3 — Fila Distribuída (PGMQ)
-- [ ] Integrar PGMQ (`pgmq_setup.sql` já disponível) para travas atômicas no `claim_next_target`.
-- [ ] Habilitar execução multi-servidor (Cluster de Sentinelas) sem colisões de fila.
-
-### 8.4 — Rotação de Proxies
-- [c] Acoplar provedor de proxy (Bright Data / Oxylabs / ProxyRack) ao `new_context` do Playwright (Parcial: proxy estático via `.env` integrado).
-- [ ] Elevar resiliência anti-Shadowban de “Médio” para “Extremo” (implementar lista de proxies rotativos).
-
-### 8.5 — Graceful Shutdown com Checkpoint
-- [c] Implementar checkpoint de comentários processados no `local_buffer` (SQLite) a cada lote (Parcial: buffer SQLite ativo no final do ciclo).
-- [ ] Garantir que reinicializações do servidor não percam dados parcialmente coletados (implementar checkpoint intermediário a cada post raspado).
-
-### 8.6 — Circuit Breaker Global
-- [x] Expandir `core/circuit_breaker.py` para cobrir o Supabase e o Scraping (além da IA) (Auditado: `db_circuit_breaker` ativo).
-- [x] Proteção total contra instabilidade externa em toda a infraestrutura.
+### Administração e analytics
+- [ ] tabelas tabulares de gasto por usuário e por perfil monitorado
+- [ ] shadowban léxico
+- [ ] exportação de dossiês em lote
 
 ---
 
-## Próximas Ações Imediatas
+## Futuro
 
-1. Executar `scripts/reclassify_low_confidence.py` em produção e acompanhar taxa de acerto pós-reclassificação.
-2. Refatorar `Orchestrator` com `asyncio.Semaphore(3)` para paralelismo de alvos (Fase 8.2).
-3. Integrar PGMQ na `fila_coleta` com `SELECT FOR UPDATE SKIP LOCKED` para escala horizontal (Fase 8.3).
+### Fila distribuída
+- [ ] avaliar PGMQ como alternativa futura de fila
+- [ ] decidir se PGMQ agrega valor além da trava atômica já implantada
 
-## Registro da Rodada 31/05/2026
-- **Data/Hora:** 31/05/2026 13:37 (GMT‑3)
-- **Objetivo:** Documentar a sessão de hoje conforme solicitado.
-- **Ações realizadas:**
-  - Criação de artefato de documentação da rodada.
-  - Atualização de STATUS e ROADMAP com referência à rodada.
-- **Próximos passos sugeridos:**
-  - Incorporar métricas de desempenho no dashboard.
-  - Revisar persistência técnica de logs.
+### Operação
+- [ ] consolidar documentação viva por domínio
+- [ ] reduzir artefatos históricos conflitantes no workspace
 
-## Registro da Rodada 03/06/2026
-- **Data/Hora:** 03/06/2026 09:40 (GMT-3)
-- **Objetivo:** Auditar a implementação do Watchdog local, verificar frentes implementadas e lacunas, e implementar terminal de logs e controle remoto no dashboard.
-- **Ações realizadas:**
-  - Auditamos frentes da Fase 8: confirmamos que o desacoplamento de Scraping/IA (8.1) e o Circuit Breaker global (8.6) estão totalmente operacionais. Rotação de proxies (8.4) e Zero-Loss Buffer (8.5) estão parcialmente em vigor.
-  - Implementamos abas de navegação no painel central do `local_dashboard.html` ("Monitor de Discurso" e "Console de Logs") e conectamos via EventSource ao SSE `/api/stream` do Watchdog, transmitindo logs técnicos do `main_runner.py` em tempo real.
-  - Adicionamos botões de controle de execução no Header do dashboard local (Play, Stop, Restart) e gatilho de inicialização manual de Ollama/LiteRT quando inativos.
-- **Próximos passos sugeridos:**
-  - Implementar checkpoints intermediários intra-cycle (a cada post raspado) no loop do `InstagramScraperWorker` para salvar o estado antes do final do perfil completo (Fase 8.5).
-  - Implementar suporte para travas atômicas na `fila_coleta` via `SELECT FOR UPDATE SKIP LOCKED` ou com fila PGMQ no Supabase para suportar clusters horizontais de múltiplos servidores (Fase 8.3).
+---
+
+## Decisões registradas
+
+- a fila atômica atual usa RPC + `SELECT FOR UPDATE SKIP LOCKED`
+- PGMQ não é requisito atual de produção
+- LiteRT não compõe mais o pipeline de processamento ativo
+- `frontend/` é o frontend oficial
+- `STATE.md` é a fonte de verdade operacional
