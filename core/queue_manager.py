@@ -93,6 +93,9 @@ class QueueManager:
 
         Fallback: se a função SQL não existir, delega para claim_next_target() legado.
         """
+        # 🔄 AUTO-REPOPULAÇÃO (v80.0): Garante que a fila nunca esvazia
+        self._ensure_queue_populated()
+
         blocked = (seen_targets or set()) | (active_targets or set())
 
         try:
@@ -379,6 +382,9 @@ class QueueManager:
             if target.queue_id:
                 self.db.table("fila_coleta").update({
                     "status": "FALHA",
+                    "locked_by": None,
+                    "locked_until": None,
+                    "locked_at": None,
                     "updated_at": now_iso
                 }).eq("id", target.queue_id).execute()
             return
