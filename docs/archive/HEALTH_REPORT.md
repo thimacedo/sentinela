@@ -4,7 +4,7 @@
 O projeto passou por uma auditoria Solenya e purgação de lixo legado em 19/05/2026. A infraestrutura central foi preservada e o diretório raiz foi limpo.
 
 ### 🏛️ Infraestrutura (Base)
-- **Database**: Supabase integrado. Schema `pgmq` operacional para filas.
+- **Database**: Supabase integrado. Fila atômica operacional baseada em transações concorrentes (com PGMQ como alternativa futura).
 - **Orquestrador**: `watchdog.py` gerencia o monitoramento e o dashboard.
 - **Pipeline**: `main_runner.py` centraliza a execução de workers.
 

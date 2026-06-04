@@ -11,10 +11,10 @@ Este documento serve como a "Memória Técnica" do projeto, garantindo que qualq
 2. **Nuvem**: `Supabase` armazena `candidatos`, `posts` e `comentarios`.
 3. **Cérebro**: `orquestrador.py` coordena o ciclo completo de atualização.
 4. **Motores (Folder: /processing)**:
-   - `text_processor.py`: Limpeza e Lematização Forense.
+   - `text_processor.py`: Limpeza e Lematização Analítica.
    - `data_miner.py`: Clustering KMeans e Z-Score (Picos de Ódio).
    - `report_generator.py`: PDF FPDF2 com suporte nativo a UTF-8.
-5. **IA Pericial**: `core/qwen_classifier.py` utiliza o modelo **Qwen 2.5** balizado pelo `CRITERIOS_TREINAMENTO.md`.
+5. **IA Analítica**: `core/ai_service.py` balizado pelo `MANUAL_CLASSIFICACAO_ANALITICA_v2.md`.
 
 ## 📜 REGRAS INVIOLÁVEIS (GOVERNANÇA)
 - **Código Integral**: Proibido omitir partes de código (`//...`). Entregar sempre o arquivo completo.

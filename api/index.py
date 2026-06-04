@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Body, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Literal
 from supabase import create_client, Client
 import os
 import sys
@@ -37,6 +37,9 @@ logger = logging.getLogger("sentinela-api")
 
 load_dotenv()
 
+# Import CORS configuration (SECURITY FIX: Fase 1 - Replaces wildcard CORS)
+from api.config.cors import CORS_CONFIG, validate_cors_config
+
 # --- CONSTANTS ---
 PASA_CONFIG = {
     "ODIO_IDENTITARIO": {"label": "Ódio Identitário", "color": "#ef4444", "icon": "users"},
@@ -49,11 +52,11 @@ PASA_CONFIG = {
 RISK_COLORS = {"CRITICO": "#ef4444", "ELEVADO": "#f59e0b", "MONITORANDO": "#06b6d4", "CONTROLADO": "#10b981"}
 
 app = FastAPI()
+# SECURITY FIX: Fase 1 - Use secure CORS configuration from environment
+validate_cors_config()
 app.add_middleware(
     CORSMiddleware, 
-    allow_origins=["*"], 
-    allow_methods=["*"], 
-    allow_headers=["*"]
+    **CORS_CONFIG
 )
 
 @app.get("/")
@@ -118,6 +121,23 @@ class SessionRotationRequest(BaseModel):
 
 class SessionCookieRequest(BaseModel):
     cookies: str
+
+class CommandRequest(BaseModel):
+    command: Literal['PAUSE', 'RESUME']
+
+@app.post("/api/v1/command")
+def post_command(payload: CommandRequest, supa: Client = Depends(get_supa)):
+    """Insert command into system_commands for watchdog processing."""
+    try:
+        res = supa.table('system_commands').insert({
+            "command": payload.command,
+            "status": "PENDING",
+            "issued_at": datetime.now(timezone.utc).isoformat()
+        }).execute()
+        return {"status": "success", "id": res.data[0].get('id') if res.data else None}
+    except Exception as e:
+        logger.error(f"Command Insert Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/v1/webhooks/stripe")
 async def stripe_webhook(request: Request, supa: Client = Depends(get_supa)):
@@ -239,7 +259,7 @@ def get_finance_dashboard(supa: Client = Depends(get_supa)):
         transactions = tx_res.data or []
         
         modules_breakdown = {
-            "Dossiês Forenses": 0,
+            "Dossiês Analíticos": 0,
             "Inclusão de Alvos": 0,
             "Radar de Tendências": 0,
             "Alertas Live": 0,
@@ -247,7 +267,7 @@ def get_finance_dashboard(supa: Client = Depends(get_supa)):
         }
         
         action_map = {
-            "unlock_dossier": "Dossiês Forenses",
+            "unlock_dossier": "Dossiês Analíticos",
             "add_target": "Inclusão de Alvos",
             "unlock_radar": "Radar de Tendências",
             "unlock_alerts": "Alertas Live"
@@ -717,17 +737,31 @@ def pasa_breakdown(supa: Client = Depends(get_supa)):
         logger.error(f"PASA Breakdown Error: {e}")
         return {}
 
-@app.post("/api/v1/checkout/create-session")
-def create_checkout(payload: CheckoutRequest):
+@app.post("/api/v1/command")
+def post_command(payload: CommandRequest, supa: Client = Depends(get_supa)):
+    """Recebe comando PAUSE/RESUME e insere na tabela system_commands para ser processado pelo CloudListener."""
     try:
-        # A lógica de mapeamento de CI e Price IDs foi movida para o PaymentManager.
-        # Agora ele aceita package_slug ("tatica", "warroom", "nacional").
-        # O user_id é mantido para que os webhooks creditem a conta certa depois.
+        data = {
+            "command": payload.command,
+            "status": "pending",
+            "issued_at": datetime.now(timezone.utc).isoformat(),
+        }
+        res = supa.table('system_commands').insert(data).execute()
+        return {"status": "queued", "id": res.data[0].get('id') if res.data else None}
+    except Exception as e:
+        logger.error(f"Command insertion error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/v1/checkout/create-session")
+def create_checkout_session(payload: CheckoutRequest, supa: Client = Depends(get_supa)):
+    try:
         session_url = payment_manager.create_checkout_session(
             user_id=payload.user_id or "guest_user", 
             package_type=payload.package_slug
         )
         return {"url": session_url}
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Checkout error: {e}")
         raise HTTPException(status_code=500, detail=str(e))

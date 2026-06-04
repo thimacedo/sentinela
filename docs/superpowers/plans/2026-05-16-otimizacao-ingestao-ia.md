@@ -4,7 +4,7 @@
 
 **Goal:** Otimizar a velocidade de ingestão do Instagram, adicionar validação prévia de comentários, atualizar o schema para scores de confiança e evidências, e apresentar esses dados com uma UX/UI profissional no dashboard.
 
-**Architecture:** A validação e limpeza ocorrerão no `InstagramWorker`. Adicionaremos uma migração no Supabase para as novas colunas. Atualizaremos o `PasaForensicsService` para garantir o output estruturado da IA (confidence_score e evidence_extracted). Por fim, o `src/core/app.js` será modificado para renderizar a evidência de forma fluida.
+**Architecture:** A validação e limpeza ocorrerão no `InstagramWorker`. Adicionaremos uma migração no Supabase para as novas colunas. Atualizaremos o `PasaClassificationService` para garantir o output estruturado da IA (confidence_score e evidence_extracted). Por fim, o `src/core/app.js` será modificado para renderizar o indício de forma fluida.
 
 **Tech Stack:** Python, FastAPI, Supabase (PostgreSQL), Vanilla JS (Frontend).
 
@@ -105,22 +105,22 @@ git add app/workers/instagram_worker.py
 git commit -m "perf: optimize InstagramWorker delay and embed pre-validation"
 ```
 
-### Task 3: Atualizar o Motor de IA e Forensics para Extrair Evidência e Score
+### Task 3: Atualizar o Motor de IA e Classificação para Extrair Indício e Score
 
 **Files:**
-- Modify: `core/forensics_service.py`
+- Modify: `core/classification_service.py`
 - Modify: `core/ai_service.py`
 
 - [ ] **Step 1: Atualizar o System Prompt**
 
-No arquivo `core/forensics_service.py`, atualize a string de retorno do `get_system_prompt()`:
+No arquivo `core/classification_service.py`, atualize a string de retorno do `get_system_prompt()`:
 
 ```python
     def get_system_prompt(self) -> str:
         """Retorna o System Prompt baseado no MCF v2.0 definitivo."""
         manual = self._load_manual()
         return f"""
-Você é um Analista Forense Linguístico do Sistema Sentinela Democrática.
+Você é um Analista de Linguística Analítica do Sistema Sentinela Democrática.
 Siga RIGOROSAMENTE o manual abaixo para classificar os comentários.
 
 {manual}
@@ -135,7 +135,7 @@ IMPORTANTE: Toda resposta DEVE ser um JSON válido contendo obrigatoriamente as 
 
 - [ ] **Step 2: Atualizar o Parser de Veredito**
 
-Na função `parse_verdict` em `core/forensics_service.py`, adicione os novos campos no dicionário retornado:
+Na função `parse_verdict` em `core/classification_service.py`, adicione os novos campos no dicionário retornado:
 
 ```python
             return {
@@ -182,7 +182,7 @@ Mude a seção `updates.append(...)` para:
 - [ ] **Step 4: Commit**
 
 ```bash
-git add core/forensics_service.py core/ai_service.py
+git add core/classification_service.py core/ai_service.py
 git commit -m "feat(ai): enforce structured JSON with confidence_score and evidence_extracted"
 ```
 
@@ -203,7 +203,7 @@ Na função `fetchComments`, atualize o `.select()` para buscar as novas colunas
             .limit(100);
 ```
 
-- [ ] **Step 2: Renderizar Evidências e Score Visualmente**
+- [ ] **Step 2: Renderizar Indícios e Score Visualmente**
 
 No método `renderCommentCard(comment)`, ajuste a lógica do confidence e a renderização do HTML para exibir a evidência com design profissional:
 
@@ -222,7 +222,7 @@ No método `renderCommentCard(comment)`, ajuste a lógica do confidence e a rend
         evidenceHtml = `
             <div class="mt-3 bg-white bg-opacity-50 rounded p-3 border border-danger-100">
                 <p class="text-xs font-semibold text-danger-800 mb-1 flex items-center gap-1">
-                    <i data-lucide="microscope" class="w-3 h-3"></i> Evidência Analítica:
+                    <i data-lucide="microscope" class="w-3 h-3"></i> Indício Analítico:
                 </p>
                 <p class="text-xs text-danger-900 italic font-medium">"${comment.evidence_extracted}"</p>
             </div>

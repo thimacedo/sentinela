@@ -3,8 +3,9 @@ import { useQuery } from '@tanstack/react-query';
 import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import React, { useState } from 'react';
 
-import { fetchApi } from '@/lib/api';
+import { fetchApi, postCommand } from '@/lib/api';
 
 interface Worker {
   worker: string;
@@ -27,12 +28,22 @@ interface Telemetry {
 }
 
 export default function QueueTab() {
+  const [paused, setPaused] = useState(false);
+  const togglePause = async () => {
+    try {
+      await postCommand(paused ? 'RESUME' : 'PAUSE');
+      setPaused(!paused);
+    } catch (e) {
+      console.error('Failed to send pause command:', e);
+    }
+  };
   const { data, isLoading } = useQuery<Telemetry>({
     queryKey: ['workers-telemetry'],
     queryFn: async () => {
       return await fetchApi('/api/v1/monitor/workers');
     },
     refetchInterval: 10000, // Telemetria rápida (10s)
+    enabled: !paused,
   });
 
   const getStatusColor = (status: string) => {
@@ -41,19 +52,29 @@ export default function QueueTab() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="p-4 bg-black/50 border-tactical-accent">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-xl font-bold text-text-main">Telemetria Workers</h3>
+        <button
+          onClick={togglePause}
+          className="flex items-center gap-2 px-3 py-1.5 bg-bg-card border border-border-main rounded-full text-xs font-bold uppercase hover:bg-bg-main transition-colors"
+        >
+          <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path></svg>
+          {paused ? 'Retomar' : 'Pausar'}
+        </button>
+      </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-min">
+        <Card className="p-4 bg-black/50 border-tactical-accent flex flex-col justify-between">
           <h3 className="text-xs text-gray-500 uppercase mb-2">Saúde do Sistema</h3>
           <div className="flex items-center gap-3">
             <div className={`w-3 h-3 rounded-full animate-ping ${data?.system_health === 'green' ? 'bg-tactical-accent' : 'bg-red-500'}`} />
             <span className="text-2xl font-bold uppercase">{data?.system_health || '---'}</span>
           </div>
         </Card>
-        <Card className="p-4 bg-black/50 border-tactical-accent">
+        <Card className="p-4 bg-black/50 border-tactical-accent flex flex-col justify-between">
           <h3 className="text-xs text-gray-500 uppercase mb-2">Workers Ativos</h3>
           <div className="text-2xl font-bold">{data?.healthy_workers || 0} / {data?.total_workers || 0}</div>
         </Card>
-        <Card className="p-4 bg-black/50 border-tactical-accent">
+        <Card className="p-4 bg-black/50 border-tactical-accent flex flex-col justify-between">
           <h3 className="text-xs text-gray-500 uppercase mb-2">Vazão Global</h3>
           <div className="text-2xl font-bold text-tactical-accent">
             {data?.workers.reduce((acc, w) => acc + w.avg_throughput_items_per_sec, 0).toFixed(2) || "0.00"} <span className="text-xs text-gray-500">items/s</span>
@@ -61,7 +82,7 @@ export default function QueueTab() {
         </Card>
       </div>
 
-      <Card className="p-4 bg-black/50 border-tactical-accent">
+      <Card className="p-4 bg-black/50 border-tactical-accent overflow-x-auto overflow-y-auto max-h-96 md:col-span-3">
         <h2 className="text-xl font-bold mb-4 text-tactical-accent uppercase tracking-wider">Status dos Workers</h2>
         <Table>
           <TableHeader>

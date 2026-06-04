@@ -16,7 +16,7 @@ Foi implementado um sistema de logs "honestos" para eliminar ambiguidades durant
 
 ### 2.2. Infraestrutura de Targeting e Fila
 A transição do targeting estático para o real foi concluída com sucesso:
-- **Targeting Real:** Implementação da lógica de seleção de alvos baseada em prioridades e estado da fila (via Supabase/PGMQ).
+- **Targeting Real:** Implementação da lógica de seleção de alvos baseada em prioridades e estado da fila (via Supabase/Fila Atômica baseada em transações concorrentes).
 - **Fila Funcional:** Validação do fluxo de consumo e limpeza da fila, garantindo que nenhum alvo seja processado em duplicidade ou perdido.
 
 ### 2.3. Contratos e Ciclo de Vida do Worker
@@ -35,9 +35,9 @@ A base técnica para todos os workers foi consolidada através do `BaseWorker`:
 | **Extração Real (Zyte)** | 🔄 Em Progresso | Implementação do motor de busca real. |
 | **Persistência Real** | 🔄 Em Progresso | Stubs prontos para transição final. |
 
-## 4. Evidências de Validação
+## 4. Dados de Validação
 - **Logs de Dry-Run:** Confirmam o funcionamento correto do orquestrador com `simulated=True`.
-- **Verificação de Fila:** Testes de estresse na fila PGMQ realizados com sucesso.
+- **Verificação de Fila:** Testes de estresse na fila de transações atômicas realizados com sucesso.
 - **Integridade de Código:** Todas as novas classes seguem o contrato abstrato definido, garantindo conformidade arquitetural.
 
 ## 5. Próximos Passos

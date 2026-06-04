@@ -14,7 +14,7 @@ O "Cérebro" do sistema que gerencia a vida dos workers e a integridade da infra
 - **`claim_lock`**: Garantia de atomicidade para que múltiplos workers não escolham o mesmo alvo simultaneamente.
 
 ## 2. 🕷️ Motor de Coleta V2 (`InstagramScraperV2`)
-Motor independente baseado em Playwright para extração forense de dados.
+Motor independente baseado em Playwright para extração analítica de dados.
 
 - **`scrape_profile(username)`**: Fluxo principal de navegação, bypass de login wall e extração de posts.
 - **`_validate_target_identity()`**: Proteção contra redirects e perfis inválidos/privados.
@@ -22,13 +22,12 @@ Motor independente baseado em Playwright para extração forense de dados.
 - **`_scrape_post()`**: Abre o modal, verifica a idade do post (limite de 7 dias) e extrai comentários.
 - **Tiers de Resiliência**: Tenta capturar dados via (1) Network Interception (GraphQL) -> (2) Scripts JSON -> (3) Heurística DOM.
 
-## 3. 🧠 Serviço de Inteligência (`AIService`)
+## 3. 🧠 Serviço de Inteligência (`AIService` / `FallbackLLM`)
 Motor de classificação híbrida em cascata seguindo o MCA v2.2.
 
-- **`classify_text(text)`**: Roteamento dinâmico entre provedores:
-    - **Tier 0**: LiteRT / Ollama (Local/Velocidade).
-    - **Tier 1**: Mistral Nemo (Cloud/Precisão).
-    - **Tier 2**: Groq Llama 3.3 (Cloud/Resiliência).
+- **`classify_text(text)`**: Roteamento dinâmico entre provedores utilizando uma Fila Circular Unificada (Unified Rotation Queue):
+    - **Local**: Ollama (Triagem local rápida).
+    - **Cloud**: Rotação Round-Robin entre provedores configurados (Mistral, Groq Llama 3, DeepSeek, Google Gemini, Cohere, etc.) com tempo de delay rigoroso de 1.0s e circuit breaker ativo.
 - **`_parse_json_response()`**: Interpretador resiliente para capturar confiança e categorias mesmo com variações de formato.
 - **MCA v2.2**: Protocolo de classificação especializado em ironia técnica, hostilidade velada e misoginia política.
 

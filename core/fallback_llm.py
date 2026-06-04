@@ -204,6 +204,19 @@ class FallbackLLM:
         # Como fallback simples, retornamos o texto original marcado.
         return f"[LLAMA2] {text}"
 
+    def _log_fallback_call(self, provider: str, status: str, payload: dict):
+        """Salva um log de chamada na tabela fallback_logs no Supabase para auditoria financeira."""
+        try:
+            from core.supabase_client import get_supabase_client
+            supabase = get_supabase_client()
+            supabase.table('fallback_logs').insert({
+                'provider': provider,
+                'status': status,
+                'payload': payload
+            }).execute()
+        except Exception as e:
+            logger.warning(f"Não foi possível salvar fallback_log no Supabase: {e}")
+
     # ---------------------------------------------------------------------
     # API pública
     # ---------------------------------------------------------------------
@@ -283,12 +296,14 @@ class FallbackLLM:
                     res = f"[DUMMY-{name.upper()}] {text}"
                 
                 ai_circuit_breaker.record_success(f"fallback_{name}")
+                self._log_fallback_call(name, "SUCCESS", {"model": model_name, "text_length": len(text)})
                 return res
 
             except requests.exceptions.HTTPError as exc:
                 status_code = exc.response.status_code
                 logger.error(f"Erro HTTP {status_code} no provider {name}: {exc}")
                 ai_circuit_breaker.record_failure(f"fallback_{name}", status_code)
+                self._log_fallback_call(name, "ERROR", {"model": model_name, "error_type": "HTTPError", "status_code": status_code, "error": str(exc)})
                 
                 # Hard limit: remove provider from rotation
                 if status_code in [400, 401, 402, 403, 404]:
@@ -302,6 +317,7 @@ class FallbackLLM:
             except Exception as exc:
                 logger.error(f"Erro ao usar provider {name}: {exc}")
                 ai_circuit_breaker.record_failure(f"fallback_{name}")
+                self._log_fallback_call(name, "ERROR", {"model": model_name, "error_type": "Exception", "error": str(exc)})
                 
                 # Config error: remove provider
                 if "ausente" in str(exc).lower():
