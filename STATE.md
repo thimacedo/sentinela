@@ -119,3 +119,15 @@ PGMQ deve aparecer apenas como hipótese futura.
 2. Monitorar o consumo e o custo (burn rate) gerados nas últimas 24h através do TreasurerAgent.
 3. Acompanhar o progresso da re-classificação dos 17.734 comentários ERRO que foram recolocados na fila de processamento (2026-06-04).
 4. Normalizar categorias legadas fora do MCA v2.2 (`POSITIVO`, `NEGATIVO`, `HATE`, `MILICIA_DIGITAL`, etc.) — re-analisar via ai_service para padronizar o schema.
+
+## Últimas Operações (YOLO Test)
+
+- **Teste de Operação Contínua (5 Minutos)**: Em 2026-06-04, um teste acelerado foi executado (`test_5min_operation.py`) para validar simultaneamente o pool de coleta (`InstagramWorker`) e o classificador da fila primária (`AIProcessorWorker`).
+- **Resultados e Auditoria**:
+  - **Fila Atômica**: O mecanismo `queue_manager` funcionou perfeitamente realizando claims com `SKIP LOCKED` do Supabase.
+  - **Coleta**: Scraper V2 autenticou, identificou postagens fixadas (FAST-SKIP) e avançou pelo grid alvo (`@dep.paulomagalhaes`) utilizando instâncias autônomas Headless do Playwright.
+  - **Inteligência (Fallbacks Ativados)**: O Round-Robin com CircuitBreaker operou conforme esperado:
+    - OLLAMA (Local) e MISTRAL (Cloud) operaram com sucesso contínuo.
+    - MARITACA sofreu falha (403 Forbidden - Provável Chave Expirada/Sem Fundo) e sofreu **Poda Automática** via CircuitBreaker, sendo removido permanentemente da malha ativa, protegendo o runtime.
+    - GROQ sofreu limitador de taxa (429 Too Many Requests) e foi temporariamente suspenso na rotação, direcionando a carga fluída para Ollama e Mistral sem interromper o serviço (graceful fallback).
+  - **Conclusão**: O sistema operou de forma perfeitamente resiliente, sem quedas ou congelamentos (deadlocks), confirmando a robustez da arquitetura PASA e do roteamento adaptativo de LLM. O processo assíncrono finalizou corretamente.
