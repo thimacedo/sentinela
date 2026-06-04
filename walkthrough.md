@@ -64,6 +64,7 @@ Ainda pendente:
 Foram corrigidos e validados dois problemas operacionais observados nos logs do runner:
 1. **Poda Automática para Erros 400 (Bad Request)**: Provedores de IA que retornarem `HTTP 400` (ex: chaves mal configuradas ou payloads incompatíveis, como verificado com `zhipu_glm4`) agora são removidos permanentemente da fila unificada em tempo de execução, em vez de ficarem retentando e gerando ruído de log.
 2. **Timeout estendido no Playwright**: Aumentamos o timeout na etapa de navegação do `_verify_session` do Instagram de 30s para 45s, mitigando erros causados por instabilidade ou lentidão temporária da rede local.
+3. **Mapeamento de Cores Semânticas de Badge**: Refatoramos o estilo de categoria para que a classificação `ERRO` seja renderizada de forma consistente em **Roxo (Purple)** no `local_dashboard.html` e no componente React `AnaliseTab.tsx`. Isso soluciona o problema onde erros eram coloridos de verde (Neutro) ou vermelho (Ódio), provendo uma distinção visual clara.
 
 ### Validação Executada
 Rodamos o script `test_ai_service.py` que simulou chamadas com provedores de IA reais e de fallback. Durante o teste:
