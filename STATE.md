@@ -117,3 +117,5 @@ PGMQ deve aparecer apenas como hipótese futura.
 
 1. Habilitar RLS e criar políticas de acesso para as 15 tabelas que estão expostas no Supabase (incluindo `threat_alerts`, `worker_ledger`, `fallback_logs`, etc.).
 2. Monitorar o consumo e o custo (burn rate) gerados nas últimas 24h através do TreasurerAgent.
+3. Acompanhar o progresso da re-classificação dos 17.734 comentários ERRO que foram recolocados na fila de processamento (2026-06-04).
+4. Normalizar categorias legadas fora do MCA v2.2 (`POSITIVO`, `NEGATIVO`, `HATE`, `MILICIA_DIGITAL`, etc.) — re-analisar via ai_service para padronizar o schema.
