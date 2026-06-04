@@ -493,13 +493,21 @@
                         document.getElementById('kpi-restars').innerText = `${m.cycle || 0} / ${m.restarts || 0}`;
                         if(m.ai_services) {
                             document.getElementById('kpi-ai-services').innerHTML = Object.entries(m.ai_services).map(([s,st]) => {
-                                const ok = st === 'OK';
-                                const isDisabled = st === 'DESATIVADO';
-                                const isCloud = s !== 'ollama';
                                 const label = s === 'ollama' ? 'ollama (local)' : `${s} (cloud)`;
-                                const statusDot = `<span class="w-2.5 h-2.5 rounded-full shadow-sm ${ok ? 'bg-emerald-500 shadow-emerald-500/40' : (isDisabled ? 'bg-slate-600 shadow-slate-600/40' : 'bg-rose-500 animate-pulse shadow-rose-500/40')}"></span>`;
-                                const actionBtn = (ok || isDisabled || isCloud) ? '' : `<button onclick="startAIService('${s}')" class="ml-auto text-[10px] bg-rose-500/10 border border-rose-500/40 text-rose-400 px-2.5 py-1 rounded-md font-black hover:bg-rose-500/20 active:scale-95 transition-all shadow-md">START</button>`;
-                                return `<div class="flex items-center gap-3 w-full bg-slate-900/50 p-2 rounded-lg border border-slate-800/60">${statusDot}<span class="text-[11px] font-mono font-bold text-slate-300 uppercase tracking-widest">${label}</span>${actionBtn}</div>`;
+                                // Mapeamento real de status → aparência visual
+                                const statusMap = {
+                                    'OK':         { dot: 'bg-emerald-500 shadow-emerald-500/40',          text: 'text-emerald-400', badge: '' },
+                                    'COOLDOWN':   { dot: 'bg-amber-400 shadow-amber-400/40',              text: 'text-amber-400',   badge: 'COOLDOWN' },
+                                    'RATE_LIMIT': { dot: 'bg-amber-500 animate-pulse shadow-amber-500/40', text: 'text-amber-500',  badge: '429' },
+                                    'BLOQUEADO':  { dot: 'bg-rose-500 animate-pulse shadow-rose-500/40',  text: 'text-rose-400',   badge: 'BLOQUEADO' },
+                                    'REMOVIDO':   { dot: 'bg-rose-700 shadow-rose-700/40',                text: 'text-rose-600',   badge: 'REMOVIDO' },
+                                    'DESATIVADO': { dot: 'bg-slate-600 shadow-slate-600/40',              text: 'text-slate-500',  badge: '' },
+                                    'DOWN':       { dot: 'bg-rose-500 animate-pulse shadow-rose-500/40',  text: 'text-rose-400',   badge: 'DOWN' },
+                                };
+                                const style = statusMap[st] || statusMap['DOWN'];
+                                const badgeHtml = style.badge ? `<span class="ml-auto text-[9px] font-black px-1.5 py-0.5 rounded ${style.text} border border-current/30 bg-current/5">${style.badge}</span>` : '';
+                                const startBtn = (st === 'DOWN' && s === 'ollama') ? `<button onclick="startAIService('${s}')" class="ml-auto text-[10px] bg-rose-500/10 border border-rose-500/40 text-rose-400 px-2.5 py-1 rounded-md font-black hover:bg-rose-500/20 active:scale-95 transition-all shadow-md">START</button>` : '';
+                                return `<div class="flex items-center gap-3 w-full bg-slate-900/50 p-2 rounded-lg border border-slate-800/60"><span class="w-2.5 h-2.5 rounded-full shadow-sm ${style.dot}"></span><span class="text-[11px] font-mono font-bold text-slate-300 uppercase tracking-widest">${label}</span>${badgeHtml}${startBtn}</div>`;
                             }).join('');
                         }
                         if(m.instagram_accounts) {

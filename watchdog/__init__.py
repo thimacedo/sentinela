@@ -199,6 +199,55 @@ async def evaluate_ia(data: dict):
     except Exception as e:
         return {"success": False, "message": str(e)}
 
+@app.get("/api/ai_health")
+async def get_ai_health():
+    """
+    Expõe o estado REAL dos circuit breakers do ai_service.
+    Diferente de /api/metrics, este endpoint mostra se o provedor está
+    realmente disponível no momento (não apenas se a chave existe no .env).
+    """
+    try:
+        import time as _time
+        from core.circuit_breaker import ai_circuit_breaker
+        from core.ai_service import ai_service
+
+        now = _time.time()
+        result = {}
+
+        # Itera sobre os provedores ativos na fila do ai_service
+        active_names = {p["name"] for p in ai_service.providers}
+
+        # Inclui também provedores que podem ter sido removidos permanentemente
+        all_known = active_names | set(ai_circuit_breaker.open_until.keys())
+
+        for name in sorted(all_known):
+            if name not in active_names:
+                # Provedor removido permanentemente (ex: 401/403)
+                result[name] = {"status": "REMOVIDO", "icon": "🔴", "detail": "Removido permanentemente (erro fatal)"}
+                continue
+
+            prov = next((p for p in ai_service.providers if p["name"] == name), None)
+            cooldown_until = prov.get("cooldown_until", 0) if prov else 0
+            cb_until = ai_circuit_breaker.open_until.get(name, 0)
+            failures = ai_circuit_breaker.failures.get(name, 0)
+
+            # Determina o status mais restritivo
+            if cb_until > now:
+                secs_left = int(cb_until - now)
+                if secs_left > 1800:  # > 30min → provavelmente erro fatal
+                    result[name] = {"status": "BLOQUEADO", "icon": "🔴", "detail": f"Circuit breaker aberto por mais {secs_left//60}min (erro fatal)"}
+                else:
+                    result[name] = {"status": "RATE_LIMIT", "icon": "🟡", "detail": f"Cooldown por mais {secs_left}s ({failures} falhas)"}
+            elif cooldown_until > now:
+                secs_left = int(cooldown_until - now)
+                result[name] = {"status": "COOLDOWN", "icon": "🟡", "detail": f"Cooldown por mais {secs_left}s"}
+            else:
+                result[name] = {"status": "OK", "icon": "🟢", "detail": "Disponível"}
+
+        return {"providers": result, "timestamp": now}
+    except Exception as e:
+        return {"providers": {}, "error": str(e)}
+
 @app.get("/api/stream")
 async def stream(request: Request):
     """Server-Sent Events para logs em tempo real com MIME Type corrigido."""
@@ -292,27 +341,41 @@ async def get_metrics():
         except Exception:
             return "DOWN"
 
-    # Checagem de status de IA
+    # Checagem de status de IA — usa circuit breakers reais se o runner estiver ativo
     ai_status = {}
-    
-    # Ollama (Local)
-    ollama_health = _get_health_url(os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"), "http://localhost:11434", "/api/tags")
-    ai_status["ollama"] = _service_status(ollama_health)
-    
-    # Provedores de Cloud
-    providers_keys = {
-        "groq": "GROQ_API_KEY",
-        "deepseek": "DEEPSEEK_API_KEY",
-        "openrouter": "OPENROUTER_API_KEY",
-        "gemini": "GEMINI_API_KEY",
-    }
-    
-    for prov_name, env_var in providers_keys.items():
-        val = os.getenv(env_var, "").strip()
-        if not val or "dummy" in val.lower():
-            ai_status[prov_name] = "DESATIVADO"
-        else:
-            ai_status[prov_name] = "OK"
+    ai_status_detail = {}  # campo extra com status detalhado por provedor
+
+    try:
+        # Tenta ler o estado real dos circuit breakers do processo runner em memória
+        import time as _time
+        from core.circuit_breaker import ai_circuit_breaker
+        from core.ai_service import ai_service
+
+        now = _time.time()
+        active_names = {p["name"] for p in ai_service.providers}
+        all_known = active_names | set(ai_circuit_breaker.open_until.keys())
+
+        for name in sorted(all_known):
+            if name not in active_names:
+                ai_status[name] = "REMOVIDO"
+                continue
+            prov = next((p for p in ai_service.providers if p["name"] == name), None)
+            cooldown_until = prov.get("cooldown_until", 0) if prov else 0
+            cb_until = ai_circuit_breaker.open_until.get(name, 0)
+            if cb_until > now:
+                secs_left = int(cb_until - now)
+                ai_status[name] = "BLOQUEADO" if secs_left > 1800 else "RATE_LIMIT"
+            elif cooldown_until > now:
+                ai_status[name] = "COOLDOWN"
+            else:
+                ai_status[name] = "OK"
+    except Exception:
+        # Fallback: verifica apenas presença das chaves no .env
+        ollama_health = _get_health_url(os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"), "http://localhost:11434", "/api/tags")
+        ai_status["ollama"] = _service_status(ollama_health)
+        for prov_name, env_var in {"groq": "GROQ_API_KEY", "mistral": "MISTRAL_API_KEY", "deepseek": "DEEPSEEK_API_KEY", "openrouter": "OPENROUTER_API_KEY", "gemini": "GEMINI_API_KEY"}.items():
+            val = os.getenv(env_var, "").strip()
+            ai_status[prov_name] = "OK" if (val and "dummy" not in val.lower()) else "DESATIVADO"
 
     with state.lock:
         return {
@@ -462,7 +525,20 @@ def heal_runtime_error(reason: str) -> str:
         state.update_metrics(status="PARADO - OOM")
         return "fatal"
         
-    if "connectionrefusederror" in stderr_lower or "supabase" in stderr_lower:
+    # Detecta falha REAL de conexão com banco — não apenas a presença da URL do Supabase nos logs
+    _db_connection_terms = [
+        "connectionrefusederror",
+        "connection refused",
+        "could not connect",
+        "connection reset",
+        "network unreachable",
+        "max retries exceeded",
+        "failed to connect",
+        "unable to connect",
+        "econnrefused",
+    ]
+    _is_db_failure = any(t in stderr_lower for t in _db_connection_terms)
+    if _is_db_failure:
         state.add_log("warn", "[Watchdog] ⏸️ Banco de dados/API offline. Aguardando 5 min antes de tentar.")
         time.sleep(300)
         return "wait"
