@@ -628,9 +628,17 @@ def guard():
                 if reanalyzed > 0:
                     state.add_log("info", f"[Watchdog] Reanalisados {reanalyzed} comentários com baixa confiança durante o descanso.")
                 
-                state.add_log("info", "[Watchdog] Manutenção de IA concluída com sucesso durante o descanso.")
+                # 3. Exportar dados atualizados para o Datasette local
+                state.add_log("info", "[Watchdog] Sincronizando dados para o Datasette local...")
+                try:
+                    from scripts.export_to_sqlite import export_to_sqlite
+                    export_to_sqlite()
+                except Exception as e_sql:
+                    state.add_log("warn", f"[Watchdog] Falha ao exportar dados para SQLite: {e_sql}")
+                
+                state.add_log("info", "[Watchdog] Manutenção de IA e sincronização concluídas com sucesso durante o descanso.")
             except Exception as e:
-                state.add_log("warn", f"[Watchdog] Falha ao executar manutenção de IA no cooldown: {e}")
+                state.add_log("warn", f"[Watchdog] Falha ao executar manutenção no cooldown: {e}")
 
 if __name__ == "__main__":
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -651,6 +659,35 @@ if __name__ == "__main__":
 
     web_thread = Thread(target=run_web_server, daemon=True)
     web_thread.start()
+    
+    # 🤖 INICIALIZAÇÃO DO DATASETTE EXPLORADOR SQL (PASA v50.1 - Porta 8002)
+    db_file = os.path.join(PROJECT_ROOT, "data", "sentinela_data.db")
+    
+    # Garante exportação inicial do banco se ele não existir
+    if not os.path.exists(db_file):
+        try:
+            from scripts.export_to_sqlite import export_to_sqlite
+            export_to_sqlite()
+        except Exception as e_init:
+            print(f"[Watchdog] Erro na exportação inicial para Datasette: {e_init}")
+
+    def run_datasette_server():
+        try:
+            creationflags = 0x08000000 if os.name == 'nt' else 0
+            subprocess.Popen(
+                [python_exe, "-m", "datasette", "serve", db_file, "--port", "8002", "--host", "0.0.0.0", "--immutable"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                creationflags=creationflags
+            )
+            print("[START] Explorador SQL (Datasette) disponível em: http://localhost:8002")
+        except Exception as e_ds:
+            print(f"[WARN] Falha ao iniciar Datasette: {e_ds}")
+
+    datasette_thread = Thread(target=run_datasette_server, daemon=True)
+    datasette_thread.start()
+
     print("[START] Dashboard disponível em: http://localhost:8001")
     print("[SHIELD] SENTINELA DEMOCRÁTICA - WATCHDOG v50.0")
+    
     guard()
