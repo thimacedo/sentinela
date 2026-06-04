@@ -76,6 +76,23 @@ Rodamos o script `test_ai_service.py` que simulou chamadas com provedores de IA 
 - O sistema interceptou, acionou o Circuit Breaker e **podou permanentemente** o provedor da lista ativa.
 - A requisição rotacionou com sucesso para o `groq_llama3` e obteve a classificação `DANO_A_IMAGEM` em JSON estruturado com sucesso absoluto.
 
+## 9. Consolidação de Subagentes, Sanitização e Auditoria de Custos (Fase Recente)
+
+Nesta fase recente de saneamento técnico e monetização, realizamos melhorias críticas no monitoramento e nas garantias de conformidade do projeto:
+
+1. **Verificação de Lint e Build do Frontend**:
+   - Correção do erro no elemento SVG em [QueueTab.tsx](file:///c:/projetos/sentinela/frontend/components/warroom/QueueTab.tsx#L61) (substituindo `class` por `className`), o que resolveu o erro de type-checking do TypeScript.
+   - Build do frontend (`npm run build`) validado e concluído com absoluto sucesso (100% estático e limpo).
+2. **Mapeamento de Custos de IA (Burn Rate)**:
+   - Implementação de gravação de log no [fallback_llm.py](file:///c:/projetos/sentinela/core/fallback_llm.py#L286) para persistir as estatísticas de chamadas bem-sucedidas e erros da malha de IA de fallback na tabela `fallback_logs` do Supabase.
+   - Criação da lógica de cálculo financeiro `_compute_burn_rate()` no subagente [treasurer_agent.py](file:///c:/projetos/sentinela/workers/financial/treasurer_agent.py#L98) para estimar o custo financeiro operacional em USD gasto com chamadas de IA nas últimas 24 horas.
+   - Integração da telemetria de burn rate nos relatórios e auditorias consolidadas pelo subagente financeiro.
+3. **Purgação de Termos Proibidos**:
+   - Expurgo dos termos juridicamente sensíveis ("forense", "prova", "evidência") e atualização de referências obsoletas em [api/index.py](file:///c:/projetos/sentinela/api/index.py#L262), [copilot-instructions.md](file:///c:/projetos/sentinela/copilot-instructions.md#L14), [docs/superpowers/plans/2026-05-16-otimizacao-ingestao-ia.md](file:///c:/projetos/sentinela/docs/superpowers/plans/2026-05-16-otimizacao-ingestao-ia.md), [docs/project_functions_v58.md](file:///c:/projetos/sentinela/docs/project_functions_v58.md#L17) e relatórios históricos de auditoria.
+   - Exclusão de arquivos temporários e de log obsoletos da raiz do workspace (`tmp_litert_*.txt`).
+4. **Vulnerabilidade Identificada no Supabase (RLS Desabilitado)**:
+   - Identificação de que 15 tabelas no banco de dados remoto do Supabase estão com RLS (Row Level Security) desabilitado. O script de remediação foi apresentado para aprovação e posterior aplicação por parte do usuário.
+
 ## 8. Uso recomendado
 
 Para iniciar trabalho novo:
