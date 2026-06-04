@@ -238,7 +238,7 @@ class SentinelaOrchestrator:
                 
                 # --- SMART WAIT (PASA v85.12) ---
                 if result.cycle_result.error == "no_tasks_available":
-                    idle_wait = 600.0 # 10 minutos de sono profundo
+                    idle_wait = 1200.0 # 20 minutos de sono profundo
                     logger.info("[%s] 💤 Fila vazia. Entrando em modo de espera (%.0fs).", worker.worker_id, idle_wait)
                     await asyncio.sleep(idle_wait)
                 elif result.cycle_result.error == "worker_suspended":

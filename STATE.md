@@ -5,8 +5,8 @@ _last_updated: 2026-06-04 | branch: main_
 
 | Subsistema | Status | Observação |
 |---|---|---|
-| Coleta | 🟢 Operacional | Scraper V2 ativo, com fila atômica, faxina de zumbis no boot e recuperação resiliente via sqlite buffer |
-| Inteligência | 🟢 Operacional | Malha de IA ativa e dinâmica: ollama local monitorado e provedores de nuvem configurados via chaves no .env (groq, deepseek, openrouter, gemini) |
+| Coleta | 🟢 Operacional | Scraper V2 ativo com ritmo conservador (10 a 30 min de cooldown) focado em constância e prevenção de bloqueios |
+| Inteligência | 🟢 Operacional | Fila de processamento cíclico cadenciada e rotativa Round-Robin baseada em chaves de IA cloud (.env) e ollama local |
 | Analytics de Rede | 🟢 Operacional | Subagente `NetworkMinerAgent` ativo de forma reativa/sob demanda |
 | Financeiro | 🟢 Operacional | Subagente `TreasurerAgent` ativo de forma reativa/sob demanda, com telemetria e burn rate diário de IA |
 | Watchdog Local | 🟢 Operacional | Porta 8001, SSE, controle remoto, dashboard local premium e monitor dinâmico de chaves de IA ativo |
@@ -19,11 +19,12 @@ _last_updated: 2026-06-04 | branch: main_
 3. O classificador oficial em produção é `workers/processors/ai_processor_worker.py`.
 4. A trava de instância única no `main_runner.py` e `watchdog` impede a execução redundante de múltiplos processos usando caminhos de lock absoluto baseados em `PROJECT_ROOT`.
 5. O `cleanup_orphans()` é executado preventivamente no boot do `main_runner.py`, no setup de cada worker (`InstagramScraperWorker` e `TargetResearchWorker`), no `run_all()` do orquestrador e ciclicamente na sua autocura.
-6. LiteRT não compõe mais o pipeline ativo de processamento.
-7. A fila distribuída real hoje usa travas atômicas com `SELECT FOR UPDATE SKIP LOCKED`.
-8. PGMQ permanece como possibilidade futura, não como base atual do runtime.
-9. `frontend/` é o frontend oficial.
-10. `local_dashboard.html` é o painel operacional local do watchdog, contendo seção de "Serviços de IA" dinâmica que exibe bolinhas cinzas (`bg-slate-600`) para serviços Cloud não configurados (status `DESATIVADO`).
+6. A cadência de ciclos de processamento de todos os workers e agentes é lenta e constante: **10 min** (gold), **20 min** (silver/idle) e **30 min** (bronze) para proteção de sessões e cotas.
+7. LiteRT não compõe mais o pipeline ativo de processamento.
+8. A fila distribuída real hoje usa travas atômicas com `SELECT FOR UPDATE SKIP LOCKED`.
+9. PGMQ permanece como possibilidade futura, não como base atual do runtime.
+10. `frontend/` é o frontend oficial.
+11. `local_dashboard.html` é o painel operacional local do watchdog, contendo seção de "Serviços de IA" dinâmica que exibe bolinhas cinzas (`bg-slate-600`) para serviços Cloud não configurados (status `DESATIVADO`).
 
 ## Achados da auditoria documental
 
@@ -65,7 +66,7 @@ _last_updated: 2026-06-04 | branch: main_
 
 O principal risco operacional hoje é a expiração ou bloqueio de cookies da sessão do Instagram (gerando respostas de feeds vazios):
 - Necessidade de renovação periódica das cookies via script interativo no terminal.
-- providers de fallback com erros de quota/configuração (remediado via Unified Rotation Queue).
+- A mitigação do risco de taxa foi aplicada aumentando os cooldowns de todos os ciclos para 10 a 30 minutos de descanso.
 
 ## Situação da IA
 
@@ -110,7 +111,7 @@ PGMQ deve aparecer apenas como hipótese futura.
 
 - `docs/archive/**`
 - `docs/superpowers/**`
-- arquiteturas PASA antigas
+- arquitetura PASA antiga
 
 ## Próximos passos recomendados
 

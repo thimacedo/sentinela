@@ -5,13 +5,13 @@ from workers.base.cycle_result import CycleResult
 
 # Intervalos em segundos por tier
 _TIER_INTERVALS = {
-    "gold":     120,
-    "silver":   300,
-    "bronze":   480,
-    "critical": 600,
-    "db_failed":600,
-    "idle":     300,
-    "dry_run":  300,
+    "gold":     600,
+    "silver":   1200,
+    "bronze":   1800,
+    "critical": 2400,
+    "db_failed":2400,
+    "idle":     1200,
+    "dry_run":  1200,
 }
 
 @dataclass
