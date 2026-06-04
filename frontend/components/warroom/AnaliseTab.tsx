@@ -78,7 +78,8 @@ export default function AnaliseTab() {
     return () => observer.disconnect();
   }, [apiLimit, comments.length]);
 
-  const getRiskColor = (isHate: boolean, confidence: number) => {
+  const getRiskColor = (category: string, isHate: boolean, confidence: number) => {
+    if (category === 'ERRO') return 'text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-900 bg-purple-50 dark:bg-purple-900/10';
     if (!isHate) return 'text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-900/10';
     if (confidence > 0.8) return 'text-red-600 dark:text-red-400 border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-900/10';
     if (confidence > 0.5) return 'text-orange-600 dark:text-orange-400 border-orange-200 dark:border-orange-900 bg-orange-50 dark:bg-orange-900/10';
@@ -152,7 +153,7 @@ export default function AnaliseTab() {
                         </div>
                       </div>
                     </div>
-                    <Badge className={`px-2.5 py-0.5 text-[9px] font-black uppercase rounded-sm border ${getRiskColor(c.is_hate, c.confianca_ia)}`}>
+                    <Badge className={`px-2.5 py-0.5 text-[9px] font-black uppercase rounded-sm border ${getRiskColor(c.categoria_ia, c.is_hate, c.confianca_ia)}`}>
                       {c.categoria_ia}
                     </Badge>
                   </div>

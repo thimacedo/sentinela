@@ -107,9 +107,9 @@
     </div>
 
     <!-- Main Content -->
-    <main class="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 min-h-0 overflow-hidden">
+    <main class="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 min-h-0 overflow-y-auto lg:overflow-hidden pb-10 lg:pb-0">
         <!-- Radar (Left) -->
-        <aside class="lg:col-span-3 flex flex-col gap-4 h-[calc(100vh-280px)] min-h-0 bg-slate-900/20 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-4 shadow-xl">
+        <aside class="lg:col-span-3 flex flex-col gap-4 h-[500px] lg:h-full min-h-0 bg-slate-900/40 backdrop-blur-2xl border border-slate-800/60 rounded-2xl p-5 shadow-2xl">
             <div class="flex justify-between items-center pb-3 border-b border-slate-800">
                 <h2 class="text-xs font-black uppercase tracking-widest text-slate-400">Radar de Alvos</h2>
                 <span id="targets-count-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 mono">--/--</span>
@@ -118,11 +118,11 @@
                 <input type="text" id="target-search" oninput="filterTargets()" placeholder="Buscar @username..." class="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-indigo-500/50 transition-all text-slate-200">
                 <svg class="w-3.5 h-3.5 text-slate-500 absolute right-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </div>
-            <div id="thermo-filters" class="flex gap-1 overflow-x-auto pb-1 custom-scrollbar">
-                <button data-filter="ALL" class="thermo-btn active text-[9px] font-bold px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-800 text-slate-400">TUDO</button>
-                <button data-filter="QUENTE" class="thermo-btn text-[9px] font-bold px-2.5 py-1 rounded-lg border border-rose-900/50 bg-rose-500/10 text-rose-400">QUENTE</button>
-                <button data-filter="MORNO" class="thermo-btn text-[9px] font-bold px-2.5 py-1 rounded-lg border border-amber-900/50 bg-amber-500/10 text-amber-400">MORNO</button>
-                <button data-filter="FRIO" class="thermo-btn text-[9px] font-bold px-2.5 py-1 rounded-lg border border-blue-900/50 bg-blue-500/10 text-blue-400">FRIO</button>
+            <div id="thermo-filters" class="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
+                <button data-filter="ALL" class="thermo-btn active text-[10px] font-bold px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800 text-slate-300 shadow-md">TUDO</button>
+                <button data-filter="QUENTE" class="thermo-btn text-[10px] font-bold px-3 py-1.5 rounded-lg border border-rose-900/50 bg-rose-500/10 text-rose-400 shadow-md">QUENTE</button>
+                <button data-filter="MORNO" class="thermo-btn text-[10px] font-bold px-3 py-1.5 rounded-lg border border-amber-900/50 bg-amber-500/10 text-amber-400 shadow-md">MORNO</button>
+                <button data-filter="FRIO" class="thermo-btn text-[10px] font-bold px-3 py-1.5 rounded-lg border border-blue-900/50 bg-blue-500/10 text-blue-400 shadow-md">FRIO</button>
             </div>
             <div id="targets-feed" class="flex-1 overflow-y-auto pr-1 flex flex-col gap-2.5 custom-scrollbar">
                 <div class="skeleton h-20 w-full opacity-20"></div>
@@ -131,7 +131,7 @@
         </aside>
 
         <!-- Monitor (Center) -->
-        <section class="lg:col-span-6 flex flex-col gap-4 h-[calc(100vh-280px)] min-h-0 bg-slate-900/30 border border-slate-800/80 rounded-2xl shadow-2xl overflow-hidden">
+        <section class="lg:col-span-6 flex flex-col gap-4 h-[650px] lg:h-full min-h-0 bg-slate-900/50 border border-slate-800/60 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-md">
             <div class="p-5 border-b border-slate-800/80 flex justify-between items-center bg-slate-900/20 backdrop-blur-md sticky top-0 z-10">
                 <div class="flex items-center gap-4">
                     <button id="tab-monitor" onclick="switchTab('monitor')" class="text-xs font-black uppercase tracking-widest text-white border-b-2 border-indigo-500 pb-1 focus:outline-none transition-all">Monitor de Discurso</button>
@@ -161,7 +161,7 @@
         </section>
 
         <!-- Status (Right) -->
-        <aside class="lg:col-span-3 flex flex-col gap-4 h-[calc(100vh-280px)] min-h-0 overflow-hidden">
+        <aside class="lg:col-span-3 flex flex-col gap-4 h-auto lg:h-full min-h-0 overflow-visible lg:overflow-y-auto">
             <div class="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-5 shadow-xl">
                 <h2 class="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">Serviços Locais</h2>
                 <div id="kpi-ai-services" class="flex flex-col gap-3"></div>
@@ -171,7 +171,9 @@
                 <div id="kpi-instagram" class="flex flex-col gap-3"></div>
             </div>
             <div class="bg-slate-900/40 border border-slate-800/80 rounded-2xl flex-1 flex flex-col min-h-0 shadow-xl overflow-hidden">
-                <div class="p-4 border-b border-slate-800"><h2 class="text-xs font-black uppercase tracking-widest text-slate-400">Telemetria</h2></div>
+                <div class="p-4 border-b border-slate-800 bg-slate-900/20">
+                    <h2 class="text-xs font-black uppercase tracking-widest text-slate-400">Telemetria</h2>
+                </div>
                 <div id="runs-feed" class="flex-1 overflow-y-auto p-4 flex flex-col gap-3 custom-scrollbar"></div>
             </div>
         </aside>
@@ -221,17 +223,17 @@
             feed.innerHTML = list.map(c => {
                 const color = c.termometro === 'QUENTE' ? 'text-rose-400 border-rose-900/50 bg-rose-500/10' : (c.termometro === 'MORNO' ? 'text-amber-400 border-amber-900/50 bg-amber-500/10' : 'text-blue-400 border-blue-900/50 bg-blue-500/10');
                 return `
-                <div class="bg-slate-900/40 border border-slate-800/60 p-3 rounded-xl flex flex-col gap-2 group relative hover:border-slate-700 transition-all">
+                <div class="bg-slate-900/60 border border-slate-800/60 p-4 rounded-xl flex flex-col gap-3 group relative hover:border-slate-600 transition-all shadow-md">
                     <div class="flex justify-between items-center">
-                        <span class="font-bold text-white text-xs cursor-pointer hover:text-indigo-400" onclick="navigator.clipboard.writeText('@${c.username}'); this.classList.add('text-indigo-400'); setTimeout(()=>this.classList.remove('text-indigo-400'),1000)">@${escapeHTML(c.username)}</span>
-                        <div class="flex items-center gap-2">
-                            <button id="btn-scr-${escapeHTML(c.username)}" onclick="forceScrape('${escapeHTML(c.username)}')" class="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-indigo-400 transition-all"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path></svg></button>
-                            <span class="text-[8px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider ${color}">${c.termometro || 'FRIO'}</span>
+                        <span class="font-extrabold text-white text-sm cursor-pointer hover:text-indigo-400 transition-colors" onclick="navigator.clipboard.writeText('@${c.username}'); this.classList.add('text-indigo-400'); setTimeout(()=>this.classList.remove('text-indigo-400'),1000)">@${escapeHTML(c.username)}</span>
+                        <div class="flex items-center gap-3">
+                            <button id="btn-scr-${escapeHTML(c.username)}" onclick="forceScrape('${escapeHTML(c.username)}')" class="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-indigo-400 transition-all bg-slate-800 p-1.5 rounded-md"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path></svg></button>
+                            <span class="text-[10px] font-black px-2 py-1 rounded border uppercase tracking-wider shadow-sm ${color}">${c.termometro || 'FRIO'}</span>
                         </div>
                     </div>
-                    <div class="flex justify-between text-[10px] text-slate-500">
-                        <span class="truncate max-w-[120px]">${escapeHTML(c.nome_completo || 'Sem nome')}</span>
-                        <span class="font-mono text-[9px]">${timeAgo(c.last_scraped_at)}</span>
+                    <div class="flex justify-between text-xs text-slate-400">
+                        <span class="truncate max-w-[140px] font-medium">${escapeHTML(c.nome_completo || 'Sem nome')}</span>
+                        <span class="font-mono text-[10px] bg-slate-950/50 px-2 py-0.5 rounded-md">${timeAgo(c.last_scraped_at)}</span>
                     </div>
                 </div>`;
             }).join('');
@@ -255,7 +257,7 @@
                     else if (feedbackType === 'FALSO_POSITIVO') { feedbackLabel = '⚠️ Falso Positivo'; color = 'text-amber-500'; }
                     else if (feedbackType === 'FALSO_NEGATIVO') { feedbackLabel = '🚨 Falso Negativo'; color = 'text-rose-500'; }
                     
-                    if(btnContainer) btnContainer.innerHTML = `<span class="text-[8px] font-black uppercase ${color} tracking-tighter">${feedbackLabel}</span>`;
+                    if(btnContainer) btnContainer.innerHTML = `<span class="text-[10px] font-black uppercase ${color} tracking-tighter bg-slate-900/80 px-2 py-1 rounded-md border border-slate-800">${feedbackLabel}</span>`;
                 }
             } catch(e) { console.error("Eval error:", e); }
         }
@@ -271,6 +273,16 @@
                 const displayConf = isProcessed ? `${(conf * 100).toFixed(1)}%` : 'FILTRANDO...';
                 const barColor = !isProcessed ? 'bg-slate-800' : (conf >= 0.8 ? 'bg-emerald-500' : (conf >= 0.4 ? 'bg-amber-500' : 'bg-slate-700'));
                 const isHate = c.is_hate === true;
+                const isError = c.categoria_ia === 'ERRO';
+                
+                let badgeClasses = '';
+                if (isError) {
+                    badgeClasses = 'text-purple-400 bg-purple-500/10 border-purple-500/30 shadow-sm shadow-purple-500/20';
+                } else if (isHate) {
+                    badgeClasses = 'text-rose-400 bg-rose-500/10 border-rose-500/30 shadow-sm shadow-rose-500/20';
+                } else {
+                    badgeClasses = 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30 shadow-sm';
+                }
                 
                 // Extrai motor da analise_pericial (ex: [GROQ] ...)
                 let engine = isProcessed ? 'N/A' : 'LEXICAL';
@@ -280,41 +292,41 @@
                 }
 
                 return `
-                <div class="bg-slate-900/40 border ${isHate ? 'border-rose-900/50 glow-red' : 'border-slate-800/60'} rounded-xl p-4 flex flex-col gap-3 transition-all hover:bg-slate-900/60">
+                <div class="bg-slate-900/60 border ${isHate ? 'border-rose-900/70 glow-red' : 'border-slate-800'} rounded-xl p-5 flex flex-col gap-4 transition-all hover:bg-slate-900/80 shadow-lg">
                     <div class="flex justify-between items-start">
                         <div>
-                            <div class="font-black text-white text-xs">@${escapeHTML(c.autor_username)}</div>
-                            <div class="text-[9px] text-slate-500 mt-1">em <b class="text-slate-300">@${escapeHTML(c.candidato_id)}</b></div>
+                            <div class="font-black text-white text-sm">@${escapeHTML(c.autor_username)}</div>
+                            <div class="text-[11px] text-slate-400 mt-1 font-medium">em <b class="text-slate-200">@${escapeHTML(c.candidato_id)}</b></div>
                         </div>
-                        <div class="flex flex-col items-end gap-1">
-                            <span class="text-[8px] font-black px-2 py-0.5 rounded border ${isHate ? 'text-rose-400 bg-rose-500/10 border-rose-500/30' : 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30'} uppercase tracking-widest">${c.categoria_ia}</span>
-                            <span class="text-[7px] font-mono text-slate-600 uppercase tracking-tighter">AI: ${engine}</span>
+                        <div class="flex flex-col items-end gap-2">
+                            <span class="text-[10px] font-black px-2.5 py-1 rounded-md border ${badgeClasses} uppercase tracking-widest">${c.categoria_ia}</span>
+                            <span class="text-[9px] font-mono text-slate-500 uppercase tracking-tighter font-bold">AI: ${engine}</span>
                         </div>
                     </div>
-                    <p class="text-xs text-slate-200 leading-relaxed font-medium bg-slate-950/40 p-3 rounded-lg border border-slate-800/50 italic">"${escapeHTML(c.texto_limpo || c.texto_bruto)}"</p>
-                    <div class="flex flex-col gap-1.5">
-                        <div class="flex justify-between text-[8px] font-black tracking-widest text-slate-500 uppercase">
-                            <span>Confiança IA <b class="ml-1 text-slate-600">${engine}</b></span>
-                            <span class="${conf >= 0.4 ? 'text-slate-200' : ''}">${displayConf}</span>
+                    <p class="text-sm text-slate-200 leading-relaxed font-medium bg-slate-950/60 p-4 rounded-xl border border-slate-800/80 italic shadow-inner">"${escapeHTML(c.texto_limpo || c.texto_bruto)}"</p>
+                    <div class="flex flex-col gap-2">
+                        <div class="flex justify-between text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                            <span>Confiança IA <b class="ml-1 text-slate-300">${engine}</b></span>
+                            <span class="${conf >= 0.4 ? 'text-slate-100 font-bold' : ''}">${displayConf}</span>
                         </div>
-                        <div class="w-full bg-slate-800 rounded-full h-[3px] overflow-hidden"><div class="conf-bar ${barColor}" style="width:${conf*100}%"></div></div>
+                        <div class="w-full bg-slate-950 rounded-full h-[4px] overflow-hidden border border-slate-800/50"><div class="conf-bar ${barColor}" style="width:${conf*100}%"></div></div>
                     </div>
-                    <div class="flex justify-between items-center border-t border-slate-800/50 pt-2">
-                        <div class="flex items-center gap-3">
-                            <div id="eval-btns-${c.id}" class="flex items-center gap-1.5">
-                                <button onclick="evaluateIA('${c.id}', '${c.trace_id}', '${engine}', 'VALIDADO', '${c.categoria_ia}', '${escapeHTML(c.texto_limpo || c.texto_bruto)}')" class="text-slate-600 hover:text-emerald-400 transition-colors" title="Correto / Validado">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                    <div class="flex justify-between items-center border-t border-slate-800/80 pt-3">
+                        <div class="flex items-center gap-4">
+                            <div id="eval-btns-${c.id}" class="flex items-center gap-2">
+                                <button onclick="evaluateIA('${c.id}', '${c.trace_id}', '${engine}', 'VALIDADO', '${c.categoria_ia}', '${escapeHTML(c.texto_limpo || c.texto_bruto)}')" class="text-slate-500 hover:text-emerald-400 hover:bg-emerald-500/10 p-1.5 rounded-lg transition-all" title="Correto / Validado">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                                 </button>
-                                <button onclick="evaluateIA('${c.id}', '${c.trace_id}', '${engine}', 'FALSO_POSITIVO', '${c.categoria_ia}', '${escapeHTML(c.texto_limpo || c.texto_bruto)}')" class="text-slate-600 hover:text-amber-400 transition-colors" title="Falso Positivo (Inocente)">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                <button onclick="evaluateIA('${c.id}', '${c.trace_id}', '${engine}', 'FALSO_POSITIVO', '${c.categoria_ia}', '${escapeHTML(c.texto_limpo || c.texto_bruto)}')" class="text-slate-500 hover:text-amber-400 hover:bg-amber-500/10 p-1.5 rounded-lg transition-all" title="Falso Positivo (Inocente)">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                                 </button>
-                                <button onclick="evaluateIA('${c.id}', '${c.trace_id}', '${engine}', 'FALSO_NEGATIVO', '${c.categoria_ia}', '${escapeHTML(c.texto_limpo || c.texto_bruto)}')" class="text-slate-600 hover:text-rose-400 transition-colors" title="Falso Negativo (Ódio Passou)">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <button onclick="evaluateIA('${c.id}', '${c.trace_id}', '${engine}', 'FALSO_NEGATIVO', '${c.categoria_ia}', '${escapeHTML(c.texto_limpo || c.texto_bruto)}')" class="text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 p-1.5 rounded-lg transition-all" title="Falso Negativo (Ódio Passou)">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                 </button>
                             </div>
-                            <span class="text-[9px] text-slate-500 font-mono">${c.direcao_odio ? `Alvo: <b class="text-rose-400">${c.direcao_odio}</b>` : ''}</span>
+                            <span class="text-[10px] text-slate-400 font-mono bg-slate-950/50 px-2 py-0.5 rounded-md border border-slate-800/50">${c.direcao_odio ? `Alvo: <b class="text-rose-400 font-bold">${c.direcao_odio}</b>` : 'Geral'}</span>
                         </div>
-                        <span class="text-[9px] text-slate-500 font-mono">${timeAgo(c.data_coleta)}</span>
+                        <span class="text-[10px] text-slate-400 font-mono font-medium">${timeAgo(c.data_coleta)}</span>
                     </div>
                 </div>`;
             }).join('');
@@ -451,9 +463,9 @@
                     if(m.ai_services) {
                         document.getElementById('kpi-ai-services').innerHTML = Object.entries(m.ai_services).map(([s,st]) => {
                             const ok = st === 'OK';
-                            const statusDot = `<span class="w-2 h-2 rounded-full ${ok ? 'bg-emerald-500' : 'bg-rose-500 animate-pulse'}"></span>`;
-                            const actionBtn = ok ? '' : `<button onclick="startAIService('${s}')" class="ml-auto text-[8px] bg-rose-500/10 border border-rose-500/30 text-rose-400 px-1.5 py-0.5 rounded font-black hover:bg-rose-500/20 active:scale-95 transition-all">START</button>`;
-                            return `<div class="flex items-center gap-2 w-full">${statusDot}<span class="text-[10px] font-mono text-slate-300 uppercase">${s}</span>${actionBtn}</div>`;
+                            const statusDot = `<span class="w-2.5 h-2.5 rounded-full shadow-sm ${ok ? 'bg-emerald-500 shadow-emerald-500/40' : 'bg-rose-500 animate-pulse shadow-rose-500/40'}"></span>`;
+                            const actionBtn = ok ? '' : `<button onclick="startAIService('${s}')" class="ml-auto text-[10px] bg-rose-500/10 border border-rose-500/40 text-rose-400 px-2.5 py-1 rounded-md font-black hover:bg-rose-500/20 active:scale-95 transition-all shadow-md">START</button>`;
+                            return `<div class="flex items-center gap-3 w-full bg-slate-900/50 p-2 rounded-lg border border-slate-800/60">${statusDot}<span class="text-[11px] font-mono font-bold text-slate-300 uppercase tracking-widest">${s}</span>${actionBtn}</div>`;
                         }).join('');
                     }
                     if(m.instagram_accounts) {
@@ -465,8 +477,8 @@
                         });
                         document.getElementById('kpi-instagram').innerHTML = Object.entries(accs).map(([idx, sts]) => {
                             const ok = sts.every(s => s === 'OK');
-                            const label = idx === '0' ? 'Principal' : `Backup ${idx}`;
-                            return `<div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full ${ok ? 'bg-emerald-500' : 'bg-rose-500'}"></span><span class="text-[10px] font-mono text-slate-300">${label}</span></div>`;
+                            const label = idx === '0' ? 'Nó Principal' : `Nó Secundário ${idx}`;
+                            return `<div class="flex items-center gap-3 bg-slate-900/50 p-2 rounded-lg border border-slate-800/60"><span class="w-2.5 h-2.5 rounded-full shadow-sm ${ok ? 'bg-emerald-500 shadow-emerald-500/40' : 'bg-rose-500 shadow-rose-500/40'}"></span><span class="text-[11px] font-bold font-mono text-slate-300 tracking-wide">${label}</span></div>`;
                         }).join('');
                     }
                 }
@@ -478,7 +490,7 @@
                 db.from('comentarios').select('*').order('data_coleta', { ascending: false }).limit(40)
             ]);
             if(cands) { localCandidatesList = cands; document.getElementById('targets-count-badge').innerText = `${cands.length}/${cands.length}`; filterTargets(); }
-            if(runs) document.getElementById('runs-feed').innerHTML = runs.map(r => `<div class="bg-slate-900/35 border border-slate-800/60 p-3 rounded-xl flex flex-col gap-1.5"><div class="flex justify-between text-[10px]"><span class="font-bold text-slate-300">${r.worker_id}</span><span class="text-slate-500">${timeAgo(r.timestamp)}</span></div><div class="flex justify-between items-center"><span class="text-[8px] font-black px-1.5 py-0.5 rounded border border-slate-700 bg-slate-800 text-slate-400 uppercase tracking-widest">${r.tier || 'silver'}</span><span class="text-[10px] font-black text-emerald-400">+${(r.delta || 0).toFixed(1)} XP</span></div></div>`).join('');
+            if(runs) document.getElementById('runs-feed').innerHTML = runs.map(r => `<div class="bg-slate-900/50 border border-slate-800/60 p-4 rounded-xl flex flex-col gap-2.5 shadow-sm"><div class="flex justify-between text-xs"><span class="font-black text-slate-200 tracking-wide">${r.worker_id}</span><span class="text-slate-400 font-medium">${timeAgo(r.timestamp)}</span></div><div class="flex justify-between items-center"><span class="text-[10px] font-black px-2 py-1 rounded border border-slate-700 bg-slate-800 shadow-inner text-slate-300 uppercase tracking-widest">${r.tier || 'silver'}</span><span class="text-xs font-black text-emerald-400">+${(r.delta || 0).toFixed(1)} XP</span></div></div>`).join('');
             if(coms) renderComments(coms);
             setupRealtime();
         }
