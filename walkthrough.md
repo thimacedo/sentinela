@@ -92,6 +92,10 @@ Nesta fase recente de saneamento técnico e monetização, realizamos melhorias 
    - Exclusão de arquivos temporários e de log obsoletos da raiz do workspace (`tmp_litert_*.txt`).
 4. **Vulnerabilidade Identificada no Supabase (RLS Desabilitado)**:
    - Identificação de que 15 tabelas no banco de dados remoto do Supabase estão com RLS (Row Level Security) desabilitado. O script de remediação foi apresentado para aprovação e posterior aplicação por parte do usuário.
+5. **Monitoramento e Autocura do Pipeline**:
+   - Criação do script de monitoramento e autocura [monitor_pipeline.py](file:///c:/projetos/sentinela/scratch/monitor_pipeline.py) que checa a porta `8001` (Watchdog) e interage via API HTTP (`/api/server/start`) ou subprocesso para restaurar o pipeline se inativo.
+   - Agendamento da verificação periódica de status a cada 10 minutos (via cron do Antigravity).
+   - Teste inicial validou o watchdog e o runner com sucesso completo (Status: `OPERACIONAL`, Score: `95.0`, Trust: `9.5`, Tier: `Gold`, DB/AI: `OK`).
 
 ## 8. Uso recomendado
 

@@ -200,6 +200,42 @@ async def main() -> None:
     logger.info("[main_runner] Encerrado.")
 
 
+def check_single_instance():
+    import subprocess
+    import signal
+    import time
+    
+    lock_file = "runtime_state/main_runner.lock"
+    os.makedirs("runtime_state", exist_ok=True)
+    if os.path.exists(lock_file):
+        try:
+            with open(lock_file, "r") as f:
+                content = f.read().strip()
+                if content:
+                    pid = int(content)
+            
+            # Checa se o PID antigo está rodando no Windows
+            creationflags = 0x08000000  # CREATE_NO_WINDOW
+            output = subprocess.check_output(f"tasklist /FI \"PID eq {pid}\"", shell=True, creationflags=creationflags).decode('utf-8', errors='ignore')
+            if str(pid) in output:
+                if pid != os.getpid():
+                    print(f"🚨 [main_runner] Outra instância ativa detectada (PID {pid}). Encerrando-a...")
+                    try:
+                        os.kill(pid, signal.SIGTERM)
+                        time.sleep(1.5)
+                    except Exception as ex:
+                        print(f"Falha ao matar PID {pid}: {ex}")
+        except Exception:
+            pass
+            
+    # Grava o PID atual
+    try:
+        with open(lock_file, "w") as f:
+            f.write(str(os.getpid()))
+    except Exception:
+        pass
+
 if __name__ == "__main__":
+    check_single_instance()
     asyncio.run(main())
-# hot-reload trigger: 2026-05-26 v2
+# hot-reload trigger: 2026-06-04 v3
