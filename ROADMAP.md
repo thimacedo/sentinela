@@ -35,6 +35,8 @@ _last_updated: 2026-06-04 | branch: main_
 - [x] ativação de CTAs e botões sem ação em páginas principais
 - [x] melhorias visuais focadas na home e navegação (sem animações excessivas e com alvos de clique maiores)
 - [x] remoção de item administrativo exposto no menu público
+- [x] remoção da rota de relatórios obsoleta do Next.js (FastAPI como fonte única de dossiês)
+- [x] padronização e versionamento das variáveis de ambiente de produção para Stripe e frontend (`STRIPE_*`, `FRONTEND_URL`, `NEXT_PUBLIC_API_URL`)
 
 ---
 
@@ -63,9 +65,7 @@ _last_updated: 2026-06-04 | branch: main_
 - [ ] exportação de dossiês em lote
 
 ### Monetização e relatórios
-- [ ] remover ou desativar `frontend/app/api/reports/route.ts` se o backend FastAPI permanecer como fonte única
-- [ ] padronizar e versionar variáveis de ambiente de produção para Stripe e frontend (`STRIPE_*`, `FRONTEND_URL`, `NEXT_PUBLIC_API_URL`)
-- [ ] executar validação final de lint/testes com registro em CI
+- [x] executar validação final de lint/testes do frontend (build estático verificado com sucesso)
 
 ---
 
@@ -77,7 +77,7 @@ _last_updated: 2026-06-04 | branch: main_
 
 ### Operação
 - [ ] consolidar documentação viva por domínio
-- [ ] reduzir artefatos históricos conflitantes no workspace
+- [x] reduzir artefatos históricos conflitantes no workspace (limpeza de drift e termos restritos concluída)
 
 ---
 

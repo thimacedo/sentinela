@@ -8,7 +8,7 @@ _last_updated: 2026-06-04 | branch: main_
 | Coleta | 🟢 Operacional | Scraper V2 ativo, com fila atômica e fallback compatível quando RPC não existe |
 | Inteligência | 🟡 Operacional com degradação | `ollama` ativo localmente; cloud sujeito a 429/quota; fallback profundo existe mas precisa saneamento de providers |
 | Analytics de Rede | 🟢 Operacional | Subagente `NetworkMinerAgent` ativo de forma reativa/sob demanda |
-| Financeiro | 🟢 Operacional | Subagente `TreasurerAgent` ativo de forma reativa/sob demanda |
+| Financeiro | 🟢 Operacional | Subagente `TreasurerAgent` ativo de forma reativa/sob demanda, com mapeamento de custos de IA e burn rate integrado |
 | Watchdog Local | 🟢 Operacional | SSE, controle remoto e dashboard local funcionando |
 | Frontend oficial | 🟢 Estável | `frontend/` é o frontend oficial, com integração de relatórios no backend real e CTAs conectados |
 
@@ -119,5 +119,5 @@ PGMQ deve aparecer apenas como hipótese futura.
 
 ## Próximos passos recomendados
 
-1. revisar docs metodológicas antigas para reduzir contradição
-2. monitorar performance da nova malha de fallback do orquestrador unificado
+1. Habilitar RLS e criar políticas de acesso para as 15 tabelas que estão expostas no Supabase (incluindo `threat_alerts`, `worker_ledger`, `fallback_logs`, etc.).
+2. Monitorar o consumo e o custo (burn rate) gerados nas últimas 24h através do TreasurerAgent.
