@@ -1,5 +1,5 @@
 # STATE.md — Sentinela
-_last_updated: 2026-06-03 | branch: main_
+_last_updated: 2026-06-04 | branch: main_
 
 ## Status Operacional
 
@@ -10,22 +10,22 @@ _last_updated: 2026-06-03 | branch: main_
 | Analytics de Rede | 🟢 Operacional | `network-miner` em execução |
 | Financeiro | 🟢 Operacional | `treasurer` ativo |
 | Watchdog Local | 🟢 Operacional | SSE, controle remoto e dashboard local funcionando |
-| Frontend oficial | 🟢 Estável | `frontend/` é o frontend oficial |
+| Frontend oficial | 🟢 Estável | `frontend/` é o frontend oficial, com integração de relatórios no backend real e CTAs conectados |
 
 ## Verdades operacionais auditadas
 
 1. O backend é iniciado por `main_runner.py`.
 2. O watchdog local supervisiona a execução e publica logs por SSE.
 3. O classificador oficial em produção é `workers/processors/ai_processor_worker.py`.
-4. A cascata de IA ativa é:
-   - `ollama` na triagem local
-   - `mistral`, `groq` e `openrouter` no refino cloud
-   - `FallbackLLM` em cenário de desastre
+4. A cascata de IA ativa agora é uma fila unificada (Unified Rotation Queue):
+   - Fila primária unificada: `ollama`, `mistral` e os fallbacks (`groq`, `openrouter`, `deepseek`, etc.) em rotação Round-Robin.
+   - Delay rigoroso mínimo de 1.0s imposto a cada chamada para evitar rate limit.
+   - Penalidade automatizada e global (`_handle_provider_error`): +60s para 429, +30s geral com rebaixamento, e remoção/expurgo permanente para erros críticos de cota (401, 402, 404).
 5. LiteRT não compõe mais o pipeline ativo de processamento.
 6. A fila distribuída real hoje usa travas atômicas com `SELECT FOR UPDATE SKIP LOCKED`.
 7. PGMQ permanece como possibilidade futura, não como base atual do runtime.
 8. `frontend/` é o frontend oficial.
-9. `local_dashboard.html` é o painel operacional local do watchdog, não o frontend oficial do produto.
+9. `local_dashboard.html` é o painel operacional local do watchdog, totalmente refatorado com UI Premium, Glassmorphism, layout responsivo dinâmico para desktop (`calc(100vh - 290px)`), telemetria e alvos perfeitamente visíveis e roláveis, e auto-reload automático periódico a cada 10 segundos com trava anti-concorrência.
 
 ## Achados da auditoria documental
 
@@ -36,6 +36,9 @@ _last_updated: 2026-06-03 | branch: main_
 - `AIProcessorWorker` como classificador central
 - `TargetResearchWorker` com ativação controlada por `RESEARCHER_MODE`
 - `queue_manager` com claim atômico
+- Stripe com fallback mock controlado por flag (`STRIPE_ALLOW_MOCK_PAYMENTS`)
+- AdSense com retry defensivo para evitar race condition de carregamento
+- página de relatórios ligada ao backend FastAPI (`/api/v1/dossiers`)
 
 ### Refatorações de workers já concluídas
 
@@ -62,26 +65,27 @@ _last_updated: 2026-06-03 | branch: main_
 
 ### Risco atual
 
-O principal risco operacional hoje não é ausência de pipeline, e sim degradação da malha cloud/fallback:
+O principal risco operacional hoje não é ausência de pipeline, e sim degradação da malha cloud/fallback e drift de configuração de produção:
 
 - `429` em providers principais
 - providers de fallback com erros de quota/configuração
 - necessidade de saneamento em `config/fallback_providers.yaml`
+- variáveis de ambiente Stripe e frontend não padronizadas entre ambientes podem quebrar checkout/retorno
 
 ## Situação da IA
 
 ### Ativo
 
-- triagem local com `ollama`
-- refinamento cloud
-- reanálise de baixa confiança
-- fallback profundo por `FallbackLLM`
+- fila circular unificada: local e cloud dividem o mesmo loop com rotacionamento Round-Robin
+- reanálise de baixa confiança (usando exclusivamente cloud da fila unificada)
+- fallback estruturado injetado ativamente na fila com **Poda Automática** (provedores são banidos instantaneamente em caso de erro 401/402/404)
+- padronização léxica forçada via `PADRONIZACAO_LINGUISTICA_FORENSE.md` incondicionalmente em todos os providers
+- **Cache de I/O**: Prompts e datasets locais são carregados na RAM (Zero overhead de leitura em disco no event-loop)
 
-### Pendente de saneamento
+### Saneado
 
-- remover referências residuais a LiteRT
-- revisar providers de fallback indisponíveis
-- reduzir ruído de tentativas quando todos os providers externos estiverem indisponíveis
+- referências residuais a LiteRT removidas
+- malha de fallback reordenada e sem provedores indisponíveis (como eden_ai e cerebras)
 
 ## Situação da fila
 
@@ -114,7 +118,5 @@ PGMQ deve aparecer apenas como hipótese futura.
 
 ## Próximos passos recomendados
 
-1. sanear `config/fallback_providers.yaml`
-2. simplificar `workers/orchestrator/orchestrator.py` removendo duplicidade entre `run_cycle_with_validation` e `run_cycle_with_validation_v2`
-3. padronizar semântica de idle e `CycleResult` entre workers ativos
-4. revisar docs metodológicas antigas para reduzir contradição
+1. revisar docs metodológicas antigas para reduzir contradição
+2. monitorar performance da nova malha de fallback do orquestrador unificado

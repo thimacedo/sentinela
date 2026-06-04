@@ -1,5 +1,5 @@
 # ROADMAP.md — Sentinela
-_last_updated: 2026-06-03 | branch: main_
+_last_updated: 2026-06-04 | branch: main_
 
 ## Concluído
 
@@ -25,9 +25,15 @@ _last_updated: 2026-06-03 | branch: main_
 - [x] buffer/checkpoint de scraping em estágio operacional
 
 ### UX e operação
-- [x] `local_dashboard.html` com tabs de monitor e logs
+- [x] local_dashboard.html refeito com UI Premium, Glassmorphism e responsividade absoluta (Mobile-first, com colunas flexíveis de `calc(100vh-290px)`, telemetria e alvos roláveis e auto-reload automático de 10s com trava de concorrência).
 - [x] frontend oficial em `frontend/`
 - [x] dashboard financeiro com Recharts
+- [x] robustez do carregamento AdSense com retry até script estar pronto
+- [x] integração de checkout e planos com base URL centralizada
+- [x] conclusão da página `frontend/app/relatorios/page.tsx` com backend real
+- [x] ativação de CTAs e botões sem ação em páginas principais
+- [x] melhorias visuais focadas na home e navegação (sem animações excessivas e com alvos de clique maiores)
+- [x] remoção de item administrativo exposto no menu público
 
 ---
 
@@ -39,20 +45,26 @@ _last_updated: 2026-06-03 | branch: main_
 - [ ] redução de ciclos com `no_comments_found`
 
 ### Inteligência
-- [ ] saneamento da malha de providers em `config/fallback_providers.yaml`
-- [ ] remover referências residuais a LiteRT do código e da operação
+- [x] saneamento da malha de providers em `config/fallback_providers.yaml`
+- [x] remover referências residuais a LiteRT do código e da operação
+- [x] Caching de I/O e expurgo de modelos inoperantes (401/402/404) via `_handle_provider_error`
 - [ ] calibrar reanálise de baixa confiança com menor ruído de fallback
 
 ### Workers e orquestração
-- [ ] simplificar `workers/orchestrator/orchestrator.py`
-- [ ] unificar semântica de `no_tasks_available` entre workers ativos
-- [ ] reduzir duplicidade de logging, cooldown e fluxo entre ciclos
+- [x] simplificar `workers/orchestrator/orchestrator.py`
+- [x] unificar semântica de `no_tasks_available` entre workers ativos
+- [x] reduzir duplicidade de logging, cooldown e fluxo entre ciclos
 - [ ] revisar se `TargetResearchWorker` deve permanecer em `workers/ai/` ou migrar para domínio próprio
 
 ### Administração e analytics
 - [ ] tabelas tabulares de gasto por usuário e por perfil monitorado
 - [ ] shadowban léxico
 - [ ] exportação de dossiês em lote
+
+### Monetização e relatórios
+- [ ] remover ou desativar `frontend/app/api/reports/route.ts` se o backend FastAPI permanecer como fonte única
+- [ ] padronizar e versionar variáveis de ambiente de produção para Stripe e frontend (`STRIPE_*`, `FRONTEND_URL`, `NEXT_PUBLIC_API_URL`)
+- [ ] executar validação final de lint/testes com registro em CI
 
 ---
 
