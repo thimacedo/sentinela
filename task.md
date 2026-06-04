@@ -32,3 +32,5 @@ _last_updated: 2026-06-04_
 - [x] Adicionar status HTTP 400 (Bad Request) ao mecanismo de poda automática de provedores de IA
 - [x] Aumentar timeout de verificação de sessão do Playwright de 30s para 45s para mitigar instabilidade de rede
 - [x] Ajustar design semântico de cores do badge de ERRO para Roxo/Purple (distinto de Ódio e Neutro)
+- [x] Inverter console de logs do watchdog local para exibir logs recentes no topo (prepend)
+- [x] Comentar provedores de fallback inoperantes (deepseek_chat, openrouter, google_gemini, zhipu_glm4) no YAML de configuração para evitar erros no boot
