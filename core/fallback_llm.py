@@ -291,11 +291,13 @@ class FallbackLLM:
                 ai_circuit_breaker.record_failure(f"fallback_{name}", status_code)
                 
                 # Hard limit: remove provider from rotation
-                if status_code in [401, 402, 403, 404]:
-                    logger.warning(f"🚨 [AI] Provider '{name}' com restrição permanente/gratuita esgotada ({status_code}). Removendo do fallback.")
+                if status_code in [400, 401, 402, 403, 404]:
+                    logger.warning(f"🚨 [AI] Provider '{name}' com restrição permanente/gratuita esgotada ({status_code}). Removendo do fallback interno.")
                     if prov in self.providers_order:
                         self.providers_order.remove(prov)
                 last_error = exc
+                if provider_name:
+                    raise exc
                 continue
             except Exception as exc:
                 logger.error(f"Erro ao usar provider {name}: {exc}")
@@ -303,10 +305,12 @@ class FallbackLLM:
                 
                 # Config error: remove provider
                 if "ausente" in str(exc).lower():
-                    logger.warning(f"🚨 [AI] Provider '{name}' sem API Key configurada. Removendo do fallback.")
+                    logger.warning(f"🚨 [AI] Provider '{name}' sem API Key configurada. Removendo do fallback interno.")
                     if prov in self.providers_order:
                         self.providers_order.remove(prov)
                 last_error = exc
+                if provider_name:
+                    raise exc
                 continue
         raise RuntimeError(f"Todas as chamadas de fallback falharam. Último erro: {last_error}")
 

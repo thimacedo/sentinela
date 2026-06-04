@@ -98,8 +98,8 @@ class InstagramScraperV2:
                     data = await response.json()
                     self.captured_data.append({"url": url, "data": data})
                     self.stats["api_calls"] += 1
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug("[V2] Falha ao processar response JSON (%s): %s", url, e)
 
     def _generate_stealth_profile(self) -> Dict[str, Any]:
         """Gera perfis de dispositivos e cabeçalhos HTTP realistas e aleatórios (PASA v85.10)."""
@@ -261,7 +261,8 @@ class InstagramScraperV2:
                                 await browser.close()
                                 raise ValueError(f"invalid_target: 404_not_found")
                     except ValueError as ve: raise ve
-                    except: pass
+                    except Exception as e_header:
+                        logger.debug("[V2] Falha ao validar header de erro para @%s: %s", username, e_header)
 
                     try:
                         await page.wait_for_selector("main, header", timeout=20000)
@@ -337,7 +338,8 @@ class InstagramScraperV2:
                                     continue
                                 else:
                                     consecutive_old_posts = 0
-                            except: pass
+                            except Exception as e_post_dt:
+                                logger.debug("[V2] Falha ao interpretar data do post %s: %s", shortcode, e_post_dt)
 
                         logger.info(f"📄 [V2] Verificando post {shortcode}...")
                         post_comments, post_timestamp = await self._scrape_post(page, shortcode, username, candidato_id, max_comments_per_post, max_age_days)
@@ -364,7 +366,9 @@ class InstagramScraperV2:
                 logger.error(f"💥 [V2] Erro na tentativa {retry_count+1}: {e}")
                 self.stats["errors"] += 1
                 retry_count += 1
-                await asyncio.sleep((2 ** retry_count) + random.uniform(2, 5))
+                wait_seconds = min((2 ** retry_count) + random.uniform(4, 12), 120)
+                logger.warning("[V2] Aplicando backoff de %.1fs antes da próxima tentativa.", wait_seconds)
+                await asyncio.sleep(wait_seconds)
 
         return {"comments": all_comments, "post_metas": []}
 
@@ -377,14 +381,16 @@ class InstagramScraperV2:
                 await post_element.click(timeout=15000, force=True)
                 await asyncio.sleep(random.uniform(4, 7))
                 if await page.query_selector("article"): return True
-        except: pass
+        except Exception as e_click:
+            logger.debug("[V2] Falha ao abrir modal por clique (%s): %s", shortcode, e_click)
         try:
             logger.info(f"🔄 [V2] Fallback URL para {shortcode}...")
             await page.goto(f"https://www.instagram.com/p/{shortcode}/", wait_until="domcontentloaded", timeout=30000)
             await asyncio.sleep(random.uniform(5, 8))
             if await page.query_selector("article") or len(await page.query_selector_all("section")) > 0:
                 return True
-        except: pass
+        except Exception as e_fallback:
+            logger.debug("[V2] Falha no fallback URL (%s): %s", shortcode, e_fallback)
         return False
 
     async def scroll_comment_column(self, page: Page, scroll_amount: int = 800) -> None:
@@ -426,7 +432,8 @@ class InstagramScraperV2:
             await asyncio.sleep(2)
             if await page.query_selector("article"):
                 await page.go_back(wait_until="domcontentloaded", timeout=10000)
-        except: pass
+        except Exception as e_close:
+            logger.debug("[V2] Falha ao fechar modal: %s", e_close)
 
     async def _scrape_post(self, page: Page, shortcode: str, username: str, candidato_id: str, max_comments: int, max_age_days: int) -> Tuple[List[Dict[str, Any]], Optional[str]]:
         self.captured_data = []
@@ -555,7 +562,9 @@ class InstagramScraperV2:
             try:
                 extracted = self._recursive_find_comments(json.loads(content))
                 comments.extend(extracted)
-            except: continue
+            except Exception as e_script:
+                logger.debug("[V2] Falha ao parsear script JSON de comentários: %s", e_script)
+                continue
         return comments
 
     async def _extract_from_dom(self, page: Page, shortcode: str) -> List[Dict[str, Any]]:
@@ -635,7 +644,7 @@ class InstagramScraperV2:
     async def _verify_session(self, page: Page, session: Session) -> bool:
         try:
             # Tenta carregar a home
-            await page.goto("https://www.instagram.com/", wait_until="domcontentloaded", timeout=30000)
+            await page.goto("https://www.instagram.com/", wait_until="domcontentloaded", timeout=45000)
             await asyncio.sleep(random.uniform(2, 4))
             
             current_url = page.url
@@ -668,7 +677,8 @@ class InstagramScraperV2:
             os.makedirs(folder, exist_ok=True)
             path = os.path.join(folder, f"{datetime.now().strftime('%H%M%S')}_{name}.png")
             await page.screenshot(path=path, full_page=True)
-        except: pass
+        except Exception as e_screenshot:
+            logger.debug("[V2] Falha ao capturar screenshot '%s': %s", name, e_screenshot)
 
 async def scrape_instagram(username: str, candidato_id: str, max_posts: int = 3, max_comments_per_post: int = 50) -> List[Dict[str, Any]]:
     scraper = InstagramScraperV2()
