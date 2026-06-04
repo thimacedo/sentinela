@@ -1,5 +1,5 @@
 # Walkthrough — Estado Atual Auditável
-_last_updated: 2026-06-03_
+_last_updated: 2026-06-04_
 
 Este documento resume apenas o que continua válido após auditoria do código.
 
@@ -59,7 +59,19 @@ Ainda pendente:
 - simplificar `workers/orchestrator/orchestrator.py`
 - padronizar semântica de idle e `CycleResult`
 
-## 7. Uso recomendado
+## 7. Melhorias de Resiliência de Emergência (Fase 4.5)
+
+Foram corrigidos e validados dois problemas operacionais observados nos logs do runner:
+1. **Poda Automática para Erros 400 (Bad Request)**: Provedores de IA que retornarem `HTTP 400` (ex: chaves mal configuradas ou payloads incompatíveis, como verificado com `zhipu_glm4`) agora são removidos permanentemente da fila unificada em tempo de execução, em vez de ficarem retentando e gerando ruído de log.
+2. **Timeout estendido no Playwright**: Aumentamos o timeout na etapa de navegação do `_verify_session` do Instagram de 30s para 45s, mitigando erros causados por instabilidade ou lentidão temporária da rede local.
+
+### Validação Executada
+Rodamos o script `test_ai_service.py` que simulou chamadas com provedores de IA reais e de fallback. Durante o teste:
+- O provedor `mistral` retornou erro `401 Unauthorized`.
+- O sistema interceptou, acionou o Circuit Breaker e **podou permanentemente** o provedor da lista ativa.
+- A requisição rotacionou com sucesso para o `groq_llama3` e obteve a classificação `DANO_A_IMAGEM` em JSON estruturado com sucesso absoluto.
+
+## 8. Uso recomendado
 
 Para iniciar trabalho novo:
 

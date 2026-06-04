@@ -1,5 +1,5 @@
 # Task — Auditoria e Limpeza de Documentação
-_last_updated: 2026-06-03_
+_last_updated: 2026-06-04_
 
 ## Concluído
 
@@ -18,11 +18,16 @@ _last_updated: 2026-06-03_
 - [x] Absorver padrão ouro legado em `core/ai_service.py`
 - [x] Atualizar scripts operacionais para o runtime moderno
 - [x] Documentar o estado atual da refatoração de workers
+- [x] Remover referências residuais a LiteRT no código operacional (limpeza de .env e health_check.py)
+- [x] Sanear `config/fallback_providers.yaml` com providers realmente utilizáveis e ativos
+- [x] Simplificar e unificar `workers/orchestrator/orchestrator.py` eliminando duplicidade
+- [x] Padronizar semântica de idle entre workers ativos com Smart Wait de 10 min
 
 ## Pendências reais
 
-- [ ] remover referências residuais a LiteRT no código operacional
-- [ ] revisar documentação metodológica histórica
-- [ ] sanear `config/fallback_providers.yaml` com providers realmente utilizáveis
-- [ ] simplificar `workers/orchestrator/orchestrator.py`
-- [ ] padronizar semântica de idle entre workers ativos
+- [ ] revisar documentação metodológica histórica (limpar arquivamento obsoleto)
+
+## Melhorias de Resiliência Concluídas
+
+- [x] Adicionar status HTTP 400 (Bad Request) ao mecanismo de poda automática de provedores de IA
+- [x] Aumentar timeout de verificação de sessão do Playwright de 30s para 45s para mitigar instabilidade de rede
