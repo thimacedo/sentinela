@@ -675,7 +675,7 @@ if __name__ == "__main__":
         try:
             creationflags = 0x08000000 if os.name == 'nt' else 0
             subprocess.Popen(
-                [python_exe, "-m", "datasette", "serve", db_file, "--port", "8002", "--host", "0.0.0.0", "--immutable"],
+                [python_exe, "-m", "datasette", "serve", "-i", db_file, "--port", "8002", "--host", "0.0.0.0"],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
                 creationflags=creationflags
