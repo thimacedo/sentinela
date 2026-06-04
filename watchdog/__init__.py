@@ -295,6 +295,7 @@ async def get_metrics():
     ollama_health = _get_health_url(os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"), "http://localhost:11434", "/api/tags")
 
     ollama_status = _service_status(ollama_health)
+    maritaca_status = _service_status("https://chat.maritaca.ai/api")
     with state.lock:
         return {
             "restarts": state.restarts,
@@ -305,7 +306,8 @@ async def get_metrics():
             "db_status": "OPERACIONAL",
             "instagram_accounts": ig_status,
             "ai_services": {
-                "ollama": ollama_status
+                "ollama": ollama_status,
+                "maritaca": maritaca_status
             },
             **worker_metrics
         }
@@ -510,6 +512,7 @@ def guard():
                 creationflags=creationflags,
             )
             state.process = process
+            start_time = time.time()
             
             def pipe_reader(pipe, level):
                 NOISY_PATTERNS = ["HTTP Request:", "HTTP/2 200 OK", "HTTP/2 201 Created"]
@@ -563,16 +566,21 @@ def guard():
                         heal_dependencies(python_exe)
                 else:
                     consecutive_code_errors = 0
+                    runtime = time.time() - start_time
                     state.update_metrics(restarts=state.restarts + 1)
-                    state.add_log("warn", "[Watchdog] Falha rapida na inicializacao. Analisando autocura...")
                     
+                    if runtime > 60:
+                        state.add_log("warn", f"[Watchdog] Processo finalizado apos {int(runtime)}s. Reiniciando...")
+                        state.fast_crashes = 0
+                    else:
+                        state.add_log("warn", "[Watchdog] Falha rapida na inicializacao. Analisando autocura...")
+                        state.fast_crashes += 1
+                        
                     healing_action = heal_runtime_error(recent_logs or "erro desconhecido")
                     
                     if healing_action == "fatal":
                         send_whatsapp_alert("WATCHDOG: OOM FATAL - Memoria esgotada. Sistema pausado.", category="oom")
                         break
-                    
-                    state.fast_crashes += 1
                     
                     if state.fast_crashes >= 3:
                         state.add_log("error", "[Watchdog] 3 falhas rapidas consecutivas. Hibernando por 1h.")
@@ -580,7 +588,7 @@ def guard():
                         state.update_metrics(status="HIBERNANDO - INIT LOOP")
                         time.sleep(3600)
                         state.fast_crashes = 0
-                    else:
+                    elif runtime <= 60:
                         send_whatsapp_alert(f"WATCHDOG: RUNTIME ERROR - Code: {poll}. Reiniciando.", category="runtime")
             else:
                 consecutive_code_errors = 0

@@ -297,6 +297,7 @@
                     'FALLBACK_LLM': 'Fallback Cloud',
                     'SYSTEM_FAILURE': 'Falha do Sistema',
                     'OLLAMA': 'Ollama (Local)',
+                    'MARITACA': 'Maritaca AI (Cloud)',
                     'GROQ_LLAMA3': 'Groq (Cloud)',
                     'MISTRAL': 'Mistral (Cloud)',
                     'DEEPSEEK_CHAT': 'DeepSeek (Cloud)',
@@ -483,12 +484,12 @@
                         }
 
                         document.getElementById('kpi-restars').innerText = `${m.cycle || 0} / ${m.restarts || 0}`;
-                        
                         if(m.ai_services) {
                             document.getElementById('kpi-ai-services').innerHTML = Object.entries(m.ai_services).map(([s,st]) => {
                                 const ok = st === 'OK';
+                                const isCloud = s !== 'ollama';
                                 const statusDot = `<span class="w-2.5 h-2.5 rounded-full shadow-sm ${ok ? 'bg-emerald-500 shadow-emerald-500/40' : 'bg-rose-500 animate-pulse shadow-rose-500/40'}"></span>`;
-                                const actionBtn = ok ? '' : `<button onclick="startAIService('${s}')" class="ml-auto text-[10px] bg-rose-500/10 border border-rose-500/40 text-rose-400 px-2.5 py-1 rounded-md font-black hover:bg-rose-500/20 active:scale-95 transition-all shadow-md">START</button>`;
+                                const actionBtn = (ok || isCloud) ? '' : `<button onclick="startAIService('${s}')" class="ml-auto text-[10px] bg-rose-500/10 border border-rose-500/40 text-rose-400 px-2.5 py-1 rounded-md font-black hover:bg-rose-500/20 active:scale-95 transition-all shadow-md">START</button>`;
                                 return `<div class="flex items-center gap-3 w-full bg-slate-900/50 p-2 rounded-lg border border-slate-800/60">${statusDot}<span class="text-[11px] font-mono font-bold text-slate-300 uppercase tracking-widest">${s}</span>${actionBtn}</div>`;
                             }).join('');
                         }
