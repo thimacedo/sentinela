@@ -2,11 +2,11 @@ import re
 import asyncio
 from typing import List, Dict, Tuple, Any
 from core.ai_service import AIService 
-from core.forensics_service import forensics_service
+from core.classification_service import classification_service
 
 class PASAAuditor:
     """
-    Auditor Linguístico e Forense PASA v16.4.
+    Auditor Linguístico e Analítico PASA v16.4.
     Realiza classificação de risco (IA) seguida de auditoria terminológica.
     """
     def __init__(self, ai_service_instance=None):
@@ -21,8 +21,8 @@ class PASAAuditor:
         # 1. Classificação via IA (usando AIService refatorado)
         classification = await self.ai_service.classify(text, comment_id=comment_id)
         
-        # 2. Auditoria terminológica PASA (centralizada no ForensicsService)
-        is_compliant, violations = forensics_service.audit_terms(text)
+        # 2. Auditoria terminológica PASA (centralizada no ClassificationService)
+        is_compliant, violations = classification_service.audit_terms(text)
         
         return {
             "text": text,
@@ -31,9 +31,9 @@ class PASAAuditor:
             "classification": classification,
             "is_compliant": is_compliant,
             "violations": violations,
-            "pasa_version": forensics_service.VERSION
+            "pasa_version": classification_service.VERSION
         }
 
     def audit_text(self, text: str) -> Tuple[bool, List[Dict]]:
         """Proxy para compatibilidade com testes legados."""
-        return forensics_service.audit_terms(text)
+        return classification_service.audit_terms(text)

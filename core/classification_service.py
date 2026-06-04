@@ -6,9 +6,9 @@ import os
 from typing import Dict, Any, List, Optional, Tuple
 from datetime import datetime
 
-logger = logging.getLogger("sentinela-forensics")
+logger = logging.getLogger("sentinela-classification")
 
-# --- Matriz TaxonÃ´mica PASA v42 (MTAD) ---
+# --- Matriz Taxonômica PASA v42 (MTAD) ---
 VALID_CATEGORIES = [
     "ODIO_IDENTITARIO",
     "VIOLENCIA_GENERO",
@@ -19,57 +19,57 @@ VALID_CATEGORIES = [
     "NEUTRO"
 ]
 
-class PasaForensicsService:
+class PasaClassificationService:
     """
-    ServiÃ§o Centralizado de Peritagem Forense PASA v42.
-    Gerencia prompts baseados no MCF v2.0, parsing e auditoria CCF.
+    Serviço Centralizado de Auditoria Analítica PASA v42.
+    Gerencia prompts baseados no MCA v2.0, parsing e auditoria CCF.
     """
 
     VERSION = "42.1.0"
 
     def __init__(self):
-        self.manual_path = "docs/forensics/MANUAL_CLASSIFICACAO_FORENSE_v2.md"
+        self.manual_path = "docs/classification/MANUAL_CLASSIFICACAO_ANALITICA_v2.md"
         self.forbidden_terms = {
-            re.compile(r'\bper[Ã­i]cia(?:s)?\b', re.IGNORECASE): "anÃ¡lise / relatÃ³rio",
-            re.compile(r'\bper[Ã­i]to(?:s|as|a)?\b', re.IGNORECASE): "analista",
-            re.compile(r'\bpericial\b', re.IGNORECASE): "analÃ­tica",
-            re.compile(r'\bforense(?:s)?\b', re.IGNORECASE): "estratÃ©gica",
-            re.compile(r'\bprova(?:s)?\b', re.IGNORECASE): "evidÃªncias situacionais",
-            re.compile(r'\blaudo(?:s)?\b', re.IGNORECASE): "dossiÃª"
+            re.compile(r'\bperícia(?:s)?\b', re.IGNORECASE): "análise / relatório",
+            re.compile(r'\bperito(?:s|as|a)?\b', re.IGNORECASE): "analista",
+            re.compile(r'\bpericial\b', re.IGNORECASE): "analítica",
+            re.compile(r'\bforense(?:s)?\b', re.IGNORECASE): "estratégica",
+            re.compile(r'\bprova(?:s)?\b', re.IGNORECASE): "indícios situacionais",
+            re.compile(r'\blaudo(?:s)?\b', re.IGNORECASE): "dossiê"
         }
 
     def _load_manual(self) -> str:
-        """Carrega o manual MCF v2.0 do disco."""
+        """Carrega o manual MCA v2.0 do disco."""
         try:
-            # Tenta caminhos relativos diferentes dependendo de onde o processo Ã© iniciado
+            # Tenta caminhos relativos diferentes dependendo de onde o processo é iniciado
             paths = [self.manual_path, f"../{self.manual_path}", f"E:/Projetos/sentinela-democratica/{self.manual_path}"]
             for p in paths:
                 if os.path.exists(p):
                     with open(p, 'r', encoding='utf-8') as f:
                         return f.read()
-            return "AVISO: Manual MCF v2.0 nÃ£o encontrado. Use a taxonomia MTAD e o CCF Framework."
+            return "AVISO: Manual MCA v2.0 não encontrado. Use a taxonomia MTAD e o CCF Framework."
         except Exception as e:
             logger.error(f"Erro ao carregar manual: {e}")
-            return "ERRO ao carregar Manual MCF v2.0."
+            return "ERRO ao carregar Manual MCA v2.0."
 
     def get_system_prompt(self) -> str:
-        """Retorna o System Prompt baseado no MCF v2.0 definitivo."""
+        """Retorna o System Prompt baseado no MCA v2.0 definitivo."""
         manual = self._load_manual()
         return f"""
-VocÃª Ã© um Analista Forense LinguÃ­stico do Sistema Sentinela DemocrÃ¡tica.
-Siga RIGOROSAMENTE o manual abaixo para classificar os comentÃ¡rios.
+Você é um Analista de Linguística Analítica do Sistema Sentinela Democrática.
+Siga RIGOROSAMENTE o manual abaixo para classificar os comentários.
 
 {manual}
 
-IMPORTANTE: Toda resposta DEVE ser um JSON vÃ¡lido contendo obrigatoriamente as chaves:
+IMPORTANTE: Toda resposta DEVE ser um JSON válido contendo obrigatoriamente as chaves:
 - "is_hate" (boolean)
-- "categoria_ia" (string, usar "NEUTRO" se nÃ£o houver risco)
+- "categoria_ia" (string, usar "NEUTRO" se não houver risco)
 - "confidence_score" (int de 0 a 100)
-- "evidence_extracted" (string com o trecho exato que justifica a classificaÃ§Ã£o, ou vazio)
+- "evidence_extracted" (string com o trecho exato que justifica a classificação, ou vazio)
 """
 
     def parse_verdict(self, raw_text: str) -> Dict[str, Any]:
-        """Parser resiliente para respostas de IA (MCF v2.0 Pattern)."""
+        """Parser resiliente para respostas de IA (MCA v2.0 Pattern)."""
         try:
             # Limpeza de markdown
             clean = raw_text.strip()
@@ -89,7 +89,8 @@ IMPORTANTE: Toda resposta DEVE ser um JSON vÃ¡lido contendo obrigatoriamente a
             # Determina o rotulo (is_hate)
             rotulo = data.get("rotulo", "not_hate")
             is_hate = True if rotulo == "hate" else False
-            if cat != "NEUTRO": is_hate = True # Garantia forense
+            if cat != "NEUTRO": 
+                is_hate = True # Garantia analítica
 
             return {
                 "id": data.get("id"),
@@ -105,11 +106,11 @@ IMPORTANTE: Toda resposta DEVE ser um JSON vÃ¡lido contendo obrigatoriamente a
                 "confianca_ia": float(data.get("confidence_score", data.get("confianca_ia", 0))),
                 "confidence_score": int(data.get("confidence_score", 0)),
                 "evidence_extracted": str(data.get("evidence_extracted", data.get("reason", ""))),
-                "reason": str(data.get("evidence_extracted", data.get("reason", "AnÃ¡lise PASA v42"))),
+                "reason": str(data.get("evidence_extracted", data.get("reason", "Análise PASA v42"))),
                 "pasa_version": self.VERSION
             }
         except Exception as e:
-            logger.error(f"[Forensics] Erro de parsing MCF v2.0: {e}")
+            logger.error(f"[Classification] Erro de parsing MCA v2.0: {e}")
             return {
                 "categoria_ia": "NEUTRO",
                 "is_hate": False,
@@ -119,7 +120,7 @@ IMPORTANTE: Toda resposta DEVE ser um JSON vÃ¡lido contendo obrigatoriamente a
             }
 
     def audit_terms(self, text: str) -> Tuple[bool, List[Dict]]:
-        """Auditoria terminolÃ³gica para conformidade jurÃ­dica PASA."""
+        """Auditoria terminológica para conformidade jurídica PASA."""
         violations = []
         for pattern, replacement in self.forbidden_terms.items():
             for match in pattern.finditer(text):
@@ -130,7 +131,7 @@ IMPORTANTE: Toda resposta DEVE ser um JSON vÃ¡lido contendo obrigatoriamente a
         return len(violations) == 0, violations
 
     def log_audit(self, text: str, verdict: Dict[str, Any], engine: str, latency: float):
-        """Registra o evento de peritagem para auditoria futura."""
+        """Registra o evento de classificação para auditoria futura."""
         log_entry = {
             "timestamp": datetime.now().isoformat(),
             "engine": engine,
@@ -142,8 +143,8 @@ IMPORTANTE: Toda resposta DEVE ser um JSON vÃ¡lido contendo obrigatoriamente a
             "reason": verdict.get("reason", ""),
             "pasa_version": verdict.get("pasa_version", self.VERSION)
         }
-        logger.info(f"âš–ï¸ [PASA AUDIT] {engine.upper()} | {verdict.get('categoria_ia', 'NEUTRO')} | {latency:.2f}s | {verdict.get('reason', '')}")
+        logger.info(f"[PASA AUDIT] {engine.upper()} | {verdict.get('categoria_ia', 'NEUTRO')} | {latency:.2f}s | {verdict.get('reason', '')}")
         return log_entry
 
-# Singleton para acesso fÃ¡cil
-forensics_service = PasaForensicsService()
+# Singleton para acesso fácil
+classification_service = PasaClassificationService()

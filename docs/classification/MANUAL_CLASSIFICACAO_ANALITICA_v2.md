@@ -1,4 +1,4 @@
-# ⚖️ MANUAL DE CLASSIFICAÇÃO FORENSE (MCF) v2.0
+# ⚖️ MANUAL DE CLASSIFICAÇÃO ANALÍTICA (MCA) v2.0
 **Sistema:** Sentinela Democrática
 **Protocolo Base:** PASA v42 / Vichi-Sentinela Methodology / CCF Framework
 **Status:** OPERACIONAL E VINCULATIVO
@@ -6,7 +6,7 @@
 ---
 
 ## 1. Missão e Princípios Imutáveis
-Classificar comentários públicos de perfis políticos com precisão forense, eliminando ruídos (falsos positivos) e tipificando condutas que ameaçam a democracia. O foco é a **INTENÇÃO PERFORMATIVA**, não o vernáculo.
+Classificar comentários públicos de perfis políticos com precisão analítica, eliminando ruídos (falsos positivos) e tipificando condutas que ameaçam a estabilidade democrática. O foco é a **INTENÇÃO PERFORMATIVA**, não o vernáculo.
 
 **Lei Máxima:** Em caso de dúvida entre hostilidade e entusiasmo político, classifique como `NEUTRO`. A injustiça contra um falso positivo é maior que a omissão de um insulto genérico.
 
@@ -27,15 +27,15 @@ Antes de classificar, todo agente deve aplicar a Norm-V:
 
 Mapeamento rigoroso para o campo `categoria_ia`:
 
-| Categoria | Definição Forense | Direção do Ódio (`direcao_odio`) | Lexical Signatures |
+| Categoria | Definição Analítica | Direção do Ódio (`direcao_odio`) | Lexical Signatures |
 | :--- | :--- | :--- | :--- |
 | **ODIO_IDENTITARIO** | Ataque baseado em raça, origem, religião, orientação sexual ou **XENOFOBIA REGIONAL**. | Nordeste, Norte, Negro, LGBTQIA+, Judeu, etc. | "Pobre", "analfabeto", "macumbeira", "viado". |
 | **VIOLENCIA_GENERO** | Misoginia política, ameaças sexuais ou reprodutivas. | Mulheres, Feministas. | "Vaca", "puta", "louca", "lugar de mulher". |
 | **AMEACA** | Incitação direta/velada a dano físico, morte ou violência institucional. | Alvo monitorado, Opositores. | "Levar tiro", "paredão", "morte ao", "invadir". |
 | **ATAQUE_INSTITUCIONAL** | Deslegitimação do Estado, justiça ou processo eleitoral. | STF, TSE, Democracia, Urnas. | "Ditadura da toga", "fraude", "Xandão", "golpe". |
-| **RIGOR_CRIMINAL** | Imputação de crime sem prova ou trânsito em julgado. | Alvo monitorado. | "Ladrão", "corrupto", "chefe de quadrilha". |
+| **RIGOR_CRIMINAL** | Imputação de crime sem indício verificado ou trânsito em julgado. | Alvo monitorado. | "Ladrão", "corrupto", "chefe de quadrilha". |
 | **INSULTO_AD_HOMINEM** | Desumanização e baixo calão genérico (sem componente identitário/crime). | Alvo monitorado. | "Verme", "lixo", "gado", "escória". |
-| **NEUTRO** | Engajamento democrático, crítica política, apoio agressivo. | Nulo (null) | Qualquer texto sem intenção hostil forense. |
+| **NEUTRO** | Engajamento democrático, crítica política, apoio agressivo. | Nulo (null) | Qualquer texto sem intenção hostil analítica. |
 
 ---
 
@@ -53,7 +53,7 @@ A classificação não é binária. Calcule a confiabilidade (`confianca_ia`) us
 
 ## 5. Blindagem contra Falsos Positivos (Protocolo de Defesa)
 
-A análise deve distinguir **ENTUSIASMO** e **CRÍTICA POLÍTICA** de **HOSTILIDADE FORENSE**.
+A análise deve distinguir **ENTUSIASMO** e **CRÍTICA POLÍTICA** de **HOSTILIDADE ANALÍTICA**.
 
 - **Apoio Agressivo/Gírias:** "O brabo tem nome porra!", "Mito!", "Papai!" → **NEUTRO**.
 - **Metáforas de Embate/Vitória:** "Vamos pra cima", "A ousadia vai ocupar o congresso", "Presente para o Brasil" → **NEUTRO**.
@@ -63,11 +63,11 @@ A análise deve distinguir **ENTUSIASMO** e **CRÍTICA POLÍTICA** de **HOSTILID
 
 ---
 
-## 6. Árvore de Decisão Forense
+## 6. Árvore de Decisão Analítica
 
 1. Há ameaça explícita/velada de violência? → `AMEACA`
 2. Há ataque identitário (raça, gênero, região)? → `ODIO_IDENTITARIO` / `VIOLENCIA_GENERO`
-3. Há imputação de crime sem prova? → `RIGOR_CRIMINAL`
+3. Há imputação de crime sem indício verificado? → `RIGOR_CRIMINAL`
 4. Há deslegitimação do Estado/Justiça? → `ATAQUE_INSTITUCIONAL`
 5. Há desumanização genérica pesada? → `INSULTO_AD_HOMINEM`
 6. É apoio agressivo, crítica política ou sarcasmo sem dano? → `NEUTRO`
