@@ -17,14 +17,15 @@ O Sentinela é uma plataforma de monitoramento político com foco em:
 [Watchdog Local] (Porta 8001)
   └── main_runner.py
         └── Orquestrador
-              ├── InstagramScraperWorker
+              ├── InstagramWorker
               ├── AIProcessorWorker
-              ├── NetworkMinerWorker
-              ├── TreasurerWorker
               └── TargetResearchWorker (opcional por RESEARCHER_MODE)
 
-[DatabaseAgent] (Subagente de Dados)
-  └── Consome API HTTP do Datasette local para prover consultas leves
+[Subagentes Analíticos e de Dados]
+  ├── DatabaseAgent: Prover consultas SQL locais leves via Datasette
+  ├── AuditAgent: Auditoria cruzada anti-alucinação sob demanda (Groq)
+  ├── NetworkMinerAgent: Análise de redes coordenadas e clusters reativa
+  └── TreasurerAgent: Auditoria financeira e fechamento diário reativo
 
 [Datasette Server] (Porta 8002)
   └── sentinela_data.db (Espelhamento SQLite local imutável FTS5)
@@ -48,11 +49,11 @@ O Sentinela é uma plataforma de monitoramento político com foco em:
 
 1. claim atômico da fila em `core/queue_manager.py`
 2. coleta de comentários com scraper V2
-3. persistência no banco
-4. classificação do backlog via `core/ai_service.py`
-5. reanálise de baixa confiança como tarefa de utilidade
-6. mineração de rede
-7. atualização de métricas financeiras e telemetria
+3. classificação do backlog via `core/ai_service.py`
+4. reanálise de baixa confiança como tarefa de utilidade
+5. disparo reativo em background de subagentes analíticos (`NetworkMinerAgent` & `TreasurerAgent`)
+6. atualização de métricas financeiras, telemetria e grafos de influência
+
 
 ## 3.1 Estado atual dos workers
 
@@ -61,13 +62,17 @@ Contrato oficial:
 - `workers/base/worker_base.py`
 - `workers/base/cycle_result.py`
 
-Workers ativos observados no runtime:
+Workers cíclicos ativos no runtime:
 
-- `InstagramScraperWorker`
-- `AIProcessorWorker`
-- `NetworkMinerWorker`
-- `TreasurerWorker`
-- `TargetResearchWorker` quando habilitado
+- `InstagramWorker` (coleta estrutural)
+- `AIProcessorWorker` (classificação principal)
+- `TargetResearchWorker` (quando habilitado via `RESEARCHER_MODE`)
+
+Subagentes analíticos (sob demanda / reativos):
+
+- `AuditAgent` (auditoria cruzada)
+- `NetworkMinerAgent` (mineração de redes coordenada)
+- `TreasurerAgent` (gestão financeira e de XP)
 
 Mudanças já aplicadas:
 
@@ -154,10 +159,11 @@ Atualizações consolidadas no ciclo mais recente:
 
 Esses ajustes devem ser considerados baseline atual do frontend oficial.
 
-## 11. Subagente de Dados (DatabaseAgent) e Mineração Analítica
+## 11. Subagentes Analíticos e de Dados (PASA v88.1)
 
-Introduzido na v50.1 para otimizar as buscas no ecossistema local:
+A arquitetura foi migrada para subagentes especializados executados de forma reativa ou sob demanda:
 
-- **Propósito**: Desacoplar a leitura de dados históricos de produção (Supabase) das atividades dos workers de IA e curadoria, evitando gargalos de conexões concorrentes na nuvem.
-- **Interface**: O `DatabaseAgent` (`workers/ai/database_agent.py`) consome a API JSON gerada nativamente pelo Datasette na porta `8002`.
-- **Funcionalidades**: Prover buscas textuais indexadas ultra-velozes (FTS5) e estatísticas analíticas de ódio/classificação consolidadas diretamente via SQL estruturado.
+- **DatabaseAgent** (`workers/ai/database_agent.py`): Desacopla a leitura de dados históricos de produção (Supabase) via API HTTP do Datasette local na porta `8002`, provendo buscas FTS5 ultra-velozes.
+- **AuditAgent** (`workers/ai/audit_agent.py`): Subagente de curadoria cruzada anti-alucinação. Consome o `DatabaseAgent` local e efetua reclassificações via API Groq para calcular o drift do modelo.
+- **NetworkMinerAgent** (`workers/analytics/network_agent.py`): Analisa grafos de hostilidade e detecta campanhas coordenadas organizadas (clusters de ataque), persistindo os dados e gerando relatórios físicos para o frontend.
+- **TreasurerAgent** (`workers/financial/treasurer_agent.py`): Efetua auditoria de saldos de CI inconsistentes, monitora conectividade do Stripe e gera relatórios DRE consolidados diários.

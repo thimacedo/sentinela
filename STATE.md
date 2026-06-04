@@ -7,8 +7,8 @@ _last_updated: 2026-06-04 | branch: main_
 |---|---|---|
 | Coleta | 🟢 Operacional | Scraper V2 ativo, com fila atômica e fallback compatível quando RPC não existe |
 | Inteligência | 🟡 Operacional com degradação | `ollama` ativo localmente; cloud sujeito a 429/quota; fallback profundo existe mas precisa saneamento de providers |
-| Analytics de Rede | 🟢 Operacional | `network-miner` em execução |
-| Financeiro | 🟢 Operacional | `treasurer` ativo |
+| Analytics de Rede | 🟢 Operacional | Subagente `NetworkMinerAgent` ativo de forma reativa/sob demanda |
+| Financeiro | 🟢 Operacional | Subagente `TreasurerAgent` ativo de forma reativa/sob demanda |
 | Watchdog Local | 🟢 Operacional | SSE, controle remoto e dashboard local funcionando |
 | Frontend oficial | 🟢 Estável | `frontend/` é o frontend oficial, com integração de relatórios no backend real e CTAs conectados |
 
@@ -79,7 +79,7 @@ O principal risco operacional hoje não é ausência de pipeline, e sim degrada�
 - fila circular unificada: local e cloud dividem o mesmo loop com rotacionamento Round-Robin
 - reanálise de baixa confiança (usando exclusivamente cloud da fila unificada)
 - fallback estruturado injetado ativamente na fila com **Poda Automática** (provedores são banidos instantaneamente em caso de erro 401/402/404)
-- padronização léxica forçada via `PADRONIZACAO_LINGUISTICA_FORENSE.md` incondicionalmente em todos os providers
+- padronização léxica forçada via `PADRONIZACAO_LINGUISTICA_ANALITICA.md` incondicionalmente em todos os providers
 - **Cache de I/O**: Prompts e datasets locais são carregados na RAM (Zero overhead de leitura em disco no event-loop)
 - **DatabaseAgent (Subagente de dados)**: Integrado e disponível em `workers.ai.DatabaseAgent`. Esse subagente consome a API JSON do Datasette local na porta `8002` para fornecer consultas SQL assíncronas, buscas textuais indexadas (FTS5) e estatísticas analíticas para os demais workers do ecossistema de forma desacoplada.
 

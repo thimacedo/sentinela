@@ -108,16 +108,12 @@ def build_orchestrator() -> SentinelaOrchestrator:
     # Este worker consome o backlog deixado pelos scrapers
     try:
         from workers.processors.ai_processor_worker import AIProcessorWorker
-        from workers.analytics.network_worker import NetworkMinerWorker
-        from workers.financial.treasurer_worker import TreasurerWorker
         
         orch.register(AIProcessorWorker(worker_id="ai-processor-01", config={}))
-        orch.register(NetworkMinerWorker(worker_id="network-miner-01", config={"lookback_days": 3}))
-        orch.register(TreasurerWorker(worker_id="treasurer-01", config={}))
         
-        logger.info("[main_runner] Workers de Processamento/Rede/Financeiro registrados.")
+        logger.info("[main_runner] AIProcessorWorker registrado com sucesso.")
     except ImportError as e:
-        logger.warning(f"[main_runner] Erro ao registrar workers de analytics/financeiro: {e}")
+        logger.warning(f"[main_runner] Erro ao registrar AIProcessorWorker: {e}")
 
     # Motor de Curadoria e Inteligência de Alvos (v84.9)
     researcher_mode = os.getenv("RESEARCHER_MODE", "disabled").strip().lower()

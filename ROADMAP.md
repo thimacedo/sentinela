@@ -9,8 +9,9 @@ _last_updated: 2026-06-04 | branch: main_
 - [x] `AIProcessorWorker` como classificador oficial do pipeline
 - [x] Triagem local com `ollama`
 - [x] Fallback profundo com `FallbackLLM`
-- [x] `NetworkMiner` com deduplicação por assinatura lexical
-- [x] `Treasurer` com telemetria financeira
+- [x] AuditWorker refatorado para AuditAgent (subagente analítico sob demanda)
+- [x] `NetworkMinerWorker` refatorado para `NetworkMinerAgent` (subagente relacional sob demanda)
+- [x] `TreasurerWorker` refatorado para `TreasurerAgent` (subagente financeiro sob demanda)
 - [x] `TargetResearchWorker` com ativação controlada por `RESEARCHER_MODE`
 - [x] Expurgo dos entrypoints e contratos legados paralelos ao runtime oficial
 - [x] Absorção do padrão ouro legado em `core/ai_service.py`

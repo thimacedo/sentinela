@@ -7,7 +7,6 @@ Uso:
     python scripts/run_audit_agent.py --sample-size 20
     python scripts/run_audit_agent.py --cycles 3     # executa N ciclos
     python scripts/run_audit_agent.py --loop         # roda indefinidamente (a cada 6h)
-    python scripts/run_audit_agent.py --dry-run      # só testa conexões, não auditoria
 """
 from __future__ import annotations
 
@@ -23,15 +22,20 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+# Configuração de encoding segura para o Windows para evitar UnicodeEncodeError
+if sys.platform.startswith("win"):
+    try:
+        sys.stdout.reconfigure(encoding='utf-8', errors='backslashreplace')
+        sys.stderr.reconfigure(encoding='utf-8', errors='backslashreplace')
+    except AttributeError:
+        pass
+
 # Carrega variáveis de ambiente antes de importar módulos do projeto
 from dotenv import load_dotenv
 load_dotenv(PROJECT_ROOT / ".env", override=True)
 
-from workers.audit_worker import AuditWorker
-from workers.base.reward_engine import RewardEngine
-from workers.base.memory_store import MemoryStore
-from workers.ai.ai_advisor import AIAdvisor
-from workers.ai.doc_fetcher import DocFetcher
+from workers.ai.audit_agent import AuditAgent
+from workers.ai.database_agent import DatabaseAgent
 
 # Logging configurado para o sub-agente
 logging.basicConfig(
@@ -41,13 +45,12 @@ logging.basicConfig(
 )
 logger = logging.getLogger("audit_agent")
 
-# Intervalo padrão do loop contínuo: 6 horas
 DEFAULT_LOOP_INTERVAL_SECONDS = 6 * 3600
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Sub-agente de Auditoria Cruzada Anti-Alucinação — Sentinela PASA v88.0"
+        description="Sub-agente de Auditoria Cruzada Anti-Alucinação - Sentinela"
     )
     parser.add_argument(
         "--sample-size", type=int, default=10,
@@ -73,88 +76,61 @@ def parse_args() -> argparse.Namespace:
         "--interval", type=int, default=DEFAULT_LOOP_INTERVAL_SECONDS,
         help="Intervalo em segundos entre ciclos no modo --loop."
     )
-    parser.add_argument(
-        "--dry-run", action="store_true",
-        help="Executa apenas setup() e teardown() sem rodar ciclos reais."
-    )
     return parser.parse_args()
 
 
 async def run(args: argparse.Namespace) -> None:
-    config = {
-        "sample_size": args.sample_size,
-        "confidence_threshold": args.confidence,
-        "drift_alert_threshold": args.drift_threshold,
-    }
-
-    worker = AuditWorker(worker_id="audit_agent", config=config)
-    shutdown_event = asyncio.Event()
-
-    # Injeta evento de shutdown (compatível com orquestrador)
-    worker.shutdown_event = shutdown_event
-
-    await worker.setup()
-
-    if args.dry_run:
-        logger.info("🔍 [dry-run] Setup concluído. Encerrando sem executar ciclos.")
-        await worker.teardown()
-        return
-
-    # Instancia os helpers necessários pelo BaseWorker (não usados diretamente aqui)
-    try:
-        memory  = MemoryStore()
-        fetcher = DocFetcher()
-        advisor = AIAdvisor(memory=memory, fetcher=fetcher)
-        reward_engine = RewardEngine(memory=memory)
-    except Exception as e:
-        logger.warning("⚠️ RewardEngine/AIAdvisor não disponíveis: %s. Continuando sem telemetria.", e)
-        reward_engine = None
-        advisor = None
+    db_agent = DatabaseAgent()
+    agent = AuditAgent(database_agent=db_agent)
 
     cycles_executed = 0
     try:
         while True:
-            result = await worker.run_cycle()
-
-            logger.info(
-                "📊 Ciclo #%d concluído | auditados=%d | divergências=%d | drift=%.1f%% | erro=%s",
-                result.cycle,
-                result.audit_checked,
-                result.metadata.get("discrepancies", 0),
-                result.metadata.get("drift_rate_pct", 0.0),
-                result.error or "nenhum",
+            cycles_executed += 1
+            logger.info(f"[AuditAgent] Iniciando ciclo #{cycles_executed}")
+            
+            result = await agent.run_audit(
+                sample_size=args.sample_size,
+                confidence_threshold=args.confidence,
+                drift_alert_threshold=args.drift_threshold
             )
 
-            # Persiste métricas se RewardEngine disponível
-            if reward_engine:
-                try:
-                    await reward_engine.process_result(result)
-                except Exception as e:
-                    logger.debug("RewardEngine indisponível: %s", e)
-
-            cycles_executed += 1
+            if result.get("success"):
+                logger.info(
+                    "Concluido ciclo #%d | auditados=%d | divergencias=%d | drift=%.1f%% | alerta=%s",
+                    cycles_executed,
+                    result.get("checked", 0),
+                    result.get("discrepancies", 0),
+                    result.get("drift_rate_pct", 0.0),
+                    result.get("drift_alert", False)
+                )
+            else:
+                logger.error(
+                    "Erro no ciclo #%d: %s",
+                    cycles_executed,
+                    result.get("error", "Erro desconhecido")
+                )
 
             if not args.loop and cycles_executed >= args.cycles:
                 break
 
             if args.loop:
-                logger.info("😴 Próximo ciclo em %.0fh. Aguardando...", args.interval / 3600)
+                logger.info("Próximo ciclo em %.0fh. Aguardando...", args.interval / 3600)
                 await asyncio.sleep(args.interval)
 
     except KeyboardInterrupt:
-        logger.info("⛔ Interrupção detectada. Encerrando gracefully...")
-        shutdown_event.set()
+        logger.info("Interrupção detectada. Encerrando...")
     finally:
-        await worker.teardown()
-        logger.info("✅ AuditAgent encerrado. Total de ciclos: %d.", cycles_executed)
+        logger.info("AuditAgent encerrado. Total de ciclos: %d.", cycles_executed)
 
 
 def main() -> None:
     args = parse_args()
-    logger.info("🚀 AuditAgent iniciando | sample=%d | confidence≥%.0f%% | drift_alerta=%.0f%%",
+    logger.info("AuditAgent iniciando | sample=%d | confidence>=%.0f%% | drift_alerta=%.0f%%",
                 args.sample_size, args.confidence * 100, args.drift_threshold)
     asyncio.run(run(args))
 
 
 if __name__ == "__main__":
     main()
+
