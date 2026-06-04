@@ -433,85 +433,95 @@
             } catch (e) { console.error("KPI Error:", e); }
         }
 
+        let isFetchingData = false;
         async function fetchData() {
+            if (isFetchingData) return;
+            isFetchingData = true;
             try {
-                const r = await fetch('/api/metrics');
-                if(r.ok) {
-                    const m = await r.json();
-                    
-                    // Atualiza status textual e cores do indicador
-                    const statusText = document.getElementById('watchdog-status-text');
-                    statusText.innerText = m.status;
-                    
-                    const pingDot = document.getElementById('ping-dot');
-                    const pingPulse = document.getElementById('ping-pulse');
-                    if (m.status === 'OPERACIONAL') {
-                        statusText.className = "text-xs font-black text-emerald-400";
-                        pingDot.className = "relative inline-flex rounded-full h-3 w-3 bg-emerald-500";
-                        pingPulse.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75";
-                    } else if (m.status.startsWith('PARADO') || m.status.startsWith('HIBERNANDO')) {
-                        statusText.className = "text-xs font-black text-rose-500";
-                        pingDot.className = "relative inline-flex rounded-full h-3 w-3 bg-rose-500";
-                        pingPulse.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-500 opacity-75";
-                    } else {
-                        statusText.className = "text-xs font-black text-amber-500";
-                        pingDot.className = "relative inline-flex rounded-full h-3 w-3 bg-amber-500";
-                        pingPulse.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75";
-                    }
-                    
-                    // Atualiza botões de controle de acordo com o status
-                    const startBtn = document.getElementById('btn-srv-start');
-                    const stopBtn = document.getElementById('btn-srv-stop');
-                    if (m.status === 'OPERACIONAL') {
-                        startBtn.classList.add('text-slate-700', 'cursor-not-allowed');
-                        startBtn.classList.remove('text-slate-400');
-                        stopBtn.classList.remove('text-slate-700', 'cursor-not-allowed');
-                        stopBtn.classList.add('text-slate-400');
-                    } else if (m.status === 'PARADO') {
-                        stopBtn.classList.add('text-slate-700', 'cursor-not-allowed');
-                        stopBtn.classList.remove('text-slate-400');
-                        startBtn.classList.remove('text-slate-700', 'cursor-not-allowed');
-                        startBtn.classList.add('text-slate-400');
-                    } else {
-                        startBtn.classList.remove('text-slate-700', 'cursor-not-allowed');
-                        stopBtn.classList.remove('text-slate-700', 'cursor-not-allowed');
-                    }
+                try {
+                    const r = await fetch('/api/metrics');
+                    if(r.ok) {
+                        const m = await r.json();
+                        
+                        // Atualiza status textual e cores do indicador
+                        const statusText = document.getElementById('watchdog-status-text');
+                        statusText.innerText = m.status;
+                        
+                        const pingDot = document.getElementById('ping-dot');
+                        const pingPulse = document.getElementById('ping-pulse');
+                        if (m.status === 'OPERACIONAL') {
+                            statusText.className = "text-xs font-black text-emerald-400";
+                            pingDot.className = "relative inline-flex rounded-full h-3 w-3 bg-emerald-500";
+                            pingPulse.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75";
+                        } else if (m.status.startsWith('PARADO') || m.status.startsWith('HIBERNANDO')) {
+                            statusText.className = "text-xs font-black text-rose-500";
+                            pingDot.className = "relative inline-flex rounded-full h-3 w-3 bg-rose-500";
+                            pingPulse.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-500 opacity-75";
+                        } else {
+                            statusText.className = "text-xs font-black text-amber-500";
+                            pingDot.className = "relative inline-flex rounded-full h-3 w-3 bg-amber-500";
+                            pingPulse.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75";
+                        }
+                        
+                        // Atualiza botões de controle de acordo com o status
+                        const startBtn = document.getElementById('btn-srv-start');
+                        const stopBtn = document.getElementById('btn-srv-stop');
+                        if (m.status === 'OPERACIONAL') {
+                            startBtn.classList.add('text-slate-700', 'cursor-not-allowed');
+                            startBtn.classList.remove('text-slate-400');
+                            stopBtn.classList.remove('text-slate-700', 'cursor-not-allowed');
+                            stopBtn.classList.add('text-slate-400');
+                        } else if (m.status === 'PARADO') {
+                            stopBtn.classList.add('text-slate-700', 'cursor-not-allowed');
+                            stopBtn.classList.remove('text-slate-400');
+                            startBtn.classList.remove('text-slate-700', 'cursor-not-allowed');
+                            startBtn.classList.add('text-slate-400');
+                        } else {
+                            startBtn.classList.remove('text-slate-700', 'cursor-not-allowed');
+                            stopBtn.classList.remove('text-slate-700', 'cursor-not-allowed');
+                        }
 
-                    document.getElementById('kpi-restars').innerText = `${m.cycle || 0} / ${m.restarts || 0}`;
-                    
-                    if(m.ai_services) {
-                        document.getElementById('kpi-ai-services').innerHTML = Object.entries(m.ai_services).map(([s,st]) => {
-                            const ok = st === 'OK';
-                            const statusDot = `<span class="w-2.5 h-2.5 rounded-full shadow-sm ${ok ? 'bg-emerald-500 shadow-emerald-500/40' : 'bg-rose-500 animate-pulse shadow-rose-500/40'}"></span>`;
-                            const actionBtn = ok ? '' : `<button onclick="startAIService('${s}')" class="ml-auto text-[10px] bg-rose-500/10 border border-rose-500/40 text-rose-400 px-2.5 py-1 rounded-md font-black hover:bg-rose-500/20 active:scale-95 transition-all shadow-md">START</button>`;
-                            return `<div class="flex items-center gap-3 w-full bg-slate-900/50 p-2 rounded-lg border border-slate-800/60">${statusDot}<span class="text-[11px] font-mono font-bold text-slate-300 uppercase tracking-widest">${s}</span>${actionBtn}</div>`;
-                        }).join('');
+                        document.getElementById('kpi-restars').innerText = `${m.cycle || 0} / ${m.restarts || 0}`;
+                        
+                        if(m.ai_services) {
+                            document.getElementById('kpi-ai-services').innerHTML = Object.entries(m.ai_services).map(([s,st]) => {
+                                const ok = st === 'OK';
+                                const statusDot = `<span class="w-2.5 h-2.5 rounded-full shadow-sm ${ok ? 'bg-emerald-500 shadow-emerald-500/40' : 'bg-rose-500 animate-pulse shadow-rose-500/40'}"></span>`;
+                                const actionBtn = ok ? '' : `<button onclick="startAIService('${s}')" class="ml-auto text-[10px] bg-rose-500/10 border border-rose-500/40 text-rose-400 px-2.5 py-1 rounded-md font-black hover:bg-rose-500/20 active:scale-95 transition-all shadow-md">START</button>`;
+                                return `<div class="flex items-center gap-3 w-full bg-slate-900/50 p-2 rounded-lg border border-slate-800/60">${statusDot}<span class="text-[11px] font-mono font-bold text-slate-300 uppercase tracking-widest">${s}</span>${actionBtn}</div>`;
+                            }).join('');
+                        }
+                        if(m.instagram_accounts) {
+                            const accs = {};
+                            Object.entries(m.instagram_accounts).forEach(([k, st]) => {
+                                const idx = k.match(/\d+$/) ? k.match(/\d+$/)[0] : '0';
+                                if(!accs[idx]) accs[idx] = [];
+                                accs[idx].push(st);
+                            });
+                            document.getElementById('kpi-instagram').innerHTML = Object.entries(accs).map(([idx, sts]) => {
+                                const ok = sts.every(s => s === 'OK');
+                                const label = idx === '0' ? 'Nó Principal' : `Nó Secundário ${idx}`;
+                                return `<div class="flex items-center gap-3 bg-slate-900/50 p-2 rounded-lg border border-slate-800/60"><span class="w-2.5 h-2.5 rounded-full shadow-sm ${ok ? 'bg-emerald-500 shadow-emerald-500/40' : 'bg-rose-500 shadow-rose-500/40'}"></span><span class="text-[11px] font-bold font-mono text-slate-300 tracking-wide">${label}</span></div>`;
+                            }).join('');
+                        }
                     }
-                    if(m.instagram_accounts) {
-                        const accs = {};
-                        Object.entries(m.instagram_accounts).forEach(([k, st]) => {
-                            const idx = k.match(/\d+$/) ? k.match(/\d+$/)[0] : '0';
-                            if(!accs[idx]) accs[idx] = [];
-                            accs[idx].push(st);
-                        });
-                        document.getElementById('kpi-instagram').innerHTML = Object.entries(accs).map(([idx, sts]) => {
-                            const ok = sts.every(s => s === 'OK');
-                            const label = idx === '0' ? 'Nó Principal' : `Nó Secundário ${idx}`;
-                            return `<div class="flex items-center gap-3 bg-slate-900/50 p-2 rounded-lg border border-slate-800/60"><span class="w-2.5 h-2.5 rounded-full shadow-sm ${ok ? 'bg-emerald-500 shadow-emerald-500/40' : 'bg-rose-500 shadow-rose-500/40'}"></span><span class="text-[11px] font-bold font-mono text-slate-300 tracking-wide">${label}</span></div>`;
-                        }).join('');
-                    }
-                }
-            } catch(e) {}
-            await fetchKPIs();
-            const [{data:cands}, {data:runs}, {data:coms}] = await Promise.all([
-                db.from('candidatos').select('*').ilike('status_monitoramento', 'ATIVO').order('last_scraped_at', { ascending: false, nullsFirst: false }),
-                db.from('worker_rewards').select('*').order('timestamp', { ascending: false }).limit(10),
-                db.from('comentarios').select('*').order('data_coleta', { ascending: false }).limit(40)
-            ]);
-            if(cands) { localCandidatesList = cands; document.getElementById('targets-count-badge').innerText = `${cands.length}/${cands.length}`; filterTargets(); }
-            if(runs) document.getElementById('runs-feed').innerHTML = runs.map(r => `<div class="bg-slate-900/50 border border-slate-800/60 p-4 rounded-xl flex flex-col gap-2.5 shadow-sm"><div class="flex justify-between text-xs"><span class="font-black text-slate-200 tracking-wide">${r.worker_id}</span><span class="text-slate-400 font-medium">${timeAgo(r.timestamp)}</span></div><div class="flex justify-between items-center"><span class="text-[10px] font-black px-2 py-1 rounded border border-slate-700 bg-slate-800 shadow-inner text-slate-300 uppercase tracking-widest">${r.tier || 'silver'}</span><span class="text-xs font-black text-emerald-400">+${(r.delta || 0).toFixed(1)} XP</span></div></div>`).join('');
-            if(coms) renderComments(coms);
-            setupRealtime();
+                } catch(e) { console.error("Metrics fetch error:", e); }
+                
+                await fetchKPIs();
+                const [{data:cands}, {data:runs}, {data:coms}] = await Promise.all([
+                    db.from('candidatos').select('*').ilike('status_monitoramento', 'ATIVO').order('last_scraped_at', { ascending: false, nullsFirst: false }),
+                    db.from('worker_rewards').select('*').order('timestamp', { ascending: false }).limit(10),
+                    db.from('comentarios').select('*').order('data_coleta', { ascending: false }).limit(40)
+                ]);
+                if(cands) { localCandidatesList = cands; document.getElementById('targets-count-badge').innerText = `${cands.length}/${cands.length}`; filterTargets(); }
+                if(runs) document.getElementById('runs-feed').innerHTML = runs.map(r => `<div class="bg-slate-900/50 border border-slate-800/60 p-4 rounded-xl flex flex-col gap-2.5 shadow-sm"><div class="flex justify-between text-xs"><span class="font-black text-slate-200 tracking-wide">${r.worker_id}</span><span class="text-slate-400 font-medium">${timeAgo(r.timestamp)}</span></div><div class="flex justify-between items-center"><span class="text-[10px] font-black px-2 py-1 rounded border border-slate-700 bg-slate-800 shadow-inner text-slate-300 uppercase tracking-widest">${r.tier || 'silver'}</span><span class="text-xs font-black text-emerald-400">+${(r.delta || 0).toFixed(1)} XP</span></div></div>`).join('');
+                if(coms) renderComments(coms);
+                setupRealtime();
+            } catch(e) {
+                console.error("General fetch data error:", e);
+            } finally {
+                isFetchingData = false;
+            }
         }
 
         function toggleHateOnly() {
@@ -649,7 +659,7 @@
 
         fetchData();
         setupLogStream();
-        setInterval(fetchKPIs, 60000);
+        setInterval(fetchData, 10000);
     </script>
 </body>
 </html>
