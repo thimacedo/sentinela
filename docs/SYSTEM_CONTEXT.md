@@ -154,7 +154,7 @@ Atualizações consolidadas no ciclo mais recente:
 
 Esses ajustes devem ser considerados baseline atual do frontend oficial.
 
-## 11. Subagente de Dados (DatabaseAgent) e Mineração Forense
+## 11. Subagente de Dados (DatabaseAgent) e Mineração Analítica
 
 Introduzido na v50.1 para otimizar as buscas no ecossistema local:
 
