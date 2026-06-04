@@ -25,7 +25,7 @@ _last_updated: 2026-06-04 | branch: main_
 6. A fila distribuída real hoje usa travas atômicas com `SELECT FOR UPDATE SKIP LOCKED`.
 7. PGMQ permanece como possibilidade futura, não como base atual do runtime.
 8. `frontend/` é o frontend oficial.
-9. `local_dashboard.html` é o painel operacional local do watchdog, totalmente refatorado com UI Premium, Glassmorphism, layout responsivo dinâmico para desktop (`calc(100vh - 290px)`), telemetria e alvos perfeitamente visíveis e roláveis, e auto-reload automático periódico a cada 10 segundos com trava anti-concorrência.
+9. `local_dashboard.html` é o painel operacional local do watchdog, totalmente refatorado com UI Premium, Glassmorphism, layout responsivo dinâmico para desktop (`calc(100vh - 290px)`), telemetria e alvos perfeitamente visíveis e roláveis, auto-reload automático periódico a cada 10 segundos com trava anti-concorrência, e seção "Serviços de IA" com classificação explícita de cada provedor em `(local)` ou `(cloud)`.
 
 ## Achados da auditoria documental
 
