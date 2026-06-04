@@ -44,6 +44,10 @@ class InstagramScraperWorker(BaseWorker):
 
     async def setup(self) -> None:
         logger.info(f"🚀 Worker {self.worker_id} configurado.")
+        try:
+            cleanup_orphans()
+        except Exception as e:
+            logger.warning(f"⚠️ [V2] Falha ao limpar órfãos no setup: {e}")
         await local_buffer.sync_with_supabase(self.db)
 
     async def teardown(self) -> None:

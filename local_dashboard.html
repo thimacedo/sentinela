@@ -494,10 +494,11 @@
                         if(m.ai_services) {
                             document.getElementById('kpi-ai-services').innerHTML = Object.entries(m.ai_services).map(([s,st]) => {
                                 const ok = st === 'OK';
+                                const isDisabled = st === 'DESATIVADO';
                                 const isCloud = s !== 'ollama';
                                 const label = s === 'ollama' ? 'ollama (local)' : `${s} (cloud)`;
-                                const statusDot = `<span class="w-2.5 h-2.5 rounded-full shadow-sm ${ok ? 'bg-emerald-500 shadow-emerald-500/40' : 'bg-rose-500 animate-pulse shadow-rose-500/40'}"></span>`;
-                                const actionBtn = (ok || isCloud) ? '' : `<button onclick="startAIService('${s}')" class="ml-auto text-[10px] bg-rose-500/10 border border-rose-500/40 text-rose-400 px-2.5 py-1 rounded-md font-black hover:bg-rose-500/20 active:scale-95 transition-all shadow-md">START</button>`;
+                                const statusDot = `<span class="w-2.5 h-2.5 rounded-full shadow-sm ${ok ? 'bg-emerald-500 shadow-emerald-500/40' : (isDisabled ? 'bg-slate-600 shadow-slate-600/40' : 'bg-rose-500 animate-pulse shadow-rose-500/40')}"></span>`;
+                                const actionBtn = (ok || isDisabled || isCloud) ? '' : `<button onclick="startAIService('${s}')" class="ml-auto text-[10px] bg-rose-500/10 border border-rose-500/40 text-rose-400 px-2.5 py-1 rounded-md font-black hover:bg-rose-500/20 active:scale-95 transition-all shadow-md">START</button>`;
                                 return `<div class="flex items-center gap-3 w-full bg-slate-900/50 p-2 rounded-lg border border-slate-800/60">${statusDot}<span class="text-[11px] font-mono font-bold text-slate-300 uppercase tracking-widest">${label}</span>${actionBtn}</div>`;
                             }).join('');
                         }

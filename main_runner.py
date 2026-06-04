@@ -167,6 +167,13 @@ def setup_signal_handlers(
 async def main() -> None:
     logger.info("[main_runner] Sentinela iniciando...")
 
+    # 🧹 Faxina de processos órfãos de navegadores no boot
+    try:
+        from core.process_cleaner import cleanup_orphans
+        cleanup_orphans()
+    except Exception as e:
+        logger.warning(f"[main_runner] Falha ao executar cleanup_orphans no boot: {e}")
+
     orch = build_orchestrator()
     # Injeta o evento de shutdown no orquestrador
     orch.shutdown_event = shutdown_event
@@ -205,8 +212,8 @@ def check_single_instance():
     import signal
     import time
     
-    lock_file = "runtime_state/main_runner.lock"
-    os.makedirs("runtime_state", exist_ok=True)
+    lock_file = os.path.join(PROJECT_ROOT, "runtime_state", "main_runner.lock")
+    os.makedirs(os.path.join(PROJECT_ROOT, "runtime_state"), exist_ok=True)
     if os.path.exists(lock_file):
         try:
             with open(lock_file, "r") as f:
@@ -223,8 +230,17 @@ def check_single_instance():
                     try:
                         os.kill(pid, signal.SIGTERM)
                         time.sleep(1.5)
-                    except Exception as ex:
-                        print(f"Falha ao matar PID {pid}: {ex}")
+                    except Exception:
+                        pass
+                    # Verificação secundária e força bruta se necessário
+                    try:
+                        if sys.platform.startswith("win"):
+                            subprocess.run(f"taskkill /F /PID {pid}", shell=True, creationflags=creationflags, capture_output=True)
+                        else:
+                            subprocess.run(["kill", "-9", str(pid)], capture_output=True)
+                        time.sleep(1.0)
+                    except Exception:
+                        pass
         except Exception:
             pass
             

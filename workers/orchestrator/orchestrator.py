@@ -41,6 +41,13 @@ class SentinelaOrchestrator:
             except Exception as e:
                 logger.warning("[orchestrator] Falha ao executar malloc_trim: %s", e)
 
+        # 3. Limpeza de Navegadores Órfãos (PASA v65.1)
+        try:
+            from core.process_cleaner import cleanup_orphans
+            cleanup_orphans()
+        except Exception as e:
+            logger.warning("[orchestrator] Falha ao executar cleanup_orphans na autocura: %s", e)
+
     def register(self, worker: BaseWorker) -> None:
         self._workers.append(worker)
         logger.info("[orchestrator] registrado: %s", worker.worker_id)
@@ -209,6 +216,13 @@ class SentinelaOrchestrator:
         return float(self.reward_engine.get_interval(ctx.reward.tier))
 
     async def run_all(self) -> None:
+        # 🧹 Faxina de processos órfãos de navegadores antes de iniciar o loop
+        try:
+            from core.process_cleaner import cleanup_orphans
+            cleanup_orphans()
+        except Exception as e:
+            logger.warning("[orchestrator] Falha na limpeza de órfãos no run_all: %s", e)
+
         if not self._workers:
             logger.warning("[orchestrator] Nenhum worker registrado.")
             return

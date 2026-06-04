@@ -27,6 +27,11 @@ class TargetResearchWorker(BaseWorker):
     async def setup(self) -> None:
         """Inicializacao de recursos (obrigatorio BaseWorker)."""
         self.logger.info(f"[Curador] {self.worker_id} pronto.")
+        try:
+            from core.process_cleaner import cleanup_orphans
+            cleanup_orphans()
+        except Exception as e:
+            self.logger.warning(f"[Curador] Falha ao limpar órfãos no setup: {e}")
 
     async def teardown(self) -> None:
         """Liberacao de recursos (obrigatorio BaseWorker)."""

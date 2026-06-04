@@ -5,27 +5,25 @@ _last_updated: 2026-06-04 | branch: main_
 
 | Subsistema | Status | Observação |
 |---|---|---|
-| Coleta | 🟢 Operacional | Scraper V2 ativo, com fila atômica e fallback compatível quando RPC não existe |
-| Inteligência | 🟡 Operacional com degradação | `ollama` ativo localmente; cloud sujeito a 429/quota; fallback profundo existe mas precisa saneamento de providers |
+| Coleta | 🟢 Operacional | Scraper V2 ativo, com fila atômica, faxina de zumbis no boot e recuperação resiliente via sqlite buffer |
+| Inteligência | 🟢 Operacional | Malha de IA ativa e dinâmica: ollama local monitorado e provedores de nuvem configurados via chaves no .env (groq, deepseek, openrouter, gemini) |
 | Analytics de Rede | 🟢 Operacional | Subagente `NetworkMinerAgent` ativo de forma reativa/sob demanda |
-| Financeiro | 🟢 Operacional | Subagente `TreasurerAgent` ativo de forma reativa/sob demanda, com mapeamento de custos de IA e burn rate integrado |
-| Watchdog Local | 🟢 Operacional | SSE, controle remoto e dashboard local funcionando |
-| Frontend oficial | 🟢 Estável | `frontend/` é o frontend oficial, com integração de relatórios no backend real e CTAs conectados |
+| Financeiro | 🟢 Operacional | Subagente `TreasurerAgent` ativo de forma reativa/sob demanda, com telemetria e burn rate diário de IA |
+| Watchdog Local | 🟢 Operacional | Porta 8001, SSE, controle remoto, dashboard local premium e monitor dinâmico de chaves de IA ativo |
+| Frontend oficial | 🟢 Estável | `frontend/` é o frontend oficial, com integração de relatórios reais e CTAs conectados |
 
 ## Verdades operacionais auditadas
 
 1. O backend é iniciado por `main_runner.py`.
-2. O watchdog local supervisiona a execução e publica logs por SSE.
+2. O watchdog local supervisiona a execução, gerencia os status dinâmicos de IA e publica logs por SSE.
 3. O classificador oficial em produção é `workers/processors/ai_processor_worker.py`.
-4. A cascata de IA ativa agora é uma fila unificada (Unified Rotation Queue):
-   - Fila primária unificada: `ollama`, `mistral` e os fallbacks (`groq`, `openrouter`, `deepseek`, etc.) em rotação Round-Robin.
-   - Delay rigoroso mínimo de 1.0s imposto a cada chamada para evitar rate limit.
-   - Penalidade automatizada e global (`_handle_provider_error`): +60s para 429, +30s geral com rebaixamento, e remoção/expurgo permanente para erros críticos de cota (401, 402, 404).
-5. LiteRT não compõe mais o pipeline ativo de processamento.
-6. A fila distribuída real hoje usa travas atômicas com `SELECT FOR UPDATE SKIP LOCKED`.
-7. PGMQ permanece como possibilidade futura, não como base atual do runtime.
-8. `frontend/` é o frontend oficial.
-9. `local_dashboard.html` é o painel operacional local do watchdog, totalmente refatorado com UI Premium, Glassmorphism, layout responsivo dinâmico para desktop (`calc(100vh - 290px)`), telemetria e alvos perfeitamente visíveis e roláveis, auto-reload automático periódico a cada 10 segundos com trava anti-concorrência, e seção "Serviços de IA" com classificação explícita de cada provedor em `(local)` ou `(cloud)`.
+4. A trava de instância única no `main_runner.py` e `watchdog` impede a execução redundante de múltiplos processos usando caminhos de lock absoluto baseados em `PROJECT_ROOT`.
+5. O `cleanup_orphans()` é executado preventivamente no boot do `main_runner.py`, no setup de cada worker (`InstagramScraperWorker` e `TargetResearchWorker`), no `run_all()` do orquestrador e ciclicamente na sua autocura.
+6. LiteRT não compõe mais o pipeline ativo de processamento.
+7. A fila distribuída real hoje usa travas atômicas com `SELECT FOR UPDATE SKIP LOCKED`.
+8. PGMQ permanece como possibilidade futura, não como base atual do runtime.
+9. `frontend/` é o frontend oficial.
+10. `local_dashboard.html` é o painel operacional local do watchdog, contendo seção de "Serviços de IA" dinâmica que exibe bolinhas cinzas (`bg-slate-600`) para serviços Cloud não configurados (status `DESATIVADO`).
 
 ## Achados da auditoria documental
 
@@ -65,12 +63,9 @@ _last_updated: 2026-06-04 | branch: main_
 
 ### Risco atual
 
-O principal risco operacional hoje não é ausência de pipeline, e sim degradação da malha cloud/fallback e drift de configuração de produção:
-
-- `429` em providers principais
-- providers de fallback com erros de quota/configuração
-- necessidade de saneamento em `config/fallback_providers.yaml`
-- variáveis de ambiente Stripe e frontend não padronizadas entre ambientes podem quebrar checkout/retorno
+O principal risco operacional hoje é a expiração ou bloqueio de cookies da sessão do Instagram (gerando respostas de feeds vazios):
+- Necessidade de renovação periódica das cookies via script interativo no terminal.
+- providers de fallback com erros de quota/configuração (remediado via Unified Rotation Queue).
 
 ## Situação da IA
 

@@ -292,10 +292,28 @@ async def get_metrics():
         except Exception:
             return "DOWN"
 
+    # Checagem de status de IA
+    ai_status = {}
+    
+    # Ollama (Local)
     ollama_health = _get_health_url(os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"), "http://localhost:11434", "/api/tags")
+    ai_status["ollama"] = _service_status(ollama_health)
+    
+    # Provedores de Cloud
+    providers_keys = {
+        "groq": "GROQ_API_KEY",
+        "deepseek": "DEEPSEEK_API_KEY",
+        "openrouter": "OPENROUTER_API_KEY",
+        "gemini": "GEMINI_API_KEY",
+    }
+    
+    for prov_name, env_var in providers_keys.items():
+        val = os.getenv(env_var, "").strip()
+        if not val or "dummy" in val.lower():
+            ai_status[prov_name] = "DESATIVADO"
+        else:
+            ai_status[prov_name] = "OK"
 
-    ollama_status = _service_status(ollama_health)
-    maritaca_status = _service_status("https://chat.maritaca.ai/api")
     with state.lock:
         return {
             "restarts": state.restarts,
@@ -305,10 +323,7 @@ async def get_metrics():
             "fast_crashes": state.fast_crashes,
             "db_status": "OPERACIONAL",
             "instagram_accounts": ig_status,
-            "ai_services": {
-                "ollama": ollama_status,
-                "maritaca": maritaca_status
-            },
+            "ai_services": ai_status,
             **worker_metrics
         }
 
