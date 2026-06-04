@@ -15,7 +15,7 @@ Este índice foi limpo para refletir o estado real do workspace em `2026-06-03`.
 - `docs/project_functions_v58.md` — contexto funcional histórico ainda parcialmente útil
 - `docs/REFATORACAO_FRONTEND.md` — contexto da evolução do frontend
 - `docs/RESILIENCIA_LOGIN_INSTAGRAM.md` — detalhes da operação de login/coleta
-- `docs/PADRONIZACAO_LINGUISTICA_FORENSE.md` — referência metodológica da classificação
+- `docs/PADRONIZACAO_LINGUISTICA_ANALITICA.md` — referência metodológica da classificação
 
 ## 3. Documentos operacionais ativos
 

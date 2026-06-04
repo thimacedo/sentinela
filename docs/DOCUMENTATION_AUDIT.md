@@ -30,7 +30,7 @@ Continua útil como contexto funcional, mas não representa mais a topologia atu
 ### `docs/database_schema_v58.md`
 Útil como referência estrutural, porém precisa ser sempre validado contra o banco real e o código.
 
-### `docs/PADRONIZACAO_LINGUISTICA_FORENSE.md`
+### `docs/PADRONIZACAO_LINGUISTICA_ANALITICA.md`
 Metodologia ainda útil, mas referências a engines antigas devem ser lidas com cautela.
 
 ## 3. Documentos históricos

@@ -19,11 +19,11 @@ logger = logging.getLogger("AIService")
 CONFIDENCE_THRESHOLD = float(os.getenv('CONFIDENCE_THRESHOLD', '0.5'))
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 GOLD_DATASET_PATH = os.path.join(BASE_DIR, "data", "classifier_gold_dataset.json")
-MD_PATH = os.path.join(BASE_DIR, "docs", "PADRONIZACAO_LINGUISTICA_FORENSE.md")
+MD_PATH = os.path.join(BASE_DIR, "docs", "PADRONIZACAO_LINGUISTICA_ANALITICA.md")
 CUSTOM_RULES_PATH = os.path.join(BASE_DIR, "config", "custom_rules.json")
 
-# MCA v2.2 Protocol - Calibragem Forense Crítica (v85.11)
-SYSTEM_PROMPT = """Você é um perito em Linguística Forense Digital especializado em ataques coordenados e hostilidade política.
+# MCA v2.2 Protocol - Calibragem Analítica Crítica (v85.11)
+SYSTEM_PROMPT = """Você é um perito em Linguística Analítica Digital especializado em ataques coordenados e hostilidade política.
 Sua missão é classificar comentários com realismo absoluto, seguindo a Metodologia de Classificação de Ataques (MCA v2.2) e as Diretrizes do Protocolo PASA v16.4.
 
 --- REGRAS DE OURO ---
@@ -152,7 +152,7 @@ class AIService:
     def _build_enrichment(self, is_local: bool) -> str:
         """Gera o prompt do zero combinando SYSTEM_PROMPT, PADRONIZACAO e dataset ouro."""
         base_prompt = LOCAL_SYSTEM_PROMPT if is_local else SYSTEM_PROMPT
-        enrichment = "\n\n--- PADRONIZACAO LINGUÍSTICA FORENSE (MD) ---\n"
+        enrichment = "\n\n--- PADRONIZACAO LINGUÍSTICA ANALITICA (MD) ---\n"
         
         if os.path.exists(MD_PATH):
             try:

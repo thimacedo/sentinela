@@ -1,14 +1,14 @@
-﻿# Documentação de Padronização Linguística Forense (PASA v16.3)
+# Documentação de Padronização Linguística Analítica (PASA v16.3)
 **Projeto: Sentinela Democrática**
-**Versão:** 16.3.0 - Forensic Intelligence
+**Versão:** 16.3.0 - Analytical Intelligence
 **Data:** 28 de Abril de 2026
 
 ## 1. Visão Geral
-Este documento estabelece as diretrizes léxico-semânticas e os protocolos periciais para todos os Workers e Agentes de IA do sistema Sentinela. O objetivo é garantir a precisão na detecção de discurso de ódio, violência política e ataques coordenados, utilizando os princípios da **Linguística Forense** e a **Matriz Taxonômica de Ameaças Democráticas (MTAD)**.
+Este documento estabelece as diretrizes léxico-semânticas e os protocolos periciais para todos os Workers e Agentes de IA do sistema Sentinela. O objetivo é garantir a precisão na detecção de discurso de ódio, violência política e ataques coordenados, utilizando os princípios da **Linguística Analítica** e a **Matriz Taxonômica de Ameaças Democráticas (MTAD)**.
 
 ## 2. Matriz Taxonômica de Ameaças (Padrão de Classificação)
 
-Toda evidência coletada deve ser classificada dentro de um dos seguintes eixos, seguindo o padrão JSON de saída:
+Todo indício coletado deve ser classificado dentro de um dos seguintes eixos, seguindo o padrão JSON de saída:
 
 | Categoria | Marcadores Semânticos (Keywords) | Nível de Risco |
 | :--- | :--- | :--- |
@@ -44,14 +44,14 @@ Todos os Workers de inteligência (Ollama, Gemini, Groq) DEVEM retornar este for
   "is_hate": true,
   "categoria": "XENOFOBIA_REGIONAL",
   "risco": "CRITICO",
-  "evidencia_lexical": ["analfabeto", "burro", "povo do NE"],
+  "indicio_lexical": ["analfabeto", "burro", "povo do NE"],
   "analise_pericial": "O autor utiliza insultos cognitivos para desumanizar o eleitorado regional, caracterizando xenofobia eleitoral performativa.",
   "pasa_version": "16.3.0"
 }
 `
 
 ## 5. Referências Teóricas Integradas
-- **Linguística Forense Digital**: Técnicas de extração de termos e frequências (N-Gramas).
+- **Linguística Analítica Digital**: Técnicas de extração de termos e frequências (N-Gramas).
 - **Análise de Discurso (PASA)**: Protocolo de Análise Semântico-Arquitetural.
 - **Operaçaõ Bulwark (2026)**: Parâmetros de repressão cibernética e desmantelamento de milícias digitais.
 - **Estudo NLP UFSCar/UFCG**: Mapeamento do ódio anti-nordestino em ciclos eleitorais.
@@ -60,7 +60,7 @@ Todos os Workers de inteligência (Ollama, Gemini, Groq) DEVEM retornar este for
 *Documento de uso restrito do Ecossistema Sentinela Democrática.*
 
 ## 6. Critérios Enriquecidos via Pesquisa Automatizada
-_Última atualização: 02/06/2026_
+_Última atualização: 04/06/2026_
 
 ### Regras Linguísticas Adicionais:
 - Considerar contexto cultural e social para evitar falsos positivos em ofensas raciais e religiosas
@@ -75,6 +75,9 @@ _Última atualização: 02/06/2026_
 - Usar recursos de NLP para identificar ironia em 'INSULTO_AD_HOMINEM'
 - Considerar contexto para diferenciar entre ironia e hostilidade
 - Analisar a intenção por trás das palavras
+- Considerar contexto para diferenciar entre humor e hostilidade
+- Usar recursos de NLP para identificar ironia e sarcasmo
+- Considerar ataques a instituições democráticas como ATAQUE_INSTITUCIONAL
 
 ### Regras de Mitigação de Falsos Positivos:
 - Evitar marcação de expressões comuns em comunidades específicas como ofensivas sem contexto
@@ -91,12 +94,13 @@ _Última atualização: 02/06/2026_
 - Não marcar como 'ATAQUE_INSTITUCIONAL' quando a crítica é construtiva
 - Evitar classificar expressões de opinião fortes como hostilidade
 - Considerar o tom de voz e emoção por trás das palavras
+- Considerar a intenção comunicativa para diferenciar entre insultos e expressões coloquiais
 
 ### Marcadores Léxico-Semânticos Adicionais:
-- **ODIO_IDENTITARIO**: racista, xenofobia, homofobia, transfobia, racismo, racial slur, homophobic slur, xenophobic term, regionalismo, islamofobia, raça, religião, orientação sexual
-- **VIOLENCIA_GENERO**: machista, sexista, misoginia, machismo, sexismo, abuso, misogynistic slur, sexist term, violência de gênero, mulheres
-- **AMEACA**: morte, violência, ameaça, matar, atacar, destruir, threat, violence, kill, ataque, ameaça de morte
-- **INSULTO_AD_HOMINEM**: idiota, imbecil, estúpido, incompetente, insult, attack, offensive slur, insulto, ofensa, calúnia, covarde, mentiroso, honra, competência, aparência
-- **ATAQUE_INSTITUCIONAL**: corrupto, incompetente, deslegitimar, corrupção, institutional attack, electoral system attack, deslegitimação, crime, sistema, sistema político, governo, órgãos de Estado, sistema eleitoral
-- **DANO_A_IMAGEM**: crime, corrupção, desvios de conduta, theorize crime, impute grave misconduct, corruption, crimes, desvios de conduta grave
+- **ODIO_IDENTITARIO**: racista, xenofobia, homofobia, transfobia, racismo, racial slur, homophobic slur, xenophobic term, regionalismo, islamofobia, raça, religião, orientação sexual, religiophobia, antissemitismo, racial slurs, religious slurs, homophobic slurs
+- **VIOLENCIA_GENERO**: machista, sexista, misoginia, machismo, sexismo, abuso, misogynistic slur, sexist term, violência de gênero, mulheres, patriarcado, feminicidio, misogynistic term, sexist slur, feminicídio, misogynistic terms, sexist slurs, misoandria
+- **AMEACA**: morte, violência, ameaça, matar, atacar, destruir, threat, violence, kill, ataque, ameaça de morte, assassinato, harm, incitação à violência, ataque físico, incitar violência, terrorismo, incitar à violência, incitar
+- **INSULTO_AD_HOMINEM**: idiota, imbecil, estúpido, incompetente, insult, attack, offensive slur, insulto, ofensa, calúnia, covarde, mentiroso, honra, competência, aparência, traidor, ofender, difamar, fraco, fraude
+- **ATAQUE_INSTITUCIONAL**: corrupto, incompetente, deslegitimar, corrupção, institutional attack, electoral system attack, deslegitimação, crime, sistema, sistema político, governo, órgãos de Estado, sistema eleitoral, crítica construtiva, government, institutions, democratic infrastructure, press, law system, science
+- **DANO_A_IMAGEM**: crime, corrupção, desvios de conduta, theorize crime, impute grave misconduct, corruption, crimes, desvios de conduta grave, imputação de desvios de conduta, fake news, misinformation, discredit, desvios, imputar, desvio de conduta, scandal, acusações falsas, teorias da conspiração, imputação de crimes, escândalo
 
