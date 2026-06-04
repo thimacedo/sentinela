@@ -673,6 +673,7 @@ if __name__ == "__main__":
 
     def run_datasette_server():
         try:
+            python_exe = get_python_executable()
             creationflags = 0x08000000 if os.name == 'nt' else 0
             subprocess.Popen(
                 [python_exe, "-m", "datasette", "serve", "-i", db_file, "--port", "8002", "--host", "0.0.0.0"],
