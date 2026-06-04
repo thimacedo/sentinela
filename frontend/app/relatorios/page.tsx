@@ -2,24 +2,34 @@
 import { useEffect, useState } from 'react';
 import ReportCard from '@/components/ReportCard';
 import AdSenseSlot from '@/components/ads/AdSenseSlot';
+import { API_BASE_URL } from '@/lib/api';
 
 export interface Report {
   name: string;
   type: string;
   url: string;
+  candidatoId: string;
 }
 
 export default function RelatoriosPage() {
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
-  const userId = 'demo-user'; // TODO: replace with real user ID from auth
+  const userId = typeof window !== 'undefined'
+    ? localStorage.getItem('sentinela_user_id') || 'guest_user'
+    : 'guest_user';
 
   useEffect(() => {
     async function fetchReports() {
       try {
-        const res = await fetch('/api/reports');
+        const res = await fetch(`${API_BASE_URL}/api/v1/dossiers`);
         const data = await res.json();
-        setReports(data.reports || []);
+        const mapped = (data || []).map((d: any) => ({
+          name: `Dossiê @${d.candidato_id || 'alvo'}`,
+          type: 'pdf',
+          url: d.arquivo_path || '',
+          candidatoId: d.candidato_id || '',
+        }));
+        setReports(mapped);
       } catch (e) {
         console.error('Erro ao obter relatórios', e);
       } finally {
@@ -31,17 +41,22 @@ export default function RelatoriosPage() {
 
   const handleBuy = async (reportName: string) => {
     try {
-      const res = await fetch('/api/reports', {
+      const selected = reports.find((r) => r.name === reportName);
+      if (!selected?.candidatoId) {
+        alert('Falha na emissão: candidato inválido para este dossiê.');
+        return;
+      }
+      const res = await fetch(`${API_BASE_URL}/api/v1/dossiers/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reportName, userId }),
+        body: JSON.stringify({ candidato_id: selected.candidatoId, user_id: userId, modules: ['base'] }),
       });
       const data = await res.json();
-      if (data.downloadUrl) {
-        // open visualizer with the signed URL in a new tab
-        window.open(`/relatorios/visualizar?url=${encodeURIComponent(data.downloadUrl)}`, '_blank');
+      if (data.pdf_url) {
+        const targetUrl = data.pdf_url.startsWith('http') ? data.pdf_url : `${API_BASE_URL}${data.pdf_url}`;
+        window.open(targetUrl, '_blank');
       } else {
-        alert('Falha na compra: ' + (data.error || '')); 
+        alert('Falha na compra: ' + (data.detail || data.error || ''));
       }
     } catch (e) {
       console.error('Erro ao comprar relatório', e);
@@ -78,7 +93,7 @@ export default function RelatoriosPage() {
           <>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {reports.map((r) => (
-                <ReportCard key={r.name} report={r} onBuy={handleBuy} />
+                <ReportCard key={`${r.name}-${r.candidatoId}`} report={r} onBuy={handleBuy} />
               ))}
             </div>
             <div className="mt-8">

@@ -120,17 +120,17 @@ export default function CandidateProfile({
         <>
           <button 
             onClick={handlePrev} 
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 dark:bg-slate-800/90 border border-border-main flex items-center justify-center z-20 hover:bg-brand-primary hover:text-white transition-all shadow-lg opacity-0 group-hover:opacity-100"
+            className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/90 dark:bg-slate-800/90 border border-border-main flex items-center justify-center z-20 hover:bg-brand-primary hover:text-white transition-all shadow-lg opacity-0 group-hover:opacity-100"
             aria-label="Candidato Anterior"
           >
-            <ChevronLeft size={24} />
+            <ChevronLeft size={28} />
           </button>
           <button 
             onClick={handleNext} 
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 dark:bg-slate-800/90 border border-border-main flex items-center justify-center z-20 hover:bg-brand-primary hover:text-white transition-all shadow-lg opacity-0 group-hover:opacity-100"
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/90 dark:bg-slate-800/90 border border-border-main flex items-center justify-center z-20 hover:bg-brand-primary hover:text-white transition-all shadow-lg opacity-0 group-hover:opacity-100"
             aria-label="Próximo Candidato"
           >
-            <ChevronRight size={24} />
+            <ChevronRight size={28} />
           </button>
           
           {/* Pagination Indicators */}

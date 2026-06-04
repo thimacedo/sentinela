@@ -176,6 +176,16 @@ async def run_research(limit_files: int):
         with open(config_path, "w", encoding="utf-8") as f:
             json.dump(existing_rules, f, indent=2, ensure_ascii=False)
         logger.info(f"Regras customizadas salvas com sucesso em: {config_path}")
+        # Notify Ollama via AIService to reload prompts
+        from core.ai_service import ai_service
+        try:
+            ai_service.refresh_prompt_cache()
+            logger.info("🔄 Prompt cache refreshed in AIService (Ollama).")
+            # Attempt to push rules to providers via API if possible
+            await ai_service.push_custom_rules_to_providers()
+        except Exception as e:
+            logger.warning(f"Falha ao atualizar cache de prompts ou enviar regras ao provedor: {e}")
+        logger.info(f"Regras customizadas salvas com sucesso em: {config_path}")
     except Exception as e:
         logger.error(f"Erro ao gravar {config_path}: {e}")
         return

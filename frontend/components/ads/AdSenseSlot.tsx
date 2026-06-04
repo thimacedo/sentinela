@@ -27,21 +27,29 @@ export default function AdSenseSlot({ adSlot, format = 'auto', layout, layoutKey
   const pathname = usePathname();
 
   useEffect(() => {
-    const loadAd = () => {
+    let retries = 0;
+
+    const tryLoadAd = () => {
       try {
-        if (typeof window !== 'undefined') {
-          (window as any).adsbygoogle = (window as any).adsbygoogle || [];
-          
-          if (insRef.current && !insRef.current.hasAttribute('data-adsbygoogle-status')) {
-            (window as any).adsbygoogle.push({});
+        if (typeof window === 'undefined') return;
+        if (!insRef.current || insRef.current.hasAttribute('data-adsbygoogle-status')) return;
+
+        const hasScript = !!document.querySelector('script[src*="adsbygoogle.js"]');
+        if (!hasScript || typeof (window as any).adsbygoogle === 'undefined') {
+          if (retries < 8) {
+            retries += 1;
+            setTimeout(tryLoadAd, 500);
           }
+          return;
         }
+
+        (window as any).adsbygoogle.push({});
       } catch (err) {
         console.warn("⚠️ AdSense injeção falhou silenciosamente:", err);
       }
     };
 
-    const timer = setTimeout(loadAd, 200);
+    const timer = setTimeout(tryLoadAd, 500);
     return () => clearTimeout(timer);
   }, [pathname, adSlot]);
 

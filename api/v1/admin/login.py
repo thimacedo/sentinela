@@ -1,41 +1,75 @@
 import os
 import httpx
 import pyotp
-import time
-import hmac
-import hashlib
+import logging
 from fastapi import FastAPI, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
+# SECURITY FIX: Fase 1 - Import new JWT service and CORS config
+from api.config.cors import CORS_CONFIG, validate_cors_config
+from api.services.jwt_service import generate_token_pair
+
 load_dotenv()
+
+logger = logging.getLogger("sentinela-api")
 
 app = FastAPI()
 
+# SECURITY FIX: Fase 1 - Use secure CORS configuration
+validate_cors_config()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"]
+    **CORS_CONFIG
 )
 
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 TOTP_SECRET = os.getenv("SENTINELA_ADMIN_TOTP_SECRET")
 
-def generate_session_token():
-    exp = int(time.time()) + (2 * 3600)
-    msg = str(exp).encode()
-    sig = hmac.new(SUPABASE_KEY.encode(), msg, hashlib.sha256).hexdigest()
-    return f"{exp}.{sig}"
 
 @app.post("/api/v1/admin/login")
 async def admin_login(payload: dict = Body(...)):
+    """
+    Admin login endpoint with TOTP verification.
+    
+    SECURITY FIX: Fase 1 - Now returns secure JWT tokens instead of weak HMAC tokens.
+    
+    Request:
+        {
+            "code": "123456"  # 6-digit TOTP code
+        }
+    
+    Response:
+        {
+            "access_token": "eyJ...",
+            "refresh_token": "eyJ...",
+            "token_type": "bearer",
+            "expires_in": 3600
+        }
+    """
     code = payload.get("code")
     if not TOTP_SECRET:
+        logger.error("Admin auth not configured - TOTP_SECRET missing")
         raise HTTPException(status_code=500, detail="Auth not configured")
     
-    totp = pyotp.TOTP(TOTP_SECRET)
-    if totp.verify(code):
-        return {"token": generate_session_token(), "expires_in": 7200}
-    else:
-        raise HTTPException(status_code=401, detail="Código inválido")
+    try:
+        totp = pyotp.TOTP(TOTP_SECRET)
+        if totp.verify(code):
+            # SECURITY FIX: Use new JWT token generation
+            # For admin login, we use a hardcoded admin user ID
+            # In production, this should be replaced with actual user ID from database
+            tokens = generate_token_pair(
+                user_id="admin-user",
+                additional_claims={"role": "ADMIN"}
+            )
+            
+            logger.info("✅ Admin login successful")
+            return tokens
+        else:
+            logger.warning(f"Failed admin login attempt with invalid TOTP code")
+            raise HTTPException(status_code=401, detail="Código inválido")
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error during admin login: {e}")
+        raise HTTPException(status_code=500, detail="Login error")

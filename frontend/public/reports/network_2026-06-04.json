@@ -1,0 +1,269 @@
+{
+  "nome_rede": "Cluster de Ataque #2 (42 nodes)",
+  "tipo_coordenacao": "MULTI_TARGET",
+  "nodes": [
+    "valentewelton",
+    "claudetereque86",
+    "flaviorodriges86",
+    "ccnceica",
+    "silvanahermes.sh",
+    "kallazans",
+    "joemarcellino25",
+    "nardeligildete",
+    "pr_joao_batista_rdgs",
+    "andrebrayneroficial",
+    "vitor_alcazar",
+    "barbiecapixabaoficial",
+    "deltandallagnol",
+    "fatycsl",
+    "kadumolina",
+    "wclcarvalho",
+    "ivan.poontes",
+    "diogovdsfjv10",
+    "raijcmartins_",
+    "reinaldocarlosbueno",
+    "walterembu",
+    "haralampid",
+    "depheliolopes",
+    "leonelandrigo",
+    "jostondarwin",
+    "cabrallula",
+    "vasconcelos_3.0",
+    "carmitcha1",
+    "marcio_z_cardia",
+    "filipebarrosoficial",
+    "marlis998",
+    "luci_sil_2020",
+    "joao_neto44",
+    "anjoluzmodas",
+    "_adriano_damasceno_",
+    "widerlan05",
+    "acaciagoncalves",
+    "siga.sempre.a.direita",
+    "prmateussouza",
+    "rosemary.queiroz.52",
+    "marlizepaes",
+    "carolinahunhoff"
+  ],
+  "edges": [
+    {
+      "from": "valentewelton",
+      "to": "filipebarrosoficial",
+      "weight": 1
+    },
+    {
+      "from": "claudetereque86",
+      "to": "depheliolopes",
+      "weight": 2
+    },
+    {
+      "from": "flaviorodriges86",
+      "to": "deltandallagnol",
+      "weight": 1
+    },
+    {
+      "from": "ccnceica",
+      "to": "filipebarrosoficial",
+      "weight": 1
+    },
+    {
+      "from": "silvanahermes.sh",
+      "to": "depheliolopes",
+      "weight": 2
+    },
+    {
+      "from": "kallazans",
+      "to": "depheliolopes",
+      "weight": 2
+    },
+    {
+      "from": "joemarcellino25",
+      "to": "depheliolopes",
+      "weight": 3
+    },
+    {
+      "from": "nardeligildete",
+      "to": "depheliolopes",
+      "weight": 1
+    },
+    {
+      "from": "pr_joao_batista_rdgs",
+      "to": "depheliolopes",
+      "weight": 2
+    },
+    {
+      "from": "andrebrayneroficial",
+      "to": "deltandallagnol",
+      "weight": 1
+    },
+    {
+      "from": "vitor_alcazar",
+      "to": "deltandallagnol",
+      "weight": 2
+    },
+    {
+      "from": "barbiecapixabaoficial",
+      "to": "depheliolopes",
+      "weight": 1
+    },
+    {
+      "from": "barbiecapixabaoficial",
+      "to": "deltandallagnol",
+      "weight": 1
+    },
+    {
+      "from": "deltandallagnol",
+      "to": "marcio_z_cardia",
+      "weight": 1
+    },
+    {
+      "from": "deltandallagnol",
+      "to": "kadumolina",
+      "weight": 1
+    },
+    {
+      "from": "deltandallagnol",
+      "to": "carolinahunhoff",
+      "weight": 1
+    },
+    {
+      "from": "deltandallagnol",
+      "to": "cabrallula",
+      "weight": 1
+    },
+    {
+      "from": "deltandallagnol",
+      "to": "diogovdsfjv10",
+      "weight": 2
+    },
+    {
+      "from": "deltandallagnol",
+      "to": "raijcmartins_",
+      "weight": 1
+    },
+    {
+      "from": "deltandallagnol",
+      "to": "marlis998",
+      "weight": 1
+    },
+    {
+      "from": "deltandallagnol",
+      "to": "jostondarwin",
+      "weight": 1
+    },
+    {
+      "from": "deltandallagnol",
+      "to": "luci_sil_2020",
+      "weight": 1
+    },
+    {
+      "from": "deltandallagnol",
+      "to": "fatycsl",
+      "weight": 1
+    },
+    {
+      "from": "deltandallagnol",
+      "to": "anjoluzmodas",
+      "weight": 1
+    },
+    {
+      "from": "wclcarvalho",
+      "to": "filipebarrosoficial",
+      "weight": 1
+    },
+    {
+      "from": "ivan.poontes",
+      "to": "depheliolopes",
+      "weight": 1
+    },
+    {
+      "from": "reinaldocarlosbueno",
+      "to": "filipebarrosoficial",
+      "weight": 1
+    },
+    {
+      "from": "walterembu",
+      "to": "depheliolopes",
+      "weight": 1
+    },
+    {
+      "from": "haralampid",
+      "to": "depheliolopes",
+      "weight": 1
+    },
+    {
+      "from": "depheliolopes",
+      "to": "_adriano_damasceno_",
+      "weight": 1
+    },
+    {
+      "from": "depheliolopes",
+      "to": "siga.sempre.a.direita",
+      "weight": 3
+    },
+    {
+      "from": "depheliolopes",
+      "to": "joao_neto44",
+      "weight": 2
+    },
+    {
+      "from": "depheliolopes",
+      "to": "vasconcelos_3.0",
+      "weight": 3
+    },
+    {
+      "from": "depheliolopes",
+      "to": "rosemary.queiroz.52",
+      "weight": 1
+    },
+    {
+      "from": "depheliolopes",
+      "to": "widerlan05",
+      "weight": 2
+    },
+    {
+      "from": "leonelandrigo",
+      "to": "filipebarrosoficial",
+      "weight": 1
+    },
+    {
+      "from": "carmitcha1",
+      "to": "filipebarrosoficial",
+      "weight": 1
+    },
+    {
+      "from": "filipebarrosoficial",
+      "to": "marlizepaes",
+      "weight": 1
+    },
+    {
+      "from": "filipebarrosoficial",
+      "to": "luci_sil_2020",
+      "weight": 1
+    },
+    {
+      "from": "filipebarrosoficial",
+      "to": "prmateussouza",
+      "weight": 1
+    },
+    {
+      "from": "filipebarrosoficial",
+      "to": "acaciagoncalves",
+      "weight": 1
+    }
+  ],
+  "estatisticas": {
+    "total_interacoes": 55,
+    "principais_categorias": {
+      "ATAQUE_INSTITUCIONAL": 16,
+      "INSULTO_AD_HOMINEM": 14,
+      "LIXO": 11,
+      "DANO_A_IMAGEM": 9,
+      "NEUTRO": 2,
+      "SUSPEITO": 2,
+      "HATE": 1
+    },
+    "contas_coordenadas": 2
+  },
+  "score_perigoso": 100
+}

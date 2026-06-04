@@ -19,7 +19,7 @@ interface HighlightCardsProps {
   stories?: HighlightStory[];
 }
 
-export default function HighlightCards({ stories: mockStories }: HighlightCardsProps) {
+export default function HighlightCards({ stories }: HighlightCardsProps) {
   const { data: alerts = [], isLoading, error } = useAlerts(10);
 
   // Transformar alertas reais em stories
@@ -37,7 +37,7 @@ export default function HighlightCards({ stories: mockStories }: HighlightCardsP
       topWords: alert.categoria_ia ? [alert.categoria_ia] : ['análise'],
     }));
 
-  const stories = mockStories || processedAlerts;
+  const displayStories = stories || processedAlerts;
 
   const getSeverityStyle = (severity: string) => {
     switch (severity) {
@@ -93,13 +93,13 @@ export default function HighlightCards({ stories: mockStories }: HighlightCardsP
         <div className="text-center py-8">
           <p className="text-text-muted font-mono text-sm animate-pulse">Carregando destaques...</p>
         </div>
-      ) : stories.length === 0 ? (
+      ) : displayStories.length === 0 ? (
         <div className="text-center py-8 bg-bg-card border border-border-main rounded p-6">
           <p className="text-text-muted font-mono text-sm">Nenhum alerta recente encontrado</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4">
-          {stories.map((story) => {
+          {displayStories.map((story) => {
             const badge = getSeverityBadge(story.severity);
             return (
               <article

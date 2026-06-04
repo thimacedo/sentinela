@@ -1,0 +1,20 @@
+fallback_providers:
+  cohere:
+    api_key: ${COHERE_API_KEY}
+  deepseek:
+    api_key: ${DEEPSEEK_API_KEY}
+  replicate:
+    api_token: ${REPLICATE_API_TOKEN}
+  ai21:
+    api_key: ${AI21_API_KEY}
+  fireworks:
+    api_key: ${FIREWORKS_API_KEY}
+  openrouter:
+    api_key: ${OPENROUTER_API_KEY}
+  route_llm:
+    api_key: ${ROUTELLM_API_KEY}
+  ollama:
+    base_url: ${OLLAMA_BASE_URL}
+    model: ${OLLAMA_MODEL}
+  abacus:
+    api_key: ${ABACUS_CLI_API_KEY}

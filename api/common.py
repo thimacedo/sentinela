@@ -8,6 +8,12 @@ import httpx
 from dotenv import load_dotenv
 from fastapi import Header, HTTPException
 
+# SECURITY FIX: Fase 1 - Import new JWT service
+try:
+    from api.services.jwt_service import generate_token_pair, verify_token
+except ImportError:
+    from services.jwt_service import generate_token_pair, verify_token
+
 load_dotenv()
 
 
@@ -49,7 +55,31 @@ async def fetch_json(path: str, *, method: str = "GET", params: Optional[dict] =
     return None, response
 
 
-def generate_session_token() -> str:
+def generate_session_token(user_id: str = None) -> str:
+    """
+    SECURITY FIX: Fase 1 - Generate secure JWT token instead of weak HMAC token.
+    
+    This replaces the insecure HMAC-based token generation that used SUPABASE_KEY
+    as the secret. Now uses PyJWT with proper secret key management.
+    
+    Args:
+        user_id: Optional user ID. If provided, returns full token pair.
+        
+    Returns:
+        str: Access token (or access token from token pair if user_id provided)
+    """
+    if user_id:
+        # Return only the access token for backwards compatibility
+        tokens = generate_token_pair(user_id)
+        return tokens["access_token"]
+    
+    # Fallback for backwards compatibility (no user_id provided)
+    # This is deprecated and should not be used in new code
+    import logging
+    logger = logging.getLogger("sentinela-api")
+    logger.warning("generate_session_token() called without user_id. Use generate_token_pair(user_id) instead.")
+    
+    # Old implementation as fallback (kept for backwards compatibility only)
     key = require_env("SUPABASE_KEY", SUPABASE_KEY)
     exp = int(time.time()) + (2 * 3600)
     payload = str(exp).encode()
@@ -57,21 +87,55 @@ def generate_session_token() -> str:
     return f"{exp}.{sig}"
 
 
-def verify_session_token(token: Optional[str]) -> None:
-    key = require_env("SUPABASE_KEY", SUPABASE_KEY)
+def verify_session_token(token: Optional[str]) -> Optional[str]:
+    """
+    Verify JWT token and return user_id.
+    
+    SECURITY FIX: Fase 1 - Now properly validates JWT tokens with signature
+    and expiration verification.
+    
+    Args:
+        token: JWT token to verify
+        
+    Returns:
+        str: User ID from token
+        
+    Raises:
+        HTTPException: If token is invalid, expired, or missing
+    """
     if not token:
         raise HTTPException(status_code=401, detail="Sessao ausente")
+    
     try:
-        exp_str, sig = token.split(".")
-        expected_sig = hmac.new(key.encode(), exp_str.encode(), hashlib.sha256).hexdigest()
-        if not hmac.compare_digest(sig, expected_sig):
-            raise HTTPException(status_code=401, detail="Sessao invalida")
-        if int(exp_str) < int(time.time()):
-            raise HTTPException(status_code=401, detail="Sessao expirada")
-    except HTTPException:
-        raise
-    except Exception as exc:
-        raise HTTPException(status_code=401, detail="Erro de autenticacao") from exc
+        # Try new JWT verification first
+        payload = verify_token(token)
+        user_id = payload.get("sub")
+        
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Token inválido: user ID ausente")
+        
+        return user_id
+        
+    except Exception as e:
+        # Fallback to old token format for backwards compatibility during migration
+        try:
+            exp_str, sig = token.split(".")
+            key = require_env("SUPABASE_KEY", SUPABASE_KEY)
+            expected_sig = hmac.new(key.encode(), exp_str.encode(), hashlib.sha256).hexdigest()
+            
+            if not hmac.compare_digest(sig, expected_sig):
+                raise HTTPException(status_code=401, detail="Sessao invalida")
+            
+            if int(exp_str) < int(time.time()):
+                raise HTTPException(status_code=401, detail="Sessao expirada")
+            
+            # Old token format - no user_id available
+            return None
+            
+        except HTTPException:
+            raise
+        except Exception:
+            raise HTTPException(status_code=401, detail="Erro de autenticacao") from e
 
 
 def get_admin_token(authorization: Optional[str] = Header(None)) -> str:

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
   PieChart, Pie, Sector, AreaChart, Area, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar
@@ -72,13 +73,14 @@ const renderActiveShape = (props: any) => {
 export default function DemographicsMarketingPage() {
   const { data, isLoading } = useDemographics();
   const [activeIndex, setActiveIndex] = useState(0);
+  const router = useRouter();
 
   if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto space-y-8 py-6">
         <div className="text-center py-32 flex flex-col items-center gap-4">
           <div className="w-10 h-10 border-4 border-red-500/30 border-t-red-500 rounded-full animate-spin" />
-          <div className="text-text-main font-bold animate-pulse font-mono text-[12px] uppercase tracking-widest">
+          <div className="text-text-main font-bold font-mono text-[12px] uppercase tracking-widest">
             Mapeando Redes Neurais e Compilando Informações Analíticas...
           </div>
         </div>
@@ -99,7 +101,7 @@ export default function DemographicsMarketingPage() {
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-8 border-b border-border-main pb-8">
         <div className="max-w-2xl">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-500/10 text-red-500 rounded-full text-[10px] font-bold uppercase tracking-widest mb-3 border border-red-500/20">
-            <Activity className="w-3 h-3 animate-pulse" /> Monitoramento Ativo | Alerta de Volume
+            <Activity className="w-3 h-3" /> Monitoramento Ativo | Alerta de Volume
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-text-main tracking-tight leading-snug">
             Radiografia do <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-pink-500">Ruído Oculto</span>
@@ -110,7 +112,7 @@ export default function DemographicsMarketingPage() {
           </p>
         </div>
         <div className="flex-shrink-0 flex flex-col gap-3">
-          <button className="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-black uppercase tracking-widest px-8 py-4 rounded-xl shadow-[0_0_20px_rgba(220,38,38,0.3)] hover:shadow-[0_0_30px_rgba(220,38,38,0.5)] transition-all duration-300 hover:-translate-y-1 flex items-center justify-center gap-3">
+          <button onClick={() => router.push('/relatorios')} className="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-black uppercase tracking-widest px-8 py-4 rounded-xl shadow-[0_0_20px_rgba(220,38,38,0.3)] hover:shadow-[0_0_30px_rgba(220,38,38,0.5)] transition-all duration-300 hover:-translate-y-1 flex items-center justify-center gap-3">
             <FileText className="w-5 h-5" /> Gerar Dossiê Analítico
           </button>
           <p className="text-[10px] text-center text-text-muted font-bold uppercase tracking-widest">Apenas 350 CI por relatório</p>
@@ -369,7 +371,7 @@ export default function DemographicsMarketingPage() {
           Ao solicitar o Dossiê Analítico Completo, nossa IA extrai, certifica e gera material com consolidação rigorosa de informações (Assinatura SHA-256). 
           Proteja sua reputação e mapeie clusters de atividades coordenadas.
         </p>
-        <button className="bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-widest px-10 py-5 rounded-xl shadow-[0_0_30px_rgba(220,38,38,0.4)] hover:shadow-[0_0_50px_rgba(220,38,38,0.6)] transition-all duration-300 hover:-translate-y-1 flex items-center justify-center gap-3">
+        <button onClick={() => router.push('/relatorios')} className="bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-widest px-10 py-5 rounded-xl shadow-[0_0_30px_rgba(220,38,38,0.4)] hover:shadow-[0_0_50px_rgba(220,38,38,0.6)] transition-all duration-300 hover:-translate-y-1 flex items-center justify-center gap-3">
           <Sparkles className="w-5 h-5" /> Emitir Dossiê Analítico Agora
         </button>
       </div>

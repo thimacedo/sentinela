@@ -21,11 +21,26 @@ logging.basicConfig(
     format='%(asctime)s [%(levelname)s] %(name)s: %(message)s'
 )
 
+def _get_str_arg(index: int, default: str) -> str:
+    if len(sys.argv) <= index:
+        return default
+    value = str(sys.argv[index]).strip()
+    return value or default
+
+
+def _get_int_arg(index: int, default: int) -> int:
+    if len(sys.argv) <= index:
+        return default
+    try:
+        return int(sys.argv[index])
+    except (TypeError, ValueError):
+        return default
+
+
 async def test_scraper_v2():
-    # Configuração de teste
-    target = sys.argv[1] if len(sys.argv) > 1 else "janainacpaschoal"
-    max_posts = int(sys.argv[2]) if len(sys.argv) > 2 else 3
-    max_comments = int(sys.argv[3]) if len(sys.argv) > 3 else 10
+    target = _get_str_arg(1, os.getenv("TEST_SCRAPER_TARGET") or "janainacpaschoal")
+    max_posts = _get_int_arg(2, int(os.getenv("TEST_SCRAPER_MAX_POSTS", "3")))
+    max_comments = _get_int_arg(3, int(os.getenv("TEST_SCRAPER_MAX_COMMENTS", "10")))
 
     print(f"[*] Iniciando teste do Scraper V2 para @{target}...")
     print(f"[*] Limite: {max_posts} posts, {max_comments} comentários/post.")

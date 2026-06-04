@@ -102,7 +102,7 @@ class AIService:
             api_key="ollama",
             base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1"),
             max_retries=0,
-            http_client=httpx.AsyncClient(timeout=httpx.Timeout(timeout=45.0, connect=15.0))
+            http_client=httpx.AsyncClient(timeout=httpx.Timeout(timeout=120.0, connect=30.0))
         )
         self.mistral_client = AsyncOpenAI(
             api_key=os.getenv("MISTRAL_API_KEY") or "dummy-mistral-key",
@@ -120,8 +120,8 @@ class AIService:
         finetuned_model = os.getenv('FINETUNED_MODEL_NAME', "open-mistral-nemo")
 
         self.providers = [
-            {"name": "ollama", "client": self.ollama_client, "model": os.getenv("OLLAMA_MODEL", "qwen2.5-coder:3b"), "timeout": 45.0, "cooldown_until": 0.0, "is_async_openai": True},
-            {"name": "mistral", "client": self.mistral_client, "model": finetuned_model, "timeout": 15.0, "cooldown_until": 0.0, "is_async_openai": True},
+            {"name": "ollama", "client": self.ollama_client, "model": os.getenv("OLLAMA_MODEL", "qwen2.5-coder:3b"), "timeout": 120.0, "cooldown_until": 0.0, "is_async_openai": True},
+            {"name": "mistral", "client": self.mistral_client, "model": finetuned_model, "timeout": 30.0, "cooldown_until": 0.0, "is_async_openai": True},
         ]
 
         # Adiciona maritaca APENAS se a chave real estiver configurada
@@ -140,7 +140,7 @@ class AIService:
                 self.providers.append({
                     "name": prov["name"],
                     "model": prov.get("model", ""),
-                    "timeout": 20.0,
+                    "timeout": 45.0,
                     "cooldown_until": 0.0,
                     "is_async_openai": False,
                 })
@@ -163,8 +163,16 @@ class AIService:
     def _build_enrichment(self, is_local: bool) -> str:
         """Gera o prompt do zero combinando SYSTEM_PROMPT, PADRONIZACAO e dataset ouro."""
         base_prompt = LOCAL_SYSTEM_PROMPT if is_local else SYSTEM_PROMPT
-        enrichment = "\n\n--- PADRONIZACAO LINGUÍSTICA ANALITICA (MD) ---\n"
         
+        # Para modelos locais (Ollama), evitamos o bloat do prompt para não estourar contexto (ReadTimeout/Error 500)
+        if is_local:
+            enrichment = "\n\n--- DIRETRIZES ESSENCIAIS (TRIAGEM LOCAL) ---\n"
+            enrichment += "- Foque em detectar INSULTOS, AMEAÇAS e ACUSAÇÕES GRAVES.\n"
+            enrichment += "- Se houver hostilidade clara, marque como SUSPEITO.\n"
+            enrichment += "- Críticas normais e slogas são NEUTRO.\n"
+            return base_prompt + enrichment
+
+        enrichment = "\n\n--- PADRONIZACAO LINGUÍSTICA ANALITICA (MD) ---\n"
         if os.path.exists(MD_PATH):
             try:
                 with open(MD_PATH, "r", encoding="utf-8") as f:
@@ -442,6 +450,10 @@ class AIService:
                             "categoria_ia": res_ia["categoria_ia"], "confianca_ia": res_ia["confianca_ia"], "is_hate": res_ia["is_hate"], "analise_pericial": analise, "processado_ia": True
                         }).eq("id", item["id"]).execute()
                         count += 1
+                    
+                    # PASA v88.2 - Cadência Constante (Persistência sobre Velocidade)
+                    # Introduz delay para evitar picos e respeitar limites de IA a longo prazo
+                    await asyncio.sleep(1.0)
                 except Exception as e:
                     if "Colapso" in str(e):
                         logger.error("🛑 [AI] Colapso detectado nas APIs. Abortando lote.")
@@ -472,6 +484,9 @@ class AIService:
                                 "categoria_ia": res_ia["categoria_ia"], "confianca_ia": res_ia["confianca_ia"], "is_hate": res_ia["is_hate"], "analise_pericial": analise
                             }).eq("id", item["id"]).execute()
                             count += 1
+                        
+                        # PASA v88.2 - Cadência Constante (Persistência sobre Velocidade)
+                        await asyncio.sleep(1.0)
                     except Exception as e:
                         if "Colapso" in str(e): break
             finally:

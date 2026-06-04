@@ -25,6 +25,7 @@ class LocalBuffer:
     """
     def __init__(self, db_path: str = "runtime_state/buffer.db"):
         self.is_cloud = _IS_CLOUD
+        self._sqlite_has_trace_id = True
         if self.is_cloud:
             logger.info("☁️ [Buffer] Ambiente cloud detectado. Usando buffer em memória (sem SQLite).")
             self._memory_buffer: List[Dict[str, Any]] = []
@@ -47,6 +48,11 @@ class LocalBuffer:
                     UNIQUE(id_externo, candidato_id, post_shortcode)
                 )
             """)
+            cols = {row[1] for row in conn.execute("PRAGMA table_info(pending_comments)").fetchall()}
+            if "trace_id" not in cols:
+                conn.execute("ALTER TABLE pending_comments ADD COLUMN trace_id TEXT")
+                cols = {row[1] for row in conn.execute("PRAGMA table_info(pending_comments)").fetchall()}
+            self._sqlite_has_trace_id = "trace_id" in cols
             conn.commit()
 
     def save(self, comments: List[Dict[str, Any]]):
@@ -64,10 +70,16 @@ class LocalBuffer:
         with sqlite3.connect(self.db_path) as conn:
             for c in comments:
                 try:
-                    conn.execute(
-                        "INSERT INTO pending_comments (id_externo, candidato_id, post_shortcode, data_json, trace_id) VALUES (?, ?, ?, ?, ?)",
-                        (c.get("id_externo"), c.get("candidato_id"), c.get("post_shortcode"), json.dumps(c, ensure_ascii=False), c.get("trace_id"))
-                    )
+                    if self._sqlite_has_trace_id:
+                        conn.execute(
+                            "INSERT INTO pending_comments (id_externo, candidato_id, post_shortcode, data_json, trace_id) VALUES (?, ?, ?, ?, ?)",
+                            (c.get("id_externo"), c.get("candidato_id"), c.get("post_shortcode"), json.dumps(c, ensure_ascii=False), c.get("trace_id"))
+                        )
+                    else:
+                        conn.execute(
+                            "INSERT INTO pending_comments (id_externo, candidato_id, post_shortcode, data_json) VALUES (?, ?, ?, ?)",
+                            (c.get("id_externo"), c.get("candidato_id"), c.get("post_shortcode"), json.dumps(c, ensure_ascii=False))
+                        )
                     inserted += 1
                 except sqlite3.IntegrityError:
                     continue # Já existe no buffer
@@ -81,14 +93,18 @@ class LocalBuffer:
             return [{"buffer_id": i, **c} for i, c in enumerate(self._memory_buffer[:limit])]
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
-            cursor = conn.execute("SELECT id, data_json, trace_id FROM pending_comments ORDER BY created_at ASC LIMIT ?", (limit,))
+            if self._sqlite_has_trace_id:
+                cursor = conn.execute("SELECT id, data_json, trace_id FROM pending_comments ORDER BY created_at ASC LIMIT ?", (limit,))
+            else:
+                cursor = conn.execute("SELECT id, data_json FROM pending_comments ORDER BY created_at ASC LIMIT ?", (limit,))
             rows = cursor.fetchall()
             
             result = []
             for row in rows:
                 data = json.loads(row["data_json"])
-                if row["trace_id"] and "trace_id" not in data:
-                    data["trace_id"] = row["trace_id"]
+                trace_id = row["trace_id"] if self._sqlite_has_trace_id else None
+                if trace_id and "trace_id" not in data:
+                    data["trace_id"] = trace_id
                 result.append({"buffer_id": row["id"], **data})
             return result
 
@@ -137,13 +153,13 @@ class LocalBuffer:
             
         except Exception as e:
             error_msg = str(e)
-            if "analise_pericial" in error_msg or "PGRST204" in error_msg:
-                logger.warning("⚠️ [Buffer] Schema mismatch detectado no sync. Tentando fallback sem 'analise_pericial'...")
+            if "analise_pericial" in error_msg or "trace_id" in error_msg or "PGRST204" in error_msg:
+                logger.warning("⚠️ [Buffer] Schema mismatch detectado no sync. Tentando fallback sem colunas opcionais...")
                 try:
-                    # Fallback: Remove colunas que podem não existir no banco remoto
                     fallback_pending = []
                     for p in clean_pending:
                         p.pop("analise_pericial", None)
+                        p.pop("trace_id", None)
                         fallback_pending.append(p)
                     
                     res = db_client.table("comentarios").upsert(

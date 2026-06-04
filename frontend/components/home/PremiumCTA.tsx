@@ -1,10 +1,12 @@
 'use client';
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import React, { useState } from 'react';
-import { Shield, Zap } from 'lucide-react';
+import React from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function PremiumCTA() {
+  const router = useRouter();
+
   return (
     <div className="bg-bg-card border-2 border-brand-primary p-8 rounded-[2rem] text-center shadow-2xl relative overflow-hidden group">
       <div className="absolute top-0 right-0 w-32 h-32 bg-brand-primary/5 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000" />
@@ -15,7 +17,7 @@ export default function PremiumCTA() {
           Dossiês completos, análise de grafos de influência e relatórios em tempo real com validade técnica.
         </p>
         <div className="space-y-3">
-          <button onClick={() => window.location.href='/planos'} className="w-full bg-brand-primary text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-brand-primary/10 hover:translate-y-[-2px] transition-all active:scale-95">
+          <button onClick={() => router.push('/planos')} className="w-full bg-brand-primary text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-brand-primary/10 hover:translate-y-[-2px] transition-all active:scale-95">
             Adquirir Créditos de Inteligência
           </button>
           <p className="text-[9px] text-text-muted font-bold uppercase tracking-widest">

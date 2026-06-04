@@ -92,7 +92,7 @@ export default function HomePage() {
               <span className="text-3xl">👤</span>
               <h2 className="text-3xl font-black text-text-main tracking-tight uppercase">Perfis em Destaque</h2>
             </div>
-            <p className="text-[10px] text-text-muted font-mono font-bold animate-pulse uppercase tracking-widest hidden sm:block">
+            <p className="text-[10px] text-text-muted font-mono font-bold uppercase tracking-widest hidden sm:block">
               Use as setas para explorar →
             </p>
           </div>
@@ -121,7 +121,7 @@ export default function HomePage() {
           <p className="text-xs text-text-muted max-w-md mx-auto leading-relaxed opacity-60 font-mono uppercase tracking-widest">
             Tecnologia de vigilância cívica para a transparência do processo democrático brasileiro.
           </p>
-          <div className="flex gap-8 justify-center text-[10px] font-bold text-text-muted uppercase tracking-tighter">
+          <div className="flex gap-8 justify-center text-xs font-bold text-text-muted uppercase tracking-tighter">
             <Link href="/termos" className="hover:text-brand-primary transition-colors">Termos</Link>
             <Link href="/metodologia" className="hover:text-brand-primary transition-colors">Metodologia</Link>
             <Link href="/lgpd" className="hover:text-brand-primary transition-colors">LGPD</Link>

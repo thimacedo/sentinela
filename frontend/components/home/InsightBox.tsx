@@ -107,7 +107,7 @@ export default function InsightBox({
           {/* Metric Display */}
           {metric !== undefined && metricLabel && (
             <div className="bg-bg-main/50 border border-border-main rounded-2xl p-5 mb-6 backdrop-blur-sm">
-              <p className="text-[9px] text-text-muted mb-2 font-black uppercase tracking-widest">📊 {metricLabel}</p>
+              <p className="text-[9px] text-text-muted mb-2 font-black uppercase tracking-widest">{metricLabel}</p>
               <p className="text-4xl font-black text-text-main tabular-nums tracking-tighter">{metric}%</p>
             </div>
           )}
@@ -115,7 +115,7 @@ export default function InsightBox({
           {/* Insight Box */}
           <div className="bg-bg-card border-l-4 border-brand-primary/60 pl-5 py-4 mb-6 rounded-r-2xl shadow-sm">
             <p className="text-sm text-text-main italic leading-relaxed">
-              <strong className="text-brand-primary not-italic mr-2 font-black uppercase tracking-widest text-[10px]">💡 Insight Analítico:</strong> {insight}
+              <strong className="text-brand-primary not-italic mr-2 font-black uppercase tracking-widest text-[10px]">Insight Analítico:</strong> {insight}
             </p>
           </div>
 

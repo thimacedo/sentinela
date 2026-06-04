@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { X, Copy, Check, QrCode, ShieldCheck, HelpCircle, CreditCard, ArrowRight, Loader2 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { generatePixPayload } from '@/lib/pix';
+import { API_BASE_URL } from '@/lib/api';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -53,7 +54,7 @@ export default function CheckoutModal({ isOpen, onClose, planName, ciAmount, pri
       const packageSlug = slugMap[planName] || 'tatica';
       const userId = localStorage.getItem('sentinela_user_id') || 'guest_user';
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/checkout/create-session`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/checkout/create-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId, package_slug: packageSlug })

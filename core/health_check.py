@@ -4,8 +4,8 @@ import httpx
 from pathlib import Path
 
 """Módulo de verificação de saúde para serviços críticos do Sentinela.
-Inclui verificações das credenciais do Instagram e garantias de que os
-provedores de IA locais (Ollama e LiteRT) estejam em execução.
+Inclui verificações das credenciais do Instagram e garantias de que o
+provedor de IA local (Ollama) esteja em execução.
 """
 
 def check_instagram_accounts():

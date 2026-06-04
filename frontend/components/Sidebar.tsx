@@ -56,12 +56,6 @@ const menuItems = [
     path: '/relatorios',
     icon: FileText
   },
-  {
-    id: 'financeiro',
-    label: 'GOD MODE',
-    path: '/admin/financeiro',
-    icon: ShieldAlert
-  },
 ]
 
 import { useUIStore } from '@/src/store/useUIStore'
@@ -172,7 +166,7 @@ export default function Sidebar() {
 
             {/* Indicator Ativo */}
             <div className="flex items-center gap-2 mb-6">
-              <div className="w-2 h-2 bg-brand-primary rounded-full animate-pulse" />
+              <div className="w-2 h-2 bg-brand-primary rounded-full" />
               <span className="text-[10px] font-mono text-text-muted uppercase tracking-widest">
                 Monitor Ativo
               </span>

@@ -9,6 +9,7 @@ from core.db import db_client # Adicionado para injetar CI no modo Mock
 # O hardcoding de chaves Live é proibido por protocolos de segurança.
 stripe.api_key = os.getenv("STRIPE_API_KEY")
 WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
+ALLOW_MOCK_PAYMENTS = os.getenv("STRIPE_ALLOW_MOCK_PAYMENTS", "false").lower() == "true"
 
 class PaymentManager:
     """Gerencia o fluxo de Créditos de Inteligência (CI) do Sentinela."""
@@ -34,17 +35,15 @@ class PaymentManager:
         }
 
         package_info = package_map.get(package_type)
-        
-        # --- MODO STRESS TEST / BETA (Mock Payment) ---
-        # Se as chaves do Stripe não estiverem configuradas, simula a compra com sucesso
+        if not package_info:
+            raise HTTPException(status_code=400, detail=f"Pacote '{package_type}' inválido.")
+
         if not stripe.api_key or not package_info.get("price_id"):
+            if not ALLOW_MOCK_PAYMENTS:
+                raise HTTPException(status_code=503, detail="Stripe não configurado. Defina STRIPE_API_KEY e STRIPE_*_PRICE_ID no ambiente.")
             print(f"⚠️ [Stripe Service] Modo Mock ativado para pacote '{package_type}'. Chaves ausentes.")
-            if not package_info:
-                 raise HTTPException(status_code=400, detail=f"Pacote '{package_type}' inválido.")
-            
-            # Injeta o CI diretamente via RPC para simular o Webhook
             try:
-                db_client.client.rpc('process_stn_transaction', {
+                db_client.client.rpc('process_ci_transaction', {
                     "p_user_id": user_id,
                     "p_amount": package_info["ci_amount"],
                     "p_type": "PURCHASE",
@@ -53,7 +52,7 @@ class PaymentManager:
                 }).execute()
             except Exception as e:
                 print(f"❌ Erro no Mock Payment: {e}")
-                
+
             return f"{os.getenv('FRONTEND_URL', 'http://localhost:3000')}/alvos?payment=success&mock=true"
 
         try:

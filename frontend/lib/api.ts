@@ -3,7 +3,7 @@
  * Centraliza as chamadas para o backend FastAPI com suporte a fallback e ambiente local.
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 export async function fetchApi(path: string, options: RequestInit = {}) {
   const url = `${API_BASE_URL}${path}`;
@@ -21,6 +21,13 @@ export async function fetchApi(path: string, options: RequestInit = {}) {
   }
 
   return response.json();
+}
+
+export async function postCommand(command: 'PAUSE' | 'RESUME') {
+  return fetchApi('/api/v1/command', {
+    method: 'POST',
+    body: JSON.stringify({ command }),
+  });
 }
 
 // ─── DASHBOARD ENDPOINTS ───
