@@ -24,7 +24,7 @@
         .copy-pop { animation: copyPop 0.2s ease; }
     </style>
 </head>
-<body class="bg-[#030712] text-slate-100 min-h-screen lg:h-screen lg:overflow-hidden p-6 flex flex-col gap-6 select-none">
+<body class="bg-[#030712] text-slate-100 min-h-screen p-6 flex flex-col gap-6 select-none">
 
     <!-- Header Panel -->
     <header class="bg-slate-900/40 backdrop-blur-2xl border border-slate-800/80 rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-2xl sticky top-0 z-50">
@@ -107,9 +107,9 @@
     </div>
 
     <!-- Main Content -->
-    <main class="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 min-h-0 overflow-y-auto lg:overflow-hidden pb-10 lg:pb-0">
+    <main class="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 min-h-0 overflow-y-auto lg:overflow-visible pb-10 lg:pb-0">
         <!-- Radar (Left) -->
-        <aside class="lg:col-span-3 flex flex-col gap-4 h-[500px] lg:h-full min-h-0 bg-slate-900/40 backdrop-blur-2xl border border-slate-800/60 rounded-2xl p-5 shadow-2xl">
+        <aside class="lg:col-span-3 flex flex-col gap-4 h-[500px] lg:h-[calc(100vh-290px)] lg:min-h-[480px] bg-slate-900/40 backdrop-blur-2xl border border-slate-800/60 rounded-2xl p-5 shadow-2xl">
             <div class="flex justify-between items-center pb-3 border-b border-slate-800">
                 <h2 class="text-xs font-black uppercase tracking-widest text-slate-400">Radar de Alvos</h2>
                 <span id="targets-count-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 mono">--/--</span>
@@ -131,7 +131,7 @@
         </aside>
 
         <!-- Monitor (Center) -->
-        <section class="lg:col-span-6 flex flex-col gap-4 h-[650px] lg:h-full min-h-0 bg-slate-900/50 border border-slate-800/60 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-md">
+        <section class="lg:col-span-6 flex flex-col gap-4 h-[650px] lg:h-[calc(100vh-290px)] lg:min-h-[480px] bg-slate-900/50 border border-slate-800/60 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-md">
             <div class="p-5 border-b border-slate-800/80 flex justify-between items-center bg-slate-900/20 backdrop-blur-md sticky top-0 z-10">
                 <div class="flex items-center gap-4">
                     <button id="tab-monitor" onclick="switchTab('monitor')" class="text-xs font-black uppercase tracking-widest text-white border-b-2 border-indigo-500 pb-1 focus:outline-none transition-all">Monitor de Discurso</button>
@@ -161,7 +161,7 @@
         </section>
 
         <!-- Status (Right) -->
-        <aside class="lg:col-span-3 flex flex-col gap-4 h-auto lg:h-full min-h-0 overflow-visible lg:overflow-y-auto">
+        <aside class="lg:col-span-3 flex flex-col gap-4 h-auto lg:h-[calc(100vh-290px)] lg:min-h-[480px] overflow-y-auto custom-scrollbar">
             <div class="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-5 shadow-xl">
                 <h2 class="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">Serviços Locais</h2>
                 <div id="kpi-ai-services" class="flex flex-col gap-3"></div>
@@ -170,7 +170,7 @@
                 <h2 class="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">Nós de Coleta</h2>
                 <div id="kpi-instagram" class="flex flex-col gap-3"></div>
             </div>
-            <div class="bg-slate-900/40 border border-slate-800/80 rounded-2xl flex-1 flex flex-col min-h-0 shadow-xl overflow-hidden">
+            <div class="bg-slate-900/40 border border-slate-800/80 rounded-2xl flex-1 min-h-[220px] flex flex-col shadow-xl overflow-hidden">
                 <div class="p-4 border-b border-slate-800 bg-slate-900/20">
                     <h2 class="text-xs font-black uppercase tracking-widest text-slate-400">Telemetria</h2>
                 </div>
