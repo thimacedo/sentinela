@@ -39,6 +39,9 @@ class Settings:
     AUREO_API_KEY: str = os.getenv("AUREO_API_KEY", "")
     AUREO_API_SECRET: str = os.getenv("AUREO_API_SECRET", "")
 
+    # Datasette
+    DATASETTE_URL: str = os.getenv("DATASETTE_URL", "http://localhost:8002")
+
     # Security
     DASHBOARD_PIN: str = os.getenv("DASHBOARD_PIN", "1234")
     ADMIN_TOTP_SECRET: str = os.getenv("SENTINELA_ADMIN_TOTP_SECRET", "")

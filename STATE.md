@@ -81,6 +81,7 @@ O principal risco operacional hoje não é ausência de pipeline, e sim degrada�
 - fallback estruturado injetado ativamente na fila com **Poda Automática** (provedores são banidos instantaneamente em caso de erro 401/402/404)
 - padronização léxica forçada via `PADRONIZACAO_LINGUISTICA_FORENSE.md` incondicionalmente em todos os providers
 - **Cache de I/O**: Prompts e datasets locais são carregados na RAM (Zero overhead de leitura em disco no event-loop)
+- **DatabaseAgent (Subagente de dados)**: Integrado e disponível em `workers.ai.DatabaseAgent`. Esse subagente consome a API JSON do Datasette local na porta `8002` para fornecer consultas SQL assíncronas, buscas textuais indexadas (FTS5) e estatísticas analíticas para os demais workers do ecossistema de forma desacoplada.
 
 ### Saneado
 
