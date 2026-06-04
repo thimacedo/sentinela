@@ -28,6 +28,9 @@ class Settings:
     META_ACCESS_TOKEN: str = os.getenv("META_ACCESS_TOKEN", "")
     META_API_VERSION: str = os.getenv("META_API_VERSION", "v19.0")
 
+    # Abstra Cloud
+    ABSTRA_API_KEY: str = os.getenv("ABSTRA_API_KEY", "")
+
     # Security
     DASHBOARD_PIN: str = os.getenv("DASHBOARD_PIN", "1234")
     ADMIN_TOTP_SECRET: str = os.getenv("SENTINELA_ADMIN_TOTP_SECRET", "")
