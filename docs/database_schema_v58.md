@@ -101,6 +101,11 @@ Diagnósticos gerados pelo AIAdvisor.
 - **suggestion**: Texto técnico de correção sugerida pela IA.
 - **status**: pending_review | applied | rejected.
 
+### 6. Banco de Dados SQLite Local de Cache (`sentinela_data.db`)
+Espelhamento local e imutável para suporte analítico e mineração de dados via Datasette.
+- **Estrutura**: Espelha a tabela `comentarios` do PostgreSQL Supabase.
+- **Full-Text Search (FTS5)**: Possui a tabela virtual `comentarios_fts` com índices baseados nas colunas `id`, `texto_limpo` e `autor_username` para buscas textuais instantâneas de alta relevância (BM25).
+
 ---
 
 ## 🔗 Ponto de Integração Frontend

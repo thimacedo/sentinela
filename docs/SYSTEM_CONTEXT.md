@@ -1,5 +1,5 @@
 # Sentinela — Contexto do Sistema
-_last_updated: 2026-06-03_
+_last_updated: 2026-06-04_
 
 ## 1. Missão
 
@@ -14,7 +14,7 @@ O Sentinela é uma plataforma de monitoramento político com foco em:
 ## 2. Topologia atual
 
 ```text
-[Watchdog Local]
+[Watchdog Local] (Porta 8001)
   └── main_runner.py
         └── Orquestrador
               ├── InstagramScraperWorker
@@ -23,7 +23,13 @@ O Sentinela é uma plataforma de monitoramento político com foco em:
               ├── TreasurerWorker
               └── TargetResearchWorker (opcional por RESEARCHER_MODE)
 
-[Supabase / PostgreSQL]
+[DatabaseAgent] (Subagente de Dados)
+  └── Consome API HTTP do Datasette local para prover consultas leves
+
+[Datasette Server] (Porta 8002)
+  └── sentinela_data.db (Espelhamento SQLite local imutável FTS5)
+
+[Supabase / PostgreSQL] (Produção Nuvem)
   ├── candidatos
   ├── comentarios
   ├── fila_coleta
@@ -105,6 +111,7 @@ O Watchdog atual:
 - registra métricas e feedback humano de classificação
 - verifica credenciais do Instagram
 - garante disponibilidade do Ollama
+- gerencia a inicialização automática do servidor Datasette na porta 8002
 
 ## 7. Frontends
 
@@ -133,3 +140,24 @@ Os itens abaixo aparecem em documentos antigos, mas não representam a verdade o
 - operação: `STATE.md`
 - planejamento: `ROADMAP.md`
 - auditoria documental: `docs/DOCUMENTATION_AUDIT.md`
+
+## 10. Ajustes recentes de produto (frontend + monetização)
+
+Atualizações consolidadas no ciclo mais recente:
+
+- integração de checkout do frontend com `API_BASE_URL` centralizado
+- correção de robustez de AdSense com tentativa/retry até disponibilidade de `adsbygoogle`
+- conclusão da página `frontend/app/relatorios/page.tsx` consumindo backend FastAPI real
+- conexão de CTAs e botões sem ação em páginas chave
+- redução de ruído visual na home/sidebar e aumento de usabilidade em alvos de clique
+- proteção de mock de pagamento por variável explícita (`STRIPE_ALLOW_MOCK_PAYMENTS`)
+
+Esses ajustes devem ser considerados baseline atual do frontend oficial.
+
+## 11. Subagente de Dados (DatabaseAgent) e Mineração Forense
+
+Introduzido na v50.1 para otimizar as buscas no ecossistema local:
+
+- **Propósito**: Desacoplar a leitura de dados históricos de produção (Supabase) das atividades dos workers de IA e curadoria, evitando gargalos de conexões concorrentes na nuvem.
+- **Interface**: O `DatabaseAgent` (`workers/ai/database_agent.py`) consome a API JSON gerada nativamente pelo Datasette na porta `8002`.
+- **Funcionalidades**: Prover buscas textuais indexadas ultra-velozes (FTS5) e estatísticas analíticas de ódio/classificação consolidadas diretamente via SQL estruturado.
