@@ -31,6 +31,10 @@ class Settings:
     # Abstra Cloud
     ABSTRA_API_KEY: str = os.getenv("ABSTRA_API_KEY", "")
 
+    # Emergent & AskCodi APIs
+    EMERGENT_API_KEY: str = os.getenv("EMERGENT_API_KEY", "")
+    ASKCODI_API_KEY: str = os.getenv("ASKCODI_API_KEY", "")
+
     # Security
     DASHBOARD_PIN: str = os.getenv("DASHBOARD_PIN", "1234")
     ADMIN_TOTP_SECRET: str = os.getenv("SENTINELA_ADMIN_TOTP_SECRET", "")
