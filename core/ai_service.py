@@ -102,7 +102,7 @@ class AIService:
             api_key="ollama",
             base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1"),
             max_retries=0,
-            http_client=httpx.AsyncClient(timeout=httpx.Timeout(timeout=45.0, connect=1.5))
+            http_client=httpx.AsyncClient(timeout=httpx.Timeout(timeout=45.0, connect=15.0))
         )
         self.mistral_client = AsyncOpenAI(
             api_key=os.getenv("MISTRAL_API_KEY") or "dummy-mistral-key",

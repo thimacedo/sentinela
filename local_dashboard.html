@@ -376,6 +376,7 @@
                             lastComments[idx] = payload.new; 
                             renderComments(lastComments); 
                         }
+                        fetchKPIs();
                     }
                 })
                 .subscribe((status) => {
