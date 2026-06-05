@@ -207,3 +207,10 @@ PGMQ deve aparecer apenas como hipótese futura.
 - **Ajuste de Referências de Import**:
   - Atualizamos as referências de importação do `WkPesquisaAlvos` em [main_runner.py](file:///C:/Projetos/sentinela/main_runner.py), [scripts/add_target.py](file:///C:/Projetos/sentinela/scripts/add_target.py) e [scripts/run_pesquisa_alvos.py](file:///C:/Projetos/sentinela/scripts/run_pesquisa_alvos.py).
 - **Validação**: Todos os módulos compilados e testados com sucesso total. Alterações registradas no repositório.
+
+## Correções de Resiliência e Conformidade Jurídica (2026-06-05)
+
+- **Conversão de Métodos Síncronos para Assíncronos**: Refatoramos métodos no cliente de banco de dados (`core/db.py`), no gerenciador de checkpoints (`core/checkpoint_manager.py`) e no gerenciador de filas (`core/queue_manager.py`) para utilizar `async/await`. Mapeamos as chamadas síncronas do Supabase (`execute()`) usando `asyncio.to_thread` para prevenir bloqueios indesejados no event loop do runner principal e dos workers.
+- **Resolução de Syntax Errors**: Corrigimos duplicações de código que haviam gerado erros sintáticos em `core/queue_manager.py` e `core/db.py`.
+- **Conformidade Jurídica de Nomenclatura**: Renomeamos `docs/METODOLOGIA_VICHI_FORENSE.md` para `docs/METODOLOGIA_VICHI_ANALITICA.md` e removemos menções aos termos proibidos ("forense", "evidência", "pericial") substituindo-os por termos permitidos ("indício", "analítica") em toda a documentação de IA, critérios de treinamento, e prompts em `core/ai_service.py` e `docs/`.
+- **Validação de Testes Unitários**: Atualizamos a lógica dos testes de rebaixamento de temperatura para `no_comments_found` (PASA v88.4) no `tests/test_queue_manager.py` de modo a testar adequadamente as transições para "FRIO" (partindo de "MORNO" ou indefinido) e para "MORNO" (partindo de "QUENTE"). Todos os 12 testes unitários agora estão verdes e validados com 100% de sucesso.
