@@ -1,7 +1,7 @@
 # Database Schema — Sentinela v88.0
 
-**Última Atualização**: 2026-06-04  
-**Versão do Schema**: v88.0 (Fase 8.3)  
+**Última Atualização**: 2026-06-05  
+**Versão do Schema**: v88.2 (Fases de Otimização dos Subagentes)  
 **Banco**: Supabase (PostgreSQL)
 
 ---
@@ -13,7 +13,7 @@ O banco de dados da Sentinela é organizado em **5 domínios principais**:
 | Domínio | Descrição | Tabelas Principais |
 |---------|-----------|-------------------|
 | **Monitoramento** | Candidatos e coleta de dados | `candidatos`, `fila_coleta`, `comentarios` |
-| **Inteligência** | Análise e classificação | `dossies`, `network_clusters`, `sentimentos` |
+| **Inteligência** | Análise e classificação | `dossies`, `network_clusters`, `sentimentos`, `lotes_analises` |
 | **Alertas** | Notificações e monitoramento | `system_alerts`, `profiles`, `push_notifications` |
 | **Financeiro** | Créditos internos (CI) | `ci_transactions`, `profiles` |
 | **Admin** | Configuração e auditoria | `audit_logs`, `kpis`, `worker_rewards` |
@@ -221,6 +221,29 @@ CREATE INDEX idx_comentarios_id_externo ON comentarios(id_externo);
 ---
 
 ### Domínio 2: Inteligência
+
+#### `lotes_analises` — Controle Concorrente de Lotes Analíticos
+
+**Descrição**: Tabela de orquestração de processamento concorrente distribuído, utilizada para coordenar a concorrência horizontal entre subagentes analíticos (como `SaMineracaoRedes`), garantindo que lotes pesados de dados de processamento de grafos/CPU-bound sejam reivindicados atomicamente (via `SKIP LOCKED`) e processados por uma única réplica da engine principal.
+
+**Columns**:
+```sql
+CREATE TABLE lotes_analises (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    batch_id UUID NOT NULL,
+    status TEXT NOT NULL DEFAULT 'PENDENTE' CHECK (status IN ('PENDENTE', 'PROCESSANDO', 'CONCLUIDO', 'ERRO')),
+    processado_por TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc', now()),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc', now())
+);
+```
+
+**Índices**:
+```sql
+CREATE INDEX idx_lotes_analises_fetch ON lotes_analises (status, created_at) WHERE status = 'PENDENTE';
+```
+
+---
 
 #### `dossies` — Dossiês PDF Gerados
 

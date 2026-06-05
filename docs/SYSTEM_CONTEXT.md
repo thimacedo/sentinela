@@ -1,5 +1,5 @@
 # Sentinela — Contexto do Sistema
-_last_updated: 2026-06-04_
+_last_updated: 2026-06-05_
 
 ## 1. Missão
 
@@ -22,10 +22,10 @@ O Sentinela é uma plataforma de monitoramento político com foco em:
               └── TargetResearchWorker (opcional por RESEARCHER_MODE)
 
 [Subagentes Analíticos e de Dados]
-  ├── DatabaseAgent: Prover consultas SQL locais leves via Datasette
-  ├── AuditAgent: Auditoria cruzada anti-alucinação sob demanda (Groq)
-  ├── NetworkMinerAgent: Análise de redes coordenadas e clusters reativa
-  └── TreasurerAgent: Auditoria financeira e fechamento diário reativo
+  ├── SaConsultaBanco: Prover consultas SQL locais leves via Datasette
+  ├── SaAuditaClassificacoes: Auditoria cruzada anti-alucinação sob demanda (Groq)
+  ├── SaMineracaoRedes: Análise de redes coordenadas e clusters reativa
+  └── SaAuditoriaFinanceira: Auditoria financeira e fechamento diário reativo
 
 [Datasette Server] (Porta 8002)
   └── sentinela_data.db (Espelhamento SQLite local imutável FTS5)
@@ -70,9 +70,9 @@ Workers cíclicos ativos no runtime:
 
 Subagentes analíticos (sob demanda / reativos):
 
-- `AuditAgent` (auditoria cruzada)
-- `NetworkMinerAgent` (mineração de redes coordenada)
-- `TreasurerAgent` (gestão financeira e de XP)
+- `SaAuditaClassificacoes` (auditoria cruzada)
+- `SaMineracaoRedes` (mineração de redes coordenada)
+- `SaAuditoriaFinanceira` (gestão financeira e de XP)
 
 Mudanças já aplicadas:
 
@@ -102,6 +102,7 @@ O estado real do código mostra:
 - trava atômica com `SELECT FOR UPDATE SKIP LOCKED`
 - suporte a release de locks expirados
 - fallback compatível quando RPC/migração não está disponível
+- tabela `lotes_analises` e RPC `reivindicar_lote_analise` para controle atômico e concorrência horizontal de subagentes analíticos (`SaMineracaoRedes`), garantindo que tarefas CPU-bound de grafos não sejam duplicadas em réplicas simultâneas da engine.
 
 Portanto, a fila distribuída via lock atômico já está operacional em nível de código.
 PGMQ permanece como alternativa futura, não como dependência atual.
@@ -159,11 +160,11 @@ Atualizações consolidadas no ciclo mais recente:
 
 Esses ajustes devem ser considerados baseline atual do frontend oficial.
 
-## 11. Subagentes Analíticos e de Dados (PASA v88.1)
+## 11. Subagentes Analíticos e de Dados (PASA v88.2)
 
-A arquitetura foi migrada para subagentes especializados executados de forma reativa ou sob demanda:
+A arquitetura foi migrada para subagentes especializados executados de forma reativa ou sob demanda, todos herdando da classe base `BaseSubAgent` para offloading de CPU (subprocessos) e I/O (threads):
 
-- **DatabaseAgent** (`workers/ai/database_agent.py`): Desacopla a leitura de dados históricos de produção (Supabase) via API HTTP do Datasette local na porta `8002`, provendo buscas FTS5 ultra-velozes.
-- **AuditAgent** (`workers/ai/audit_agent.py`): Subagente de curadoria cruzada anti-alucinação. Consome o `DatabaseAgent` local e efetua reclassificações via API Groq para calcular o drift do modelo.
-- **NetworkMinerAgent** (`workers/analytics/network_agent.py`): Analisa grafos de hostilidade e detecta campanhas coordenadas organizadas (clusters de ataque), persistindo os dados e gerando relatórios físicos para o frontend.
-- **TreasurerAgent** (`workers/financial/treasurer_agent.py`): Efetua auditoria de saldos de CI inconsistentes, monitora conectividade do Stripe e gera relatórios DRE consolidados diários.
+- **SaConsultaBanco** (`workers/ai/sa_consulta_banco.py`): Desacopla a leitura de dados históricos de produção (Supabase) via API HTTP do Datasette local na porta `8002`, provendo buscas FTS5 ultra-velozes.
+- **SaAuditaClassificacoes** (`workers/ai/sa_audita_classificacoes.py`): Subagente de curadoria cruzada anti-alucinação. Consome o `SaConsultaBanco` e efetua reclassificações via cascata de IA com circuit breaker para calcular o drift do modelo, gerando sugestões de prioridade `HIGH` em `worker_suggestions`.
+- **SaMineracaoRedes** (`workers/analytics/sa_mineracao_redes.py`): Analisa grafos de hostilidade e detecta campanhas coordenadas organizadas (clusters de ataque) em processos filhos separados (`ProcessPoolExecutor`), persistindo os dados e gerando relatórios físicos para o frontend com claims atômicos concorrentes.
+- **SaAuditoriaFinanceira** (`workers/financial/sa_auditoria_financeira.py`): Efetua auditoria de saldos de CI inconsistentes, monitora conectividade do Stripe e gera relatórios DRE consolidados diários.

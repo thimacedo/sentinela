@@ -1,5 +1,5 @@
-# Worker Ledger System — Sentinela v50.1
-_last_updated: 2026-05-21_
+# Worker Ledger System — Sentinela v88.2
+_last_updated: 2026-06-05_
 
 ## Visao Geral
 
@@ -50,11 +50,11 @@ Casos especiais:
 | Alta performance | score>=85 |
 | Upsert saudavel | duplicated>0 e inserted>0 |
 
-## AIAdvisor
+## AIAdvisor & Drift Analítico
 
-Acionado apenas quando `score < 40` ou `tier in (critical, db_failed)`.
-Salva sugestao em `worker_suggestions` com `status=pending_review`.
-**Nunca aplica patches automaticamente.**
+1. **Sugestões de Performance (AIAdvisor)**: Acionado quando `score < 40` ou `tier in (critical, db_failed)` para sugerir ajustes operacionais em scrapers e workers degradados. Salva sugestões em `worker_suggestions` com `status=pending_review`.
+2. **Sugestões de Drift Analítico (Auditoria de IA)**: Acionado pelo subagente `SaAuditaClassificacoes` caso a taxa de desvio/divergência na reclassificação da auditoria contra o Groq/Mistral supere 20%. Salva o aviso do tipo `drift_detected` com prioridade `HIGH` em `worker_suggestions` com `status=pending_review` para alertar a necessidade de calibração do modelo ou blindagem.
+3. **Padrão de Aplicação**: Sugestões permanecem para revisão humana e não são auto-aplicadas no runtime principal a menos que explicitado pelo orquestrador.
 
 ## Tabelas Supabase
 

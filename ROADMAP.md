@@ -16,6 +16,11 @@ _last_updated: 2026-06-05 | branch: main_
 - [x] Expurgo dos entrypoints e contratos legados paralelos ao runtime oficial
 - [x] Absorção do padrão ouro legado em `core/ai_service.py`
 - [x] Atualização dos scripts operacionais para o runtime moderno
+- [x] Padronização semântica e de nomenclatura de todos os workers (`wk_`) e subagentes (`sa_`) em português brasileiro
+- [x] Especialização da classe BaseSubAgent com offloading de CPU (processos) e I/O (threads)
+- [x] Orquestração concorrente de subagentes analíticos efêmeros com lotes via `SELECT FOR UPDATE SKIP LOCKED`
+- [x] Cascata de IA resiliente com circuit breaker local e detecção de drift analítico em SaAuditaClassificacoes
+- [x] Parametrização imutável por ciclo operacional no WkColetaInstagram para mitigação de race conditions de SRE
 
 ### Escalabilidade e resiliência
 - [x] Claim atômico da `fila_coleta`
@@ -63,8 +68,6 @@ _last_updated: 2026-06-05 | branch: main_
 - [x] simplificar `workers/orchestrator/orchestrator.py`
 - [x] unificar semântica de `no_tasks_available` entre workers ativos
 - [x] reduzir duplicidade de logging, cooldown e fluxo entre ciclos
-- [x] padronizar nomenclatura de todos os workers e subagentes em português (prefixos `wk_` e `sa_`)
-- [x] Otimização de Subagentes - Fase 1: Classe abstrata BaseSubAgent com pools de subprocessos e threads e refatoração do SaMineracaoRedes
 - [ ] revisar se `WkPesquisaAlvos` deve permanecer em `workers/ai/` ou migrar para domínio próprio
 
 ### Administração e analytics
