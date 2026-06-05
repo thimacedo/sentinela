@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m ruff check core/ai_service.py core/instagram_scraper_v2.py 2>&1 || true)",
+      "Bash(git --no-pager status --short 2>&1 || true)",
+      "Bash(npm run build --prefix frontend 2>&1 || true)",
+      "Bash(git --no-pager status --short 2>&1 || true)"
+    ]
+  }
+}

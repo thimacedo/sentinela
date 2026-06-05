@@ -147,7 +147,30 @@ Libera um item da fila após processamento (versão atômica).
 - `status` (str): `CONCLUIDO`, `FALHA`, `SEM_DADOS_RECENTES`, `PENDENTE`
 - `worker_id` (str): Worker que está liberando
 
-**Comportamento:**
+---
+
+### `update_target_metrics(target: Target) -> str`
+
+**Gerencia o Termômetro** e a frequência de postagens do candidato monitorado (PASA v88.2).
+
+**Gatilho**: Chamado exclusivamente após um ciclo de coleta bem-sucedido ou falha de conteúdo (junk/404).
+
+**Lógica de Decisão**:
+- **QUENTE**: Frequência de postagem >= 5 posts/semana.
+- **MORNO**: Frequência < 5 posts/semana e último post há menos de 7 dias.
+- **FRIO**: Último post há mais de 7 dias ou falha de conteúdo recorrente.
+
+**Restrição Crítica**:
+- 🛡️ **Isolamento de IA**: Este método **NÃO** é chamado por workers de inteligência (reanálise) para evitar que dados antigos ou reclassificações influenciem o posicionamento atual (timing) do alvo.
+
+**Exemplo de uso no Worker**:
+```python
+# No InstagramScraperWorker.run_cycle
+if target.source == 'fila_coleta_atomic':
+    self.queue.update_target_metrics(target)  # Atualiza termômetro
+    self.queue.release_atomic(target.queue_id, "CONCLUIDO", self.worker_id)
+```
+
 - Tenta chamar `fila_coleta_release()` SQL function
 - Fallback: atualiza direto a tabela se função não existir
 - Log de erro se ambos falharem
