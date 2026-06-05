@@ -168,3 +168,10 @@ PGMQ deve aparecer apenas como hipótese futura.
   - Criamos o subagente **`SaRevisaoOnline`** (`sa_revisao_online.py`) herdando do `BaseSubAgent`. Ele atua em ciclos assíncronos paralelos e independentes gerenciados pelo orquestrador no `main_runner.py`.
   - Este subagente executa a rotina `run_batch_online_review` buscando no banco apenas registros `"SUSPEITO"` e os revisa utilizando exclusivamente a malha de IA Cloud (Mistral, Groq, etc.), liberando totalmente o fluxo de coletas e a fila de triagem primária de interrupções e timeouts de rede externa.
 - **Validação com Sucesso**: Implementamos e rodamos testes unitários de integração que confirmaram o redirecionamento e a perícia do Ollama para `"SUSPEITO"`, seguido pela classificação cloud no Mistral para a categoria correta (`DANO_A_IMAGEM`). Todos os patches foram commitados e sincronizados remotamente.
+- **Atalhos e Disparo sob Demanda (Bandeja Gráfica)**:
+  - Desenvolvemos scripts de entrypoint CLI individuais na pasta `scripts/` para rodar os subagentes sob demanda:
+    - [run_mineracao_redes.py](file:///C:/Projetos/sentinela/scripts/run_mineracao_redes.py) para o `SaMineracaoRedes`.
+    - [run_auditoria_financeira.py](file:///C:/Projetos/sentinela/scripts/run_auditoria_financeira.py) para o `SaAuditoriaFinanceira`.
+    - [run_revisao_online.py](file:///C:/Projetos/sentinela/scripts/run_revisao_online.py) para o `SaRevisaoOnline`.
+  - Acrescentamos comandos no menu da bandeja do Watchdog ([__main__.py](file:///C:/Projetos/sentinela/watchdog/__main__.py)) mapeando atalhos que abrem novas janelas dedicadas de console do Windows para disparar individualmente cada um dos subagentes (`SaAuditaClassificacoes`, `SaRevisaoOnline`, `SaMineracaoRedes`, `SaAuditoriaFinanceira`, `ScannerAgent`, `DossierAgent`).
+  - Todos os scripts e patches de menu foram comitados e sincronizados remotamente.
