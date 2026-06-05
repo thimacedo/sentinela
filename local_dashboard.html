@@ -191,6 +191,13 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoYW1lamtsZHp4YmVpYnFlcXBrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjQ4ODEyNSwiZXhwIjoyMDkyMDY0MTI1fQ.GfvAI7rV8isgdhVeJp4mOUscWpdOqOuBoURGm82VdtY';
         const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        function withTimeout(promise, ms = 8000) {
+            return Promise.race([
+                promise,
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout Supabase')), ms))
+            ]);
+        }
+
         let localCandidatesList = [];
         let lastComments = [];
         let activeThermo = 'ALL';
@@ -410,7 +417,7 @@
                     { count: eCount },
                     { data: firstComm },
                     { count: rCount }
-                ] = await Promise.all([
+                ] = await withTimeout(Promise.all([
                     db.from('comentarios').select('*', { count:'exact', head:true }),
                     db.from('comentarios').select('*', { count:'exact', head:true }).eq('is_hate', true),
                     db.from('candidatos').select('*',  { count:'exact', head:true }).ilike('status_monitoramento', 'ATIVO'),
@@ -418,7 +425,7 @@
                     db.from('candidatos').select('*',  { count:'exact', head:true }).or('status_monitoramento.ilike.EXCLUIDO,status_monitoramento.ilike.DESATIVADO,status_monitoramento.ilike.Inativo'),
                     db.from('comentarios').select('data_coleta').order('data_coleta', { ascending: true }).limit(1),
                     db.from('comentarios').select('*', { count:'exact', head:true }).ilike('analise_pericial', '%RE-ANÁLISE%')
-                ]);
+                ]), 8000);
 
                 document.getElementById('kpi-total-comments').innerText = (cCount || 0).toLocaleString();
                 document.getElementById('kpi-hate-comments').innerText = (hCount || 0).toLocaleString();
@@ -492,7 +499,14 @@
 
                         document.getElementById('kpi-restars').innerText = `${m.cycle || 0} / ${m.restarts || 0}`;
                         if(m.ai_services) {
-                            document.getElementById('kpi-ai-services').innerHTML = Object.entries(m.ai_services).map(([s,st]) => {
+                            const sortedServices = Object.entries(m.ai_services).sort(([a], [b]) => {
+                                const aLocal = (a === 'ollama');
+                                const bLocal = (b === 'ollama');
+                                if (aLocal && !bLocal) return -1;
+                                if (!aLocal && bLocal) return 1;
+                                return a.localeCompare(b);
+                            });
+                            document.getElementById('kpi-ai-services').innerHTML = sortedServices.map(([s,st]) => {
                                 const label = s === 'ollama' ? 'ollama (local)' : `${s} (cloud)`;
                                 // Mapeamento real de status → aparência visual
                                 const statusMap = {
@@ -527,11 +541,11 @@
                 } catch(e) { console.error("Metrics fetch error:", e); }
                 
                 await fetchKPIs();
-                const [{data:cands}, {data:runs}, {data:coms}] = await Promise.all([
+                const [{data:cands}, {data:runs}, {data:coms}] = await withTimeout(Promise.all([
                     db.from('candidatos').select('*').ilike('status_monitoramento', 'ATIVO').order('last_scraped_at', { ascending: false, nullsFirst: false }),
                     db.from('worker_rewards').select('*').order('timestamp', { ascending: false }).limit(10),
                     db.from('comentarios').select('*').order('data_coleta', { ascending: false }).limit(40)
-                ]);
+                ]), 8000);
                 if(cands) { localCandidatesList = cands; document.getElementById('targets-count-badge').innerText = `${cands.length}/${cands.length}`; filterTargets(); }
                 if(runs) document.getElementById('runs-feed').innerHTML = runs.map(r => `<div class="bg-slate-900/50 border border-slate-800/60 p-4 rounded-xl flex flex-col gap-2.5 shadow-sm"><div class="flex justify-between text-xs"><span class="font-black text-slate-200 tracking-wide">${r.worker_id}</span><span class="text-slate-400 font-medium">${timeAgo(r.timestamp)}</span></div><div class="flex justify-between items-center"><span class="text-[10px] font-black px-2 py-1 rounded border border-slate-700 bg-slate-800 shadow-inner text-slate-300 uppercase tracking-widest">${r.tier || 'silver'}</span><span class="text-xs font-black text-emerald-400">+${(r.delta || 0).toFixed(1)} XP</span></div></div>`).join('');
                 if(coms) renderComments(coms);
