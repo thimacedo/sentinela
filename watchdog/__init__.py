@@ -158,6 +158,29 @@ async def favicon():
     from fastapi.responses import Response
     return Response(status_code=204)
 
+@app.get("/api/evaluations")
+async def get_evaluations():
+    """Retorna o histórico recente de avaliações para persistência no frontend."""
+    try:
+        eval_file = os.path.join(PROJECT_ROOT, "data", "ia_evaluations.jsonl")
+        if not os.path.exists(eval_file):
+            return {"evaluations": {}}
+        
+        evals = {}
+        with open(eval_file, "r", encoding="utf-8") as f:
+            for line in f:
+                try:
+                    data = json.loads(line)
+                    if data.get("comment_id"):
+                        evals[str(data["comment_id"])] = {
+                            "type": data.get("feedback_type"),
+                            "is_correct": data.get("is_correct")
+                        }
+                except: continue
+        return {"evaluations": evals}
+    except Exception as e:
+        return {"evaluations": {}, "error": str(e)}
+
 @app.post("/api/evaluate")
 async def evaluate_ia(data: dict):
     """
@@ -421,8 +444,18 @@ async def stop_server():
     state.should_run = False
     if state.process and state.process.poll() is None:
         state.add_log("warn", "[Watchdog] Sinal de parada recebido via API. Finalizando processo...")
-        state.process.terminate()
-        return {"success": True, "message": "Sinal de parada enviado. Processo sendo encerrado."}
+        # v50.1: Encerra árvore de processos para evitar zumbis
+        try:
+            if os.name == 'nt':
+                subprocess.run(['taskkill', '/F', '/T', '/PID', str(state.process.pid)], capture_output=True)
+            else:
+                state.process.terminate()
+        except Exception as e:
+            state.add_log("error", f"[Watchdog] Falha ao encerrar processo: {e}")
+            
+        state.update_metrics(status="PARADO")
+        return {"success": True, "message": "Sinal de parada enviado. Processo encerrado."}
+    state.update_metrics(status="PARADO")
     state.add_log("info", "[Watchdog] Servidor já estava parado.")
     return {"success": True, "message": "Servidor parado."}
 

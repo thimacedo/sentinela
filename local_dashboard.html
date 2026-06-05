@@ -200,6 +200,7 @@
 
         let localCandidatesList = [];
         let lastComments = [];
+        let iaEvaluations = {}; // Cache local de avaliações persistentes
         let activeThermo = 'ALL';
         let hateOnly = false;
         let realtimeSubscription = null;
@@ -229,11 +230,14 @@
             let list = localCandidatesList;
             if (activeThermo !== 'ALL') list = list.filter(c => (c.termometro || 'FRIO') === activeThermo);
             if (term) list = list.filter(c => c.username.toLowerCase().includes(term) || (c.nome_completo?.toLowerCase().includes(term)));
-            renderTargets(list);
+            
+            // PASA v50.1: Mostra apenas os últimos 10 alvos no radar para foco e performance
+            renderTargets(list.slice(0, 10));
         }
 
         function renderTargets(list) {
             const feed = document.getElementById('targets-feed');
+            if(!list.length) { feed.innerHTML = '<p class="text-slate-600 text-[10px] italic text-center py-4">Nenhum alvo encontrado...</p>'; return; }
             feed.innerHTML = list.map(c => {
                 const color = c.termometro === 'QUENTE' ? 'text-rose-400 border-rose-900/50 bg-rose-500/10' : (c.termometro === 'MORNO' ? 'text-amber-400 border-amber-900/50 bg-amber-500/10' : 'text-blue-400 border-blue-900/50 bg-blue-500/10');
                 return `
@@ -253,25 +257,27 @@
             }).join('');
         }
 
+        async function fetchEvaluations() {
+            try {
+                const r = await fetch('/api/evaluations');
+                if(r.ok) {
+                    const data = await r.json();
+                    iaEvaluations = data.evaluations || {};
+                }
+            } catch(e) {}
+        }
+
         async function evaluateIA(commentId, traceId, engine, feedbackType, category, text) {
             try {
-                // feedbackType: VALIDADO, FALSO_POSITIVO, FALSO_NEGATIVO
-                let isCorrect = (feedbackType === 'VALIDADO');
                 const resp = await fetch('/api/evaluate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: commentId, trace_id: traceId, engine, feedback_type: feedbackType, is_correct: isCorrect, category, text })
+                    body: JSON.stringify({ id: commentId, trace_id: traceId, engine, feedback_type: feedbackType, is_correct: (feedbackType === 'VALIDADO'), category, text })
                 });
                 const res = await resp.json();
                 if(res.success) {
-                    const btnContainer = document.getElementById(`eval-btns-${commentId}`);
-                    let feedbackLabel = '';
-                    let color = '';
-                    if (feedbackType === 'VALIDADO') { feedbackLabel = '✓ Validado'; color = 'text-emerald-500'; }
-                    else if (feedbackType === 'FALSO_POSITIVO') { feedbackLabel = '⚠️ Falso Positivo'; color = 'text-amber-500'; }
-                    else if (feedbackType === 'FALSO_NEGATIVO') { feedbackLabel = '🚨 Falso Negativo'; color = 'text-rose-500'; }
-                    
-                    if(btnContainer) btnContainer.innerHTML = `<span class="text-[10px] font-black uppercase ${color} tracking-tighter bg-slate-900/80 px-2 py-1 rounded-md border border-slate-800">${feedbackLabel}</span>`;
+                    iaEvaluations[commentId] = { type: feedbackType };
+                    renderComments(lastComments);
                 }
             } catch(e) { console.error("Eval error:", e); }
         }
@@ -298,32 +304,46 @@
                     badgeClasses = 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30 shadow-sm';
                 }
                 
-                // Extrai motor da analise_pericial (ex: [GROQ] ...)
                 let rawEngine = '';
                 if(c.analise_pericial && c.analise_pericial.startsWith('[')) {
                     const match = c.analise_pericial.match(/^\[([^\]:]+)/);
                     if(match) rawEngine = match[1];
                 }
                 
-                // Mapeamento amigável de motores
                 const engineMap = {
-                    'LEXICAL': 'Filtro Heurístico',
-                    'FALLBACK_LLM': 'Fallback Cloud',
-                    'SYSTEM_FAILURE': 'Falha do Sistema',
-                    'OLLAMA': 'Ollama (Local)',
-                    'MARITACA': 'Maritaca AI (Cloud)',
-                    'GROQ_LLAMA3': 'Groq (Cloud)',
-                    'MISTRAL': 'Mistral (Cloud)',
-                    'DEEPSEEK_CHAT': 'DeepSeek (Cloud)',
-                    'GOOGLE_GEMINI': 'Gemini (Cloud)',
-                    'ZHIPU_GLM4': 'Zhipu (Cloud)',
-                    'OPENROUTER': 'OpenRouter (Cloud)'
+                    'LEXICAL': 'Filtro Heurístico', 'FALLBACK_LLM': 'Fallback Cloud', 'SYSTEM_FAILURE': 'Falha do Sistema',
+                    'OLLAMA': 'Ollama (Local)', 'MARITACA': 'Maritaca AI (Cloud)', 'GROQ_LLAMA3': 'Groq (Cloud)',
+                    'MISTRAL': 'Mistral (Cloud)', 'DEEPSEEK_CHAT': 'DeepSeek (Cloud)', 'GOOGLE_GEMINI': 'Gemini (Cloud)',
+                    'ZHIPU_GLM4': 'Zhipu (Cloud)', 'OPENROUTER': 'OpenRouter (Cloud)'
                 };
                 
                 const engineKey = rawEngine.toUpperCase();
                 const friendlyEngine = engineMap[engineKey] || engineMap[rawEngine] || (isProcessed ? 'IA Geral' : 'Filtro Heurístico');
-
                 const finalRawEngine = rawEngine || (isProcessed ? 'IA_GERAL' : 'LEXICAL');
+
+                // Persistência de Avaliação
+                const evalData = iaEvaluations[c.id];
+                let evalHtml = '';
+                if (evalData) {
+                    let label = '', color = '';
+                    if (evalData.type === 'VALIDADO') { label = '✓ Validado'; color = 'text-emerald-500'; }
+                    else if (evalData.type === 'FALSO_POSITIVO') { label = '⚠️ Falso Positivo'; color = 'text-amber-500'; }
+                    else if (evalData.type === 'FALSO_NEGATIVO') { label = '🚨 Falso Negativo'; color = 'text-rose-500'; }
+                    evalHtml = `<span class="text-[10px] font-black uppercase ${color} tracking-tighter bg-slate-900/80 px-2 py-1 rounded-md border border-slate-800">${label}</span>`;
+                } else {
+                    evalHtml = `
+                        <div id="eval-btns-${c.id}" class="flex items-center gap-2">
+                            <button onclick="evaluateIA('${c.id}', '${c.trace_id}', '${finalRawEngine}', 'VALIDADO', '${c.categoria_ia}', '${escapeHTML(c.texto_limpo || c.texto_bruto)}')" class="text-slate-500 hover:text-emerald-400 hover:bg-emerald-500/10 p-1.5 rounded-lg transition-all" title="Correto / Validado">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                            </button>
+                            <button onclick="evaluateIA('${c.id}', '${c.trace_id}', '${finalRawEngine}', 'FALSO_POSITIVO', '${c.categoria_ia}', '${escapeHTML(c.texto_limpo || c.texto_bruto)}')" class="text-slate-500 hover:text-amber-400 hover:bg-amber-500/10 p-1.5 rounded-lg transition-all" title="Falso Positivo (Inocente)">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                            </button>
+                            <button onclick="evaluateIA('${c.id}', '${c.trace_id}', '${finalRawEngine}', 'FALSO_NEGATIVO', '${c.categoria_ia}', '${escapeHTML(c.texto_limpo || c.texto_bruto)}')" class="text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 p-1.5 rounded-lg transition-all" title="Falso Negativo (Ódio Passou)">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </button>
+                        </div>`;
+                }
 
                 return `
                 <div class="bg-slate-900/60 border ${isHate ? 'border-rose-900/70 glow-red' : 'border-slate-800'} rounded-xl p-5 flex flex-col gap-4 transition-all hover:bg-slate-900/80 shadow-lg">
@@ -347,17 +367,7 @@
                     </div>
                     <div class="flex justify-between items-center border-t border-slate-800/80 pt-3">
                         <div class="flex items-center gap-4">
-                            <div id="eval-btns-${c.id}" class="flex items-center gap-2">
-                                <button onclick="evaluateIA('${c.id}', '${c.trace_id}', '${finalRawEngine}', 'VALIDADO', '${c.categoria_ia}', '${escapeHTML(c.texto_limpo || c.texto_bruto)}')" class="text-slate-500 hover:text-emerald-400 hover:bg-emerald-500/10 p-1.5 rounded-lg transition-all" title="Correto / Validado">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                                </button>
-                                <button onclick="evaluateIA('${c.id}', '${c.trace_id}', '${finalRawEngine}', 'FALSO_POSITIVO', '${c.categoria_ia}', '${escapeHTML(c.texto_limpo || c.texto_bruto)}')" class="text-slate-500 hover:text-amber-400 hover:bg-amber-500/10 p-1.5 rounded-lg transition-all" title="Falso Positivo (Inocente)">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                                </button>
-                                <button onclick="evaluateIA('${c.id}', '${c.trace_id}', '${finalRawEngine}', 'FALSO_NEGATIVO', '${c.categoria_ia}', '${escapeHTML(c.texto_limpo || c.texto_bruto)}')" class="text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 p-1.5 rounded-lg transition-all" title="Falso Negativo (Ódio Passou)">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                </button>
-                            </div>
+                            ${evalHtml}
                             <span class="text-[10px] text-slate-400 font-mono bg-slate-950/50 px-2 py-0.5 rounded-md border border-slate-800/50">${c.direcao_odio ? `Alvo: <b class="text-rose-400 font-bold">${c.direcao_odio}</b>` : 'Geral'}</span>
                         </div>
                         <span class="text-[10px] text-slate-400 font-mono font-medium">${timeAgo(c.data_coleta)}</span>
@@ -449,11 +459,11 @@
             } catch (e) { console.error("KPI Error:", e); }
         }
 
-        let isFetchingData = false;
         async function fetchData() {
             if (isFetchingData) return;
             isFetchingData = true;
             try {
+                // 1. Atualiza métricas do Watchdog (API Local)
                 try {
                     const r = await fetch('/api/metrics');
                     if(r.ok) {
@@ -479,24 +489,6 @@
                             pingPulse.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75";
                         }
                         
-                        // Atualiza botões de controle de acordo com o status
-                        const startBtn = document.getElementById('btn-srv-start');
-                        const stopBtn = document.getElementById('btn-srv-stop');
-                        if (m.status === 'OPERACIONAL') {
-                            startBtn.classList.add('text-slate-700', 'cursor-not-allowed');
-                            startBtn.classList.remove('text-slate-400');
-                            stopBtn.classList.remove('text-slate-700', 'cursor-not-allowed');
-                            stopBtn.classList.add('text-slate-400');
-                        } else if (m.status === 'PARADO') {
-                            stopBtn.classList.add('text-slate-700', 'cursor-not-allowed');
-                            stopBtn.classList.remove('text-slate-400');
-                            startBtn.classList.remove('text-slate-700', 'cursor-not-allowed');
-                            startBtn.classList.add('text-slate-400');
-                        } else {
-                            startBtn.classList.remove('text-slate-700', 'cursor-not-allowed');
-                            stopBtn.classList.remove('text-slate-700', 'cursor-not-allowed');
-                        }
-
                         document.getElementById('kpi-restars').innerText = `${m.cycle || 0} / ${m.restarts || 0}`;
                         if(m.ai_services) {
                             const sortedServices = Object.entries(m.ai_services).sort(([a], [b]) => {
@@ -508,7 +500,6 @@
                             });
                             document.getElementById('kpi-ai-services').innerHTML = sortedServices.map(([s,st]) => {
                                 const label = s === 'ollama' ? 'ollama (local)' : `${s} (cloud)`;
-                                // Mapeamento real de status → aparência visual
                                 const statusMap = {
                                     'OK':         { dot: 'bg-emerald-500 shadow-emerald-500/40',          text: 'text-emerald-400', badge: '' },
                                     'COOLDOWN':   { dot: 'bg-amber-400 shadow-amber-400/40',              text: 'text-amber-400',   badge: 'COOLDOWN' },
@@ -524,28 +515,19 @@
                                 return `<div class="flex items-center gap-3 w-full bg-slate-900/50 p-2 rounded-lg border border-slate-800/60"><span class="w-2.5 h-2.5 rounded-full shadow-sm ${style.dot}"></span><span class="text-[11px] font-mono font-bold text-slate-300 uppercase tracking-widest">${label}</span>${badgeHtml}${startBtn}</div>`;
                             }).join('');
                         }
-                        if(m.instagram_accounts) {
-                            const accs = {};
-                            Object.entries(m.instagram_accounts).forEach(([k, st]) => {
-                                const idx = k.match(/\d+$/) ? k.match(/\d+$/)[0] : '0';
-                                if(!accs[idx]) accs[idx] = [];
-                                accs[idx].push(st);
-                            });
-                            document.getElementById('kpi-instagram').innerHTML = Object.entries(accs).map(([idx, sts]) => {
-                                const ok = sts.every(s => s === 'OK');
-                                const label = idx === '0' ? 'Nó Principal' : `Nó Secundário ${idx}`;
-                                return `<div class="flex items-center gap-3 bg-slate-900/50 p-2 rounded-lg border border-slate-800/60"><span class="w-2.5 h-2.5 rounded-full shadow-sm ${ok ? 'bg-emerald-500 shadow-emerald-500/40' : 'bg-rose-500 shadow-rose-500/40'}"></span><span class="text-[11px] font-bold font-mono text-slate-300 tracking-wide">${label}</span></div>`;
-                            }).join('');
-                        }
                     }
                 } catch(e) { console.error("Metrics fetch error:", e); }
                 
-                await fetchKPIs();
+                // 2. Atualiza KPIs do Supabase (Cloud) e Avaliações (Local)
+                await Promise.all([fetchKPIs(), fetchEvaluations()]);
+                
+                // 3. Atualiza Alvos e Recompensas
                 const [{data:cands}, {data:runs}, {data:coms}] = await withTimeout(Promise.all([
                     db.from('candidatos').select('*').ilike('status_monitoramento', 'ATIVO').order('last_scraped_at', { ascending: false, nullsFirst: false }),
                     db.from('worker_rewards').select('*').order('timestamp', { ascending: false }).limit(10),
                     db.from('comentarios').select('*').order('data_coleta', { ascending: false }).limit(40)
-                ]), 8000);
+                ]), 10000);
+                
                 if(cands) { localCandidatesList = cands; document.getElementById('targets-count-badge').innerText = `${cands.length}/${cands.length}`; filterTargets(); }
                 if(runs) document.getElementById('runs-feed').innerHTML = runs.map(r => `<div class="bg-slate-900/50 border border-slate-800/60 p-4 rounded-xl flex flex-col gap-2.5 shadow-sm"><div class="flex justify-between text-xs"><span class="font-black text-slate-200 tracking-wide">${r.worker_id}</span><span class="text-slate-400 font-medium">${timeAgo(r.timestamp)}</span></div><div class="flex justify-between items-center"><span class="text-[10px] font-black px-2 py-1 rounded border border-slate-700 bg-slate-800 shadow-inner text-slate-300 uppercase tracking-widest">${r.tier || 'silver'}</span><span class="text-xs font-black text-emerald-400">+${(r.delta || 0).toFixed(1)} XP</span></div></div>`).join('');
                 if(coms) renderComments(coms);
@@ -556,6 +538,7 @@
                 isFetchingData = false;
             }
         }
+
 
         function toggleHateOnly() {
             hateOnly = !hateOnly;
