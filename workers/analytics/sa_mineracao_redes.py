@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 import logging
 import json
@@ -5,33 +7,104 @@ import hashlib
 import os
 from datetime import datetime, timedelta, timezone
 from typing import List, Dict, Any, Optional
-import pandas as pd
-import networkx as nx
+
+from workers.base.subagent_base import BaseSubAgent
 from core.db import db_client
 
 logger = logging.getLogger("SaMineracaoRedes")
 
-class SaMineracaoRedes:
+def _processar_rede_coordenada_sync(data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    # Processamento pesado via Pandas/NetworkX (CPU-bound)
+    import pandas as pd
+    import networkx as nx
+
+    df = pd.DataFrame(data)
+
+    # Identifica contas que atacam múltiplos alvos (indicador de coordenação)
+    attacker_counts = df.groupby('autor_username')['candidato_id'].nunique()
+    multi_attackers = attacker_counts[attacker_counts > 1].index.tolist()
+
+    # Cria o grafo direcionado de interações
+    G = nx.Graph()
+    for _, row in df.iterrows():
+        u, c = row['autor_username'], row['candidato_id']
+        if not u or not c:
+            continue
+
+        if G.has_edge(u, c):
+            G[u][c]['weight'] += 1
+        else:
+            G.add_edge(u, c, weight=1, type='attack')
+
+    # Detecta comunidades baseadas em componentes conectados
+    communities = list(nx.connected_components(G))
+    suspect_clusters = []
+
+    for i, comm in enumerate(communities):
+        if len(comm) < 3:
+            continue  # Ignora interações muito pequenas
+
+        nodes = list(comm)
+        edges = []
+        for u, v, d in G.edges(nodes, data=True):
+            if u in comm and v in comm:
+                edges.append({"from": u, "to": v, "weight": d['weight']})
+
+        # Estatísticas do cluster
+        cluster_df = df[df['autor_username'].isin(comm) | df['candidato_id'].isin(comm)]
+        hate_types = cluster_df['categoria_ia'].value_counts().to_dict()
+
+        cluster_meta = {
+            "nome_rede": f"Cluster de Ataque #{i+1} ({len(comm)} nodes)",
+            "tipo_coordenacao": "MULTI_TARGET" if any(a in comm for a in multi_attackers) else "SINGLE_TARGET",
+            "nodes": nodes,
+            "edges": edges,
+            "estatisticas": {
+                "total_interacoes": len(cluster_df),
+                "principais_categorias": hate_types,
+                "contas_coordenadas": len([a for a in comm if a in multi_attackers])
+            },
+            "score_perigoso": min(100, len(comm) * 5 + len(cluster_df) // 10)
+        }
+        suspect_clusters.append(cluster_meta)
+
+    return suspect_clusters
+
+class SaMineracaoRedes(BaseSubAgent):
     """
     Subagente relacional para análise de redes coordenadas e detecção de clusters de ataque.
     Executa a mineração analítica de redes de hostilidade de forma assíncrona sob demanda.
-    PASA v88.1
+    PASA v88.2 (Refatorado para BaseSubAgent efêmero)
     """
 
-    def __init__(self, lookback_days: int = 7, min_similarity: float = 0.8):
-        self.lookback_days = lookback_days
-        self.min_similarity = min_similarity
+    def __init__(self, worker_id: str = "sa-mineracao-redes-01", config: Optional[dict] = None):
+        cfg = config or {}
+        super().__init__(worker_id, cfg)
+        self.lookback_days = cfg.get("lookback_days", 7)
+        self.min_similarity = cfg.get("min_similarity", 0.8)
+
+    def describe(self) -> str:
+        return f"SaMineracaoRedes — Analisa redes coordenadas de hostilidade (lookback={self.lookback_days} dias)"
+
+    async def setup(self) -> None:
+        await super().setup()
+
+    async def teardown(self) -> None:
+        await super().teardown()
+
+    async def run_cycle(self):
+        # Cumpre contrato do BaseWorker
+        return await self.run_analysis()
 
     async def run_analysis(self) -> Dict[str, Any]:
         """
-        Executa a mineração de grafos e identifica comunidades/clusters suspectos de ataque.
-        Persiste os resultados no Supabase e atualiza os arquivos de relatórios no frontend.
+        Executa a mineração de grafos em processo filho e identifica clusters de ataque.
         """
-        logger.info(f"[SaMineracaoRedes] Iniciando análise de redes coordenadas (lookback={self.lookback_days} dias)")
+        logger.info(f"[{self.worker_id}] Iniciando análise de redes coordenadas (lookback={self.lookback_days} dias)")
         start_time = asyncio.get_event_loop().time()
 
         try:
-            # 1. Recuperação de comentários recentes classificados como ódio
+            # 1. Recuperação de comentários recentes classificados como ódio (I/O)
             now = datetime.now(timezone.utc)
             since = (now - timedelta(days=self.lookback_days)).isoformat()
 
@@ -43,63 +116,15 @@ class SaMineracaoRedes:
 
             data = res.data or []
             if len(data) < 10:
-                logger.info("[SaMineracaoRedes] Dados insuficientes de comentários de ódio para minerar rede.")
+                logger.info(f"[{self.worker_id}] Dados insuficientes de comentários de ódio para minerar rede.")
                 return {
                     "success": True,
                     "message": "no_tasks_available",
                     "clusters_detected": 0
                 }
 
-            # 2. Processamento via NetworkX e Pandas
-            df = pd.DataFrame(data)
-
-            # Identifica contas que atacam múltiplos alvos (indicador de coordenação)
-            attacker_counts = df.groupby('autor_username')['candidato_id'].nunique()
-            multi_attackers = attacker_counts[attacker_counts > 1].index.tolist()
-
-            # Cria o grafo direcionado de interações
-            G = nx.Graph()
-            for _, row in df.iterrows():
-                u, c = row['autor_username'], row['candidato_id']
-                if not u or not c:
-                    continue
-
-                if G.has_edge(u, c):
-                    G[u][c]['weight'] += 1
-                else:
-                    G.add_edge(u, c, weight=1, type='attack')
-
-            # Detecta comunidades baseadas em componentes conectados
-            communities = list(nx.connected_components(G))
-            suspect_clusters = []
-
-            for i, comm in enumerate(communities):
-                if len(comm) < 3:
-                    continue  # Ignora interações muito pequenas
-
-                nodes = list(comm)
-                edges = []
-                for u, v, d in G.edges(nodes, data=True):
-                    if u in comm and v in comm:
-                        edges.append({"from": u, "to": v, "weight": d['weight']})
-
-                # Estatísticas do cluster
-                cluster_df = df[df['autor_username'].isin(comm) | df['candidato_id'].isin(comm)]
-                hate_types = cluster_df['categoria_ia'].value_counts().to_dict()
-
-                cluster_meta = {
-                    "nome_rede": f"Cluster de Ataque #{i+1} ({len(comm)} nodes)",
-                    "tipo_coordenacao": "MULTI_TARGET" if any(a in comm for a in multi_attackers) else "SINGLE_TARGET",
-                    "nodes": nodes,
-                    "edges": edges,
-                    "estatisticas": {
-                        "total_interacoes": len(cluster_df),
-                        "principais_categorias": hate_types,
-                        "contas_coordenadas": len([a for a in comm if a in multi_attackers])
-                    },
-                    "score_perigoso": min(100, len(comm) * 5 + len(cluster_df) // 10)
-                }
-                suspect_clusters.append(cluster_meta)
+            # 2. Executa processamento matemático no processo filho (Offloading de CPU-bound)
+            suspect_clusters = await self.run_cpu_bound(_processar_rede_coordenada_sync, data)
 
             # 3. Persistência do Cluster mais relevante no Supabase
             top_cluster = None
@@ -121,10 +146,10 @@ class SaMineracaoRedes:
                     "created_at": now.isoformat()
                 }).execute()
 
-                logger.info(f"[SaMineracaoRedes] Cluster mais crítico persistido: {top_cluster['nome_rede']} (Score: {top_cluster['score_perigoso']})")
+                logger.info(f"[{self.worker_id}] Cluster mais crítico persistido: {top_cluster['nome_rede']} (Score: {top_cluster['score_perigoso']})")
 
-                # 4. Gera relatórios físicos para consumo do Frontend
-                self._generate_physical_reports(top_cluster)
+                # 4. Gera relatórios físicos para consumo do Frontend (I/O Thread)
+                await self.run_io_bound(self._generate_physical_reports, top_cluster)
 
             duration = asyncio.get_event_loop().time() - start_time
             return {
@@ -136,7 +161,7 @@ class SaMineracaoRedes:
             }
 
         except Exception as e:
-            logger.error(f"[SaMineracaoRedes] Erro na análise de redes: {e}", exc_info=True)
+            logger.error(f"[{self.worker_id}] Erro na análise de redes: {e}", exc_info=True)
             return {
                 "success": False,
                 "error": str(e)
@@ -171,9 +196,8 @@ class SaMineracaoRedes:
             with open(md_path, "w", encoding="utf-8") as f:
                 f.write("\n".join(lines))
 
-            logger.info(f"[SaMineracaoRedes] Relatórios físicos exportados para: {json_path}")
+            logger.info(f"[{self.worker_id}] Relatórios físicos exportados para: {json_path}")
         except Exception as e:
-            logger.warning(f"[SaMineracaoRedes] Falha ao exportar relatórios físicos de rede: {e}")
+            logger.warning(f"[{self.worker_id}] Falha ao exportar relatórios físicos de rede: {e}")
 
-# Compatibilidade retroativa para código legível
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
