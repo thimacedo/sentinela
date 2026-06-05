@@ -115,6 +115,15 @@ def build_orchestrator() -> SentinelaOrchestrator:
     except ImportError as e:
         logger.warning(f"[main_runner] Erro ao registrar WkClassificaComentarios: {e}")
 
+    # 🔍 REVISÃO ONLINE: Fila secundária e independente para revisão cloud de suspeitos
+    try:
+        from workers.ai.sa_revisao_online import SaRevisaoOnline
+        
+        orch.register(SaRevisaoOnline(worker_id="sa-revisao-online-01", config={"batch_size": 20}))
+        logger.info("[main_runner] SaRevisaoOnline registrado com sucesso na fila secundária.")
+    except ImportError as e:
+        logger.warning(f"[main_runner] Erro ao registrar SaRevisaoOnline: {e}")
+
     # Motor de Curadoria e Inteligência de Alvos (v84.9)
     researcher_mode = os.getenv("RESEARCHER_MODE", "disabled").strip().lower()
     if researcher_mode != "disabled":

@@ -337,7 +337,7 @@ class AIService:
                 
         return None
 
-    async def classify_text(self, text: str, comment_id: str = "N/A", trace_id: str = None) -> Dict[str, Any]:
+    async def classify_text(self, text: str, comment_id: str = "N/A", trace_id: str = None, force_cloud: bool = False) -> Dict[str, Any]:
         if not isinstance(text, str):
             text = str(text or "")
         text = text.strip()
@@ -350,10 +350,39 @@ class AIService:
         if lexical_filter.is_junk(text):
             return {"is_hate": False, "categoria_ia": "NEUTRO", "confianca_ia": 1.0, "analise_pericial": "Filtro léxico.", "name": "lexical"}
 
-        max_attempts = len(self.providers)
+        # Filtra os provedores ativos com base no parâmetro force_cloud
+        if force_cloud:
+            active_providers = [p for p in self.providers if p["name"] != "ollama"]
+        else:
+            active_providers = [p for p in self.providers if p["name"] == "ollama"]
+
+        if not active_providers:
+            if not force_cloud:
+                logger.warning(f"⚠️ [AI] Ollama local não encontrado na lista de provedores. Enviando comment_id={comment_id} para revisão online.")
+                return {
+                    "is_hate": False,
+                    "categoria_ia": "SUSPEITO",
+                    "confianca_ia": 0.5,
+                    "analise_pericial": "Ollama local não disponível, enviado para revisão online.",
+                    "name": "ollama_fallback"
+                }
+            else:
+                logger.error(f"❌ [AI] Nenhum provedor cloud configurado para revisão do ID {comment_id}.")
+                return {
+                    "is_hate": False,
+                    "categoria_ia": "ERRO",
+                    "confianca_ia": 0.5,
+                    "analise_pericial": "Nenhum provedor cloud disponível para revisão.",
+                    "name": "cloud_failure"
+                }
+
+        max_attempts = len(active_providers)
         
         for _ in range(max_attempts):
-            provider = self.providers[0]
+            provider = next((p for p in self.providers if p in active_providers), None)
+            if not provider:
+                break
+                
             name = provider["name"]
 
             if not ai_circuit_breaker.can_execute(name):
@@ -388,12 +417,22 @@ class AIService:
                 self._handle_provider_error(provider, e)
                 continue
 
-        logger.error(f"❌ [AI] Todos os provedores falharam para o ID {comment_id}. Colapso temporário.")
+        if not force_cloud:
+            logger.warning(f"⚠️ [AI] Ollama local falhou para o ID {comment_id}. Direcionando para a fila de revisão online.")
+            return {
+                "is_hate": False,
+                "categoria_ia": "SUSPEITO",
+                "confianca_ia": 0.5,
+                "analise_pericial": "Falha na perícia do Ollama local, enviado para revisão online.",
+                "name": "ollama_fallback"
+            }
+
+        logger.error(f"❌ [AI] Todos os provedores cloud falharam para a revisão do ID {comment_id}. Colapso temporário.")
         return {
             "is_hate": False, 
             "categoria_ia": "ERRO", 
             "confianca_ia": 0.5, 
-            "analise_pericial": "Todos os provedores da fila unificada falharam.", 
+            "analise_pericial": "Todos os provedores cloud da fila unificada falharam.", 
             "name": "system_failure"
         }
 
@@ -498,5 +537,37 @@ class AIService:
 
     async def push_custom_rules_to_providers(self) -> None:
         pass
+
+    async def run_batch_online_review(self, limit: int = 50) -> int:
+        """Busca comentários marcados como SUSPEITO no banco e executa a reclassificação online (Cloud)."""
+        try:
+            from core.db import db_client
+            res = db_client.client.table('comentarios').select('id, texto_bruto, trace_id').eq('categoria_ia', 'SUSPEITO').limit(limit).execute()
+            items = res.data or []
+            count = 0
+            for item in items:
+                try:
+                    res_ia = await self.classify_text(item["texto_bruto"], item["id"], trace_id=item.get("trace_id"), force_cloud=True)
+                    if res_ia and res_ia.get("categoria_ia") not in ["ERRO", "SUSPEITO"]:
+                        engine_name = res_ia.get("name", "unknown").upper()
+                        analise = f"[REVISÃO:{engine_name}] {res_ia.get('analise_pericial', '')}"
+                        db_client.client.table('comentarios').update({
+                            "categoria_ia": res_ia["categoria_ia"],
+                            "confianca_ia": res_ia["confianca_ia"],
+                            "is_hate": res_ia["is_hate"],
+                            "analise_pericial": analise,
+                            "processado_ia": True
+                        }).eq("id", item["id"]).execute()
+                        count += 1
+                    
+                    await asyncio.sleep(2.0)
+                except Exception as e:
+                    logger.error(f"[AI] Erro ao processar revisao do ID {item['id']}: {e}")
+                    if "Colapso" in str(e):
+                        logger.error("🛑 [AI] Colapso detectado nas APIs Cloud. Abortando lote de revisao.")
+                        raise e
+            return count
+        except Exception as e:
+            raise e
 
 ai_service = AIService()
