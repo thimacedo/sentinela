@@ -156,8 +156,8 @@ Libera um item da fila após processamento (versão atômica).
 **Gatilho**: Chamado exclusivamente após um ciclo de coleta bem-sucedido ou falha de conteúdo (junk/404).
 
 **Lógica de Decisão**:
-- **QUENTE**: Frequência de postagem >= 5 posts/semana.
-- **MORNO**: Frequência < 5 posts/semana e último post há menos de 7 dias.
+- **QUENTE**: Frequência de postagem >= 5 posts/semana **E** postagem realizada nos últimos 2 dias.
+- **MORNO**: Frequência < 5 posts/semana (ou sem post nos últimos 2 dias) e último post há menos de 7 dias.
 - **FRIO**: Último post há mais de 7 dias ou falha de conteúdo recorrente.
 
 **Restrição Crítica**:

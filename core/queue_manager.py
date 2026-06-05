@@ -406,7 +406,7 @@ class QueueManager:
             else:
                 frequencia = round(7 / (days_since_last_post + 1), 1)
 
-            if frequencia >= 5:
+            if frequencia >= 5 and days_since_last_post <= 2:
                 termometro = "QUENTE"
             elif days_since_last_post > 7:
                 termometro = "FRIO"
