@@ -148,12 +148,24 @@ def quit_tray(icon, item_clicked):
     icon.stop()
 
 def update_tray_loop(icon):
+    last_vals = None
     while icon.visible:
         try:
-            icon.menu = build_menu()
+            with state.lock:
+                current_vals = (
+                    state.status,
+                    state.restarts,
+                    state.code_errors,
+                    state.alerts,
+                    state.fast_crashes
+                )
+            
+            if current_vals != last_vals:
+                icon.menu = build_menu()
+                last_vals = current_vals
         except Exception as e:
             print(f"[Tray] Erro ao atualizar menu: {e}")
-        time.sleep(5)
+        time.sleep(2)
 
 def kill_process_on_port(port: int):
     try:
