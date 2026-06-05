@@ -22,13 +22,18 @@ GOLD_DATASET_PATH = os.path.join(BASE_DIR, "data", "classifier_gold_dataset.json
 MD_PATH = os.path.join(BASE_DIR, "docs", "PADRONIZACAO_LINGUISTICA_ANALITICA.md")
 CUSTOM_RULES_PATH = os.path.join(BASE_DIR, "config", "custom_rules.json")
 
-# MCA v2.2 Protocol - Calibragem Analítica Crítica (v85.11)
-SYSTEM_PROMPT = """Você é um perito em Linguística Analítica Digital especializado em ataques coordenados e hostilidade política.
+# MCA v2.2 Protocol - Calibragem Analítica Crítica Vichi-Sentinela (v85.11)
+SYSTEM_PROMPT = """Você é um analista especializado em Linguística Analítica Digital baseado no Método Vichi-Sentinela para identificação de ataques coordenados e hostilidade política.
 Sua missão é classificar comentários com realismo absoluto, seguindo a Metodologia de Classificação de Ataques (MCA v2.2) e as Diretrizes do Protocolo PASA v16.4.
+
+--- METODOLOGIA VICHI-SENTINELA (INEGOCIÁVEL) ---
+1. A análise de texto deve se basear fundamentalmente nas relações gramaticais de verbos, substantivos e a carga ofensiva em adjetivos (POS Filtering).
+2. Agrupe variações de agressões usando equivalência de lemas.
+3. Identifique slogans repetitivos (N-Gramas) para detecção de coordenação e astroturfing.
 
 --- REGRAS DE OURO ---
 1. REALISMO: Não ignore ataques velados, ironias destrutivas ou acusações de corrupção/crime.
-2. FALSAS PERÍCIAS: O uso de jargão jurídico, citação de artigos penais (CP, CF, Leis) para "teorizar" ou acusar o alvo de traição, assassininato, genocídio ou crimes hediondos NÃO É crítica política legítima. É um ataque direto e deve ser classificado como DANO_A_IMAGEM.
+2. FALSAS ANÁLISES: O uso de jargão jurídico, citação de artigos penais (CP, CF, Leis) para "teorizar" ou acusar o alvo de traição, assassininato, genocídio ou crimes hediondos NÃO É crítica política legítima. É um ataque direto e deve ser classificado como DANO_A_IMAGEM.
 3. DISTINÇÃO: Crítica política legítima foca em IDEIAS. Ataques focam em PESSOAS ou INSTITUIÇÕES.
 4. COMUNICAÇÃO: Você é um sistema de INFORMAÇÃO. Se detectar uma imputação de ato ilícito, você NÃO DEVE usar a palavra "crime" na sua classificação ou análise. Você deve rotular como dano à imagem.
 5. IDIOMA: Sua resposta (incluindo a analise_pericial) deve ser 100% em Português Brasileiro (pt-BR).
@@ -61,7 +66,7 @@ Marque como NEUTRO os seguintes cenários:
 }
 """
 
-LOCAL_SYSTEM_PROMPT = """Você é um classificador binário de hostilidade política. 
+LOCAL_SYSTEM_PROMPT = """Você é um classificador binário de hostilidade política baseado no Método Vichi-Sentinela (POS Filtering e lemas). 
 Analise se o texto contém: insultos reais, ameaças, acusações de atos ilícitos/corrupção ou deslegitimação institucional.
 Responda APENAS com JSON:
 {
@@ -70,7 +75,7 @@ Responda APENAS com JSON:
   "confianca_ia": float,
   "analise_pericial": "Motivo rápido (sem usar a palavra crime)"
 }
-IMPORTANTE: Se houver QUALQUER sinal de ataque ou hostilidade real, marque como "SUSPEITO" para perícia posterior.
+IMPORTANTE: Se houver QUALQUER sinal de ataque ou hostilidade real, marque como "SUSPEITO" para análise posterior.
 """
 
 def safe_decode_unicode(s: str) -> str:
@@ -476,7 +481,9 @@ class AIService:
         """Busca comentários não processados no banco e executa a classificação."""
         try:
             from core.db import db_client
-            res = db_client.client.table('comentarios').select('id, texto_bruto, trace_id').eq('processado_ia', False).limit(limit).execute()
+            res = await asyncio.to_thread(
+                db_client.client.table('comentarios').select('id, texto_bruto, trace_id').eq('processado_ia', False).limit(limit).execute
+            )
             items = res.data or []
             count = 0
             for item in items:
@@ -485,9 +492,11 @@ class AIService:
                     if res_ia and res_ia.get("categoria_ia") != "ERRO":
                         engine_name = res_ia.get("name", "unknown").upper()
                         analise = f"[{engine_name}] {res_ia.get('analise_pericial', '')}"
-                        db_client.client.table('comentarios').update({
-                            "categoria_ia": res_ia["categoria_ia"], "confianca_ia": res_ia["confianca_ia"], "is_hate": res_ia["is_hate"], "analise_pericial": analise, "processado_ia": True
-                        }).eq("id", item["id"]).execute()
+                        await asyncio.to_thread(
+                            db_client.client.table('comentarios').update({
+                                "categoria_ia": res_ia["categoria_ia"], "confianca_ia": res_ia["confianca_ia"], "is_hate": res_ia["is_hate"], "analise_pericial": analise, "processado_ia": True
+                            }).eq("id", item["id"]).execute
+                        )
                         count += 1
                     
                     # PASA v88.2 - Cadência Constante (Persistência sobre Velocidade)
@@ -505,7 +514,9 @@ class AIService:
         """Busca registros já processados mas com baixa confiança para re-análise profunda."""
         try:
             from core.db import db_client
-            res = db_client.client.table('comentarios').select('id, texto_bruto, trace_id').eq('processado_ia', True).lt('confianca_ia', confidence_threshold).not_.eq('categoria_ia', 'ERRO').order('data_coleta', desc=True).limit(limit).execute()
+            res = await asyncio.to_thread(
+                db_client.client.table('comentarios').select('id, texto_bruto, trace_id').eq('processado_ia', True).lt('confianca_ia', confidence_threshold).not_.eq('categoria_ia', 'ERRO').order('data_coleta', desc=True).limit(limit).execute
+            )
             items = res.data or []
             count = 0
             
@@ -519,9 +530,11 @@ class AIService:
                         if res_ia and res_ia.get("categoria_ia") != "ERRO":
                             engine_name = res_ia.get("name", "unknown").upper()
                             analise = f"[RE-ANÁLISE:{engine_name}] {res_ia.get('analise_pericial', '')}"
-                            db_client.client.table('comentarios').update({
-                                "categoria_ia": res_ia["categoria_ia"], "confianca_ia": res_ia["confianca_ia"], "is_hate": res_ia["is_hate"], "analise_pericial": analise
-                            }).eq("id", item["id"]).execute()
+                            await asyncio.to_thread(
+                                db_client.client.table('comentarios').update({
+                                    "categoria_ia": res_ia["categoria_ia"], "confianca_ia": res_ia["confianca_ia"], "is_hate": res_ia["is_hate"], "analise_pericial": analise
+                                }).eq("id", item["id"]).execute
+                            )
                             count += 1
                         
                         # PASA v88.2 - Cadência Constante (Persistência sobre Velocidade)
@@ -542,7 +555,9 @@ class AIService:
         """Busca comentários marcados como SUSPEITO no banco e executa a reclassificação online (Cloud)."""
         try:
             from core.db import db_client
-            res = db_client.client.table('comentarios').select('id, texto_bruto, trace_id').eq('categoria_ia', 'SUSPEITO').limit(limit).execute()
+            res = await asyncio.to_thread(
+                db_client.client.table('comentarios').select('id, texto_bruto, trace_id').eq('categoria_ia', 'SUSPEITO').limit(limit).execute
+            )
             items = res.data or []
             count = 0
             for item in items:
@@ -551,13 +566,15 @@ class AIService:
                     if res_ia and res_ia.get("categoria_ia") not in ["ERRO", "SUSPEITO"]:
                         engine_name = res_ia.get("name", "unknown").upper()
                         analise = f"[REVISÃO:{engine_name}] {res_ia.get('analise_pericial', '')}"
-                        db_client.client.table('comentarios').update({
-                            "categoria_ia": res_ia["categoria_ia"],
-                            "confianca_ia": res_ia["confianca_ia"],
-                            "is_hate": res_ia["is_hate"],
-                            "analise_pericial": analise,
-                            "processado_ia": True
-                        }).eq("id", item["id"]).execute()
+                        await asyncio.to_thread(
+                            db_client.client.table('comentarios').update({
+                                "categoria_ia": res_ia["categoria_ia"],
+                                "confianca_ia": res_ia["confianca_ia"],
+                                "is_hate": res_ia["is_hate"],
+                                "analise_pericial": analise,
+                                "processado_ia": True
+                            }).eq("id", item["id"]).execute
+                        )
                         count += 1
                     
                     await asyncio.sleep(2.0)

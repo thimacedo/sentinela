@@ -67,7 +67,8 @@ class RotateTargetTest(unittest.TestCase):
             mock_dt.timezone = timezone
             # also need isoformat method on datetime objects used in code
             mock_dt.fromisoformat = datetime.fromisoformat
-            self.qm.rotate_target(target)
+            import asyncio
+            asyncio.run(self.qm.rotate_target(target))
         return self.db.last_update_data['termometro']
 
     def test_no_posts_no_dates_results_in_morno(self):
@@ -76,8 +77,16 @@ class RotateTargetTest(unittest.TestCase):
         term = self._run_rotate(target)
         self.assertEqual(term, 'MORNO')
 
-    def test_no_comments_error_results_in_morno(self):
+    def test_no_comments_error_results_in_frio(self):
         target = Target(username='user2', candidato_id='user2', source='test')
+        target.error = 'no_comments_found'
+        target.post_metas = []
+        term = self._run_rotate(target)
+        self.assertEqual(term, 'FRIO')
+
+    def test_no_comments_error_from_quente_results_in_morno(self):
+        target = Target(username='user2', candidato_id='user2', source='test')
+        target.termometro = 'QUENTE'
         target.error = 'no_comments_found'
         target.post_metas = []
         term = self._run_rotate(target)

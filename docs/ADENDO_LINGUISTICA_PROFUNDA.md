@@ -1,6 +1,6 @@
-﻿# Adendo de Linguística Forense Profunda (PASA v16.3.1)
+# Adendo de Linguística Analítica Profunda (PASA v16.3.1)
 **Projeto:** Sentinela Democrática
-**Integração:** Base Teórica 'linguistica-forense' (Bakhtin, Empoli, Marcuschi)
+**Integração:** Base Teórica 'linguistica-analitica' (Bakhtin, Empoli, Marcuschi)
 
 ## 1. Psicologia do Caos Algorítmico (Engenheiros do Caos)
 A análise deve agora identificar o **Vetor de Engajamento por Fúria**. Comentários que utilizam "Polarização Afetiva" (ódio ao outro mais do que amor ao próprio candidato) devem ser sinalizados como **ESTRATÉGIA_CAOS**.
@@ -21,18 +21,18 @@ Os Agentes de Inteligência devem identificar a estrutura lógica do ataque:
 3. **Falsa Dicotomia:** "Ou você está com o povo (nós), ou está com os criminosos (eles)".
 
 ## 4. Atualização do JSON de Saída (Metadata Profundo)
-A partir da v16.3.1, o campo nalise_pericial deve incluir a identificação da falácia e do vetor de fúria:
+A partir da v16.3.1, o campo analise_analitica deve incluir a identificação da falácia e do vetor de fúria:
 
-`json
+```json
 {
   "is_hate": true,
   "categoria": "VIOLÊNCIA_GÊNERO",
   "falacia_detectada": "AD_HOMINEM",
   "vetor_furia": "ALTO",
-  "analise_pericial": "Ataque performativo utilizando falácia Ad Hominem para silenciamento político via deslegitimação de gênero.",
+  "analise_analitica": "Ataque performativo utilizando falácia Ad Hominem para silenciamento político via deslegitimação de gênero.",
   "referencia_teorica": "Bakhtin/Empoli"
 }
-`
+```
 
 ---
 *Este adendo expande as capacidades de diagnóstico para além da superfície lexical.*

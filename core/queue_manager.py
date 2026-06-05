@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import os
 import random
+import asyncio
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
@@ -35,7 +36,7 @@ class QueueManager:
     def __init__(self, db_client):
         self.db = db_client
 
-    def claim_next_target(
+    async def claim_next_target(
         self,
         config: dict,
         seen_queue_ids: set,
@@ -47,7 +48,7 @@ class QueueManager:
         Prioridades: Manual > fila_coleta (High Priority) > fila_coleta (Normal) > Fallback Rotation.
         """
         # 🔄 AUTO-REPOPULAÇÃO (v80.0): Garante que a fila nunca esvazia
-        self._ensure_queue_populated()
+        await self._ensure_queue_populated()
 
         blocked = seen_targets | (active_targets or set())
 
@@ -66,16 +67,16 @@ class QueueManager:
         
         target = None
         if not prefer_global_rotation:
-            target = self._get_from_fila_coleta(blocked, seen_queue_ids, seen_targets, active_targets)
+            target = await self._get_from_fila_coleta(blocked, seen_queue_ids, seen_targets, active_targets)
         
         if not target:
-            target = self._get_from_global_rotation(blocked, seen_targets, active_targets)
+            target = await self._get_from_global_rotation(blocked, seen_targets, active_targets)
             
         return target
 
     # ── Travas Atômicas PASA v88.0 (Fase 8.3) ─────────────────────────────────
 
-    def claim_next_target_atomic(
+    async def claim_next_target_atomic(
         self,
         worker_id: str,
         seen_targets: Optional[set] = None,
@@ -94,27 +95,29 @@ class QueueManager:
         Fallback: se a função SQL não existir, delega para claim_next_target() legado.
         """
         # 🔄 AUTO-REPOPULAÇÃO (v80.0): Garante que a fila nunca esvazia
-        self._ensure_queue_populated()
+        await self._ensure_queue_populated()
 
         blocked = (seen_targets or set()) | (active_targets or set())
 
         try:
             # Chama função SQL atômica
-            res = self.db.rpc("fila_coleta_claim_next", {
-                "p_worker_id": worker_id,
-                "p_max_prioridade": max_prioridade,
-            }).execute()
+            res = await asyncio.to_thread(
+                self.db.rpc("fila_coleta_claim_next", {
+                    "p_worker_id": worker_id,
+                    "p_max_prioridade": max_prioridade,
+                }).execute
+            )
 
             if not res.data:
                 # Fila vazia — tenta rotação global como fallback
-                return self._get_from_global_rotation(blocked, seen_targets or set(), active_targets)
+                return await self._get_from_global_rotation(blocked, seen_targets or set(), active_targets)
 
             row = res.data[0]
             username = row.get("candidato_id", "").strip().lstrip("@").lower()
 
             if not username or username in blocked:
                 # Item claimado mas bloqueado localmente — libera e retorna None
-                self._release_atomic(row["id"], "PENDENTE", worker_id)
+                await self._release_atomic(row["id"], "PENDENTE", worker_id)
                 return None
 
             self._add_to_blocked(username, seen_targets or set(), active_targets)
@@ -139,44 +142,50 @@ class QueueManager:
             else:
                 logger.error("[Queue:atomic] Erro no claim atômico: %s", e)
             # Fallback para o método legado
-            return self.claim_next_target(
+            return await self.claim_next_target(
                 {}, seen_targets or set(), set(), active_targets
             )
 
-    def release_atomic(self, queue_id, status: str, worker_id: str) -> None:
+    async def release_atomic(self, queue_id, status: str, worker_id: str) -> None:
         """Libera o item da fila após processamento via função SQL atômica."""
-        self._release_atomic(queue_id, status, worker_id)
+        await self._release_atomic(queue_id, status, worker_id)
 
-    def _release_atomic(self, queue_id, status: str, worker_id: str) -> None:
+    async def _release_atomic(self, queue_id, status: str, worker_id: str) -> None:
         """Implementação interna do release atômico."""
         try:
-            self.db.rpc("fila_coleta_release", {
-                "p_queue_id": str(queue_id),
-                "p_status": status,
-                "p_worker_id": worker_id,
-            }).execute()
+            await asyncio.to_thread(
+                self.db.rpc("fila_coleta_release", {
+                    "p_queue_id": str(queue_id),
+                    "p_status": status,
+                    "p_worker_id": worker_id,
+                }).execute
+            )
         except Exception as e:
             logger.warning("[Queue:atomic] Falha no release atômico (queue_id=%s): %s", queue_id, e)
             # Fallback: atualiza status diretamente
             try:
-                self.db.table("fila_coleta").update({
-                    "status": status,
-                    "locked_by": None,
-                    "locked_at": None,
-                }).eq("id", str(queue_id)).execute()
+                await asyncio.to_thread(
+                    self.db.table("fila_coleta").update({
+                        "status": status,
+                        "locked_by": None,
+                        "locked_at": None,
+                    }).eq("id", str(queue_id)).execute
+                )
             except Exception as e2:
                 logger.error("[Queue:atomic] Fallback de release também falhou: %s", e2)
 
-    def release_stale_locks(self, timeout_minutes: int = 30) -> int:
+    async def release_stale_locks(self, timeout_minutes: int = 30) -> int:
         """
         Auto-desbloqueio de locks expirados (worker crashou sem liberar).
         Deve ser chamado periodicamente pelo orquestrador (ex: a cada 10 ciclos).
         Retorna quantos itens foram desbloqueados.
         """
         try:
-            res = self.db.rpc("fila_coleta_release_stale", {
-                "p_timeout_minutes": timeout_minutes,
-            }).execute()
+            res = await asyncio.to_thread(
+                self.db.rpc("fila_coleta_release_stale", {
+                    "p_timeout_minutes": timeout_minutes,
+                }).execute
+            )
             count = res.data[0] if res.data else 0
             if count:
                 logger.info("[Queue:atomic] %d lock(s) expirado(s) liberado(s) (timeout=%dmin).", count, timeout_minutes)
@@ -185,30 +194,33 @@ class QueueManager:
             logger.debug("[Queue:atomic] release_stale_locks indisponível (migração pendente): %s", e)
             return 0
 
-    # ── Fim das Travas Atômicas ────────────────────────────────────────────────
-
-    def _get_from_fila_coleta(self, blocked, seen_queue_ids, seen_targets, active_targets) -> Optional[Target]:
+    async def _get_from_fila_coleta(self, blocked, seen_queue_ids, seen_targets, active_targets) -> Optional[Target]:
         """Busca alvos na fila de prioridade, ordenados por nível de importância."""
         try:
             # Pega os Top 20 pendentes (Prioridade 1 = Máxima, depois FIFO)
-            pending = self.db.table("fila_coleta")\
-                .select("*")\
-                .eq("status", "PENDENTE")\
-                .order("prioridade", desc=False)\
-                .order("created_at", desc=False)\
-                .limit(20).execute()
+            pending = await asyncio.to_thread(
+                self.db.table("fila_coleta")
+                .select("*")
+                .eq("status", "PENDENTE")
+                .order("prioridade", desc=False)
+                .order("created_at", desc=False)
+                .limit(20)
+                .execute
+            )
             
             for item in pending.data or []:
                 queue_id = item["id"]
                 target_val = item.get("username") or item.get("candidato_id") or item.get("target_username")
                 
                 if not target_val: continue
-
+ 
                 # Resolução inteligente de Identidade (PASA v85.6)
                 username = None
                 # Se for UUID, busca o username
                 if len(str(target_val)) > 30 and "-" in str(target_val):
-                    cand = self.db.table("candidatos").select("username").eq("id", target_val).limit(1).execute()
+                    cand = await asyncio.to_thread(
+                        self.db.table("candidatos").select("username").eq("id", target_val).limit(1).execute
+                    )
                     if cand.data: username = cand.data[0]["username"]
                 else:
                     # Já é o username
@@ -233,14 +245,16 @@ class QueueManager:
             logger.error(f"❌ [Queue] Erro ao consultar fila_coleta: {e}")
         return None
 
-    def _ensure_queue_populated(self, min_pending: int = 50) -> None:
+    async def _ensure_queue_populated(self, min_pending: int = 50) -> None:
         """Repopula a fila_coleta automaticamente quando há poucos itens pendentes (v80.0)."""
         try:
             # Conta itens PENDENTE
-            count_res = self.db.table("fila_coleta")\
-                .select("id", count="exact")\
-                .eq("status", "PENDENTE")\
-                .execute()
+            count_res = await asyncio.to_thread(
+                self.db.table("fila_coleta")
+                .select("id", count="exact")
+                .eq("status", "PENDENTE")
+                .execute
+            )
             current_pending = count_res.count or 0
 
             if current_pending >= min_pending:
@@ -249,11 +263,14 @@ class QueueManager:
             logger.info(f"🔄 [Queue] Apenas {current_pending} itens pendentes. Repopulando fila...")
 
             # Busca candidatos ativos mais antigos para reinserir
-            candidatos_res = self.db.table("candidatos")\
-                .select("id,username,termometro")\
-                .filter("status_monitoramento", "ilike", "Ativo")\
-                .order("last_scraped_at", desc=False)\
-                .limit(min_pending).execute()
+            candidatos_res = await asyncio.to_thread(
+                self.db.table("candidatos")
+                .select("id,username,termometro")
+                .filter("status_monitoramento", "ilike", "Ativo")
+                .order("last_scraped_at", desc=False)
+                .limit(min_pending)
+                .execute
+            )
 
             reinseridos = 0
             for cand in (candidatos_res.data or []):
@@ -261,11 +278,14 @@ class QueueManager:
                 if not username:
                     continue
                 # Verifica se já existe na fila como PENDENTE
-                check = self.db.table("fila_coleta")\
-                    .select("id")\
-                    .eq("candidato_id", cand["username"])\
-                    .eq("status", "PENDENTE")\
-                    .limit(1).execute()
+                check = await asyncio.to_thread(
+                    self.db.table("fila_coleta")
+                    .select("id")
+                    .eq("candidato_id", cand["username"])
+                    .eq("status", "PENDENTE")
+                    .limit(1)
+                    .execute
+                )
                 if check.data:
                     continue
 
@@ -273,11 +293,13 @@ class QueueManager:
                 prioridade = 1 if termometro == "QUENTE" else (5 if termometro in ("FRIO", "MORNO") else 3)
 
                 # Reinserção via upsert
-                self.db.table("fila_coleta").upsert({
-                    "candidato_id": cand["username"],
-                    "status": "PENDENTE",
-                    "prioridade": prioridade,
-                }, on_conflict="candidato_id,data_agendada").execute()
+                await asyncio.to_thread(
+                    self.db.table("fila_coleta").upsert({
+                        "candidato_id": cand["username"],
+                        "status": "PENDENTE",
+                        "prioridade": prioridade,
+                    }, on_conflict="candidato_id,data_agendada").execute
+                )
                 reinseridos += 1
 
                 if (current_pending + reinseridos) >= min_pending:
@@ -288,7 +310,7 @@ class QueueManager:
         except Exception as e:
             logger.error(f"❌ [Queue] Erro na auto-repopulação: {e}")
 
-    def _get_from_global_rotation(self, blocked, seen_targets, active_targets) -> Optional[Target]:
+    async def _get_from_global_rotation(self, blocked, seen_targets, active_targets) -> Optional[Target]:
         """Garante que todos os candidatos ativos sejam processados circularmente com Smart Backoff (PASA v85.6)."""
         try:
             # ❄️ SMART BACKOFF: Pula alvos 'FRIO' que foram processados recentemente (< 12h)
@@ -298,12 +320,15 @@ class QueueManager:
 
             # Query otimizada (v85.6): Suporta Case Insensitive e Cooldown por Temperatura
             # Pega alvos validados OU alvos que ainda não foram raspados (last_scraped_at is null)
-            res = self.db.table("candidatos")\
-                .select("id,username,termometro,last_scraped_at")\
-                .filter("status_monitoramento", "ilike", "Ativo")\
-                .or_(f"last_scraped_at.is.null,and(termometro.eq.FRIO,last_scraped_at.lt.{cold_threshold}),and(termometro.neq.FRIO,last_scraped_at.lt.{hot_threshold})")\
-                .order("last_scraped_at", desc=False)\
-                .limit(20).execute()
+            res = await asyncio.to_thread(
+                self.db.table("candidatos")
+                .select("id,username,termometro,last_scraped_at")
+                .filter("status_monitoramento", "ilike", "Ativo")
+                .or_(f"last_scraped_at.is.null,and(termometro.eq.FRIO,last_scraped_at.lt.{cold_threshold}),and(termometro.neq.FRIO,last_scraped_at.lt.{hot_threshold})")
+                .order("last_scraped_at", desc=False)
+                .limit(20)
+                .execute
+            )
                 
             for cand in res.data or []:
                 username = cand["username"].lower()
@@ -322,11 +347,14 @@ class QueueManager:
 
         # Fallback extremo (Fila Vazia)
         try:
-            res_fallback = self.db.table("candidatos")\
-                .select("id,username,termometro,last_scraped_at")\
-                .filter("status_monitoramento", "ilike", "Ativo")\
-                .order("last_scraped_at", desc=False)\
-                .limit(10).execute()
+            res_fallback = await asyncio.to_thread(
+                self.db.table("candidatos")
+                .select("id,username,termometro,last_scraped_at")
+                .filter("status_monitoramento", "ilike", "Ativo")
+                .order("last_scraped_at", desc=False)
+                .limit(10)
+                .execute
+            )
 
             for cand in res_fallback.data or []:
                 username = cand["username"].lower()
@@ -351,7 +379,7 @@ class QueueManager:
         if active_targets is not None:
             active_targets.add(username)
 
-    def update_target_metrics(self, target: Target) -> str:
+    async def update_target_metrics(self, target: Target) -> str:
         """
         Calcula e atualiza o termômetro e a frequência de postagens do candidato.
         Retorna o novo valor do termômetro ('QUENTE', 'MORNO' ou 'FRIO').
@@ -374,9 +402,11 @@ class QueueManager:
         
         if is_system_error or is_session_error:
             logger.warning(f"⚠️ [Queue] Erro sistêmico/sessão detectado para @{target.username} ({target.error}). Mantendo temperatura atual.")
-            self.db.table("candidatos").update({
-                "last_scraped_at": now_iso
-            }).eq("username", target.username).execute()
+            await asyncio.to_thread(
+                self.db.table("candidatos").update({
+                    "last_scraped_at": now_iso
+                }).eq("username", target.username).execute
+            )
             return getattr(target, "termometro", "MORNO")
 
         frequencia = 0.0
@@ -421,10 +451,12 @@ class QueueManager:
             "posts_frequencia_semanal": frequencia,
             "termometro": termometro
         }
-        self.db.table("candidatos").update(update_data).eq("username", target.username).execute()
+        await asyncio.to_thread(
+            self.db.table("candidatos").update(update_data).eq("username", target.username).execute
+        )
         return termometro
 
-    def rotate_target(self, target: Target) -> None:
+    async def rotate_target(self, target: Target) -> None:
         """Remove o item processado e reinsere no fim da fila com status e termômetro (v86.3)."""
         if not target.username:
             return
@@ -435,26 +467,30 @@ class QueueManager:
         now_iso = now.isoformat()
         
         # Atualiza métricas do candidato
-        termometro = self.update_target_metrics(target)
+        termometro = await self.update_target_metrics(target)
 
         if target.queue_id:
             nova_prioridade = 1 if termometro == "QUENTE" else (5 if termometro in ("FRIO", "MORNO") else 3)
             is_error = hasattr(target, "error") and target.error
             is_empty = is_error and target.error in ["junk_detected", "invalid_target: 404_not_found"]
             
-            self.db.table("fila_coleta").update({
-                "status": "SEM_DADOS_RECENTES" if is_empty else "CONCLUIDO",
-                "prioridade": nova_prioridade,
-                "updated_at": now_iso
-            }).eq("id", target.queue_id).execute()
+            await asyncio.to_thread(
+                self.db.table("fila_coleta").update({
+                    "status": "SEM_DADOS_RECENTES" if is_empty else "CONCLUIDO",
+                    "prioridade": nova_prioridade,
+                    "updated_at": now_iso
+                }).eq("id", target.queue_id).execute
+            )
             
         logger.info(f"[Queue] Rotação finalizada para @{target.username} -> {termometro}")
 
 
-    def mark_candidate_scraped(self, target: Target) -> None:
+    async def mark_candidate_scraped(self, target: Target) -> None:
         """Update the last_scraped_at timestamp for the candidate."""
         if not target.username:
             return
-        self.db.table("candidatos").update({
-            "last_scraped_at": datetime.now(timezone.utc).isoformat(),
-        }).eq("username", target.username).execute()
+        await asyncio.to_thread(
+            self.db.table("candidatos").update({
+                "last_scraped_at": datetime.now(timezone.utc).isoformat(),
+            }).eq("username", target.username).execute
+        )

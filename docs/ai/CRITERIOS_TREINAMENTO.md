@@ -9,7 +9,7 @@ Este documento define os critérios para a classificação de discurso de ódio 
 - **AMEACA**: Incitação a dano físico ou morte (ex: "tem que levar tiro", "paredão").
 - **INSULTO_AD_HOMINEM**: Desumanização e baixo calão (ex: "verme", "rato", "lixo").
 - **ATAQUE_INSTITUCIONAL**: Deslegitimação de órgãos de Estado (ex: "ditadura da toga", "fraude", "comprado").
-- **RIGOR_CRIMINAL**: Imputação de crime sem prova ou trânsito em julgado (ex: "ladrão", "traficante", "corrupto").
+- **RIGOR_CRIMINAL**: Imputação de crime sem indício verificado ou trânsito em julgado (ex: "ladrão", "traficante", "corrupto").
 
 ## 2. Scanner de Ironia e Sarcasmo
 A análise deve identificar dissonância semântica:
@@ -24,7 +24,7 @@ A análise deve identificar dissonância semântica:
 
 ## 5. Blindagem contra Falsos Positivos (Protocolo de Defesa)
 
-A análise deve distinguir **ENTUSIASMO** e **CRÍTICA POLÍTICA** de **HOSTILIDADE FORENSE**.
+A análise deve distinguir **ENTUSIASMO** e **CRÍTICA POLÍTICA** de **HOSTILIDADE ANALÍTICA**.
 
 - **ENTUSIASMO / APOIO**: Frases como *"Fulano no Congresso será um presente"*, *"A ousadia vai ocupar o congresso"* ou *"Vamos pra cima"* são expressões de engajamento democrático e devem ser classificadas como **NEUTRO**.
 - **DEFESA DE MANDATO**: Denúncias de "perseguição", "lawfare" ou "investida autoritária" feitas por apoiadores em defesa do alvo monitorado são **OPINIÕES POLÍTICAS**, não ataques institucionais ao Estado. Classificar como **NEUTRO**.

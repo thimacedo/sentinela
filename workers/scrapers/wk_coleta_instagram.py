@@ -88,7 +88,7 @@ class WkColetaInstagram(BaseWorker):
         use_atomic = getattr(self.queue, 'claim_next_target_atomic', None) is not None
 
         if use_atomic:
-            target = self.queue.claim_next_target_atomic(
+            target = await self.queue.claim_next_target_atomic(
                 worker_id=self.worker_id,
                 seen_targets=self.seen_targets,
                 active_targets=getattr(self, 'active_targets', None),
@@ -96,12 +96,12 @@ class WkColetaInstagram(BaseWorker):
         else:
             if hasattr(self, "claim_lock"):
                 async with self.claim_lock:
-                    target = self.queue.claim_next_target(
+                    target = await self.queue.claim_next_target(
                         current_cycle_config, self.seen_queue_ids, self.seen_targets,
                         active_targets=getattr(self, "active_targets", None),
                     )
             else:
-                target = self.queue.claim_next_target(
+                target = await self.queue.claim_next_target(
                     current_cycle_config, self.seen_queue_ids, self.seen_targets,
                     active_targets=getattr(self, "active_targets", None),
                 )
@@ -139,7 +139,7 @@ class WkColetaInstagram(BaseWorker):
         self.logger.debug(f"[V2] Aplicando jitter inicial de {jitter:.1f}s")
         await asyncio.sleep(jitter)
 
-        self.queue.mark_candidate_scraped(target)
+        await self.queue.mark_candidate_scraped(target)
 
         # 💾 CHECKPOINT INTRA-CYCLE (PASA v88.0 - Fase 8.5)
         # Carrega checkpoint existente para retomar do último post após crash.
@@ -148,7 +148,7 @@ class WkColetaInstagram(BaseWorker):
             worker_id=self.worker_id,
             candidato_id=target.username,
         )
-        previous_cp = checkpoint.load()
+        previous_cp = await checkpoint.load()
         resume_from_shortcode = previous_cp.get('last_shortcode') if previous_cp else None
         if resume_from_shortcode:
             self.logger.info(
@@ -343,7 +343,7 @@ class WkColetaInstagram(BaseWorker):
                 successful_metas = [m for m in target.post_metas if m.get('shortcode')]
                 if successful_metas:
                     last_saved_shortcode = successful_metas[-1]['shortcode']
-                    checkpoint.save(
+                    await checkpoint.save(
                         last_shortcode=last_saved_shortcode,
                         posts_done=len(successful_metas),
                         comments_done=inserted,
@@ -361,7 +361,7 @@ class WkColetaInstagram(BaseWorker):
             )
 
             # Ciclo completo com sucesso: limpa checkpoint
-            checkpoint.clear()
+            await checkpoint.clear()
             return result
 
         except Exception as e:
@@ -382,7 +382,7 @@ class WkColetaInstagram(BaseWorker):
             # PASA v88.0 (Fase 8.3): Release atômico do lock se foi claimado atomicamente
             if target and getattr(target, 'source', '') == 'fila_coleta_atomic' and target.queue_id:
                 # PASA v88.2: Ativa a classificação de temperatura (termômetro) antes de liberar
-                self.queue.update_target_metrics(target)
+                await self.queue.update_target_metrics(target)
                 
                 final_status = "CONCLUIDO"
                 if hasattr(result, 'error') and result.error:
@@ -394,10 +394,10 @@ class WkColetaInstagram(BaseWorker):
                     else:
                         final_status = 'FALHA'
                 try:
-                    self.queue.release_atomic(target.queue_id, final_status, self.worker_id)
+                    await self.queue.release_atomic(target.queue_id, final_status, self.worker_id)
                 except Exception as e_rel:
                     logger.warning("[V2] Falha no release atômico: %s", e_rel)
             else:
                 # Legado: usa rotate_target para atualizar o status
-                self.queue.rotate_target(target)
+                await self.queue.rotate_target(target)
 

@@ -38,7 +38,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("cloud_queue_refresh")
 
-def main():
+async def async_main():
     logger.info("Iniciando verificação e repopulação da fila de coleta da Sentinela...")
     
     try:
@@ -50,12 +50,16 @@ def main():
         # Garante pelo menos 50 itens pendentes na fila
         min_pending = 50
         logger.info(f"Executando verificação de população da fila (meta mínima: {min_pending} pendentes)...")
-        manager._ensure_queue_populated(min_pending=min_pending)
+        await manager._ensure_queue_populated(min_pending=min_pending)
         
         logger.info("Verificação da fila concluída com sucesso.")
     except Exception as e:
         logger.error(f"Erro ao repopular fila de coleta: {e}", exc_info=True)
         sys.exit(1)
+
+def main():
+    import asyncio
+    asyncio.run(async_main())
 
 if __name__ == "__main__":
     main()

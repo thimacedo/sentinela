@@ -20,6 +20,7 @@ Uso típico:
 from __future__ import annotations
 
 import logging
+import asyncio
 from typing import Optional
 
 logger = logging.getLogger("checkpoint_manager")
@@ -39,12 +40,14 @@ class CheckpointManager:
         self.candidato_id = candidato_id
         self._available: Optional[bool] = None  # cache de disponibilidade
 
-    def _is_available(self) -> bool:
+    async def _is_available(self) -> bool:
         """Verifica se a tabela de checkpoints existe no banco (cache após 1ª chamada)."""
         if self._available is not None:
             return self._available
         try:
-            self.db.table("scraping_checkpoints").select("id").limit(1).execute()
+            await asyncio.to_thread(
+                self.db.table("scraping_checkpoints").select("id").limit(1).execute
+            )
             self._available = True
         except Exception:
             self._available = False
@@ -54,21 +57,21 @@ class CheckpointManager:
             )
         return self._available
 
-    def load(self) -> Optional[dict]:
+    async def load(self) -> Optional[dict]:
         """
         Carrega o checkpoint mais recente para este (worker_id, candidato_id).
         Retorna dict com {last_shortcode, posts_done, comments_done} ou None.
         """
-        if not self._is_available():
+        if not await self._is_available():
             return None
         try:
-            res = (
+            res = await asyncio.to_thread(
                 self.db.table("scraping_checkpoints")
                 .select("last_shortcode, posts_done, comments_done, updated_at")
                 .eq("worker_id", self.worker_id)
                 .eq("candidato_id", self.candidato_id)
                 .limit(1)
-                .execute()
+                .execute
             )
             if res.data:
                 cp = res.data[0]
@@ -84,7 +87,7 @@ class CheckpointManager:
             logger.warning("[Checkpoint] Erro ao carregar checkpoint para @%s: %s", self.candidato_id, e)
         return None
 
-    def save(
+    async def save(
         self,
         last_shortcode: str,
         posts_done: int,
@@ -94,16 +97,18 @@ class CheckpointManager:
         Salva (upsert) o checkpoint atual.
         Retorna True se bem-sucedido, False em caso de falha (não bloqueia o ciclo).
         """
-        if not self._is_available():
+        if not await self._is_available():
             return False
         try:
-            self.db.rpc("upsert_scraping_checkpoint", {
-                "p_worker_id":      self.worker_id,
-                "p_candidato_id":   self.candidato_id,
-                "p_last_shortcode": last_shortcode,
-                "p_posts_done":     posts_done,
-                "p_comments_done":  comments_done,
-            }).execute()
+            await asyncio.to_thread(
+                self.db.rpc("upsert_scraping_checkpoint", {
+                    "p_worker_id":      self.worker_id,
+                    "p_candidato_id":   self.candidato_id,
+                    "p_last_shortcode": last_shortcode,
+                    "p_posts_done":     posts_done,
+                    "p_comments_done":  comments_done,
+                }).execute
+            )
             logger.debug(
                 "[Checkpoint] Salvo para @%s | post=%s | posts=%d | comentários=%d",
                 self.candidato_id, last_shortcode, posts_done, comments_done,
@@ -113,26 +118,30 @@ class CheckpointManager:
             logger.warning("[Checkpoint] Erro ao salvar checkpoint para @%s: %s", self.candidato_id, e)
             return False
 
-    def clear(self) -> bool:
+    async def clear(self) -> bool:
         """
         Remove o checkpoint após ciclo bem-sucedido.
         Retorna True se bem-sucedido.
         """
-        if not self._is_available():
+        if not await self._is_available():
             return False
         try:
-            self.db.rpc("clear_scraping_checkpoint", {
-                "p_worker_id":    self.worker_id,
-                "p_candidato_id": self.candidato_id,
-            }).execute()
+            await asyncio.to_thread(
+                self.db.rpc("clear_scraping_checkpoint", {
+                    "p_worker_id":    self.worker_id,
+                    "p_candidato_id": self.candidato_id,
+                }).execute
+            )
             logger.debug("[Checkpoint] Removido para @%s após ciclo completo.", self.candidato_id)
             return True
         except Exception as e:
             # Fallback via DELETE direto
             try:
-                self.db.table("scraping_checkpoints").delete().eq(
-                    "worker_id", self.worker_id
-                ).eq("candidato_id", self.candidato_id).execute()
+                await asyncio.to_thread(
+                    self.db.table("scraping_checkpoints").delete().eq(
+                        "worker_id", self.worker_id
+                    ).eq("candidato_id", self.candidato_id).execute
+                )
                 return True
             except Exception:
                 logger.warning("[Checkpoint] Erro ao limpar checkpoint para @%s: %s", self.candidato_id, e)

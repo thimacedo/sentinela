@@ -66,6 +66,7 @@ _last_updated: 2026-06-05 | branch: main_
 - [x] saneamento da malha de providers em `config/fallback_providers.yaml`
 - [x] remover referências residuais a LiteRT do código e da operação
 - [x] Caching de I/O e expurgo de modelos inoperantes (401/402/404) via `_handle_provider_error`
+- [x] Estabelecer a Metodologia Vichi-Sentinela de análise linguística (POS filtering + Lematização + N-Gramas) como inegociável no projeto
 - [ ] calibrar reanálise de baixa confiança com menor ruído de fallback
 
 ### Workers e orquestração

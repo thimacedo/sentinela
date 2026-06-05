@@ -1,4 +1,5 @@
 import httpx
+import asyncio
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 from core.config import settings
@@ -65,7 +66,9 @@ class DatabaseClient:
 
         try:
             # O upsert no Supabase funciona como merge se o id_externo estiver presente
-            self.client.table('comentarios').upsert(updates, on_conflict='id_externo').execute()
+            await asyncio.to_thread(
+                self.client.table('comentarios').upsert(updates, on_conflict='id_externo').execute
+            )
             print(f"[DB] {len(updates)} comentarios atualizados em lote.")
         except Exception as e:
             print(f"[DB] Erro no batch_update_comments: {e}")
@@ -79,7 +82,9 @@ class DatabaseClient:
             return
 
         try:
-            self.client.table('anuncios').upsert(updates).execute()
+            await asyncio.to_thread(
+                self.client.table('anuncios').upsert(updates).execute
+            )
             print(f"[DB] {len(updates)} anuncios atualizados em lote.")
         except Exception as e:
             print(f"[DB] Erro no batch_update_ad_classification: {e}")
@@ -111,7 +116,9 @@ class DatabaseClient:
         """Busca usernames de candidatos marcados para re-perícia."""
         if not self.client: return []
         try:
-            res = self.client.table('candidatos').select('username').eq('needs_re_pericia', True).execute()
+            res = await asyncio.to_thread(
+                self.client.table('candidatos').select('username').eq('needs_re_pericia', True).execute
+            )
             return [item['username'] for item in res.data]
         except Exception as e:
             if "column" in str(e) and "needs_re_pericia" in str(e):
@@ -126,7 +133,9 @@ class DatabaseClient:
         
         try:
             # Busca IDs dos comentários do alvo
-            res = self.client.table('comentarios').select('id').eq('candidato_id', username).execute()
+            res = await asyncio.to_thread(
+                self.client.table('comentarios').select('id').eq('candidato_id', username).execute
+            )
             comment_ids = [c['id'] for c in res.data]
             
             if not comment_ids:
@@ -137,12 +146,14 @@ class DatabaseClient:
             batch_size = 100
             for i in range(0, len(comment_ids), batch_size):
                 batch = comment_ids[i:i+batch_size]
-                self.client.table('comentarios').update({
-                    'processado_ia': False,
-                    'categoria_ia': None,
-                    'confianca_ia': 0,
-                    'is_hate': False
-                }).in_('id', batch).execute()
+                await asyncio.to_thread(
+                    self.client.table('comentarios').update({
+                        'processado_ia': False,
+                        'categoria_ia': None,
+                        'confianca_ia': 0,
+                        'is_hate': False
+                    }).in_('id', batch).execute
+                )
             
             print(f"[DB] {len(comment_ids)} comentarios resetados para @{username}.")
         except Exception as e:
@@ -152,7 +163,9 @@ class DatabaseClient:
         """Desmarca o flag de re-perícia para o alvo."""
         if not self.client: return
         try:
-            self.client.table('candidatos').update({'needs_re_pericia': False}).eq('username', username).execute()
+            await asyncio.to_thread(
+                self.client.table('candidatos').update({'needs_re_pericia': False}).eq('username', username).execute
+            )
         except Exception as e:
             print(f"[DB] Erro ao desmarcar re-pericia para @{username}: {e}")
 
@@ -161,7 +174,9 @@ class DatabaseClient:
         if not self.client: return
         try:
             # Usa upsert baseado no ad_id (id_externo no contexto Meta)
-            self.client.table('anuncios').upsert(data, on_conflict='ad_id').execute()
+            await asyncio.to_thread(
+                self.client.table('anuncios').upsert(data, on_conflict='ad_id').execute
+            )
         except Exception as e:
             print(f"[DB] Erro ao persistir anuncio {data.get('ad_id')}: {e}")
 
@@ -170,7 +185,9 @@ class DatabaseClient:
         if not self.client or not ads: return
         try:
             # Supabase permite upsert de lista
-            self.client.table('anuncios').upsert(ads, on_conflict='ad_id').execute()
+            await asyncio.to_thread(
+                self.client.table('anuncios').upsert(ads, on_conflict='ad_id').execute
+            )
             print(f"[DB] {len(ads)} anuncios processados em lote.")
         except Exception as e:
             print(f"[DB] Erro ao persistir lote de anuncios: {e}")
@@ -179,7 +196,9 @@ class DatabaseClient:
         """Busca anúncios que ainda não foram processados pela IA."""
         if not self.client: return []
         try:
-            res = self.client.table('anuncios').select('*').eq('processado_ia', False).limit(limit).execute()
+            res = await asyncio.to_thread(
+                self.client.table('anuncios').select('*').eq('processado_ia', False).limit(limit).execute
+            )
             return res.data
         except Exception as e:
             print(f"[DB] Erro ao buscar anuncios nao processados: {e}")
@@ -189,7 +208,9 @@ class DatabaseClient:
         """Atualiza a classificação de um único anúncio."""
         if not self.client: return
         try:
-            self.client.table('anuncios').update(data).eq('id', ad_id).execute()
+            await asyncio.to_thread(
+                self.client.table('anuncios').update(data).eq('id', ad_id).execute
+            )
         except Exception as e:
             print(f"[DB] Erro ao atualizar anuncio {ad_id}: {e}")
 
@@ -197,7 +218,9 @@ class DatabaseClient:
         """Persiste metadados de um dossiê gerado."""
         if not self.client: return
         try:
-            res = self.client.table('dossies').insert(data).execute()
+            res = await asyncio.to_thread(
+                self.client.table('dossies').insert(data).execute
+            )
             print(f"[DB] Dossie persistido: {data.get('hash_integridade')[:10]}...")
             return res.data
         except Exception as e:
@@ -211,12 +234,14 @@ class DatabaseClient:
         Retorna o dicionário/JSON.
         """
         try:
-            res = self.client.rpc('process_ci_transaction', {
-                "p_user_id": user_id,
-                "p_amount": amount,
-                "p_type": type_tx,
-                "p_description": description
-            }).execute()
+            res = await asyncio.to_thread(
+                self.client.rpc('process_ci_transaction', {
+                    "p_user_id": user_id,
+                    "p_amount": amount,
+                    "p_type": type_tx,
+                    "p_description": description
+                }).execute
+            )
             return res.data
         except Exception as e:
             import logging
@@ -224,56 +249,68 @@ class DatabaseClient:
             logger.error(f"[DB] Erro ao registrar transacao CI: {e}")
             return {'success': False, 'message': str(e)}
             
-    def get_user_ci_balance(self, user_id: str) -> int:
+    async def get_user_ci_balance(self, user_id: str) -> int:
         """Retorna o saldo atual de CI do usuário."""
         try:
-            res = self.client.table('profiles').select('saldo_ci').eq('id', user_id).single().execute()
+            res = await asyncio.to_thread(
+                self.client.table('profiles').select('saldo_ci').eq('id', user_id).single().execute
+            )
             return res.data.get('saldo_ci', 0) if res.data else 0
         except: return 0
-
+ 
     async def fetch_dossier_history(self, candidato_id: str, limit: int = 20) -> List[Dict[str, Any]]:
         """Recupera o histórico de dossiês estruturados de um candidato."""
         if not self.client: return []
         try:
-            res = self.client.table('dossies')\
-                .select('*')\
-                .eq('candidato_id', candidato_id)\
-                .order('data_geracao', ascending=False)\
-                .limit(limit)\
-                .execute()
+            res = await asyncio.to_thread(
+                self.client.table('dossies')
+                .select('*')
+                .eq('candidato_id', candidato_id)
+                .order('data_geracao', ascending=False)
+                .limit(limit)
+                .execute
+            )
             return res.data
         except Exception as e:
             print(f"[DB] Erro ao buscar historico de dossies: {e}")
             return []
-
+ 
     async def fetch_unmined_comments(self, limit: int = 100) -> List[Dict[str, Any]]:
         """Busca comentários processados pela IA mas ainda não minerados."""
         if not self.client: return []
         try:
             # Tenta filtrar pela coluna 'mined' se existir, caso contrário busca processados
-            res = self.client.table('comentarios').select('*').eq('processado_ia', True).eq('mined', False).limit(limit).execute()
+            res = await asyncio.to_thread(
+                self.client.table('comentarios').select('*').eq('processado_ia', True).eq('mined', False).limit(limit).execute
+            )
             return res.data
         except Exception as e:
             if "column" in str(e) and "mined" in str(e):
                 # Fallback se a coluna não existir ainda
-                res = self.client.table('comentarios').select('*').eq('processado_ia', True).limit(limit).execute()
+                res = await asyncio.to_thread(
+                    self.client.table('comentarios').select('*').eq('processado_ia', True).limit(limit).execute
+                )
                 return res.data
             print(f"[DB] Erro ao buscar comentarios nao minerados: {e}")
             return []
-
+ 
     async def fetch_unmined_ads(self, limit: int = 100) -> List[Dict[str, Any]]:
         """Busca anúncios processados pela IA mas ainda não minerados."""
         if not self.client: return []
         try:
-            res = self.client.table('anuncios').select('*').eq('processado_ia', True).eq('mined', False).limit(limit).execute()
+            res = await asyncio.to_thread(
+                self.client.table('anuncios').select('*').eq('processado_ia', True).eq('mined', False).limit(limit).execute
+            )
             return res.data
         except Exception as e:
             if "column" in str(e) and "mined" in str(e):
-                res = self.client.table('anuncios').select('*').eq('processado_ia', True).limit(limit).execute()
+                res = await asyncio.to_thread(
+                    self.client.table('anuncios').select('*').eq('processado_ia', True).limit(limit).execute
+                )
                 return res.data
             print(f"[DB] Erro ao buscar anuncios nao minerados: {e}")
             return []
-
+ 
     async def upsert_candidate(self, data: Dict[str, Any]):
         """Insere ou atualiza um candidato/alvo na base de dados."""
         if not self.client: return
@@ -282,7 +319,9 @@ class DatabaseClient:
             if 'username' in data:
                 data['username'] = str(data['username']).lower().strip().replace('@', '')
             
-            res = self.client.table('candidatos').upsert(data, on_conflict='username').execute()
+            res = await asyncio.to_thread(
+                self.client.table('candidatos').upsert(data, on_conflict='username').execute
+            )
             print(f"[DB] Alvo @{data.get('username')} persistido com sucesso.")
             return res.data
         except Exception as e:

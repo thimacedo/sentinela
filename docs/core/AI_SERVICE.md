@@ -35,8 +35,8 @@ O **AIService** é o motor de inteligência central da plataforma Sentinela resp
 - **Classificação de Hostilidade:** Determinar se um comentário é hostil (is_hate: true/false)
 - **Categorização:** Atribuir uma categoria precisa (ex: INSULTO_AD_HOMINEM)
 - **Confiança:** Retornar score de confiança (0.0-1.0)
-- **Análise Forense:** Explicar o motivo da classificação
-- **Cascata de Provedores:** Usar múltiplas LLMs em fallback automático
+- **Análise Analítica:** Explicar o motivo da classificação
+- **Cascata de Provedores:** Usar múltiplas LLMs in fallback automático
 - **Filtragem Léxica:** Detectar lixo/spam antes de IA
 
 ### Necessidade de Negócio
@@ -65,7 +65,7 @@ A plataforma precisa detectar **ataques coordenados** contra candidatos polític
 └──────────────┬──────────────────────────┘
                ↓ (Se SUSPEITO ou incerteza)
 ┌─────────────────────────────────────────┐
-│ CAMADA 2: PERÍCIA CLOUD (MISTRAL/GROQ)  │
+│ CAMADA 2: ANÁLISE CLOUD (MISTRAL/GROQ)  │
 │ • Mistral: open-mistral-nemo            │
 │ • Groq: llama-3.3-70b-versatile        │
 │ • Latência: 10-15s                      │
@@ -118,8 +118,8 @@ self.providers = [
 | Provedor | Tipo | Velocidade | Custo | Uso |
 |----------|------|-----------|-------|-----|
 | **Ollama** | Local | Rápido (45s) | Grátis | Triagem rápida |
-| **Mistral** | Cloud | Médio (15s) | Low (~R$0.002) | Perícia principal |
-| **Groq** | Cloud | Muito Rápido (10s) | Low (~R$0.001) | Perícia rápida |
+| **Mistral** | Cloud | Médio (15s) | Low (~R$0.002) | Análise principal |
+| **Groq** | Cloud | Muito Rápido (10s) | Low (~R$0.001) | Análise rápida |
 | **OpenRouter** | Cloud | Médio (20s) | Variable | Fallback |
 
 ---
@@ -152,7 +152,7 @@ async def classify_text(text: str, comment_id: str = "N/A", trace_id: str = None
    │  └─ RETORNA AQUI (custo zero!) ✅
    └─ Se SUSPEITO ou incerteza → continua
 
-4. CAMADA 2: PERÍCIA CLOUD
+4. CAMADA 2: ANÁLISA CLOUD
    ├─ Para cada provider (Mistral, Groq, OpenRouter)
    ├─ Executa SYSTEM_PROMPT completo
    ├─ Primeira que suceder RETORNA (categorias: ODIO_IDENTITARIO, etc)
@@ -204,20 +204,20 @@ Responda APENAS com JSON:
   "confianca_ia": float,
   "analise_pericial": "Motivo rápido (sem usar a palavra crime)"
 }
-IMPORTANTE: Se houver QUALQUER sinal de ataque ou hostilidade real, marque como "SUSPEITO" para perícia posterior.
+IMPORTANTE: Se houver QUALQUER sinal de ataque ou hostilidade real, marque como "SUSPEITO" para análise posterior.
 ```
 
 **Propósito:** Decisão rápida (custo zero), não precisa de categoria fina.
 
-### SYSTEM_PROMPT (Para Mistral/Groq - Perícia Completa)
+### SYSTEM_PROMPT (Para Mistral/Groq - Análise Completa)
 
 ```
-Você é um perito em Linguística Forense Digital especializado em ataques coordenados e hostilidade política.
+Você é um analista especializado em Linguística Analítica Digital para identificação de ataques coordenados e hostilidade política.
 Sua missão é classificar comentários com realismo absoluto, seguindo MCA v2.2 e PASA v16.4.
 
 --- REGRAS DE OURO ---
 1. REALISMO: Não ignore ataques velados, ironias destrutivas ou acusações
-2. FALSAS PERÍCIAS: Jargão jurídico para acusar de "crimes" = ataque direto (DANO_A_IMAGEM)
+2. FALSAS ANÁLISES: Jargão jurídico para acusar de "crimes" = ataque direto (DANO_A_IMAGEM)
 3. DISTINÇÃO: Crítica = ideias. Ataques = pessoas/instituições
 4. COMUNICAÇÃO: Não use a palavra "crime" na análise
 5. IDIOMA: Português Brasileiro (pt-BR)
@@ -264,7 +264,7 @@ Se NÃO for hostil:
 |-----------|-----|
 | **NEUTRO** | Conteúdo legítimo (crítica política, slogans, apoio) |
 | **LIXO** | Spam, mensagens sem sentido |
-| **SUSPEITO** | Pode ser hostil, precisa de perícia |
+| **SUSPEITO** | Pode ser hostil, precisa de análise |
 | **ERRO** | Falha no parse JSON |
 
 ---
@@ -454,7 +454,7 @@ result = await ai_service.classify_text("Texto aqui", comment_id="123")
    └─ Resposta rápida da triagem local
 
 🔍 [AI] MISTRAL | ID: abc123 | DANO_A_IMAGEM | (Refinado)
-   └─ Resposta da perícia cloud
+   └─ Resposta da análise cloud
 
 ⚠️ [AI] Provedor local 'ollama' indisponível/offline
    └─ Ollama não está rodando, abrindo disjuntor
