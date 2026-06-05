@@ -78,7 +78,7 @@ from core.autopilot.cloud_listener import CloudListener, set_current_cycle
 
 # Workers disponíveis (PASA v52.0):
 from workers.scrapers.wk_coleta_instagram import WkColetaInstagram
-from workers.ai.wk_pesquisa_alvos import WkPesquisaAlvos
+from workers.processors.wk_pesquisa_alvos import WkPesquisaAlvos
 
 
 def build_orchestrator() -> SentinelaOrchestrator:

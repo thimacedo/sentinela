@@ -13,7 +13,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from dotenv import load_dotenv
 load_dotenv(PROJECT_ROOT / ".env", override=True)
 
-from workers.ai.wk_pesquisa_alvos import WkPesquisaAlvos
+from workers.processors.wk_pesquisa_alvos import WkPesquisaAlvos
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger("run_pesquisa_alvos")

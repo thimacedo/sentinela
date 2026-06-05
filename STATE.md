@@ -199,3 +199,11 @@ PGMQ deve aparecer apenas como hipótese futura.
   - O método `_handle_candidate` agora gera e retorna objetos contendo as instruções estruturadas de persistência em vez de fazer chamadas individuais diretas ao Supabase remoto para cada candidato.
   - A escrita no banco de dados agora executa um único Bulk Upsert na tabela `candidatos` e outro Bulk Upsert na tabela `fila_coleta`, reduzindo expressivamente o consumo de conexões simultâneas, o tráfego de rede e a latência global da aplicação.
 - **Validação**: Verificada a compilação sem falhas de sintaxe e preparada a sincronização via Git.
+
+## Reorganização Arquitetural de Domínio (Fase 9)
+
+- **Migração do WkPesquisaAlvos**: Movemos o arquivo de curadoria de alvos `WkPesquisaAlvos` de `workers/ai/wk_pesquisa_alvos.py` para o domínio adequado de processadores operacionais em `workers/processors/wk_pesquisa_alvos.py`.
+  - Esta alteração resolve a inconsistência semântica de manter um worker de prospecção/curadoria sob o domínio exclusivo de IA (`workers/ai/`), alinhando-o com o `WkEscaneiaCandidatos` e garantindo coerência de pastas no projeto.
+- **Ajuste de Referências de Import**:
+  - Atualizamos as referências de importação do `WkPesquisaAlvos` em [main_runner.py](file:///C:/Projetos/sentinela/main_runner.py), [scripts/add_target.py](file:///C:/Projetos/sentinela/scripts/add_target.py) e [scripts/run_pesquisa_alvos.py](file:///C:/Projetos/sentinela/scripts/run_pesquisa_alvos.py).
+- **Validação**: Todos os módulos compilados e testados com sucesso total. Alterações registradas no repositório.

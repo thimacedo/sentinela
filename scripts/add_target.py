@@ -9,7 +9,7 @@ if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 os.chdir(PROJECT_ROOT)
 
-from workers.ai.wk_pesquisa_alvos import WkPesquisaAlvos
+from workers.processors.wk_pesquisa_alvos import WkPesquisaAlvos
 
 async def main():
     if len(sys.argv) < 2:
