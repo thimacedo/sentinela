@@ -23,6 +23,8 @@ _last_updated: 2026-06-05 | branch: main_
 - [x] Parametrização imutável por ciclo operacional no WkColetaInstagram para mitigação de race conditions de SRE
 - [x] Unificação e estabilização do watchdog_tray (Fase 5): instância única robusta (socket + boot file lock) e correção do menu Win32 travado
 - [x] Otimização de IA e Fila Secundária (Fase 6): priorização do Ollama local com delay de 1s e criação do subagente SaRevisaoOnline (nuvem) para comentários suspeitos
+- [x] Cobertura Total de Comandos na Bandeja do Watchdog (Fase 7): criação de entrypoints CLI de offloading para todos os subagentes/workers e menu bandeja categorizado
+- [x] Otimização de Performance no Cadastro de Candidatos (Fase 8): processamento e escrita em lote (Bulk Upserts) de novos alvos e coletas no WkEscaneiaCandidatos
 
 ### Escalabilidade e resiliência
 - [x] Claim atômico da `fila_coleta`
