@@ -47,6 +47,12 @@ _last_updated: 2026-06-04 | branch: main_
 - [ ] rotação real de proxies no Playwright
 - [ ] redução de ciclos com `no_comments_found`
 
+### Otimização de Pipeline Reativo (Fase 9) - Em andamento
+- [ ] Implementar `EventBus` centralizado para sinalização em memória.
+- [ ] Atualizar `InstagramScraperWorker` para disparar evento `NEW_DATA_AVAILABLE` após a coleta.
+- [ ] Atualizar `AIProcessorWorker` para usar `event.wait()` (Reatividade) em vez de polling constante, com timeout de segurança.
+- [ ] Validar redução de latência entre coleta e classificação de "minutos" para "milissegundos".
+
 ### Inteligência
 - [x] saneamento da malha de providers em `config/fallback_providers.yaml`
 - [x] remover referências residuais a LiteRT do código e da operação

@@ -126,6 +126,7 @@ PGMQ deve aparecer apenas como hipótese futura.
 ## Últimas Operações (YOLO Test)
 
 - **Teste de Operação Contínua (5 Minutos)**: Em 2026-06-04, um teste acelerado foi executado (`test_5min_operation.py`) para validar simultaneamente o pool de coleta (`InstagramWorker`) e o classificador da fila primária (`AIProcessorWorker`).
+- **Pipeline Reativo (Início da Fase 9)**: Em 2026-06-04, foi aprovada a otimização arquitetural para mover o sistema de um modelo "Polling-based" para "Event-Driven". O objetivo é conectar o Scraper diretamente ao AIProcessor via EventBus (sinalização em memória), zerando a latência de repouso do dado no banco.
 - **Resultados e Auditoria**:
   - **Fila Atômica**: O mecanismo `queue_manager` funcionou perfeitamente realizando claims com `SKIP LOCKED` do Supabase.
   - **Coleta**: Scraper V2 autenticou, identificou postagens fixadas (FAST-SKIP) e avançou pelo grid alvo (`@dep.paulomagalhaes`) utilizando instâncias autônomas Headless do Playwright.
