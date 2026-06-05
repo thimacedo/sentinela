@@ -17,6 +17,7 @@ import time
 import subprocess
 import requests
 import json
+import traceback
 from core.health_check import check_instagram_accounts
 import asyncio
 from threading import Thread, Lock
@@ -638,23 +639,32 @@ def guard():
             t_stdout.start()
             t_stderr.start()
 
-            while True:
+            while state.should_run:
                 poll = process.poll()
                 if poll is not None:
                     break
-                time.sleep(2)
+                time.sleep(1)
 
-            t_stdout.join(timeout=5)
-            t_stderr.join(timeout=5)
+            t_stdout.join(timeout=2)
+            t_stderr.join(timeout=2)
 
-            if poll != 0:
+            if poll is not None and poll != 0:
                 error_type = "runtime"
                 with state.lock:
-                    recent_logs = "".join([l["message"] for l in state.logs[-10:]]).lower()
-                    for err_type in CODE_ERRORS:
-                        if err_type in recent_logs:
-                            error_type = "code"
-                            break
+                    # Analisamos os logs recentes em busca de tracebacks reais
+                    # Evitamos capturar a palavra "exception" genérica fora de contexto
+                    recent_logs = "".join([l["message"] for l in state.logs[-20:]]).lower()
+                    
+                    critical_errors = [
+                        "importerror", "modulenotfounderror", "syntaxerror",
+                        "indentationerror", "attributeerror", "nameerror", "typeerror",
+                        "valueerror", "keyerror", "recursionerror", "zerodivisionerror"
+                    ]
+                    
+                    if any(err in recent_logs for err in critical_errors):
+                        error_type = "code"
+                    elif "traceback (most recent call last)" in recent_logs:
+                        error_type = "code"
                 
                 if error_type == "code":
                     consecutive_code_errors += 1
@@ -694,17 +704,20 @@ def guard():
                         send_whatsapp_alert("WATCHDOG: INIT LOOP - Servidor falhou ao iniciar 3x. Hibernando 1h.", category="runtime")
                         state.update_metrics(status="HIBERNANDO - INIT LOOP", should_run=False)
                         
-                        # Espera defensiva interrompível (1 hora / 3600 segundos)
-                        hibernate_seconds = 3600
-                        check_interval = 5
+                        # Espera defensiva interrompível (1 hora)
                         elapsed = 0
-                        while elapsed < hibernate_seconds and not state.should_run:
-                            time.sleep(check_interval)
-                            elapsed += check_interval
+                        while elapsed < 3600 and not state.should_run:
+                            time.sleep(5)
+                            elapsed += 5
                             
                         state.fast_crashes = 0
                     elif runtime <= 60:
                         send_whatsapp_alert(f"WATCHDOG: RUNTIME ERROR - Code: {poll}. Reiniciando.", category="runtime")
+            elif poll is None:
+                # Parada manual via should_run = False
+                state.add_log("info", "[Watchdog] Processo encerrado pelo operador.")
+                consecutive_code_errors = 0
+                state.fast_crashes = 0
             else:
                 consecutive_code_errors = 0
                 state.fast_crashes = 0
@@ -715,13 +728,19 @@ def guard():
             break
         except Exception as e:
             state.add_log("error", f"[Watchdog] Exceção no guardião: {e}")
+            traceback.print_exc()
         
+        # Cooldown interrompível
         delay = RESTART_DELAY * min(consecutive_code_errors + 1, 5)
-        state.add_log("dim", f"[Watchdog] Aguardando {delay}s antes do próximo ciclo...")
-        time.sleep(delay)
+        state.add_log("dim", f"[Watchdog] Cooldown de {delay}s... (interrompível)")
+        
+        elapsed_delay = 0
+        while elapsed_delay < delay and state.should_run:
+            time.sleep(1)
+            elapsed_delay += 1
 
         # Executa sincronização com o Datasette local durante o cooldown (repouso) de forma assíncrona (não-bloqueante)
-        if state.fast_crashes == 0 and consecutive_code_errors == 0:
+        if state.should_run and state.fast_crashes == 0 and consecutive_code_errors == 0:
             def run_sync():
                 try:
                     state.add_log("info", "[Watchdog] Sincronizando dados para o Datasette local...")
@@ -736,6 +755,7 @@ def guard():
                         state.add_log("warn", f"[Watchdog] Falha ao sincronizar Datasette no cooldown: {e}")
             
             Thread(target=run_sync, daemon=True).start()
+
 
 if __name__ == "__main__":
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
