@@ -561,19 +561,29 @@ def heal_runtime_error(reason: str) -> str:
 
 def guard():
     # Garantir que serviços de IA estejam operacionais antes de iniciar o ciclo
-    from core.health_check import run_startup_health_checks
-    run_startup_health_checks()
-    python_exe = get_python_executable()
+    python_exe = None
+    while python_exe is None:
+        try:
+            from core.health_check import run_startup_health_checks
+            run_startup_health_checks()
+            python_exe = get_python_executable()
+        except Exception as e:
+            state.add_log("error", f"[Watchdog] Falha na inicialização do guardião: {e}")
+            time.sleep(5)
+            
     consecutive_code_errors = 0
 
     while True:
         # Checa se deve rodar o processo. Se não, fica em loop de espera
         if not state.should_run:
-            state.update_metrics(status="PARADO")
+            if not (state.status and state.status.startswith("PARADO -")):
+                state.update_metrics(status="PARADO")
             state.process = None
             while not state.should_run:
                 time.sleep(1)
-            state.update_metrics(status="OPERACIONAL")
+            consecutive_code_errors = 0
+            state.fast_crashes = 0
+            state.update_metrics(status="OPERACIONAL", code_errors=0)
 
         # 1. Auto Update
         try:
@@ -675,19 +685,20 @@ def guard():
                     
                     if healing_action == "fatal":
                         send_whatsapp_alert("WATCHDOG: OOM FATAL - Memoria esgotada. Sistema pausado.", category="oom")
+                        state.update_metrics(status="PARADO - OOM")
                         state.should_run = False
                         continue
                     
                     if state.fast_crashes >= 3:
                         state.add_log("error", "[Watchdog] 3 falhas rapidas consecutivas. Hibernando por 1h.")
                         send_whatsapp_alert("WATCHDOG: INIT LOOP - Servidor falhou ao iniciar 3x. Hibernando 1h.", category="runtime")
-                        state.update_metrics(status="HIBERNANDO - INIT LOOP")
+                        state.update_metrics(status="HIBERNANDO - INIT LOOP", should_run=False)
                         
                         # Espera defensiva interrompível (1 hora / 3600 segundos)
                         hibernate_seconds = 3600
                         check_interval = 5
                         elapsed = 0
-                        while elapsed < hibernate_seconds and state.should_run:
+                        while elapsed < hibernate_seconds and not state.should_run:
                             time.sleep(check_interval)
                             elapsed += check_interval
                             
@@ -709,19 +720,22 @@ def guard():
         state.add_log("dim", f"[Watchdog] Aguardando {delay}s antes do próximo ciclo...")
         time.sleep(delay)
 
-        # Executa sincronização com o Datasette local durante o cooldown (repouso)
+        # Executa sincronização com o Datasette local durante o cooldown (repouso) de forma assíncrona (não-bloqueante)
         if state.fast_crashes == 0 and consecutive_code_errors == 0:
-            try:
-                state.add_log("info", "[Watchdog] Sincronizando dados para o Datasette local...")
-                from scripts.export_to_sqlite import export_to_sqlite
-                export_to_sqlite()
-                state.add_log("info", "[Watchdog] Sincronização Datasette concluída com sucesso durante o descanso.")
-            except Exception as e:
-                err_msg = str(e).lower()
-                if any(t in err_msg for t in ["10060", "timed out", "timeout", "connection", "componente conectado não respondeu"]):
-                    state.add_log("warn", "[Watchdog] Sincronização Datasette ignorada: Banco de dados/Rede offline.")
-                else:
-                    state.add_log("warn", f"[Watchdog] Falha ao sincronizar Datasette no cooldown: {e}")
+            def run_sync():
+                try:
+                    state.add_log("info", "[Watchdog] Sincronizando dados para o Datasette local...")
+                    from scripts.export_to_sqlite import export_to_sqlite
+                    export_to_sqlite()
+                    state.add_log("info", "[Watchdog] Sincronização Datasette concluída com sucesso durante o descanso.")
+                except Exception as e:
+                    err_msg = str(e).lower()
+                    if any(t in err_msg for t in ["10060", "timed out", "timeout", "connection", "componente conectado não respondeu"]):
+                        state.add_log("warn", "[Watchdog] Sincronização Datasette ignorada: Banco de dados/Rede offline.")
+                    else:
+                        state.add_log("warn", f"[Watchdog] Falha ao sincronizar Datasette no cooldown: {e}")
+            
+            Thread(target=run_sync, daemon=True).start()
 
 if __name__ == "__main__":
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
