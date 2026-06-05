@@ -236,18 +236,31 @@ class SentinelaOrchestrator:
                     break
                 result = await self.run_cycle_with_validation_v2(worker)
                 
-                # --- SMART WAIT (PASA v85.12) ---
+                # --- SMART WAIT (PASA v85.12 & Pipeline Reativo Fase 9) ---
                 if result.cycle_result.error == "no_tasks_available":
-                    idle_wait = 1200.0 # 20 minutos de sono profundo
-                    logger.info("[%s] 💤 Fila vazia. Entrando em modo de espera (%.0fs).", worker.worker_id, idle_wait)
-                    await asyncio.sleep(idle_wait)
+                    if "ai-processor" in worker.worker_id.lower():
+                        from core.event_bus import local_bus
+                        idle_wait = 1200.0
+                        logger.info("[%s] 💤 Fila vazia. Aguardando novo sinal via EventBus (Pipeline Reativo)...", worker.worker_id)
+                        # Aguarda o sinal de novos dados do Scraper (ou timeout)
+                        acordado_por_sinal = await local_bus.wait_for_data(timeout=idle_wait)
+                        if acordado_por_sinal:
+                            logger.info("[%s] ⚡ Sinal recebido! Reativando AIProcessor imediatamente.", worker.worker_id)
+                            local_bus.clear_signal()
+                    else:
+                        idle_wait = 1200.0 # 20 minutos de sono profundo
+                        logger.info("[%s] 💤 Fila vazia. Entrando em modo de espera (%.0fs).", worker.worker_id, idle_wait)
+                        await asyncio.sleep(idle_wait)
                 elif result.cycle_result.error == "worker_suspended":
                     logger.info("[%s] ⏳ Worker suspenso. Aguardando 60s antes de nova verificação.", worker.worker_id)
                     await asyncio.sleep(60.0)
                 else:
+                    # Se foi produtivo, aplica cooldown normal, mas o AIProcessor pode pular o cooldown se tiver sinal?
+                    # Não, mantemos o cooldown para evitar rate-limit de APIs.
                     wait_time = float(self.reward_engine.get_interval(result.reward.tier))
                     logger.debug("[%s] Aguardando %.0fs de cooldown space.", worker.worker_id, wait_time)
                     await asyncio.sleep(wait_time)
+
 
         # Roda todos em paralelo, cada um com seu próprio ritmo de cooldown
         await asyncio.gather(*(_worker_loop(w) for w in self._workers))

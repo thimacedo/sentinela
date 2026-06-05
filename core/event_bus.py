@@ -1,11 +1,48 @@
 # core/event_bus.py
 from __future__ import annotations
 import logging
+import asyncio
 from core.supabase_service import get_supabase_client
 
 logger = logging.getLogger("EventBus")
 
+class AsyncLocalEventBus:
+    """
+    EventBus Local (In-Memory) para sinalização instantânea entre workers no mesmo processo.
+    Zero-latency signaling para Pipeline Reativo (Fase 9).
+    """
+    def __init__(self):
+        self.new_data_event = asyncio.Event()
+
+    def signal_new_data(self):
+        """Notifica os consumidores (ex: AIProcessor) que há novos dados no banco."""
+        self.new_data_event.set()
+
+    def clear_signal(self):
+        """Limpa o sinal de novos dados após o início do consumo."""
+        self.new_data_event.clear()
+
+    async def wait_for_data(self, timeout: float = None) -> bool:
+        """
+        Aguarda até que novos dados sejam sinalizados ou até o timeout.
+        Retorna True se foi acordado por um sinal, False se deu timeout.
+        """
+        if self.new_data_event.is_set():
+            return True
+        try:
+            if timeout:
+                await asyncio.wait_for(self.new_data_event.wait(), timeout=timeout)
+                return True
+            else:
+                await self.new_data_event.wait()
+                return True
+        except asyncio.TimeoutError:
+            return False
+
+local_bus = AsyncLocalEventBus()
+
 QUEUES = {
+
     "scan_candidate":    "scan_candidate",
     "scrape_profile":    "scrape_profile",
     "classify_comments": "classify_comments",

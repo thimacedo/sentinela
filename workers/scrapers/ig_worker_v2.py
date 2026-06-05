@@ -16,6 +16,7 @@ from core.local_buffer import local_buffer
 from core.lexical_filter import lexical_filter
 from core.process_cleaner import cleanup_orphans
 from core.checkpoint_manager import CheckpointManager
+from core.event_bus import local_bus
 
 logger = logging.getLogger("worker.ig_v2")
 
@@ -313,8 +314,14 @@ class InstagramScraperWorker(BaseWorker):
                     self.logger.error(f"❌ [V2] Falha total na persistência: {e2}")
                     raise ValueError(f"db_persistence_fatal: {str(e2)}")
 
+            # --- SINALIZAÇÃO DE NOVO DADO (Pipeline Reativo Fase 9) ---
+            if inserted > 0:
+                self.logger.info(f"⚡ [EventBus] Sinalizando AIProcessorWorker: {inserted} novos registros.")
+                local_bus.signal_new_data()
+
             stats = self.scraper.get_stats()
             final_extracted = len(comments)
+
             
             if final_extracted <= 0 and stats.get("junk_detected", 0) > 0:
                 self.logger.warning(f"⚠️ [V2] Todo o conteúdo extraído de @{target.username} era LIXO. Sinalizando falha e anulando recompensas.")
