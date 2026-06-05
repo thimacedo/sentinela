@@ -654,8 +654,9 @@ def guard():
                     if consecutive_code_errors >= 3:
                         send_whatsapp_alert("WATCHDOG: ERRO DE CODIGO - Reinicios parados. Correcao manual necessaria.", category="code")
                         state.update_metrics(status="PARADO - ERRO CODIGO")
-                        state.add_log("error", "[Watchdog] 3 erros consecutivos. Parando.")
-                        break
+                        state.add_log("error", "[Watchdog] 3 erros consecutivos de código. Entrando em pausa de segurança.")
+                        state.should_run = False
+                        continue
                     elif consecutive_code_errors == 1:
                         heal_dependencies(python_exe)
                 else:
@@ -674,13 +675,22 @@ def guard():
                     
                     if healing_action == "fatal":
                         send_whatsapp_alert("WATCHDOG: OOM FATAL - Memoria esgotada. Sistema pausado.", category="oom")
-                        break
+                        state.should_run = False
+                        continue
                     
                     if state.fast_crashes >= 3:
                         state.add_log("error", "[Watchdog] 3 falhas rapidas consecutivas. Hibernando por 1h.")
                         send_whatsapp_alert("WATCHDOG: INIT LOOP - Servidor falhou ao iniciar 3x. Hibernando 1h.", category="runtime")
                         state.update_metrics(status="HIBERNANDO - INIT LOOP")
-                        time.sleep(3600)
+                        
+                        # Espera defensiva interrompível (1 hora / 3600 segundos)
+                        hibernate_seconds = 3600
+                        check_interval = 5
+                        elapsed = 0
+                        while elapsed < hibernate_seconds and state.should_run:
+                            time.sleep(check_interval)
+                            elapsed += check_interval
+                            
                         state.fast_crashes = 0
                     elif runtime <= 60:
                         send_whatsapp_alert(f"WATCHDOG: RUNTIME ERROR - Code: {poll}. Reiniciando.", category="runtime")
@@ -699,44 +709,19 @@ def guard():
         state.add_log("dim", f"[Watchdog] Aguardando {delay}s antes do próximo ciclo...")
         time.sleep(delay)
 
-        # Executa classificação de novos comentários pendentes e reanálise durante o cooldown,
-        # eliminando todas as pendências de IA enquanto as raspagens descansam.
+        # Executa sincronização com o Datasette local durante o cooldown (repouso)
         if state.fast_crashes == 0 and consecutive_code_errors == 0:
             try:
-                from core.ai_service import ai_service
-                
-                # 1. Processar todas as classificações normais pendentes na fila
-                state.add_log("info", "[Watchdog] Processando fila de novas classificações pendentes...")
-                total_classified = 0
-                while True:
-                    processed = asyncio.run(ai_service.run_batch_classification(limit=100))
-                    if processed == 0:
-                        break
-                    total_classified += processed
-                if total_classified > 0:
-                    state.add_log("info", f"[Watchdog] Classificados {total_classified} comentários pendentes durante o descanso.")
-                
-                # 2. Executa reanálise de comentários de baixa confiança
-                state.add_log("info", "[Watchdog] Processando reanálise de comentários de baixa confiança...")
-                reanalyzed = asyncio.run(ai_service.run_batch_reanalysis(limit=100))
-                if reanalyzed > 0:
-                    state.add_log("info", f"[Watchdog] Reanalisados {reanalyzed} comentários com baixa confiança durante o descanso.")
-                
-                # 3. Exportar dados atualizados para o Datasette local
                 state.add_log("info", "[Watchdog] Sincronizando dados para o Datasette local...")
-                try:
-                    from scripts.export_to_sqlite import export_to_sqlite
-                    export_to_sqlite()
-                except Exception as e_sql:
-                    state.add_log("warn", f"[Watchdog] Falha ao exportar dados para SQLite: {e_sql}")
-                
-                state.add_log("info", "[Watchdog] Manutenção de IA e sincronização concluídas com sucesso durante o descanso.")
+                from scripts.export_to_sqlite import export_to_sqlite
+                export_to_sqlite()
+                state.add_log("info", "[Watchdog] Sincronização Datasette concluída com sucesso durante o descanso.")
             except Exception as e:
                 err_msg = str(e).lower()
                 if any(t in err_msg for t in ["10060", "timed out", "timeout", "connection", "componente conectado não respondeu"]):
-                    state.add_log("warn", "[Watchdog] Manutenção de IA ignorada no cooldown: Banco de dados/Rede offline.")
+                    state.add_log("warn", "[Watchdog] Sincronização Datasette ignorada: Banco de dados/Rede offline.")
                 else:
-                    state.add_log("warn", f"[Watchdog] Falha ao executar manutenção no cooldown: {e}")
+                    state.add_log("warn", f"[Watchdog] Falha ao sincronizar Datasette no cooldown: {e}")
 
 if __name__ == "__main__":
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
