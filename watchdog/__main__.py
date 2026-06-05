@@ -44,6 +44,39 @@ def run_audit_agent(icon=None, item=None):
     except Exception as e:
         print(f"[Tray] Erro ao disparar AuditAgent: {e}")
 
+def run_revisao_online(icon=None, item=None):
+    REVISAO_SCRIPT = os.path.join(PROJECT_ROOT, "scripts", "run_revisao_online.py")
+    try:
+        subprocess.Popen(
+            ["cmd", "/k", sys.executable, REVISAO_SCRIPT],
+            cwd=PROJECT_ROOT,
+            creationflags=subprocess.CREATE_NEW_CONSOLE,
+        )
+    except Exception as e:
+        print(f"[Tray] Erro ao disparar SaRevisaoOnline: {e}")
+
+def run_mineracao_redes(icon=None, item=None):
+    MINERACAO_SCRIPT = os.path.join(PROJECT_ROOT, "scripts", "run_mineracao_redes.py")
+    try:
+        subprocess.Popen(
+            ["cmd", "/k", sys.executable, MINERACAO_SCRIPT],
+            cwd=PROJECT_ROOT,
+            creationflags=subprocess.CREATE_NEW_CONSOLE,
+        )
+    except Exception as e:
+        print(f"[Tray] Erro ao disparar SaMineracaoRedes: {e}")
+
+def run_auditoria_financeira(icon=None, item=None):
+    FINANCEIRA_SCRIPT = os.path.join(PROJECT_ROOT, "scripts", "run_auditoria_financeira.py")
+    try:
+        subprocess.Popen(
+            ["cmd", "/k", sys.executable, FINANCEIRA_SCRIPT],
+            cwd=PROJECT_ROOT,
+            creationflags=subprocess.CREATE_NEW_CONSOLE,
+        )
+    except Exception as e:
+        print(f"[Tray] Erro ao disparar SaAuditoriaFinanceira: {e}")
+
 def run_dossier_agent(icon=None, item=None):
     DOSSIER_SCRIPT = os.path.join(PROJECT_ROOT, "scripts", "run_dossier_agent.py")
     if not os.path.exists(DOSSIER_SCRIPT):
@@ -89,9 +122,12 @@ def build_menu():
         item('Parar Servidor', stop_server_action),
         item('Reiniciar Servidor', restart_server_action),
         pystray.Menu.SEPARATOR,
-        item('▶ Rodar Auditoria IA', run_audit_agent),
-        item('▶ Rodar DossierAgent', run_dossier_agent),
+        item('▶ Rodar Auditoria IA (SaAuditaClassificacoes)', run_audit_agent),
+        item('▶ Rodar Revisão Online (SaRevisaoOnline)', run_revisao_online),
+        item('▶ Rodar Mineração de Redes (SaMineracaoRedes)', run_mineracao_redes),
+        item('▶ Rodar Auditoria Financeira (SaAuditoriaFinanceira)', run_auditoria_financeira),
         item('▶ Rodar ScannerAgent', run_scanner_agent),
+        item('▶ Rodar DossierAgent', run_dossier_agent),
         pystray.Menu.SEPARATOR,
         item('Sair', quit_tray),
     )
