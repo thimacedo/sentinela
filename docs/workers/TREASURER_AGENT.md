@@ -1,64 +1,100 @@
-# TreasurerAgent - Documentação de Auditoria Financeira e Fechamento
+# TreasurerAgent — Auditoria Financeira e Burn Rate
+_version: 88.1 | last_updated: 2026-06-04 | status: Ativo (Sob Demanda)_
 
-**Versão:** PASA v88.1  
-**Arquivo Fonte:** [treasurer_agent.py](file:///c:/projetos/sentinela/workers/financial/treasurer_agent.py)  
-**Status:** ✅ Operacional (Subagente reativo / sob demanda)  
-**Última Atualização:** Junho 2026
+## 1. Visão Geral
 
----
+**TreasurerAgent** é o subagente responsável pela saúde financeira e contábil do ecossistema Sentinela. Ele monitora a integridade dos saldos de Créditos Internos (CI), a conectividade com o gateway de pagamentos (Stripe) e calcula o custo operacional de IA em tempo real (Burn Rate).
 
-## 🎯 Visão Geral
-
-O **TreasurerAgent** é o subagente financeiro responsável por garantir a integridade das transações do ecossistema de créditos de informação (CI) no Sentinela. Suas responsabilidades principais incluem:
-
-- **Auditoria de Saldos**: Rastrear perfis com saldos inconsistentes ou negativos para evitar exploits no uso de créditos.
-- **Verificação de Gateway**: Testar e garantir que a integração com o gateway de pagamentos (Stripe) está operacional.
-- **Fechamento Diário (DRE)**: Calcular e consolidar o fluxo de compras de créditos (Inflow) contra o consumo de recursos (Outflow) nas últimas 24 horas.
-
-Sua execução é disparada de forma assíncrona em background na conclusão de processamentos de IA ou via requisições explícitas do dashboard administrativo.
+### Informações Básicas
+- **ID do Agente**: `treasurer-agent`
+- **Localização**: `workers/financial/treasurer_agent.py`
+- **Engine**: Supabase API + Stripe API
+- **Trigger**: Disparado reativamente pelo `AIProcessorWorker` ou manualmente sob demanda.
+- **Status**: 🟢 Ativo
 
 ---
 
-## 🔄 Fluxo de Processamento
+## 2. Responsabilidades
 
+### Responsabilidade 1: Auditoria de Saldos (Governance)
+- Verifica a tabela `profiles` em busca de saldos negativos ou inconsistentes.
+- Detecta possíveis falhas no sistema de débitos de CI durante o processamento em lote.
+
+### Responsabilidade 2: Monitoramento de Gateway (Stripe)
+- Testa a conectividade com o Stripe.
+- Diferencia o modo de produção (Live Key) do modo de simulação (Mock/Test Key), garantindo que o checkout esteja sempre operacional.
+
+### Responsabilidade 3: Cálculo de Burn Rate (IA Cost)
+- Analisa a tabela `fallback_logs` das últimas 24 horas.
+- Atribui pesos financeiros a cada provedor (Ollama=0, Mistral/Groq/Gemini=pago).
+- Calcula o custo estimado em USD do processamento de inteligência.
+
+### Responsabilidade 4: DRE Diário (Demonstrativo de Resultados)
+- Consolida o fluxo de entrada (PURCHASE) e saída (CONSUMPTION) de CI.
+- Gera um sumário de rentabilidade operacional diária nos logs.
+
+---
+
+## 3. Fluxo de Auditoria
+
+1. **Saldos**: `SELECT id, saldo_ci FROM profiles WHERE saldo_ci < 0`.
+2. **Stripe**: `stripe.Balance.retrieve()` para validar a integridade da conexão.
+3. **Burn Rate**:
+   - Agrupa chamadas de IA por provedor.
+   - Aplica a tabela de preços dinâmica (PASA v88.1 Pricing).
+   - Reporta o valor consolidado.
+
+---
+
+## 4. Tabela de Preços de IA (Estimada em USD)
+
+| Provedor | Preço por Chamada |
+|----------|-------------------|
+| Ollama (Local) | $0.00000 |
+| Google Gemini | $0.000075 |
+| Mistral | $0.00010 |
+| Groq Llama 3 | $0.00010 |
+| OpenRouter | $0.00050 |
+| OpenAI GPT-3.5 | $0.00150 |
+
+---
+
+## 5. Configuração
+
+### Variáveis de Ambiente
+- `STRIPE_API_KEY`: Necessária para auditoria real do gateway.
+- `SERVICE_KEY`: Necessária para auditoria de todas as tabelas no Supabase.
+
+### Monitoramento de Logs
+```bash
+tail -f logs/main_runner.json | grep TreasurerAgent
 ```
-┌────────────────────────────────────────────────────────┐
-│ 1. INICIALIZAÇÃO                                       │
-│   • Prepara variáveis de controle e status             │
-└────────────────────────────────────────────────────────┘
-                           ↓
-┌────────────────────────────────────────────────────────┐
-│ 2. AUDITORIA DE SALDOS (profiles)                      │
-│   • Executa consulta por perfis com saldo_ci < 0       │
-│   • Registra anomalias como erro para ação corretiva   │
-└────────────────────────────────────────────────────────┘
-                           ↓
-┌────────────────────────────────────────────────────────┐
-│ 3. CONECTIVIDADE GATEWAY (Stripe)                      │
-│   • Testa conectividade real contra API do Stripe      │
-│   • Fallback automático para modo Mock/Beta se key ok  │
-└────────────────────────────────────────────────────────┘
-                           ↓
-┌────────────────────────────────────────────────────────┐
-│ 4. FECHAMENTO DIÁRIO DRE (Uma vez por dia)             │
-│   • Agrega transações PURCHASE (+) e CONSUMPTION (-)   │
-│   • Loga receita líquida consolidada das últimas 24h   │
-└────────────────────────────────────────────────────────┘
+
+---
+
+## 6. Integração
+
+O `TreasurerAgent` é disparado automaticamente após ciclos de sucesso da IA para atualizar a telemetria financeira:
+
+```python
+# workers/orchestrator/orchestrator.py
+if "ai-processor" in result.worker_id and result.classifier_success:
+    asyncio.create_task(TreasurerAgent().run_financial_audit())
 ```
 
 ---
 
-## 🧬 Métodos Principais
+## 7. Troubleshooting
 
-### `run_financial_audit()`
-Executa o pipeline completo de auditoria financeira.
-- **Retorno**: Um dicionário contendo estatísticas da auditoria (sucesso do ciclo, anomalias encontradas, conectividade Stripe).
+### Problema: "Burn rate reportado como zero"
+1. Verifique se existem registros na tabela `fallback_logs` nas últimas 24 horas.
+2. Certifique-se de que o `AIProcessorWorker` está enviando logs de uso para o banco.
 
-### `audit_balances()`
-Busca no Supabase e identifica perfis que consumiram créditos além de seus limites.
+### Problema: "Anomalias de saldo detectadas"
+1. O TreasurerAgent reportará o ID do perfil com saldo negativo no log `error`.
+2. A correção deve ser feita manualmente ou via script de compensação.
 
-### `check_stripe_connectivity()`
-Realiza uma chamada leve para listar o saldo da conta e verificar se a API Key do Stripe está válida.
+---
 
-### `generate_daily_financial_report()`
-Agrega transações do dia anterior por tipo para compor o fluxo de caixa consolidado.
+**Última Revisão**: 2026-06-04
+**PASA Version**: v88.1

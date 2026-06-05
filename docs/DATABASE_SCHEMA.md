@@ -181,6 +181,11 @@ CREATE TABLE comentarios (
   is_hate BOOLEAN DEFAULT FALSE,              -- Detectado como hate speech
   is_spam BOOLEAN DEFAULT FALSE,              -- Detectado como spam
   
+  -- Auditoria Analítica (AuditAgent)
+  audit_discrepancy BOOLEAN DEFAULT FALSE,    -- Divergência detectada entre classificadores
+  audit_data JSONB,                           -- JSON de reclassificação do auditor (Groq)
+  needs_review BOOLEAN DEFAULT FALSE,         -- Marcador para revisão humana
+  
   -- Rasping Info
   data_comentario TIMESTAMP,                  -- Quando foi postado
   data_coleta TIMESTAMP DEFAULT NOW(),        -- Quando foi coletado

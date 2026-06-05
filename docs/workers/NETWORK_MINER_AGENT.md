@@ -1,74 +1,105 @@
-# NetworkMinerAgent - Documentação de Análise de Redes Coordenadas
+# NetworkMinerAgent — Análise de Redes Coordenadas
+_version: 88.1 | last_updated: 2026-06-04 | status: Ativo (Sob Demanda)_
 
-**Versão:** PASA v88.1  
-**Arquivo Fonte:** [network_agent.py](file:///c:/projetos/sentinela/workers/analytics/network_agent.py)  
-**Status:** ✅ Operacional (Subagente reativo / sob demanda)  
-**Última Atualização:** Junho 2026
+## 1. Visão Geral
 
----
+**NetworkMinerAgent** é o subagente especializado em mineração de grafos e detecção de ataques coordenados. Ele analisa a similaridade entre comentários, a frequência de ataques a múltiplos alvos e a conexão entre perfis suspeitos para identificar comunidades de hostilidade (Astroturfing/Bot Rings).
 
-## 🎯 Visão Geral
-
-O **NetworkMinerAgent** é um subagente analítico especializado na mineração de **redes coordenadas** e **detecção de clusters** na plataforma Sentinela. Seu objetivo é:
-
-- **Analisar grafos de interação** entre autores de comentários classificados como ódio e candidatos políticos alvos.
-- **Identificar comunidades suspeitas** (clusters) que indicam coordenação organizada ou comportamento inautêntico.
-- **Quantificar o risco** de campanhas de ataque organizadas.
-- **Alimentar o frontend** com dados estruturados sobre redes de influência via tabela `redes_coordenadas` e relatórios em formato JSON/Markdown.
-
-A análise é executada em segundo plano de forma reativa após ciclos de classificação de IA bem-sucedidos ou sob demanda via API/Dashboard.
+### Informações Básicas
+- **ID do Agente**: `network-miner-agent`
+- **Localização**: `workers/analytics/network_agent.py`
+- **Engine**: NetworkX + Pandas
+- **Trigger**: Disparado reativamente pelo `AIProcessorWorker` ou manualmente sob demanda.
+- **Status**: 🟢 Ativo
 
 ---
 
-## 🏗️ Fluxo de Processamento e Design
+## 2. Responsabilidades
 
+### Responsabilidade 1: Detecção de Clusters
+- Identifica contas que atacam múltiplos candidatos monitorados simultaneamente.
+- Cria grafos de interações entre autores e alvos.
+- Detecta componentes conectados (comunidades) que operam de forma síncrona ou coordenada.
+
+### Responsabilidade 2: Cálculo de Score de Perigo
+- Atribui um score de 0 a 100 para cada cluster detectado.
+- O score baseia-se no tamanho da rede, volume de interações e densidade de conexões coordenadas.
+
+### Responsabilidade 3: Exportação de Relatórios
+- Persiste os dados dos clusters na tabela `redes_coordenadas` do Supabase.
+- Gera arquivos físicos (`.json` e `.md`) em `frontend/public/reports/` para consumo do dashboard de analytics.
+
+---
+
+## 3. Algoritmo de Análise
+
+1. **Ingestão**: Recupera até 2000 comentários classificados como ódio (`is_hate=True`) dos últimos 7 dias.
+2. **Filtragem de Atacantes**: Identifica `multi_attackers` (usuários que atacaram > 1 candidato).
+3. **Construção do Grafo**:
+   - Nodos: Autores e Candidatos.
+   - Arestas: Representam a ação de postar um comentário hostil.
+4. **Detecção de Comunidades**: Utiliza `nx.connected_components` para isolar grupos de interação.
+5. **Classificação da Coordenação**:
+   - `MULTI_TARGET`: Se o cluster contém atacantes que operam em múltiplos alvos.
+   - `SINGLE_TARGET`: Se o cluster é focado em um único alvo mas demonstra volume anormal.
+
+---
+
+## 4. Persistência e Saída
+
+### Tabela: `redes_coordenadas`
+O agente armazena o cluster mais crítico de cada ciclo:
+- `id`: UUID v4 derivado do hash do nome da rede.
+- `nodes`: Array de strings (usernames).
+- `edges`: JSONB com o mapa de conexões.
+- `score_perigoso`: Valor de 0-100.
+
+### Relatórios Físicos
+Arquivos gerados em `frontend/public/reports/network_YYYY-MM-DD.md`:
+```markdown
+# Relatorio de Analise de Redes Coordenadas
+## Nome do Cluster: Cluster de Ataque #2 (42 nodes)
+- **Tipo de Coordenacao:** MULTI_TARGET
+- **Score de Perigo:** 100/100
+- **Contas Suspeitas Envolvidas:** 42
+- **Conexoes Identificadas:** 41
 ```
-┌────────────────────────────────────────────────────────┐
-│ 1. COLETA DE DADOS                                     │
-│   • Busca comentários classificados como ódio          │
-│   • Filtra registros das últimas N horas/dias          │
-└────────────────────────────────────────────────────────┘
-                           ↓
-┌────────────────────────────────────────────────────────┐
-│ 2. CONSTRUÇÃO DO GRAFO (NetworkX)                      │
-│   • Cria grafo de conexões (Autor ↔ Candidato Alvo)    │
-│   • Adiciona arestas pesadas pela frequência de ataque │
-└────────────────────────────────────────────────────────┘
-                           ↓
-┌────────────────────────────────────────────────────────┐
-│ 3. DETECÇÃO DE COMUNIDADES                             │
-│   • Identifica componentes conexas no grafo            │
-│   • Filtra interações menores (menos de 3 nós)         │
-└────────────────────────────────────────────────────────┘
-                           ↓
-┌────────────────────────────────────────────────────────┐
-│ 4. SCORING DE RISCO E RANKING                          │
-│   • Score = min(100, len(nós)*5 + interações//10)      │
-│   • Seleciona o principal cluster crítico              │
-└────────────────────────────────────────────────────────┘
-                           ↓
-┌────────────────────────────────────────────────────────┐
-│ 5. PERSISTÊNCIA E RELATÓRIO                            │
-│   • Grava dados estruturados na tabela Supabase         │
-│   • Gera arquivos network_YYYY-MM-DD em reports/       │
-└────────────────────────────────────────────────────────┘
+
+---
+
+## 5. Configuração e Monitoramento
+
+### Variáveis de Ambiente
+- Não requer variáveis exclusivas, utiliza a `SERVICE_KEY` do Supabase via `core/db.py`.
+
+### Monitoramento de Logs
+```bash
+tail -f logs/main_runner.json | grep NetworkMinerAgent
 ```
 
 ---
 
-## 🧬 Métodos Principais
+## 6. Integração
 
-### `run_analysis()`
-Executa todo o pipeline de detecção de clusters coordenadas.
-- **Retorno**: Um dicionário com metadados do processamento (quantidade de clusters identificados, score do top cluster, etc.).
+O `NetworkMinerAgent` é disparado automaticamente pelo orquestrador quando o `AIProcessorWorker` conclui um ciclo com sucesso:
 
-### `_generate_physical_reports(cluster_data)`
-Gera arquivos em `frontend/public/reports/` nos formatos JSON e Markdown contendo detalhes analíticos do cluster mapeado.
+```python
+# workers/orchestrator/orchestrator.py
+if "ai-processor" in result.worker_id and result.classifier_success:
+    asyncio.create_task(NetworkMinerAgent().run_analysis())
+```
 
 ---
 
-## ⚙️ Configuração
+## 7. Troubleshooting
 
-O subagente aceita parâmetros em seu construtor:
-- `lookback_days` (padrão: 7): Janela de dias para coleta de dados históricos.
-- `min_similarity` (padrão: 0.8): Similaridade léxica (reservado para futuras atualizações de clustering de posts).
+### Problema: "Relatório de rede não atualiza"
+**Sintomas**: Arquivos em `frontend/public/reports` com data antiga.
+1. Verifique se existem comentários marcados como `is_hate=True` nos últimos 7 dias.
+2. Verifique se o `AIProcessorWorker` está rodando e concluindo ciclos.
+3. Verifique se o volume de dados atinge o mínimo (10 comentários de ódio) para disparar a mineração.
+
+---
+
+**Última Revisão**: 2026-06-04
+**PASA Version**: v88.1

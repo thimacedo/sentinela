@@ -72,17 +72,19 @@ O principal risco operacional hoje é a expiração ou bloqueio de cookies da se
 
 ### Ativo
 
-- fila circular unificada: local e cloud dividem o mesmo loop com rotacionamento Round-Robin
-- reanálise de baixa confiança (usando exclusivamente cloud da fila unificada)
-- fallback estruturado injetado ativamente na fila com **Poda Automática** (provedores são banidos instantaneamente em caso de erro 401/402/404)
-- padronização léxica forçada via `PADRONIZACAO_LINGUISTICA_ANALITICA.md` incondicionalmente em todos os providers
-- **Cache de I/O**: Prompts e datasets locais são carregados na RAM (Zero overhead de leitura em disco no event-loop)
-- **DatabaseAgent (Subagente de dados)**: Integrado e disponível em `workers.ai.DatabaseAgent`. Esse subagente consome a API JSON do Datasette local na porta `8002` para fornecer consultas SQL assíncronas, buscas textuais indexadas (FTS5) e estatísticas analíticas para os demais workers do ecossistema de forma desacoplada.
+- **Fila Circular Unificada**: Local (Ollama) e Cloud (Mistral, Groq, etc.) dividem o mesmo loop com rotacionamento Round-Robin.
+- **Parametrização Diferenciada**:
+  - **Cloud Providers**: Consomem o prompt completo enriquecido com `PADRONIZACAO_LINGUISTICA_ANALITICA.md` (PASA v16.3), `custom_rules.json` e o `classifier_gold_dataset.json`.
+  - **Local (Ollama)**: Utiliza uma versão **reduzida** e otimizada ("DIRETRIZES ESSENCIAIS") para triagem rápida, visando evitar o *context bloat* e garantir respostas em < 2s.
+- **Reanálise de Baixa Confiança**: Usando exclusivamente provedores Cloud da fila unificada para refinar itens com `confianca_ia < 0.6`.
+- **Circuit Breaker & Poda**: Provedores com erro 401/403 (chave/cota) são removidos da malha ativa em tempo real; erros 429 (rate limit) geram suspensão temporária de 60s.
+- **Cache de I/O**: Prompts e datasets locais são carregados na RAM no boot para zero overhead de leitura em disco.
+- **DatabaseAgent (Subagente de dados)**: Integrado para consultas SQL e buscas FTS5 via porta 8002.
 
 ### Saneado
 
-- referências residuais a LiteRT removidas
-- malha de fallback reordenada e sem provedores indisponíveis (como eden_ai e cerebras)
+- Referências residuais a LiteRT removidas do pipeline de processamento ativo.
+- Malha de fallback reordenada e sem provedores indisponíveis.
 
 ## Situação da fila
 
@@ -131,3 +133,10 @@ PGMQ deve aparecer apenas como hipótese futura.
     - MARITACA sofreu falha (403 Forbidden - Provável Chave Expirada/Sem Fundo) e sofreu **Poda Automática** via CircuitBreaker, sendo removido permanentemente da malha ativa, protegendo o runtime.
     - GROQ sofreu limitador de taxa (429 Too Many Requests) e foi temporariamente suspenso na rotação, direcionando a carga fluída para Ollama e Mistral sem interromper o serviço (graceful fallback).
   - **Conclusão**: O sistema operou de forma perfeitamente resiliente, sem quedas ou congelamentos (deadlocks), confirmando a robustez da arquitetura PASA e do roteamento adaptativo de LLM. O processo assíncrono finalizou corretamente.
+
+## Auditoria de Inteligência (AuditAgent)
+
+- **Falha de Persistência**: Em 2026-06-04, o `AuditAgent` detectou uma falha de schema ao tentar salvar dados de auditoria cruzada. O erro `PGRST204` confirmou a ausência da coluna `audit_data` na tabela `comentarios`.
+- **Correção Aplicada**: Criada a migração `migrations/20260604_add_audit_data.sql` para adicionar a coluna `JSONB` necessária.
+- **Detecção de Drift**: O agente reportou um **Drift de 26.7%** (4 divergências em 15 amostras) entre o classificador de produção e o auditor (Groq/Llama 3.3). O alerta de drift (> 20%) foi disparado, sugerindo necessidade de recalibragem dos prompts ou do threshold de confiança.
+- **Relatórios de Rede**: O `NetworkMinerAgent` gerou novos relatórios em `frontend/public/reports/` identificando clusters de ataque coordenado com score de perigo máximo (100/100).
