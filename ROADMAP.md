@@ -21,6 +21,7 @@ _last_updated: 2026-06-05 | branch: main_
 - [x] Orquestração concorrente de subagentes analíticos efêmeros com lotes via `SELECT FOR UPDATE SKIP LOCKED`
 - [x] Cascata de IA resiliente com circuit breaker local e detecção de drift analítico em SaAuditaClassificacoes
 - [x] Parametrização imutável por ciclo operacional no WkColetaInstagram para mitigação de race conditions de SRE
+- [x] Unificação e estabilização do watchdog_tray (Fase 5): instância única robusta (socket + boot file lock) e correção do menu Win32 travado
 
 ### Escalabilidade e resiliência
 - [x] Claim atômico da `fila_coleta`
