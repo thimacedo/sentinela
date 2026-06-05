@@ -9,7 +9,7 @@ from core.db import db_client
 
 logger = logging.getLogger("worker.researcher")
 
-class TargetResearchWorker(BaseWorker):
+class WkPesquisaAlvos(BaseWorker):
     """
     Worker especializado em curadoria e manutenção de dados de alvos (PASA v84.16).
     Utiliza IntelligenceService para processamento estruturado.

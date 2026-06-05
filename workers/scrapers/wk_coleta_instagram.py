@@ -20,7 +20,7 @@ from core.event_bus import local_bus
 
 logger = logging.getLogger("worker.ig_v2")
 
-class InstagramScraperWorker(BaseWorker):
+class WkColetaInstagram(BaseWorker):
     """
     Worker Instagram V2 (Independente).
     Implementa o fluxo completo de coleta e classificação usando o motor V2.

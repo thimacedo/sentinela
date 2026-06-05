@@ -1,8 +1,8 @@
 """
-SuggestionConsumer — Consumidor de Sugestões do AIAdvisor (PASA v80.0)
+WkAplicaSugestoes — Consumidor de Sugestões do AIAdvisor (PASA v80.0)
 
 Fecha o loop de feedback do AIAdvisor:
-  AIAdvisor gera sugestão → SuggestionConsumer aplica automaticamente
+  AIAdvisor gera sugestão → WkAplicaSugestoes aplica automaticamente
   
 Sugestões aplicáveis automaticamente:
   - Ajuste de max_posts (reduzir carga)
@@ -23,7 +23,7 @@ from datetime import datetime, timezone
 logger = logging.getLogger("workers.ai.suggestion_consumer")
 
 
-class SuggestionConsumer:
+class WkAplicaSugestoes:
     """
     Lê sugestões pendentes do AIAdvisor e aplica as que são automatizáveis (PASA v80.0).
     Roda como task assíncrona no main_runner.
@@ -38,7 +38,7 @@ class SuggestionConsumer:
 
     async def start(self) -> None:
         """Inicia o loop de verificação de sugestões."""
-        logger.info("💡 [SuggestionConsumer] Iniciado. Verificando sugestões a cada 30 min.")
+        logger.info("💡 [WkAplicaSugestoes] Iniciado. Verificando sugestões a cada 30 min.")
         while self.is_active:
             await asyncio.sleep(self._check_interval)
             await self._process_pending_suggestions()
@@ -58,16 +58,16 @@ class SuggestionConsumer:
 
             suggestions = res.data or []
             if not suggestions:
-                logger.debug("💡 [SuggestionConsumer] Nenhuma sugestão pendente.")
+                logger.debug("💡 [WkAplicaSugestoes] Nenhuma sugestão pendente.")
                 return
 
-            logger.info(f"💡 [SuggestionConsumer] {len(suggestions)} sugestão(ões) para processar.")
+            logger.info(f"💡 [WkAplicaSugestoes] {len(suggestions)} sugestão(ões) para processar.")
 
             for s in suggestions:
                 await self._evaluate_and_apply(s)
 
         except Exception as e:
-            logger.error(f"❌ [SuggestionConsumer] Erro ao ler sugestões: {e}")
+            logger.error(f"❌ [WkAplicaSugestoes] Erro ao ler sugestões: {e}")
 
     async def _evaluate_and_apply(self, suggestion: dict) -> None:
         """Avalia uma sugestão e decide se pode ser aplicada automaticamente."""
@@ -122,17 +122,17 @@ class SuggestionConsumer:
             self.db.table("worker_suggestions").update(update_data).eq("id", sid).execute()
 
             if new_status == "auto_applied":
-                logger.info(f"✅ [SuggestionConsumer] Sugestão #{sid} aplicada automaticamente: {action_taken}")
+                logger.info(f"✅ [WkAplicaSugestoes] Sugestão #{sid} aplicada automaticamente: {action_taken}")
             else:
-                logger.info(f"👤 [SuggestionConsumer] Sugestão #{sid} requer revisão humana.")
+                logger.info(f"👤 [WkAplicaSugestoes] Sugestão #{sid} requer revisão humana.")
 
         except Exception as e:
-            logger.error(f"❌ [SuggestionConsumer] Erro ao atualizar sugestão #{sid}: {e}")
+            logger.error(f"❌ [WkAplicaSugestoes] Erro ao atualizar sugestão #{sid}: {e}")
 
     async def _apply_config_change(self, worker_id: str, param: str, new_value) -> Optional[str]:
         """Tenta ajustar a config de um worker registrado no orquestrador."""
         if not self.orchestrator:
-            logger.warning("⚠️ [SuggestionConsumer] Sem referência ao orquestrador. Config não pode ser ajustada.")
+            logger.warning("⚠️ [WkAplicaSugestoes] Sem referência ao orquestrador. Config não pode ser ajustada.")
             return None
 
         for worker in getattr(self.orchestrator, "_workers", []):
@@ -140,7 +140,7 @@ class SuggestionConsumer:
                 old_value = worker.config.get(param)
                 worker.config[param] = new_value
                 msg = f"Config '{param}' de {worker_id}: {old_value} → {new_value}"
-                logger.info(f"⚙️ [SuggestionConsumer] {msg}")
+                logger.info(f"⚙️ [WkAplicaSugestoes] {msg}")
                 return msg
 
         return None
@@ -163,7 +163,7 @@ class SuggestionConsumer:
             }).eq("username", username).execute()
             return f"Alvo @{username} movido para HIBERNANDO."
         except Exception as e:
-            logger.error(f"❌ [SuggestionConsumer] Erro ao hibernar @{username}: {e}")
+            logger.error(f"❌ [WkAplicaSugestoes] Erro ao hibernar @{username}: {e}")
             return None
 
     def _extract_username(self, text: str) -> Optional[str]:

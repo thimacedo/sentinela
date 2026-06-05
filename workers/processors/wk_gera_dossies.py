@@ -1,5 +1,5 @@
 """
-PASA v88.0 — DossierWorker: Sub-agente de Geração de Dossiês em PDF
+PASA v88.0 — WkGeraDossies: Sub-agente de Geração de Dossiês em PDF
 Refatorado de script standalone (while True + sleep) para BaseWorker com ciclo de vida gerenciado.
 Processa itens da tabela 'dossies' e gera os PDFs correspondentes.
 """
@@ -17,7 +17,7 @@ from workers.base.cycle_result import CycleResult
 logger = logging.getLogger("worker.dossier")
 
 
-class DossierWorker(BaseWorker):
+class WkGeraDossies(BaseWorker):
     """
     Sub-agente de geração de dossiês.
 
@@ -38,31 +38,31 @@ class DossierWorker(BaseWorker):
         self._error_column: Optional[str] = None
 
     def describe(self) -> str:
-        return f"DossierWorker — Geração de PDFs de Dossiês (dir={self.report_dir})"
+        return f"WkGeraDossies — Geração de PDFs de Dossiês (dir={self.report_dir})"
 
     async def setup(self) -> None:
         try:
             from core.supabase_service import get_supabase_client
             self._supabase = get_supabase_client()
-            logger.info("✅ [DossierWorker] Conexão Supabase estabelecida.")
+            logger.info("✅ [WkGeraDossies] Conexão Supabase estabelecida.")
         except Exception as e:
-            logger.error("❌ [DossierWorker] Falha ao conectar Supabase: %s", e)
+            logger.error("❌ [WkGeraDossies] Falha ao conectar Supabase: %s", e)
 
         try:
             from processing.report_generator import ReportGenerator
             self._report_gen = ReportGenerator()
-            logger.info("✅ [DossierWorker] ReportGenerator inicializado.")
+            logger.info("✅ [WkGeraDossies] ReportGenerator inicializado.")
         except ImportError as e:
-            logger.error("❌ [DossierWorker] ReportGenerator não encontrado: %s", e)
+            logger.error("❌ [WkGeraDossies] ReportGenerator não encontrado: %s", e)
 
         os.makedirs(self.report_dir, exist_ok=True)
         await self._detect_dossies_columns()
-        logger.info("🚀 [DossierWorker] Pronto. %s", self.describe())
+        logger.info("🚀 [WkGeraDossies] Pronto. %s", self.describe())
 
     async def teardown(self) -> None:
         self._supabase = None
         self._report_gen = None
-        logger.info("🛑 [DossierWorker] Encerrado.")
+        logger.info("🛑 [WkGeraDossies] Encerrado.")
 
     async def run_cycle(self) -> CycleResult:
         start_time = asyncio.get_event_loop().time()
@@ -86,10 +86,10 @@ class DossierWorker(BaseWorker):
                 duration=asyncio.get_event_loop().time() - start_time,
             )
 
-        logger.info("📋 [DossierWorker] Ciclo #%d — buscando dossiês pendentes.", self.cycle)
+        logger.info("📋 [WkGeraDossies] Ciclo #%d — buscando dossiês pendentes.", self.cycle)
         pending = await self._fetch_pending()
         if not pending:
-            logger.info("✅ [DossierWorker] Nenhum dossiê pendente.")
+            logger.info("✅ [WkGeraDossies] Nenhum dossiê pendente.")
             return CycleResult(
                 worker_id=self.worker_id,
                 cycle=self.cycle,
@@ -98,13 +98,13 @@ class DossierWorker(BaseWorker):
                 duration=asyncio.get_event_loop().time() - start_time,
             )
 
-        logger.info("📄 [DossierWorker] %d dossiê(s) encontrado(s).", len(pending))
+        logger.info("📄 [WkGeraDossies] %d dossiê(s) encontrado(s).", len(pending))
 
         success = 0
         failed = 0
         for dossier in pending:
             if self.shutdown_event and self.shutdown_event.is_set():
-                logger.info("🛑 [DossierWorker] Shutdown durante processamento. Parando.")
+                logger.info("🛑 [WkGeraDossies] Shutdown durante processamento. Parando.")
                 break
 
             ok = await self._process_dossier(dossier)
@@ -114,7 +114,7 @@ class DossierWorker(BaseWorker):
                 failed += 1
 
         logger.info(
-            "📊 [DossierWorker] Ciclo #%d | Encontrados=%d | Gerados=%d | Falhas=%d",
+            "📊 [WkGeraDossies] Ciclo #%d | Encontrados=%d | Gerados=%d | Falhas=%d",
             self.cycle,
             len(pending),
             success,
@@ -164,13 +164,13 @@ class DossierWorker(BaseWorker):
                 self._error_column = "erro"
 
             logger.info(
-                "[DossierWorker] Schema detectado: status=%s | path=%s | error=%s",
+                "[WkGeraDossies] Schema detectado: status=%s | path=%s | error=%s",
                 self._status_column or "(nenhum)",
                 self._path_column,
                 self._error_column or "(nenhum)",
             )
         except Exception as e:
-            logger.warning("[DossierWorker] Falha ao detectar schema de dossies: %s", e)
+            logger.warning("[WkGeraDossies] Falha ao detectar schema de dossies: %s", e)
 
     def _build_update_payload(self, status_value: Optional[str] = None, report_path: Optional[str] = None, error_text: Optional[str] = None) -> dict[str, Any]:
         payload: dict[str, Any] = {}
@@ -194,21 +194,21 @@ class DossierWorker(BaseWorker):
             msg = str(e)
             if "column dossies.status does not exist" in msg:
                 self._status_column = None
-                logger.warning("[DossierWorker] Coluna de status inexistente em dossies. Usando fallback por arquivo_path nulo.")
+                logger.warning("[WkGeraDossies] Coluna de status inexistente em dossies. Usando fallback por arquivo_path nulo.")
                 try:
                     res = self._supabase.table("dossies").select("*").is_(self._path_column, "null").limit(25).execute()
                     return res.data or []
                 except Exception as e2:
-                    logger.error("❌ [DossierWorker] Erro ao buscar pendentes no fallback: %s", e2)
+                    logger.error("❌ [WkGeraDossies] Erro ao buscar pendentes no fallback: %s", e2)
                     return []
 
-            logger.error("❌ [DossierWorker] Erro ao buscar pendentes: %s", e)
+            logger.error("❌ [WkGeraDossies] Erro ao buscar pendentes: %s", e)
             return []
 
     async def _process_dossier(self, dossier: dict) -> bool:
         d_id = dossier.get("id")
         candidato_id = dossier.get("candidato_id", f"dossie_{d_id}")
-        logger.info("→ [DossierWorker] Processando dossiê ID=%s (candidato=%s)", d_id, candidato_id)
+        logger.info("→ [WkGeraDossies] Processando dossiê ID=%s (candidato=%s)", d_id, candidato_id)
 
         try:
             processing_payload = self._build_update_payload(status_value="Processando")
@@ -227,16 +227,16 @@ class DossierWorker(BaseWorker):
                 done_payload = self._build_update_payload(status_value="Concluído", report_path=gen_path)
                 if done_payload:
                     self._supabase.table("dossies").update(done_payload).eq("id", d_id).execute()
-                logger.info("✅ [DossierWorker] PDF gerado: %s", gen_path)
+                logger.info("✅ [WkGeraDossies] PDF gerado: %s", gen_path)
                 return True
 
             raise RuntimeError("ReportGenerator não retornou caminho válido.")
         except Exception as e:
-            logger.error("❌ [DossierWorker] Erro no dossiê ID=%s: %s", d_id, e)
+            logger.error("❌ [WkGeraDossies] Erro no dossiê ID=%s: %s", d_id, e)
             try:
                 fail_payload = self._build_update_payload(status_value="Falhou", error_text=str(e))
                 if fail_payload:
                     self._supabase.table("dossies").update(fail_payload).eq("id", d_id).execute()
             except Exception as db_err:
-                logger.error("❌ [DossierWorker] Erro ao registrar falha no banco: %s", db_err)
+                logger.error("❌ [WkGeraDossies] Erro ao registrar falha no banco: %s", db_err)
             return False

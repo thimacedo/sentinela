@@ -12,7 +12,7 @@ import logging
 from workers.base.memory_store import MemoryStore
 from workers.base.reward_engine import RewardEngine
 from workers.ai.doc_fetcher import DocFetcher
-from workers.ai.ai_advisor import AIAdvisor
+from workers.ai.sa_diagnostica_sistemas import SaDiagnosticaSistemas
 from workers.scrapers.ig_headless import IGHeadlessWorker
 from workers.scrapers.ig_zyte import IGZyteWorker
 from workers.orchestrator import SentinelaOrchestrator
@@ -24,7 +24,7 @@ async def main():
     memory = MemoryStore()
     reward = RewardEngine(memory)
     fetcher = DocFetcher()
-    advisor = AIAdvisor(memory, fetcher)
+    advisor = SaDiagnosticaSistemas(memory, fetcher)
     
     orch = SentinelaOrchestrator(reward, advisor)
     

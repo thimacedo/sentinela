@@ -6,7 +6,7 @@ from workers.base.memory_store import MemoryStore
 from workers.ai.doc_fetcher import DocFetcher
 from core.ai_service import AIService
 
-class AIAdvisor:
+class SaDiagnosticaSistemas:
     """
     Advisor que analisa métricas de workers e gera sugestões
     utilizando cache de documentos e IA Cloud (Mistral/Groq).
@@ -14,7 +14,7 @@ class AIAdvisor:
     def __init__(self, memory: MemoryStore, fetcher: DocFetcher):
         self.memory = memory
         self.fetcher = fetcher
-        self.logger = logging.getLogger("AIAdvisor")
+        self.logger = logging.getLogger("SaDiagnosticaSistemas")
         self.ai_service = AIService() # Reutiliza infra de cascata
 
     async def analyze_and_suggest(self, worker, result) -> None:
@@ -68,4 +68,4 @@ class AIAdvisor:
             cycle=result.cycle,
             suggestion=suggestion
         )
-        self.logger.info(f"💡 [AIAdvisor] Sugestão salva para {result.worker_id}: {suggestion[:50]}...")
+        self.logger.info(f"💡 [SaDiagnosticaSistemas] Sugestão salva para {result.worker_id}: {suggestion[:50]}...")

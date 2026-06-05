@@ -7,7 +7,7 @@ import random
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 
-from workers.scrapers.instagram_worker import InstagramWorker
+from workers.scrapers.wk_coleta_instagram import WkColetaInstagram as InstagramWorker
 from core.supabase_service import save_comments, get_next_targets_to_scrape, update_last_scraped_at, save_scrape_error
 from core.worker_auditor import audit_worker_result
 

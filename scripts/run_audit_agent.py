@@ -34,8 +34,8 @@ if sys.platform.startswith("win"):
 from dotenv import load_dotenv
 load_dotenv(PROJECT_ROOT / ".env", override=True)
 
-from workers.ai.audit_agent import AuditAgent
-from workers.ai.database_agent import DatabaseAgent
+from workers.ai.sa_audita_classificacoes import SaAuditaClassificacoes
+from workers.ai.sa_consulta_banco import SaConsultaBanco
 
 # Logging configurado para o sub-agente
 logging.basicConfig(
@@ -80,14 +80,14 @@ def parse_args() -> argparse.Namespace:
 
 
 async def run(args: argparse.Namespace) -> None:
-    db_agent = DatabaseAgent()
-    agent = AuditAgent(database_agent=db_agent)
+    db_agent = SaConsultaBanco()
+    agent = SaAuditaClassificacoes(database_agent=db_agent)
 
     cycles_executed = 0
     try:
         while True:
             cycles_executed += 1
-            logger.info(f"[AuditAgent] Iniciando ciclo #{cycles_executed}")
+            logger.info(f"[SaAuditaClassificacoes] Iniciando ciclo #{cycles_executed}")
             
             result = await agent.run_audit(
                 sample_size=args.sample_size,
@@ -121,12 +121,12 @@ async def run(args: argparse.Namespace) -> None:
     except KeyboardInterrupt:
         logger.info("Interrupção detectada. Encerrando...")
     finally:
-        logger.info("AuditAgent encerrado. Total de ciclos: %d.", cycles_executed)
+        logger.info("SaAuditaClassificacoes encerrado. Total de ciclos: %d.", cycles_executed)
 
 
 def main() -> None:
     args = parse_args()
-    logger.info("AuditAgent iniciando | sample=%d | confidence>=%.0f%% | drift_alerta=%.0f%%",
+    logger.info("SaAuditaClassificacoes iniciando | sample=%d | confidence>=%.0f%% | drift_alerta=%.0f%%",
                 args.sample_size, args.confidence * 100, args.drift_threshold)
     asyncio.run(run(args))
 

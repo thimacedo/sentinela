@@ -70,22 +70,22 @@ logger = logging.getLogger("main_runner")
 from workers.base.memory_store import MemoryStore
 from workers.base.reward_engine import RewardEngine
 from workers.ai.doc_fetcher import DocFetcher
-from workers.ai.ai_advisor import AIAdvisor
-from workers.ai.suggestion_consumer import SuggestionConsumer
+from workers.ai.sa_diagnostica_sistemas import SaDiagnosticaSistemas
+from workers.ai.wk_aplica_sugestoes import WkAplicaSugestoes
 from workers.orchestrator.orchestrator import SentinelaOrchestrator
 from core.autopilot.manager import autopilot
 from core.autopilot.cloud_listener import CloudListener, set_current_cycle
 
 # Workers disponíveis (PASA v52.0):
-from workers.scrapers.instagram_worker import InstagramWorker
-from workers.ai.target_research_worker import TargetResearchWorker
+from workers.scrapers.wk_coleta_instagram import WkColetaInstagram
+from workers.ai.wk_pesquisa_alvos import WkPesquisaAlvos
 
 
 def build_orchestrator() -> SentinelaOrchestrator:
     store = MemoryStore()
     engine = RewardEngine(store)
     fetcher = DocFetcher()
-    advisor = AIAdvisor(memory=store, fetcher=fetcher)
+    advisor = SaDiagnosticaSistemas(memory=store, fetcher=fetcher)
 
     orch = SentinelaOrchestrator(engine, advisor)
 
@@ -95,7 +95,7 @@ def build_orchestrator() -> SentinelaOrchestrator:
     
     for i in range(num_scrapers):
         worker_id = f"ig-v2-{i+1:02d}"
-        orch.register(InstagramWorker(
+        orch.register(WkColetaInstagram(
             worker_id=worker_id,
             config={
                 "max_posts": int(os.getenv("MAX_POSTS_PER_PROFILE", "3")),
@@ -107,18 +107,18 @@ def build_orchestrator() -> SentinelaOrchestrator:
     # 🧠 AI PROCESSOR: Worker dedicado para classificação PASA
     # Este worker consome o backlog deixado pelos scrapers
     try:
-        from workers.processors.ai_processor_worker import AIProcessorWorker
+        from workers.processors.wk_classifica_comentarios import WkClassificaComentarios
         
-        orch.register(AIProcessorWorker(worker_id="ai-processor-01", config={}))
+        orch.register(WkClassificaComentarios(worker_id="ai-processor-01", config={}))
         
-        logger.info("[main_runner] AIProcessorWorker registrado com sucesso.")
+        logger.info("[main_runner] WkClassificaComentarios registrado com sucesso.")
     except ImportError as e:
-        logger.warning(f"[main_runner] Erro ao registrar AIProcessorWorker: {e}")
+        logger.warning(f"[main_runner] Erro ao registrar WkClassificaComentarios: {e}")
 
     # Motor de Curadoria e Inteligência de Alvos (v84.9)
     researcher_mode = os.getenv("RESEARCHER_MODE", "disabled").strip().lower()
     if researcher_mode != "disabled":
-        orch.register(TargetResearchWorker(
+        orch.register(WkPesquisaAlvos(
             worker_id="researcher-01",
             config={
                 "headless": True,
@@ -190,9 +190,9 @@ async def main() -> None:
     logger.info("[main_runner] 🛡️ CloudListener ativado (heartbeat + controle remoto).")
 
     # 💡 LOOP DE FEEDBACK DO AI ADVISOR (PASA v80.0)
-    suggestion_consumer = SuggestionConsumer(orchestrator=orch)
+    suggestion_consumer = WkAplicaSugestoes(orchestrator=orch)
     asyncio.create_task(suggestion_consumer.start())
-    logger.info("[main_runner] 💡 SuggestionConsumer ativado (aplicação automática de sugestões).")
+    logger.info("[main_runner] 💡 WkAplicaSugestoes ativado (aplicação automática de sugestões).")
 
     if not orch.worker_ids:
         logger.warning(

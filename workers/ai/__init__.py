@@ -1,6 +1,7 @@
-from workers.ai.ai_advisor import AIAdvisor
+from workers.ai.sa_diagnostica_sistemas import SaDiagnosticaSistemas
 from workers.ai.doc_fetcher import DocFetcher
-from workers.ai.database_agent import DatabaseAgent
-from workers.ai.audit_agent import AuditAgent
+from workers.ai.sa_consulta_banco import SaConsultaBanco
+from workers.ai.sa_audita_classificacoes import SaAuditaClassificacoes
 
-__all__ = ["AIAdvisor", "DocFetcher", "DatabaseAgent", "AuditAgent"]
+__all__ = ["SaDiagnosticaSistemas", "DocFetcher", "SaConsultaBanco", "SaAuditaClassificacoes"]
+

@@ -30,7 +30,8 @@
     "Analisar a intenção por trás das palavras para identificar misoginia",
     "Desconsiderar expressões de descontentamento geral sem alvo específico",
     "Considerar contexto cultural e social para entender ofensas",
-    "Analisar relações de poder entre falantes e alvo"
+    "Analisar relações de poder entre falantes e alvo",
+    "Analisar a intenção por trás das palavras para diferenciar insultos ad hominem de críticas construtivas."
   ],
   "mitigate_false_positives": [
     "Evitar marcação de expressões comuns em comunidades específicas como ofensivas sem contexto",
@@ -72,7 +73,9 @@
     "Evitar classificar linguagem reappropriada como ofensiva em contextos específicos",
     "Considerar a intenção por trás das palavras",
     "Evitar falso positivo em expressões artísticas ou literárias",
-    "Considerar ironia e sarcasmo em alguns casos"
+    "Considerar ironia e sarcasmo em alguns casos",
+    "Evitar marcação de expressões comuns em comunidades específicas como ofensivas sem contexto.",
+    "Considerar o tom e a intenção por trás das palavras para evitar marcação de expressões inofensivas como ameaças."
   ],
   "custom_keywords": {
     "ODIO_IDENTITARIO": [

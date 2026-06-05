@@ -34,7 +34,7 @@ except ImportError:
     PdfReader = None
 
 
-class CandidateScannerWorker(BaseWorker):
+class WkEscaneiaCandidatos(BaseWorker):
     """
     Sub-agente de escaneamento de candidatos.
     Monitora a pasta de pesquisas em PDF, extrai candidatos e os enfileira para coleta.
@@ -56,7 +56,7 @@ class CandidateScannerWorker(BaseWorker):
 
     def describe(self) -> str:
         return (
-            f"CandidateScannerWorker | "
+            f"WkEscaneiaCandidatos | "
             f"Monitora PDFs em '{self.base_path}', extrai candidatos e enfileira para coleta."
         )
 

@@ -7,7 +7,7 @@ from core.ai_service import ai_service
 
 logger = logging.getLogger("worker.ai_processor")
 
-class AIProcessorWorker(BaseWorker):
+class WkClassificaComentarios(BaseWorker):
     """
     Worker: AIProcessor — Classificador Oficial do Pipeline PASA (PASA v88.0)
     ══════════════════════════════════════════════════════════════════════════
@@ -35,10 +35,10 @@ class AIProcessorWorker(BaseWorker):
         return "AI Processor Worker - Classificação PASA em Lote"
 
     async def setup(self) -> None:
-        logger.info(f"🚀 AIProcessorWorker {self.worker_id} pronto para perícia.")
+        logger.info(f"🚀 WkClassificaComentarios {self.worker_id} pronto para perícia.")
 
     async def teardown(self) -> None:
-        logger.info(f"🛑 AIProcessorWorker {self.worker_id} encerrado.")
+        logger.info(f"🛑 WkClassificaComentarios {self.worker_id} encerrado.")
 
     async def run_cycle(self) -> CycleResult:
         start_time = asyncio.get_event_loop().time()
@@ -93,7 +93,7 @@ class AIProcessorWorker(BaseWorker):
             )
 
         except Exception as e:
-            logger.error(f"💥 Erro no AIProcessorWorker: {e}")
+            logger.error(f"💥 Erro no WkClassificaComentarios: {e}")
             return CycleResult(
                 worker_id=self.worker_id, cycle=self.cycle,
                 failed=1, error=str(e)[:200], simulated=False,

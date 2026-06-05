@@ -16,10 +16,10 @@ load_dotenv(override=True)
 from workers.base.memory_store import MemoryStore
 from workers.base.reward_engine import RewardEngine
 from workers.ai.doc_fetcher import DocFetcher
-from workers.ai.ai_advisor import AIAdvisor
+from workers.ai.sa_diagnostica_sistemas import SaDiagnosticaSistemas
 from workers.orchestrator.orchestrator import SentinelaOrchestrator
-from workers.scrapers.instagram_worker import InstagramWorker
-from workers.processors.ai_processor_worker import AIProcessorWorker
+from workers.scrapers.wk_coleta_instagram import WkColetaInstagram
+from workers.processors.wk_classifica_comentarios import WkClassificaComentarios
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger("Test_5Min")
@@ -30,15 +30,15 @@ async def run_5min_test():
     store = MemoryStore()
     engine = RewardEngine(store)
     fetcher = DocFetcher()
-    advisor = AIAdvisor(memory=store, fetcher=fetcher)
+    advisor = SaDiagnosticaSistemas(memory=store, fetcher=fetcher)
     orch = SentinelaOrchestrator(engine, advisor)
 
     # Configurando os workers
-    scraper_worker = InstagramWorker(
+    scraper_worker = WkColetaInstagram(
         worker_id="ig-test-01",
         config={"max_posts": 2, "max_comments_per_post": 10, "headless": True}
     )
-    ai_worker = AIProcessorWorker(
+    ai_worker = WkClassificaComentarios(
         worker_id="ai-test-01",
         config={"batch_size": 20}
     )

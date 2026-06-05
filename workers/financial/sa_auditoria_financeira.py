@@ -5,9 +5,9 @@ from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, Tuple
 from core.db import db_client
 
-logger = logging.getLogger("TreasurerAgent")
+logger = logging.getLogger("SaAuditoriaFinanceira")
 
-class TreasurerAgent:
+class SaAuditoriaFinanceira:
     """
     Subagente financeiro de auditoria analítica e fechamento financeiro diário.
     Monitora a conformidade do fluxo de CI e o status dos gateways de pagamento.
@@ -24,7 +24,7 @@ class TreasurerAgent:
         2. Teste de conectividade com Stripe.
         3. Geração de DRE/fechamento diário (se aplicável).
         """
-        logger.info("[TreasurerAgent] Iniciando auditoria financeira do ecossistema Sentinela")
+        logger.info("[SaAuditoriaFinanceira] Iniciando auditoria financeira do ecossistema Sentinela")
         start_time = asyncio.get_event_loop().time()
 
         anomalies = 0
@@ -52,7 +52,7 @@ class TreasurerAgent:
                 report_generated = True
 
         except Exception as e:
-            logger.error(f"[TreasurerAgent] Erro durante auditoria financeira: {e}", exc_info=True)
+            logger.error(f"[SaAuditoriaFinanceira] Erro durante auditoria financeira: {e}", exc_info=True)
             error = str(e)
 
         duration = asyncio.get_event_loop().time() - start_time
@@ -74,11 +74,11 @@ class TreasurerAgent:
             negatives = res.data or []
             
             for profile in negatives:
-                logger.error(f"🚨 [TreasurerAgent] Inconsistência de saldo encontrada: ID {profile.get('id')} ({profile.get('saldo_ci')} CI)")
+                logger.error(f"🚨 [SaAuditoriaFinanceira] Inconsistência de saldo encontrada: ID {profile.get('id')} ({profile.get('saldo_ci')} CI)")
             
             return len(negatives)
         except Exception as e:
-            logger.error(f"[TreasurerAgent] Falha na auditoria de saldos no DB: {e}")
+            logger.error(f"[SaAuditoriaFinanceira] Falha na auditoria de saldos no DB: {e}")
             raise
 
     async def check_stripe_connectivity(self) -> Tuple[bool, bool]:
@@ -86,7 +86,7 @@ class TreasurerAgent:
         import stripe
         stripe_key = os.getenv("STRIPE_API_KEY")
         if not stripe_key:
-            logger.info("[TreasurerAgent] Stripe API Key ausente. Rodando em modo simulado/mock.")
+            logger.info("[SaAuditoriaFinanceira] Stripe API Key ausente. Rodando em modo simulado/mock.")
             return False, False
 
         stripe.api_key = stripe_key
@@ -94,10 +94,10 @@ class TreasurerAgent:
             # Tenta listar o balanço básico para validar a chave de API
             loop = asyncio.get_event_loop()
             await loop.run_in_executor(None, stripe.Balance.retrieve)
-            logger.info("✅ [TreasurerAgent] Conexão com gateway Stripe operando normalmente.")
+            logger.info("✅ [SaAuditoriaFinanceira] Conexão com gateway Stripe operando normalmente.")
             return True, True
         except Exception as e:
-            logger.error(f"[TreasurerAgent] Falha ao conectar ao gateway Stripe: {e}")
+            logger.error(f"[SaAuditoriaFinanceira] Falha ao conectar ao gateway Stripe: {e}")
             return False, True
 
     async def _compute_burn_rate(self) -> float:
@@ -139,10 +139,10 @@ class TreasurerAgent:
                 cost = provider_prices.get(prov, 0.0001)  # Custo padrão de $0.0001 por chamada se desconhecido
                 total_cost += cost
                 
-            logger.info(f"💸 [TreasurerAgent] Burn Rate calculado nas últimas 24h: {len(logs)} chamadas | Custo Estimado = ${total_cost:.5f} USD")
+            logger.info(f"💸 [SaAuditoriaFinanceira] Burn Rate calculado nas últimas 24h: {len(logs)} chamadas | Custo Estimado = ${total_cost:.5f} USD")
             return round(total_cost, 5)
         except Exception as e:
-            logger.error(f"[TreasurerAgent] Erro ao calcular burn rate no DB: {e}")
+            logger.error(f"[SaAuditoriaFinanceira] Erro ao calcular burn rate no DB: {e}")
             return 0.0
 
     async def generate_daily_financial_report(self) -> None:
@@ -161,7 +161,7 @@ class TreasurerAgent:
             # Aqui calculamos o custo real de IA nas últimas 24h
             burn_rate = await self._compute_burn_rate()
 
-            logger.info(f"📊 [TreasurerAgent] DRE Fechamento {yesterday.date()}: Inflow={total_in} CI | Outflow={total_out} CI | Net={net_flow} CI | AI Burn Cost=${burn_rate:.5f} USD")
+            logger.info(f"📊 [SaAuditoriaFinanceira] DRE Fechamento {yesterday.date()}: Inflow={total_in} CI | Outflow={total_out} CI | Net={net_flow} CI | AI Burn Cost=${burn_rate:.5f} USD")
         except Exception as e:
-            logger.error(f"[TreasurerAgent] Erro ao consolidar relatório diário DRE: {e}")
+            logger.error(f"[SaAuditoriaFinanceira] Erro ao consolidar relatório diário DRE: {e}")
             raise

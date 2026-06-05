@@ -9,16 +9,16 @@ load_dotenv()
 from workers.base.memory_store import MemoryStore
 from workers.base.cycle_result import CycleResult
 from workers.ai.doc_fetcher import DocFetcher
-from workers.ai.ai_advisor import AIAdvisor
+from workers.ai.sa_diagnostica_sistemas import SaDiagnosticaSistemas
 
 logging.basicConfig(level=logging.INFO)
 
 async def test_advisor():
-    print("🚀 Testando AIAdvisor...")
+    print("🚀 Testando SaDiagnosticaSistemas...")
     
     store = MemoryStore()
     fetcher = DocFetcher()
-    advisor = AIAdvisor(store, fetcher)
+    advisor = SaDiagnosticaSistemas(store, fetcher)
     
     # Simula um resultado degradado
     fake_result = CycleResult(

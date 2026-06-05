@@ -28,7 +28,7 @@ except ImportError:
     _FIREBASE_AVAILABLE = False
 
 
-class AlertWorker(BaseWorker):
+class WkGeraAlertas(BaseWorker):
     """
     Sub-agente de monitoramento e alertas.
     Observa a saúde do sistema e dispara notificações FCM/Webhook
@@ -74,13 +74,13 @@ class AlertWorker(BaseWorker):
             self.fcm_enabled = False
 
     def describe(self) -> str:
-        return "AlertWorker — Monitor de Anomalias e Notificações FCM/Webhook"
+        return "WkGeraAlertas — Monitor de Anomalias e Notificações FCM/Webhook"
 
     async def setup(self) -> None:
-        self.logger.info("✅ [AlertWorker] Inicializado. FCM=%s", self.fcm_enabled)
+        self.logger.info("✅ [WkGeraAlertas] Inicializado. FCM=%s", self.fcm_enabled)
 
     async def teardown(self) -> None:
-        self.logger.info("🛑 [AlertWorker] Encerrado.")
+        self.logger.info("🛑 [WkGeraAlertas] Encerrado.")
 
     async def run_cycle(self) -> CycleResult:
         """Ciclo principal: detecta anomalias e dispara alertas."""
@@ -99,14 +99,14 @@ class AlertWorker(BaseWorker):
         anomalies = self._detect_anomalies()
 
         if not anomalies:
-            self.logger.info("✅ [AlertWorker] Sistema saudável. Nenhuma anomalia detectada.")
+            self.logger.info("✅ [WkGeraAlertas] Sistema saudável. Nenhuma anomalia detectada.")
             return CycleResult(
                 worker_id=self.worker_id, cycle=self.cycle,
                 source="alert", error="no_tasks_available",
                 duration=_aio.get_event_loop().time() - start,
             )
 
-        self.logger.warning("⚠️ [AlertWorker] %d anomalia(s) detectada(s).", len(anomalies))
+        self.logger.warning("⚠️ [WkGeraAlertas] %d anomalia(s) detectada(s).", len(anomalies))
 
         # 2. Para cada anomalia, decide se notifica
         fired = []
@@ -315,4 +315,4 @@ class AlertWorker(BaseWorker):
 
 
 if __name__ == "__main__":
-    asyncio.run(AlertWorker().execute({}))
+    asyncio.run(WkGeraAlertas().execute({}))

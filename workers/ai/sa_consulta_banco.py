@@ -3,9 +3,9 @@ import httpx
 from typing import List, Dict, Any, Optional
 from core.config import settings
 
-logger = logging.getLogger("DatabaseAgent")
+logger = logging.getLogger("SaConsultaBanco")
 
-class DatabaseAgent:
+class SaConsultaBanco:
     """
     Subagente de dados especializado em interagir com o Datasette local.
     Fornece consultas SQL assíncronas de alto desempenho, busca textual (FTS) e 

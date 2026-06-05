@@ -9,14 +9,14 @@ from typing import List, Any
 from workers.base.worker_base import BaseWorker, WorkerMetrics
 from workers.base.reward_engine import RewardEngine, RewardSummary
 from workers.base.memory_store import MemoryStore
-from workers.ai.ai_advisor import AIAdvisor
+from workers.ai.sa_diagnostica_sistemas import SaDiagnosticaSistemas
 from workers.base.cycle_result import CycleResult
 
 logger = logging.getLogger("orchestrator")
 
 
 class SentinelaOrchestrator:
-    def __init__(self, reward_engine: RewardEngine, ai_advisor: AIAdvisor):
+    def __init__(self, reward_engine: RewardEngine, ai_advisor: SaDiagnosticaSistemas):
         self.reward_engine  = reward_engine
         self.ai_advisor     = ai_advisor
         self.logger         = logging.getLogger("orchestrator")
@@ -167,23 +167,23 @@ class SentinelaOrchestrator:
         degraded = reward.score < 40 or reward.tier in ("critical", "db_failed")
 
         if not result.simulated and (degraded or is_empty):
-            logger.info("[%s] 🧠 Acionando AIAdvisor para diagnóstico (motivo: %s)",
+            logger.info("[%s] 🧠 Acionando SaDiagnosticaSistemas para diagnóstico (motivo: %s)",
                         result.worker_id, "vazio" if is_empty else "degradado")
             await self.ai_advisor.analyze_and_suggest(worker, result)
         elif not result.simulated:
-            logger.debug("[%s] AIAdvisor ignorado (tier=%s score=%.1f)", result.worker_id, reward.tier, reward.score)
+            logger.debug("[%s] SaDiagnosticaSistemas ignorado (tier=%s score=%.1f)", result.worker_id, reward.tier, reward.score)
 
         # --- ATIVACAO REATIVA DE SUBAGENTES ANALITICOS (PASA v88.1) ---
         if not result.simulated and "ai-processor" in result.worker_id and result.classifier_success and result.classified > 0:
-            logger.info("[%s] Disparando subagentes analiticos (NetworkMinerAgent & TreasurerAgent) em background...", result.worker_id)
+            logger.info("[%s] Disparando subagentes analiticos (SaMineracaoRedes & SaAuditoriaFinanceira) em background...", result.worker_id)
             
             async def _run_subagents_async():
                 try:
-                    from workers.analytics.network_agent import NetworkMinerAgent
-                    from workers.financial.treasurer_agent import TreasurerAgent
+                    from workers.analytics.sa_mineracao_redes import SaMineracaoRedes
+                    from workers.financial.sa_auditoria_financeira import SaAuditoriaFinanceira
                     
-                    net_agent = NetworkMinerAgent()
-                    treas_agent = TreasurerAgent()
+                    net_agent = SaMineracaoRedes()
+                    treas_agent = SaAuditoriaFinanceira()
                     
                     await asyncio.gather(
                         net_agent.run_analysis(),

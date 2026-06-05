@@ -23,7 +23,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from dotenv import load_dotenv
 load_dotenv(PROJECT_ROOT / ".env", override=True)
 
-from workers.processors.dossier_worker import DossierWorker
+from workers.processors.wk_gera_dossies import WkGeraDossies
 
 logging.basicConfig(
     level=logging.INFO,
@@ -56,7 +56,7 @@ def parse_args() -> argparse.Namespace:
 
 async def run(args: argparse.Namespace) -> None:
     config = {"report_dir": args.report_dir}
-    worker = DossierWorker(worker_id="dossier_agent", config=config)
+    worker = WkGeraDossies(worker_id="dossier_agent", config=config)
     shutdown_event = asyncio.Event()
     worker.shutdown_event = shutdown_event
 

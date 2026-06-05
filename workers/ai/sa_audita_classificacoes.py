@@ -6,11 +6,11 @@ import random
 import httpx
 from typing import List, Dict, Any, Optional, Tuple
 from core.db import db_client as db
-from workers.ai.database_agent import DatabaseAgent
+from workers.ai.sa_consulta_banco import SaConsultaBanco
 
-logger = logging.getLogger("AuditAgent")
+logger = logging.getLogger("SaAuditaClassificacoes")
 
-class AuditAgent:
+class SaAuditaClassificacoes:
     """
     Subagente de auditoria analítica e verificação cruzada anti-alucinação.
     Reclassifica amostras de alta confiança utilizando provedores independentes (Groq/Llama)
@@ -24,8 +24,8 @@ class AuditAgent:
         "ATAQUE_INSTITUCIONAL", "RIGOR_CRIMINAL", "INSULTO_AD_HOMINEM", "NEUTRO",
     }
 
-    def __init__(self, database_agent: Optional[DatabaseAgent] = None):
-        self.db_agent = database_agent or DatabaseAgent()
+    def __init__(self, database_agent: Optional[SaConsultaBanco] = None):
+        self.db_agent = database_agent or SaConsultaBanco()
         self._groq_api_key = os.getenv("GROQ_API_KEY")
 
     async def run_audit(
@@ -38,25 +38,25 @@ class AuditAgent:
         Executa um ciclo completo de auditoria cruzada analítica.
         """
         if not self._groq_api_key:
-            logger.error("[AuditAgent] GROQ_API_KEY nao configurada. Auditoria abortada.")
+            logger.error("[SaAuditaClassificacoes] GROQ_API_KEY nao configurada. Auditoria abortada.")
             return {"success": False, "error": "groq_api_key_missing"}
 
-        logger.info(f"[AuditAgent] Iniciando ciclo de auditoria (amostra={sample_size}, confianca>={confidence_threshold:.0%})")
+        logger.info(f"[SaAuditaClassificacoes] Iniciando ciclo de auditoria (amostra={sample_size}, confianca>={confidence_threshold:.0%})")
 
         # 1. Busca amostra de alta confiança via DatabaseAgent local (porta 8002)
         sample = await self._fetch_sample(confidence_threshold, sample_size)
         if not sample:
-            logger.info("[AuditAgent] Dados insuficientes para auditoria neste ciclo.")
+            logger.info("[SaAuditaClassificacoes] Dados insuficientes para auditoria neste ciclo.")
             return {"success": True, "checked": 0, "discrepancies": 0, "drift_rate": 0.0, "message": "no_tasks_available"}
 
         # 2. Executa a auditoria cruzada reclassificando amostras
         discrepancies, checked = await self._run_audit_loop(sample)
         drift_rate = (discrepancies / checked * 100) if checked > 0 else 0.0
 
-        logger.info(f"[AuditAgent] Concluido | Auditados={checked} | Divergencias={discrepancies} | Drift={drift_rate:.1f}%")
+        logger.info(f"[SaAuditaClassificacoes] Concluido | Auditados={checked} | Divergencias={discrepancies} | Drift={drift_rate:.1f}%")
 
         if drift_rate > drift_alert_threshold:
-            logger.warning(f"[AuditAgent] ALERTA: Taxa de drift {drift_rate:.1f}% supera limiar de {drift_alert_threshold:.1f}%.")
+            logger.warning(f"[SaAuditaClassificacoes] ALERTA: Taxa de drift {drift_rate:.1f}% supera limiar de {drift_alert_threshold:.1f}%.")
 
         return {
             "success": True,
@@ -81,7 +81,7 @@ class AuditAgent:
             return []
 
         if len(pool) < sample_size:
-            logger.info(f"[AuditAgent] Pool de amostras insuficiente ({len(pool)} < {sample_size}). Usando pool completo.")
+            logger.info(f"[SaAuditaClassificacoes] Pool de amostras insuficiente ({len(pool)} < {sample_size}). Usando pool completo.")
             return pool
 
         return random.sample(pool, sample_size)
@@ -146,13 +146,13 @@ class AuditAgent:
             return json.loads(raw)
         except httpx.HTTPStatusError as e:
             if e.response.status_code == 429:
-                logger.warning("[AuditAgent] Rate limit Groq na auditoria. Aguardando 5s...")
+                logger.warning("[SaAuditaClassificacoes] Rate limit Groq na auditoria. Aguardando 5s...")
                 await asyncio.sleep(5)
             else:
-                logger.error(f"[AuditAgent] HTTP {e.response.status_code} no comentario ID {comment['id']}")
+                logger.error(f"[SaAuditaClassificacoes] HTTP {e.response.status_code} no comentario ID {comment['id']}")
             return None
         except Exception as e:
-            logger.error(f"[AuditAgent] Erro na reclassificacao do ID {comment['id']}: {e}")
+            logger.error(f"[SaAuditaClassificacoes] Erro na reclassificacao do ID {comment['id']}: {e}")
             return None
 
     async def _mark_discrepancy(self, comment_id: str, groq_result: Dict[str, Any]) -> None:
@@ -163,6 +163,6 @@ class AuditAgent:
                 "audit_discrepancy": True,
                 "audit_data": groq_result,
             }).eq("id", comment_id).execute()
-            logger.debug(f"[AuditAgent] Divergencia marcada para ID {comment_id}")
+            logger.debug(f"[SaAuditaClassificacoes] Divergencia marcada para ID {comment_id}")
         except Exception as e:
-            logger.warning(f"[AuditAgent] Falha ao atualizar discrepancia no DB para ID {comment_id}: {e}")
+            logger.warning(f"[SaAuditaClassificacoes] Falha ao atualizar discrepancia no DB para ID {comment_id}: {e}")

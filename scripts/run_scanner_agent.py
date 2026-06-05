@@ -26,7 +26,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from dotenv import load_dotenv
 load_dotenv(PROJECT_ROOT / ".env", override=True)
 
-from workers.processors.candidate_scanner import CandidateScannerWorker
+from workers.processors.wk_escaneia_candidatos import WkEscaneiaCandidatos
 
 # ── Logging ────────────────────────────────────────────────────────────────
 logging.basicConfig(
@@ -70,12 +70,12 @@ def parse_args() -> argparse.Namespace:
 
 
 async def run(args: argparse.Namespace) -> None:
-    """Orquestra a execução do CandidateScannerWorker."""
+    """Orquestra a execução do WkEscaneiaCandidatos."""
     config: dict = {}
     if args.base_path:
         config["base_path"] = args.base_path
 
-    worker = CandidateScannerWorker(worker_id="scanner_agent", config=config)
+    worker = WkEscaneiaCandidatos(worker_id="scanner_agent", config=config)
     shutdown_event = asyncio.Event()
     worker.shutdown_event = shutdown_event
 

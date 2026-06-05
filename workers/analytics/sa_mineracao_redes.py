@@ -9,9 +9,9 @@ import pandas as pd
 import networkx as nx
 from core.db import db_client
 
-logger = logging.getLogger("NetworkMinerAgent")
+logger = logging.getLogger("SaMineracaoRedes")
 
-class NetworkMinerAgent:
+class SaMineracaoRedes:
     """
     Subagente relacional para análise de redes coordenadas e detecção de clusters de ataque.
     Executa a mineração analítica de redes de hostilidade de forma assíncrona sob demanda.
@@ -27,7 +27,7 @@ class NetworkMinerAgent:
         Executa a mineração de grafos e identifica comunidades/clusters suspectos de ataque.
         Persiste os resultados no Supabase e atualiza os arquivos de relatórios no frontend.
         """
-        logger.info(f"[NetworkMinerAgent] Iniciando análise de redes coordenadas (lookback={self.lookback_days} dias)")
+        logger.info(f"[SaMineracaoRedes] Iniciando análise de redes coordenadas (lookback={self.lookback_days} dias)")
         start_time = asyncio.get_event_loop().time()
 
         try:
@@ -43,7 +43,7 @@ class NetworkMinerAgent:
 
             data = res.data or []
             if len(data) < 10:
-                logger.info("[NetworkMinerAgent] Dados insuficientes de comentários de ódio para minerar rede.")
+                logger.info("[SaMineracaoRedes] Dados insuficientes de comentários de ódio para minerar rede.")
                 return {
                     "success": True,
                     "message": "no_tasks_available",
@@ -121,7 +121,7 @@ class NetworkMinerAgent:
                     "created_at": now.isoformat()
                 }).execute()
 
-                logger.info(f"[NetworkMinerAgent] Cluster mais crítico persistido: {top_cluster['nome_rede']} (Score: {top_cluster['score_perigoso']})")
+                logger.info(f"[SaMineracaoRedes] Cluster mais crítico persistido: {top_cluster['nome_rede']} (Score: {top_cluster['score_perigoso']})")
 
                 # 4. Gera relatórios físicos para consumo do Frontend
                 self._generate_physical_reports(top_cluster)
@@ -136,7 +136,7 @@ class NetworkMinerAgent:
             }
 
         except Exception as e:
-            logger.error(f"[NetworkMinerAgent] Erro na análise de redes: {e}", exc_info=True)
+            logger.error(f"[SaMineracaoRedes] Erro na análise de redes: {e}", exc_info=True)
             return {
                 "success": False,
                 "error": str(e)
@@ -171,9 +171,9 @@ class NetworkMinerAgent:
             with open(md_path, "w", encoding="utf-8") as f:
                 f.write("\n".join(lines))
 
-            logger.info(f"[NetworkMinerAgent] Relatórios físicos exportados para: {json_path}")
+            logger.info(f"[SaMineracaoRedes] Relatórios físicos exportados para: {json_path}")
         except Exception as e:
-            logger.warning(f"[NetworkMinerAgent] Falha ao exportar relatórios físicos de rede: {e}")
+            logger.warning(f"[SaMineracaoRedes] Falha ao exportar relatórios físicos de rede: {e}")
 
 # Compatibilidade retroativa para código legível
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
