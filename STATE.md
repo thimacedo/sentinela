@@ -77,7 +77,7 @@ O principal risco operacional hoje é a expiração ou bloqueio de cookies da se
   - **Cloud Providers**: Consomem o prompt completo enriquecido com `PADRONIZACAO_LINGUISTICA_ANALITICA.md` (PASA v16.3), `custom_rules.json` e o `classifier_gold_dataset.json`.
   - **Local (Ollama)**: Utiliza uma versão **reduzida** e otimizada ("DIRETRIZES ESSENCIAIS") para triagem rápida, visando evitar o *context bloat* e garantir respostas em < 2s.
 - **Termômetro de Alvos (PASA v88.2)**: Reativada a classificação automática de temperatura (Frio/Morno/Quente) no fluxo de coleta. O status do alvo agora é atualizado imediatamente após a extração, garantindo o posicionamento correto na fila de prioridade.
-- **Restrição de Reanálise**: A re-análise automática de itens de baixa confiança foi desativada para focar os recursos em dados novos e evitar drift analítico.
+- **Restrição de Reanálise**: A re-análise de comentários de baixa confiança permanece ativa para garantir a qualidade analítica, porém ela foi **desacoplada** do status do alvo. O termômetro do candidato (Frio/Morno/Quente) agora é atualizado **exclusivamente** durante os ciclos de coleta (scrape), baseando-se no timing e volume de dados frescos.
 - **Circuit Breaker & Poda**: Provedores com erro 401/403 (chave/cota) são removidos da malha ativa em tempo real; erros 429 (rate limit) geram suspensão temporária de 60s.
 - **Cache de I/O**: Prompts e datasets locais são carregados na RAM no boot para zero overhead de leitura em disco.
 - **DatabaseAgent (Subagente de dados)**: Integrado para consultas SQL e buscas FTS5 via porta 8002.
