@@ -498,8 +498,14 @@ class AIService:
                             }).eq("id", item["id"]).execute
                         )
                         count += 1
+                        
+                        # Se for SUSPEITO, sinaliza o subagente de revisão online imediatamente
+                        if res_ia.get("categoria_ia") == "SUSPEITO":
+                            from core.event_bus import local_bus
+                            local_bus.signal_new_suspects()
                     
                     # PASA v88.2 - Cadência Constante (Persistência sobre Velocidade)
+
                     # Introduz delay para evitar picos e respeitar limites de IA a longo prazo
                     await asyncio.sleep(1.0)
                 except Exception as e:

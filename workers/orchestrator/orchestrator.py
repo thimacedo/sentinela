@@ -238,15 +238,24 @@ class SentinelaOrchestrator:
                 
                 # --- SMART WAIT (PASA v85.12 & Pipeline Reativo Fase 9) ---
                 if result.cycle_result.error == "no_tasks_available":
-                    if "ai-processor" in worker.worker_id.lower():
+                    is_ai_processor = "ai-processor" in worker.worker_id.lower()
+                    is_revisao_online = "sa-revisao-online" in worker.worker_id.lower()
+                    
+                    if is_ai_processor or is_revisao_online:
                         from core.event_bus import local_bus
                         idle_wait = 1200.0
                         logger.info("[%s] 💤 Fila vazia. Aguardando novo sinal via EventBus (Pipeline Reativo)...", worker.worker_id)
-                        # Aguarda o sinal de novos dados do Scraper (ou timeout)
-                        acordado_por_sinal = await local_bus.wait_for_data(timeout=idle_wait)
-                        if acordado_por_sinal:
-                            logger.info("[%s] ⚡ Sinal recebido! Reativando AIProcessor imediatamente.", worker.worker_id)
-                            local_bus.clear_signal()
+                        
+                        if is_ai_processor:
+                            acordado = await local_bus.wait_for_comments(timeout=idle_wait)
+                            if acordado:
+                                logger.info("[%s] ⚡ Novos comentários detectados! Reativando worker.", worker.worker_id)
+                                local_bus.clear_comments_signal()
+                        else: # is_revisao_online
+                            acordado = await local_bus.wait_for_suspects(timeout=idle_wait)
+                            if acordado:
+                                logger.info("[%s] ⚡ Novos itens SUSPEITOS detectados! Reativando worker.", worker.worker_id)
+                                local_bus.clear_suspects_signal()
                     else:
                         idle_wait = 1200.0 # 20 minutos de sono profundo
                         logger.info("[%s] 💤 Fila vazia. Entrando em modo de espera (%.0fs).", worker.worker_id, idle_wait)

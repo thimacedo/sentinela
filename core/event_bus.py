@@ -12,32 +12,42 @@ class AsyncLocalEventBus:
     Zero-latency signaling para Pipeline Reativo (Fase 9).
     """
     def __init__(self):
-        self.new_data_event = asyncio.Event()
+        self.new_comments_event = asyncio.Event()
+        self.new_suspects_event = asyncio.Event()
 
     def signal_new_data(self):
-        """Notifica os consumidores (ex: AIProcessor) que há novos dados no banco."""
-        self.new_data_event.set()
+        """Notifica que há novos comentários coletados (Scraper -> AIProcessor)."""
+        self.new_comments_event.set()
 
-    def clear_signal(self):
-        """Limpa o sinal de novos dados após o início do consumo."""
-        self.new_data_event.clear()
+    def clear_comments_signal(self):
+        self.new_comments_event.clear()
 
-    async def wait_for_data(self, timeout: float = None) -> bool:
-        """
-        Aguarda até que novos dados sejam sinalizados ou até o timeout.
-        Retorna True se foi acordado por um sinal, False se deu timeout.
-        """
-        if self.new_data_event.is_set():
-            return True
+    def signal_new_suspects(self):
+        """Notifica que há novos itens SUSPEITOS (AIProcessor -> SaRevisaoOnline)."""
+        self.new_suspects_event.set()
+
+    def clear_suspects_signal(self):
+        self.new_suspects_event.clear()
+
+    async def wait_for_comments(self, timeout: float = None) -> bool:
+        if self.new_comments_event.is_set(): return True
         try:
             if timeout:
-                await asyncio.wait_for(self.new_data_event.wait(), timeout=timeout)
+                await asyncio.wait_for(self.new_comments_event.wait(), timeout=timeout)
                 return True
-            else:
-                await self.new_data_event.wait()
+            await self.new_comments_event.wait()
+            return True
+        except asyncio.TimeoutError: return False
+
+    async def wait_for_suspects(self, timeout: float = None) -> bool:
+        if self.new_suspects_event.is_set(): return True
+        try:
+            if timeout:
+                await asyncio.wait_for(self.new_suspects_event.wait(), timeout=timeout)
                 return True
-        except asyncio.TimeoutError:
-            return False
+            await self.new_suspects_event.wait()
+            return True
+        except asyncio.TimeoutError: return False
 
 local_bus = AsyncLocalEventBus()
 
