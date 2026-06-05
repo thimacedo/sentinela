@@ -174,14 +174,37 @@ class WkEscaneiaCandidatos(BaseWorker):
 
             pesquisa_id = res_pesquisa.data[0]['id'] if res_pesquisa.data else None
 
+            candidatos_to_upsert = []
+            fila_to_upsert = []
+
             # 5. Processar cada candidato detectado
             for candidate in candidates:
-                success = await self._handle_candidate(candidate, pesquisa_id, file_name)
-                if success:
-                    inserted += 1
-                else:
-                    # Candidatos em observação ou rejeitados não contam como falha técnica
-                    pass
+                # Parada graceful entre candidatos
+                if self.shutdown_event and self.shutdown_event.is_set():
+                    break
+                res_handle = await self._handle_candidate(candidate, pesquisa_id, file_name)
+                if res_handle:
+                    if res_handle.get("candidato"):
+                        candidatos_to_upsert.append(res_handle["candidato"])
+                    if res_handle.get("fila"):
+                        fila_to_upsert.append(res_handle["fila"])
+                    if res_handle.get("success"):
+                        inserted += 1
+
+            # Executa os Bulk Upserts no banco
+            if candidatos_to_upsert:
+                try:
+                    db_client.client.table(self.candidate_table).upsert(candidatos_to_upsert, on_conflict="username").execute()
+                    self.logger.info(f"💾 Bulk Upsert concluído: {len(candidatos_to_upsert)} candidatos salvos/atualizados.")
+                except Exception as e_bulk_c:
+                    self.logger.error(f"❌ Falha no Bulk Upsert de candidatos: {e_bulk_c}")
+
+            if fila_to_upsert:
+                try:
+                    db_client.client.table(self.queue_table).upsert(fila_to_upsert, on_conflict="candidato_id,data_agendada").execute()
+                    self.logger.info(f"🚀 Bulk Upsert concluído: {len(fila_to_upsert)} agendamentos de coleta criados.")
+                except Exception as e_bulk_f:
+                    self.logger.error(f"❌ Falha no Bulk Upsert de fila_coleta: {e_bulk_f}")
 
         except Exception as e:
             self.logger.error(f"❌ Erro ao processar '{file_name}': {e}")
@@ -319,10 +342,10 @@ class WkEscaneiaCandidatos(BaseWorker):
         self.logger.warning(f"⚠️ Nenhum handle oficial encontrado para '{name}'. Marcando como observação.")
         return None
 
-    async def _handle_candidate(self, info: Dict, pesquisa_id: Optional[str], file_name: str) -> bool:
+    async def _handle_candidate(self, info: Dict, pesquisa_id: Optional[str], file_name: str) -> Optional[Dict]:
         """
-        Calcula prioridade, descobre a rede oficial, valida com o IntelligenceService e enfileira.
-        Retorna True se o candidato foi enfileirado com sucesso.
+        Calcula prioridade, descobre a rede oficial, valida com o IntelligenceService.
+        Retorna um dicionário com os dados preparados para inserção em lote, ou None se deve pular.
         """
         nome = info['nome']
         intencao = info['intencao']
@@ -338,8 +361,8 @@ class WkEscaneiaCandidatos(BaseWorker):
         if not username:
             # Nenhum handle encontrado; registra como observação e encerra
             self.logger.warning(f"⚠️ Nenhum handle oficial detectado para '{nome}'. Registrando como observação.")
-            try:
-                db_client.client.table(self.candidate_table).upsert({
+            return {
+                "candidato": {
                     "username": self._generate_handle(nome),  # fallback genérico
                     "nome_completo": nome,
                     "cargo": cargo,
@@ -349,10 +372,9 @@ class WkEscaneiaCandidatos(BaseWorker):
                     "status_monitoramento": "Observação",
                     "identidade_validada": None,
                     "atualizado_em": datetime.now(UTC).isoformat()
-                }, on_conflict="username").execute()
-            except Exception as e_up:
-                self.logger.error(f"❌ Erro ao registrar alvo em observação (no handle) @{nome}: {e_up}")
-            return False
+                },
+                "success": False
+            }
 
         # Garante que o username está normalizado conforme aliases
         username = self._apply_handle_alias(username)
@@ -372,20 +394,11 @@ class WkEscaneiaCandidatos(BaseWorker):
                 # Se o alvo já foi desativado/rejeitado anteriormente (e não por erro temporário), pulamos
                 if status_mon == "DESATIVADO" or ident_val is False:
                     self.logger.info(f"⏩ Alvo @{username} já rejeitado/desativado anteriormente no banco. Pulando.")
-                    return False
+                    return None
 
                 # Se o alvo já está ativo e validado, atualizamos as estatísticas e enfileiramos direto
                 if status_mon == "Ativo" or ident_val is True:
-                    self.logger.info(f"♻️ Alvo @{username} já existe e está ativo no banco. Atualizando estatísticas e enfileirando direto.")
-                    try:
-                        db_client.client.table(self.candidate_table).update({
-                            "intenção_voto": intencao,
-                            "nota_relevancia": nota,
-                            "ultima_pesquisa_id": pesquisa_id,
-                            "atualizado_em": datetime.now(UTC).isoformat()
-                        }).eq("username", username).execute()
-                    except Exception as e_up:
-                        self.logger.warning(f"⚠️ Erro ao atualizar estatísticas da pesquisa para @{username}: {e_up}")
+                    self.logger.info(f"♻️ Alvo @{username} já existe e está ativo no banco. Preparando agendamento direto.")
 
                     # Define a prioridade na fila (1 a 3) baseada na relevância/situação
                     prioridade = 3
@@ -394,20 +407,28 @@ class WkEscaneiaCandidatos(BaseWorker):
                     elif intencao > 5:
                         prioridade = 2
 
-                    try:
-                        today = datetime.now(UTC).date().isoformat()
-                        db_client.client.table(self.queue_table).upsert({
+                    today = datetime.now(UTC).date().isoformat()
+                    return {
+                        "candidato": {
+                            "username": username,
+                            "nome_completo": nome,
+                            "cargo": cargo,
+                            "intenção_voto": intencao,
+                            "nota_relevancia": nota,
+                            "ultima_pesquisa_id": pesquisa_id,
+                            "status_monitoramento": status_mon,
+                            "identidade_validada": ident_val,
+                            "atualizado_em": datetime.now(UTC).isoformat()
+                        },
+                        "fila": {
                             "candidato_id": username,
                             "prioridade": prioridade,
                             "status": "PENDENTE",
                             "data_agendada": today,
                             "updated_at": datetime.now(UTC).isoformat()
-                        }, on_conflict="candidato_id,data_agendada").execute()
-                        self.logger.info(f"🚀 Alvo @{username} inserido na fila de coleta imediata hoje.")
-                        return True
-                    except Exception as e_queue:
-                        self.logger.error(f"❌ Erro ao inserir @{username} na fila de coleta: {e_queue}")
-                        return False
+                        },
+                        "success": True
+                    }
 
         except Exception as e_check:
             self.logger.error(f"⚠️ Erro ao consultar existência de @{username} no banco: {e_check}")
@@ -442,9 +463,18 @@ class WkEscaneiaCandidatos(BaseWorker):
             temporary_reason = "Falha de comunicação/timeout na validação"
 
         if is_valid:
-            # 5. Se o perfil for válido, insere como Ativo e enfileira na fila_coleta imediata
-            try:
-                db_client.client.table(self.candidate_table).upsert({
+            # 5. Se o perfil for válido, prepara para inserir como Ativo e enfileirar na fila_coleta
+            prioridade = 3
+            if cargo in ["Presidente", "Governador"] or intencao > 15:
+                prioridade = 1
+            elif intencao > 5:
+                prioridade = 2
+
+            self.logger.info(f"💎 Target: @{username} | Nota: {nota:.2f} | Prioridade: {prioridade}")
+            today = datetime.now(UTC).date().isoformat()
+
+            return {
+                "candidato": {
                     "username": username,
                     "nome_completo": nome,
                     "cargo": cargo,
@@ -454,38 +484,22 @@ class WkEscaneiaCandidatos(BaseWorker):
                     "status_monitoramento": "Ativo",
                     "identidade_validada": True,
                     "atualizado_em": datetime.now(UTC).isoformat()
-                }, on_conflict="username").execute()
-            except Exception as e_up:
-                self.logger.warning(f"⚠️ Erro ao atualizar estatísticas da pesquisa para @{username}: {e_up}")
-
-            # Define a prioridade na fila (1 a 3) baseada na relevância/situação
-            prioridade = 3
-            if cargo in ["Presidente", "Governador"] or intencao > 15:
-                prioridade = 1
-            elif intencao > 5:
-                prioridade = 2
-
-            self.logger.info(f"💎 Target: @{username} | Nota: {nota:.2f} | Prioridade: {prioridade}")
-
-            try:
-                today = datetime.now(UTC).date().isoformat()
-                db_client.client.table(self.queue_table).upsert({
+                },
+                "fila": {
                     "candidato_id": username,
                     "prioridade": prioridade,
                     "status": "PENDENTE",
                     "data_agendada": today,
                     "updated_at": datetime.now(UTC).isoformat()
-                }, on_conflict="candidato_id,data_agendada").execute()
-                self.logger.info(f"🚀 Alvo @{username} inserido na fila de coleta imediata hoje.")
-                return True
-            except Exception as e_queue:
-                self.logger.error(f"❌ Erro ao inserir @{username} na fila de coleta: {e_queue}")
-                return False
+                },
+                "success": True
+            }
 
         elif is_temporary_error:
-            # 6. Se for erro temporário de validação, salva em status 'Observação' e NÃO enfileira
-            try:
-                db_client.client.table(self.candidate_table).upsert({
+            # 6. Se for erro temporário de validação, prepara para salvar em status 'Observação' e NÃO enfileira
+            self.logger.warning(f"⚠️ Validação de @{username} falhou por erro temporário ({temporary_reason}). Preparando alvo para observação.")
+            return {
+                "candidato": {
                     "username": username,
                     "nome_completo": nome,
                     "cargo": cargo,
@@ -495,15 +509,14 @@ class WkEscaneiaCandidatos(BaseWorker):
                     "status_monitoramento": "Observação",
                     "identidade_validada": None,
                     "atualizado_em": datetime.now(UTC).isoformat()
-                }, on_conflict="username").execute()
-                self.logger.warning(f"⚠️ Validação de @{username} falhou por erro temporário ({temporary_reason}). Alvo colocado em observação/curadoria.")
-            except Exception as e_up:
-                self.logger.warning(f"⚠️ Erro ao registrar alvo em observação @{username}: {e_up}")
+                },
+                "success": False
+            }
         else:
             reason = research_res.get("motivo_desativacao") if research_res else "Validação falhou ou timeout"
             self.logger.warning(f"🚫 Alvo @{username} desconsiderado da fila imediata. Motivo: {reason}")
 
-        return False
+        return None
 
     def _generate_handle(self, nome: str) -> str:
         """Gera um handle provisório a partir do nome."""

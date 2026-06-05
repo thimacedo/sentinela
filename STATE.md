@@ -192,3 +192,10 @@ PGMQ deve aparecer apenas como hipótese futura.
   - Reestruturamos o menu da bandeja do Watchdog em [__main__.py](file:///C:/Projetos/sentinela/watchdog/__main__.py) dividindo os disparadores explicitamente em dois blocos organizados por divisores visuais: `SUBAGENTES (SA)` e `WORKERS (WK)`.
   - Essa divisão traz total clareza operacional para o usuário e assegura compatibilidade absoluta e estabilidade de renderização no Windows, sem os riscos de falhas de reconstrução do Win32 comuns com submenus dinâmicos profundos.
 - **Validação**: Testamos a compilação e sintaxe de todos os módulos com sucesso absoluto. Todos os arquivos foram preparados para o versionamento do Git.
+
+## Otimização de Performance no Cadastro de Candidatos (Fase 8)
+
+- **Processamento e Escrita em Lote (Bulk Upserts)**: Refatoramos o `WkEscaneiaCandidatos` ([wk_escaneia_candidatos.py](file:///C:/Projetos/sentinela/workers/processors/wk_escaneia_candidatos.py)) para acumular dados de novos alvos e agendamentos de coletas e gravá-los de uma única vez em lote ao fim do processamento do PDF de pesquisa.
+  - O método `_handle_candidate` agora gera e retorna objetos contendo as instruções estruturadas de persistência em vez de fazer chamadas individuais diretas ao Supabase remoto para cada candidato.
+  - A escrita no banco de dados agora executa um único Bulk Upsert na tabela `candidatos` e outro Bulk Upsert na tabela `fila_coleta`, reduzindo expressivamente o consumo de conexões simultâneas, o tráfego de rede e a latência global da aplicação.
+- **Validação**: Verificada a compilação sem falhas de sintaxe e preparada a sincronização via Git.
