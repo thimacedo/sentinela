@@ -100,10 +100,41 @@ class SaMineracaoRedes(BaseSubAgent):
         """
         Executa a mineração de grafos em processo filho e identifica clusters de ataque.
         """
+        # Garante setup se necessário
+        is_self_setup = False
+        if not self._cpu_executor:
+            await self.setup()
+            is_self_setup = True
+
         logger.info(f"[{self.worker_id}] Iniciando análise de redes coordenadas (lookback={self.lookback_days} dias)")
         start_time = asyncio.get_event_loop().time()
+        lote_id = None
 
         try:
+            # --- CONCORRÊNCIA HORIZONTAL (Fase 2: SELECT FOR UPDATE SKIP LOCKED) ---
+            try:
+                # Reivindica o lote analítico pendente via RPC no Supabase
+                res_claim = db_client.client.rpc("reivindicar_lote_analise", {"worker_name": self.worker_id}).execute()
+                lotes = res_claim.data or []
+                if not lotes:
+                    logger.info(f"[{self.worker_id}] Nenhuma tarefa de lote pendente na tabela lotes_analises. Abortando execução.")
+                    return {
+                        "success": True,
+                        "message": "no_tasks_available",
+                        "clusters_detected": 0
+                    }
+                
+                lote = lotes[0]
+                lote_id = lote["id"]
+                batch_id = lote["batch_id"]
+                logger.info(f"[{self.worker_id}] Lote analitico reivindicado com sucesso: ID={lote_id}, BatchID={batch_id}")
+            except Exception as claim_err:
+                logger.error(f"[{self.worker_id}] Falha ao reivindicar lote analitico: {claim_err}")
+                return {
+                    "success": False,
+                    "error": f"claim_failed: {str(claim_err)}"
+                }
+
             # 1. Recuperação de comentários recentes classificados como ódio (I/O)
             now = datetime.now(timezone.utc)
             since = (now - timedelta(days=self.lookback_days)).isoformat()
@@ -117,9 +148,17 @@ class SaMineracaoRedes(BaseSubAgent):
             data = res.data or []
             if len(data) < 10:
                 logger.info(f"[{self.worker_id}] Dados insuficientes de comentários de ódio para minerar rede.")
+                
+                # Se reivindicou e não há dados suficientes, marcamos como concluído mesmo assim (lote vazio)
+                if lote_id:
+                    db_client.client.table('lotes_analises').update({
+                        "status": "CONCLUIDO",
+                        "updated_at": now.isoformat()
+                    }).eq("id", lote_id).execute()
+
                 return {
                     "success": True,
-                    "message": "no_tasks_available",
+                    "message": "insufficient_data",
                     "clusters_detected": 0
                 }
 
@@ -152,6 +191,14 @@ class SaMineracaoRedes(BaseSubAgent):
                 await self.run_io_bound(self._generate_physical_reports, top_cluster)
 
             duration = asyncio.get_event_loop().time() - start_time
+            
+            # --- Fase 2: Finaliza o lote na tabela de orquestração ---
+            if lote_id:
+                db_client.client.table('lotes_analises').update({
+                    "status": "CONCLUIDO",
+                    "updated_at": now.isoformat()
+                }).eq("id", lote_id).execute()
+
             return {
                 "success": True,
                 "duration_seconds": round(duration, 2),
@@ -162,10 +209,23 @@ class SaMineracaoRedes(BaseSubAgent):
 
         except Exception as e:
             logger.error(f"[{self.worker_id}] Erro na análise de redes: {e}", exc_info=True)
+            # --- Fase 2: Marca o lote como erro na tabela de orquestração ---
+            if lote_id:
+                try:
+                    db_client.client.table('lotes_analises').update({
+                        "status": "ERRO",
+                        "updated_at": datetime.now(timezone.utc).isoformat()
+                    }).eq("id", lote_id).execute()
+                except Exception as db_err:
+                    logger.error(f"[{self.worker_id}] Falha ao registrar status de erro do lote: {db_err}")
+
             return {
                 "success": False,
                 "error": str(e)
             }
+        finally:
+            if is_self_setup:
+                await self.teardown()
 
     def _generate_physical_reports(self, cluster_data: Dict[str, Any]) -> None:
         """Salva arquivos de relatório físico em frontend/public/reports."""

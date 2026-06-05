@@ -58,6 +58,9 @@ class WkColetaInstagram(BaseWorker):
         start_time = asyncio.get_event_loop().time()
         self.cycle += 1
         
+        # --- CONFIGURAÇÃO IMUTÁVEL POR CICLO (Fase 4: SRE Anti-Race Condition) ---
+        current_cycle_config = dict(self.config)
+        
         # 🛡️ HIBERNAÇÃO INTELIGENTE (PASA v65.1)
         if self.consecutive_blocks >= 3:
             hibernation_time = 3600 # 1 hora
@@ -94,12 +97,12 @@ class WkColetaInstagram(BaseWorker):
             if hasattr(self, "claim_lock"):
                 async with self.claim_lock:
                     target = self.queue.claim_next_target(
-                        self.config, self.seen_queue_ids, self.seen_targets,
+                        current_cycle_config, self.seen_queue_ids, self.seen_targets,
                         active_targets=getattr(self, "active_targets", None),
                     )
             else:
                 target = self.queue.claim_next_target(
-                    self.config, self.seen_queue_ids, self.seen_targets,
+                    current_cycle_config, self.seen_queue_ids, self.seen_targets,
                     active_targets=getattr(self, "active_targets", None),
                 )
 
@@ -158,7 +161,7 @@ class WkColetaInstagram(BaseWorker):
             scrape_data = await self.scraper.scrape_profile(
                 username=target.username,
                 candidato_id=target.candidato_id,
-                max_posts=self.config.get('max_posts', 3),
+                max_posts=current_cycle_config.get('max_posts', 3),
                 max_comments_per_post=100,
                 resume_after_shortcode=resume_from_shortcode,  # Fase 8.5: retomada
             )

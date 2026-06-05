@@ -1,20 +1,27 @@
+from __future__ import annotations
+
 import asyncio
 import json
 import logging
 import os
 import random
+from datetime import datetime, timezone
 import httpx
 from typing import List, Dict, Any, Optional, Tuple
+
 from core.db import db_client as db
+from core.circuit_breaker import ai_circuit_breaker
+from workers.base.subagent_base import BaseSubAgent
 from workers.ai.sa_consulta_banco import SaConsultaBanco
 
 logger = logging.getLogger("SaAuditaClassificacoes")
 
-class SaAuditaClassificacoes:
+class SaAuditaClassificacoes(BaseSubAgent):
     """
     Subagente de auditoria analítica e verificação cruzada anti-alucinação.
     Reclassifica amostras de alta confiança utilizando provedores independentes (Groq/Llama)
     para detectar desvios de calibragem (drift) na classificação de produção.
+    PASA v88.2 (Refatorado para BaseSubAgent e Cascata de IA com Circuit Breaker)
     """
     GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
     GROQ_MODEL = "llama-3.3-70b-versatile"
@@ -24,9 +31,29 @@ class SaAuditaClassificacoes:
         "ATAQUE_INSTITUCIONAL", "RIGOR_CRIMINAL", "INSULTO_AD_HOMINEM", "NEUTRO",
     }
 
-    def __init__(self, database_agent: Optional[SaConsultaBanco] = None):
+    def __init__(
+        self, 
+        database_agent: Optional[SaConsultaBanco] = None, 
+        worker_id: str = "sa-audita-classificacoes-01", 
+        config: Optional[dict] = None
+    ):
+        cfg = config or {}
+        super().__init__(worker_id, cfg)
         self.db_agent = database_agent or SaConsultaBanco()
         self._groq_api_key = os.getenv("GROQ_API_KEY")
+
+    def describe(self) -> str:
+        return "SaAuditaClassificacoes — Auditoria cruzada de modelos e detecção de drift analítico"
+
+    async def setup(self) -> None:
+        await super().setup()
+
+    async def teardown(self) -> None:
+        await super().teardown()
+
+    async def run_cycle(self):
+        # Cumpre o contrato do BaseWorker executando a auditoria com os padrões do sistema
+        return await self.run_audit()
 
     async def run_audit(
         self, 
@@ -37,34 +64,54 @@ class SaAuditaClassificacoes:
         """
         Executa um ciclo completo de auditoria cruzada analítica.
         """
-        if not self._groq_api_key:
-            logger.error("[SaAuditaClassificacoes] GROQ_API_KEY nao configurada. Auditoria abortada.")
-            return {"success": False, "error": "groq_api_key_missing"}
+        # Garante setup se necessário
+        is_self_setup = False
+        if not self._cpu_executor:
+            await self.setup()
+            is_self_setup = True
 
-        logger.info(f"[SaAuditaClassificacoes] Iniciando ciclo de auditoria (amostra={sample_size}, confianca>={confidence_threshold:.0%})")
+        logger.info(f"[{self.worker_id}] Iniciando ciclo de auditoria (amostra={sample_size}, confianca>={confidence_threshold:.0%})")
 
-        # 1. Busca amostra de alta confiança via DatabaseAgent local (porta 8002)
-        sample = await self._fetch_sample(confidence_threshold, sample_size)
-        if not sample:
-            logger.info("[SaAuditaClassificacoes] Dados insuficientes para auditoria neste ciclo.")
-            return {"success": True, "checked": 0, "discrepancies": 0, "drift_rate": 0.0, "message": "no_tasks_available"}
+        try:
+            # 1. Busca amostra de alta confiança via DatabaseAgent local
+            sample = await self._fetch_sample(confidence_threshold, sample_size)
+            if not sample:
+                logger.info(f"[{self.worker_id}] Dados insuficientes para auditoria neste ciclo.")
+                return {"success": True, "checked": 0, "discrepancies": 0, "drift_rate": 0.0, "message": "no_tasks_available"}
 
-        # 2. Executa a auditoria cruzada reclassificando amostras
-        discrepancies, checked = await self._run_audit_loop(sample)
-        drift_rate = (discrepancies / checked * 100) if checked > 0 else 0.0
+            # 2. Executa a auditoria cruzada reclassificando amostras
+            discrepancies, checked = await self._run_audit_loop(sample)
+            drift_rate = (discrepancies / checked * 100) if checked > 0 else 0.0
 
-        logger.info(f"[SaAuditaClassificacoes] Concluido | Auditados={checked} | Divergencias={discrepancies} | Drift={drift_rate:.1f}%")
+            logger.info(f"[{self.worker_id}] Concluido | Auditados={checked} | Divergencias={discrepancies} | Drift={drift_rate:.1f}%")
 
-        if drift_rate > drift_alert_threshold:
-            logger.warning(f"[SaAuditaClassificacoes] ALERTA: Taxa de drift {drift_rate:.1f}% supera limiar de {drift_alert_threshold:.1f}%.")
+            # --- Fase 3: Cria sugestão de prioridade HIGH se o drift ultrapassar o limiar ---
+            drift_alert = drift_rate > drift_alert_threshold
+            if drift_alert:
+                logger.warning(f"[{self.worker_id}] ALERTA: Taxa de drift {drift_rate:.1f}% supera limiar de {drift_alert_threshold:.1f}%.")
+                try:
+                    sugestao_txt = f"drift_detected: taxa de drift de {drift_rate:.1f}% supera o limiar de {drift_alert_threshold:.1f}% na calibragem MCA v2.2. Recomenda-se revisao das regras de classificacao e calibragem do modelo de producao. | Prioridade: HIGH"
+                    db.client.table("worker_suggestions").insert({
+                        "worker_id": self.worker_id,
+                        "cycle": self.cycle,
+                        "suggestion": sugestao_txt,
+                        "status": "pending_review",
+                        "timestamp": datetime.now(timezone.utc).isoformat()
+                    }).execute()
+                    logger.info(f"[{self.worker_id}] Sugestao de drift_detected salva com sucesso na tabela worker_suggestions.")
+                except Exception as e:
+                    logger.error(f"[{self.worker_id}] Falha ao salvar sugestao de drift na tabela worker_suggestions: {e}")
 
-        return {
-            "success": True,
-            "checked": checked,
-            "discrepancies": discrepancies,
-            "drift_rate_pct": round(drift_rate, 2),
-            "drift_alert": drift_rate > drift_alert_threshold
-        }
+            return {
+                "success": True,
+                "checked": checked,
+                "discrepancies": discrepancies,
+                "drift_rate_pct": round(drift_rate, 2),
+                "drift_alert": drift_alert
+            }
+        finally:
+            if is_self_setup:
+                await self.teardown()
 
     async def _fetch_sample(self, confidence_threshold: float, sample_size: int) -> List[Dict[str, Any]]:
         """Busca amostras de alta confiança consumindo o DatabaseAgent local."""
@@ -81,7 +128,7 @@ class SaAuditaClassificacoes:
             return []
 
         if len(pool) < sample_size:
-            logger.info(f"[SaAuditaClassificacoes] Pool de amostras insuficiente ({len(pool)} < {sample_size}). Usando pool completo.")
+            logger.info(f"[{self.worker_id}] Pool de amostras insuficiente ({len(pool)} < {sample_size}). Usando pool completo.")
             return pool
 
         return random.sample(pool, sample_size)
@@ -93,7 +140,7 @@ class SaAuditaClassificacoes:
 
         async with httpx.AsyncClient(timeout=15.0) as client:
             for comment in sample:
-                result = await self._classify_with_groq(client, comment)
+                result = await self._classify_with_cascade(client, comment)
                 if result is None:
                     continue
 
@@ -113,8 +160,8 @@ class SaAuditaClassificacoes:
 
         return discrepancies, checked
 
-    async def _classify_with_groq(self, client: httpx.AsyncClient, comment: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        """Classifica uma amostra via Groq e retorna o JSON estruturado."""
+    async def _classify_with_cascade(self, client: httpx.AsyncClient, comment: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """Classifica uma amostra respeitando a cascata resiliente e o Circuit Breaker."""
         texto = (comment.get("texto_limpo") or "").strip()
         if not texto:
             return None
@@ -129,40 +176,86 @@ class SaAuditaClassificacoes:
             f'Texto: "{texto}"'
         )
 
-        try:
-            resp = await client.post(
-                self.GROQ_URL,
-                headers={"Authorization": f"Bearer {self._groq_api_key}"},
-                json={
-                    "model": self.GROQ_MODEL,
-                    "messages": [{"role": "user", "content": prompt}],
-                    "response_format": {"type": "json_object"},
-                    "temperature": 0.1,
-                },
-                timeout=10.0,
-            )
-            resp.raise_for_status()
-            raw = resp.json()["choices"][0]["message"]["content"]
-            return json.loads(raw)
-        except httpx.HTTPStatusError as e:
-            if e.response.status_code == 429:
-                logger.warning("[SaAuditaClassificacoes] Rate limit Groq na auditoria. Aguardando 5s...")
-                await asyncio.sleep(5)
-            else:
-                logger.error(f"[SaAuditaClassificacoes] HTTP {e.response.status_code} no comentario ID {comment['id']}")
-            return None
-        except Exception as e:
-            logger.error(f"[SaAuditaClassificacoes] Erro na reclassificacao do ID {comment['id']}: {e}")
-            return None
+        providers_to_try = ["groq", "mistral", "ollama"]
 
-    async def _mark_discrepancy(self, comment_id: str, groq_result: Dict[str, Any]) -> None:
+        for prov in providers_to_try:
+            if not ai_circuit_breaker.can_execute(prov):
+                logger.warning(f"[{self.worker_id}] Circuito ABERTO para {prov}. Pulando provedor na cascata...")
+                continue
+
+            try:
+                if prov == "groq" and self._groq_api_key:
+                    resp = await client.post(
+                        "https://api.groq.com/openai/v1/chat/completions",
+                        headers={"Authorization": f"Bearer {self._groq_api_key}"},
+                        json={
+                            "model": self.GROQ_MODEL,
+                            "messages": [{"role": "user", "content": prompt}],
+                            "response_format": {"type": "json_object"},
+                            "temperature": 0.1,
+                        },
+                        timeout=10.0,
+                    )
+                    resp.raise_for_status()
+                    raw = resp.json()["choices"][0]["message"]["content"]
+                    ai_circuit_breaker.record_success("groq")
+                    return json.loads(raw)
+
+                elif prov == "mistral" and os.getenv("MISTRAL_API_KEY"):
+                    resp = await client.post(
+                        "https://api.mistral.ai/v1/chat/completions",
+                        headers={"Authorization": f"Bearer {os.getenv('MISTRAL_API_KEY')}"},
+                        json={
+                            "model": "open-mistral-nemo",
+                            "messages": [{"role": "user", "content": prompt}],
+                            "response_format": {"type": "json_object"},
+                            "temperature": 0.1,
+                        },
+                        timeout=15.0,
+                    )
+                    resp.raise_for_status()
+                    raw = resp.json()["choices"][0]["message"]["content"]
+                    ai_circuit_breaker.record_success("mistral")
+                    return json.loads(raw)
+
+                elif prov == "ollama":
+                    ollama_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1") + "/chat/completions"
+                    resp = await client.post(
+                        ollama_url,
+                        json={
+                            "model": os.getenv("OLLAMA_MODEL", "qwen2.5-coder:3b"),
+                            "messages": [{"role": "user", "content": prompt}],
+                            "response_format": {"type": "json_object"},
+                            "temperature": 0.1,
+                        },
+                        timeout=15.0,
+                    )
+                    resp.raise_for_status()
+                    raw = resp.json()["choices"][0]["message"]["content"]
+                    ai_circuit_breaker.record_success("ollama")
+                    return json.loads(raw)
+
+            except httpx.HTTPStatusError as e:
+                status_code = e.response.status_code
+                logger.warning(f"[{self.worker_id}] Falha no provedor {prov} (HTTP {status_code})")
+                ai_circuit_breaker.record_failure(prov, status_code)
+                if status_code == 429:
+                    await asyncio.sleep(2)
+            except Exception as e:
+                logger.warning(f"[{self.worker_id}] Falha inesperada no provedor {prov}: {e}")
+                ai_circuit_breaker.record_failure(prov, 500)
+
+        logger.error(f"[{self.worker_id}] Todos os provedores de auditoria falharam ou estao sob Circuit Breaker.")
+        return None
+
+    async def _mark_discrepancy(self, comment_id: str, result: Dict[str, Any]) -> None:
         """Marca o comentário divergente no banco Supabase remoto."""
         try:
             db.client.table("comentarios").update({
                 "needs_review": True,
                 "audit_discrepancy": True,
-                "audit_data": groq_result,
+                "audit_data": result,
             }).eq("id", comment_id).execute()
-            logger.debug(f"[SaAuditaClassificacoes] Divergencia marcada para ID {comment_id}")
+            logger.debug(f"[{self.worker_id}] Divergencia marcada para ID {comment_id}")
         except Exception as e:
-            logger.warning(f"[SaAuditaClassificacoes] Falha ao atualizar discrepancia no DB para ID {comment_id}: {e}")
+            logger.warning(f"[{self.worker_id}] Falha ao atualizar discrepancia no DB para ID {comment_id}: {e}")
