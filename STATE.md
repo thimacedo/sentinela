@@ -175,3 +175,20 @@ PGMQ deve aparecer apenas como hipótese futura.
     - [run_revisao_online.py](file:///C:/Projetos/sentinela/scripts/run_revisao_online.py) para o `SaRevisaoOnline`.
   - Acrescentamos comandos no menu da bandeja do Watchdog ([__main__.py](file:///C:/Projetos/sentinela/watchdog/__main__.py)) mapeando atalhos que abrem novas janelas dedicadas de console do Windows para disparar individualmente cada um dos subagentes (`SaAuditaClassificacoes`, `SaRevisaoOnline`, `SaMineracaoRedes`, `SaAuditoriaFinanceira`, `ScannerAgent`, `DossierAgent`).
   - Todos os scripts e patches de menu foram comitados e sincronizados remotamente.
+
+## Cobertura Total de Comandos na Bandeja do Watchdog (Fase 7)
+
+- **Novos Scripts de Entrada CLI Individuais**: Desenvolvemos e organizamos entrypoints individuais na pasta `scripts/` para os subagentes e workers restantes agirem de forma autônoma e assíncrona sob demanda em consoles dedicados:
+  - [run_coleta_instagram.py](file:///C:/Projetos/sentinela/scripts/run_coleta_instagram.py) para o `WkColetaInstagram`.
+  - [run_pesquisa_alvos.py](file:///C:/Projetos/sentinela/scripts/run_pesquisa_alvos.py) para o `WkPesquisaAlvos`.
+  - [run_classifica_comentarios.py](file:///C:/Projetos/sentinela/scripts/run_classifica_comentarios.py) para o `WkClassificaComentarios`.
+  - [run_analisa_tendencias.py](file:///C:/Projetos/sentinela/scripts/run_analisa_tendencias.py) para o `WkAnalisaTendencias`.
+  - [run_aplica_sugestoes.py](file:///C:/Projetos/sentinela/scripts/run_aplica_sugestoes.py) para o `WkAplicaSugestoes`.
+  - [run_gera_alertas.py](file:///C:/Projetos/sentinela/scripts/run_gera_alertas.py) para o `WkGeraAlertas`.
+  - [run_consulta_banco.py](file:///C:/Projetos/sentinela/scripts/run_consulta_banco.py) para o `SaConsultaBanco`.
+  - [run_diagnostica_sistemas.py](file:///C:/Projetos/sentinela/scripts/run_diagnostica_sistemas.py) para o `SaDiagnosticaSistemas`.
+  - [run_doc_fetcher.py](file:///C:/Projetos/sentinela/scripts/run_doc_fetcher.py) para o `DocFetcher`.
+- **Interface Organizada e Hierárquica**:
+  - Reestruturamos o menu da bandeja do Watchdog em [__main__.py](file:///C:/Projetos/sentinela/watchdog/__main__.py) dividindo os disparadores explicitamente em dois blocos organizados por divisores visuais: `SUBAGENTES (SA)` e `WORKERS (WK)`.
+  - Essa divisão traz total clareza operacional para o usuário e assegura compatibilidade absoluta e estabilidade de renderização no Windows, sem os riscos de falhas de reconstrução do Win32 comuns com submenus dinâmicos profundos.
+- **Validação**: Testamos a compilação e sintaxe de todos os módulos com sucesso absoluto. Todos os arquivos foram preparados para o versionamento do Git.

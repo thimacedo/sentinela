@@ -102,6 +102,105 @@ def run_scanner_agent(icon=None, item=None):
     except Exception as e:
         print(f"[Tray] Erro ao disparar ScannerAgent: {e}")
 
+def run_coleta_instagram(icon=None, item=None):
+    SCRIPT = os.path.join(PROJECT_ROOT, "scripts", "run_coleta_instagram.py")
+    try:
+        subprocess.Popen(
+            ["cmd", "/k", sys.executable, SCRIPT],
+            cwd=PROJECT_ROOT,
+            creationflags=subprocess.CREATE_NEW_CONSOLE,
+        )
+    except Exception as e:
+        print(f"[Tray] Erro ao disparar WkColetaInstagram: {e}")
+
+def run_pesquisa_alvos(icon=None, item=None):
+    SCRIPT = os.path.join(PROJECT_ROOT, "scripts", "run_pesquisa_alvos.py")
+    try:
+        subprocess.Popen(
+            ["cmd", "/k", sys.executable, SCRIPT],
+            cwd=PROJECT_ROOT,
+            creationflags=subprocess.CREATE_NEW_CONSOLE,
+        )
+    except Exception as e:
+        print(f"[Tray] Erro ao disparar WkPesquisaAlvos: {e}")
+
+def run_classifica_comentarios(icon=None, item=None):
+    SCRIPT = os.path.join(PROJECT_ROOT, "scripts", "run_classifica_comentarios.py")
+    try:
+        subprocess.Popen(
+            ["cmd", "/k", sys.executable, SCRIPT],
+            cwd=PROJECT_ROOT,
+            creationflags=subprocess.CREATE_NEW_CONSOLE,
+        )
+    except Exception as e:
+        print(f"[Tray] Erro ao disparar WkClassificaComentarios: {e}")
+
+def run_analisa_tendencias(icon=None, item=None):
+    SCRIPT = os.path.join(PROJECT_ROOT, "scripts", "run_analisa_tendencias.py")
+    try:
+        subprocess.Popen(
+            ["cmd", "/k", sys.executable, SCRIPT],
+            cwd=PROJECT_ROOT,
+            creationflags=subprocess.CREATE_NEW_CONSOLE,
+        )
+    except Exception as e:
+        print(f"[Tray] Erro ao disparar WkAnalisaTendencias: {e}")
+
+def run_aplica_sugestoes(icon=None, item=None):
+    SCRIPT = os.path.join(PROJECT_ROOT, "scripts", "run_aplica_sugestoes.py")
+    try:
+        subprocess.Popen(
+            ["cmd", "/k", sys.executable, SCRIPT],
+            cwd=PROJECT_ROOT,
+            creationflags=subprocess.CREATE_NEW_CONSOLE,
+        )
+    except Exception as e:
+        print(f"[Tray] Erro ao disparar WkAplicaSugestoes: {e}")
+
+def run_gera_alertas(icon=None, item=None):
+    SCRIPT = os.path.join(PROJECT_ROOT, "scripts", "run_gera_alertas.py")
+    try:
+        subprocess.Popen(
+            ["cmd", "/k", sys.executable, SCRIPT],
+            cwd=PROJECT_ROOT,
+            creationflags=subprocess.CREATE_NEW_CONSOLE,
+        )
+    except Exception as e:
+        print(f"[Tray] Erro ao disparar WkGeraAlertas: {e}")
+
+def run_consulta_banco(icon=None, item=None):
+    SCRIPT = os.path.join(PROJECT_ROOT, "scripts", "run_consulta_banco.py")
+    try:
+        subprocess.Popen(
+            ["cmd", "/k", sys.executable, SCRIPT],
+            cwd=PROJECT_ROOT,
+            creationflags=subprocess.CREATE_NEW_CONSOLE,
+        )
+    except Exception as e:
+        print(f"[Tray] Erro ao disparar SaConsultaBanco: {e}")
+
+def run_diagnostica_sistemas(icon=None, item=None):
+    SCRIPT = os.path.join(PROJECT_ROOT, "scripts", "run_diagnostica_sistemas.py")
+    try:
+        subprocess.Popen(
+            ["cmd", "/k", sys.executable, SCRIPT],
+            cwd=PROJECT_ROOT,
+            creationflags=subprocess.CREATE_NEW_CONSOLE,
+        )
+    except Exception as e:
+        print(f"[Tray] Erro ao disparar SaDiagnosticaSistemas: {e}")
+
+def run_doc_fetcher(icon=None, item=None):
+    SCRIPT = os.path.join(PROJECT_ROOT, "scripts", "run_doc_fetcher.py")
+    try:
+        subprocess.Popen(
+            ["cmd", "/k", sys.executable, SCRIPT],
+            cwd=PROJECT_ROOT,
+            creationflags=subprocess.CREATE_NEW_CONSOLE,
+        )
+    except Exception as e:
+        print(f"[Tray] Erro ao disparar DocFetcher: {e}")
+
 def build_menu():
     with state.lock:
         status_val = state.status
@@ -122,12 +221,24 @@ def build_menu():
         item('Parar Servidor', stop_server_action),
         item('Reiniciar Servidor', restart_server_action),
         pystray.Menu.SEPARATOR,
-        item('▶ Rodar Auditoria IA (SaAuditaClassificacoes)', run_audit_agent),
-        item('▶ Rodar Revisão Online (SaRevisaoOnline)', run_revisao_online),
-        item('▶ Rodar Mineração de Redes (SaMineracaoRedes)', run_mineracao_redes),
-        item('▶ Rodar Auditoria Financeira (SaAuditoriaFinanceira)', run_auditoria_financeira),
-        item('▶ Rodar ScannerAgent', run_scanner_agent),
-        item('▶ Rodar DossierAgent', run_dossier_agent),
+        item('--- SUBAGENTES (SA) ---', lambda i: None, enabled=False),
+        item('▶ Auditoria IA (SaAuditaClassificacoes)', run_audit_agent),
+        item('▶ Revisão Online (SaRevisaoOnline)', run_revisao_online),
+        item('▶ Mineração de Redes (SaMineracaoRedes)', run_mineracao_redes),
+        item('▶ Auditoria Financeira (SaAuditoriaFinanceira)', run_auditoria_financeira),
+        item('▶ Consulta Banco (SaConsultaBanco)', run_consulta_banco),
+        item('▶ Diagnóstico Sistemas (SaDiagnosticaSistemas)', run_diagnostica_sistemas),
+        item('▶ Sincronizar Docs (DocFetcher)', run_doc_fetcher),
+        pystray.Menu.SEPARATOR,
+        item('--- WORKERS (WK) ---', lambda i: None, enabled=False),
+        item('▶ Coleta Instagram (WkColetaInstagram)', run_coleta_instagram),
+        item('▶ Curador de Alvos (WkPesquisaAlvos)', run_pesquisa_alvos),
+        item('▶ Classificador (WkClassificaComentarios)', run_classifica_comentarios),
+        item('▶ Scanner de Candidatos (WkEscaneiaCandidatos)', run_scanner_agent),
+        item('▶ Gerador de Dossiês (WkGeraDossies)', run_dossier_agent),
+        item('▶ Analisador Tendências (WkAnalisaTendencias)', run_analisa_tendencias),
+        item('▶ Aplicador Sugestões (WkAplicaSugestoes)', run_aplica_sugestoes),
+        item('▶ Monitor Alertas (WkGeraAlertas)', run_gera_alertas),
         pystray.Menu.SEPARATOR,
         item('Sair', quit_tray),
     )
