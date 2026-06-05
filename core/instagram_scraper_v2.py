@@ -213,7 +213,14 @@ class InstagramScraperV2:
                         session.profile = self._generate_stealth_profile()
                     profile = session.profile
                     
+                    proxy_list_env = os.getenv("PROXY_LIST", "")
+                    proxies = [p.strip() for p in proxy_list_env.split(",") if p.strip()]
                     proxy_url = os.getenv("PROXY_URL")
+                    
+                    # Rotação real de proxies (PASA v88.4)
+                    if proxies:
+                        proxy_url = random.choice(proxies)
+
                     context_kwargs = {
                         "viewport": {"width": profile["w"], "height": profile["h"]},
                         "user_agent": profile["ua"]

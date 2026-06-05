@@ -394,7 +394,10 @@ class QueueManager:
             termometro = getattr(target, "termometro", "MORNO")
             frequencia = 0.0
         elif is_no_comments or not valid_dates:
-            termometro = getattr(target, "termometro", "MORNO")
+            # PASA v88.4: Redução de ciclos com no_comments_found
+            # Rebaixa o termômetro gradativamente para aumentar o cooldown
+            current_term = getattr(target, "termometro", "MORNO")
+            termometro = "MORNO" if current_term == "QUENTE" else "FRIO"
             frequencia = 0.0
         else:
             last_post_date = max(valid_dates)

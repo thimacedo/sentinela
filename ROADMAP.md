@@ -44,8 +44,8 @@ _last_updated: 2026-06-04 | branch: main_
 
 ### Coleta e scraping
 - [ ] checkpoint intermediário por post raspado
-- [ ] rotação real de proxies no Playwright
-- [ ] redução de ciclos com `no_comments_found`
+- [x] rotação real de proxies no Playwright
+- [x] redução de ciclos com `no_comments_found`
 
 ### Otimização de Pipeline Reativo (Fase 9) - Concluído
 - [x] Implementar `EventBus` centralizado para sinalização em memória (`AsyncLocalEventBus`).
