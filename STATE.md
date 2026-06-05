@@ -208,6 +208,12 @@ PGMQ deve aparecer apenas como hipótese futura.
   - Atualizamos as referências de importação do `WkPesquisaAlvos` em [main_runner.py](file:///C:/Projetos/sentinela/main_runner.py), [scripts/add_target.py](file:///C:/Projetos/sentinela/scripts/add_target.py) e [scripts/run_pesquisa_alvos.py](file:///C:/Projetos/sentinela/scripts/run_pesquisa_alvos.py).
 - **Validação**: Todos os módulos compilados e testados com sucesso total. Alterações registradas no repositório.
 
+## Correções de Estabilidade do Stack de Desenvolvimento (2026-06-05 sessão 2)
+
+- **Fix Crítico — Uvicorn CancelledError em Loop**: O script `api` no `package.json` usava `uvicorn --reload` sem exclusões. Qualquer arquivo gerado em `scratch/`, `.agents/`, `logs/` ou `runtime_state/` disparava um reload imediato do uvicorn, causando `asyncio.CancelledError` em cadeia e derrubando o backend constantemente. Adicionadas flags `--reload-exclude` para esses quatro diretórios.
+- **Substituição de Alvo**: O alvo `pablomarcaloficial` foi desativado (`status_monitoramento = DESATIVADO`) no Supabase. O alvo canônico `pablomarcal1` permanece ATIVO e é o ponto de monitoramento oficial do candidato.
+- **Ordenação de Serviços de IA no Dashboard**: Confirmado que a lógica de ordenação no `local_dashboard.html` já está correta (local → cloud, ambos asc). O problema de "dados não atualizando" era consequência do Watchdog offline por causa do CancelledError em loop — corrigido pelo item acima.
+
 ## Correções de Resiliência e Conformidade Jurídica (2026-06-05)
 
 - **Conversão de Métodos Síncronos para Assíncronos**: Refatoramos métodos no cliente de banco de dados (`core/db.py`), no gerenciador de checkpoints (`core/checkpoint_manager.py`) e no gerenciador de filas (`core/queue_manager.py`) para utilizar `async/await`. Mapeamos as chamadas síncronas do Supabase (`execute()`) usando `asyncio.to_thread` para prevenir bloqueios indesejados no event loop do runner principal e dos workers.
