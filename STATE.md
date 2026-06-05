@@ -142,3 +142,8 @@ PGMQ deve aparecer apenas como hipótese futura.
 - **Correção Aplicada**: Criada a migração `migrations/20260604_add_audit_data.sql` para adicionar a coluna `JSONB` necessária.
 - **Detecção de Drift**: O agente reportou um **Drift de 26.7%** (4 divergências em 15 amostras) entre o classificador de produção e o auditor (Groq/Llama 3.3). O alerta de drift (> 20%) foi disparado, sugerindo necessidade de recalibragem dos prompts ou do threshold de confiança.
 - **Relatórios de Rede**: O `SaMineracaoRedes` gerou novos relatórios em `frontend/public/reports/` identificando clusters de ataque coordenado com score de perigo máximo (100/100).
+
+## Otimização de Subagentes (Fase 1)
+
+- **Classe Abstrata BaseSubAgent**: Em 2026-06-05, criamos `workers/base/subagent_base.py` herdando de `BaseWorker` e fornecendo `ProcessPoolExecutor` para offloading assíncrono de tarefas CPU-bound.
+- **Refatoração do SaMineracaoRedes**: Atualizamos `workers/analytics/sa_mineracao_redes.py` para herdar de `BaseSubAgent` e isolar todo o processamento matemático e estatístico (Pandas/NetworkX) de detecção de clusters em um pool de subprocessos efêmeros. O script de validação de importações confirmou o perfeito funcionamento de compilação sem bloqueios.

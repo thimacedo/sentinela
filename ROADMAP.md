@@ -64,6 +64,7 @@ _last_updated: 2026-06-05 | branch: main_
 - [x] unificar semântica de `no_tasks_available` entre workers ativos
 - [x] reduzir duplicidade de logging, cooldown e fluxo entre ciclos
 - [x] padronizar nomenclatura de todos os workers e subagentes em português (prefixos `wk_` e `sa_`)
+- [x] Otimização de Subagentes - Fase 1: Classe abstrata BaseSubAgent com pools de subprocessos e threads e refatoração do SaMineracaoRedes
 - [ ] revisar se `WkPesquisaAlvos` deve permanecer em `workers/ai/` ou migrar para domínio próprio
 
 ### Administração e analytics
