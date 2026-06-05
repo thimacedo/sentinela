@@ -158,6 +158,42 @@ async def favicon():
     from fastapi.responses import Response
     return Response(status_code=204)
 
+@app.get("/api/analytics/top-attackers")
+async def get_top_attackers():
+    """Retorna os perfis mais agressivos usando o banco local."""
+    try:
+        from workers.ai.sa_consulta_banco import SaConsultaBanco
+        sa = SaConsultaBanco()
+        data = await sa.get_top_attackers(limit=5)
+        await sa.close()
+        return {"attackers": data}
+    except Exception as e:
+        return {"attackers": [], "error": str(e)}
+
+@app.get("/api/analytics/hate-stats")
+async def get_hate_stats():
+    """Retorna estatísticas de ódio por candidato usando o banco local."""
+    try:
+        from workers.ai.sa_consulta_banco import SaConsultaBanco
+        sa = SaConsultaBanco()
+        data = await sa.get_hate_stats()
+        await sa.close()
+        return {"stats": data}
+    except Exception as e:
+        return {"stats": [], "error": str(e)}
+
+@app.get("/api/analytics/search")
+async def search_local(q: str):
+    """Busca textual ultra-rápida usando FTS5 local."""
+    try:
+        from workers.ai.sa_consulta_banco import SaConsultaBanco
+        sa = SaConsultaBanco()
+        data = await sa.search_comments(q, limit=20)
+        await sa.close()
+        return {"results": data}
+    except Exception as e:
+        return {"results": [], "error": str(e)}
+
 @app.get("/api/evaluations")
 async def get_evaluations():
     """Retorna o histórico recente de avaliações para persistência no frontend."""
