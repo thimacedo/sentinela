@@ -732,7 +732,11 @@ def guard():
                 
                 state.add_log("info", "[Watchdog] Manutenção de IA e sincronização concluídas com sucesso durante o descanso.")
             except Exception as e:
-                state.add_log("warn", f"[Watchdog] Falha ao executar manutenção no cooldown: {e}")
+                err_msg = str(e).lower()
+                if any(t in err_msg for t in ["10060", "timed out", "timeout", "connection", "componente conectado não respondeu"]):
+                    state.add_log("warn", "[Watchdog] Manutenção de IA ignorada no cooldown: Banco de dados/Rede offline.")
+                else:
+                    state.add_log("warn", f"[Watchdog] Falha ao executar manutenção no cooldown: {e}")
 
 if __name__ == "__main__":
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
