@@ -351,10 +351,13 @@ class QueueManager:
         if active_targets is not None:
             active_targets.add(username)
 
-    def rotate_target(self, target: Target) -> None:
-        """Remove o item processado e reinsere no fim da fila com status e termômetro (v86.3)."""
+    def update_target_metrics(self, target: Target) -> str:
+        """
+        Calcula e atualiza o termômetro e a frequência de postagens do candidato.
+        Retorna o novo valor do termômetro ('QUENTE', 'MORNO' ou 'FRIO').
+        """
         if not target.username:
-            return
+            return "MORNO"
 
         # Use horário local (UTC‑3) como referência de tempo
         LOCAL_TZ = timezone(timedelta(hours=-3))
@@ -362,32 +365,19 @@ class QueueManager:
         now_iso = now.isoformat()
         
         # PASA v86.3: Não pune o alvo se for um erro do Scraper
-        # Apenas "junk_detected" ou "invalid_target: 404_not_found" justificam diminuir a temperatura
-        # "no_comments_found" será tratado como falta de dados, mas não será classificado como FRIO
         is_error = hasattr(target, "error") and target.error
         is_no_comments = is_error and target.error == "no_comments_found"
         is_empty = is_error and target.error in ["junk_detected", "invalid_target: 404_not_found"]
-        # Detecta erros de sessão ou bloqueio (ex: cookies expirados, 429, captcha, login wall)
         session_terms = ["session", "blocked", "429", "login wall", "captcha"]
         is_session_error = is_error and any(term in str(target.error).lower() for term in session_terms)
         is_system_error = is_error and not is_empty and not is_no_comments and not is_session_error
         
-        # Se for um erro do sistema ou sessão, atualizamos o last_scraped_at mas NÃO mudamos o termômetro
         if is_system_error or is_session_error:
             logger.warning(f"⚠️ [Queue] Erro sistêmico/sessão detectado para @{target.username} ({target.error}). Mantendo temperatura atual.")
             self.db.table("candidatos").update({
                 "last_scraped_at": now_iso
             }).eq("username", target.username).execute()
-            
-            if target.queue_id:
-                self.db.table("fila_coleta").update({
-                    "status": "FALHA",
-                    "locked_by": None,
-                    "locked_until": None,
-                    "locked_at": None,
-                    "updated_at": now_iso
-                }).eq("id", target.queue_id).execute()
-            return
+            return getattr(target, "termometro", "MORNO")
 
         frequencia = 0.0
         post_metas = getattr(target, "post_metas", [])
@@ -396,18 +386,14 @@ class QueueManager:
             for m in post_metas:
                 if m.get("timestamp"):
                     try:
-                        # Usa horário local (UTC-3) para normalizar timestamps armazenados sem zona
                         valid_dates.append(_parse_local_timestamp(m["timestamp"]))
                     except Exception:
                         continue
         
         if (is_empty or not valid_dates) and not is_no_comments:
-            # Tenta manter a temperatura atual se possível, senão MORNO
             termometro = getattr(target, "termometro", "MORNO")
             frequencia = 0.0
         elif is_no_comments or not valid_dates:
-            # Caso especial: nenhum comentário encontrado, mas ainda não há dados suficientes
-            # Tenta manter a temperatura atual
             termometro = getattr(target, "termometro", "MORNO")
             frequencia = 0.0
         else:
@@ -420,7 +406,6 @@ class QueueManager:
             else:
                 frequencia = round(7 / (days_since_last_post + 1), 1)
 
-            # Prioridade: frequência alta → QUENTE, caso contrário verifica tempo desde o último post
             if frequencia >= 5:
                 termometro = "QUENTE"
             elif days_since_last_post > 7:
@@ -434,16 +419,34 @@ class QueueManager:
             "termometro": termometro
         }
         self.db.table("candidatos").update(update_data).eq("username", target.username).execute()
+        return termometro
+
+    def rotate_target(self, target: Target) -> None:
+        """Remove o item processado e reinsere no fim da fila com status e termômetro (v86.3)."""
+        if not target.username:
+            return
+
+        # Use horário local (UTC‑3) como referência de tempo
+        LOCAL_TZ = timezone(timedelta(hours=-3))
+        now = datetime.now(LOCAL_TZ)
+        now_iso = now.isoformat()
+        
+        # Atualiza métricas do candidato
+        termometro = self.update_target_metrics(target)
 
         if target.queue_id:
             nova_prioridade = 1 if termometro == "QUENTE" else (5 if termometro in ("FRIO", "MORNO") else 3)
+            is_error = hasattr(target, "error") and target.error
+            is_empty = is_error and target.error in ["junk_detected", "invalid_target: 404_not_found"]
+            
             self.db.table("fila_coleta").update({
                 "status": "SEM_DADOS_RECENTES" if is_empty else "CONCLUIDO",
                 "prioridade": nova_prioridade,
                 "updated_at": now_iso
             }).eq("id", target.queue_id).execute()
             
-        logger.info(f"[Queue] @{target.username} -> {termometro} ({frequencia} posts/sem)")
+        logger.info(f"[Queue] Rotação finalizada para @{target.username} -> {termometro}")
+
 
     def mark_candidate_scraped(self, target: Target) -> None:
         """Update the last_scraped_at timestamp for the candidate."""

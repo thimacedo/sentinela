@@ -371,6 +371,9 @@ class InstagramScraperWorker(BaseWorker):
 
             # PASA v88.0 (Fase 8.3): Release atômico do lock se foi claimado atomicamente
             if target and getattr(target, 'source', '') == 'fila_coleta_atomic' and target.queue_id:
+                # PASA v88.2: Ativa a classificação de temperatura (termômetro) antes de liberar
+                self.queue.update_target_metrics(target)
+                
                 final_status = "CONCLUIDO"
                 if hasattr(result, 'error') and result.error:
                     err = result.error
@@ -387,3 +390,4 @@ class InstagramScraperWorker(BaseWorker):
             else:
                 # Legado: usa rotate_target para atualizar o status
                 self.queue.rotate_target(target)
+

@@ -59,14 +59,15 @@ class AIProcessorWorker(BaseWorker):
             # O ai_service já gerencia a seleção de itens processado_ia=False
             classified_count = await ai_service.run_batch_classification(limit=self.batch_size)
             
-            # --- TAREFA DE UTILIDADE (PASA v85.12) ---
-            # Se não houver novos dados, aproveita o ciclo para RE-ANALISAR itens de baixa confiança (< 60%)
+            # --- TAREFA DE UTILIDADE DESATIVADA (PASA v88.2) ---
+            # O usuário solicitou a proibição de classificação em comentários já processados (re-análise)
             utility_count = 0
-            if classified_count == 0:
-                logger.info(f"🧠 [AI] Fila primária vazia. Iniciando Re-análise de Baixa Confiança...")
-                utility_count = await ai_service.run_batch_reanalysis(limit=self.batch_size // 2, confidence_threshold=0.6)
-                if utility_count > 0:
-                    logger.info(f"✨ [AI] Sucesso: {utility_count} registros de baixa confiança refinados.")
+            # if classified_count == 0:
+            #     logger.info(f"🧠 [AI] Fila primária vazia. Iniciando Re-análise de Baixa Confiança...")
+            #     utility_count = await ai_service.run_batch_reanalysis(limit=self.batch_size // 2, confidence_threshold=0.6)
+            #     if utility_count > 0:
+            #         logger.info(f"✨ [AI] Sucesso: {utility_count} registros de baixa confiança refinados.")
+
             
             if classified_count == 0 and utility_count == 0:
                 logger.info("✅ Sem tarefas ou registros para refinar no momento.")
