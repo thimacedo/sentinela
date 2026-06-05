@@ -525,7 +525,6 @@ def heal_runtime_error(reason: str) -> str:
         state.update_metrics(status="PARADO - OOM")
         return "fatal"
         
-    # Detecta falha REAL de conexão com banco — não apenas a presença da URL do Supabase nos logs
     _db_connection_terms = [
         "connectionrefusederror",
         "connection refused",
@@ -536,6 +535,10 @@ def heal_runtime_error(reason: str) -> str:
         "failed to connect",
         "unable to connect",
         "econnrefused",
+        "10060",
+        "timed out",
+        "timeout",
+        "componente conectado não respondeu",
     ]
     _is_db_failure = any(t in stderr_lower for t in _db_connection_terms)
     if _is_db_failure:
