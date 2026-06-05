@@ -143,7 +143,10 @@ PGMQ deve aparecer apenas como hipótese futura.
 - **Detecção de Drift**: O agente reportou um **Drift de 26.7%** (4 divergências em 15 amostras) entre o classificador de produção e o auditor (Groq/Llama 3.3). O alerta de drift (> 20%) foi disparado, sugerindo necessidade de recalibragem dos prompts ou do threshold de confiança.
 - **Relatórios de Rede**: O `SaMineracaoRedes` gerou novos relatórios em `frontend/public/reports/` identificando clusters de ataque coordenado com score de perigo máximo (100/100).
 
-## Otimização de Subagentes (Fase 1)
+## Otimização de Subagentes (Fases 1, 2, 3 e 4)
 
-- **Classe Abstrata BaseSubAgent**: Em 2026-06-05, criamos `workers/base/subagent_base.py` herdando de `BaseWorker` e fornecendo `ProcessPoolExecutor` para offloading assíncrono de tarefas CPU-bound.
-- **Refatoração do SaMineracaoRedes**: Atualizamos `workers/analytics/sa_mineracao_redes.py` para herdar de `BaseSubAgent` e isolar todo o processamento matemático e estatístico (Pandas/NetworkX) de detecção de clusters em um pool de subprocessos efêmeros. O script de validação de importações confirmou o perfeito funcionamento de compilação sem bloqueios.
+- **Classe Abstrata BaseSubAgent (Fase 1)**: Criamos `workers/base/subagent_base.py` herdando de `BaseWorker` e fornecendo `ProcessPoolExecutor` para offloading assíncrono de tarefas CPU-bound.
+- **Concorrência e Claims Horizontais (Fase 2)**: Criamos a tabela `lotes_analises` e a RPC `reivindicar_lote_analise` (corrigindo ambiguidades do compilador SQL) aplicando claims baseados em `SELECT FOR UPDATE SKIP LOCKED`. Refatoramos o `SaMineracaoRedes` para reivindicar lotes e persistir o status atômico de término do ciclo (`CONCLUIDO` / `ERRO`).
+- **Resiliência e Drift em IA (Fase 3)**: Corrigimos a ausência da coluna `audit_data` na tabela `comentarios` do Supabase remoto. Refatoramos `SaAuditaClassificacoes` para herdar de `BaseSubAgent` e consumir a cascata de IA (Groq -> Mistral -> Ollama) integrada com o `ai_circuit_breaker` global. Adicionamos a lógica de criação de sugestões `drift_detected` de prioridade `HIGH` na tabela `worker_suggestions` se o drift superar 20%.
+- **Parametrização por Ciclo (Fase 4)**: Implementamos a clonagem e congelamento de configurações no boot do ciclo operacional (`current_cycle_config`) do `WkColetaInstagram` para evitar race conditions contra as alterações automáticas do SRE via `WkAplicaSugestoes`.
+- **Validação Integrada**: Rodamos os testes scratch de imports e de claims analíticos integrados com sucesso absoluto de processamento e persistência. Todas as fases foram commitadas e sincronizadas com a branch `main`.
