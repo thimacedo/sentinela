@@ -15,17 +15,18 @@ O Sentinela é uma plataforma de monitoramento político com foco em:
 
 ```text
 [Watchdog Local] (Porta 8001)
-  └── main_runner.py
+  └── main_runner.py (Modo Silencioso - v90.4)
         └── Orquestrador
               ├── InstagramWorker
-              ├── AIProcessorWorker
+              ├── AIProcessorWorker (Cascata: Ollama -> Sabia-4 -> Cloud)
               └── TargetResearchWorker (opcional por RESEARCHER_MODE)
 
 [Subagentes Analíticos e de Dados]
   ├── SaConsultaBanco: Prover consultas SQL locais leves via Datasette
   ├── SaAuditaClassificacoes: Auditoria cruzada anti-alucinação sob demanda (Groq)
   ├── SaMineracaoRedes: Análise de redes coordenadas e clusters reativa
-  └── SaAuditoriaFinanceira: Auditoria financeira e fechamento diário reativo
+  ├── SaAuditoriaFinanceira: Auditoria financeira e fechamento diário reativo
+  └── Hugging Face MCP: Descoberta e acesso ao ecossistema Hub via Agente CLI
 
 [Datasette Server] (Porta 8002)
   └── sentinela_data.db (Espelhamento SQLite local imutável FTS5)

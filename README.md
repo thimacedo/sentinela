@@ -19,9 +19,10 @@ O fluxo atual observado no código é:
 2. o orquestrador registra workers especializados
 3. a fila usa claim atômico com `SELECT FOR UPDATE SKIP LOCKED` via RPCs do Supabase
 4. o scraper coleta comentários e metadados
-5. `AIProcessorWorker` classifica backlog com cascata:
+- `AIProcessorWorker` classifica backlog com cascata:
    - `ollama` para triagem local
-   - `mistral`, `groq` e `openrouter` na camada cloud
+   - `maritaca` (Sabia-4) e `huggingface` (MCP) na camada cloud
+   - `mistral`, `groq` e `openrouter` como provedores de auditoria
    - `FallbackLLM` como recuperação de desastre
 6. `network-miner` consolida redes
 7. `treasurer` atualiza indicadores financeiros

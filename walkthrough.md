@@ -18,8 +18,10 @@ Este documento resume apenas o que continua válido após auditoria do código.
 Camadas observadas no código:
 
 1. `ollama` para triagem local
-2. `mistral`, `groq`, `openrouter` para refino cloud
-3. `FallbackLLM` como recuperação de desastre
+2. `maritaca` (Sabia-4) para auditoria e perícia cloud
+3. `huggingface` via MCP para descoberta de modelos e datasets
+4. `mistral`, `groq`, `openrouter` para refino e auditoria cruzada
+5. `FallbackLLM` como recuperação de desastre
 
 ## 3. O que mudou na auditoria
 
@@ -27,6 +29,7 @@ Camadas observadas no código:
 - PGMQ deixou de ser tratado como item implantado; hoje a fila distribuída real é a trava atômica da `fila_coleta`
 - o frontend oficial é `frontend/`
 - o watchdog local virou parte importante da operação diária
+- **v90.4**: Implementada a supressão total de popups de console no Windows via `CREATE_NO_WINDOW`, garantindo operação silenciosa do orquestrador e subagentes.
 
 ## 4. Estado da fila
 

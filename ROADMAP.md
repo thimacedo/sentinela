@@ -30,8 +30,9 @@ _last_updated: 2026-06-05 | branch: main_
 
 - [x] Otimização de Boot e Pré-Aquecimento de Filas (v89.2): filas populadas antes do start dos workers
 - [x] Otimização de Produção e Escalabilidade de IA (v90.0): implementação do Batch Processing concorrente, Escalonamento Horizontal de Workers (múltiplos classificadores) e Auto-renovação Preditiva de Sessões
+- [x] Integração de IA e Estabilização de UX (v90.4): Atualização Maritaca Sabia-4, Integração Hugging Face MCP e eliminação total de popups de console no Windows via `CREATE_NO_WINDOW`.
 
-### Escalabilidade e resiliência
+### Coleta e scraping
 - [x] Claim atômico da `fila_coleta`
 - [x] Suporte a `SELECT FOR UPDATE SKIP LOCKED`
 - [x] Release de locks expirados
