@@ -58,7 +58,7 @@ file_handler.setFormatter(json_formatter)
 root_logger.addHandler(file_handler)
 
 # Enable INFO for principais loggers
-for important_logger in ["main_runner", "orchestrator", "queue_manager", "worker.ig_v2", "worker.researcher", "instagram_scraper_v2"]:
+for important_logger in ["main_runner", "orchestrator", "queue_manager", "worker.ig_v2", "worker.researcher", "instagram_scraper_v2", "core.ai_service", "worker.ai_processor"]:
     logging.getLogger(important_logger).setLevel(logging.INFO)
 
 # Silenciar bibliotecas barulhentas

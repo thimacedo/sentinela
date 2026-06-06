@@ -164,9 +164,14 @@ PGMQ deve aparecer apenas como hipótese futura.
 - **Instalação**: Extensão `huggingface` instalada no Gemini CLI.
 - **Autenticação**: Token de API configurado no `.env` como `HF_TOKEN` e injetado nos headers do servidor MCP no arquivo `.gemini/settings.json` via variável de ambiente. O agente agora possui acesso direto ao ecossistema Hugging Face (Modelos, Datasets e Spaces).
 
-### 3. Correção de Foco e UX (Anti-Popup Windows)
+### 2. Correção de Foco e UX (Anti-Popup Windows)
 - **CREATE_NO_WINDOW**: Aplicada a flag de sistema `0x08000000` em todas as chamadas de subprocessos no Windows, incluindo o orquestrador (`watchdog`), verificadores de saúde (`core.health_check`), limpadores de processos (`core.process_cleaner`) e até mesmo nos gatilhos manuais da bandeja gráfica (`watchdog/__main__.py`). Isso elimina definitivamente o problema de janelas pretas de terminal (cmd.exe) abrindo e roubando o foco do usuário durante a operação em background.
 - **Headless Enforcement**: Reforçada a política de execução invisível para todos os workers de coleta, garantindo que o sistema opere de forma 100% silenciosa.
+
+### 3. Estabilização de Runtime e Monitoramento (v90.5 - 2026-06-06)
+- **Eliminação de Zumbis**: Identificada e corrigida uma condição de corrida que gerava instâncias duplicadas do `main_runner.py` durante o boot do Watchdog. O sistema agora utiliza o `GuardLocker` com maior rigor, garantindo um único orquestrador ativo.
+- **Visibilidade de IA**: Ativado o nível de log `INFO` para `core.ai_service` e `worker.ai_processor`, permitindo o acompanhamento detalhado da vazão de classificação no terminal e dashboard.
+- **Início do Ciclo de 24h**: Iniciado monitoramento contínuo de 24h para validação de estresse. Vazão inicial estabilizada em ~25 classificações/minuto com suporte total da malha Maritaca Sabia-4.
 
 ## Próximos passos OBRIGATÓRIOS
 
