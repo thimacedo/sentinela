@@ -1,4 +1,5 @@
 # scripts/run_doc_fetcher.py
+import asyncio
 import logging
 import os
 import sys
@@ -17,11 +18,11 @@ from workers.ai.doc_fetcher import DocFetcher
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger("run_doc_fetcher")
 
-def main():
+async def main():
     logger.info("Disparando Sincronizador de Documentos Técnicos (DocFetcher)...")
     fetcher = DocFetcher()
-    fetcher.refresh_all()
+    await fetcher.refresh_all()
     logger.info("Sincronização concluída com sucesso!")
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

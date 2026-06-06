@@ -150,7 +150,7 @@ class FallbackLLM:
     def _call_gemini(self, text: str, api_key: str, model: str) -> str:
         if not api_key:
             raise ValueError("GEMINI_API_KEY ausente.")
-        model = model or "gemini-1.5-flash"
+        model = model or "gemini-2.5-flash"
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
         payload = {"contents": [{"parts": [{"text": text}]}]}
         resp = requests.post(url, json=payload, timeout=15)

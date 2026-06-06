@@ -9,21 +9,64 @@ provedor de IA local (Ollama) esteja em execução.
 """
 
 def check_instagram_accounts():
-    """Verifica se as variáveis de ambiente de contas Instagram estão definidas.
-    Retorna um dicionário com status para cada credencial.
+    """Verifica a saúde real das sessões do Instagram no banco (PASA v90.0).
+    Retorna o status por conta ou sinaliza 'expired' para alertar o Dashboard.
+    Se todas estiverem expiradas, tenta auto-renovação preditiva.
     """
-    accounts = {
-        "IG_USER": os.getenv("IG_USER"),
-        "IG_PASS": os.getenv("IG_PASS"),
-        "IG_USER_1": os.getenv("IG_USER_1"),
-        "IG_PASS_1": os.getenv("IG_PASS_1"),
-    }
     status = {}
-    for key, value in accounts.items():
-        if value and value.strip():
-            status[key] = "OK"
-        else:
-            status[key] = "MISSING (ação manual requerida)"
+    try:
+        import asyncio
+        from core.db import db_client
+        # Consulta síncrona/async usando o driver
+        res = db_client.client.table('worker_sessions').select('username, status').execute()
+        sessions = res.data or []
+        
+        expired_count = 0
+        for s in sessions:
+            username = s.get('username') or 'Desconhecido'
+            s_status = s.get('status', 'expired')
+            status[username] = s_status
+            if s_status != 'active':
+                expired_count += 1
+                
+        # 🛡️ Gestão Preditiva de Sessões (PASA v90.0)
+        # Se 100% das sessões estão expiradas e temos pelo menos 1 registrada, dispara auto-renovação
+        if len(sessions) > 0 and expired_count == len(sessions):
+            lock_file = Path("runtime_state/session_renewal.lock")
+            import time
+            
+            # Evita disparar scripts simultâneos em menos de 10 minutos
+            can_renew = True
+            if lock_file.exists():
+                mtime = lock_file.stat().st_mtime
+                if (time.time() - mtime) < 600:
+                    can_renew = False
+                    
+            if can_renew:
+                print("🚨 [HealthCheck] Todas as sessões do Instagram expiraram. Disparando renovação automática em background...")
+                lock_file.parent.mkdir(exist_ok=True)
+                lock_file.touch()
+                
+                # Executa o export_playwright_cookies em processo desanexado para não travar o loop
+                import subprocess
+                import sys
+                script_path = str(Path("scripts/export_playwright_cookies.py").absolute())
+                is_windows = os.name == 'nt'
+                flags = 0x08000000 if is_windows else 0 # CREATE_NO_WINDOW
+                subprocess.Popen([sys.executable, script_path, "--force"], creationflags=flags, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                
+    except Exception as e:
+        # Fallback genérico para variáveis de ambiente
+        accounts = {
+            "IG_USER": os.getenv("IG_USER"),
+            "IG_USER_1": os.getenv("IG_USER_1"),
+        }
+        for key, value in accounts.items():
+            if value and value.strip():
+                status[key] = "OK"
+            else:
+                status[key] = "MISSING"
+                
     return status
 
 def _start_service(name: str, command: list[str]):
@@ -34,7 +77,8 @@ def _start_service(name: str, command: list[str]):
     try:
         # v50.1: Usando shell=True no Windows para maior resiliência com scripts/batch files
         is_windows = os.name == 'nt'
-        subprocess.Popen(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=is_windows)
+        creationflags = 0x08000000 if is_windows else 0
+        subprocess.Popen(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=is_windows, creationflags=creationflags)
         print("[TOOL] Serviço {} iniciado: {}".format(name, ' '.join(command)))
     except Exception as e:
         print(f"[WARN] Falha ao iniciar {name}: {e}")
@@ -54,16 +98,23 @@ def _get_health_url(base_url: str, default_origin: str, path: str) -> str:
         return f"{default_origin}{path}"
 
 def ensure_ollama_running():
+    from core.process_cleaner import ensure_ollama_singleton
+    
     base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
     health_url = _get_health_url(base_url, "http://localhost:11434", "/api/tags")
+    
+    # 1. Checa se o serviço responde HTTP
     try:
         resp = httpx.get(health_url, timeout=2.0)
         if resp.status_code == 200:
-            print("[OK] Ollama já está ativo.")
-            return True
+            # 2. Se responde, garante que não há DUPLICATAS no nível do SO
+            if ensure_ollama_singleton():
+                print("[OK] Ollama já está ativo e único.")
+                return True
     except Exception:
         pass
-    print("[WARN] Ollama não respondendo, iniciando serviço...")
+        
+    print("[WARN] Ollama não respondendo ou instâncias duplicadas, iniciando serviço...")
     cmd_str = os.getenv("OLLAMA_COMMAND", "ollama serve")
     import shlex
     cmd = shlex.split(cmd_str)

@@ -478,40 +478,66 @@ class AIService:
         return {"is_hate": is_hate, "categoria_ia": category, "confianca_ia": confidence, "analise_pericial": analise}
 
     async def run_batch_classification(self, limit: int = 50) -> int:
-        """Busca comentários não processados no banco e executa a classificação."""
+        """Busca comentários não processados no banco e executa a classificação.
+        Otimizado (v90.0): Implementação Híbrida. Processamento individual com concorrência
+        limitada para provedores locais e cloud. Em breve migraremos para Single-Prompt Batch.
+        """
         try:
             from core.db import db_client
             res = await asyncio.to_thread(
                 db_client.client.table('comentarios').select('id, texto_bruto, trace_id').eq('processado_ia', False).limit(limit).execute
             )
             items = res.data or []
+            if not items:
+                return 0
+                
             count = 0
-            for item in items:
-                try:
-                    res_ia = await self.classify_text(item["texto_bruto"], item["id"], trace_id=item.get("trace_id"))
-                    if res_ia and res_ia.get("categoria_ia") != "ERRO":
-                        engine_name = res_ia.get("name", "unknown").upper()
-                        analise = f"[{engine_name}] {res_ia.get('analise_pericial', '')}"
-                        await asyncio.to_thread(
-                            db_client.client.table('comentarios').update({
-                                "categoria_ia": res_ia["categoria_ia"], "confianca_ia": res_ia["confianca_ia"], "is_hate": res_ia["is_hate"], "analise_pericial": analise, "processado_ia": True
-                            }).eq("id", item["id"]).execute
-                        )
-                        count += 1
-                        
-                        # Se for SUSPEITO, sinaliza o subagente de revisão online imediatamente
-                        if res_ia.get("categoria_ia") == "SUSPEITO":
-                            from core.event_bus import local_bus
-                            local_bus.signal_new_suspects()
-                    
-                    # PASA v88.2 - Cadência Constante (Persistência sobre Velocidade)
+            
+            # v90.0: Paralelismo controlado (Concurrency)
+            # Ao invés de enviar 1 prompt gigante (que modelos menores erram a formatação JSON),
+            # nós enviamos N requisições concorrentes, respeitando limites de taxa.
+            semaphore = asyncio.Semaphore(5) # Limita a 5 requests paralelos simultâneos para evitar 429/OOM
+            
+            async def _process_single(item):
+                async with semaphore:
+                    try:
+                        res_ia = await self.classify_text(item["texto_bruto"], item["id"], trace_id=item.get("trace_id"))
+                        if res_ia and res_ia.get("categoria_ia") != "ERRO":
+                            engine_name = res_ia.get("name", "unknown").upper()
+                            analise = f"[{engine_name}] {res_ia.get('analise_pericial', '')}"
+                            
+                            # Atualiza no banco
+                            await asyncio.to_thread(
+                                db_client.client.table('comentarios').update({
+                                    "categoria_ia": res_ia["categoria_ia"], 
+                                    "confianca_ia": res_ia["confianca_ia"], 
+                                    "is_hate": res_ia["is_hate"], 
+                                    "analise_pericial": analise, 
+                                    "processado_ia": True
+                                }).eq("id", item["id"]).execute
+                            )
+                            
+                            # Se for SUSPEITO, sinaliza o subagente de revisão online imediatamente (Pipeline Reativo)
+                            if res_ia.get("categoria_ia") == "SUSPEITO":
+                                from core.event_bus import local_bus
+                                local_bus.signal_new_suspects()
+                                
+                            return True
+                    except Exception as e:
+                        if "Colapso" in str(e):
+                            raise e
+                        logger.debug(f"[AI:Batch] Erro pontual no ID {item['id']}: {e}")
+                    return False
 
-                    # Introduz delay para evitar picos e respeitar limites de IA a longo prazo
-                    await asyncio.sleep(1.0)
-                except Exception as e:
-                    if "Colapso" in str(e):
-                        logger.error("🛑 [AI] Colapso detectado nas APIs. Abortando lote.")
-                        raise e 
+            results = await asyncio.gather(*[_process_single(item) for item in items], return_exceptions=True)
+            
+            for r in results:
+                if isinstance(r, Exception) and "Colapso" in str(r):
+                    logger.error("🛑 [AI] Colapso detectado nas APIs. Abortando lote.")
+                    raise r
+                if r is True:
+                    count += 1
+                    
             return count
         except Exception as e:
             raise e 

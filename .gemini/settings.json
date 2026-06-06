@@ -1,4 +1,12 @@
 {
+  "mcpServers": {
+    "browseract": {
+      "url": "https://api.browseract.com/mcp",
+      "headers": {
+        "Authorization": "Bearer app-x6UGQW4qYIVW7QVSJvxqi8CB"
+      }
+    }
+  },
   "experimental": {
     "gemmaModelRouter": {
       "enabled": true,

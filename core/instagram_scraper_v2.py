@@ -195,18 +195,29 @@ class InstagramScraperV2:
 
             try:
                 async with async_playwright() as pw:
-                    browser = await pw.chromium.launch(
-                        headless=self.headless,
-                        args=[
-                            "--disable-blink-features=AutomationControlled", 
-                            "--no-sandbox",
-                            "--disable-infobars",
-                            "--window-position=0,0",
-                            "--ignore-certificate-errors",
-                            "--disable-extensions",
-                            "--disable-notifications"
-                        ]
-                    )
+                    browseract_key = os.getenv("BROWSERACT_API_KEY")
+                    
+                    # Temporariamente desabilitado o CDP do BrowserAct devido a erro 401 na API. 
+                    # O BrowserAct será usado via ferramentas MCP configuradas no settings.json do agente.
+                    use_browseract_cdp = False 
+                    
+                    if browseract_key and use_browseract_cdp:
+                        logger.info(f"🌐 [V2] Conectando via BrowserAct (Cloud CDP) para máxima evasão antibot...")
+                        ws_url = f"wss://api.browseract.com/connect?apiKey={browseract_key}&keep_alive=300000"
+                        browser = await pw.chromium.connect_over_cdp(ws_url)
+                    else:
+                        browser = await pw.chromium.launch(
+                            headless=self.headless,
+                            args=[
+                                "--disable-blink-features=AutomationControlled", 
+                                "--no-sandbox",
+                                "--disable-infobars",
+                                "--window-position=0,0",
+                                "--ignore-certificate-errors",
+                                "--disable-extensions",
+                                "--disable-notifications"
+                            ]
+                        )
                     
                     # 🎭 STEALTH PROFILE (Fixo por sessão para evitar suspeitas)
                     if not session.profile:

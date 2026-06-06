@@ -38,10 +38,11 @@ def check_for_updates() -> bool:
             if command == 'UPDATE_REPO':
                 # Puxa as últimas melhorias do Git
                 try:
-                    subprocess.run(['git', 'pull', 'origin', 'main'], check=True)
+                    flags = 0x08000000 if os.name == 'nt' else 0
+                    subprocess.run(['git', 'pull', 'origin', 'main'], check=True, creationflags=flags)
                     # Verifica se o requirements.txt mudou e instala se necessário
                     if os.path.exists('requirements.txt'):
-                        subprocess.run(['pip', 'install', '-r', 'requirements.txt'], check=True)
+                        subprocess.run(['pip', 'install', '-r', 'requirements.txt'], check=True, creationflags=flags)
                     needs_restart = True
                 except Exception as e:
                     print(f"[AutoUpdater] Falha no git pull: {e}")

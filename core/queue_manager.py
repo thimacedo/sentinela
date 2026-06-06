@@ -34,7 +34,11 @@ def _parse_local_timestamp(ts: str) -> datetime:
 
 class QueueManager:
     def __init__(self, db_client):
-        self.db = db_client
+        # Proteção v90.1: Extrai o client real se for passado o wrapper DatabaseClient
+        if hasattr(db_client, 'client') and db_client.client is not None:
+            self.db = db_client.client
+        else:
+            self.db = db_client
 
     async def claim_next_target(
         self,
@@ -245,12 +249,36 @@ class QueueManager:
             logger.error(f"❌ [Queue] Erro ao consultar fila_coleta: {e}")
         return None
 
+    async def pre_warm_queues(self) -> None:
+        """
+        Pré-aquecimento das filas de trabalho (v89.2).
+        Popula a fila_coleta e garante alvos prontos ANTES dos workers iniciarem.
+        """
+        logger.info("🔥 [Queue] Iniciando pré-aquecimento das filas...")
+        
+        # 1. Garante que a fila_coleta tenha o mínimo necessário
+        await self._ensure_queue_populated(min_pending=50)
+        
+        # 2. Limpeza de locks órfãos que possam travar o boot
+        unlocked = await self.release_stale_locks(timeout_minutes=0) # 0 força liberação de tudo no boot
+        if unlocked > 0:
+            logger.info(f"🔓 [Queue] {unlocked} locks órfãos liberados no boot.")
+
+        logger.info("✅ [Queue] Filas aquecidas e prontas para operação.")
+
+    def _get_db_client(self):
+        """Retorna o cliente Supabase real, suportando late initialization."""
+        if hasattr(self.db, 'client') and self.db.client is not None:
+            return self.db.client
+        return self.db
+
     async def _ensure_queue_populated(self, min_pending: int = 50) -> None:
         """Repopula a fila_coleta automaticamente quando há poucos itens pendentes (v80.0)."""
         try:
+            db_real = self._get_db_client()
             # Conta itens PENDENTE
             count_res = await asyncio.to_thread(
-                self.db.table("fila_coleta")
+                db_real.table("fila_coleta")
                 .select("id", count="exact")
                 .eq("status", "PENDENTE")
                 .execute

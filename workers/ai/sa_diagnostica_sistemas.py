@@ -9,7 +9,7 @@ from core.ai_service import AIService
 class SaDiagnosticaSistemas:
     """
     Advisor que analisa métricas de workers e gera sugestões
-    utilizando cache de documentos e IA Cloud (Mistral/Groq).
+    utilizando cache de documentos e a malha de IA unificada (AIService).
     """
     def __init__(self, memory: MemoryStore, fetcher: DocFetcher):
         self.memory = memory
@@ -29,7 +29,7 @@ class SaDiagnosticaSistemas:
             "extracted": result.extracted,
             "failed": result.failed,
             "error": result.error,
-            "duration": result.metadata.get("duration_seconds", 0),
+            "duration": result.metadata.get("duration_seconds", 0) if result.metadata else 0,
             "db_success": result.db_success
         }
 
@@ -40,32 +40,33 @@ class SaDiagnosticaSistemas:
             "Formato de resposta: 'ANÁLISE: ... SUGESTÃO: ...'"
         )
 
-        user_content = f"METRICAS: {json.dumps(metrics_summary)}\n"
+        user_content = f"METRICAS DO CICLO:\n{json.dumps(metrics_summary, indent=2)}\n"
         if doc:
-            user_content += f"\nDOCUMENTAÇÃO TÉCNICA:\n{doc}\n"
+            user_content += f"\nDOCUMENTAÇÃO TÉCNICA DE APOIO:\n{doc}\n"
+        else:
+            user_content += "\n(Nenhuma documentação técnica específica encontrada para este worker.)\n"
 
         try:
-            # Usamos o classify_text mas com um prompt customizado (overshadowing o default via injeção se possível, 
-            # ou chamando o client do AIService diretamente para flexibilidade)
-            # Para manter o padrão de cascata do AIService, vamos injetar o prompt no user_content
-            
-            response = await self.ai_service.mistral_client.chat.completions.create(
-                model="open-mistral-nemo",
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_content}
-                ],
-                temperature=0.3,
-                timeout=20.0
+            # Reutiliza a cascata de IA (Mistral -> Groq -> Ollama) via chat_completion
+            # Passamos o system_prompt específico para o Advisor
+            response = await self.ai_service.chat_completion(
+                prompt=user_content,
+                system_prompt=system_prompt,
+                response_format="text" # O Advisor retorna texto livre no formato ANÁLISE/SUGESTÃO
             )
-            suggestion = response.choices[0].message.content.strip()
+            
+            if response and "content" in response:
+                suggestion = response["content"].strip()
+            else:
+                suggestion = f"ANÁLISE: Ciclo degradado com erro {result.error}. SUGESTÃO: Verificar conectividade e validade das sessões no .env."
+
         except Exception as e:
-            self.logger.error(f"Erro ao consultar IA para Advisor: {e}")
-            suggestion = f"Falha crítica no ciclo {result.cycle}. Erro reportado: {result.error}. Verifique logs de rede."
+            self.logger.error(f"Erro ao consultar malha de IA para Advisor: {e}")
+            suggestion = f"ANÁLISE: Falha crítica no diagnóstico. Erro reportado pelo worker: {result.error}. SUGESTÃO: Reiniciar watchdog e verificar quotas de IA."
 
         await self.memory.save_suggestion(
             worker_id=result.worker_id,
             cycle=result.cycle,
             suggestion=suggestion
         )
-        self.logger.info(f"💡 [SaDiagnosticaSistemas] Sugestão salva para {result.worker_id}: {suggestion[:50]}...")
+        self.logger.info(f"💡 [SaDiagnosticaSistemas] Diagnóstico concluído para {result.worker_id}. Sugestão persistida.")

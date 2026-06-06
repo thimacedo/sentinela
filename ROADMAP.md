@@ -25,6 +25,11 @@ _last_updated: 2026-06-05 | branch: main_
 - [x] Otimização de IA e Fila Secundária (Fase 6): priorização do Ollama local com delay de 1s e criação do subagente SaRevisaoOnline (nuvem) para comentários suspeitos
 - [x] Cobertura Total de Comandos na Bandeja do Watchdog (Fase 7): criação de entrypoints CLI de offloading para todos os subagentes/workers e menu bandeja categorizado
 - [x] Otimização de Performance no Cadastro de Candidatos (Fase 8): processamento e escrita em lote (Bulk Upserts) de novos alvos e coletas no WkEscaneiaCandidatos
+- [x] Refinação da Inteligência de Autocura (Fase 4): implementação real do DocFetcher (sincronização remota) e refatoração do AIAdvisor para cascata de IA resiliente
+- [x] Segurança, Governança e Filtros Analíticos (Fase 10): implementação de RLS global, normalização de categorias MCA v2.2 e Shadowban Léxico no frontend
+
+- [x] Otimização de Boot e Pré-Aquecimento de Filas (v89.2): filas populadas antes do start dos workers
+- [x] Otimização de Produção e Escalabilidade de IA (v90.0): implementação do Batch Processing concorrente, Escalonamento Horizontal de Workers (múltiplos classificadores) e Auto-renovação Preditiva de Sessões
 
 ### Escalabilidade e resiliência
 - [x] Claim atômico da `fila_coleta`

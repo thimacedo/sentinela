@@ -99,14 +99,26 @@ class WatchdogState:
         self.should_run = True
         
     def add_log(self, level: str, message: str):
+        # Filtragem Inteligente para Reduzir "Enxurrada de Erros" no Terminal (v88.9)
+        # Omitimos do stdout mensagens de erro de rede/IA repetitivas, mas mantemos no Dashboard/SSE.
+        SUPPRESSED_TERMINAL_TERMS = ["429", "403", "401", "CIRCUITO ABERTO", "COOLDOWN", "HTTP REQUEST:", "HTTP/2 200 OK"]
+        msg_upper = message.upper()
+        
+        should_print = True
+        if any(term in msg_upper for term in SUPPRESSED_TERMINAL_TERMS):
+            if level in ["dim", "warn", "error"]:
+                should_print = False
+
         prefix = "" if level == "dim" else f"[{level.upper()}] "
-        try:
-            print(f"[{time.strftime('%H:%M')}] {prefix}{message}")
-        except UnicodeEncodeError:
+        if should_print:
             try:
-                print(f"[{time.strftime('%H:%M')}] {prefix}{message.encode('ascii', 'replace').decode('ascii')}")
-            except Exception:
-                pass
+                print(f"[{time.strftime('%H:%M')}] {prefix}{message}")
+            except UnicodeEncodeError:
+                try:
+                    print(f"[{time.strftime('%H:%M')}] {prefix}{message.encode('ascii', 'replace').decode('ascii')}")
+                except Exception:
+                    pass
+                    
         with self.lock:
             log_entry = {"time": time.strftime("%H:%M:%S"), "level": level, "message": message}
             self.logs.append(log_entry)
@@ -551,19 +563,21 @@ def classify_error(stderr_output: str) -> str:
 def heal_dependencies(python_exe: str) -> None:
     state.add_log("info", "[Watchdog] Verificando integridade das dependências...")
     try:
+        flags = 0x08000000 if os.name == 'nt' else 0
         # v61.2: Usa uv para instalar dependências se disponível
         subprocess.run(
             ["uv", "pip", "install", "-r", REQUIREMENTS_FILE, "-q"],
-            check=True, env=CHILD_ENV,
+            check=True, env=CHILD_ENV, creationflags=flags
         )
         state.add_log("info", "[Watchdog] Dependências sincronizadas via 'uv'.")
     except (subprocess.CalledProcessError, FileNotFoundError):
         state.add_log("warn", "[Watchdog] Falha na instalação via 'uv'. Tentando fallback...")
         try:
-            subprocess.run(["uv", "cache", "clean"], check=True, env=CHILD_ENV)
+            flags = 0x08000000 if os.name == 'nt' else 0
+            subprocess.run(["uv", "cache", "clean"], check=True, env=CHILD_ENV, creationflags=flags)
             subprocess.run(
                 [python_exe, "-m", "pip", "install", "-r", REQUIREMENTS_FILE, "-q"],
-                check=True, env=CHILD_ENV,
+                check=True, env=CHILD_ENV, creationflags=flags
             )
             state.add_log("info", "[Watchdog] Dependências sincronizadas após purga de cache.")
         except Exception as e2:
@@ -619,8 +633,9 @@ def heal_runtime_error(reason: str) -> str:
     if "browser closed" in stderr_lower or "playwright" in stderr_lower:
         state.add_log("warn", "[Watchdog] 🧹 Playwright detectado nos logs de erro. Limpando processos órfãos...")
         try:
+            flags = 0x08000000 if os.name == 'nt' else 0
             if os.name == 'nt':
-                subprocess.run('wmic process where "ExecutablePath like \'%ms-playwright%\'" call terminate', shell=True, capture_output=True)
+                subprocess.run('wmic process where "ExecutablePath like \'%ms-playwright%\'" call terminate', shell=True, capture_output=True, creationflags=flags)
             else:
                 subprocess.run(["pkill", "-f", "playwright"], capture_output=True)
         except Exception:
@@ -630,6 +645,15 @@ def heal_runtime_error(reason: str) -> str:
     return "restart"
 
 def guard():
+    from core.guard_locker import GuardLocker
+    from core.process_cleaner import cleanup_orphans
+    
+    # 🔐 Garante instância única do Watchdog
+    watchdog_locker = GuardLocker("watchdog", PROJECT_ROOT)
+    if not watchdog_locker.acquire(kill_existing=True):
+        print("🚨 [Watchdog] Outra instância do Watchdog já está ativa. Abortando.")
+        sys.exit(1)
+
     # Garantir que serviços de IA estejam operacionais antes de iniciar o ciclo
     python_exe = None
     while python_exe is None:
@@ -655,12 +679,16 @@ def guard():
             state.fast_crashes = 0
             state.update_metrics(status="OPERACIONAL", code_errors=0)
 
-        # 1. Auto Update
+        # 1. Auto Update e Faxina agressiva de processos órfãos (v88.5)
         try:
             if check_for_updates():
                 heal_dependencies(python_exe)
-        except Exception:
-            pass
+            
+            # Limpeza preventiva antes de iniciar o main_runner
+            state.add_log("info", "[Watchdog] Realizando limpeza preventiva de processos órfãos...")
+            cleanup_orphans(kill_ollama=False) # Não mata Ollama a menos que esteja duplicado (o health_check cuida disso)
+        except Exception as e:
+            state.add_log("warn", f"[Watchdog] Falha na limpeza preventiva: {e}")
 
         # 2. Executar Servidor
         state.update_metrics(status="OPERACIONAL")

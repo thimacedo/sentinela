@@ -42,6 +42,10 @@
             </div>
         </div>
 
+        <div id="critical-alerts-container" class="flex-1 max-w-xl hidden">
+            <div id="critical-alerts-feed" class="flex flex-col gap-2"></div>
+        </div>
+
         <div class="flex flex-wrap items-center gap-3">
             <div id="live-indicator" class="hidden flex items-center gap-2 px-3 py-1.5 rounded-xl bg-rose-500/10 border border-rose-500/30">
                 <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
@@ -208,6 +212,8 @@
     </main>
 
     <script>
+        // v89.0: Resiliência de Conexão (Suporte a file:// e localhost)
+        const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:8001' : '';
         const SUPABASE_URL = 'https://vhamejkldzxbeibqeqpk.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoYW1lamtsZHp4YmVpYnFlcXBrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjQ4ODEyNSwiZXhwIjoyMDkyMDY0MTI1fQ.GfvAI7rV8isgdhVeJp4mOUscWpdOqOuBoURGm82VdtY';
         const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -280,7 +286,7 @@
 
         async function fetchEvaluations() {
             try {
-                const r = await fetch('/api/evaluations');
+                const r = await fetch(API_BASE + '/api/evaluations');
                 if(r.ok) {
                     const data = await r.json();
                     iaEvaluations = data.evaluations || {};
@@ -290,7 +296,7 @@
 
         async function evaluateIA(commentId, traceId, engine, feedbackType, category, text) {
             try {
-                const resp = await fetch('/api/evaluate', {
+                const resp = await fetch(API_BASE + '/api/evaluate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id: commentId, trace_id: traceId, engine, feedback_type: feedbackType, is_correct: (feedbackType === 'VALIDADO'), category, text })
@@ -441,8 +447,8 @@
         async function fetchLocalAnalytics() {
             try {
                 const [rAtt, rHate] = await Promise.all([
-                    fetch('/api/analytics/top-attackers'),
-                    fetch('/api/analytics/hate-stats')
+                    fetch(API_BASE + '/api/analytics/top-attackers'),
+                    fetch(API_BASE + '/api/analytics/hate-stats')
                 ]);
                 
                 if(rAtt.ok) {
@@ -480,7 +486,7 @@
             if(!q) { renderComments(lastComments); return; }
             
             try {
-                const r = await fetch(`/api/analytics/search?q=${encodeURIComponent(q)}`);
+                const r = await fetch(API_BASE + `/api/analytics/search?q=${encodeURIComponent(q)}`);
                 if(r.ok) {
                     const { results } = await r.json();
                     renderComments(results);
@@ -531,15 +537,59 @@
         }
 
         async function fetchData() {
-            if (isFetchingData) return;
-            isFetchingData = true;
+            if (window.isFetchingData) return;
+            window.isFetchingData = true;
             try {
                 // 1. Atualiza métricas do Watchdog (API Local)
                 try {
-                    const r = await fetch('/api/metrics');
+                    const r = await fetch(API_BASE + '/api/metrics');
                     if(r.ok) {
                         const m = await r.json();
                         
+                        // Painel de Alertas Críticos (v88.9)
+                        const alertsFeed = document.getElementById('critical-alerts-feed');
+                        const alertsContainer = document.getElementById('critical-alerts-container');
+                        let criticalAlerts = [];
+
+                        // Checa sessões do Instagram
+                        if (m.instagram_accounts) {
+                            const expired = Object.entries(m.instagram_accounts).filter(([k, v]) => v === 'expired');
+                            if (expired.length > 0) {
+                                criticalAlerts.push({
+                                    level: 'error',
+                                    title: 'SESSÕES EXPIRADAS',
+                                    msg: `${expired.length} contas do Instagram precisam de renovação de cookies.`
+                                });
+                            }
+                        }
+
+                        // Checa colapso de IA
+                        if (m.ai_services) {
+                            const blocked = Object.entries(m.ai_services).filter(([k, v]) => v === 'BLOQUEADO' || v === 'REMOVIDO');
+                            if (blocked.length > 0) {
+                                criticalAlerts.push({
+                                    level: 'warn',
+                                    title: 'MALHA DE IA DEGRADADA',
+                                    msg: `${blocked.length} provedores cloud fora de operação (Bloqueio/Cota).`
+                                });
+                            }
+                        }
+
+                        if (criticalAlerts.length > 0) {
+                            alertsContainer.classList.remove('hidden');
+                            alertsFeed.innerHTML = criticalAlerts.map(a => `
+                                <div class="flex items-center gap-3 px-4 py-2 rounded-xl ${a.level === 'error' ? 'bg-rose-500/10 border border-rose-500/30 text-rose-400' : 'bg-amber-500/10 border border-amber-500/30 text-amber-400'} animate-pulse">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                    <div class="flex flex-col">
+                                        <span class="text-[10px] font-black uppercase tracking-widest">${a.title}</span>
+                                        <span class="text-[9px] font-bold opacity-80">${a.msg}</span>
+                                    </div>
+                                </div>
+                            `).join('');
+                        } else {
+                            alertsContainer.classList.add('hidden');
+                        }
+
                         // Atualiza status textual e cores do indicador
                         const statusText = document.getElementById('watchdog-status-text');
                         statusText.innerText = m.status;
@@ -660,7 +710,7 @@
             if (logSource) return;
             
             console.log("📡 [Logs] Conectando ao terminal de logs...");
-            logSource = new EventSource('/api/stream');
+            logSource = new EventSource(API_BASE + '/api/stream');
             const terminal = document.getElementById('terminal-feed');
             
             logSource.onmessage = function(event) {
@@ -723,7 +773,7 @@
             
             console.log(`[Server Control] Enviando comando: ${action}`);
             try {
-                const resp = await fetch(`/api/server/${action}`, { method: 'POST' });
+                const resp = await fetch(API_BASE + `/api/server/${action}`, { method: 'POST' });
                 const res = await resp.json();
                 console.log(`[Server Control] Resposta de ${action}:`, res.message);
                 setTimeout(fetchData, 1000);
@@ -735,7 +785,7 @@
         async function startAIService(name) {
             console.log(`[AI Service] Enviando sinal de início para: ${name}`);
             try {
-                const resp = await fetch(`/api/services/${name}/start`, { method: 'POST' });
+                const resp = await fetch(API_BASE + `/api/services/${name}/start`, { method: 'POST' });
                 const res = await resp.json();
                 console.log(`[AI Service] Resposta:`, res.message);
                 setTimeout(fetchData, 1000);

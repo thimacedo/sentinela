@@ -27,7 +27,7 @@ class SentinelaOrchestrator:
         self._banned_until: dict[str, float] = {}
         self._cycle_total = 0
 
-    def _perform_self_healing(self):
+    async def _perform_self_healing(self):
         """Ações de autocura de infraestrutura (v57.1)."""
         # 1. Limpeza de Memória (Preventiva contra OOM)
         gc.collect()
@@ -47,6 +47,24 @@ class SentinelaOrchestrator:
             cleanup_orphans()
         except Exception as e:
             logger.warning("[orchestrator] Falha ao executar cleanup_orphans na autocura: %s", e)
+
+        # 4. Sincronização de Documentação Técnica (PASA v84.4)
+        if self._cycle_total % 100 == 0:
+            try:
+                logger.info("[orchestrator] 📄 Sincronizando documentação técnica via DocFetcher...")
+                await self.ai_advisor.fetcher.refresh_all()
+            except Exception as e:
+                logger.warning("[orchestrator] Falha ao sincronizar docs na autocura: %s", e)
+                
+        # 5. Pré-Aquecimento Frequente de Filas (v89.2)
+        if self._cycle_total % 10 == 0:
+            try:
+                from core.queue_manager import QueueManager
+                from core.db import db_client
+                queue_manager = QueueManager(db_client.client)
+                await queue_manager.pre_warm_queues()
+            except Exception as e:
+                logger.warning("[orchestrator] Falha ao pré-aquecer filas na autocura: %s", e)
 
     def register(self, worker: BaseWorker) -> None:
         self._workers.append(worker)
@@ -69,7 +87,7 @@ class SentinelaOrchestrator:
         Retorna um CycleContext contendo o CycleResult e o RewardSummary."""
         self._cycle_total += 1
         if self._cycle_total % 10 == 0:
-            self._perform_self_healing()
+            await self._perform_self_healing()
 
         # 1. Gestão de Suspensão por Reputação Zero
         if worker.worker_id in self._banned_until:
@@ -216,6 +234,7 @@ class SentinelaOrchestrator:
         return float(self.reward_engine.get_interval(ctx.reward.tier))
 
     async def run_all(self) -> None:
+        """Executa todos os workers registrados em seus próprios loops (v89.2)."""
         # 🧹 Faxina de processos órfãos de navegadores antes de iniciar o loop
         try:
             from core.process_cleaner import cleanup_orphans
@@ -223,13 +242,24 @@ class SentinelaOrchestrator:
         except Exception as e:
             logger.warning("[orchestrator] Falha na limpeza de órfãos no run_all: %s", e)
 
+        # 🔥 PRÉ-AQUECIMENTO DE FILAS (v89.2)
+        # Garante alvos prontos e limpa locks órfãos ANTES de disparar os loops
+        try:
+            from core.queue_manager import QueueManager
+            from core.db import db_client
+            queue_manager = QueueManager(db_client.client)
+            await queue_manager.pre_warm_queues()
+        except Exception as e:
+            logger.error(f"[orchestrator] Falha no pré-aquecimento das filas: {e}")
+
         if not self._workers:
             logger.warning("[orchestrator] Nenhum worker registrado.")
             return
-        
-        logger.info("[orchestrator] Iniciando %s worker(s) em loops individuais...", len(self._workers))
-        
+
+        logger.info("[orchestrator] Iniciando %d worker(s) em loops individuais...", len(self._workers))
+
         async def _worker_loop(worker: BaseWorker):
+
             while True:
                 if getattr(self, "shutdown_event", None) and self.shutdown_event.is_set():
                     logger.info("[%s] Shutdown detectado. Saindo do loop.", worker.worker_id)

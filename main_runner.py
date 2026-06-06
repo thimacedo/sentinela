@@ -109,9 +109,13 @@ def build_orchestrator() -> SentinelaOrchestrator:
     try:
         from workers.processors.wk_classifica_comentarios import WkClassificaComentarios
         
-        orch.register(WkClassificaComentarios(worker_id="ai-processor-01", config={}))
+        num_ai_workers = int(os.getenv("NUM_AI_WORKERS", "2"))
+        logger.info(f"[main_runner] Configurando {num_ai_workers} AI Processors...")
         
-        logger.info("[main_runner] WkClassificaComentarios registrado com sucesso.")
+        for i in range(num_ai_workers):
+            orch.register(WkClassificaComentarios(worker_id=f"ai-processor-{i+1:02d}", config={}))
+            
+        logger.info("[main_runner] WkClassificaComentarios registrados com sucesso.")
     except ImportError as e:
         logger.warning(f"[main_runner] Erro ao registrar WkClassificaComentarios: {e}")
 
@@ -216,51 +220,19 @@ async def main() -> None:
     logger.info("[main_runner] Encerrado.")
 
 
-def check_single_instance():
-    import subprocess
-    import signal
-    import time
-    
-    lock_file = os.path.join(PROJECT_ROOT, "runtime_state", "main_runner.lock")
-    os.makedirs(os.path.join(PROJECT_ROOT, "runtime_state"), exist_ok=True)
-    if os.path.exists(lock_file):
-        try:
-            with open(lock_file, "r") as f:
-                content = f.read().strip()
-                if content:
-                    pid = int(content)
-            
-            # Checa se o PID antigo está rodando no Windows
-            creationflags = 0x08000000  # CREATE_NO_WINDOW
-            output = subprocess.check_output(f"tasklist /FI \"PID eq {pid}\"", shell=True, creationflags=creationflags).decode('utf-8', errors='ignore')
-            if str(pid) in output:
-                if pid != os.getpid():
-                    print(f"🚨 [main_runner] Outra instância ativa detectada (PID {pid}). Encerrando-a...")
-                    try:
-                        os.kill(pid, signal.SIGTERM)
-                        time.sleep(1.5)
-                    except Exception:
-                        pass
-                    # Verificação secundária e força bruta se necessário
-                    try:
-                        if sys.platform.startswith("win"):
-                            subprocess.run(f"taskkill /F /PID {pid}", shell=True, creationflags=creationflags, capture_output=True)
-                        else:
-                            subprocess.run(["kill", "-9", str(pid)], capture_output=True)
-                        time.sleep(1.0)
-                    except Exception:
-                        pass
-        except Exception:
-            pass
-            
-    # Grava o PID atual
+from core.guard_locker import GuardLocker
+
+def main_with_lock():
+    locker = GuardLocker("main_runner", PROJECT_ROOT)
+    if not locker.acquire(kill_existing=True):
+        print("🚨 [main_runner] Falha ao adquirir lock de instância única. Abortando.")
+        sys.exit(1)
+        
     try:
-        with open(lock_file, "w") as f:
-            f.write(str(os.getpid()))
-    except Exception:
-        pass
+        asyncio.run(main())
+    finally:
+        locker.release()
 
 if __name__ == "__main__":
-    check_single_instance()
-    asyncio.run(main())
+    main_with_lock()
 # hot-reload trigger: 2026-06-04 v3

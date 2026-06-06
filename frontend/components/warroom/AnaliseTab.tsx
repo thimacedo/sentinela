@@ -19,12 +19,16 @@ interface Comment {
   data_coleta: string;
   username_alvo: string;
   analise_pericial?: string;
+  ccf_sync?: number; // Sincronização de bot/coordenação
 }
 
 export default function AnaliseTab() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const targetParam = searchParams.get('target');
+
+  // Shadowban Léxico (Limpeza Analítica)
+  const [shadowbanActive, setShadowbanActive] = useState(true);
 
   // Paginação e scroll infinito
   const [visibleCount, setVisibleCount] = useState(10);
@@ -36,7 +40,7 @@ export default function AnaliseTab() {
     queryFn: async () => {
       let query = supabase
         .from('comentarios')
-        .select('id, texto_bruto, categoria_ia, confianca_ia, is_hate, data_coleta, analise_pericial, candidatos!inner(username)')
+        .select('id, texto_bruto, categoria_ia, confianca_ia, is_hate, data_coleta, analise_pericial, ccf_sync, candidatos!inner(username)')
         .not('categoria_ia', 'is', null);
 
       if (targetParam) {
@@ -56,6 +60,11 @@ export default function AnaliseTab() {
     },
     refetchInterval: 15000,
   });
+
+  // Filtro de Shadowban Léxico: Oculta ataques coordenados (Sync > 80%) se o filtro estiver ativo
+  const displayedComments = shadowbanActive 
+    ? comments.filter(c => (c.ccf_sync || 0) < 0.8 || c.categoria_ia === 'ATAQUE_INSTITUCIONAL') // Mantém institucionais mesmo se sync for alto
+    : comments;
 
   // Observer para Wall Infinito
   useEffect(() => {
@@ -112,9 +121,20 @@ export default function AnaliseTab() {
             </div>
           )}
         </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-brand-primary/10 border border-brand-primary/20 rounded-full">
-          <ShieldCheck className="w-3.5 h-3.5 text-brand-primary" />
-          <span className="text-[10px] font-bold text-brand-primary uppercase">Audit Ativo</span>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-900 px-3 py-1.5 rounded-xl border border-border-main">
+            <span className="text-[10px] font-black text-text-muted uppercase tracking-tighter">Shadowban Léxico</span>
+            <button 
+              onClick={() => setShadowbanActive(!shadowbanActive)}
+              className={`w-8 h-4 rounded-full relative transition-all ${shadowbanActive ? 'bg-brand-primary' : 'bg-slate-300 dark:bg-slate-700'}`}
+            >
+              <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${shadowbanActive ? 'left-4.5' : 'left-0.5'}`} />
+            </button>
+          </div>
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-brand-primary/10 border border-brand-primary/20 rounded-full">
+            <ShieldCheck className="w-3.5 h-3.5 text-brand-primary" />
+            <span className="text-[10px] font-bold text-brand-primary uppercase">Audit Ativo</span>
+          </div>
         </div>
       </div>
 
@@ -124,15 +144,18 @@ export default function AnaliseTab() {
           <div className="text-center py-20 text-text-muted animate-pulse font-mono text-xs">
             PROCESSANDO PACOTES DE LINGUAGEM...
           </div>
-        ) : comments.length === 0 ? (
+        ) : displayedComments.length === 0 ? (
           <div className="text-center py-20 text-text-muted font-mono text-xs">
             {targetParam 
               ? `NENHUMA DETECÇÃO LOCALIZADA PARA @${targetParam.toUpperCase()}.`
               : 'ESPECTRO LIMPO. NENHUMA DETECÇÃO NO PERÍODO.'}
+            {shadowbanActive && comments.length > 0 && (
+              <p className="mt-2 text-brand-primary animate-pulse">Itens ocultados pelo Shadowban Léxico.</p>
+            )}
           </div>
         ) : (
           <div className="flex flex-col gap-6 max-w-2xl mx-auto">
-            {comments.slice(0, visibleCount).map((c, index) => (
+            {displayedComments.slice(0, visibleCount).map((c, index) => (
               <div key={c.id} className="w-full">
                 {/* Post Card Estilo Rede Social */}
                 <div className="bg-bg-card border border-border-main rounded-2xl p-6 shadow-sm hover:border-brand-primary/20 transition-all duration-200">
@@ -153,9 +176,16 @@ export default function AnaliseTab() {
                         </div>
                       </div>
                     </div>
-                    <Badge className={`px-2.5 py-0.5 text-[9px] font-black uppercase rounded-sm border ${getRiskColor(c.categoria_ia, c.is_hate, c.confianca_ia)}`}>
-                      {c.categoria_ia}
-                    </Badge>
+                    <div className="flex flex-col items-end gap-1.5">
+                      <Badge className={`px-2.5 py-0.5 text-[9px] font-black uppercase rounded-sm border ${getRiskColor(c.categoria_ia, c.is_hate, c.confianca_ia)}`}>
+                        {c.categoria_ia}
+                      </Badge>
+                      {c.ccf_sync && c.ccf_sync > 0.4 && (
+                        <span className="text-[8px] font-black text-brand-primary bg-brand-primary/5 px-1.5 py-0.5 rounded border border-brand-primary/10 animate-pulse">
+                          Coordenação: {(c.ccf_sync * 100).toFixed(0)}%
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {/* Conteúdo Central do Comentário */}

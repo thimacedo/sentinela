@@ -36,7 +36,8 @@ def _list_python_processes() -> List:
             "| Select-Object ProcessId, CommandLine, CreationDate "
             "| ConvertTo-Json\""
         )
-        result = subprocess.run(cmd, capture_output=True, text=True, shell=True)
+        flags = 0x08000000 if os.name == 'nt' else 0
+        result = subprocess.run(cmd, capture_output=True, text=True, shell=True, creationflags=flags)
         if result.returncode == 0 and result.stdout.strip():
             try:
                 import json
@@ -105,7 +106,8 @@ def _terminate(proc) -> None:
         if psutil:
             psutil.Process(proc.pid).terminate()
         else:
-            subprocess.run(f"taskkill /PID {proc.pid} /F", shell=True, capture_output=True)
+            flags = 0x08000000 if os.name == 'nt' else 0
+            subprocess.run(f"taskkill /PID {proc.pid} /F", shell=True, capture_output=True, creationflags=flags)
         logger.info(f"Killed duplicate process PID {proc.pid}")
     except Exception as exc:  # pragma: no cover
         logger.error(f"Failed to kill PID {proc.pid}: {exc}")

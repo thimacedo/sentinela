@@ -116,12 +116,58 @@ PGMQ deve aparecer apenas como hipótese futura.
 - `docs/superpowers/**`
 - arquitetura PASA antiga
 
-## Próximos passos recomendados
+## Auditoria Operacional e Transparência (v88.9 / v89.0 - 2026-06-05)
 
-1. Habilitar RLS e criar políticas de acesso para as 15 tabelas que estão expostas no Supabase (incluindo `threat_alerts`, `worker_ledger`, `fallback_logs`, etc.).
-2. Monitorar o consumo e o custo (burn rate) gerados nas últimas 24h através do SaAuditoriaFinanceira.
-3. Acompanhar o progresso da re-classificação dos 17.734 comentários ERRO que foram recolocados na fila de processamento (2026-06-04).
-4. Normalizar categorias legadas fora do MCA v2.2 (`POSITIVO`, `NEGATIVO`, `HATE`, `MILICIA_DIGITAL`, etc.) — re-analisar via ai_service para padronizar o schema.
+### Diagnóstico de Colapso (Coleta)
+- **Status Real**: 🔴 **COLAPSO DE COLETA (Corrigido na v89.0)**. 
+- **Causa Raiz 1 (Falso Positivo de Estabilidade)**: O sistema entrou em um "crash loop" silencioso devido à ausência da biblioteca `psutil` no ambiente virtual e a uma falha lógica no `core/process_cleaner.py`, que levava o `main_runner` a cometer "suicídio" (matar a si próprio) logo no boot. O Watchdog reiniciava o processo infinitamente, omitindo os logs para evitar poluição no terminal, o que gerou um falso reporte de "Operacional".
+- **Causa Raiz 2 (Dashboard Vazio)**: O frontend (`local_dashboard.html`) utilizava caminhos relativos (`/api/metrics`) que quebravam silenciosamente por problemas de CORS/Origem quando o arquivo era aberto diretamente via protocolo `file://` no navegador.
+- **Impacto**: O backlog de 13.8k comentários não estava recebendo novos dados. O AIAdvisor gerou **68 sugestões de autocura** pendentes, apontando falhas de extração.
+
+### Status da Camada de IA
+- **Status**: 🟡 **DEGRADADO (Corrigido na v90.1)**.
+- **Observações**: Malha de IA enfrentava exaustão de cota massiva. **Maritaca (403)**, **DeepSeek (402)** e **Groq (429)** sob Circuit Breaker. A operação estava sendo sustentada pelo **Ollama local** e **Mistral**, resultando em menor throughput. O modelo **Gemini-1.5-flash** estava descontinuado e foi atualizado para **Gemini-2.5-flash** na v90.1, restaurando a comunicação com a API do Google.
+- O modelo do Ollama (`llama3.2:1b`) não estava instalado, causando erros locais, mas já foi puxado e as classificações operam sem falhas locais.
+
+### Melhorias de Resiliência e UX (v89.0)
+- **Filtro de Ruído no Terminal**: Implementamos supressão inteligente no terminal do Watchdog. Erros previsíveis de rede (429, 403, 401) agora são omitidos do stdout para evitar a "enxurrada de erros", mas permanecem visíveis no Dashboard SSE.
+- **Alertas Críticos no Dashboard**: Criamos um painel de alertas de alta visibilidade no `local_dashboard.html`. O sistema agora valida e exibe explicitamente o estado de "SESSÕES EXPIRADAS" e "MALHA DE IA DEGRADADA".
+- **Resiliência do Frontend**: O Dashboard foi refatorado para detectar automaticamente o ambiente de execução (`file://` vs `http://`) e injetar o host `http://localhost:8001` em todas as chamadas de Fetch e Server-Sent Events, garantindo que os dados apareçam mesmo ao abrir o HTML direto no desktop.
+- **Boot Seguro (ProcessCleaner)**: Corrigida a lógica de proteção de PIDs. O sistema agora limpa zumbis sem interromper a thread principal.
+
+## Otimização de Produção e Cura da Malha de IA (v90.0 - 2026-06-05)
+
+### 1. Escalonamento Horizontal de Classificadores
+- Aumentada a capacidade de processamento com a instância simultânea de múltiplos classificadores de inteligência artificial (`ai-processor-01` e `ai-processor-02`), impulsionados pela variável de ambiente `NUM_AI_WORKERS=2`. Isso duplica o throughput de esvaziamento do backlog primário e suporta concorrência assíncrona nas requisições aos modelos locais e em nuvem.
+
+### 2. Implementação Híbrida de Batching / Paralelismo Local
+- O endpoint `run_batch_classification` agora processa tarefas concorrentemente com uso de semáforos (`asyncio.Semaphore(5)`), limitando a pressão sobre APIs pagas (e Ollama local) ao enviar *batches* paralelos. Isso aumenta drasticamente o limite operacional em comparação ao antigo loop linear síncrono. Fallback suave é mantido na conversão JSON.
+
+### 3. Pipeline Reativo (Event-Driven) Consolidado
+- Os workers e a malha de IA foram acoplados pelo `EventBus` (`core.event_bus`). A lógica implementa reatividade em tempo real: assim que a coleta salva um dado classificado como "SUSPEITO", a fila secundária de *Revisão Online* acorda do estado `Idle` sem a necessidade de esperar timeouts (polling) ociosos. 
+
+### 4. Gestão Preditiva de Sessões de Coleta
+- Implementado um check proativo no `health_check.py` que lê o banco de dados diretamente: se a proporção de contas `active` chegar a 0% (todas expiradas ou com login wall), o Sentinel engatilha automaticamente um script shell em background (`export_playwright_cookies.py`) para auto-renovação preditiva dos cookies sem travar o orchestrator.
+
+## Integração BrowserAct MCP e Fallback CDP (v90.2)
+- **Integração de Credenciais**: A chave da API de nuvem do BrowserAct foi recebida e fixada no ambiente como `BROWSERACT_API_KEY`.
+- **Mitigação de Erros 401**: O sistema tentou conectar via WebSocket do Chrome DevTools Protocol (`connect_over_cdp`) nativamente, mas enfrentou erros *Unauthorized 401*. Foi diagnosticado que parâmetros como `?token=` devem ser substituídos por `?apiKey=` nas futuras versões do BrowserAct ou que seu plano requer autorização de IPs e Workflow explícito.
+- **Configuração de Servidor MCP**: Em resposta ao problema, retrocedemos o Playwright para instância local no backend Python (`instagram_scraper_v2.py`) e acoplamos a plataforma **BrowserAct via MCP Server** no arquivo `.gemini/settings.json`. O Gemini CLI agora possui acesso nativo aos nós do BrowserAct (List Workflows, Create Tasks) via Model Context Protocol sem precisar abrir portas WebSocket manualmente no código local.
+
+## Estabilização e Atualização de Provedores (v90.4 - 2026-06-05)
+
+### 1. Atualização Maritaca AI (Sabia-4)
+- **Nova Chave de API**: Integrada a nova credencial Maritaca (`102559585717394475550_c72f0cd78f17d78f`).
+- **Capacidade Operacional**: Modelo configurado para `sabia-4` com suporte a 60 RPM (Requisições por Minuto). A malha de IA (`AIService`) agora utiliza este modelo como um dos provedores primários de auditoria.
+
+### 2. Correção de Foco e UX (Anti-Popup Windows)
+- **CREATE_NO_WINDOW**: Aplicada a flag de sistema `0x08000000` em todas as chamadas de subprocessos no Windows (`watchdog`, `core.health_check`, `core.process_cleaner`). Isso elimina definitivamente o problema de janelas pretas de terminal (cmd.exe) abrindo e roubando o foco do usuário durante a operação em background.
+- **Headless Enforcement**: Reforçada a política de execução invisível para todos os workers de coleta, garantindo que o sistema opere de forma 100% silenciosa.
+
+## Próximos passos OBRIGATÓRIOS
+
+1. **Purga de Sugestões**: Limpar a tabela `worker_suggestions` após a renovação, pois as sugestões atuais são sintomas do colapso de sessão.
+2. **Calibragem de Backoff**: Revisar o tempo de suspensão de workers em caso de 429 para evitar queima desnecessária de tokens de auditoria.
 
 ## Últimas Operações (YOLO Test)
 
