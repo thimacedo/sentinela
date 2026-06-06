@@ -157,11 +157,15 @@ PGMQ deve aparecer apenas como hipótese futura.
 ## Estabilização e Atualização de Provedores (v90.4 - 2026-06-05)
 
 ### 1. Atualização Maritaca AI (Sabia-4)
-- **Nova Chave de API**: Integrada a nova credencial Maritaca (`102559585717394475550_c72f0cd78f17d78f`).
+- **Nova Chave de API**: Integrada a nova credencial Maritaca via `.env`.
 - **Capacidade Operacional**: Modelo configurado para `sabia-4` com suporte a 60 RPM (Requisições por Minuto). A malha de IA (`AIService`) agora utiliza este modelo como um dos provedores primários de auditoria.
 
-### 2. Correção de Foco e UX (Anti-Popup Windows)
-- **CREATE_NO_WINDOW**: Aplicada a flag de sistema `0x08000000` em todas as chamadas de subprocessos no Windows (`watchdog`, `core.health_check`, `core.process_cleaner`). Isso elimina definitivamente o problema de janelas pretas de terminal (cmd.exe) abrindo e roubando o foco do usuário durante a operação em background.
+### 2. Integração Hugging Face Hub (MCP)
+- **Instalação**: Extensão `huggingface` instalada no Gemini CLI.
+- **Autenticação**: Token de API configurado no `.env` como `HF_TOKEN` e injetado nos headers do servidor MCP no arquivo `.gemini/settings.json` via variável de ambiente. O agente agora possui acesso direto ao ecossistema Hugging Face (Modelos, Datasets e Spaces).
+
+### 3. Correção de Foco e UX (Anti-Popup Windows)
+- **CREATE_NO_WINDOW**: Aplicada a flag de sistema `0x08000000` em todas as chamadas de subprocessos no Windows, incluindo o orquestrador (`watchdog`), verificadores de saúde (`core.health_check`), limpadores de processos (`core.process_cleaner`) e até mesmo nos gatilhos manuais da bandeja gráfica (`watchdog/__main__.py`). Isso elimina definitivamente o problema de janelas pretas de terminal (cmd.exe) abrindo e roubando o foco do usuário durante a operação em background.
 - **Headless Enforcement**: Reforçada a política de execução invisível para todos os workers de coleta, garantindo que o sistema opere de forma 100% silenciosa.
 
 ## Próximos passos OBRIGATÓRIOS

@@ -3,7 +3,13 @@
     "browseract": {
       "url": "https://api.browseract.com/mcp",
       "headers": {
-        "Authorization": "Bearer app-x6UGQW4qYIVW7QVSJvxqi8CB"
+        "Authorization": "Bearer $BROWSERACT_API_KEY"
+      }
+    },
+    "huggingface": {
+      "url": "https://huggingface.co/mcp",
+      "headers": {
+        "Authorization": "Bearer $HF_TOKEN"
       }
     }
   },
