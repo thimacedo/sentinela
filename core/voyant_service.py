@@ -76,7 +76,7 @@ HOSTILE_LEXICON: set[str] = {
     # === DANO À IMAGEM / ACUSAÇÕES CRIMINAIS (DANO_A_IMAGEM) ===
     "pedofil", "pedofilia", "genocida", "genocidio", "genocídio", "traidor", "traicao",
     "traição", "terrorista", "terrorismo", "quadrilha", "esquema",
-    "crime", "corrupcao", "corrupção", "desvios de conduta", "desvio de conduta",
+    "crime", "corrupcao", "corrupção", "desvios de conducto", "desvio de conduta",
     "theorize crime", "impute grave misconduct", "fake news", "misinformation",
     "disinformation", "discredit", "escandalo", "escândalo", "acusacoes falsas",
     "acusações falsas", "teorias da conspiracao", "teorias da conspiração",
@@ -120,6 +120,7 @@ class VoyantService:
     def __init__(self, base_url: str = VOYANT_BASE_URL, timeout: float = VOYANT_TIMEOUT):
         self.base_url = base_url
         self.timeout = timeout
+        # Cliente HTTP reutilizado por toda a vida do objeto (pool de conexões).
         self._client: Optional[httpx.AsyncClient] = None
 
     def _get_client(self) -> httpx.AsyncClient:
@@ -153,16 +154,9 @@ class VoyantService:
 
     async def extract_corpus_terms(self, texts: list[str]) -> Optional[dict]:
         """
-        Envia um lote de textos para o Trombone e retorna os top-N termos
-        ordenados por frequência relativa (proxy de TF-IDF no corpus inline).
+        Envia um lote de textos para o Trombone e retorna os top-N termos.
 
-        Parâmetros:
-            texts: lista de strings (comentários brutos do lote).
-
-        Retorna:
-            dict no formato { "palavra": score_float } ou None em caso de falha.
-
-        Nota de Engenharia:
+        Nota de Engenharia (v92.3.1):
             O parâmetro correto para texto inline é `string`, não `input`.
             O campo `input` causa erro 500 no DocumentExpander do Trombone.
             Passamos uma lista de strings para o parâmetro `string`, o que cria
@@ -179,10 +173,12 @@ class VoyantService:
             "tool": "corpus.CorpusTerms",
             "format": "json",
             "limit": TROMBONE_LIMIT,
-            "sort": "RELATIVEFREQ",  # Ordena por frequência relativa
+            "sort": "RELATIVEFREQ",
         }
-        # v92.3.1: 'string' é o parâmetro oficial para texto inline (multi-doc)
-        data = {"string": clean_texts}
+        
+        # httpx aceita lista de tuplas para repetir a mesma chave no form body.
+        # Isso cria N documentos reais no Trombone.
+        data = [("string", t) for t in clean_texts]
 
         try:
             client = self._get_client()
@@ -246,6 +242,37 @@ class VoyantService:
         }
 
     # ------------------------------------------------------------------
+    # Fase 2 (Opcional) — Colocados para implementação futura
+    # ------------------------------------------------------------------
+
+    async def get_collocates(self, texts: list[str], target_word: str) -> list[str]:
+        """
+        Consulta o CollocatesGraph para encontrar palavras que co-ocorrem
+        frequentemente com `target_word` no corpus do lote.
+        """
+        if not texts or not target_word:
+            return []
+
+        clean_texts = [t.strip() for t in texts if t and t.strip()]
+        params = {
+            "tool": "corpus.CollocatesGraph",
+            "format": "json",
+            "query": target_word,
+            "limit": 20,
+        }
+        data = [("string", t) for t in clean_texts]
+
+        try:
+            client = self._get_client()
+            resp = await client.post(self.base_url, params=params, data=data)
+            resp.raise_for_status()
+            payload = resp.json()
+            return self._parse_collocates(payload)
+        except Exception as exc:
+            logger.debug("[Voyant] Collocates indisponível para '%s': %s", target_word, exc)
+            return []
+
+    # ------------------------------------------------------------------
     # Helpers privados
     # ------------------------------------------------------------------
 
@@ -283,6 +310,19 @@ class VoyantService:
             logger.warning("[Voyant] Falha ao parsear resposta do Trombone: %s. Payload: %s", exc, str(payload)[:200])
 
         return result
+
+    def _parse_collocates(self, payload: dict) -> list[str]:
+        """Extrai lista de termos colocados da resposta do CollocatesGraph."""
+        collocates: list[str] = []
+        try:
+            edges = payload.get("corpusCollocates", {}).get("collocates", [])
+            for edge in edges:
+                term = edge.get("term", "").lower().strip()
+                if term and len(term) > 2:
+                    collocates.append(term)
+        except (KeyError, TypeError):
+            pass
+        return collocates
 
 
 # Instância singleton

@@ -215,11 +215,12 @@ PGMQ deve aparecer apenas como hipótese futura.
 - **Deduplicação e IDF**: O sistema agora envia cada comentário como um parâmetro `string` separado, criando um corpus com documentos reais. Isso permite que o Voyant calcule estatísticas de IDF precisas dentro do próprio lote, melhorando a qualidade da triagem.
 - **Validação de Produção**: O script `scripts/validate_trombone.py` agora passa em 100% dos testes (5/5), detectando corretamente 30% de agressividade em lotes hostis e executando o Fast-Drop em lotes neutros.
 
-## Próximos passos OBRIGATÓRIOS
-- **SaVoyant (Subagente Linguista)**: O Voyant foi elevado de uma ferramenta para um Subagente autônomo registrado no Orchestrator.
-- **Bases Linguísticas Forenses**: Integrado contexto da "Bíblia Linguística Forense PASA" e outros manuais periciais ao raciocínio do SaVoyant.
-- **Insights Periciais**: O subagente agora gera eventos de `linguistic_insight` no banco de dados, cruzando estatísticas do Voyant Tools com interpretação de IA para detectar Xenofobia, Ataques Institucionais e Sarcasmo.
-- **Sistema de Recompensas**: SaVoyant integrado ao motor de XP do Sentinela, recebendo +15 XP por insights de alta relevância.
+### 10. Subagente Voyant (v92.5)
+- **SaVoyant (Subagente Linguista)**: Elevado ao padrão de produção com processamento incremental via checkpoint de timestamp (`_last_processed_ts`), eliminando re-análise redundante.
+- **Resiliência de Conexão**: Implementado monitoramento ativo com reconexão automática ao VoyantServer (porta 8888).
+- **Extração de Bigramas**: Adicionada detecção local de slogans e padrões coordenados para enriquecer os insights periciais.
+- **Otimização de Dados**: Queries SQL agora utilizam SELECT seletivo, reduzindo overhead de tráfego com o Supabase.
+- **Reward Engine Sync**: Correção na atribuição de XP (+15.0 para insights relevantes) garantindo a progressão do agente.
 
 ## Próximos passos OBRIGATÓRIOS
 1. **Rotação de Proxies**: Finalizar a integração real de proxies residenciais no Scraper V2 (AGENTS_SYNC.md).
