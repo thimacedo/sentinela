@@ -153,26 +153,36 @@ class VoyantService:
 
     async def extract_corpus_terms(self, texts: list[str]) -> Optional[dict]:
         """
-        Envia um lote de textos para o Trombone e retorna os top-N termos.
+        Envia um lote de textos para o Trombone e retorna os top-N termos
+        ordenados por frequência relativa (proxy de TF-IDF no corpus inline).
+
+        Parâmetros:
+            texts: lista de strings (comentários brutos do lote).
+
+        Retorna:
+            dict no formato { "palavra": score_float } ou None em caso de falha.
+
+        Nota de Engenharia:
+            O parâmetro correto para texto inline é `string`, não `input`.
+            O campo `input` causa erro 500 no DocumentExpander do Trombone.
+            Passamos uma lista de strings para o parâmetro `string`, o que cria
+            documentos individuais no corpus, permitindo o cálculo de IDF.
         """
         if not texts:
             return {}
 
-        # Agrega o lote em um único string separado por parágrafo.
-        # O Trombone trata cada bloco separado por \n\n como um "documento" distinto,
-        # o que nos dá distribuição IDF correta dentro do lote.
-        corpus_input = "\n\n".join(t.strip() for t in texts if t and t.strip())
+        clean_texts = [t.strip() for t in texts if t and t.strip()]
+        if not clean_texts:
+            return {}
 
         params = {
             "tool": "corpus.CorpusTerms",
             "format": "json",
             "limit": TROMBONE_LIMIT,
-            "sort": "RELATIVEFREQ",  # Ordena por frequência relativa (equivalente TF-IDF simplificado)
+            "sort": "RELATIVEFREQ",  # Ordena por frequência relativa
         }
-        # inputFormat=text é obrigatório: sem ele o Trombone tenta interpretar
-        # o conteúdo do campo `input` como URL ou caminho de arquivo,
-        # levantando IllegalArgumentException no DocumentExpander.
-        data = {"input": corpus_input, "inputFormat": "text"}
+        # v92.3.1: 'string' é o parâmetro oficial para texto inline (multi-doc)
+        data = {"string": clean_texts}
 
         try:
             client = self._get_client()

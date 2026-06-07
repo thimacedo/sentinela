@@ -123,11 +123,10 @@ async def run_validation():
     import httpx
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
-            corpus_input = "\n\n".join(HOSTILE_BATCH)
             resp = await client.post(
                 "http://127.0.0.1:8888/trombone",
                 params={"tool": "corpus.CorpusTerms", "format": "json", "limit": 5, "sort": "RELATIVEFREQ"},
-                data={"input": corpus_input, "inputFormat": "text"},
+                data={"string": HOSTILE_BATCH},
             )
             raw = resp.json()
             # Imprime os primeiros 500 chars para inspeção manual

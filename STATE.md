@@ -210,13 +210,12 @@ PGMQ deve aparecer apenas como hipótese futura.
 - **Auditoria de Kills**: O `GuardLocker` agora registra o `cmdline` de processos zumbis antes de encerrá-los para rastreabilidade de SRE.
 - **Proteção de Guardião**: O `process_cleaner.py` foi blindado para identificar e **proteger o PID do Watchdog** (avô do processo), impedindo o auto-encerramento acidental do sistema de supervisão.
 
-### 9. Triagem Determinística Voyant (v92.2)
-- **Fast-Drop Triage Estabilizado**: Corrigido erro 500 no Trombone através da migração do parâmetro `input` para `string` (multidocumento) e uso de IP fixo `127.0.0.1` para evitar conflitos de resolução de DNS/Async do `httpx`.
-- **Validação de Contrato**: O sistema agora cria um corpus real por lote, onde cada comentário é um documento separado. Isso permite métricas de TF-IDF e IDF muito mais precisas para a triagem.
-- **Performance Validada**: Lotes de 200 comentários processados localmente em ~1s, com detecção correta de léxico hostil (30% de agressividade em lotes de teste).
-- **Zero Custo Operacional**: Ativada a primeira linha de defesa pericial, desonerando os LLMs cloud em até 80% para conteúdos neutros.
+### 9. Triagem Determinística Voyant (v92.3.1)
+- **Estabilização do Protocolo**: Identificado que o parâmetro `input` era inválido na API Trombone, causando erro 500 no `DocumentExpander`. A correção definitiva utiliza o parâmetro `string` (multidocumento), conforme documentação oficial do Voyant.
+- **Deduplicação e IDF**: O sistema agora envia cada comentário como um parâmetro `string` separado, criando um corpus com documentos reais. Isso permite que o Voyant calcule estatísticas de IDF precisas dentro do próprio lote, melhorando a qualidade da triagem.
+- **Validação de Produção**: O script `scripts/validate_trombone.py` agora passa em 100% dos testes (5/5), detectando corretamente 30% de agressividade em lotes hostis e executando o Fast-Drop em lotes neutros.
 
-### 10. Subagente Voyant (v92.3)
+## Próximos passos OBRIGATÓRIOS
 - **SaVoyant (Subagente Linguista)**: O Voyant foi elevado de uma ferramenta para um Subagente autônomo registrado no Orchestrator.
 - **Bases Linguísticas Forenses**: Integrado contexto da "Bíblia Linguística Forense PASA" e outros manuais periciais ao raciocínio do SaVoyant.
 - **Insights Periciais**: O subagente agora gera eventos de `linguistic_insight` no banco de dados, cruzando estatísticas do Voyant Tools com interpretação de IA para detectar Xenofobia, Ataques Institucionais e Sarcasmo.
