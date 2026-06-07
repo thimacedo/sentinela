@@ -250,6 +250,13 @@ class AIService:
         self.consecutive_failures[name] = self.consecutive_failures.get(name, 0) + 1
         ai_circuit_breaker.record_failure(name, status_code if status_code else 500)
         
+        if name == "ollama" and not ai_circuit_breaker.can_execute(name):
+            try:
+                from watchdog import send_whatsapp_alert
+                send_whatsapp_alert("🚨 Sentinela: Ollama local falhou criticamente (Circuit Breaker Aberto). O processamento local será interrompido sem recorrer à nuvem. Intervenção manual requerida.", category="ollama_down")
+            except Exception as alert_err:
+                logger.error(f"[AI] Erro ao enviar alerta de colapso do Ollama: {alert_err}")
+        
         if status_code in [400, 401, 402, 403, 404]:
             self._remove_provider(name, f"Erro Crítico de Acesso/Cota/Bad Request ({status_code})")
             return True
@@ -268,6 +275,10 @@ class AIService:
         """Encapsula o dispatch do cliente (AsyncOpenAI vs FallbackLLM)."""
         self._ensure_clients()
         name = provider["name"]
+        
+        if name == "ollama":
+            from core.health_check import ensure_ollama_running
+            ensure_ollama_running()
         
         if provider.get("is_async_openai", False):
             response = await provider["client"].chat.completions.create(
@@ -359,12 +370,12 @@ class AIService:
 
         if not active_providers:
             if not force_cloud:
-                logger.warning(f"⚠️ [AI] Ollama local não encontrado na lista de provedores. Enviando comment_id={comment_id} para revisão online.")
+                logger.warning(f"⚠️ [AI] Ollama local não encontrado na lista de provedores. ID {comment_id} receberá erro (proteção contra sangria de nuvem).")
                 return {
                     "is_hate": False,
-                    "categoria_ia": "SUSPEITO",
-                    "confianca_ia": 0.5,
-                    "analise_pericial": "Ollama local não disponível, enviado para revisão online.",
+                    "categoria_ia": "ERRO",
+                    "confianca_ia": 0.0,
+                    "analise_pericial": "Ollama local não disponível, envio retido localmente.",
                     "name": "ollama_fallback"
                 }
             else:
@@ -420,15 +431,15 @@ class AIService:
 
         if not force_cloud:
             if not ai_circuit_breaker.can_execute("ollama"):
-                logger.debug("[AI] Ollama em Circuit Breaker. ID %s direcionado para fila online.", comment_id)
+                logger.error("[AI] Ollama em Circuit Breaker. ID %s recebe ERRO (aguardando retorno local).", comment_id)
             else:
-                logger.warning(f"⚠️ [AI] Ollama local falhou para o ID {comment_id}. Direcionando para a fila de revisão online.")
+                logger.error(f"❌ [AI] Ollama local falhou para o ID {comment_id}. Recebe ERRO (aguardando retorno local).")
             
             return {
                 "is_hate": False,
-                "categoria_ia": "SUSPEITO",
-                "confianca_ia": 0.5,
-                "analise_pericial": "Falha na perícia do Ollama local, enviado para revisão online.",
+                "categoria_ia": "ERRO",
+                "confianca_ia": 0.0,
+                "analise_pericial": "Falha na perícia do Ollama local. Processamento retido para intervenção técnica.",
                 "name": "ollama_fallback"
             }
 
