@@ -123,11 +123,15 @@ def build_orchestrator() -> SentinelaOrchestrator:
     # 🔍 REVISÃO ONLINE: Fila secundária e independente para revisão cloud de suspeitos
     try:
         from workers.ai.sa_revisao_online import SaRevisaoOnline
+        from workers.ai.sa_voyant import SaVoyant
         
         orch.register(SaRevisaoOnline(worker_id="sa-revisao-online-01", config={"batch_size": 20}))
         logger.info("[main_runner] SaRevisaoOnline registrado com sucesso na fila secundária.")
+        
+        orch.register(SaVoyant(worker_id="sa-voyant-01", config={}))
+        logger.info("[main_runner] SaVoyant (Subagente Linguista) registrado com sucesso.")
     except ImportError as e:
-        logger.warning(f"[main_runner] Erro ao registrar SaRevisaoOnline: {e}")
+        logger.warning(f"[main_runner] Erro ao registrar subagentes de IA: {e}")
 
     # Motor de Curadoria e Inteligência de Alvos (v84.9)
     researcher_mode = os.getenv("RESEARCHER_MODE", "disabled").strip().lower()

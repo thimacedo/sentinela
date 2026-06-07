@@ -677,7 +677,14 @@
                             pingPulse.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75";
                         }
                         
-                        // 4. Inteligência Analítica & Malha Degradada
+                        // Atualiza contagem de ciclos
+                        if (document.getElementById('kpi-cycles')) {
+                            document.getElementById('kpi-cycles').innerText = (m.cycle || 0).toLocaleString();
+                        }
+                        // Atualiza contagem de ciclos
+                        if (document.getElementById('kpi-cycles')) {
+                            document.getElementById('kpi-cycles').innerText = (m.cycle || 0).toLocaleString();
+                        }
                         const degradedLabel = document.getElementById('ai-degraded-label');
                         if (m.ai_services) {
                             const blockedCount = Object.values(m.ai_services).filter(v => v === 'BLOQUEADO' || v === 'REMOVIDO').length;
@@ -883,6 +890,48 @@
             }
         }
 
+        async function handleDeleteKey() {
+            if(!currentModalAI) return;
+            const env_var = document.getElementById('modal-env-var').innerText;
+
+            if(!confirm(`⚠️ ATENÇÃO: Deseja apagar a chave de ${currentModalAI}?\n\nIsso desativará este provedor de IA no sistema até que uma nova chave seja inserida.`)) {
+                return;
+            }
+
+            const btn = document.getElementById('btn-delete-key');
+            const feedback = document.getElementById('modal-status-feedback');
+            
+            btn.disabled = true;
+            btn.innerText = "DELETANDO...";
+
+            try {
+                const r = await fetch(API_BASE + '/api/ai/delete_key', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: currentModalAI, env_var })
+                });
+                const res = await r.json();
+                
+                feedback.classList.remove('hidden', 'bg-emerald-500/20', 'text-emerald-400', 'bg-rose-500/20', 'text-rose-400');
+                feedback.innerText = res.message.toUpperCase();
+                
+                if(res.success) {
+                    feedback.classList.add('bg-emerald-500/20', 'text-emerald-400');
+                    setTimeout(closeAIModal, 2000);
+                } else {
+                    feedback.classList.add('bg-rose-500/20', 'text-rose-400');
+                }
+            } catch(e) {
+                feedback.classList.remove('hidden');
+                feedback.classList.add('bg-rose-500/20', 'text-rose-400');
+                feedback.innerText = "ERRO AO DELETAR";
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Deletar Chave e Desativar IA";
+                fetchData();
+            }
+        }
+
         function toggleKeyVisibility() {
             const input = document.getElementById('modal-api-key');
             input.type = input.type === 'password' ? 'text' : 'password';
@@ -1003,6 +1052,50 @@
             try {
                 const resp = await fetch(API_BASE + `/api/server/${action}`, { method: 'POST' });
                 const res = await resp.json();
+                console.log(`[Server Control] Resposta de ${action}:`, res.message);
+                setTimeout(fetchData, 1000);
+            } catch(e) {
+                console.error(`Control error for ${action}:`, e);
+            }
+        }
+
+        async function startAIService(name) {
+            console.log(`[AI Service] Enviando sinal de início para: ${name}`);
+            try {
+                const resp = await fetch(API_BASE + `/api/services/${name}/start`, { method: 'POST' });
+                const res = await resp.json();
+                console.log(`[AI Service] Resposta:`, res.message);
+                setTimeout(fetchData, 1000);
+            } catch(e) {
+                console.error(`AI Start error for ${name}:`, e);
+            }
+        }
+
+        // Exposição Global (PASA v90.7)
+        window.switchTab = switchTab;
+        window.clearTerminal = clearTerminal;
+        window.controlServer = controlServer;
+        window.startAIService = startAIService;
+        window.fetchData = fetchData;
+        window.openAIModal = openAIModal;
+        window.closeAIModal = closeAIModal;
+        window.openNewAIModal = openNewAIModal;
+        window.handleUpdateKey = handleUpdateKey;
+        window.handleDeleteKey = handleDeleteKey;
+        window.toggleKeyVisibility = toggleKeyVisibility;
+        window.toggleHateOnly = toggleHateOnly;
+        window.forceScrape = forceScrape;
+        window.filterTargets = filterTargets;
+        window.searchMonitor = searchMonitor;
+        window.evaluateIA = evaluateIA;
+
+        fetchData();
+        setupLogStream();
+        setInterval(fetchData, 10000);
+    </script>
+</body>
+</html>
+      const res = await resp.json();
                 console.log(`[Server Control] Resposta de ${action}:`, res.message);
                 setTimeout(fetchData, 1000);
             } catch(e) {

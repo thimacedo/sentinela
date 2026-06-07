@@ -26,22 +26,78 @@ logger = logging.getLogger("core.voyant_service")
 # ---------------------------------------------------------------------------
 # Dicionário de termos hostis calibrado para o contexto político brasileiro.
 # Cruzado contra os top-N termos TF-IDF retornados pelo Trombone.
-# Fonte: custom_rules.json + análise dos datasets MCA v2.2.
+# Fonte: METODOLOGIA_VICHI_ANALITICA.md, ADENDO_LINGUISTICA_PROFUNDA.md,
+#        PADRONIZACAO_LINGUISTICA_ANALITICA.md (PASA v16.3) + MCA v2.2.
 # ---------------------------------------------------------------------------
 HOSTILE_LEXICON: set[str] = {
-    # Violência / Ameaça
+    # === VIOLÊNCIA / AMEAÇA (AMEACA) ===
     "tiro", "bala", "matar", "morte", "morrer", "morre", "enforcar", "forca",
     "preso", "prender", "cadeia", "assassino", "assassinar",
-    # Insulto ad hominem grave
+    "morrer", "violencia", "violência", "ameaca", "ameaça", "atacar", "destruir",
+    "threat", "violence", "kill", "harm", "assassinato", "incitacao", "incitação",
+    "incitar", "terrorismo", "terrorista", "atentado", "massacre", "extermínio",
+
+    # === INSULTO AD HOMINEM GRAVE (INSULTO_AD_HOMINEM) ===
     "lixo", "idiota", "imbecil", "burro", "incompetente", "vagabundo",
-    "bandido", "ladrão", "roubar", "corrupto", "corrupção",
-    # Ódio identitário / gênero
-    "macaco", "nordestino", "favelado", "safada", "piranha", "puta", "vagabunda",
-    # Ataque institucional
+    "bandido", "ladrao", "ladrão", "roubar", "corrupto", "corrupcao", "corrupção",
+    "estupido", "estúpido", "covarde", "mentiroso", "fraco", "fraude", "traidor",
+    "traicao", "traição", "calunia", "calúnia", "difamar", "ofender", "insulto",
+    "ofensa", "honra", "competencia", "competência", "aparencia", "aparência",
+
+    # === XENOFOBIA REGIONAL / RACISMO ESTRUTURAL (XENOFOBIA_REGIONAL, RACISMO_ESTRUTURAL) ===
+    "nordestino", "nordestina", "pobre", "analfabeto", "ingrato", "miseravel",
+    "miserável", "burro", "nao sabe votar", "não sabe votar", "voto de cabresto",
+    "macaco", "macaca", "segregacao", "segregação", "injuria", "injúria",
+    "racista", "racismo", "racial", "preconceito", "discriminacao", "discriminação",
+
+    # === VIOLÊNCIA DE GÊNERO / MISOGINIA (VIOLÊNCIA_GENERO, MISOGINIA_POLITICA) ===
+    "favelado", "favelada", "safada", "piranha", "puta", "vagabunda",
+    "machista", "sexista", "misoginia", "machismo", "sexismo", "abuso",
+    "feminicidio", "feminicídio", "misogynistic", "patriarcado", "mulheres",
+    "doxxing", "redpill", "ataque estetico", "ataque estético", "competencia por genero",
+
+    # === RACISMO RELIGIOSO (RACISMO_RELIGIOSO) ===
+    "macumba", "vodu", "voodoo", "magia negra", "demonio", "demônio",
+    "guerra espiritual", "intolerancia", "intolerância", "islamofobia",
+    "antissemitismo", "religioso", "religiaofobia", "racial slur", "religious slur",
+
+    # === MILÍCIA DIGITAL / ATAQUE INSTITUCIONAL (MILICIA_DIGITAL, ATAQUE_INSTITUCIONAL) ===
     "golpe", "ditadura", "fraudar", "fraude", "fraudes", "urna", "golpista",
-    # Dano à imagem / acusações criminais
-    "pedofil", "pedofilia", "genocida", "genocídio", "traidor", "traição",
-    "terrorista", "terrorismo", "quadrilha", "esquema",
+    "ditadura do stf", "xandao", "xandão", "intervencao", "intervenção",
+    "urls falsas", "url falsa", "fake news", "fake news", "desinformacao",
+    "desinformação", "milicia digital", "milícia digital", "bolsonarista",
+    "lulista", "petista", "comunista", "fascista", "nazista",
+    "corrupto", "incompetente", "deslegitimar", "deslegitimacao", "deslegitimação",
+    "crime", "sistema", "sistema politico", "sistema político", "governo",
+    "orgaos de estado", "órgãos de estado", "sistema eleitoral", "justica",
+    "justiça", "stf", "tse", "congresso", "camara", "câmara", "senado",
+    "imprensa", "midia", "mídia", "ciencia", "ciência", "direito",
+
+    # === DANO À IMAGEM / ACUSAÇÕES CRIMINAIS (DANO_A_IMAGEM) ===
+    "pedofil", "pedofilia", "genocida", "genocidio", "genocídio", "traidor", "traicao",
+    "traição", "terrorista", "terrorismo", "quadrilha", "esquema",
+    "crime", "corrupcao", "corrupção", "desvios de conduta", "desvio de conduta",
+    "theorize crime", "impute grave misconduct", "fake news", "misinformation",
+    "disinformation", "discredit", "escandalo", "escândalo", "acusacoes falsas",
+    "acusações falsas", "teorias da conspiracao", "teorias da conspiração",
+    "imputacao de crimes", "imputação de crimes", "imputar", "desvios",
+
+    # === FALÁCIAS ARGUMENTATIVAS (Indicadores de coordenação/astroturfing) ===
+    "ad hominem", "espantalho", "falsa dicotomia", "ou voce esta", "ou você está",
+    "com o povo", "com os criminosos", "nós contra eles", "nos contra eles",
+    "generalizacao", "generalização", "exclusao", "exclusão", "silenciamento",
+
+    # === VETOR DE FÚRIA / POLARIZAÇÃO AFETIVA (Engenheiros do Caos) ===
+    "desumanizacao", "desumanização", "polarizacao afetiva", "polarização afetiva",
+    "engajamento por furia", "engajamento por fúria", "indignacao artificial",
+    "indignação artificial", "furia", "fúria", "odio", "ódio", "furioso",
+    "performatico", "performático", "performatividade", "deslegitimacao",
+
+    # === N-GRAMAS / COORDENAÇÃO (Slogans de ódio / Astroturfing) ===
+    "vamos quebrar tudo", "fora todos", "todos corruptos", "nao presta",
+    "não presta", "lixo total", "bandido e ladrão", "corrupto ladrão",
+    "eleicao fraudada", "eleição fraudada", "urna fraudada", "voto impresso",
+    "intervencao militar", "intervenção militar", "artigo 142", "ai 5",
 }
 
 # Limiar: se a proporção de termos hostis no vocabulário TF-IDF

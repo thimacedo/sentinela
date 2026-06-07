@@ -28,6 +28,7 @@ _last_updated: 2026-06-05 | branch: main_
 - [x] Refinação da Inteligência de Autocura (Fase 4): implementação real do DocFetcher (sincronização remota) e refatoração do AIAdvisor para cascata de IA resiliente
 - [x] Segurança, Governança e Filtros Analíticos (Fase 10): implementação de RLS global, normalização de categorias MCA v2.2 e Shadowban Léxico no frontend
 - [x] Integração Nativa Voyant Tools (v92.0): Implementação da Trombone API para triagem fast-drop determinística e redução de burn rate de LLM.
+- [x] Subagente Voyant (SaVoyant v92.3): Conversão da engine léxica em um Subagente autônomo com integração às bases de Linguística Forense.
 
 - [x] Otimização de Boot e Pré-Aquecimento de Filas (v89.2): filas populadas antes do start dos workers
 - [x] Otimização de Produção e Escalabilidade de IA (v90.0): implementação do Batch Processing concorrente, Escalonamento Horizontal de Workers (múltiplos classificadores) e Auto-renovação Preditiva de Sessões

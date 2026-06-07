@@ -212,9 +212,15 @@ PGMQ deve aparecer apenas como hipótese futura.
 
 ### 9. Triagem Determinística Voyant (v92.2)
 - **Fast-Drop Triage Estabilizado**: Corrigido erro 500 no Trombone através da migração do parâmetro `input` para `string` (multidocumento) e uso de IP fixo `127.0.0.1` para evitar conflitos de resolução de DNS/Async do `httpx`.
-- **Validação de Contrato**: O sistema agora cria um corpus real por lote, onde cada comentário é um documento distinto. Isso permite métricas de TF-IDF e IDF muito mais precisas para a triagem.
+- **Validação de Contrato**: O sistema agora cria um corpus real por lote, onde cada comentário é um documento separado. Isso permite métricas de TF-IDF e IDF muito mais precisas para a triagem.
 - **Performance Validada**: Lotes de 200 comentários processados localmente em ~1s, com detecção correta de léxico hostil (30% de agressividade em lotes de teste).
 - **Zero Custo Operacional**: Ativada a primeira linha de defesa pericial, desonerando os LLMs cloud em até 80% para conteúdos neutros.
+
+### 10. Subagente Voyant (v92.3)
+- **SaVoyant (Subagente Linguista)**: O Voyant foi elevado de uma ferramenta para um Subagente autônomo registrado no Orchestrator.
+- **Bases Linguísticas Forenses**: Integrado contexto da "Bíblia Linguística Forense PASA" e outros manuais periciais ao raciocínio do SaVoyant.
+- **Insights Periciais**: O subagente agora gera eventos de `linguistic_insight` no banco de dados, cruzando estatísticas do Voyant Tools com interpretação de IA para detectar Xenofobia, Ataques Institucionais e Sarcasmo.
+- **Sistema de Recompensas**: SaVoyant integrado ao motor de XP do Sentinela, recebendo +15 XP por insights de alta relevância.
 
 ## Próximos passos OBRIGATÓRIOS
 1. **Rotação de Proxies**: Finalizar a integração real de proxies residenciais no Scraper V2 (AGENTS_SYNC.md).

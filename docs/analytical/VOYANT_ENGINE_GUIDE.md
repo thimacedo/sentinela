@@ -1,56 +1,61 @@
-# 📘 MANUAL TÉCNICO: MOTOR LÉXICO DETERMINÍSTICO (v92.0)
+# 📘 MANUAL TÉCNICO: MOTOR LÉXICO DETERMINÍSTICO & SUBAGENTE VOYANT (v92.3)
+**Agente:** SaVoyant (sa-voyant-01)
 **Engine:** Voyant Tools (Trombone API)
-**Codinome:** Fast-Drop Triage
-**Data:** 2026-06-07
+**Codinome:** Forensic Linguist Bridge
+**Status:** OPERACIONAL
 
 ---
 
 ## 1. Visão Geral
-O Motor Léxico Determinístico é a primeira barreira analítica do Sentinela. Ele utiliza estatística computacional local (TF-IDF e Frequência Relativa) para identificar lotes de comentários "seguros" (neutros), impedindo que eles cheguem à camada de IA Generativa (LLM).
-
-**Economia Estimada:** 60% a 80% na fatura de APIs de IA.
+O Voyant Tools evoluiu de um microserviço de triagem para um **Subagente autônomo (SaVoyant)**. Ele não apenas descarta lotes neutros, mas agora atua como um analista pericial que cruza estatísticas léxicas (TF-IDF, N-gramas) com as regras de ouro da **Bíblia Linguística Forense PASA**.
 
 ---
 
-## 2. Arquitetura do Pipeline
-```mermaid
-[Fila Supabase] ➔ [AIProcessorWorker] ➔ [Voyant Service (Local)]
-                                         │
-                    ┌────────────────────┴────────────────────┐
-        [VOCABULÁRIO HOSTIL > 8%]                  [VOCABULÁRIO NEUTRO]
-                    │                                         │
-        [Delegar para LLM Cloud]                   [Marca como NEUTRO Local]
-                    │                                         │
-        [Classificação Semântica]                  [Finaliza Ciclo (Zero Custo)]
+## 2. Inteligência e Raciocínio (SaVoyant)
+O subagente opera sob o loop de recompensas do Orchestrator e utiliza as seguintes bases de conhecimento:
+- **BIBLIA_LINGUISTICA_FORENSE_PASA.md**: Regras para detecção de sarcasmo, ironia e falsos alertas de violência.
+- **Monitoramento de Ódio e Violência.md**: Matrizes de monitoramento de extremismo e milícias digitais.
+- **HOSTILE_LEXICON**: Dicionário proprietário de ~50 termos gatilhos para violência, xenofobia e ataques institucionais.
+
+### 2.1 Fluxo de Trabalho (Ciclo)
+1. **Extração Léxica**: Consulta o Trombone para obter TF-IDF e frequências relativas do lote.
+2. **Filtragem Rápida (Fast-Drop)**: Se a agressividade léxica for < 8%, o lote é processado localmente como `NEUTRO`.
+3. **Análise de Insight**: Se houver picos de interesse, o SaVoyant cruza os dados com a Bíblia Linguística e gera um `linguistic_insight` no banco de dados.
+
+---
+
+## 3. Arquitetura de Dados
+Os resultados e insights são persistidos na tabela `system_events` com o tipo `linguistic_insight`.
+
+**Exemplo de Metadados de Insight:**
+```json
+{
+    "titulo": "Alerta de Xenofobia Regionalizada",
+    "resumo": "Detectado pico de termos discriminatórios contra nordestinos em contexto eleitoral.",
+    "severidade": 85,
+    "categoria_mca": "ODIO_IDENTITARIO",
+    "relevancia": 0.95
+}
 ```
 
 ---
 
-## 3. Especificações do VoyantService (`core/voyant_service.py`)
-- **Protocolo:** REST via HTTP/1.1 (Trombone API).
-- **Modo:** Stateless (Corpus descartado após extração de termos).
-- **Léxico Hostil:** Baseado no MCA v2.2 (set de ~50 jargões de ódio e ameaça).
-- **Threshold:** Configurável via `.env` (`VOYANT_HOSTILE_THRESHOLD`). Padrão: `0.08` (8% de agressividade léxica).
+## 4. Integração no Dashboard
+- **Ciclos do Sistema**: Agora exibe o total de ciclos reais processados pelos workers ativos.
+- **KPIs de IA**: Mostra o status real do VoyantServer (porta 8888).
+- **Gestão de Chaves**: Permite excluir e desativar provedores de IA de forma segura.
 
 ---
 
-## 4. Manutenção e SRE
-
-### 4.1 Invocação do Servidor
-O binário Java deve ser iniciado com as flags de supressão de interface:
+## 5. Manutenção e SRE
+O VoyantServer deve ser iniciado manualmente ou via script de boot:
 ```powershell
-java -Djava.awt.headless=true -Xmx512m -jar tools/voyant/VoyantServer.jar headless=true
+java -Djava.awt.headless=true -Xmx1024m -jar tools/voyant/VoyantServer.jar headless=true
 ```
 
-### 4.2 Fallback de Segurança
-Se o serviço Voyant falhar (timeout ou erro 500), o sistema **automaticamente** bypassa a triagem local e envia o lote integral para o LLM. Nenhuma coleta é perdida por falha do motor léxico.
+### 5.1 Recompensas (XP)
+- **Ciclo de Triagem**: +5.0 XP.
+- **Geração de Insight Crítico**: +15.0 XP.
 
 ---
-
-## 5. Benchmarks de Validação
-- **Lote de 200 comentários:** Processado em **1040ms**.
-- **Consumo de Memória:** ~380MB (Heap JVM).
-- **Sintaxe:** 100% validada via `py_compile`.
-
----
-_Sentinela Intelligence Governance — v92.0_
+_Sentinela Intelligence Governance — v92.3_
