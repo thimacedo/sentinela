@@ -189,6 +189,35 @@ class MemoryStore:
 
     # ── Utilitários ───────────────────────────────────────────────────────────
 
+    async def set_flag(self, key: str, value: bool, ttl: int = 3600) -> None:
+        """Define uma flag no banco para IPC e controle de estado."""
+        payload = {
+            "key": key,
+            "value": value,
+            "expires_at": (datetime.utcnow().timestamp() + ttl)
+        }
+        try:
+            import asyncio
+            await asyncio.to_thread(self.db.table("system_flags").upsert(payload).execute)
+        except Exception as e:
+            # Silencioso, pois system_flags pode não existir ainda
+            pass
+
+    async def get_flag(self, key: str) -> bool:
+        """Lê o valor de uma flag do banco de dados."""
+        try:
+            import asyncio
+            res = await asyncio.to_thread(self.db.table("system_flags").select("value, expires_at").eq("key", key).execute)
+            data = res.data
+            if data:
+                if data[0].get("expires_at", 0) > datetime.utcnow().timestamp():
+                    return bool(data[0].get("value"))
+                else:
+                    await asyncio.to_thread(self.db.table("system_flags").delete().eq("key", key).execute)
+        except Exception:
+            pass
+        return False
+
     def _raise_if_error(self, result, operation: str) -> None:
         if hasattr(result, "error") and result.error:
             raise RuntimeError(
