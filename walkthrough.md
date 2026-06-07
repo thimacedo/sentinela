@@ -99,6 +99,10 @@ Nesta fase recente de saneamento técnico e monetização, realizamos melhorias 
    - Criação do script de monitoramento e autocura [monitor_pipeline.py](file:///c:/projetos/sentinela/scratch/monitor_pipeline.py) que checa a porta `8001` (Watchdog) e interage via API HTTP (`/api/server/start`) ou subprocesso para restaurar o pipeline se inativo.
    - Agendamento da verificação periódica de status a cada 10 minutos (via cron do Antigravity).
    - Teste inicial validou o watchdog e o runner com sucesso completo (Status: `OPERACIONAL`, Score: `95.0`, Trust: `9.5`, Tier: `Gold`, DB/AI: `OK`).
+6. **Resolução e Validação de Erros de Concorrência no Voyant (HTTPX)**:
+   - Correção definitiva de `RuntimeError: Attempted to send a sync request with an AsyncClient instance` em [voyant_service.py](file:///c:/projetos/sentinela/core/voyant_service.py) e [validate_trombone.py](file:///c:/projetos/sentinela/scripts/validate_trombone.py) através da codificação manual do form body (`urllib.parse.urlencode`) transmitido via parâmetro `content`.
+   - Executado teste de inicialização integrada do `VoyantServer.jar` local com o argumento obrigatório `headless=true`.
+   - A validação oficial de contrato via [validate_trombone.py](file:///c:/projetos/sentinela/scripts/validate_trombone.py) completou com 100% de sucesso (5/5 verificações aprovadas), validando conectividade, extração de CorpusTerms (43 termos), cruzamento léxico de hostilidade (ratio 30.23%), e fast-drop de lote neutro (ratio 0.00%) sem falhas de encode Unicode.
 
 ## 8. Uso recomendado
 

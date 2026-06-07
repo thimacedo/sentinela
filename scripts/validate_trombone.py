@@ -64,10 +64,7 @@ async def run_validation():
     else:
         print("  [❌] Ping FALHOU — VoyantServer não está acessível.")
         print("       Verifique se o .jar foi iniciado na porta 8888.\n")
-        errors.append("ping_failed")
-        # Sem servidor não tem como continuar
         _print_summary(ok_count, errors)
-        await voyant_service.close()
         return
 
     # --- 2. Extração de termos (lote hostil) ---
@@ -124,10 +121,13 @@ async def run_validation():
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
             corpus_input = "\n\n".join(HOSTILE_BATCH)
+            import urllib.parse
+            encoded_data = urllib.parse.urlencode({"input": corpus_input, "inputFormat": "text"})
             resp = await client.post(
                 "http://127.0.0.1:8888/trombone",
                 params={"tool": "corpus.CorpusTerms", "format": "json", "limit": 5, "sort": "RELATIVEFREQ"},
-                data={"input": corpus_input, "inputFormat": "text"},
+                content=encoded_data,
+                headers={"Content-Type": "application/x-www-form-urlencoded"}
             )
             raw = resp.json()
             # Imprime os primeiros 500 chars para inspeção manual
@@ -153,7 +153,7 @@ async def run_validation():
         print(f"  [❌] Erro ao inspecionar JSON bruto: {exc}")
         errors.append("raw_json_error")
 
-    await voyant_service.close()
+    # Sem close no voyant_service
     _print_summary(ok_count, errors)
 
 

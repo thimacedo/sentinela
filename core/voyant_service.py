@@ -160,13 +160,15 @@ class VoyantService:
             "sort": "RELATIVEFREQ",
         }
         
-        # v92.9: httpx aceita lista de tuplas para repetir a mesma chave no form body.
-        # Isso cria N documentos reais no Trombone de forma assíncrona.
-        data = [("string", t) for t in clean_texts]
+        # v92.9: Codificação manual do form body para evitar a criação de SyncByteStream no httpx AsyncClient
+        # Isso previne erros de concorrência e o bug "Attempted to send a sync request with an AsyncClient instance"
+        import urllib.parse
+        encoded_data = urllib.parse.urlencode([("string", t) for t in clean_texts])
 
         try:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
-                resp = await client.post(self.base_url, params=params, data=data)
+                headers = {"Content-Type": "application/x-www-form-urlencoded"}
+                resp = await client.post(self.base_url, params=params, content=encoded_data, headers=headers)
                 resp.raise_for_status()
         except httpx.TimeoutException:
             logger.warning("[Voyant] Timeout ao consultar Trombone (%.1fs).", self.timeout)
@@ -244,11 +246,13 @@ class VoyantService:
             "query": target_word,
             "limit": 20,
         }
-        data = [("string", t) for t in clean_texts]
+        import urllib.parse
+        encoded_data = urllib.parse.urlencode([("string", t) for t in clean_texts])
 
         try:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
-                resp = await client.post(self.base_url, params=params, data=data)
+                headers = {"Content-Type": "application/x-www-form-urlencoded"}
+                resp = await client.post(self.base_url, params=params, content=encoded_data, headers=headers)
                 resp.raise_for_status()
                 payload = resp.json()
                 return self._parse_collocates(payload)
