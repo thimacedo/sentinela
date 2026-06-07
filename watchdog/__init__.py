@@ -101,7 +101,7 @@ class WatchdogState:
     def add_log(self, level: str, message: str):
         # Filtragem Inteligente para Reduzir "Enxurrada de Erros" no Terminal (v88.9)
         # Omitimos do stdout mensagens de erro de rede/IA repetitivas, mas mantemos no Dashboard/SSE.
-        SUPPRESSED_TERMINAL_TERMS = ["429", "403", "401", "CIRCUITO ABERTO", "COOLDOWN", "HTTP REQUEST:", "HTTP/2 200 OK"]
+        SUPPRESSED_TERMINAL_TERMS = ["429", "403", "401", "CIRCUITO ABERTO", "COOLDOWN", "HTTP REQUEST:", "HTTP/2 200 OK", "FALHA FATAL (403)"]
         msg_upper = message.upper()
         
         should_print = True
@@ -708,9 +708,8 @@ def heal_runtime_error(reason: str) -> str:
         return "fatal"
 
     if "403" in stderr_lower or "402" in stderr_lower or "forbidden" in stderr_lower or "payment required" in stderr_lower:
-        state.add_log("warn", "[Watchdog] ⏸️ Erro de Cota/Saldo/Permissão (403/402). Aguardando 10 min para recuperação de créditos.")
-        time.sleep(600)
-        return "wait"
+        state.add_log("warn", "[Watchdog] ⏸️ Erro de Cota/Saldo/Permissão (403/402) detectado nos logs. O Resurrector cuidará da recuperação (sem bloquear reinício).")
+        return "restart"
         
     _db_connection_terms = [
         "connectionrefusederror",
@@ -750,6 +749,7 @@ def heal_runtime_error(reason: str) -> str:
 # --- MARITACA RESURRECTOR (v90.6) ---
 def maritaca_resurrector_loop():
     """Verifica periodicamente se a Maritaca recuperou saldo e desperta o runner."""
+    attempts_403 = 0
     while True:
         try:
             key = os.getenv("MARITACA_API_KEY", "").strip()
@@ -767,10 +767,19 @@ def maritaca_resurrector_loop():
                         state.add_log("info", f"[Resurrector] 🔔 Saldo Maritaca detectado: R$ {credits:.2f}. Despertando IA...")
                         # Se o saldo voltou, precisamos forçar o runner a recarregar o AIService
                         requests.post("http://localhost:8001/api/server/restart", timeout=5.0)
-                        # Espera 4 horas antes de checar novamente se o saldo ainda está lá (evita loops se o restart falhar)
+                        # Espera 4 horas antes de checar novamente se o saldo ainda está lá
+                        attempts_403 = 0
                         time.sleep(14400)
                         continue
-        except Exception as e:
+                elif resp.status_code == 403:
+                    attempts_403 += 1
+                    backoff = min(60 * attempts_403, 3600)  # backoff crescente até 1h
+                    state.add_log("warn", f"[Resurrector] Maritaca retornou 403 (tentativa {attempts_403}). Backoff de {backoff}s...")
+                    time.sleep(backoff)
+                    continue
+                else:
+                    attempts_403 = 0  # reseta contador em respostas inesperadas
+        except Exception:
             # Silencioso para não poluir logs se houver erro de rede intermitente
             pass
         
@@ -921,7 +930,7 @@ def guard():
                     runtime = time.time() - start_time
                     state.update_metrics(restarts=state.restarts + 1)
                     
-                    if runtime > 60:
+                    if runtime > int(os.getenv("WATCHDOG_FAST_CRASH_THRESHOLD", "120")):  # Aumentado de 60s para 120s; configurável via env
                         state.add_log("warn", f"[Watchdog] Processo finalizado apos {int(runtime)}s. Reiniciando...")
                         state.fast_crashes = 0
                     else:
@@ -948,7 +957,7 @@ def guard():
                             elapsed += 5
                             
                         state.fast_crashes = 0
-                    elif runtime <= 60:
+                    elif runtime <= int(os.getenv("WATCHDOG_FAST_CRASH_THRESHOLD", "120")):
                         send_whatsapp_alert(f"WATCHDOG: RUNTIME ERROR - Code: {poll}. Reiniciando.", category="runtime")
             elif poll is None:
                 # Parada manual via should_run = False

@@ -203,6 +203,13 @@ PGMQ deve aparecer apenas como hipótese futura.
 - **Suavização de Restart**: Aumentada a tolerância para falhas rápidas de 3 para **5 tentativas**. O tempo de hibernação por erro de boot foi reduzido de 1h para **10 minutos**.
 - **Gestão de Cotas IA**: Adicionado tratamento específico para erros **403/402** (Maritaca/OpenRouter) no Watchdog. O sistema agora entra em espera de 10 min nessas falhas em vez de tentar reinícios agressivos, preservando a saúde da malha de fallback.
 
+### 8. Refatoração de Resiliência (v90.8)
+- **Watchdog Adaptive Threshold**: Aumentada a janela de detecção de "falha rápida" para **120s** (configurável via `WATCHDOG_FAST_CRASH_THRESHOLD`). Reduzido tempo de hibernação para **10 minutos**.
+- **Maritaca Async Recovery**: O erro 403 da Maritaca não trava mais o loop de reinício do Watchdog. A recuperação foi delegada ao `maritaca_resurrector_loop` com **backoff exponencial** (1m a 1h).
+- **SQLite WAL Mode**: Implementado modo de escrita assíncrona (WAL) e retentativas em `scripts/export_to_sqlite.py`, eliminando conflitos de bloqueio com o Datasette.
+- **Auditoria de Kills**: O `GuardLocker` agora registra o `cmdline` de processos zumbis antes de encerrá-los para rastreabilidade de SRE.
+- **Proteção de Guardião**: O `process_cleaner.py` foi blindado para identificar e **proteger o PID do Watchdog** (avô do processo), impedindo o auto-encerramento acidental do sistema de supervisão.
+
 ## Próximos passos OBRIGATÓRIOS
 1. **Rotação de Proxies**: Finalizar a integração real de proxies residenciais no Scraper V2 (AGENTS_SYNC.md).
 2. **Checkpoint por Post**: Implementar persistência intermediária para evitar perda de progresso em coletas de perfis grandes.

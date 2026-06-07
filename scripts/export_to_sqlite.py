@@ -51,9 +51,25 @@ def export_to_sqlite():
 
     # 5. Conecta ao banco de dados SQLite local
     print(f"[INFO] [Datasette Export] Gravando em: {db_path}")
+    conn = None
+    max_retries = 3
+    for attempt in range(1, max_retries + 1):
+        try:
+            conn = sqlite3.connect(str(db_path), timeout=30)
+            break
+        except sqlite3.OperationalError as e:
+            print(f"[WARN] [Datasette Export] Tentativa {attempt}/{max_retries} — falha ao abrir banco: {e}")
+            if attempt < max_retries:
+                import time as _time
+                _time.sleep(5 * attempt)
+            else:
+                print(f"[ERROR] [Datasette Export] Não foi possível abrir o banco após {max_retries} tentativas.")
+                return
     try:
-        conn = sqlite3.connect(str(db_path))
         cursor = conn.cursor()
+        # WAL mode evita lock exclusivo e permite leituras concorrentes (Datasette)
+        cursor.execute("PRAGMA journal_mode=WAL;")
+        cursor.execute("PRAGMA busy_timeout=10000;")
         
         # Cria tabela de candidatos
         cursor.execute("""
@@ -135,9 +151,16 @@ def export_to_sqlite():
         
         conn.commit()
         conn.close()
+        conn = None
         print(f"[SUCCESS] [Datasette Export] Exportacao concluida com sucesso. Banco SQLite pronto!")
     except Exception as e:
         print(f"[ERROR] [Datasette Export] Erro ao gravar banco SQLite local: {e}")
+    finally:
+        if conn:
+            try:
+                conn.close()
+            except Exception:
+                pass
 
 if __name__ == "__main__":
     export_to_sqlite()

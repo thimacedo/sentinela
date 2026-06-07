@@ -32,13 +32,17 @@ class GuardLocker:
             
             pids_to_kill = []
             for line in output.splitlines():
-                if not line.strip(): continue
+                if not line.strip():
+                    continue
                 # Filtra pelo nome do script no commandline e exclui o próprio processo
                 if script_name in line:
                     parts = line.strip().split()
                     if parts and parts[-1].isdigit():
                         pid = int(parts[-1])
                         if pid != current_pid:
+                            # Verificação extra: loga o cmdline antes de matar para auditoria
+                            cmdline_preview = line.strip()[:120]
+                            logger.warning(f"🧹 [{self.name}] Zumbi identificado — PID {pid} | cmdline: {cmdline_preview}")
                             pids_to_kill.append(pid)
             
             for pid in pids_to_kill:

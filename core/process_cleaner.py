@@ -52,9 +52,21 @@ def cleanup_orphans(kill_ollama: bool = False):
             # Limpeza de scripts Python do projeto
             if "python" in proc.info['name'].lower():
                 if any(script in cmdline for script in sentinela_scripts):
-                    # v89.0: Proteção extra para não se auto-encerrar
-                    # Verifica se o PID é o atual ou o PAI do atual (para casos de subprocess/watchdog)
-                    if proc.info['pid'] == current_pid or proc.info['pid'] == os.getppid():
+                    # v90.8: Proteção extra — não encerra o processo atual, seu pai, ou o watchdog
+                    parent_pid = os.getppid()
+                    watchdog_pid = None
+                    try:
+                        # Tenta encontrar o PID do watchdog (processo avô ou processo com 'watchdog' no cmdline)
+                        current_proc = psutil.Process(current_pid)
+                        watchdog_pid = current_proc.ppid()
+                    except Exception:
+                        pass
+
+                    protected_pids = {current_pid, parent_pid}
+                    if watchdog_pid:
+                        protected_pids.add(watchdog_pid)
+
+                    if proc.info['pid'] in protected_pids:
                         continue
                     
                     logger.warning(f"🧹 [Cleaner] Encerrando script Python órfão: {cmdline} (PID {proc.info['pid']})")
