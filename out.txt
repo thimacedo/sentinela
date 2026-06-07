@@ -1,3 +1,0 @@
-[OK] Conexão com Supabase estabelecida (PASA v48.2 REST).
-🧹 [main_runner] Zumbi identificado — PID 9456 | cmdline: C:\Projetos\sentinela\.venv\Scripts\python.exe -u main_runner.py
-🧹 [main_runner] Faxina de zumbi órfão detectado: PID 9456

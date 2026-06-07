@@ -1,2 +1,0 @@
-[OK] Conexão com Supabase estabelecida (PASA v48.2 REST).
-🧹 [main_runner] Limpando processo zumbi órfão PID 16188

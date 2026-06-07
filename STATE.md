@@ -343,3 +343,11 @@ PGMQ deve aparecer apenas como hipótese futura.
   - Pasta `analise/`: Layout estético e marcação em Markdown concentrados em `CommentCard`, removendo bibliotecas desnecessárias de renderização (React Markdown + GFM) do contêiner principal da Aba.
 - **Prevenção de Render Looping**: O travamento de UI ocorrido anteriormente, proveniente de digitação reativa que repintava a árvore HTML de todos os dados defasados e do feed em tempo real, foi sanado. Módulos reagem agora individualmente.
 - **Modelo Utilizado na Execução**: *Gemini 3.5 Flash (High)*, perfil ideal para boilerplating/refatorações locais e greps complexos.
+
+## Auditoria e Manutenção Semanal de Workspace (2026-06-07)
+
+- **Higienização Geral**: Concluída a purga de arquivos temporários, logs antigos rotacionados e capturas obsoletas de erros acumulados em `logs/evidence/` para liberação de espaço em disco.
+- **Saneamento de Assets**: Excluídas duplicatas de arquivos PNG e SVG que residiam na raiz do workspace, mantendo unicamente as instâncias válidas e centralizadas na pasta oficial do frontend (`frontend/public/`).
+- **Remoção de Legados**: Eliminadas as pastas obsoletas de testes e scaffolds antigos (`frontend-bleeding-edge/` e `test_api/`) e scripts de testes locais soltos na raiz.
+- **Otimização de Testes Unitários**: Ajustado o arquivo `pytest.ini` para isolar a varredura automática do pytest unicamente à pasta `tests/`. Isso preveniu a execução indevida e lenta (que demandava cerca de 4 minutos de requisições de rede) de scripts CLI manuais do operador, reduzindo o tempo de validação local para **0.06 segundos**.
+- **Modelo Utilizado na Execução**: *Gemini 3.5 Flash (Medium)*, conforme protocolo de uso de IA para investigações locais e limpezas.

@@ -20,7 +20,7 @@ SAMPLE_TEXTS = [
 ]
 
 # Load fallback providers configuration
-CONFIG_PATH = os.path.join(os.getcwd(), "fallback_providers.yaml")
+CONFIG_PATH = os.path.join(os.getcwd(), "config", "fallback_providers.yaml")
 with open(CONFIG_PATH, "r", encoding="utf-8") as f:
     fallback_cfg = yaml.safe_load(f)
 
