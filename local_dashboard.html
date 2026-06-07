@@ -270,8 +270,8 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoYW1lamtsZHp4YmVpYnFlcXBrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjQ4ODEyNSwiZXhwIjoyMDkyMDY0MTI1fQ.GfvAI7rV8isgdhVeJp4mOUscWpdOqOuBoURGm82VdtY';
         const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        let isFetchingData = false;
-        let currentModalAI = null;
+        window.isFetchingData = false;
+        window.currentModalAI = null;
 
         function withTimeout(promise, ms = 8000) {
             return Promise.race([
@@ -754,10 +754,9 @@
         }
 
         // --- AI Management Modal Logic v90.7 ---
-        let currentModalAI = null;
 
         async function openAIModal(name) {
-            currentModalAI = name;
+            window.currentModalAI = name;
             const modal = document.getElementById('ai-modal');
             const content = document.getElementById('ai-modal-content');
             
@@ -972,6 +971,23 @@
                 console.error(`AI Start error for ${name}:`, e);
             }
         }
+
+        // Exposição Global (PASA v90.7)
+        window.switchTab = switchTab;
+        window.clearTerminal = clearTerminal;
+        window.controlServer = controlServer;
+        window.startAIService = startAIService;
+        window.fetchData = fetchData;
+        window.openAIModal = openAIModal;
+        window.closeAIModal = closeAIModal;
+        window.openNewAIModal = openNewAIModal;
+        window.handleUpdateKey = handleUpdateKey;
+        window.toggleKeyVisibility = toggleKeyVisibility;
+        window.toggleHateOnly = toggleHateOnly;
+        window.forceScrape = forceScrape;
+        window.filterTargets = filterTargets;
+        window.searchMonitor = searchMonitor;
+        window.evaluateIA = evaluateIA;
 
         fetchData();
         setupLogStream();
