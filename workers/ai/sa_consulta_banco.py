@@ -66,33 +66,34 @@ class SaConsultaBanco:
 
     async def get_hate_stats(self) -> List[Dict[str, Any]]:
         """
-        Calcula estatísticas consolidadas de discurso de ódio agrupadas por candidato.
-        Retorna a contagem de comentários neutros, de ódio e a taxa de ódio correspondente.
+        Calcula estatísticas consolidadas de discurso crítico agrupadas por candidato.
+        Utiliza a taxonomia expandida v93.1.
         """
-        sql = """
+        hate_cats = "('ODIO_IDENTITARIO', 'VIOLENCIA_GENERO', 'AMEACA', 'INSULTO_AD_HOMINEM', 'ATAQUE_INSTITUCIONAL', 'DANO_A_IMAGEM', 'MISOGINIA_POLITICA', 'CAMPANHA_COORDENADA', 'NEGATIVO')"
+        sql = f"""
             SELECT 
                 candidato_id,
-                COUNT(*) as total_comentarios,
-                SUM(CASE WHEN categoria_ia = 'ODIO' THEN 1 ELSE 0 END) as total_odio,
-                ROUND(CAST(SUM(CASE WHEN categoria_ia = 'ODIO' THEN 1 ELSE 0 END) AS REAL) / COUNT(*) * 100, 2) as taxa_odio_percent
+                COUNT(*) as total,
+                SUM(CASE WHEN categoria_ia IN {hate_cats} THEN 1 ELSE 0 END) as total_critico,
+                ROUND(CAST(SUM(CASE WHEN categoria_ia IN {hate_cats} THEN 1 ELSE 0 END) AS REAL) / COUNT(*) * 100, 1) as taxa_odio_percent
             FROM comentarios
             GROUP BY candidato_id
-            ORDER BY total_odio DESC
+            ORDER BY total_critico DESC
         """
         return await self.query(sql)
 
     async def get_top_attackers(self, limit: int = 10) -> List[Dict[str, Any]]:
         """
-        Identifica as contas (autores) mais ofensivas/agressivas do banco,
-        ordenadas pela quantidade de discursos de ódio classificados.
+        Identifica as contas (autores) mais ofensivas do banco.
         """
+        hate_cats = "('ODIO_IDENTITARIO', 'VIOLENCIA_GENERO', 'AMEACA', 'INSULTO_AD_HOMINEM', 'ATAQUE_INSTITUCIONAL', 'DANO_A_IMAGEM', 'MISOGINIA_POLITICA', 'CAMPANHA_COORDENADA', 'NEGATIVO')"
         sql = f"""
             SELECT 
                 autor_username,
                 COUNT(*) as total_ataques,
                 GROUP_CONCAT(DISTINCT candidato_id) as alvos_atacados
             FROM comentarios
-            WHERE categoria_ia = 'ODIO'
+            WHERE categoria_ia IN {hate_cats}
             GROUP BY autor_username
             ORDER BY total_ataques DESC
             LIMIT {limit}

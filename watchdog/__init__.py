@@ -177,7 +177,7 @@ async def get_top_attackers():
     try:
         from workers.ai.sa_consulta_banco import SaConsultaBanco
         sa = SaConsultaBanco()
-        data = await sa.get_top_attackers(limit=5)
+        data = await sa.get_top_attackers(limit=10) # v93.3: Aumentado de 5 para 10
         await sa.close()
         return {"attackers": data}
     except Exception as e:
