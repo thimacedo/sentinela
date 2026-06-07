@@ -18,8 +18,15 @@ class IntelligenceService:
     """
 
     def __init__(self, scraper: Optional[InstagramScraperV2] = None):
-        # Reutiliza o scraper se fornecido, senão cria um local
-        self.scraper = scraper or InstagramScraperV2(headless=True)
+        # Reutiliza o scraper se fornecido, senão cria um local (Lazy Load v90.6)
+        self._scraper = scraper
+
+    @property
+    def scraper(self) -> InstagramScraperV2:
+        if self._scraper is None:
+            from core.instagram_scraper_v2 import InstagramScraperV2
+            self._scraper = InstagramScraperV2(headless=True)
+        return self._scraper
 
     async def research_and_validate(self, username: str) -> Optional[Dict[str, Any]]:
         """

@@ -527,8 +527,15 @@ def run_web_server():
 # =========================================================
 
 def get_python_executable() -> str:
-    # Se o watchdog foi iniciado por um executável Python válido, usamos ele
-    # para herdar o ambiente correto (como o ambiente virtual gerenciado por 'uv')
+    # v90.6: Prefer uv for all operations to avoid shims/launchers issues
+    try:
+        import subprocess
+        # Verifica se uv está no PATH
+        subprocess.check_output(["uv", "--version"], shell=True, creationflags=0x08000000)
+        return "uv_run_python" # Marcador especial
+    except:
+        pass
+
     if sys.executable and os.path.exists(sys.executable):
         project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         # Se estamos sob uv run ou venv ativo, sys.prefix difere ou detectamos uv pelo executável
@@ -644,6 +651,36 @@ def heal_runtime_error(reason: str) -> str:
         
     return "restart"
 
+# --- MARITACA RESURRECTOR (v90.6) ---
+def maritaca_resurrector_loop():
+    """Verifica periodicamente se a Maritaca recuperou saldo e desperta o runner."""
+    while True:
+        try:
+            key = os.getenv("MARITACA_API_KEY", "").strip()
+            if key and "dummy" not in key.lower():
+                import httpx
+                resp = httpx.get(
+                    "https://chat.maritaca.ai/api/info/credits",
+                    headers={"Authorization": f"Bearer {key}"},
+                    timeout=10.0
+                )
+                if resp.status_code == 200:
+                    data = resp.json()
+                    credits = data.get("credits", 0.0)
+                    if credits > 0.0:
+                        state.add_log("info", f"[Resurrector] 🔔 Saldo Maritaca detectado: R$ {credits:.2f}. Despertando IA...")
+                        # Se o saldo voltou, precisamos forçar o runner a recarregar o AIService
+                        requests.post("http://localhost:8001/api/server/restart", timeout=5.0)
+                        # Espera 4 horas antes de checar novamente se o saldo ainda está lá (evita loops se o restart falhar)
+                        time.sleep(14400)
+                        continue
+        except Exception as e:
+            # Silencioso para não poluir logs se houver erro de rede intermitente
+            pass
+        
+        # Checa a cada 1 hora
+        time.sleep(3600)
+
 def guard():
     from core.guard_locker import GuardLocker
     from core.process_cleaner import cleanup_orphans
@@ -699,10 +736,17 @@ def guard():
             ENV_WITH_WATCHDOG["PYTHONUNBUFFERED"] = "1"
 
             project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+            # v90.6: Seletor de comando para evitar shims zumbis
+            if python_exe == "uv_run_python":
+                full_cmd = ["uv", "run", "python", "-u", SERVER_SCRIPT]
+            else:
+                full_cmd = [python_exe, "-u", SERVER_SCRIPT]
+
             # Inicia o script principal sem abrir janela de console (Windows)
             creationflags = 0x08000000  # CREATE_NO_WINDOW
             process = subprocess.Popen(
-                [python_exe, "-u", SERVER_SCRIPT],
+                full_cmd,
                 env=ENV_WITH_WATCHDOG,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
@@ -873,6 +917,9 @@ if __name__ == "__main__":
 
     web_thread = Thread(target=run_web_server, daemon=True)
     web_thread.start()
+
+    resurrector_thread = Thread(target=maritaca_resurrector_loop, daemon=True)
+    resurrector_thread.start()
     
     # 🤖 INICIALIZAÇÃO DO DATASETTE EXPLORADOR SQL (PASA v50.1 - Porta 8002)
     db_file = os.path.join(PROJECT_ROOT, "data", "sentinela_data.db")

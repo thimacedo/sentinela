@@ -180,42 +180,46 @@ def setup_signal_handlers(
 async def main() -> None:
     logger.info("[main_runner] Sentinela iniciando...")
 
-    # 🧹 Faxina de processos órfãos de navegadores no boot
     try:
-        from core.process_cleaner import cleanup_orphans
-        cleanup_orphans()
+        # 🧹 Faxina de processos órfãos de navegadores no boot
+        try:
+            from core.process_cleaner import cleanup_orphans
+            cleanup_orphans()
+        except Exception as e:
+            logger.warning(f"[main_runner] Falha ao executar cleanup_orphans no boot: {e}")
+
+        orch = build_orchestrator()
+        # Injeta o evento de shutdown no orquestrador
+        orch.shutdown_event = shutdown_event
+
+        loop = asyncio.get_running_loop()
+        setup_signal_handlers(orch, loop)
+
+        # 🤖 ATIVAÇÃO DO AUTOPILOT L3 (PASA v70.0)
+        asyncio.create_task(autopilot.pulse())
+
+        # 🛡️ CONTROLE REMOTO E HEARTBEAT (PASA v80.0)
+        cloud_listener = CloudListener(source="local")
+        asyncio.create_task(cloud_listener.start())
+        logger.info("[main_runner] 🛡️ CloudListener ativado (heartbeat + controle remoto).")
+
+        # 💡 LOOP DE FEEDBACK DO AI ADVISOR (PASA v80.0)
+        suggestion_consumer = WkAplicaSugestoes(orchestrator=orch)
+        asyncio.create_task(suggestion_consumer.start())
+        logger.info("[main_runner] 💡 WkAplicaSugestoes ativado (aplicação automática de sugestões).")
+
+        if not orch.worker_ids:
+            logger.warning(
+                "[main_runner] Nenhum worker ativo. "
+                "Mantendo processo vivo para evitar restart loop do Watchdog."
+            )
+            while True:
+                await asyncio.sleep(300)
+
+        await orch.run_all()
     except Exception as e:
-        logger.warning(f"[main_runner] Falha ao executar cleanup_orphans no boot: {e}")
-
-    orch = build_orchestrator()
-    # Injeta o evento de shutdown no orquestrador
-    orch.shutdown_event = shutdown_event
-
-    loop = asyncio.get_running_loop()
-    setup_signal_handlers(orch, loop)
-
-    # 🤖 ATIVAÇÃO DO AUTOPILOT L3 (PASA v70.0)
-    asyncio.create_task(autopilot.pulse())
-
-    # 🛡️ CONTROLE REMOTO E HEARTBEAT (PASA v80.0)
-    cloud_listener = CloudListener(source="local")
-    asyncio.create_task(cloud_listener.start())
-    logger.info("[main_runner] 🛡️ CloudListener ativado (heartbeat + controle remoto).")
-
-    # 💡 LOOP DE FEEDBACK DO AI ADVISOR (PASA v80.0)
-    suggestion_consumer = WkAplicaSugestoes(orchestrator=orch)
-    asyncio.create_task(suggestion_consumer.start())
-    logger.info("[main_runner] 💡 WkAplicaSugestoes ativado (aplicação automática de sugestões).")
-
-    if not orch.worker_ids:
-        logger.warning(
-            "[main_runner] Nenhum worker ativo. "
-            "Mantendo processo vivo para evitar restart loop do Watchdog."
-        )
-        while True:
-            await asyncio.sleep(300)
-
-    await orch.run_all()
+        logger.critical(f"💥 [FATAL] Erro não tratado no main_runner: {e}", exc_info=True)
+        raise e
 
     logger.info("[main_runner] Encerrado.")
 
