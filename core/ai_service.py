@@ -119,6 +119,7 @@ class AIService:
 
         self.providers = [
             {"name": "ollama", "client": self.ollama_client, "model": os.getenv("OLLAMA_MODEL", "qwen2.5-coder:3b"), "timeout": 120.0, "cooldown_until": 0.0, "is_async_openai": True},
+            {"name": "google_gemini", "client": None, "model": "gemini-2.5-flash", "timeout": 45.0, "cooldown_until": 0.0, "is_async_openai": False}, # v92.7: Promovido a primário
             {"name": "mistral", "client": self.mistral_client, "model": finetuned_model, "timeout": 30.0, "cooldown_until": 0.0, "is_async_openai": True},
         ]
 
