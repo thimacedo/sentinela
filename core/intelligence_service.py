@@ -146,12 +146,16 @@ class IntelligenceService:
                 "quality_confidence": 1.0
             }
 
-        # 2. Taxonomia Fechada
+        # 2. Taxonomia Fechada (PASA v94.0)
         TAXONOMIA_CARGOS_VALIDOS = [
-            "Presidente", "Vice-Presidente", "Governador", "Vice-Governador", 
-            "Senador", "Deputado Federal", "Deputado Estadual", "Prefeito", "Vereador",
-            "Ministro STF", "Ministro", "Influenciador Político", "Institucional", 
-            "Pré-candidato", "Nacional", "Ex-Prefeito", "Jornalista"
+            "Presidente", "Presidenta", "Vice-Presidente", "Vice-Presidenta",
+            "Governador", "Governadora", "Vice-Governador", "Vice-Governadora",
+            "Senador", "Senadora", "Deputado Federal", "Deputada Federal",
+            "Deputado Estadual", "Deputada Estadual", "Prefeito", "Prefeita",
+            "Vereador", "Vereadora", "Ministro STF", "Ministra STF",
+            "Ministro", "Ministra", "Influenciador Político", "Influenciadora Política",
+            "Institucional", "Pré-candidato", "Pré-candidata", "Nacional",
+            "Ex-Prefeito", "Ex-Prefeita", "Jornalista"
         ]
 
         prompt = f"""
@@ -162,10 +166,12 @@ class IntelligenceService:
         OFICIAL={json.dumps(official_data)}
 
         REGRAS ESTRITAS DE SANITIZAÇÃO:
-        1. O campo "cargo" DEVE ser estritamente um destes: {TAXONOMIA_CARGOS_VALIDOS}
+        1. O campo "cargo" DEVE ser estritamente um destes da lista: {TAXONOMIA_CARGOS_VALIDOS}
         2. O campo "sexo" DEVE ser apenas "M" (Masculino), "F" (Feminino) ou "NI" (Não identificado).
-        3. Se não houver certeza absoluta do cargo atual, use "Influenciador Político".
-        4. O username é o dono da conta. Não confunda com apoiadores.
+        3. Se o sexo for "F", utilize obrigatoriamente a versão feminina do cargo (ex: "Deputada Federal", "Senadora", "Governadora", "Vereadora", "Ministra", "Influenciadora Política", "Pré-candidata").
+        4. Se o sexo for "M", utilize a versão masculina correspondente.
+        5. Se não houver certeza absoluta do cargo atual, use "Influenciador Político" (ou "Influenciadora Política" se o sexo for "F").
+        6. O username é o dono da conta. Não confunda com apoiadores.
 
         Retorne JSON:
         {{

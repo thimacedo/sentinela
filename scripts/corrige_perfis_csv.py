@@ -2,6 +2,10 @@ import sys
 import os
 import asyncio
 
+# Corrige encoding de saída no Windows
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
 # Garante o path para imports locais
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -10,7 +14,7 @@ from core.db import db_client
 
 async def fix_database():
     print("==================================================")
-    print("  SANITIZAÇÃO DETERMINÍSTICA DE PERFIS (PASA v93.6) ")
+    print("  SANITIZAÇÃO DETERMINÍSTICA DE PERFIS (PASA v94.0) ")
     print("==================================================")
     
     atualizados = 0

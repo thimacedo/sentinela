@@ -2,13 +2,9 @@ import csv
 import os
 from typing import Optional, Dict
 
-# Mapeamento de sufixos para inferência determinística de gênero (sem IA)
-FEMININE_SUFFIXES = ("a", "e", "í", "is", "nha", "ela", "ana", "ia")
-MASCULINE_SUFFIXES = ("o", "r", "s", "n", "l", "der", "el", "ão", "us")
-
 class GroundTruthDB:
     """
-    Camada de Sanitização Determinística (PASA v93.6)
+    Camada de Sanitização Determinística (PASA v94.0)
     Elimina alucinações da malha de IA forçando dados reais baseados
     em um CSV de verdades absolutas ('alvos_sanitizacao.csv').
     """
@@ -24,55 +20,25 @@ class GroundTruthDB:
             return
 
         with open(csv_path, 'r', encoding='utf-8') as f:
-            # Pula headers e separa por '|' ou ';'
-            # O arquivo original pode usar delimitador de ; interno à primeira coluna se exportado incorretamente do Excel
-            reader = csv.reader(f, delimiter='|')
+            reader = csv.DictReader(f, delimiter=';')
             for row in reader:
-                if not row: continue
-                # Pula header identificando se a primeira coluna não é id numérico/UUID ou contem 'id'
-                if len(row) < 4 and ';' in row[0]:
-                    row_data = row[0].split(';')
-                else:
-                    row_data = row
-                    
-                if len(row_data) < 4 or 'id' in str(row_data[0]).lower():
-                    continue 
-                
+                if not row or not row.get("username"):
+                    continue
                 try:
-                    # Formato do CSV: id;nome_completo;cargo;username;status...
-                    username = str(row_data[3]).strip().lower().replace("@", "")
-                    nome_completo = str(row_data[1]).strip()
-                    cargo = str(row_data[2]).strip()
+                    username = str(row["username"]).strip().lower().replace("@", "")
+                    nome_completo = str(row["nome_completo"]).strip()
+                    cargo = str(row["cargo"]).strip()
+                    sexo = str(row.get("sexo", "NI")).strip().upper()
                     
                     self._db[username] = {
                         "nome_completo": nome_completo,
                         "cargo": cargo,
-                        "sexo": self._inferir_genero_deterministico(nome_completo),
+                        "sexo": sexo,
                         "validado": True
                     }
                 except Exception:
                     continue
         print(f"[GroundTruth] Carregadas {len(self._db)} verdades absolutas.")
-
-    def _inferir_genero_deterministico(self, nome: str) -> str:
-        """Regras simples baseadas no nome para evitar que a IA erre o gênero."""
-        if not nome: return "NI"
-        partes = nome.split(' ')
-        nome_limpo = partes[0] if partes else ""
-        if not nome_limpo: return "NI"
-        
-        # Exceções comuns
-        exceptions = {
-            "andre": "M", "felipe": "M", "jose": "M", "lucas": "M", 
-            "carlos": "M", "duda": "F", "luis": "M", "marcos": "M"
-        }
-        lower_nome = nome_limpo.lower()
-        if lower_nome in exceptions:
-            return exceptions[lower_nome]
-
-        if lower_nome.endswith(FEMININE_SUFFIXES): return "F"
-        if lower_nome.endswith(MASCULINE_SUFFIXES): return "M"
-        return "NI"
 
     def get_truth(self, username: str) -> Optional[dict]:
         """Retorna a verdade absoluta para um username se ele existir no banco local."""
