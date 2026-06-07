@@ -485,32 +485,53 @@ async def start_service_endpoint(name: str):
 @app.get("/api/ai/details/{name}")
 async def get_ai_details(name: str):
     """Retorna detalhes de um provedor para gestão no dashboard."""
+    # v92.6: Mapeamento expandido e normalização de variantes (fallback_*)
     env_vars = {
+        "maritaca": "MARITACA_API_KEY",
         "google_gemini": "GEMINI_API_KEY",
         "groq_llama3": "GROQ_API_KEY",
         "mistral": "MISTRAL_API_KEY",
-        "huggingface": "HF_TOKEN"
+        "deepseek_chat": "DEEPSEEK_API_KEY",
+        "openrouter": "OPENROUTER_API_KEY",
+        "zhipu_glm4": "ZHIPU_API_KEY",
+        "huggingface": "HF_TOKEN",
+        "cohere": "COHERE_API_KEY",
+        "anthropic": "ANTHROPIC_API_KEY",
+        "voyant": "VOYANT_BASE_URL"
     }
     
     links = {
+        "maritaca": "https://chat.maritaca.ai/keys",
         "google_gemini": "https://aistudio.google.com/app/apikey",
         "groq_llama3": "https://console.groq.com/keys",
         "mistral": "https://console.mistral.ai/api-keys/",
-        "huggingface": "https://huggingface.co/settings/tokens"
+        "deepseek_chat": "https://platform.deepseek.com/api_keys",
+        "openrouter": "https://openrouter.ai/keys",
+        "zhipu_glm4": "https://open.bigmodel.cn/usercenter/apikeys",
+        "huggingface": "https://huggingface.co/settings/tokens",
+        "cohere": "https://dashboard.cohere.com/api-keys",
+        "anthropic": "https://console.anthropic.com/settings/keys",
+        "voyant": "https://voyant-tools.org/"
     }
 
-    env_var = env_vars.get(name)
+    # Normalização: remove prefixos comuns usados internamente (fallback_, sa_, etc)
+    clean_name = name.lower()
+    for prefix in ["fallback_", "sa_", "wk_"]:
+        if clean_name.startswith(prefix):
+            clean_name = clean_name[len(prefix):]
+
+    env_var = env_vars.get(clean_name)
     if not env_var:
-        return {"error": "Provedor desconhecido"}
+        return {"error": f"Provedor '{name}' (identificado como '{clean_name}') desconhecido no mapeamento do Watchdog."}
         
     current_key = os.getenv(env_var, "")
     
     return {
-        "name": name,
+        "name": clean_name,
         "env_var": env_var,
         "key": current_key,
-        "auth_url": links.get(name, "#"),
-        "instructions": f"Para {name}, obtenha uma chave no link acima e cole-a no campo abaixo. O sistema testará a conexão imediatamente."
+        "auth_url": links.get(clean_name, "#"),
+        "instructions": f"Para {clean_name}, obtenha uma chave no link acima e cole-a no campo abaixo. O sistema testará a conexão imediatamente."
     }
 
 @app.post("/api/ai/update_key")
