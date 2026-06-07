@@ -78,7 +78,7 @@ class SaConsultaBanco:
                 ROUND(CAST(SUM(CASE WHEN categoria_ia IN {hate_cats} THEN 1 ELSE 0 END) AS REAL) / COUNT(*) * 100, 1) as taxa_odio_percent
             FROM comentarios
             GROUP BY candidato_id
-            ORDER BY total_critico DESC
+            ORDER BY taxa_odio_percent DESC, total_critico DESC
         """
         return await self.query(sql)
 
