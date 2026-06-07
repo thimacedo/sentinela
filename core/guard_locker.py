@@ -19,65 +19,70 @@ class GuardLocker:
         self.lock_file = os.path.join(self.lock_dir, f"{name}.lock")
         os.makedirs(self.lock_dir, exist_ok=True)
 
+    def _cleanup_zombies(self):
+        """Mata processos python zumbis que ficaram presos (Anti-Shim v90.7)."""
+        if os.name != 'nt': return
+        try:
+            current_pid = os.getpid()
+            script_name = f"{self.name}.py" if not self.name.endswith(".py") else self.name
+            
+            # Busca processos python.exe
+            cmd = 'wmic process where "name=\'python.exe\'" get processid,commandline'
+            output = subprocess.check_output(cmd, shell=True, creationflags=0x08000000).decode('utf-8', errors='ignore')
+            
+            pids_to_kill = []
+            for line in output.splitlines():
+                if not line.strip(): continue
+                # Filtra pelo nome do script no commandline e exclui o próprio processo
+                if script_name in line:
+                    parts = line.strip().split()
+                    if parts and parts[-1].isdigit():
+                        pid = int(parts[-1])
+                        if pid != current_pid:
+                            pids_to_kill.append(pid)
+            
+            for pid in pids_to_kill:
+                logger.warning(f"🧹 [{self.name}] Faxina de zumbi órfão detectado: PID {pid}")
+                self._terminate(pid)
+        except Exception as e:
+            logger.debug(f"Falha na faxina de zumbis: {e}")
+
     def acquire(self, kill_existing: bool = True) -> bool:
-        """
-        Tenta adquirir o lock. Se kill_existing for True, mata o processo antigo.
-        Também limpa zumbis com o mesmo nome de script (Anti-Shim v90.6).
-        """
+        """Tenta adquirir o lock de instância única."""
         current_pid = os.getpid()
         
-        # 1. Limpeza agressiva de zumbis (baseada em CommandLine)
         if kill_existing:
             self._cleanup_zombies()
 
         if os.path.exists(self.lock_file):
             try:
                 with open(self.lock_file, "r") as f:
-                    old_pid = int(f.read().strip())
+                    content = f.read().strip()
+                    old_pid = int(content) if content.isdigit() else None
                 
                 if old_pid == current_pid:
-                    return True # Já é o dono
+                    return True
                 
-                if self._is_running(old_pid):
+                if old_pid and self._is_running(old_pid):
                     if kill_existing:
-                        logger.warning(f"🚨 [{self.name}] Instância lock detectada (PID {old_pid}). Encerrando...")
+                        logger.warning(f"🚨 [{self.name}] Lock ocupado (PID {old_pid}). Forçando liberação...")
                         self._terminate(old_pid)
-                        time.sleep(1.0)
+                        time.sleep(1.5) # Tempo extra para o SO
                     else:
-                        logger.error(f"❌ [{self.name}] Outra instância já está rodando (PID {old_pid}). Abortando.")
+                        logger.error(f"❌ [{self.name}] Bloqueado: Outra instância ativa (PID {old_pid}).")
                         return False
-            except (ValueError, OSError, Exception):
+            except Exception:
                 pass 
 
         try:
+            # Garante diretório
+            os.makedirs(os.path.dirname(self.lock_file), exist_ok=True)
             with open(self.lock_file, "w") as f:
                 f.write(str(current_pid))
             return True
         except Exception as e:
-            logger.error(f"❌ [{self.name}] Falha ao gravar arquivo de lock: {e}")
+            logger.error(f"❌ [{self.name}] Erro fatal ao gravar lock: {e}")
             return False
-
-    def _cleanup_zombies(self):
-        """Mata qualquer processo python que tenha o nome do script no cmdline."""
-        if os.name != 'nt': return
-        try:
-            # v90.6: Usa WMIC para encontrar processos órfãos que o launcher (shim) deixou pra trás
-            # Filtra por python.exe e pelo nome do script no command line
-            script_name = f"{self.name}.py" if not self.name.endswith(".py") else self.name
-            cmd = f'wmic process where "name=\'python.exe\' and commandline like \'%{script_name}%\'" get processid'
-            output = subprocess.check_output(cmd, shell=True, creationflags=0x08000000).decode('utf-8', errors='ignore')
-            
-            pids = []
-            for line in output.splitlines():
-                line = line.strip()
-                if line.isdigit() and int(line) != os.getpid():
-                    pids.append(int(line))
-            
-            for pid in pids:
-                logger.warning(f"🧹 [{self.name}] Limpando processo zumbi órfão PID {pid}")
-                self._terminate(pid)
-        except Exception as e:
-            logger.debug(f"Falha ao limpar zumbis: {e}")
 
     def release(self):
         """Libera o lock deletando o arquivo."""

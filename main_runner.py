@@ -11,6 +11,7 @@ if PROJECT_ROOT not in sys.path:
 import asyncio
 import logging
 import signal
+from datetime import datetime
 
 if sys.platform.startswith("win"):
     try:
@@ -179,6 +180,11 @@ def setup_signal_handlers(
 
 async def main() -> None:
     logger.info("[main_runner] Sentinela iniciando...")
+    
+    # v90.7: Log de emergência para diagnosticar crash de boot
+    with open("boot_debug.log", "a", encoding="utf-8") as f:
+        f.write(f"\n[{datetime.now()}] Boot iniciado (PID {os.getpid()})\n")
+        f.flush()
 
     try:
         # 🧹 Faxina de processos órfãos de navegadores no boot

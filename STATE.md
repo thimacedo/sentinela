@@ -173,10 +173,29 @@ PGMQ deve aparecer apenas como hipótese futura.
 - **Visibilidade de IA**: Ativado o nível de log `INFO` para `core.ai_service` e `worker.ai_processor`, permitindo o acompanhamento detalhado da vazão de classificação no terminal e dashboard.
 - **Início do Ciclo de 24h**: Iniciado monitoramento contínuo de 24h para validação de estresse. Vazão inicial estabilizada em ~25 classificações/minuto com suporte total da malha Maritaca Sabia-4.
 
-## Próximos passos OBRIGATÓRIOS
+## Estabilização v90.7 e Gestão de IA (2026-06-06)
 
-1. **Purga de Sugestões**: Limpar a tabela `worker_suggestions` após a renovação, pois as sugestões atuais são sintomas do colapso de sessão.
-2. **Calibragem de Backoff**: Revisar o tempo de suspensão de workers em caso de 429 para evitar queima desnecessária de tokens de auditoria.
+### 1. Robustez do GuardLocker (Anti-Shim)
+- Refatoração profunda do `core/guard_locker.py` para utilizar `wmic` no Windows, permitindo a limpeza agressiva de "shim processes" (processos órfãos de interpretadores Python) que ficavam presos no boot.
+- Implementação de `CREATE_NO_WINDOW` em todas as chamadas de subprocesso do locker para garantir operação 100% invisível.
+
+### 2. Gestão de IA via Dashboard
+- Implementada interface visual (`local_dashboard.html`) para gestão de chaves de API.
+- Criados endpoints no Watchdog (`/api/ai/details` e `/api/ai/update_key`) que permitem atualizar o arquivo `.env` e testar a conectividade dos provedores em tempo real sem acesso direto ao terminal.
+- Adicionado alerta de "Malha Degradada" no dashboard quando provedores cloud estão sob rate limit ou bloqueio.
+
+### 3. Calibragem de Resiliência de IA
+- Aumentado o backoff de erro 429 (Rate Limit) de 60s para **300s (5 minutos)** em `core/ai_service.py`. Isso evita a queima desnecessária de tokens de auditoria e respeita melhor os limites de provedores gratuitos/tiers básicos.
+
+### 4. Manutenção de Banco de Dados
+- Executada purga total da tabela `worker_suggestions` (1399 registros removidos). As sugestões acumuladas eram sintomas de colapsos de sessão anteriores e geravam ruído analítico desnecessário para o SRE.
+
+### 5. Diagnóstico de Boot
+- Adicionado log de emergência `boot_debug.log` no `main_runner.py` para capturar falhas silenciosas antes da inicialização completa do logger.
+
+## Próximos passos OBRIGATÓRIOS
+1. **Rotação de Proxies**: Finalizar a integração real de proxies residenciais no Scraper V2 (AGENTS_SYNC.md).
+2. **Checkpoint por Post**: Implementar persistência intermediária para evitar perda de progresso em coletas de perfis grandes.
 
 ## Últimas Operações (YOLO Test)
 

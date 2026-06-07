@@ -262,8 +262,8 @@ class AIService:
             return True
             
         if status_code == 429:
-            provider["cooldown_until"] = time.time() + 60.0
-            penalty_desc = "60s (Rate Limit 429)"
+            provider["cooldown_until"] = time.time() + 300.0
+            penalty_desc = "300s (Rate Limit 429)"
         else:
             provider["cooldown_until"] = time.time() + 30.0
             penalty_desc = f"30s (Erro {status_code or 'desconhecido'})"

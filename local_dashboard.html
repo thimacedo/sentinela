@@ -270,6 +270,9 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoYW1lamtsZHp4YmVpYnFlcXBrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjQ4ODEyNSwiZXhwIjoyMDkyMDY0MTI1fQ.GfvAI7rV8isgdhVeJp4mOUscWpdOqOuBoURGm82VdtY';
         const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        let isFetchingData = false;
+        let currentModalAI = null;
+
         function withTimeout(promise, ms = 8000) {
             return Promise.race([
                 promise,
@@ -669,30 +672,61 @@
                             pingPulse.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75";
                         }
                         
-                        document.getElementById('kpi-restars').innerText = `${m.cycle || 0} / ${m.restarts || 0}`;
-                        if(m.ai_services) {
-                            const sortedServices = Object.entries(m.ai_services).sort(([a], [b]) => {
-                                const aLocal = (a === 'ollama');
-                                const bLocal = (b === 'ollama');
-                                if (aLocal && !bLocal) return -1;
-                                if (!aLocal && bLocal) return 1;
+                        // 4. Inteligência Analítica & Malha Degradada
+                        const degradedLabel = document.getElementById('ai-degraded-label');
+                        if (m.ai_services) {
+                            const blockedCount = Object.values(m.ai_services).filter(v => v === 'BLOQUEADO' || v === 'REMOVIDO').length;
+                            if (blockedCount > 0) {
+                                degradedLabel?.classList.remove('hidden');
+                                if(degradedLabel) degradedLabel.innerText = `⚠️ MALHA DEGRADADA (${blockedCount} OFF)`;
+                            } else {
+                                degradedLabel?.classList.add('hidden');
+                            }
+
+                            const sortedServices = Object.entries(m.ai_services).sort(([a],[b]) => {
+                                if (a === 'ollama') return -1;
+                                if (b === 'ollama') return 1;
                                 return a.localeCompare(b);
                             });
-                            document.getElementById('kpi-ai-services').innerHTML = sortedServices.map(([s,st]) => {
-                                const label = s === 'ollama' ? 'ollama (local)' : `${s} (cloud)`;
-                                const statusMap = {
-                                    'OK':         { dot: 'bg-emerald-500 shadow-emerald-500/40',          text: 'text-emerald-400', badge: '' },
-                                    'COOLDOWN':   { dot: 'bg-amber-400 shadow-amber-400/40',              text: 'text-amber-400',   badge: 'COOLDOWN' },
-                                    'RATE_LIMIT': { dot: 'bg-amber-500 animate-pulse shadow-amber-500/40', text: 'text-amber-500',  badge: '429' },
-                                    'BLOQUEADO':  { dot: 'bg-rose-500 animate-pulse shadow-rose-500/40',  text: 'text-rose-400',   badge: 'BLOQUEADO' },
-                                    'REMOVIDO':   { dot: 'bg-rose-700 shadow-rose-700/40',                text: 'text-rose-600',   badge: 'REMOVIDO' },
-                                    'DESATIVADO': { dot: 'bg-slate-600 shadow-slate-600/40',              text: 'text-slate-500',  badge: '' },
-                                    'DOWN':       { dot: 'bg-rose-500 animate-pulse shadow-rose-500/40',  text: 'text-rose-400',   badge: 'DOWN' },
-                                };
-                                const style = statusMap[st] || statusMap['DOWN'];
-                                const badgeHtml = style.badge ? `<span class="ml-auto text-[9px] font-black px-1.5 py-0.5 rounded ${style.text} border border-current/30 bg-current/5">${style.badge}</span>` : '';
-                                const startBtn = (st === 'DOWN' && s === 'ollama') ? `<button onclick="startAIService('${s}')" class="ml-auto text-[10px] bg-rose-500/10 border border-rose-500/40 text-rose-400 px-2.5 py-1 rounded-md font-black hover:bg-rose-500/20 active:scale-95 transition-all shadow-md">START</button>` : '';
-                                return `<div class="flex items-center gap-3 w-full bg-slate-900/50 p-2 rounded-lg border border-slate-800/60"><span class="w-2.5 h-2.5 rounded-full shadow-sm ${style.dot}"></span><span class="text-[11px] font-mono font-bold text-slate-300 uppercase tracking-widest">${label}</span>${badgeHtml}${startBtn}</div>`;
+                            
+                            const aiServicesContainer = document.getElementById('kpi-ai-services');
+                            if (aiServicesContainer) {
+                                aiServicesContainer.innerHTML = sortedServices.map(([s,st]) => {
+                                    const label = s === 'ollama' ? 'ollama (local)' : `${s} (cloud)`;
+                                    const statusMap = {
+                                        'OK':         { dot: 'bg-emerald-500 shadow-emerald-500/40',          text: 'text-emerald-400', badge: '' },
+                                        'COOLDOWN':   { dot: 'bg-amber-400 shadow-amber-400/40',              text: 'text-amber-400',   badge: 'COOLDOWN' },
+                                        'RATE_LIMIT': { dot: 'bg-amber-500 animate-pulse shadow-amber-500/40', text: 'text-amber-500',  badge: '429' },
+                                        'BLOQUEADO':  { dot: 'bg-rose-500 animate-pulse shadow-rose-500/40',  text: 'text-rose-400',   badge: 'BLOQUEADO' },
+                                        'REMOVIDO':   { dot: 'bg-rose-700 shadow-rose-700/40',                text: 'text-rose-600',   badge: 'REMOVIDO' },
+                                        'DESATIVADO': { dot: 'bg-slate-600 shadow-slate-600/40',              text: 'text-slate-500',  badge: '' },
+                                        'DOWN':       { dot: 'bg-rose-500 animate-pulse shadow-rose-500/40',  text: 'text-rose-400',   badge: 'DOWN' },
+                                    };
+                                    const style = statusMap[st] || statusMap['DOWN'];
+                                    const badgeHtml = style.badge ? `<span class="ml-auto text-[9px] font-black px-1.5 py-0.5 rounded ${style.text} border border-current/30 bg-current/5">${style.badge}</span>` : '';
+                                    const startBtn = (st === 'DOWN' && s === 'ollama') ? `<button onclick="event.stopPropagation(); startAIService('${s}')" class="ml-auto text-[10px] bg-rose-500/10 border border-rose-500/40 text-rose-400 px-2.5 py-1 rounded-md font-black hover:bg-rose-500/20 active:scale-95 transition-all shadow-md">START</button>` : '';
+                                    
+                                    // v90.7: IA clicável para detalhes, exceto ollama que tem START
+                                    const cursorClass = s !== 'ollama' ? 'cursor-pointer hover:bg-slate-800/80 active:scale-[0.98]' : '';
+                                    const clickAttr = s !== 'ollama' ? `onclick="openAIModal('${s}')"` : '';
+                                    
+                                    return `<div ${clickAttr} class="flex items-center gap-3 w-full bg-slate-900/50 p-2 rounded-lg border border-slate-800/60 transition-all ${cursorClass}"><span class="w-2.5 h-2.5 rounded-full shadow-sm ${style.dot}"></span><span class="text-[11px] font-mono font-bold text-slate-300 uppercase tracking-widest">${label}</span>${badgeHtml}${startBtn}</div>`;
+                                }).join('');
+                            }
+                        }
+
+                        // 5. Nós de Coleta
+                        const igContainer = document.getElementById('kpi-instagram');
+                        if (m.instagram_accounts && igContainer) {
+                            igContainer.innerHTML = Object.entries(m.instagram_accounts).map(([acc, st]) => {
+                                const isOk = st === 'OK';
+                                return `
+                                    <div class="flex items-center gap-3 w-full bg-slate-900/50 p-2 rounded-lg border border-slate-800/60">
+                                        <span class="w-2 h-2 rounded-full ${isOk ? 'bg-emerald-500 shadow-emerald-500/40' : 'bg-rose-500 animate-pulse shadow-rose-500/40'}"></span>
+                                        <span class="text-[10px] font-bold text-slate-300 uppercase tracking-wider">${acc}</span>
+                                        <span class="ml-auto text-[9px] font-black ${isOk ? 'text-emerald-400' : 'text-rose-400'}">${st}</span>
+                                    </div>
+                                `;
                             }).join('');
                         }
                     }
@@ -715,8 +749,94 @@
             } catch(e) {
                 console.error("General fetch data error:", e);
             } finally {
-                isFetchingData = false;
+                window.isFetchingData = false;
             }
+        }
+
+        // --- AI Management Modal Logic v90.7 ---
+        let currentModalAI = null;
+
+        async function openAIModal(name) {
+            currentModalAI = name;
+            const modal = document.getElementById('ai-modal');
+            const content = document.getElementById('ai-modal-content');
+            
+            try {
+                const r = await fetch(API_BASE + `/api/ai/details/${name}`);
+                const data = await r.json();
+                
+                document.getElementById('modal-ai-name').innerText = data.name;
+                document.getElementById('modal-env-var').innerText = data.env_var;
+                document.getElementById('modal-api-key').value = data.key;
+                document.getElementById('modal-instructions').innerText = data.instructions;
+                document.getElementById('modal-auth-link').href = data.auth_url;
+                
+                // Reset feedback
+                const feedback = document.getElementById('modal-status-feedback');
+                feedback.classList.add('hidden');
+                
+                modal.classList.remove('hidden');
+                setTimeout(() => modal.classList.remove('opacity-0'), 10);
+                setTimeout(() => content.classList.remove('scale-95'), 10);
+            } catch(e) {
+                alert("Erro ao buscar detalhes da IA.");
+            }
+        }
+
+        function closeAIModal() {
+            const modal = document.getElementById('ai-modal');
+            const content = document.getElementById('ai-modal-content');
+            modal.classList.add('opacity-0');
+            content.classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function openNewAIModal() {
+            alert("Para cadastrar nova IA, configure o provedor no core/ai_service.py e adicione a chave no .env. Interface visual de registro em breve.");
+        }
+
+        async function handleUpdateKey() {
+            if(!currentModalAI) return;
+            
+            const btn = document.getElementById('btn-update-key');
+            const feedback = document.getElementById('modal-status-feedback');
+            const key = document.getElementById('modal-api-key').value;
+            const env_var = document.getElementById('modal-env-var').innerText;
+            
+            btn.disabled = true;
+            btn.innerText = "VALIDANDO CHAVE...";
+            
+            try {
+                const r = await fetch(API_BASE + '/api/ai/update_key', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: currentModalAI, env_var, key })
+                });
+                const res = await r.json();
+                
+                feedback.classList.remove('hidden', 'bg-emerald-500/20', 'text-emerald-400', 'bg-rose-500/20', 'text-rose-400');
+                feedback.innerText = res.message.toUpperCase();
+                
+                if(res.success) {
+                    feedback.classList.add('bg-emerald-500/20', 'text-emerald-400');
+                    setTimeout(closeAIModal, 2000);
+                } else {
+                    feedback.classList.add('bg-rose-500/20', 'text-rose-400');
+                }
+            } catch(e) {
+                feedback.classList.remove('hidden');
+                feedback.classList.add('bg-rose-500/20', 'text-rose-400');
+                feedback.innerText = "ERRO DE CONEXÃO COM O WATCHDOG";
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "ATUALIZAR E TESTAR AGORA";
+                fetchData();
+            }
+        }
+
+        function toggleKeyVisibility() {
+            const input = document.getElementById('modal-api-key');
+            input.type = input.type === 'password' ? 'text' : 'password';
         }
 
 
