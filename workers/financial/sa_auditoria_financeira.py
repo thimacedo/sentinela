@@ -116,7 +116,6 @@ class SaAuditoriaFinanceira:
             "openai": 0.01,
             "anthropic_claude_instant": 0.003,
             "google_gemini": 0.000075,
-            "groq_llama3": 0.0001,
             "zhipu_glm4": 0.0001,
             "cerebras_llama3": 0.00005,
             "eden_ai": 0.001,

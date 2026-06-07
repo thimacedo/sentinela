@@ -1,7 +1,17 @@
 DEFAULT_TIMEOUT = 60.0  # seconds
 
 # Centralized taxonomia de ódio PASA (MCA v2.2)
-HATE_CATEGORIES = ("ODIO_IDENTITARIO", "VIOLENCIA_GENERO", "AMEACA")
+HATE_CATEGORIES = (
+    "ODIO_IDENTITARIO", 
+    "VIOLENCIA_GENERO", 
+    "AMEACA", 
+    "INSULTO_AD_HOMINEM", 
+    "ATAQUE_INSTITUCIONAL", 
+    "DANO_A_IMAGEM",
+    "MISOGINIA_POLITICA",
+    "CAMPANHA_COORDENADA",
+    "NEGATIVO" # Consideramos discurso negativo como parte da massa crítica
+)
 
 STOP_WORDS_PT = {
     "que", "não", "com", "uma", "para", "dos", "das", "nos", "nas",

@@ -448,7 +448,7 @@ async def get_metrics():
         # Fallback: verifica apenas presença das chaves no .env
         ollama_health = _get_health_url(os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"), "http://localhost:11434", "/api/tags")
         ai_status["ollama"] = _service_status(ollama_health)
-        for prov_name, env_var in {"groq": "GROQ_API_KEY", "mistral": "MISTRAL_API_KEY", "gemini": "GEMINI_API_KEY"}.items():
+        for prov_name, env_var in {"mistral": "MISTRAL_API_KEY", "gemini": "GEMINI_API_KEY"}.items():
             val = os.getenv(env_var, "").strip()
             ai_status[prov_name] = "OK" if (val and "dummy" not in val.lower()) else "DESATIVADO"
 
@@ -489,7 +489,6 @@ async def get_ai_details(name: str):
     env_vars = {
         "maritaca": "MARITACA_API_KEY",
         "google_gemini": "GEMINI_API_KEY",
-        "groq_llama3": "GROQ_API_KEY",
         "mistral": "MISTRAL_API_KEY",
         "deepseek_chat": "DEEPSEEK_API_KEY",
         "openrouter": "OPENROUTER_API_KEY",
@@ -503,7 +502,6 @@ async def get_ai_details(name: str):
     links = {
         "maritaca": "https://chat.maritaca.ai/keys",
         "google_gemini": "https://aistudio.google.com/app/apikey",
-        "groq_llama3": "https://console.groq.com/keys",
         "mistral": "https://console.mistral.ai/api-keys/",
         "deepseek_chat": "https://platform.deepseek.com/api_keys",
         "openrouter": "https://openrouter.ai/keys",

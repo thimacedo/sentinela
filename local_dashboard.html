@@ -418,7 +418,7 @@
                 
                 const engineMap = {
                     'LEXICAL': 'Filtro Heurístico', 'FALLBACK_LLM': 'Fallback Cloud', 'SYSTEM_FAILURE': 'Falha do Sistema',
-                    'OLLAMA': 'Ollama (Local)', 'MARITACA': 'Maritaca AI (Cloud)', 'GROQ_LLAMA3': 'Groq (Cloud)',
+                    'OLLAMA': 'Ollama (Local)', 'MARITACA': 'Maritaca AI (Cloud)', 
                     'MISTRAL': 'Mistral (Cloud)', 'DEEPSEEK_CHAT': 'DeepSeek (Cloud)', 'GOOGLE_GEMINI': 'Gemini (Cloud)',
                     'ZHIPU_GLM4': 'Zhipu (Cloud)', 'OPENROUTER': 'OpenRouter (Cloud)'
                 };
@@ -586,7 +586,7 @@
                     { count: pendCount }
                 ] = await withTimeout(Promise.all([
                     db.from('comentarios').select('*', { count:'exact', head:true }),
-                    db.from('comentarios').select('*', { count:'exact', head:true }).in('categoria_ia', ['ODIO_IDENTITARIO', 'VIOLENCIA_GENERO', 'AMEACA']),
+                    db.from('comentarios').select('*', { count:'exact', head:true }).in('categoria_ia', ['ODIO_IDENTITARIO', 'VIOLENCIA_GENERO', 'AMEACA', 'INSULTO_AD_HOMINEM', 'ATAQUE_INSTITUCIONAL', 'DANO_A_IMAGEM', 'MISOGINIA_POLITICA', 'CAMPANHA_COORDENADA', 'NEGATIVO']),
                     db.from('candidatos').select('*',  { count:'exact', head:true }).ilike('status_monitoramento', 'ATIVO'),
                     db.from('candidatos').select('*',  { count:'exact', head:true }).ilike('status_monitoramento', 'PAUSADO'),
                     db.from('candidatos').select('*',  { count:'exact', head:true }).or('status_monitoramento.ilike.EXCLUIDO,status_monitoramento.ilike.DESATIVADO,status_monitoramento.ilike.Inativo'),
