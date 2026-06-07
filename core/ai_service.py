@@ -337,6 +337,8 @@ class AIService:
         return None
 
     async def classify_text(self, text: str, comment_id: str = "N/A", trace_id: str = None, force_cloud: bool = False) -> Dict[str, Any]:
+        self._ensure_clients()
+        
         if not isinstance(text, str):
             text = str(text or "")
         text = text.strip()
