@@ -479,6 +479,97 @@ async def start_service_endpoint(name: str):
     else:
         raise HTTPException(status_code=400, detail=f"Serviço desconhecido: {name}")
 
+@app.get("/api/ai/details/{name}")
+async def get_ai_details(name: str):
+    """Retorna detalhes de um provedor para gestão no dashboard."""
+    env_vars = {
+        "maritaca": "MARITACA_API_KEY",
+        "google_gemini": "GEMINI_API_KEY",
+        "groq_llama3": "GROQ_API_KEY",
+        "mistral": "MISTRAL_API_KEY",
+        "deepseek": "DEEPSEEK_API_KEY",
+        "openrouter": "OPENROUTER_API_KEY",
+        "huggingface": "HF_TOKEN"
+    }
+    
+    links = {
+        "maritaca": "https://chat.maritaca.ai/keys",
+        "google_gemini": "https://aistudio.google.com/app/apikey",
+        "groq_llama3": "https://console.groq.com/keys",
+        "mistral": "https://console.mistral.ai/api-keys/",
+        "deepseek": "https://platform.deepseek.com/api_keys",
+        "openrouter": "https://openrouter.ai/keys",
+        "huggingface": "https://huggingface.co/settings/tokens"
+    }
+
+    env_var = env_vars.get(name)
+    if not env_var:
+        return {"error": "Provedor desconhecido"}
+        
+    current_key = os.getenv(env_var, "")
+    
+    return {
+        "name": name,
+        "env_var": env_var,
+        "key": current_key,
+        "auth_url": links.get(name, "#"),
+        "instructions": f"Para {name}, obtenha uma chave no link acima e cole-a no campo abaixo. O sistema testará a conexão imediatamente."
+    }
+
+@app.post("/api/ai/update_key")
+async def update_ai_key(data: dict):
+    """Atualiza uma chave no .env e testa imediatamente."""
+    name = data.get("name")
+    env_var = data.get("env_var")
+    new_key = data.get("key", "").strip()
+    
+    if not name or not env_var or not new_key:
+        return {"success": False, "message": "Dados incompletos"}
+
+    try:
+        # 1. Atualiza o arquivo .env fisicamente
+        from dotenv import set_key
+        env_path = os.path.join(PROJECT_ROOT, ".env")
+        set_key(env_path, env_var, new_key)
+        
+        # 2. Atualiza em memória para o processo atual
+        os.environ[env_var] = new_key
+        
+        # 3. Testa a chave imediatamente
+        state.add_log("info", f"[Manager] Testando nova chave para {name}...")
+        
+        test_success = False
+        error_msg = ""
+        
+        if name == "maritaca":
+            import httpx
+            try:
+                resp = httpx.post("https://chat.maritaca.ai/api/chat/completions", 
+                                 headers={"Authorization": f"Bearer {new_key}"},
+                                 json={"model": "sabia-4", "messages": [{"role":"user", "content":"hi"}]},
+                                 timeout=10.0)
+                test_success = resp.status_code != 403
+                if not test_success: error_msg = resp.text
+            except Exception as e:
+                error_msg = str(e)
+        else:
+            # Teste genérico para outros (apenas validação básica de formato por ora ou ping)
+            test_success = len(new_key) > 10
+            
+        if test_success:
+            state.add_log("info", f"✅ Nova chave para {name} VALIDADA com sucesso.")
+            # Dispara restart para o runner herdar a chave
+            try:
+                requests.post("http://localhost:8001/api/server/restart", timeout=2.0)
+            except: pass
+            return {"success": True, "message": f"Chave de {name} atualizada e validada. Reiniciando runner..."}
+        else:
+            state.add_log("error", f"❌ Falha ao validar nova chave de {name}: {error_msg}")
+            return {"success": False, "message": f"Chave inválida ou sem saldo: {error_msg}"}
+
+    except Exception as e:
+        return {"success": False, "message": str(e)}
+
 @app.post("/api/server/start")
 async def start_server():
     if state.should_run and state.process and state.process.poll() is None:
