@@ -65,15 +65,24 @@ Contrato oficial:
 
 Workers cíclicos ativos no runtime:
 
-- `InstagramWorker` (coleta estrutural)
-- `AIProcessorWorker` (classificação principal)
-- `TargetResearchWorker` (quando habilitado via `RESEARCHER_MODE`)
+- `WkColetaInstagram` — coleta Instagram com fila atômica (`workers/scrapers/wk_coleta_instagram.py`)
+- `WkClassificaComentarios` — classificador oficial PASA (`workers/processors/wk_classifica_comentarios.py`)
+- `WkPesquisaAlvos` — curadoria de alvos, desabilitado por padrão (`workers/processors/wk_pesquisa_alvos.py`)
+- `WkGeraAlertas` — monitoramento e alertas (`workers/processors/wk_gera_alertas.py`)
+- `WkAnalisaTendencias` — análise de tendências (`workers/analytics/wk_analisa_tendencias.py`)
+- `WkEscaneiaCandidatos` — cadastro de candidatos (`workers/processors/wk_escaneia_candidatos.py`)
+- `WkAplicaSugestoes` — aplicação de sugestões de autocura (`workers/ai/wk_aplica_sugestoes.py`)
+- `WkGeraDossies` — geração de dossiês PDF (`workers/processors/wk_gera_dossies.py`)
 
 Subagentes analíticos (sob demanda / reativos):
 
-- `SaAuditaClassificacoes` (auditoria cruzada)
-- `SaMineracaoRedes` (mineração de redes coordenada)
-- `SaAuditoriaFinanceira` (gestão financeira e de XP)
+- `SaAuditaClassificacoes` — auditoria cruzada anti-alucinação (`workers/ai/sa_audita_classificacoes.py`)
+- `SaMineracaoRedes` — mineração de redes coordenada (`workers/analytics/sa_mineracao_redes.py`)
+- `SaAuditoriaFinanceira` — gestão financeira e burn rate (`workers/financial/sa_auditoria_financeira.py`)
+- `SaRevisaoOnline` — classificação cloud para suspeitos (`workers/ai/sa_revisao_online.py`)
+- `SaConsultaBanco` — consultas SQL/FTS5 via Datasette (`workers/ai/sa_consulta_banco.py`)
+- `SaDiagnosticaSistemas` — diagnóstico de saúde do sistema (`workers/ai/sa_diagnostica_sistemas.py`)
+- `DocFetcher` — sincronização de docs de referência (`workers/ai/doc_fetcher.py`)
 
 Mudanças já aplicadas:
 
@@ -82,19 +91,19 @@ Mudanças já aplicadas:
 - alinhamento de scripts operacionais com `main_runner.py`
 - `TargetResearchWorker` agora nasce desabilitado por padrão
 
-## 4. Camada de IA em produção
+## 4. Camada de IA em produção (PASA v90.8)
 
-O pipeline ativo identificado no código é:
+Pipeline Event-Driven (Fase 9) com `EventBus` (`core.event_bus`):
 
-- triagem local: `ollama`
-- refino cloud: `mistral`, `groq`, `openrouter`
-- fallback profundo: `core/fallback_llm.py`
+- **Triagem local**: `ollama` (llama3.2:1b, < 2s por comentário)
+- **Perícia cloud**: Sabia-4 (Maritaca, primário) → Mistral → Groq → OpenRouter
+- **Fallback profundo**: `core/fallback_llm.py`
+- **Circuit Breaker**: Providers com 401/403 removidos permanentemente; 429 suspensos por 300s
 
-Observações:
-
+Notas:
 - LiteRT não integra mais o processamento ativo.
-- O reclassificador `scripts/reclassify_low_confidence.py` usa cloud-first e pode permitir fallback local com `ollama`.
-- O `FallbackLLM` depende de `config/fallback_providers.yaml`, mas parte dessa malha está sujeita a indisponibilidade de quota/configuração.
+- A reanálise de baixa confiança foi desacoplada do termômetro de alvos.
+- O pipeline reativo (EventBus) substitui polling constante — overhead real: ~2ms por sinal.
 
 ## 5. Fila e concorrência
 
@@ -137,10 +146,13 @@ Os itens abaixo aparecem em documentos antigos, mas não representam a verdade o
 - `proposta_frontend/` como frontend oficial
 - Zyte como eixo principal da coleta
 - PGMQ como mecanismo já implantado
-- Gemini como classificador oficial principal
+- Gemini direto como classificador principal de produção
 - `core/orquestrador.py` como entrypoint válido
 - `ClassifierWorker` como worker suportado
 - `official_solenya_daemon.py` como daemon ativo
+- `ai_processor_worker.py` como nome de arquivo do classificador (real: `wk_classifica_comentarios.py`)
+- `treasurer_agent.py`, `network_agent.py`, `alert_worker.py`, `dossier_worker.py`, `target_research_worker.py` — nomes legados de arquivos que foram renomeados com prefixo `wk_`/`sa_`
+- `researcher_mode` como "ativo por padrão" — na verdade é **desabilitado por padrão**
 
 ## 9. Fontes de verdade
 

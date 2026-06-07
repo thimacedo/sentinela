@@ -497,7 +497,13 @@ if __name__ == "__main__":
 
     def run_datasette_server():
         try:
-            python_exe = sys.executable
+            # v90.9: Prioriza Python do venv, que tem datasette instalado
+            project_root_ds = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            venv_python = os.path.join(project_root_ds, ".venv", "Scripts", "python.exe")
+            if os.path.exists(venv_python):
+                python_exe = venv_python
+            else:
+                python_exe = sys.executable
             creationflags = 0x08000000 if os.name == 'nt' else 0
             subprocess.Popen(
                 [python_exe, "-m", "datasette", "serve", "-i", db_file, "--port", "8002", "--host", "0.0.0.0"],

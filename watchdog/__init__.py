@@ -59,8 +59,9 @@ CHILD_ENV["TEMP"] = TEMP_DIR
 CHILD_ENV["PYTHONIOENCODING"] = "utf-8"
 CHILD_ENV["PYTHONUTF8"] = "1"
 
-CALLMEBOT_PHONE = os.getenv("CALLMEBOT_PHONE", "558496066876")
-CALLMEBOT_APIKEY = os.getenv("CALLMEBOT_APIKEY", "8552672")
+# --- Configuração de Alertas (CallMeBot) ---
+CALLMEBOT_PHONE = os.getenv("WHATSAPP_PHONE") or os.getenv("CALLMEBOT_PHONE") or "558496066876"
+CALLMEBOT_APIKEY = os.getenv("WHATSAPP_API_KEY") or os.getenv("CALLMEBOT_APIKEY") or "8552672"
 CALLMEBOT_URL = "https://api.callmebot.com/whatsapp.php"
 
 CODE_ERRORS = [
@@ -483,22 +484,16 @@ async def start_service_endpoint(name: str):
 async def get_ai_details(name: str):
     """Retorna detalhes de um provedor para gestão no dashboard."""
     env_vars = {
-        "maritaca": "MARITACA_API_KEY",
         "google_gemini": "GEMINI_API_KEY",
         "groq_llama3": "GROQ_API_KEY",
         "mistral": "MISTRAL_API_KEY",
-        "deepseek": "DEEPSEEK_API_KEY",
-        "openrouter": "OPENROUTER_API_KEY",
         "huggingface": "HF_TOKEN"
     }
     
     links = {
-        "maritaca": "https://chat.maritaca.ai/keys",
         "google_gemini": "https://aistudio.google.com/app/apikey",
         "groq_llama3": "https://console.groq.com/keys",
         "mistral": "https://console.mistral.ai/api-keys/",
-        "deepseek": "https://platform.deepseek.com/api_keys",
-        "openrouter": "https://openrouter.ai/keys",
         "huggingface": "https://huggingface.co/settings/tokens"
     }
 
@@ -541,20 +536,8 @@ async def update_ai_key(data: dict):
         test_success = False
         error_msg = ""
         
-        if name == "maritaca":
-            import httpx
-            try:
-                resp = httpx.post("https://chat.maritaca.ai/api/chat/completions", 
-                                 headers={"Authorization": f"Bearer {new_key}"},
-                                 json={"model": "sabia-4", "messages": [{"role":"user", "content":"hi"}]},
-                                 timeout=10.0)
-                test_success = resp.status_code != 403
-                if not test_success: error_msg = resp.text
-            except Exception as e:
-                error_msg = str(e)
-        else:
-            # Teste genérico para outros (apenas validação básica de formato por ora ou ping)
-            test_success = len(new_key) > 10
+        # Teste genérico (apenas validação básica de formato por ora ou ping)
+        test_success = len(new_key) > 10
             
         if test_success:
             state.add_log("info", f"✅ Nova chave para {name} VALIDADA com sucesso.")
@@ -566,6 +549,37 @@ async def update_ai_key(data: dict):
         else:
             state.add_log("error", f"❌ Falha ao validar nova chave de {name}: {error_msg}")
             return {"success": False, "message": f"Chave inválida ou sem saldo: {error_msg}"}
+
+    except Exception as e:
+        return {"success": False, "message": str(e)}
+
+@app.post("/api/ai/delete_key")
+async def delete_ai_key(data: dict):
+    """Remove uma chave do .env e desativa o provedor."""
+    name = data.get("name")
+    env_var = data.get("env_var")
+    
+    if not name or not env_var:
+        return {"success": False, "message": "Dados incompletos"}
+
+    try:
+        # 1. Remove do arquivo .env (atribui string vazia)
+        from dotenv import set_key
+        env_path = os.path.join(PROJECT_ROOT, ".env")
+        set_key(env_path, env_var, "")
+        
+        # 2. Remove da memória
+        if env_var in os.environ:
+            del os.environ[env_var]
+            
+        state.add_log("warn", f"🗑️ Chave de {name} removida pelo operador. Desativando provedor...")
+        
+        # 3. Dispara restart para o runner refletir a mudança
+        try:
+            requests.post("http://localhost:8001/api/server/restart", timeout=2.0)
+        except: pass
+        
+        return {"success": True, "message": f"Chave de {name} removida. Provedor desativado."}
 
     except Exception as e:
         return {"success": False, "message": str(e)}
@@ -618,36 +632,34 @@ def run_web_server():
 # =========================================================
 
 def get_python_executable() -> str:
-    # v90.6: Prefer uv for all operations to avoid shims/launchers issues
+    # v91.0: Priorizar .venv local se existir
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    
+    venv_paths = [
+        os.path.join(project_root, ".venv", "Scripts", "python.exe"),
+        os.path.join(project_root, "venv", "Scripts", "python.exe"),
+        os.path.join(project_root, ".venv", "bin", "python"),
+        os.path.join(project_root, "venv", "bin", "python"),
+    ]
+    for path in venv_paths:
+        if os.path.exists(path):
+            return path
+
+    # Fallback confiável via uv
     try:
         import subprocess
-        # Verifica se uv está no PATH
-        subprocess.check_output(["uv", "--version"], shell=True, creationflags=0x08000000)
-        return "uv_run_python" # Marcador especial
+        path = subprocess.check_output(
+            ["uv", "python", "find"], 
+            shell=True, text=True, creationflags=0x08000000
+        ).strip()
+        if os.path.exists(path):
+            return path
     except:
         pass
 
     if sys.executable and os.path.exists(sys.executable):
-        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        # Se estamos sob uv run ou venv ativo, sys.prefix difere ou detectamos uv pelo executável
-        if "uv" in sys.executable.lower() or sys.prefix != sys.base_prefix:
-            return sys.executable
-            
-        venv_paths = [
-            os.path.join(project_root, ".venv", "Scripts", "python.exe"),
-            os.path.join(project_root, "venv", "Scripts", "python.exe"),
-            os.path.join(project_root, ".venv", "bin", "python"),
-            os.path.join(project_root, "venv", "bin", "python"),
-        ]
-        for path in venv_paths:
-            # Verifica se o venv existe E se ele é um ambiente íntegro (com pip funcional no mesmo diretório)
-            if os.path.exists(path):
-                bin_dir = os.path.dirname(path)
-                pip_name = "pip.exe" if sys.platform.startswith("win") else "pip"
-                if os.path.exists(os.path.join(bin_dir, pip_name)):
-                    return path
         return sys.executable
-    return sys.executable
+    return "python"
 
 def classify_error(stderr_output: str) -> str:
     if not stderr_output:
@@ -746,45 +758,7 @@ def heal_runtime_error(reason: str) -> str:
         
     return "restart"
 
-# --- MARITACA RESURRECTOR (v90.6) ---
-def maritaca_resurrector_loop():
-    """Verifica periodicamente se a Maritaca recuperou saldo e desperta o runner."""
-    attempts_403 = 0
-    while True:
-        try:
-            key = os.getenv("MARITACA_API_KEY", "").strip()
-            if key and "dummy" not in key.lower():
-                import httpx
-                resp = httpx.get(
-                    "https://chat.maritaca.ai/api/info/credits",
-                    headers={"Authorization": f"Bearer {key}"},
-                    timeout=10.0
-                )
-                if resp.status_code == 200:
-                    data = resp.json()
-                    credits = data.get("credits", 0.0)
-                    if credits > 0.0:
-                        state.add_log("info", f"[Resurrector] 🔔 Saldo Maritaca detectado: R$ {credits:.2f}. Despertando IA...")
-                        # Se o saldo voltou, precisamos forçar o runner a recarregar o AIService
-                        requests.post("http://localhost:8001/api/server/restart", timeout=5.0)
-                        # Espera 4 horas antes de checar novamente se o saldo ainda está lá
-                        attempts_403 = 0
-                        time.sleep(14400)
-                        continue
-                elif resp.status_code == 403:
-                    attempts_403 += 1
-                    backoff = min(60 * attempts_403, 3600)  # backoff crescente até 1h
-                    state.add_log("warn", f"[Resurrector] Maritaca retornou 403 (tentativa {attempts_403}). Backoff de {backoff}s...")
-                    time.sleep(backoff)
-                    continue
-                else:
-                    attempts_403 = 0  # reseta contador em respostas inesperadas
-        except Exception:
-            # Silencioso para não poluir logs se houver erro de rede intermitente
-            pass
-        
-        # Checa a cada 1 hora
-        time.sleep(3600)
+
 
 def guard():
     from core.guard_locker import GuardLocker
@@ -1022,9 +996,6 @@ if __name__ == "__main__":
 
     web_thread = Thread(target=run_web_server, daemon=True)
     web_thread.start()
-
-    resurrector_thread = Thread(target=maritaca_resurrector_loop, daemon=True)
-    resurrector_thread.start()
     
     # 🤖 INICIALIZAÇÃO DO DATASETTE EXPLORADOR SQL (PASA v50.1 - Porta 8002)
     db_file = os.path.join(PROJECT_ROOT, "data", "sentinela_data.db")
@@ -1040,6 +1011,14 @@ if __name__ == "__main__":
     def run_datasette_server():
         try:
             python_exe = get_python_executable()
+            # v90.9: "uv_run_python" não é executável real — resolve para Python do venv
+            if python_exe == "uv_run_python":
+                project_root_ds = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                venv_python = os.path.join(project_root_ds, ".venv", "Scripts", "python.exe")
+                if os.path.exists(venv_python):
+                    python_exe = venv_python
+                else:
+                    raise FileNotFoundError(f"venv Python não encontrado em {venv_python}")
             creationflags = 0x08000000 if os.name == 'nt' else 0
             subprocess.Popen(
                 [python_exe, "-m", "datasette", "serve", "-i", db_file, "--port", "8002", "--host", "0.0.0.0"],

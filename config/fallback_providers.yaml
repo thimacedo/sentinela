@@ -5,12 +5,6 @@ fallback_providers:
 - name: google_gemini
   api_key_env: GEMINI_API_KEY
   model: gemini-2.5-flash
-- name: openrouter
-  api_key_env: OPENROUTER_API_KEY
-  model: meta-llama/llama-3.1-8b-instruct:free
-- name: deepseek_chat
-  api_key_env: DEEPSEEK_API_KEY
-  model: deepseek-chat
 - name: zhipu_glm4
   api_key_env: ZHIPU_API_KEY
   model: glm-4-flash

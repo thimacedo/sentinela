@@ -1,6 +1,6 @@
 # Índice de Documentação — Sentinela
 
-Este índice foi limpo para refletir o estado real do workspace em `2026-06-03`.
+Este índice foi atualizado em `2026-06-07` para refletir o estado real do workspace após a auditoria documental v90.8.
 
 ## 1. Fonte de verdade
 
@@ -8,8 +8,22 @@ Este índice foi limpo para refletir o estado real do workspace em `2026-06-03`.
 - `ROADMAP.md` — entregas concluídas, pendências reais e próximos passos
 - `docs/SYSTEM_CONTEXT.md` — visão técnica consolidada do sistema atual
 - `docs/DOCUMENTATION_AUDIT.md` — classificação da documentação: válida, parcial, histórica ou lixo operacional
+- `docs/index_documentacao.md` — este índice
 
-## 2. Documentação ainda útil
+## 2. Documentação de workers (docs/workers/)
+
+Todos os arquivos abaixo foram corrigidos em 2026-06-07 com paths e nomes de classe corretos:
+
+| Worker | Arquivo |
+|--------|---------|
+| Classificador oficial | `docs/workers/AI_PROCESSOR_WORKER.md` → `workers/processors/wk_classifica_comentarios.py` |
+| Treasurer | `docs/workers/TREASURER_AGENT.md` → `workers/financial/sa_auditoria_financeira.py` |
+| Network Miner | `docs/workers/NETWORK_MINER_AGENT.md` → `workers/analytics/sa_mineracao_redes.py` |
+| Alerts | `docs/workers/ALERT_WORKER.md` → `workers/processors/wk_gera_alertas.py` |
+| Dossier | `docs/workers/DOSSIER_WORKER.md` → `workers/processors/wk_gera_dossies.py` |
+| Target Research | `docs/workers/TARGET_RESEARCH_WORKER.md` → `workers/processors/wk_pesquisa_alvos.py` |
+
+## 3. Documentação ainda útil
 
 - `docs/database_schema_v58.md` — referência estrutural de banco
 - `docs/project_functions_v58.md` — contexto funcional histórico ainda parcialmente útil
@@ -17,13 +31,13 @@ Este índice foi limpo para refletir o estado real do workspace em `2026-06-03`.
 - `docs/RESILIENCIA_LOGIN_INSTAGRAM.md` — detalhes da operação de login/coleta
 - `docs/PADRONIZACAO_LINGUISTICA_ANALITICA.md` — referência metodológica da classificação
 
-## 3. Documentos operacionais ativos
+## 4. Documentos operacionais ativos
 
 - `walkthrough.md` — walkthrough enxuto das entregas recentes
 - `task.md` — checklist operacional da rodada atual
 - `docs/operations/INSTAGRAM_SCRAPER_V2.md` — referência de coleta
 
-## 4. Documentação histórica
+## 5. Documentação histórica
 
 Use apenas para contexto e rastreabilidade:
 
@@ -34,7 +48,7 @@ Use apenas para contexto e rastreabilidade:
 - `docs/ARCHITECTURE_PASA_V86.md`
 - PRDs e planos de fases antigas
 
-## 5. Regra de uso
+## 6. Regra de uso
 
 Antes de iniciar qualquer trabalho:
 
@@ -42,3 +56,7 @@ Antes de iniciar qualquer trabalho:
 2. leia `ROADMAP.md`
 3. valide no código
 4. só depois use docs históricas como apoio
+
+---
+
+_Última atualização do índice: 2026-06-07 (v90.8)_

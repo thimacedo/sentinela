@@ -115,28 +115,12 @@ class AIService:
             max_retries=0
         )
 
-        _maritaca_key = os.getenv("MARITACA_API_KEY", "").strip()
-        self.maritaca_client = AsyncOpenAI(
-            api_key=_maritaca_key or "dummy-maritaca-key",
-            base_url="https://chat.maritaca.ai/api",
-            max_retries=0
-        ) if _maritaca_key else None
-
         finetuned_model = os.getenv('FINETUNED_MODEL_NAME', "open-mistral-nemo")
 
         self.providers = [
             {"name": "ollama", "client": self.ollama_client, "model": os.getenv("OLLAMA_MODEL", "qwen2.5-coder:3b"), "timeout": 120.0, "cooldown_until": 0.0, "is_async_openai": True},
             {"name": "mistral", "client": self.mistral_client, "model": finetuned_model, "timeout": 30.0, "cooldown_until": 0.0, "is_async_openai": True},
         ]
-
-        # Adiciona maritaca APENAS se a chave real estiver configurada
-        if _maritaca_key:
-            self.providers.append(
-                {"name": "maritaca", "client": self.maritaca_client, "model": "sabia-4", "timeout": 20.0, "cooldown_until": 0.0, "is_async_openai": True}
-            )
-            logger.info("[AI] Maritaca ativada com chave configurada.")
-        else:
-            logger.info("[AI] Maritaca desativada (MARITACA_API_KEY não configurada).")
 
         
         try:

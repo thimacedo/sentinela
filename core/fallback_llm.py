@@ -65,19 +65,6 @@ class FallbackLLM:
         data = resp.json()
         return data.get("text", "")
 
-    def _call_deepseek(self, text: str, api_key: str) -> str:
-        url = "https://api.deepseek.com/v1/chat/completions"
-        payload = {
-            "model": "deepseek-chat",
-            "messages": [{"role": "user", "content": text}],
-            "max_tokens": 50,
-        }
-        headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
-        resp = requests.post(url, json=payload, headers=headers, timeout=15)
-        resp.raise_for_status()
-        data = resp.json()
-        return data.get("choices", [{}])[0].get("message", {}).get("content", "")
-
     def _call_azure(self, text: str, api_key: str) -> str:
         endpoint = os.getenv("AZURE_OPENAI_ENDPOINT", "https://YOUR_RESOURCE.openai.azure.com")
         url = f"{endpoint}/openai/deployments/gpt-35-turbo/chat/completions?api-version=2023-05-15"
@@ -86,19 +73,6 @@ class FallbackLLM:
             "max_tokens": 50,
         }
         headers = {"api-key": api_key, "Content-Type": "application/json"}
-        resp = requests.post(url, json=payload, headers=headers, timeout=15)
-        resp.raise_for_status()
-        data = resp.json()
-        return data.get("choices", [{}])[0].get("message", {}).get("content", "")
-
-    def _call_openrouter(self, text: str, api_key: str) -> str:
-        url = "https://openrouter.ai/api/v1/chat/completions"
-        payload = {
-            "model": "openrouter/auto",
-            "messages": [{"role": "user", "content": text}],
-            "max_tokens": 50,
-        }
-        headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
         resp = requests.post(url, json=payload, headers=headers, timeout=15)
         resp.raise_for_status()
         data = resp.json()

@@ -79,7 +79,7 @@ _last_updated: 2026-06-05 | branch: main_
 - [x] simplificar `workers/orchestrator/orchestrator.py`
 - [x] unificar semântica de `no_tasks_available` entre workers ativos
 - [x] reduzir duplicidade de logging, cooldown e fluxo entre ciclos
-- [ ] revisar se `WkPesquisaAlvos` deve permanecer em `workers/ai/` ou migrar para domínio próprio
+- [x] `WkPesquisaAlvos` migrado de `workers/ai/` para `workers/processors/wk_pesquisa_alvos.py` (Fase 9)
 
 ### Administração e analytics
 - [ ] tabelas tabulares de gasto por usuário e por perfil monitorado

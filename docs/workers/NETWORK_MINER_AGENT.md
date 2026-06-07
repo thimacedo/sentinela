@@ -1,105 +1,101 @@
-# NetworkMinerAgent — Análise de Redes Coordenadas
-_version: 88.1 | last_updated: 2026-06-04 | status: Ativo (Sob Demanda)_
+# SaMineracaoRedes — Análise de Redes Coordenadas
+_version: 90.8 | last_updated: 2026-06-07 | status: Ativo (Sob Demanda)_
 
 ## 1. Visão Geral
 
-**NetworkMinerAgent** é o subagente especializado em mineração de grafos e detecção de ataques coordenados. Ele analisa a similaridade entre comentários, a frequência de ataques a múltiplos alvos e a conexão entre perfis suspeitos para identificar comunidades de hostilidade (Astroturfing/Bot Rings).
+**SaMineracaoRedes** é o subagente especializado em mineração de grafos e detecção de ataques coordenados. Ele analisa a similaridade entre comentários, a frequência de ataques a múltiplos alvos e a conexão entre perfis suspeitos para identificar comunidades de hostilidade (Astroturfing/Bot Rings).
 
 ### Informações Básicas
-- **ID do Agente**: `network-miner-agent`
-- **Localização**: `workers/analytics/network_agent.py`
+- **ID do Subagente**: `sa-mineracao-redes`
+- **Localização**: `workers/analytics/sa_mineracao_redes.py`
+- **Classe**: `SaMineracaoRedes` (herda de `BaseSubAgent`)
 - **Engine**: NetworkX + Pandas
-- **Trigger**: Disparado reativamente pelo `AIProcessorWorker` ou manualmente sob demanda.
-- **Status**: 🟢 Ativo
+- **Trigger**: Disparado reativamente pelo `WkClassificaComentarios` via EventBus, ou sob demanda
+- **Status**: 🟢 Ativo sob demanda
 
 ---
 
 ## 2. Responsabilidades
 
-### Responsabilidade 1: Detecção de Clusters
-- Identifica contas que atacam múltiplos candidatos monitorados simultaneamente.
-- Cria grafos de interações entre autores e alvos.
-- Detecta componentes conectados (comunidades) que operam de forma síncrona ou coordenada.
+### 1. Detecção de Clusters
+- Identifica contas que atacam múltiplos candidatos monitorados simultaneamente
+- Cria grafos de interações entre autores e alvos
+- Detecta componentes conectados (comunidades) que operam de forma síncrona ou coordenada
 
-### Responsabilidade 2: Cálculo de Score de Perigo
-- Atribui um score de 0 a 100 para cada cluster detectado.
-- O score baseia-se no tamanho da rede, volume de interações e densidade de conexões coordenadas.
+### 2. Cálculo de Score de Perigo
+- Atribui um score de 0 a 100 para cada cluster detectado
+- Baseado no tamanho da rede, volume de interações e densidade de conexões coordenadas
 
-### Responsabilidade 3: Exportação de Relatórios
-- Persiste os dados dos clusters na tabela `redes_coordenadas` do Supabase.
-- Gera arquivos físicos (`.json` e `.md`) em `frontend/public/reports/` para consumo do dashboard de analytics.
+### 3. Exportação de Relatórios
+- Persiste os dados dos clusters na tabela `redes_coordenadas` do Supabase
+- Gera arquivos físicos (`.json` e `.md`) em `frontend/public/reports/` para consumo do dashboard
 
 ---
 
 ## 3. Algoritmo de Análise
 
-1. **Ingestão**: Recupera até 2000 comentários classificados como ódio (`is_hate=True`) dos últimos 7 dias.
-2. **Filtragem de Atacantes**: Identifica `multi_attackers` (usuários que atacaram > 1 candidato).
-3. **Construção do Grafo**:
-   - Nodos: Autores e Candidatos.
-   - Arestas: Representam a ação de postar um comentário hostil.
-4. **Detecção de Comunidades**: Utiliza `nx.connected_components` para isolar grupos de interação.
+1. **Ingestão**: Recupera comentários classificados como ódio (`is_hate=True`) dos últimos 7 dias
+2. **Filtragem de Atacantes**: Identifica `multi_attackers` (usuários que atacaram > 1 candidato)
+3. **Construção do Grafo**: Nodos = Autores + Candidatos; Arestas = ações hostis
+4. **Detecção de Comunidades**: Utiliza `nx.connected_components` para isolar grupos
 5. **Classificação da Coordenação**:
-   - `MULTI_TARGET`: Se o cluster contém atacantes que operam em múltiplos alvos.
-   - `SINGLE_TARGET`: Se o cluster é focado em um único alvo mas demonstra volume anormal.
+   - `MULTI_TARGET`: atacantes operando em múltiplos alvos
+   - `SINGLE_TARGET`: cluster focado em um único alvo com volume anormal
 
 ---
 
-## 4. Persistência e Saída
+## 4. Execução
 
-### Tabela: `redes_coordenadas`
-O agente armazena o cluster mais crítico de cada ciclo:
-- `id`: UUID v4 derivado do hash do nome da rede.
-- `nodes`: Array de strings (usernames).
-- `edges`: JSONB com o mapa de conexões.
-- `score_perigoso`: Valor de 0-100.
-
-### Relatórios Físicos
-Arquivos gerados em `frontend/public/reports/network_YYYY-MM-DD.md`:
-```markdown
-# Relatorio de Analise de Redes Coordenadas
-## Nome do Cluster: Cluster de Ataque #2 (42 nodes)
-- **Tipo de Coordenacao:** MULTI_TARGET
-- **Score de Perigo:** 100/100
-- **Contas Suspeitas Envolvidas:** 42
-- **Conexoes Identificadas:** 41
-```
-
----
-
-## 5. Configuração e Monitoramento
-
-### Variáveis de Ambiente
-- Não requer variáveis exclusivas, utiliza a `SERVICE_KEY` do Supabase via `core/db.py`.
-
-### Monitoramento de Logs
+### Sob Demanda (Bandeja do Watchdog)
 ```bash
-tail -f logs/main_runner.json | grep NetworkMinerAgent
+python scripts/run_mineracao_redes.py
 ```
+Menu: `SUBAGENTES (SA)` → `Executar SaMineracaoRedes`
 
----
-
-## 6. Integração
-
-O `NetworkMinerAgent` é disparado automaticamente pelo orquestrador quando o `AIProcessorWorker` conclui um ciclo com sucesso:
-
+### Via Código
 ```python
-# workers/orchestrator/orchestrator.py
-if "ai-processor" in result.worker_id and result.classifier_success:
-    asyncio.create_task(NetworkMinerAgent().run_analysis())
+from workers.analytics.sa_mineracao_redes import SaMineracaoRedes
+
+sa = SaMineracaoRedes()
+await sa.run_analysis()
 ```
 
 ---
 
-## 7. Troubleshooting
+## 5. Monitoramento
 
-### Problema: "Relatório de rede não atualiza"
-**Sintomas**: Arquivos em `frontend/public/reports` com data antiga.
-1. Verifique se existem comentários marcados como `is_hate=True` nos últimos 7 dias.
-2. Verifique se o `AIProcessorWorker` está rodando e concluindo ciclos.
-3. Verifique se o volume de dados atinge o mínimo (10 comentários de ódio) para disparar a mineração.
+```bash
+tail -f logs/main_runner.json | grep SaMineracaoRedes
+```
+
+### Dashboard Watchdog
+```
+Watchdog → Subagentes
+├─ SaMineracaoRedes
+│  ├─ Status: Idle / Running
+│  ├─ Clusters: N
+│  └─ Last Run: X minutes ago
+```
 
 ---
 
-**Última Revisão**: 2026-06-04
-**PASA Version**: v88.1
+## 6. Troubleshooting
+
+### "Relatório de rede não atualiza"
+1. Verificar se existem comentários marcados como `is_hate=True` nos últimos 7 dias
+2. Verificar se o `WkClassificaComentarios` está rodando e concluindo ciclos
+3. Verificar volume mínimo (10 comentários de ódio) para disparar a mineração
+
+---
+
+## 7. Changelog
+
+### v90.8 (2026-06-07)
+- [x] Corrigido path: `workers/analytics/sa_mineracao_redes.py`
+- [x] Classe renomeada: `SaMineracaoRedes`
+- [x] Herança `BaseSubAgent` documentada
+
+---
+
+**Última Revisão**: 2026-06-07
+**PASA Version**: v88.1 → v90.8

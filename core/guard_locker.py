@@ -20,34 +20,29 @@ class GuardLocker:
         os.makedirs(self.lock_dir, exist_ok=True)
 
     def _cleanup_zombies(self):
-        """Mata processos python zumbis que ficaram presos (Anti-Shim v90.7)."""
-        if os.name != 'nt': return
+        """Mata processos python zumbis que ficaram presos (Anti-Shim v90.9)."""
+        import psutil
         try:
             current_pid = os.getpid()
+            # Proteção v91.0: Também protege o processo pai (wrapper .venv\Scripts\python.exe)
+            # que pode ter o script no cmdline mas é o pai legítimo
+            parent_pid = os.getppid()
+            protected_pids = {current_pid, parent_pid}
+            
             script_name = f"{self.name}.py" if not self.name.endswith(".py") else self.name
             
-            # Busca processos python.exe
-            cmd = 'wmic process where "name=\'python.exe\'" get processid,commandline'
-            output = subprocess.check_output(cmd, shell=True, creationflags=0x08000000).decode('utf-8', errors='ignore')
-            
-            pids_to_kill = []
-            for line in output.splitlines():
-                if not line.strip():
+            for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
+                try:
+                    if proc.info['pid'] in protected_pids:
+                        continue
+                        
+                    cmdline = " ".join(proc.info['cmdline'] or [])
+                    if "python" in proc.info['name'].lower() and script_name in cmdline:
+                        logger.warning(f"🧹 [{self.name}] Zumbi identificado — PID {proc.info['pid']} | cmdline: {cmdline[:120]}")
+                        proc.kill()
+                        logger.warning(f"🧹 [{self.name}] Faxina de zumbi órfão detectado: PID {proc.info['pid']}")
+                except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                     continue
-                # Filtra pelo nome do script no commandline e exclui o próprio processo
-                if script_name in line:
-                    parts = line.strip().split()
-                    if parts and parts[-1].isdigit():
-                        pid = int(parts[-1])
-                        if pid != current_pid:
-                            # Verificação extra: loga o cmdline antes de matar para auditoria
-                            cmdline_preview = line.strip()[:120]
-                            logger.warning(f"🧹 [{self.name}] Zumbi identificado — PID {pid} | cmdline: {cmdline_preview}")
-                            pids_to_kill.append(pid)
-            
-            for pid in pids_to_kill:
-                logger.warning(f"🧹 [{self.name}] Faxina de zumbi órfão detectado: PID {pid}")
-                self._terminate(pid)
         except Exception as e:
             logger.debug(f"Falha na faxina de zumbis: {e}")
 
