@@ -231,12 +231,8 @@ class FallbackLLM:
                 res = ""
                 if name == "cohere":
                     res = self._call_cohere(text, api_key)
-                elif name == "deepseek":
-                    res = self._call_deepseek(text, api_key)
                 elif name == "azure":
                     res = self._call_azure(text, api_key)
-                elif name == "openrouter":
-                    res = self._call_openrouter(text, api_key)
                 elif name == "ai21":
                     res = self._call_ai21(text, api_key)
                 elif name == "fireworks":
@@ -261,8 +257,6 @@ class FallbackLLM:
                     res = self._call_cohere(text, api_key)
                 elif name == "fireworks_ai":
                     res = self._call_fireworks(text, api_key)
-                elif name == "deepseek_chat":
-                    res = self._call_deepseek(text, api_key)
                 elif name == "ai21_j2ultra":
                     res = self._call_ai21(text, api_key)
                 else:

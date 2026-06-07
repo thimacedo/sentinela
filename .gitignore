@@ -136,3 +136,8 @@ scratch/
 *.pdf
 bases_pesquisas/
 
+# 9. Motores Locais (Binários e Cache)
+tools/voyant/
+!tools/voyant/README.md
+
+

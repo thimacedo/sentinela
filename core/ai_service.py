@@ -465,6 +465,8 @@ class AIService:
         """Busca comentários não processados no banco e executa a classificação.
         Otimizado (v90.0): Implementação Híbrida. Processamento individual com concorrência
         limitada para provedores locais e cloud. Em breve migraremos para Single-Prompt Batch.
+        Fast-Drop Triage (v92.0): lote inspecionado pelo VoyantService antes do gather.
+        Lotes sem vocabulário hostil são marcados como NEUTRO localmente, sem consumir tokens.
         """
         try:
             from core.db import db_client
@@ -474,7 +476,44 @@ class AIService:
             items = res.data or []
             if not items:
                 return 0
-                
+
+            # ── FAST-DROP TRIAGE (v92.0) ────────────────────────────────────────
+            # Envia os textos do lote ao VoyantService (Trombone local) para
+            # inspecionar o vocabulário TF-IDF antes de gastar tokens de LLM.
+            #
+            # Contratos de retorno do triage_batch():
+            #   None  → Voyant offline: fallback silencioso, 100% vai ao LLM.
+            #   drop=True  → Vocabulário neutro: marca lote no banco e retorna.
+            #   drop=False → Vocabulário hostil detectado: delega normalmente ao LLM.
+            try:
+                from core.voyant_service import voyant_service
+                texts = [item["texto_bruto"] for item in items]
+                triage = await voyant_service.triage_batch(texts)
+            except Exception as _voyant_exc:
+                logger.warning("[AI:Batch] VoyantService falhou inesperadamente: %s. Fallback ao LLM.", _voyant_exc)
+                triage = None  # Garante o fallback silencioso
+
+            if triage is not None and triage["drop"]:
+                # Lote classificado como NEUTRO pelo Voyant — atualiza banco em lote
+                # e retorna sem acionar nenhum LLM.
+                ids = [item["id"] for item in items]
+                try:
+                    await asyncio.to_thread(
+                        db_client.client.table("comentarios").update({
+                            "categoria_ia": "NEUTRO",
+                            "confianca_ia": 0.75,   # Confiança conservadora para triagem local
+                            "is_hate": False,
+                            "analise_pericial": "[VOYANT/TF-IDF] Fast-drop: vocabulário neutro confirmado por PLN local.",
+                            "processado_ia": True,
+                        }).in_("id", ids).execute
+                    )
+                    logger.info("⚡ [AI:Voyant] Fast-drop: %d comentários marcados como NEUTRO (sem LLM).", len(ids))
+                    return len(ids)
+                except Exception as _db_exc:
+                    logger.warning("[AI:Batch] Falha ao gravar fast-drop no banco: %s. Reprocessando via LLM.", _db_exc)
+                    # Se o upsert falhar, deixa cair no fluxo normal do LLM abaixo.
+            # ── FIM DO FAST-DROP ─────────────────────────────────────────────────
+
             count = 0
             
             # v90.0: Paralelismo controlado (Concurrency)

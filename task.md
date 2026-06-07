@@ -28,7 +28,8 @@ _last_updated: 2026-06-04_
 - [ ] Corrigir sistema de alertas de WhatsApp (CallMeBot) — usuários reportam que não estão recebendo notificações.
 - [ ] Resolver loop de auto-exclusão no `GuardLocker`: o processo está se identificando como zumbi e se matando no boot.
 - [ ] Validar fluxo completo de coleta e classificação no Tray.
-- [ ] Estabilizar Datasette (porta 8002) no Watchdog.
+- [x] Estabilizar Datasette (porta 8002) no Watchdog.
+- [x] Implementar integração nativa Voyant Tools (v92.0) com triagem fast-drop no pipeline de IA.
 - [ ] revisar documentação metodológica histórica (limpar arquivamento obsoleto)
 
 ## Melhorias de Resiliência Concluídas

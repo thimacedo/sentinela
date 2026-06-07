@@ -210,6 +210,12 @@ PGMQ deve aparecer apenas como hipótese futura.
 - **Auditoria de Kills**: O `GuardLocker` agora registra o `cmdline` de processos zumbis antes de encerrá-los para rastreabilidade de SRE.
 - **Proteção de Guardião**: O `process_cleaner.py` foi blindado para identificar e **proteger o PID do Watchdog** (avô do processo), impedindo o auto-encerramento acidental do sistema de supervisão.
 
+### 9. Triagem Determinística Voyant (v92.0)
+- **Fast-Drop Triage**: Implementado `core/voyant_service.py` que utiliza a API Trombone do VoyantServer local para pré-processar lotes de comentários.
+- **Economia de Tokens**: Lotes identificados com vocabulário 100% neutro (via TF-IDF local) são classificados automaticamente como `NEUTRO`, eliminando chamadas desnecessárias a LLMs cloud.
+- **Validação Pericial**: Adicionado script `scripts/validate_trombone.py` para testes de contrato e latência da engine de PLN.
+- **Resiliência**: Fallback silencioso garantido; se o VoyantServer estiver offline ou falhar, o sistema delega 100% do lote ao LLM sem interromper o pipeline.
+
 ## Próximos passos OBRIGATÓRIOS
 1. **Rotação de Proxies**: Finalizar a integração real de proxies residenciais no Scraper V2 (AGENTS_SYNC.md).
 2. **Checkpoint por Post**: Implementar persistência intermediária para evitar perda de progresso em coletas de perfis grandes.
