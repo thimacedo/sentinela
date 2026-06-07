@@ -158,20 +158,21 @@ class VoyantService:
         if not texts:
             return {}
 
-        clean_texts = [t.strip() for t in texts if t and t.strip()]
-        if not clean_texts:
-            return {}
+        # Agrega o lote em um único string separado por parágrafo.
+        # O Trombone trata cada bloco separado por \n\n como um "documento" distinto,
+        # o que nos dá distribuição IDF correta dentro do lote.
+        corpus_input = "\n\n".join(t.strip() for t in texts if t and t.strip())
 
         params = {
             "tool": "corpus.CorpusTerms",
             "format": "json",
             "limit": TROMBONE_LIMIT,
-            "sort": "RELATIVEFREQ",
+            "sort": "RELATIVEFREQ",  # Ordena por frequência relativa (equivalente TF-IDF simplificado)
         }
-        # v92.2: Passar múltiplos documentos usando lista no dicionário 'data'.
-        # Isso garante compatibilidade com o parse assíncrono do httpx e cria
-        # documentos separados no Trombone para um IDF preciso por lote.
-        data = {"string": clean_texts}
+        # inputFormat=text é obrigatório: sem ele o Trombone tenta interpretar
+        # o conteúdo do campo `input` como URL ou caminho de arquivo,
+        # levantando IllegalArgumentException no DocumentExpander.
+        data = {"input": corpus_input, "inputFormat": "text"}
 
         try:
             client = self._get_client()

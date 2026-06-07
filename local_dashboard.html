@@ -199,6 +199,14 @@
                              <div class="skeleton h-12 w-full opacity-10"></div>
                         </div>
                     </div>
+                    <!-- Voyant Status (v92.4) -->
+                    <div class="pt-2 border-t border-slate-800/50 flex justify-between items-center">
+                        <span class="text-[9px] font-bold text-slate-500 uppercase">Engine Léxica (Voyant)</span>
+                        <div id="voyant-status-indicator" class="flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-slate-700"></span>
+                            <span class="text-[9px] font-black text-slate-600 uppercase">CHECKING...</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -370,8 +378,19 @@
         }
 
         function renderComments(comments) {
-            lastComments = comments;
-            const list = hateOnly ? comments.filter(c => c.is_hate) : comments;
+            // v92.5: Deduplicação rigorosa por ID para evitar "falso movimento"
+            const uniqueComments = [];
+            const seenIds = new Set();
+            
+            for (const c of comments) {
+                if (!seenIds.has(c.id)) {
+                    seenIds.add(c.id);
+                    uniqueComments.push(c);
+                }
+            }
+            
+            lastComments = uniqueComments;
+            const list = hateOnly ? uniqueComments.filter(c => c.is_hate) : uniqueComments;
             const feed = document.getElementById('classified-feed');
             if(!list.length) { feed.innerHTML = '<p class="text-slate-600 text-xs italic text-center p-10">Vazio...</p>'; return; }
             feed.innerHTML = list.map(c => {
@@ -678,11 +697,24 @@
                                 degradedLabel?.classList.add('hidden');
                             }
 
-                            const sortedServices = Object.entries(m.ai_services).sort(([a],[b]) => {
-                                if (a === 'ollama') return -1;
-                                if (b === 'ollama') return 1;
-                                return a.localeCompare(b);
-                            });
+                            // v92.4: Atualiza indicador Voyant (Inteligência Analítica)
+                            const vStatus = m.ai_services?.voyant || 'DOWN';
+                            const vIndicator = document.getElementById('voyant-status-indicator');
+                            if (vIndicator) {
+                                const isOk = vStatus === 'OK';
+                                vIndicator.innerHTML = `
+                                    <span class="w-1.5 h-1.5 rounded-full ${isOk ? 'bg-emerald-500 shadow-emerald-500/40' : 'bg-rose-500 animate-pulse shadow-rose-500/40'}"></span>
+                                    <span class="text-[9px] font-black ${isOk ? 'text-emerald-400' : 'text-rose-400'} uppercase">${isOk ? 'ATIVO' : 'OFFLINE'}</span>
+                                `;
+                            }
+
+                            const sortedServices = Object.entries(m.ai_services)
+                                .filter(([s]) => s !== 'voyant') // v92.4: Voyant tem destaque em Inteligência Analítica
+                                .sort(([a],[b]) => {
+                                    if (a === 'ollama') return -1;
+                                    if (b === 'ollama') return 1;
+                                    return a.localeCompare(b);
+                                });
                             
                             const aiServicesContainer = document.getElementById('kpi-ai-services');
                             if (aiServicesContainer) {

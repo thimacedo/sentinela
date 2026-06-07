@@ -416,7 +416,9 @@ async def get_metrics():
 
     # Checagem de status de IA — usa circuit breakers reais se o runner estiver ativo
     ai_status = {}
-    ai_status_detail = {}  # campo extra com status detalhado por provedor
+    
+    # v92.4: Status do VoyantServer (Motor Léxico)
+    ai_status["voyant"] = _service_status("http://127.0.0.1:8888/trombone?format=json")
 
     try:
         # Tenta ler o estado real dos circuit breakers do processo runner em memória

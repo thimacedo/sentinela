@@ -496,8 +496,15 @@ class InstagramScraperV2:
             if len(texto) < 2 or len(texto) > 2000: continue
             if any(p in texto.lower() for p in junk_patterns): continue
             
+            # v92.5: Geração de ID determinístico para garantir idempotência absoluta (Anti-Duplicidade)
+            id_real = c.get("id_externo")
+            if not id_real:
+                import hashlib
+                hash_input = f"{c.get('autor_username') or 'anon'}_{texto}_{shortcode}"
+                id_real = f"v2_hash_{hashlib.sha256(hash_input.encode()).hexdigest()[:16]}"
+
             normalized.append({
-                "id_externo": str(c.get("id_externo", f"v2_{shortcode}_{random.randint(0, 999999)}")),
+                "id_externo": id_real,
                 "texto_bruto": texto,
                 "autor_username": c.get("autor_username") or c.get("autor", "unknown"),
                 "data_publicacao": c.get("data_publicacao") or c.get("timestamp") or post_date_iso or now,
