@@ -22,8 +22,7 @@ def purge_target(username: str):
 
     try:
         # --- Etapa 1: Desativar na tabela de candidatos ---
-        print(f"
-🔄 Etapa 1: Tentando desativar @{username} na tabela 'candidatos'...")
+        print(f"🔄 Etapa 1: Tentando desativar @{username} na tabela 'candidatos'...")
         update_response = supabase.table('candidatos').update({
             'status_monitoramento': 'Inativo'
         }).eq('username', username).execute()
@@ -35,8 +34,7 @@ def purge_target(username: str):
             print(f"ℹ️ Info: @{username} não foi encontrado na tabela 'candidatos' para desativação.")
 
         # --- Etapa 2: Remover da fila de coleta pendente ---
-        print(f"
-🔄 Etapa 2: Tentando remover @{username} da 'fila_coleta'...")
+        print(f"🔄 Etapa 2: Tentando remover @{username} da 'fila_coleta'...")
         delete_response = supabase.table('fila_coleta').delete().eq('candidato_id', username).execute()
         
         delete_count = delete_response.count

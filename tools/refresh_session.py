@@ -7,6 +7,7 @@ from pathlib import Path
 # Adiciona o root do projeto ao sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+from core.db import db_client
 from core.supabase_service import get_supabase_client
 
 async def refresh_session():

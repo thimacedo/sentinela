@@ -193,6 +193,11 @@ PGMQ deve aparecer apenas como hipótese futura.
 ### 5. Diagnóstico de Boot
 - Adicionado log de emergência `boot_debug.log` no `main_runner.py` para capturar falhas silenciosas antes da inicialização completa do logger.
 
+### 6. Correções em Ferramentas e Logging
+- Corrigido `NameError` em `tools/refresh_session.py` (adicionado import faltante de `db_client`).
+- Ativado log `INFO` para `core.autopilot` no `main_runner.py` para visibilidade do loop OODA.
+- Validado boot limpo sem loops de reinicialização ou falhas de sintaxe.
+
 ## Próximos passos OBRIGATÓRIOS
 1. **Rotação de Proxies**: Finalizar a integração real de proxies residenciais no Scraper V2 (AGENTS_SYNC.md).
 2. **Checkpoint por Post**: Implementar persistência intermediária para evitar perda de progresso em coletas de perfis grandes.
