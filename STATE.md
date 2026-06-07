@@ -334,3 +334,12 @@ PGMQ deve aparecer apenas como hipótese futura.
 - **Prevenção contra "Sangria de Nuvem"**: Refatorado o fallback de falha crítica na triagem: caso o servidor do Ollama colapse, a tarefa é marcada com `"categoria_ia": "ERRO"` em vez de repassá-la adiante como `"SUSPEITO"`. Isso garante contenção total de custos na malha Cloud (Mistral/Gemini).
 - **Notificação Direta (Circuit Breaker)**: Inserida lógica no tratador de falhas de APIs (`_handle_provider_error`). Ao exceder os _retries_ toleráveis do modelo local (acionando o Circuit Breaker), um aviso é imediatamente encaminhado via `watchdog.send_whatsapp_alert` informando a necessidade de intervenção do operador para destravamento local.
 - **Modelo Utilizado na Execução**: *Gemini 3.1 Pro (High)*, conforme protocolo de uso.
+
+## Refatoração Estrutural do Warroom (2026-06-07)
+
+- **Desacoplamento de UI Monolítica**: Os componentes pesados e integrados do painel (como as abas monolíticas de 300+ linhas) foram quebrados em subcomponentes puros e memoizados sob a estrutura diretorial em `frontend/components/warroom/`.
+  - Pasta `targets/`: Criados `TargetCard` e `TargetFilters`, aliviando o excessivo estado da aba de prospecção.
+  - Pasta `alerts/`: O `InvestigationModal` e o `UnlockOverlay` foram abstraídos, contendo logicamente seus próprios estados (ex: inputs textuais) limitando a carga de processamento de re-render da árvore inteira no *Feed*. O `AlertItem` garante a estabilidade de exibição em listas massivas.
+  - Pasta `analise/`: Layout estético e marcação em Markdown concentrados em `CommentCard`, removendo bibliotecas desnecessárias de renderização (React Markdown + GFM) do contêiner principal da Aba.
+- **Prevenção de Render Looping**: O travamento de UI ocorrido anteriormente, proveniente de digitação reativa que repintava a árvore HTML de todos os dados defasados e do feed em tempo real, foi sanado. Módulos reagem agora individualmente.
+- **Modelo Utilizado na Execução**: *Gemini 3.5 Flash (High)*, perfil ideal para boilerplating/refatorações locais e greps complexos.
