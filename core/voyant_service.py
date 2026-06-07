@@ -35,7 +35,7 @@ HOSTILE_LEXICON: set[str] = {
     # Insulto ad hominem grave
     "lixo", "idiota", "imbecil", "burro", "incompetente", "vagabundo",
     "bandido", "ladrão", "roubar", "corrupto", "corrupção",
-    # Odio identitário / gênero
+    # Ódio identitário / gênero
     "macaco", "nordestino", "favelado", "safada", "piranha", "puta", "vagabunda",
     # Ataque institucional
     "golpe", "ditadura", "fraudar", "fraude", "fraudes", "urna", "golpista",
@@ -51,32 +51,19 @@ HOSTILE_RATIO_THRESHOLD = float(os.getenv("VOYANT_HOSTILE_THRESHOLD", "0.08"))
 # Quantos termos de alto TF-IDF solicitar ao Trombone por lote.
 TROMBONE_LIMIT = int(os.getenv("VOYANT_TROMBONE_LIMIT", "50"))
 
-VOYANT_BASE_URL = os.getenv("VOYANT_BASE_URL", "http://localhost:8888/trombone")
-VOYANT_TIMEOUT = float(os.getenv("VOYANT_TIMEOUT", "5.0"))
+# v92.2: Usar 127.0.0.1 para evitar problemas de resolução/fallback de httpx (RuntimeError)
+VOYANT_BASE_URL = os.getenv("VOYANT_BASE_URL", "http://127.0.0.1:8888/trombone")
+VOYANT_TIMEOUT = float(os.getenv("VOYANT_TIMEOUT", "8.0"))
 
 
 class VoyantService:
     """
     Cliente assíncrono para a API Trombone do VoyantServer local.
-
-    Uso típico (via fast-drop no run_batch_classification):
-
-        result = await voyant_service.triage_batch(texts)
-        if result is None:
-            # Voyant offline → fallback: enviar 100% ao LLM
-            ...
-        elif result["drop"]:
-            # Lote classificado como NEUTRO pelo Voyant → pular LLM
-            ...
-        else:
-            # Vocabulário hostil detectado → delegar ao LLM
-            ...
     """
 
     def __init__(self, base_url: str = VOYANT_BASE_URL, timeout: float = VOYANT_TIMEOUT):
         self.base_url = base_url
         self.timeout = timeout
-        # Cliente HTTP reutilizado por toda a vida do objeto (pool de conexões).
         self._client: Optional[httpx.AsyncClient] = None
 
     def _get_client(self) -> httpx.AsyncClient:
@@ -102,44 +89,33 @@ class VoyantService:
         """
         try:
             client = self._get_client()
-            resp = await client.get(self.base_url, params={"tool": "utils.Ping", "format": "json"})
-            # O Trombone retorna 200 mesmo em pings — qualquer resposta indica que está vivo.
-            return resp.status_code < 500
+            # A rota base com format=json retorna 200 OK e metadados da versão
+            resp = await client.get(self.base_url, params={"format": "json"})
+            return resp.status_code == 200 and "voyantVersion" in resp.text
         except (httpx.RequestError, httpx.TimeoutException):
             return False
 
     async def extract_corpus_terms(self, texts: list[str]) -> Optional[dict]:
         """
-        Envia um lote de textos para o Trombone e retorna os top-N termos
-        ordenados por frequência relativa (proxy de TF-IDF no corpus inline).
-
-        Parâmetros:
-            texts: lista de strings (comentários brutos do lote).
-
-        Retorna:
-            dict no formato { "palavra": score_float } ou None em caso de falha.
-
-        Nota de Engenharia:
-            O Trombone não é stateless — ele cria um corpus internamente.
-            Para lotes efêmeros (não reutilizados), passamos o texto diretamente
-            via `input` e deixamos o servidor descartar ao final da sessão.
-            O parâmetro `format=json` é obrigatório; sem ele o retorno é XML.
+        Envia um lote de textos para o Trombone e retorna os top-N termos.
         """
         if not texts:
             return {}
 
-        # Agrega o lote em um único string separado por parágrafo.
-        # O Trombone trata cada bloco separado por \n\n como um "documento" distinto,
-        # o que nos dá distribuição IDF correta dentro do lote.
-        corpus_input = "\n\n".join(t.strip() for t in texts if t and t.strip())
+        clean_texts = [t.strip() for t in texts if t and t.strip()]
+        if not clean_texts:
+            return {}
 
         params = {
             "tool": "corpus.CorpusTerms",
             "format": "json",
             "limit": TROMBONE_LIMIT,
-            "sort": "RELATIVEFREQ",  # Ordena por frequência relativa (equivalente TF-IDF simplificado)
+            "sort": "RELATIVEFREQ",
         }
-        data = {"input": corpus_input}
+        # v92.2: Passar múltiplos documentos usando lista no dicionário 'data'.
+        # Isso garante compatibilidade com o parse assíncrono do httpx e cria
+        # documentos separados no Trombone para um IDF preciso por lote.
+        data = {"string": clean_texts}
 
         try:
             client = self._get_client()
@@ -166,27 +142,16 @@ class VoyantService:
     async def triage_batch(self, texts: list[str]) -> Optional[dict]:
         """
         Ponto de entrada principal para o fast-drop triage.
-
-        Retorna um dict com:
-          - "drop": bool — True se o lote pode ser classificado como NEUTRO sem LLM.
-          - "hostile_ratio": float — proporção de termos hostis encontrados.
-          - "hostile_terms": list[str] — termos hostis identificados no lote.
-          - "top_terms": dict — vocabulário completo retornado pelo Trombone.
-
-        Retorna None se o Voyant estiver indisponível (sinal para fallback ao LLM).
         """
         top_terms = await self.extract_corpus_terms(texts)
 
         if top_terms is None:
-            # Voyant offline: o caller deve usar o fallback (LLM 100%).
             return None
 
         if not top_terms:
-            # Corpus vazio ou resposta sem termos: seguro assumir NEUTRO.
             logger.debug("[Voyant] Corpus vazio — lote marcado como NEUTRO por padrão.")
             return {"drop": True, "hostile_ratio": 0.0, "hostile_terms": [], "top_terms": {}}
 
-        # Cruzamento léxico: quantos dos top-N termos batem com o dicionário hostil?
         vocab = set(top_terms.keys())
         hostile_hits = vocab & HOSTILE_LEXICON
         hostile_ratio = len(hostile_hits) / len(vocab) if vocab else 0.0
@@ -214,58 +179,16 @@ class VoyantService:
         }
 
     # ------------------------------------------------------------------
-    # Fase 2 (Opcional) — Colocados para implementação futura
-    # ------------------------------------------------------------------
-
-    async def get_collocates(self, texts: list[str], target_word: str) -> list[str]:
-        """
-        Consulta o CollocatesGraph para encontrar palavras que co-ocorrem
-        frequentemente com `target_word` no corpus do lote.
-
-        Útil para detectar padrões de astroturfing (ex: "fraude" + "urna" + "eleição")
-        sem necessitar do LLM.
-
-        Nota: Implementação completa planejada para Fase 2 (PASA v93.0).
-        """
-        if not texts or not target_word:
-            return []
-
-        corpus_input = "\n\n".join(t.strip() for t in texts if t and t.strip())
-        params = {
-            "tool": "corpus.CollocatesGraph",
-            "format": "json",
-            "query": target_word,
-            "limit": 20,
-        }
-        data = {"input": corpus_input}
-
-        try:
-            client = self._get_client()
-            resp = await client.post(self.base_url, params=params, data=data)
-            resp.raise_for_status()
-            payload = resp.json()
-            return self._parse_collocates(payload)
-        except Exception as exc:
-            logger.debug("[Voyant] Collocates indisponível para '%s': %s", target_word, exc)
-            return []
-
-    # ------------------------------------------------------------------
     # Helpers privados
     # ------------------------------------------------------------------
 
     def _parse_corpus_terms(self, payload: dict) -> dict:
         """
-        Normaliza a resposta JSON do Trombone (corpus.CorpusTerms) para
-        o formato interno { "palavra": score_float }.
-
-        O Trombone retorna estruturas aninhadas que variam com a versão do servidor.
-        Este método tenta os dois formatos conhecidos e degrada graciosamente.
+        Normaliza a resposta JSON do Trombone (corpus.CorpusTerms).
         """
         result: dict = {}
 
         try:
-            # Formato principal observado no VoyantServer >= 2.6:
-            # { "corpusTerms": { "terms": [ { "term": "palavra", "relativeFreq": 0.002 }, ... ] } }
             terms_list = (
                 payload
                 .get("corpusTerms", {})
@@ -276,12 +199,10 @@ class VoyantService:
                 for entry in terms_list:
                     term = entry.get("term", "").lower().strip()
                     score = float(entry.get("relativeFreq", entry.get("rawFreq", 0)))
-                    if term and len(term) > 2:  # Descarta stopwords de 1-2 chars
+                    if term and len(term) > 2:
                         result[term] = score
                 return result
 
-            # Formato alternativo (versões mais antigas):
-            # { "terms": [ ... ] } na raiz
             alt_terms = payload.get("terms", [])
             if isinstance(alt_terms, list):
                 for entry in alt_terms:
@@ -296,19 +217,6 @@ class VoyantService:
 
         return result
 
-    def _parse_collocates(self, payload: dict) -> list[str]:
-        """Extrai lista de termos colocados da resposta do CollocatesGraph."""
-        collocates: list[str] = []
-        try:
-            edges = payload.get("corpusCollocates", {}).get("collocates", [])
-            for edge in edges:
-                term = edge.get("term", "").lower().strip()
-                if term and len(term) > 2:
-                    collocates.append(term)
-        except (KeyError, TypeError):
-            pass
-        return collocates
 
-
-# Instância singleton — mesma convenção do lexical_filter e ai_service do projeto.
+# Instância singleton
 voyant_service = VoyantService()

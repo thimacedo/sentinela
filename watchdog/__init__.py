@@ -446,7 +446,7 @@ async def get_metrics():
         # Fallback: verifica apenas presença das chaves no .env
         ollama_health = _get_health_url(os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"), "http://localhost:11434", "/api/tags")
         ai_status["ollama"] = _service_status(ollama_health)
-        for prov_name, env_var in {"groq": "GROQ_API_KEY", "mistral": "MISTRAL_API_KEY", "deepseek": "DEEPSEEK_API_KEY", "openrouter": "OPENROUTER_API_KEY", "gemini": "GEMINI_API_KEY"}.items():
+        for prov_name, env_var in {"groq": "GROQ_API_KEY", "mistral": "MISTRAL_API_KEY", "gemini": "GEMINI_API_KEY"}.items():
             val = os.getenv(env_var, "").strip()
             ai_status[prov_name] = "OK" if (val and "dummy" not in val.lower()) else "DESATIVADO"
 
