@@ -1,8 +1,10 @@
 """
-WkAplicaSugestoes — Consumidor de Sugestões do AIAdvisor (PASA v92.8)
+WkAplicaSugestoes — Consumidor de Sugestões do AIAdvisor (PASA v93.0)
 
 Fecha o loop de feedback do AIAdvisor:
   AIAdvisor gera sugestão → WkAplicaSugestoes aplica automaticamente
+  
+Este componente roda como uma tarefa de fundo (background task) independente do orquestrador.
 """
 import asyncio
 import logging
@@ -11,72 +13,63 @@ import os
 from typing import Optional, List, Dict, Any
 from datetime import datetime, timezone
 
-from workers.base.subagent_base import BaseSubAgent
-from workers.base.cycle_result import CycleResult
 from workers.base.memory_store import MemoryStore
 from core.db import db_client
 
 logger = logging.getLogger("WkAplicaSugestoes")
 
-class WkAplicaSugestoes(BaseSubAgent):
+class WkAplicaSugestoes:
     """
     Lê sugestões pendentes do AIAdvisor e aplica as que são automatizáveis.
-    Migrado para BaseSubAgent e MemoryStore (PASA v92.8).
+    PASA v93.0: Restaurado como Background Task (sem herança de BaseWorker).
     """
 
     def __init__(
         self, 
-        worker_id: str = "sa-aplica-sugestoes-01", 
-        config: Optional[dict] = None,
-        memory: Optional[MemoryStore] = None,
-        orchestrator = None
+        db_client_override=None,
+        orchestrator=None,
+        memory: Optional[MemoryStore] = None
     ):
-        cfg = config or {}
-        super().__init__(worker_id, cfg)
-        self.memory = memory or MemoryStore()
+        self.db = db_client_override or db_client.client
         self.orchestrator = orchestrator
+        self.memory = memory or MemoryStore()
         self.is_active = True
+        self._check_interval = 1800  # 30 minutos
 
-    def describe(self) -> str:
-        return "WkAplicaSugestoes — Execução automática de melhorias sugeridas pelo Advisor SRE."
+    async def start(self):
+        """Inicia o loop infinito de processamento de sugestões."""
+        logger.info("💡 [WkAplicaSugestoes] Iniciando loop de feedback automático...")
+        while self.is_active:
+            try:
+                await self.run_cycle()
+            except Exception as e:
+                logger.error(f"Erro no ciclo de sugestões: {e}")
+            
+            await asyncio.sleep(self._check_interval)
 
-    async def run_cycle(self) -> CycleResult:
-        """Executa um ciclo de aplicação de sugestões."""
-        self.cycle += 1
-        try:
-            # 1. Busca sugestões pendentes
-            res = await asyncio.to_thread(
-                db_client.client.table("worker_suggestions")
-                .select("*")
-                .eq("status", "pending_review")
-                .order("timestamp", desc=False)
-                .limit(5)
-                .execute()
-            )
+    async def run_cycle(self):
+        """Executa um ciclo de busca e aplicação de sugestões."""
+        # 1. Busca sugestões pendentes
+        res = await asyncio.to_thread(
+            self.db.table("worker_suggestions")
+            .select("*")
+            .eq("status", "pending_review")
+            .order("timestamp", desc=False)
+            .limit(5)
+            .execute
+        )
 
-            suggestions = res.data or []
-            if not suggestions:
-                return self._idle_result("Sem sugestões pendentes.")
+        suggestions = res.data or []
+        if not suggestions:
+            return
 
-            applied_count = 0
-            for s in suggestions:
-                success = await self._evaluate_and_apply(s)
-                if success: applied_count += 1
-
-            return CycleResult(
-                worker_id=self.worker_id,
-                cycle=self.cycle,
-                status="success",
-                extracted=len(suggestions),
-                classified=applied_count,
-                db_success=True,
-                source="wk_aplica_sugestoes",
-                metadata={"applied": applied_count}
-            )
-
-        except Exception as e:
-            logger.error(f"💥 [{self.worker_id}] Erro ao processar sugestões: {e}")
-            return CycleResult(worker_id=self.worker_id, cycle=self.cycle, status="failed", error=str(e))
+        applied_count = 0
+        for s in suggestions:
+            success = await self._evaluate_and_apply(s)
+            if success: applied_count += 1
+            
+        if applied_count > 0:
+            logger.info(f"⚡ [WkAplicaSugestoes] {applied_count} sugestões aplicadas automaticamente.")
 
     async def _evaluate_and_apply(self, suggestion: dict) -> bool:
         """Avalia uma sugestão e decide se pode ser aplicada automaticamente."""
@@ -94,7 +87,7 @@ class WkAplicaSugestoes(BaseSubAgent):
 
         # --- Padrão: Aumentar jitter ---
         elif any(p in text for p in ["aumentar jitter", "aumentar intervalo", "increase jitter", "espera maior"]):
-            action_taken = "Jitter aumentado via MemoryStore flag (v92.8)."
+            action_taken = "Jitter aumentado via MemoryStore flag (v93.0)."
             await self.memory.set_flag("AUTOPILOT_FORCE_JITTER", True, ttl=3600)
             new_status = "auto_applied"
 
@@ -124,7 +117,7 @@ class WkAplicaSugestoes(BaseSubAgent):
                 update_data["suggestion"] = f"[{new_status.upper()}] {action_taken}\n\n{suggestion.get('suggestion', '')}"
 
             await asyncio.to_thread(
-                db_client.client.table("worker_suggestions").update(update_data).eq("id", sid).execute()
+                self.db.table("worker_suggestions").update(update_data).eq("id", sid).execute
             )
             return new_status == "auto_applied"
         except Exception as e:
@@ -150,10 +143,10 @@ class WkAplicaSugestoes(BaseSubAgent):
     async def _hibernate_target(self, username: str) -> Optional[str]:
         try:
             await asyncio.to_thread(
-                db_client.client.table("fila_coleta").update({
+                self.db.table("fila_coleta").update({
                     "status": "HIBERNANDO",
                     "prioridade": 9,
-                }).eq("username", username).execute()
+                }).eq("username", username).execute
             )
             return f"Alvo @{username} movido para HIBERNANDO."
         except Exception as e:
@@ -164,5 +157,5 @@ class WkAplicaSugestoes(BaseSubAgent):
         match = re.search(r'@([\w.]+)', text)
         return match.group(1) if match else None
 
-    def _idle_result(self, msg: str) -> CycleResult:
-        return CycleResult(worker_id=self.worker_id, cycle=self.cycle, status="idle", error="no_tasks_available", metadata={"reason": msg})
+    def stop(self):
+        self.is_active = False
