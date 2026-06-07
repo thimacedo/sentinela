@@ -487,28 +487,16 @@ async def get_ai_details(name: str):
     """Retorna detalhes de um provedor para gestão no dashboard."""
     # v92.6: Mapeamento expandido e normalização de variantes (fallback_*)
     env_vars = {
-        "maritaca": "MARITACA_API_KEY",
         "google_gemini": "GEMINI_API_KEY",
         "mistral": "MISTRAL_API_KEY",
-        "deepseek_chat": "DEEPSEEK_API_KEY",
-        "openrouter": "OPENROUTER_API_KEY",
         "zhipu_glm4": "ZHIPU_API_KEY",
-        "huggingface": "HF_TOKEN",
-        "cohere": "COHERE_API_KEY",
-        "anthropic": "ANTHROPIC_API_KEY",
         "voyant": "VOYANT_BASE_URL"
     }
     
     links = {
-        "maritaca": "https://chat.maritaca.ai/keys",
         "google_gemini": "https://aistudio.google.com/app/apikey",
         "mistral": "https://console.mistral.ai/api-keys/",
-        "deepseek_chat": "https://platform.deepseek.com/api_keys",
-        "openrouter": "https://openrouter.ai/keys",
         "zhipu_glm4": "https://open.bigmodel.cn/usercenter/apikeys",
-        "huggingface": "https://huggingface.co/settings/tokens",
-        "cohere": "https://dashboard.cohere.com/api-keys",
-        "anthropic": "https://console.anthropic.com/settings/keys",
         "voyant": "https://voyant-tools.org/"
     }
 

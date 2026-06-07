@@ -97,7 +97,7 @@ export default function AlertsTab() {
       </div>
 
       <div className="relative">
-        <div className={!unlocked ? 'blur-sm pointer-events-none select-none opacity-50 transition-all duration-700' : ''}>
+        <div className={!unlocked ? 'blur-sm opacity-50 transition-all duration-700' : ''}>
           <div className="p-6 space-y-6 bg-bg-main/10 min-h-[500px]">
             {items.length === 0 && !loading ? (
               <div className="text-center py-20 text-text-muted font-mono text-xs">
