@@ -124,8 +124,9 @@ class VoyantService:
         self._client: Optional[httpx.AsyncClient] = None
 
     def _get_client(self) -> httpx.AsyncClient:
-        """Retorna o cliente HTTP, criando-o lazily na primeira chamada."""
+        """Retorna o cliente HTTP, criando-o lazily na primeira chamada dentro de um loop."""
         if self._client is None or self._client.is_closed:
+            # v92.9: Garante que o cliente seja criado dentro do loop atual
             self._client = httpx.AsyncClient(timeout=self.timeout)
         return self._client
 
@@ -159,8 +160,6 @@ class VoyantService:
         Nota de Engenharia (v92.3.1):
             O parâmetro correto para texto inline é `string`, não `input`.
             O campo `input` causa erro 500 no DocumentExpander do Trombone.
-            Passamos uma lista de strings para o parâmetro `string`, o que cria
-            documentos individuais no corpus, permitindo o cálculo de IDF.
         """
         if not texts:
             return {}
@@ -176,8 +175,8 @@ class VoyantService:
             "sort": "RELATIVEFREQ",
         }
         
-        # httpx aceita lista de tuplas para repetir a mesma chave no form body.
-        # Isso cria N documentos reais no Trombone.
+        # v92.9: httpx aceita lista de tuplas para repetir a mesma chave no form body.
+        # Isso cria N documentos reais no Trombone de forma assíncrona.
         data = [("string", t) for t in clean_texts]
 
         try:
@@ -185,13 +184,13 @@ class VoyantService:
             resp = await client.post(self.base_url, params=params, data=data)
             resp.raise_for_status()
         except httpx.TimeoutException:
-            logger.warning("[Voyant] Timeout ao consultar Trombone (%.1fs). Fallback ao LLM.", self.timeout)
+            logger.warning("[Voyant] Timeout ao consultar Trombone (%.1fs).", self.timeout)
             return None
         except httpx.RequestError as exc:
-            logger.warning("[Voyant] Erro de conexão com Trombone: %s. Fallback ao LLM.", exc)
+            logger.warning("[Voyant] Erro de conexão com Trombone: %s", exc)
             return None
         except httpx.HTTPStatusError as exc:
-            logger.warning("[Voyant] HTTP %s do Trombone: %s. Fallback ao LLM.", exc.response.status_code, exc)
+            logger.warning("[Voyant] HTTP %s do Trombone: %s", exc.response.status_code, exc)
             return None
 
         try:

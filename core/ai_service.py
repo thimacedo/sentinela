@@ -102,47 +102,55 @@ def clean_null_chars(data: Any) -> Any:
 
 class AIService:
     def __init__(self):
-        import httpx
-        self.ollama_client = AsyncOpenAI(
-            api_key="ollama",
-            base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1"),
-            max_retries=0,
-            http_client=httpx.AsyncClient(timeout=httpx.Timeout(timeout=120.0, connect=30.0))
-        )
-        self.mistral_client = AsyncOpenAI(
-            api_key=os.getenv("MISTRAL_API_KEY") or "dummy-mistral-key",
-            base_url="https://api.mistral.ai/v1",
-            max_retries=0
-        )
-
-        finetuned_model = os.getenv('FINETUNED_MODEL_NAME', "open-mistral-nemo")
-
-        self.providers = [
-            {"name": "ollama", "client": self.ollama_client, "model": os.getenv("OLLAMA_MODEL", "qwen2.5-coder:3b"), "timeout": 120.0, "cooldown_until": 0.0, "is_async_openai": True},
-            {"name": "google_gemini", "client": None, "model": "gemini-2.5-flash", "timeout": 45.0, "cooldown_until": 0.0, "is_async_openai": False}, # v92.7: Promovido a primário
-            {"name": "mistral", "client": self.mistral_client, "model": finetuned_model, "timeout": 30.0, "cooldown_until": 0.0, "is_async_openai": True},
-        ]
-
-        
-        try:
-            from core.config import FALLBACK_PROVIDERS
-            for prov in FALLBACK_PROVIDERS:
-                self.providers.append({
-                    "name": prov["name"],
-                    "model": prov.get("model", ""),
-                    "timeout": 45.0,
-                    "cooldown_until": 0.0,
-                    "is_async_openai": False,
-                })
-        except Exception as e:
-            logger.warning(f"[AI] Falha ao injetar FALLBACK_PROVIDERS: {e}")
-
+        self.ollama_client = None
+        self.mistral_client = None
+        self.providers = []
         self.consecutive_failures: Dict[str, int] = {}
         self.fallback_llm = None
         
         # Cache de I/O em memória
         self._prompt_cache = {"enriched_local": None, "enriched_cloud": None}
         self.refresh_prompt_cache()
+
+    def _ensure_clients(self):
+        """Inicializa os clientes de IA se ainda não existirem (Lazy Loading v92.9)."""
+        import httpx
+        if self.ollama_client is None:
+            self.ollama_client = AsyncOpenAI(
+                api_key="ollama",
+                base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1"),
+                max_retries=0,
+                http_client=httpx.AsyncClient(timeout=httpx.Timeout(timeout=120.0, connect=30.0))
+            )
+        
+        if self.mistral_client is None:
+            self.mistral_client = AsyncOpenAI(
+                api_key=os.getenv("MISTRAL_API_KEY") or "dummy-mistral-key",
+                base_url="https://api.mistral.ai/v1",
+                max_retries=0
+            )
+
+        if not self.providers:
+            finetuned_model = os.getenv('FINETUNED_MODEL_NAME', "open-mistral-nemo")
+            self.providers = [
+                {"name": "ollama", "client": self.ollama_client, "model": os.getenv("OLLAMA_MODEL", "qwen2.5-coder:3b"), "timeout": 120.0, "cooldown_until": 0.0, "is_async_openai": True},
+                {"name": "google_gemini", "client": None, "model": "gemini-2.5-flash", "timeout": 45.0, "cooldown_until": 0.0, "is_async_openai": False},
+                {"name": "mistral", "client": self.mistral_client, "model": finetuned_model, "timeout": 30.0, "cooldown_until": 0.0, "is_async_openai": True},
+            ]
+            
+            try:
+                from core.config import FALLBACK_PROVIDERS
+                for prov in FALLBACK_PROVIDERS:
+                    if not any(p["name"] == prov["name"] for p in self.providers):
+                        self.providers.append({
+                            "name": prov["name"],
+                            "model": prov.get("model", ""),
+                            "timeout": 45.0,
+                            "cooldown_until": 0.0,
+                            "is_async_openai": False,
+                        })
+            except Exception as e:
+                logger.warning(f"[AI] Falha ao injetar FALLBACK_PROVIDERS: {e}")
 
     def refresh_prompt_cache(self) -> None:
         """Recarrega arquivos pesados (MD/JSON) do disco e popula o cache de prompts enriquecidos."""
@@ -258,6 +266,7 @@ class AIService:
 
     async def _execute_provider_call(self, provider: Dict[str, Any], final_system_prompt: str, user_content: str, response_format: str) -> str:
         """Encapsula o dispatch do cliente (AsyncOpenAI vs FallbackLLM)."""
+        self._ensure_clients()
         name = provider["name"]
         
         if provider.get("is_async_openai", False):
@@ -408,7 +417,11 @@ class AIService:
                 continue
 
         if not force_cloud:
-            logger.warning(f"⚠️ [AI] Ollama local falhou para o ID {comment_id}. Direcionando para a fila de revisão online.")
+            if not ai_circuit_breaker.can_execute("ollama"):
+                logger.debug("[AI] Ollama em Circuit Breaker. ID %s direcionado para fila online.", comment_id)
+            else:
+                logger.warning(f"⚠️ [AI] Ollama local falhou para o ID {comment_id}. Direcionando para a fila de revisão online.")
+            
             return {
                 "is_hate": False,
                 "categoria_ia": "SUSPEITO",

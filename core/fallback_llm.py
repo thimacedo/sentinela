@@ -243,8 +243,6 @@ class FallbackLLM:
                     res = self._call_openai(text, api_key)
                 elif name == "anthropic_claude_instant":
                     res = self._call_anthropic(text, api_key)
-                elif name == "google_gemini":
-                    res = self._call_gemini(text, api_key, model_name)
                 elif name == "groq_llama3":
                     res = self._call_groq(text, api_key, model_name)
                 elif name == "zhipu_glm4":

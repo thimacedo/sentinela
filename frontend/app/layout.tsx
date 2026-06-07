@@ -27,11 +27,13 @@ export default function RootLayout({
         <meta httpEquiv="Expires" content="0" />
       </head>
       <body className={`${inter.className} antialiased bg-bg-main text-text-main`}>
-        <Script 
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1827611269042960" 
-          strategy="afterInteractive"
-          crossOrigin="anonymous" 
-        />
+        {process.env.NEXT_PUBLIC_ADSENSE_ID && (
+          <Script 
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_ID}`} 
+            strategy="lazyOnload"
+            crossOrigin="anonymous" 
+          />
+        )}
         <ClientLayoutWrapper>
           {children}
         </ClientLayoutWrapper>
