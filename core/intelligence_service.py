@@ -129,6 +129,31 @@ class IntelligenceService:
         except: return {}
 
     async def _enrich_and_validate(self, username: str, ig_data: Dict[str, Any], official_data: Dict[str, Any]) -> Dict[str, Any]:
+        from core.ground_truth import ground_truth
+        
+        # 1. Verifica Tabela da Verdade
+        verdade = ground_truth.get_truth(username)
+        if verdade:
+            return {
+                "identidade_validada": True,
+                "motivo_rejeicao": None,
+                "nome_completo": verdade["nome_completo"],
+                "cargo": verdade["cargo"],
+                "sexo": verdade["sexo"],
+                "partido": "SEM PARTIDO", # Será enriquecido depois se necessário
+                "estado": "NACIONAL",
+                "ideologia": "Centro",
+                "quality_confidence": 1.0
+            }
+
+        # 2. Taxonomia Fechada
+        TAXONOMIA_CARGOS_VALIDOS = [
+            "Presidente", "Vice-Presidente", "Governador", "Vice-Governador", 
+            "Senador", "Deputado Federal", "Deputado Estadual", "Prefeito", "Vereador",
+            "Ministro STF", "Ministro", "Influenciador Político", "Institucional", 
+            "Pré-candidato", "Nacional", "Ex-Prefeito", "Jornalista"
+        ]
+
         prompt = f"""
         Consolidador de Inteligência Sentinela. Analise a elegibilidade do alvo para monitoramento.
         ESCOPO: Candidatos reais, Políticos em mandato, Jornalistas de política, Ativistas e Influenciadores Políticos.
@@ -136,16 +161,19 @@ class IntelligenceService:
         IG={json.dumps(ig_data)}
         OFICIAL={json.dumps(official_data)}
 
-        REGRA DE OURO: Diferencie Influenciadores/Comunicadores de Pré-Candidatos.
-        Só atribua cargos como 'Deputado', 'Prefeito' ou 'Candidato' se houver evidência oficial (DivulgaCand/Notícias).
-        Se for uma figura pública que apenas comenta política ou tem influência, use 'Influenciador Político'.
+        REGRAS ESTRITAS DE SANITIZAÇÃO:
+        1. O campo "cargo" DEVE ser estritamente um destes: {TAXONOMIA_CARGOS_VALIDOS}
+        2. O campo "sexo" DEVE ser apenas "M" (Masculino), "F" (Feminino) ou "NI" (Não identificado).
+        3. Se não houver certeza absoluta do cargo atual, use "Influenciador Político".
+        4. O username é o dono da conta. Não confunda com apoiadores.
 
         Retorne JSON:
         {{
             "identidade_validada": boolean,
             "motivo_rejeicao": "string ou null",
             "nome_completo": "string",
-            "cargo": "Ex: Influenciador Político, Deputado Federal, Jornalista",
+            "cargo": "string_exatamente_como_na_lista",
+            "sexo": "M_ou_F_ou_NI",
             "partido": "Sigla ou 'SEM PARTIDO'",
             "estado": "Sigla UF ou 'NACIONAL'",
             "ideologia": "DIREITA|ESQUERDA|CENTRO|DESCONHECIDO",
