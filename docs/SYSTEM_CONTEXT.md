@@ -22,11 +22,15 @@ O Sentinela é uma plataforma de monitoramento político com foco em:
               └── TargetResearchWorker (opcional por RESEARCHER_MODE)
 
 [Subagentes Analíticos e de Dados]
+  ├── SaVoyant: Subagente Linguista Pericial (v92.3 - Voyant Tools)
   ├── SaConsultaBanco: Prover consultas SQL locais leves via Datasette
   ├── SaAuditaClassificacoes: Auditoria cruzada anti-alucinação sob demanda (Groq)
   ├── SaMineracaoRedes: Análise de redes coordenadas e clusters reativa
   ├── SaAuditoriaFinanceira: Auditoria financeira e fechamento diário reativo
   └── Hugging Face MCP: Descoberta e acesso ao ecossistema Hub via Agente CLI
+
+[Voyant Server] (Porta 8888)
+  └── Trombone API (PLN Determinístico local)
 
 [Datasette Server] (Porta 8002)
   └── sentinela_data.db (Espelhamento SQLite local imutável FTS5)
@@ -177,6 +181,7 @@ Esses ajustes devem ser considerados baseline atual do frontend oficial.
 
 A arquitetura foi migrada para subagentes especializados executados de forma reativa ou sob demanda, todos herdando da classe base `BaseSubAgent` para offloading de CPU (subprocessos) e I/O (threads):
 
+- **SaVoyant** (`workers/ai/sa_voyant.py`): Subagente Linguista. Cruza estatísticas léxicas do Voyant Tools com a 'Bíblia Linguística Forense' para detectar Xenofobia, Ataques Institucionais e Sarcasmo com precisão pericial.
 - **SaConsultaBanco** (`workers/ai/sa_consulta_banco.py`): Desacopla a leitura de dados históricos de produção (Supabase) via API HTTP do Datasette local na porta `8002`, provendo buscas FTS5 ultra-velozes.
 - **SaAuditaClassificacoes** (`workers/ai/sa_audita_classificacoes.py`): Subagente de curadoria cruzada anti-alucinação. Consome o `SaConsultaBanco` e efetua reclassificações via cascata de IA com circuit breaker para calcular o drift do modelo, gerando sugestões de prioridade `HIGH` em `worker_suggestions`.
 - **SaMineracaoRedes** (`workers/analytics/sa_mineracao_redes.py`): Analisa grafos de hostilidade e detecta campanhas coordenadas organizadas (clusters de ataque) em processos filhos separados (`ProcessPoolExecutor`), persistindo os dados e gerando relatórios físicos para o frontend com claims atômicos concorrentes.

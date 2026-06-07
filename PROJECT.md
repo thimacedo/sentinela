@@ -2,14 +2,14 @@
 
 ## Architecture
 - Module/package boundaries:
-  - `watchdog/`: Runs the system tray (pystray) and a FastAPI/uvicorn server (port 8001), supervising `main_runner.py` via subprocess.
-  - `main_runner.py`: Orchestrates all active background workers.
-  - `core/health_check.py`: Pings Instagram and local Ollama, ensuring startup health.
-  - `scripts/export_to_sqlite.py`: Synchronizes remote Supabase database with a local SQLite database for local Datasette exploration (port 8002).
+  - `watchdog/`: Supervisão de processos, Dashboards (v91.3) e gestão de chaves de API.
+  - `main_runner.py`: Orquestração de Workers e Subagentes.
+  - `core/voyant_service.py`: Motor determinístico de PLN (Trombone API) para triagem rápida.
+  - `scripts/export_to_sqlite.py`: Sincronização SQLite/Datasette (modo WAL).
 - Data flow:
-  - Remote Supabase holds queue, candidates, and logs.
-  - Watchdog guard thread starts `main_runner.py`.
-  - On cooldown (idle state), Watchdog runs local Datasette synchronization.
+  - Remote Supabase (Queue/Data) ➔ Voyant Triage (Local) ➔ AI Classification (Híbrida).
+  - VoyantServer (Porta 8888): Motor de PLN determinístico local.
+  - Datasette (Porta 8002): Explorador SQL local FTS5.
 
 ## Milestones
 | # | Name | Scope | Dependencies | Status |
