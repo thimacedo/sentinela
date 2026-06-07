@@ -602,29 +602,23 @@ class AIService:
             items = res.data or []
             count = 0
             
-            ollama_prov = next((p for p in self.providers if p["name"] == "ollama"), None)
-            if ollama_prov: self.providers.remove(ollama_prov)
-
-            try:
-                for item in items:
-                    try:
-                        res_ia = await self.classify_text(item["texto_bruto"], item["id"], trace_id=item.get("trace_id"))
-                        if res_ia and res_ia.get("categoria_ia") != "ERRO":
-                            engine_name = res_ia.get("name", "unknown").upper()
-                            analise = f"[RE-ANÁLISE:{engine_name}] {res_ia.get('analise_pericial', '')}"
-                            await asyncio.to_thread(
-                                db_client.client.table('comentarios').update({
-                                    "categoria_ia": res_ia["categoria_ia"], "confianca_ia": res_ia["confianca_ia"], "is_hate": res_ia["is_hate"], "analise_pericial": analise
-                                }).eq("id", item["id"]).execute
-                            )
-                            count += 1
-                        
-                        # PASA v88.2 - Cadência Constante (Persistência sobre Velocidade)
-                        await asyncio.sleep(1.0)
-                    except Exception as e:
-                        if "Colapso" in str(e): break
-            finally:
-                if ollama_prov: self.providers.append(ollama_prov)
+            for item in items:
+                try:
+                    res_ia = await self.classify_text(item["texto_bruto"], item["id"], trace_id=item.get("trace_id"), force_cloud=True)
+                    if res_ia and res_ia.get("categoria_ia") != "ERRO":
+                        engine_name = res_ia.get("name", "unknown").upper()
+                        analise = f"[RE-ANÁLISE:{engine_name}] {res_ia.get('analise_pericial', '')}"
+                        await asyncio.to_thread(
+                            db_client.client.table('comentarios').update({
+                                "categoria_ia": res_ia["categoria_ia"], "confianca_ia": res_ia["confianca_ia"], "is_hate": res_ia["is_hate"], "analise_pericial": analise
+                            }).eq("id", item["id"]).execute
+                        )
+                        count += 1
+                    
+                    # PASA v88.2 - Cadência Constante (Persistência sobre Velocidade)
+                    await asyncio.sleep(1.0)
+                except Exception as e:
+                    if "Colapso" in str(e): break
                 
             return count
         except Exception as e:

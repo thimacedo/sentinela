@@ -351,3 +351,9 @@ PGMQ deve aparecer apenas como hipótese futura.
 - **Remoção de Legados**: Eliminadas as pastas obsoletas de testes e scaffolds antigos (`frontend-bleeding-edge/` e `test_api/`) e scripts de testes locais soltos na raiz.
 - **Otimização de Testes Unitários**: Ajustado o arquivo `pytest.ini` para isolar a varredura automática do pytest unicamente à pasta `tests/`. Isso preveniu a execução indevida e lenta (que demandava cerca de 4 minutos de requisições de rede) de scripts CLI manuais do operador, reduzindo o tempo de validação local para **0.06 segundos**.
 - **Modelo Utilizado na Execução**: *Gemini 3.5 Flash (Medium)*, conforme protocolo de uso de IA para investigações locais e limpezas.
+
+## Resolução da Condição de Corrida no AIService (Ollama - 2026-06-07)
+
+- **Eliminação de Race Condition**: Sanamos uma falha crítica de concorrência assíncrona no [ai_service.py](file:///c:/projetos/sentinela/core/ai_service.py). O método de re-análise em lote (`run_batch_reanalysis`) removia fisicamente o `"ollama"` do array global compartilhado `self.providers` durante todo o seu ciclo (que pode levar dezenas de segundos), gerando falsos erros de triagem paralela em outros loops ativos de classificação.
+- **Isolamento de Chamada**: Removemos a manipulação direta e mutável do catálogo global e passamos `force_cloud=True` no parâmetro de chamada `classify_text` no lote de re-análise. Isso mantém a lista global compartilhada estática e garante a integridade de todas as classificações paralelas concorrentes do sistema.
+- **Modelo Utilizado na Execução**: *Gemini 3.5 Flash (Medium)*, ideal para diagnósticos de SRE, correções locais e testes rápidos.
