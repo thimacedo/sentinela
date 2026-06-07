@@ -69,14 +69,14 @@ class AutopilotManager:
 
                 if metrics.get("failure_rate", 0) > self.failure_threshold:
                     logger.warning(
-                        f"⚠️ [Autopilot] Taxa de falha crítica: {metrics['failure_rate']:.2%} "
-                        f"(ciclos: {metrics['total_cycles']}, vazios: {metrics.get('empty_cycles', 0)})"
+                    f"⚠️ [Autopilot] Taxa de falha crítica: {metrics['failure_rate']:.2%} "
+                    f"(ciclos: {metrics['total_cycles']}, vazios: {metrics.get('empty_cycles', 0)})"
                     )
                     await self._handle_degradation(metrics)
                 else:
                     logger.info(
-                        f"✅ [Autopilot] Baseline saudável. "
-                        f"Taxa de falha: {metrics['failure_rate']:.2%} / {metrics['total_cycles']} ciclos."
+                    f"✅ [Autopilot] Baseline saudável. "
+                    f"Taxa de falha: {metrics['failure_rate']:.2%} / {metrics['total_cycles']} ciclos."
                     )
 
                 self.last_check = datetime.now(timezone.utc)
