@@ -456,6 +456,7 @@ if __name__ == "__main__":
 
     # 3. Processo principal (seja detached em background ou interativo em foreground)
     # Tenta obter o socket lock de instância única definitivo
+    kill_process_on_port(8009)
     _lock_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         _lock_socket.bind(("127.0.0.1", 8009))

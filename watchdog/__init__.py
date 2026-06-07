@@ -706,6 +706,11 @@ def heal_runtime_error(reason: str) -> str:
         state.add_log("error", "[Watchdog] 🛑 OOM Detectado! Reinícios parados para proteger o sistema.")
         state.update_metrics(status="PARADO - OOM")
         return "fatal"
+
+    if "403" in stderr_lower or "402" in stderr_lower or "forbidden" in stderr_lower or "payment required" in stderr_lower:
+        state.add_log("warn", "[Watchdog] ⏸️ Erro de Cota/Saldo/Permissão (403/402). Aguardando 10 min para recuperação de créditos.")
+        time.sleep(600)
+        return "wait"
         
     _db_connection_terms = [
         "connectionrefusederror",
@@ -931,14 +936,14 @@ def guard():
                         state.should_run = False
                         continue
                     
-                    if state.fast_crashes >= 3:
-                        state.add_log("error", "[Watchdog] 3 falhas rapidas consecutivas. Hibernando por 1h.")
-                        send_whatsapp_alert("WATCHDOG: INIT LOOP - Servidor falhou ao iniciar 3x. Hibernando 1h.", category="runtime")
+                    if state.fast_crashes >= 5:
+                        state.add_log("error", "[Watchdog] 5 falhas rapidas consecutivas. Hibernando por 10 min.")
+                        send_whatsapp_alert("WATCHDOG: INIT LOOP - Servidor falhou ao iniciar 5x. Hibernando 10m.", category="runtime")
                         state.update_metrics(status="HIBERNANDO - INIT LOOP", should_run=False)
                         
-                        # Espera defensiva interrompível (1 hora)
+                        # Espera defensiva interrompível (10 minutos)
                         elapsed = 0
-                        while elapsed < 3600 and not state.should_run:
+                        while elapsed < 600 and not state.should_run:
                             time.sleep(5)
                             elapsed += 5
                             

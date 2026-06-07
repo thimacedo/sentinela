@@ -198,6 +198,11 @@ PGMQ deve aparecer apenas como hipótese futura.
 - Ativado log `INFO` para `core.autopilot` no `main_runner.py` para visibilidade do loop OODA.
 - Validado boot limpo sem loops de reinicialização ou falhas de sintaxe.
 
+### 7. Resiliência do Watchdog (v50.2)
+- **Shield Auto-Clean**: O Watchdog agora tenta limpar automaticamente a porta de lock (**8009**) antes de iniciar, evitando conflitos de instâncias "zumbis".
+- **Suavização de Restart**: Aumentada a tolerância para falhas rápidas de 3 para **5 tentativas**. O tempo de hibernação por erro de boot foi reduzido de 1h para **10 minutos**.
+- **Gestão de Cotas IA**: Adicionado tratamento específico para erros **403/402** (Maritaca/OpenRouter) no Watchdog. O sistema agora entra em espera de 10 min nessas falhas em vez de tentar reinícios agressivos, preservando a saúde da malha de fallback.
+
 ## Próximos passos OBRIGATÓRIOS
 1. **Rotação de Proxies**: Finalizar a integração real de proxies residenciais no Scraper V2 (AGENTS_SYNC.md).
 2. **Checkpoint por Post**: Implementar persistência intermediária para evitar perda de progresso em coletas de perfis grandes.
