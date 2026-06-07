@@ -173,29 +173,30 @@
         <!-- Status (Right) -->
         <aside class="lg:col-span-3 flex flex-col gap-4 h-auto lg:h-[calc(100vh-290px)] lg:min-h-[480px] overflow-y-auto custom-scrollbar">
             <!-- Inteligência Analítica (SQL Local Bridge) -->
-            <div class="bg-slate-900/60 border border-indigo-500/30 rounded-2xl p-5 shadow-xl relative group">
+            <div class="bg-slate-900/60 border border-indigo-500/30 rounded-2xl p-5 shadow-xl relative group transition-all duration-300">
                 <div class="absolute -right-4 -top-4 w-20 h-20 bg-indigo-500/10 rounded-full blur-2xl group-hover:bg-indigo-500/20 transition-all"></div>
-                <div class="flex justify-between items-start mb-4">
-                    <div class="flex flex-col">
+                <div class="flex justify-between items-start mb-4 cursor-pointer" onclick="toggleAccordion('analytics-panel', this)">
+                    <div class="flex flex-col pointer-events-none">
                         <h2 class="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 flex items-center gap-2">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                             Inteligência Analítica
                         </h2>
                         <span id="ai-degraded-label" class="text-[8px] font-black text-rose-500/60 tracking-widest hidden uppercase mt-0.5">⚠️ Malha Degradada</span>
                     </div>
+                    <svg class="w-4 h-4 text-slate-500 transform transition-transform duration-300 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </div>
-                <div id="analytics-panel" class="flex flex-col gap-4">
+                <div id="analytics-panel" class="flex flex-col gap-4 overflow-hidden transition-all duration-300 origin-top">
                     <!-- Top Attackers -->
                     <div>
                         <span class="text-[9px] font-bold text-slate-500 uppercase mb-2 block">Maiores Agressores (Global)</span>
-                        <div id="top-attackers-list" class="flex flex-col gap-1.5">
+                        <div id="top-attackers-list" class="flex flex-col gap-1.5 max-h-[300px] overflow-y-auto custom-scrollbar">
                              <div class="skeleton h-8 w-full opacity-20"></div>
                         </div>
                     </div>
                     <!-- Hate Map -->
                     <div class="pt-2 border-t border-slate-800/50">
                         <span class="text-[9px] font-bold text-slate-500 uppercase mb-2 block">Taxa de Crítica por Alvo</span>
-                        <div id="hate-map-list" class="flex flex-col gap-2">
+                        <div id="hate-map-list" class="flex flex-col gap-2 max-h-[300px] overflow-y-auto custom-scrollbar">
                              <div class="skeleton h-12 w-full opacity-10"></div>
                         </div>
                     </div>
@@ -210,22 +211,35 @@
                 </div>
             </div>
 
-            <div class="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-5 shadow-xl">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-xs font-black uppercase tracking-widest text-slate-400">Serviços de IA</h2>
-                    <button onclick="openNewAIModal()" class="text-[10px] font-bold text-violet-400 hover:text-violet-300 transition-colors uppercase tracking-widest">+ Nova</button>
+            <div class="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-5 shadow-xl transition-all duration-300">
+                <div class="flex items-center justify-between mb-4 cursor-pointer" onclick="toggleAccordion('kpi-ai-services-container', this)">
+                    <h2 class="text-xs font-black uppercase tracking-widest text-slate-400 pointer-events-none">Serviços de IA</h2>
+                    <div class="flex items-center gap-2">
+                        <button onclick="event.stopPropagation(); openNewAIModal()" class="text-[10px] font-bold text-violet-400 hover:text-violet-300 transition-colors uppercase tracking-widest">+ Nova</button>
+                        <svg class="w-4 h-4 text-slate-500 transform transition-transform duration-300 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
                 </div>
-                <div id="kpi-ai-services" class="flex flex-col gap-3"></div>
-            </div>
-            <div class="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-5 shadow-xl">
-                <h2 class="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">Nós de Coleta</h2>
-                <div id="kpi-instagram" class="flex flex-col gap-3"></div>
-            </div>
-            <div class="bg-slate-900/40 border border-slate-800/80 rounded-2xl flex-1 min-h-[220px] flex flex-col shadow-xl overflow-hidden">
-                <div class="p-4 border-b border-slate-800 bg-slate-900/20">
-                    <h2 class="text-xs font-black uppercase tracking-widest text-slate-400">Telemetria</h2>
+                <div id="kpi-ai-services-container" class="overflow-hidden transition-all duration-300 origin-top">
+                    <div id="kpi-ai-services" class="flex flex-col gap-3 max-h-[350px] overflow-y-auto custom-scrollbar pr-1"></div>
                 </div>
-                <div id="runs-feed" class="flex-1 overflow-y-auto p-4 flex flex-col gap-3 custom-scrollbar"></div>
+            </div>
+            
+            <div class="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-5 shadow-xl transition-all duration-300">
+                <div class="flex items-center justify-between mb-4 cursor-pointer" onclick="toggleAccordion('kpi-instagram-container', this)">
+                    <h2 class="text-xs font-black uppercase tracking-widest text-slate-400 pointer-events-none">Nós de Coleta</h2>
+                    <svg class="w-4 h-4 text-slate-500 transform transition-transform duration-300 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+                <div id="kpi-instagram-container" class="overflow-hidden transition-all duration-300 origin-top">
+                    <div id="kpi-instagram" class="flex flex-col gap-3 max-h-[300px] overflow-y-auto custom-scrollbar pr-1"></div>
+                </div>
+            </div>
+
+            <div class="bg-slate-900/40 border border-slate-800/80 rounded-2xl flex-1 flex flex-col shadow-xl overflow-hidden transition-all duration-300">
+                <div class="p-4 border-b border-slate-800 bg-slate-900/20 flex justify-between items-center cursor-pointer" onclick="toggleAccordion('runs-feed', this)">
+                    <h2 class="text-xs font-black uppercase tracking-widest text-slate-400 pointer-events-none">Telemetria</h2>
+                    <svg class="w-4 h-4 text-slate-500 transform transition-transform duration-300 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+                <div id="runs-feed" class="flex-1 overflow-y-auto p-4 flex flex-col gap-3 custom-scrollbar origin-top transition-all duration-300 max-h-[300px]"></div>
             </div>
         </aside>
     </main>
@@ -1018,6 +1032,28 @@
                 setTimeout(fetchData, 1000);
             } catch(e) {
                 console.error(`AI Start error for ${name}:`, e);
+            }
+        }
+
+        function toggleAccordion(targetId, headerElement) {
+            const content = document.getElementById(targetId);
+            const icon = headerElement.querySelector('svg');
+            
+            if (content.style.maxHeight && content.style.maxHeight !== '0px') {
+                content.style.maxHeight = '0px';
+                content.style.opacity = '0';
+                if(icon) icon.style.transform = 'rotate(-90deg)';
+            } else {
+                content.style.maxHeight = content.scrollHeight + 'px';
+                content.style.opacity = '1';
+                if(icon) icon.style.transform = 'rotate(0deg)';
+                
+                // Remove inline maxHeight after transition to allow dynamic content to grow (up to CSS limits)
+                setTimeout(() => {
+                    if (content.style.maxHeight !== '0px') {
+                        content.style.maxHeight = 'none';
+                    }
+                }, 300);
             }
         }
 
