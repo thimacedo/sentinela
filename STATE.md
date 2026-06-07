@@ -357,3 +357,9 @@ PGMQ deve aparecer apenas como hipótese futura.
 - **Eliminação de Race Condition**: Sanamos uma falha crítica de concorrência assíncrona no [ai_service.py](file:///c:/projetos/sentinela/core/ai_service.py). O método de re-análise em lote (`run_batch_reanalysis`) removia fisicamente o `"ollama"` do array global compartilhado `self.providers` durante todo o seu ciclo (que pode levar dezenas de segundos), gerando falsos erros de triagem paralela em outros loops ativos de classificação.
 - **Isolamento de Chamada**: Removemos a manipulação direta e mutável do catálogo global e passamos `force_cloud=True` no parâmetro de chamada `classify_text` no lote de re-análise. Isso mantém a lista global compartilhada estática e garante a integridade de todas as classificações paralelas concorrentes do sistema.
 - **Modelo Utilizado na Execução**: *Gemini 3.5 Flash (Medium)*, ideal para diagnósticos de SRE, correções locais e testes rápidos.
+
+## Estabilização do Voyant Tools (2026-06-07)
+
+- **Correção no Subagente (`sa-voyant-01`)**: Corrigida a falha `'APIResponse' object is not callable` em [sa_voyant.py](file:///c:/projetos/sentinela/workers/ai/sa_voyant.py#L121) ao remover os parênteses extras do método `execute` do Supabase passado ao `asyncio.to_thread`. A função agora é delegada e executada corretamente em background.
+- **Resiliência do VoyantService**: Ajustado o [voyant_service.py](file:///c:/projetos/sentinela/core/voyant_service.py) para utilizar gerenciadores de contexto `async with httpx.AsyncClient` locais a cada chamada de rede, eliminando a concorrência e o conflito de loops de eventos no cliente global compartilhado que disparava `Attempted to send an sync request with an AsyncClient instance`.
+- **Modelo Utilizado na Execução**: *Gemini 3.5 Flash (Medium)*, ideal para diagnóstico de concorrência HTTP, testes e estabilização de workers.

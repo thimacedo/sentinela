@@ -118,7 +118,7 @@ class SaVoyant(BaseSubAgent):
                 query = query.gt("data_coleta", self._last_processed_ts)
             
             res = await asyncio.to_thread(
-                query.order("data_coleta", desc=False).limit(100).execute()
+                query.order("data_coleta", desc=False).limit(100).execute
             )
             comments = res.data or []
 

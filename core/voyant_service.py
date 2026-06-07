@@ -120,21 +120,6 @@ class VoyantService:
     def __init__(self, base_url: str = VOYANT_BASE_URL, timeout: float = VOYANT_TIMEOUT):
         self.base_url = base_url
         self.timeout = timeout
-        # Cliente HTTP reutilizado por toda a vida do objeto (pool de conexões).
-        self._client: Optional[httpx.AsyncClient] = None
-
-    def _get_client(self) -> httpx.AsyncClient:
-        """Retorna o cliente HTTP, criando-o lazily na primeira chamada dentro de um loop."""
-        if self._client is None or self._client.is_closed:
-            # v92.9: Garante que o cliente seja criado dentro do loop atual
-            self._client = httpx.AsyncClient(timeout=self.timeout)
-        return self._client
-
-    async def close(self) -> None:
-        """Encerra o cliente HTTP. Chamar no teardown do worker."""
-        if self._client and not self._client.is_closed:
-            await self._client.aclose()
-            self._client = None
 
     # ------------------------------------------------------------------
     # API Pública
@@ -146,10 +131,10 @@ class VoyantService:
         Retorna True se o servidor estiver operante, False caso contrário.
         """
         try:
-            client = self._get_client()
-            # A rota base com format=json retorna 200 OK e metadados da versão
-            resp = await client.get(self.base_url, params={"format": "json"})
-            return resp.status_code == 200 and "voyantVersion" in resp.text
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
+                # A rota base com format=json retorna 200 OK e metadados da versão
+                resp = await client.get(self.base_url, params={"format": "json"})
+                return resp.status_code == 200 and "voyantVersion" in resp.text
         except (httpx.RequestError, httpx.TimeoutException):
             return False
 
@@ -180,9 +165,9 @@ class VoyantService:
         data = [("string", t) for t in clean_texts]
 
         try:
-            client = self._get_client()
-            resp = await client.post(self.base_url, params=params, data=data)
-            resp.raise_for_status()
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
+                resp = await client.post(self.base_url, params=params, data=data)
+                resp.raise_for_status()
         except httpx.TimeoutException:
             logger.warning("[Voyant] Timeout ao consultar Trombone (%.1fs).", self.timeout)
             return None
@@ -262,11 +247,11 @@ class VoyantService:
         data = [("string", t) for t in clean_texts]
 
         try:
-            client = self._get_client()
-            resp = await client.post(self.base_url, params=params, data=data)
-            resp.raise_for_status()
-            payload = resp.json()
-            return self._parse_collocates(payload)
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
+                resp = await client.post(self.base_url, params=params, data=data)
+                resp.raise_for_status()
+                payload = resp.json()
+                return self._parse_collocates(payload)
         except Exception as exc:
             logger.debug("[Voyant] Collocates indisponível para '%s': %s", target_word, exc)
             return []
