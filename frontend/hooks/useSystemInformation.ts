@@ -44,7 +44,7 @@ export function useSystemInformation() {
         const { count: total_alertas } = await supabase
           .from('comentarios')
           .select('id', { count: 'exact', head: true })
-          .eq('is_hate', true);
+          .in('categoria_ia', ['ODIO_IDENTITARIO', 'VIOLENCIA_GENERO', 'AMEACA']);
 
         const resiliencia = (total_amostra && total_amostra > 0)
           ? round(((total_amostra - (total_alertas || 0)) / total_amostra) * 100, 1)

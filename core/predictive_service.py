@@ -32,9 +32,10 @@ class PredictiveService:
         try:
             # Busca contagem de ódio agrupada por hora (via Supabase RPC ou fetch + process)
             # Para este MVP, vamos buscar os últimos 1000 comentários de ódio e agrupar
+            from core.constants import HATE_CATEGORIES
             res = db_client.client.table('comentarios')\
                 .select('data_coleta')\
-                .eq('is_hate', True)\
+                .in_('categoria_ia', HATE_CATEGORIES)\
                 .gte('data_coleta', start_date)\
                 .execute()
             

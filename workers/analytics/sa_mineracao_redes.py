@@ -139,9 +139,10 @@ class SaMineracaoRedes(BaseSubAgent):
             now = datetime.now(timezone.utc)
             since = (now - timedelta(days=self.lookback_days)).isoformat()
 
+            from core.constants import HATE_CATEGORIES
             res = db_client.client.table('comentarios')\
                 .select('id, autor_username, candidato_id, texto_bruto, categoria_ia, data_coleta')\
-                .eq('is_hate', True)\
+                .in_('categoria_ia', HATE_CATEGORIES)\
                 .gte('data_coleta', since)\
                 .limit(2000).execute()
 

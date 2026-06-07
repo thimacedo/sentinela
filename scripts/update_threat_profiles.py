@@ -36,7 +36,8 @@ def calculate_hate_density():
     for cand in candidates.data:
         username = cand['username']
         total_comments_res = db.client.table('comentarios').select('id', count='exact').eq('candidato_id', username).execute()
-        hate_comments_res = db.client.table('comentarios').select('id', count='exact').eq('candidato_id', username).eq('is_hate', True).execute()
+        from core.constants import HATE_CATEGORIES
+        hate_comments_res = db.client.table('comentarios').select('id', count='exact').eq('candidato_id', username).in_('categoria_ia', HATE_CATEGORIES).execute()
         
         total = total_comments_res.count if total_comments_res.count is not None else 0
         hate = hate_comments_res.count if hate_comments_res.count is not None else 0

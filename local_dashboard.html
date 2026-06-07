@@ -586,7 +586,7 @@
                     { count: pendCount }
                 ] = await withTimeout(Promise.all([
                     db.from('comentarios').select('*', { count:'exact', head:true }),
-                    db.from('comentarios').select('*', { count:'exact', head:true }).eq('is_hate', true),
+                    db.from('comentarios').select('*', { count:'exact', head:true }).in('categoria_ia', ['ODIO_IDENTITARIO', 'VIOLENCIA_GENERO', 'AMEACA']),
                     db.from('candidatos').select('*',  { count:'exact', head:true }).ilike('status_monitoramento', 'ATIVO'),
                     db.from('candidatos').select('*',  { count:'exact', head:true }).ilike('status_monitoramento', 'PAUSADO'),
                     db.from('candidatos').select('*',  { count:'exact', head:true }).or('status_monitoramento.ilike.EXCLUIDO,status_monitoramento.ilike.DESATIVADO,status_monitoramento.ilike.Inativo'),

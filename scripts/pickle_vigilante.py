@@ -17,7 +17,8 @@ def get_stats():
         # Contagem total de hoje
         res_total = db_client.client.table('comentarios').select('id', count='exact').filter('data_coleta', 'gte', today).execute()
         # Contagem de ódio de hoje
-        res_hate = db_client.client.table('comentarios').select('id', count='exact').eq('is_hate', True).filter('data_coleta', 'gte', today).execute()
+        from core.constants import HATE_CATEGORIES
+        res_hate = db_client.client.table('comentarios').select('id', count='exact').in_('categoria_ia', HATE_CATEGORIES).filter('data_coleta', 'gte', today).execute()
         # Contagem de falhas (geral)
         res_fail = db_client.client.table('comentarios').select('id', count='exact').eq('categoria_ia', 'FALHA_IA').execute()
         

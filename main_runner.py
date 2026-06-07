@@ -86,7 +86,8 @@ def build_orchestrator() -> SentinelaOrchestrator:
     store = MemoryStore()
     engine = RewardEngine(store)
     fetcher = DocFetcher()
-    advisor = SaDiagnosticaSistemas(memory=store, fetcher=fetcher)
+    # v92.8: Advisor agora é um SubAgente herdeiro de BaseSubAgent
+    advisor = SaDiagnosticaSistemas(memory=store, fetcher=fetcher, worker_id="sa-advisor-01")
 
     orch = SentinelaOrchestrator(engine, advisor)
 

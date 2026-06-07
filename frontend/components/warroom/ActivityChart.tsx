@@ -31,7 +31,7 @@ export default function ActivityChart() {
         const { data: comments, error } = await supabase
           .from('comentarios')
           .select('data_coleta')
-          .eq('is_hate', true)
+          .in('categoria_ia', ['ODIO_IDENTITARIO', 'VIOLENCIA_GENERO', 'AMEACA'])
           .gte('data_coleta', windowStr)
           .order('data_coleta', { ascending: true });
 

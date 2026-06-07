@@ -79,7 +79,7 @@ class SaVoyant(BaseSubAgent):
                 .eq("event_type", "voyant_checkpoint")
                 .order("created_at", desc=True)
                 .limit(1)
-                .execute
+                .execute()
             )
             if res.data:
                 ts = res.data[0]["metadata"].get("last_processed_ts")
@@ -118,7 +118,7 @@ class SaVoyant(BaseSubAgent):
                 query = query.gt("data_coleta", self._last_processed_ts)
             
             res = await asyncio.to_thread(
-                query.order("data_coleta", desc=False).limit(100).execute
+                query.order("data_coleta", desc=False).limit(100).execute()
             )
             comments = res.data or []
 

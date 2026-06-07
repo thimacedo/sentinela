@@ -1,21 +1,38 @@
+from __future__ import annotations
 import logging
 import json
 import os
-from typing import Dict, Any
+from typing import Dict, Any, Optional
+from workers.base.subagent_base import BaseSubAgent
+from workers.base.cycle_result import CycleResult
 from workers.base.memory_store import MemoryStore
 from workers.ai.doc_fetcher import DocFetcher
-from core.ai_service import AIService
+from core.ai_service import ai_service
 
-class SaDiagnosticaSistemas:
+class SaDiagnosticaSistemas(BaseSubAgent):
     """
     Advisor que analisa métricas de workers e gera sugestões
     utilizando cache de documentos e a malha de IA unificada (AIService).
     """
-    def __init__(self, memory: MemoryStore, fetcher: DocFetcher):
-        self.memory = memory
-        self.fetcher = fetcher
-        self.logger = logging.getLogger("SaDiagnosticaSistemas")
-        self.ai_service = AIService() # Reutiliza infra de cascata
+    def __init__(
+        self, 
+        memory: Optional[MemoryStore] = None, 
+        fetcher: Optional[DocFetcher] = None,
+        worker_id: str = "sa-diagnostica-01",
+        config: Optional[dict] = None
+    ):
+        cfg = config or {}
+        super().__init__(worker_id, cfg)
+        self.memory = memory or MemoryStore()
+        self.fetcher = fetcher or DocFetcher()
+
+    def describe(self) -> str:
+        return "SaDiagnosticaSistemas — Advisor de SRE e Autocura de Workers."
+
+    async def run_cycle(self) -> CycleResult:
+        # Este subagente é reativo, acionado pelo orquestrador em caso de falha.
+        # Mantemos o run_cycle para compatibilidade com o contrato.
+        return CycleResult(worker_id=self.worker_id, cycle=self.cycle, status="idle")
 
     async def analyze_and_suggest(self, worker, result) -> None:
         """Analisa a situação degradada e salva uma sugestão no banco."""

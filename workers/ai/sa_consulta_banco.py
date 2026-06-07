@@ -51,15 +51,16 @@ class SaConsultaBanco:
 
     async def search_comments(self, term: str, limit: int = 50) -> List[Dict[str, Any]]:
         """
-        Realiza uma busca textual indexada (Full-Text Search FTS5) de alta performance
-        nas tabelas de comentários coletados no banco de dados local.
+        Realiza uma busca textual indexada (Full-Text Search FTS5) de alta performance.
         """
+        # Sanitização básica para evitar injeção em queries SQLite FTS
+        safe_term = term.replace("'", "''").replace('"', '""')
         sql = f"""
             SELECT c.* 
             FROM comentarios c
             JOIN comentarios_fts fts ON c.id = fts.id
-            WHERE comentarios_fts MATCH '{term}'
-            LIMIT {limit}
+            WHERE comentarios_fts MATCH '{safe_term}'
+            LIMIT {int(limit)}
         """
         return await self.query(sql)
 
@@ -113,6 +114,13 @@ class SaConsultaBanco:
         rows = await self.query(sql)
         return {row['categoria_ia']: {"total": row['contagem'], "confianca_media": row['confianca_media']} for row in rows}
 
+    async def __aenter__(self):
+        return self
+    
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        await self.close()
+
     async def close(self):
         """Fecha o cliente HTTP de conexão."""
-        await self.client.aclose()
+        if self.client and not self.client.is_closed:
+            await self.client.aclose()

@@ -5,6 +5,7 @@ from typing import List, Dict, Any, Optional, Literal
 from supabase import create_client, Client
 import os
 import sys
+import hashlib
 from dotenv import load_dotenv
 from collections import Counter
 import traceback
@@ -28,7 +29,6 @@ except ImportError:
 try:
     from processing.workers_metrics import metrics_collector
 except ImportError:
-    # Fallback if running from root
     metrics_collector = None
 
 # Configuração de logs
@@ -37,7 +37,7 @@ logger = logging.getLogger("sentinela-api")
 
 load_dotenv()
 
-# Import CORS configuration (SECURITY FIX: Fase 1 - Replaces wildcard CORS)
+# Import CORS configuration
 from api.config.cors import CORS_CONFIG, validate_cors_config
 
 # --- CONSTANTS ---
@@ -49,10 +49,11 @@ PASA_CONFIG = {
     "ATAQUE_INSTITUCIONAL": {"label": "Ataque Institucional", "color": "#8b5cf6", "icon": "landmark"},
     "DANO_A_IMAGEM": {"label": "Dano à Imagem", "color": "#06b6d4", "icon": "scale"}
 }
+
+HATE_CATEGORIES = ("ODIO_IDENTITARIO", "VIOLENCIA_GENERO", "AMEACA")
 RISK_COLORS = {"CRITICO": "#ef4444", "ELEVADO": "#f59e0b", "MONITORANDO": "#06b6d4", "CONTROLADO": "#10b981"}
 
 app = FastAPI()
-# SECURITY FIX: Fase 1 - Use secure CORS configuration from environment
 validate_cors_config()
 app.add_middleware(
     CORSMiddleware, 
@@ -79,20 +80,14 @@ SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
 
 def get_supa() -> Client:
-    """Dependency para obter cliente Supabase com diagnóstico aprimorado."""
+    """Dependency para obter cliente Supabase."""
     url = os.getenv("SUPABASE_URL")
     key = os.getenv("SUPABASE_KEY")
-    
     if not url or not key:
-        logger.error(f"❌ CREDENCIAIS AUSENTES: URL={bool(url)}, KEY={bool(key)}")
-        raise HTTPException(
-            status_code=500, 
-            detail=f"Database credentials missing in environment (URL:{bool(url)}, KEY:{bool(key)})"
-        )
+        raise HTTPException(status_code=500, detail="Database credentials missing")
     try:
         return create_client(url, key)
     except Exception as e:
-        logger.error(f"❌ SUPABASE CONNECTION ERROR: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to connect to Supabase: {str(e)}")
 
 # --- MODELS ---
@@ -127,7 +122,6 @@ class CommandRequest(BaseModel):
 
 @app.post("/api/v1/command")
 def post_command(payload: CommandRequest, supa: Client = Depends(get_supa)):
-    """Insert command into system_commands for watchdog processing."""
     try:
         res = supa.table('system_commands').insert({
             "command": payload.command,
@@ -141,859 +135,237 @@ def post_command(payload: CommandRequest, supa: Client = Depends(get_supa)):
 
 @app.post("/api/v1/webhooks/stripe")
 async def stripe_webhook(request: Request, supa: Client = Depends(get_supa)):
-    """Recebe e processa confirmações de pagamento da Stripe."""
     payload = await request.body()
     sig_header = request.headers.get("Stripe-Signature")
-    
     if not STRIPE_WEBHOOK_SECRET:
-        logger.error("STRIPE_WEBHOOK_SECRET não configurado.")
         raise HTTPException(status_code=500, detail="Server webhook secret missing")
-
     try:
-        event = stripe.Webhook.construct_event(
-            payload, sig_header, STRIPE_WEBHOOK_SECRET
-        )
-    except ValueError as e:
-        logger.error(f"Payload inválido: {e}")
-        raise HTTPException(status_code=400, detail="Invalid payload")
-    except stripe.error.SignatureVerificationError as e:
-        logger.error(f"Assinatura inválida: {e}")
-        raise HTTPException(status_code=400, detail="Invalid signature")
+        event = stripe.Webhook.construct_event(payload, sig_header, STRIPE_WEBHOOK_SECRET)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
-    # Tratamento dos eventos de conclusão de compra
-    # 'checkout.session.completed': Pagamentos imediatos (Cartão)
-    # 'checkout.session.async_payment_succeeded': Pagamentos atrasados (Boleto/Alguns PIX)
     if event['type'] in ['checkout.session.completed', 'checkout.session.async_payment_succeeded']:
         session = event['data']['object']
-        
-        # Ignora se o pagamento não estiver "pago"
         if session.get('payment_status') != 'paid':
-            return {"status": "ignored", "reason": "payment_status not paid"}
-
-        # Extrai os dados customizados que injetamos na criação
+            return {"status": "ignored"}
         metadata = session.get('metadata', {})
         user_id = metadata.get('user_id')
         ci_amount = metadata.get('ci_amount')
-        
-        if not user_id or not ci_amount:
-            logger.error(f"Metadata incompleta na sessão Stripe: {session.get('id')}")
-            return {"status": "error", "reason": "missing metadata"}
-
-        try:
-            ci_amount = int(ci_amount)
-            # Injeta os tokens na carteira do usuário via RPC (Atômico)
-            rpc_payload = {
-                "p_user_id": user_id,
-                "p_amount": ci_amount,
-                "p_type": "PURCHASE",
-                "p_session_id": session.get('id'),
-                "p_metadata": metadata
-            }
-            
-            # Utiliza a RPC que já está implementada na infraestrutura de CIs
-            res = supa.rpc('process_ci_transaction', rpc_payload).execute()
-            
-            if res.data is True:
-                logger.info(f"✅ Webhook Sucesso: {ci_amount} CI injetados para o usuário {user_id}")
-            else:
-                logger.error(f"❌ Webhook Falha Lógica: RPC retornou {res.data}")
-                
-        except Exception as e:
-            error_msg = str(e)
-            if "INSUFFICIENT_FUNDS" in error_msg:
-                logger.critical(f"🚨 FRAUD ATTEMPT DETECTED: Saldo insuficiente ou Race Condition bloqueada para usuário {user_id}. Detalhes: {error_msg}")
-            else:
-                logger.error(f"Erro na injeção de CI pelo Webhook: {error_msg}")
-            raise HTTPException(status_code=500, detail="Database RPC error")
-
+        if user_id and ci_amount:
+            try:
+                supa.rpc('process_ci_transaction', {
+                    "p_user_id": user_id,
+                    "p_amount": int(ci_amount),
+                    "p_type": "PURCHASE",
+                    "p_session_id": session.get('id'),
+                    "p_metadata": metadata
+                }).execute()
+            except Exception as e:
+                logger.error(f"Webhook CI Error: {e}")
     return {"status": "success"}
 
 # --- UTILS ---
 def calculate_risk(item: Dict[str, Any]):
     totais = item.get('comentarios_totais_count', 0) or 0
     odio = item.get('comentarios_odio_count', 0) or 0
-    
-    if totais < odio:
-        totais = odio
-
+    if totais < odio: totais = odio
     if totais == 0:
-        if odio > 0:
-            score = min(100, 20 + (odio * 2))
-        else:
-            return 0, 'CONTROLADO', RISK_COLORS["CONTROLADO"]
-    else:
-        ratio = odio / totais
-        # Score ponderado: Densidade (ratio) + Volume absoluto (odio)
-        score = min(100, int(ratio * 250) + min(35, odio * 1.5))
-    
-    if score >= 75:
-        return score, 'CRITICO', RISK_COLORS["CRITICO"]
-    if score >= 45:
-        return score, 'ELEVADO', RISK_COLORS["ELEVADO"]
-    if score >= 15:
-        return score, 'MONITORANDO', RISK_COLORS["MONITORANDO"]
+        score = min(100, 20 + (odio * 2)) if odio > 0 else 0
+        nivel = 'CONTROLADO' if score == 0 else 'MONITORANDO'
+        return score, nivel, RISK_COLORS[nivel]
+    ratio = odio / totais
+    score = min(100, int(ratio * 250) + min(35, odio * 1.5))
+    if score >= 75: return score, 'CRITICO', RISK_COLORS["CRITICO"]
+    if score >= 45: return score, 'ELEVADO', RISK_COLORS["ELEVADO"]
+    if score >= 15: return score, 'MONITORANDO', RISK_COLORS["MONITORANDO"]
     return score, 'CONTROLADO', RISK_COLORS["CONTROLADO"]
 
 # --- ENDPOINTS ---
 
-@app.get("/api/v1/admin/finance/dashboard")
-def get_finance_dashboard(supa: Client = Depends(get_supa)):
-    """Retorna dados agregados do faturamento e consumo de CI (GOD Mode)."""
-    try:
-        # 1. Total CI e Receita (baseado na tabela profiles para performance na MVP)
-        profiles_res = supa.table('profiles').select('id, full_name, saldo_ci, total_stn_spent').execute()
-        profiles = profiles_res.data or []
-        
-        total_circulating = sum(p.get('saldo_ci', 0) for p in profiles)
-        total_spent = sum(p.get('total_stn_spent', 0) for p in profiles)
-        total_purchased = total_circulating + total_spent
-        
-        # Receita Estimada (Ex: 1000 CI = R$ 497 -> R$ 0,497 por CI)
-        estimated_revenue = (total_purchased / 1000) * 497.0
-        
-        # Top 5 usuários por consumo
-        top_spenders = sorted(profiles, key=lambda x: x.get('total_stn_spent', 0), reverse=True)[:5]
-        
-        # 2. Transações de CI/STN
-        tx_res = supa.table('ci_transactions').select('description, amount').eq('type', 'CONSUMPTION').order('created_at', desc=True).limit(5000).execute()
-        transactions = tx_res.data or []
-        
-        modules_breakdown = {
-            "Dossiês Analíticos": 0,
-            "Inclusão de Alvos": 0,
-            "Radar de Tendências": 0,
-            "Alertas Live": 0,
-            "Outros": 0
-        }
-        
-        action_map = {
-            "unlock_dossier": "Dossiês Analíticos",
-            "add_target": "Inclusão de Alvos",
-            "unlock_radar": "Radar de Tendências",
-            "unlock_alerts": "Alertas Live"
-        }
-        
-        for tx in transactions:
-            meta = tx.get('metadata') or {}
-            action = meta.get('action', 'outros')
-            label = action_map.get(action, "Outros")
-            amt = abs(tx.get('amount', 0))
-            modules_breakdown[label] += amt
-
-        # 3. Transações Recentes
-        recent_tx_res = supa.table('ci_transactions').select('id, type, amount, created_at, user_id, description').order('created_at', desc=True).limit(10).execute()
-        recent_tx = recent_tx_res.data or []
-
-        return {
-            "kpis": {
-                "total_purchased": total_purchased,
-                "total_spent": total_spent,
-                "total_circulating": total_circulating,
-                "estimated_revenue_brl": estimated_revenue
-            },
-            "top_spenders": top_spenders,
-            "modules_breakdown": modules_breakdown,
-            "recent_transactions": recent_tx
-        }
-    except Exception as e:
-        logger.error(f"Admin Finance Error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
 @app.get("/api/v1/summary")
 def summary(request: Request, supa: Client = Depends(get_supa)):
-    """Retorna KPIs consolidados com RECALCULO EM TEMPO REAL (PASA v85.3)."""
+    """Retorna KPIs consolidados (MCA v2.2 Compliant)."""
     try:
         org_id = request.headers.get("X-Organization-Id")
         now_utc = datetime.now(timezone.utc)
-
-        # 1. Total de Alvos Ativos (Dinâmico)
         query_c = supa.table('candidatos').select('id', count='exact').eq('status_monitoramento', 'Ativo')
-        if org_id:
-            query_c = query_c.eq('organization_id', org_id)
+        if org_id: query_c = query_c.eq('organization_id', org_id)
         c_res = query_c.execute()
-        c = c_res.count if (c_res and c_res.count is not None) else 0
-
-        # 2. Busca o timestamp da coleta mais recente para o indicador de atividade
+        
         last_comment_res = supa.table('comentarios').select('data_coleta').order('data_coleta', desc=True).limit(1).execute()
         last_update = last_comment_res.data[0]['data_coleta'] if last_comment_res.data else now_utc.isoformat()
 
-        # 3. Calcula o Acumulado (Lifetime) de forma dinâmica a partir da tabela de comentários
-        # Forçamos a contagem exata para garantir que o KPI reflita as últimas inserções
-        query_total = supa.table('comentarios').select('id', count='exact').limit(1)
-        query_hate = supa.table('comentarios').select('id', count='exact').eq('is_hate', True).limit(1)
-
+        query_total = supa.table('comentarios').select('id', count='exact')
+        query_hate = supa.table('comentarios').select('id', count='exact').in_('categoria_ia', HATE_CATEGORIES)
         if org_id:
             query_total = query_total.eq('organization_id', org_id)
             query_hate = query_hate.eq('organization_id', org_id)
 
         t_res_total = query_total.execute()
         t_res_hate = query_hate.execute()
-
-        t_lifetime = t_res_total.count if (t_res_total and t_res_total.count is not None) else 0
-        h_lifetime = t_res_hate.count if (t_res_hate and t_res_hate.count is not None) else 0
-
-        # Cálculo da Resiliência Democrática (Saúde do Discurso)
+        t_lifetime = t_res_total.count or 0
+        h_lifetime = t_res_hate.count or 0
         res_val = round(((t_lifetime - h_lifetime) / t_lifetime) * 100, 1) if t_lifetime > 0 else 100.0
 
         return {
-            "total_monitorados": c,
+            "total_monitorados": c_res.count or 0,
             "total_alertas": h_lifetime,
             "total_amostra": t_lifetime,
             "resiliencia": res_val,
-            "periodo": "Realtime",
-            "org_id": org_id,
             "timestamp": last_update
         }
     except Exception as e:
-        logger.error(f"Summary KPI Error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/api/v1/networks")
-def get_networks(request: Request, supa: Client = Depends(get_supa)):
-    """Busca as redes coordenadas (clusters) mais recentes (PASA v86.2 Native Schema)."""
-    try:
-        res = supa.table('redes_coordenadas').select('*').order('created_at', desc=True).limit(50).execute()
-        
-        parsed_networks = []
-        seen_names = set()
-        
-        for row in res.data or []:
-            nodes = row.get("nodes") or []
-            
-            # Fallback para o schema antigo caso haja registros legados
-            if not row.get("nome_rede") and row.get("status"):
-                import json
-                try:
-                    payload = json.loads(row.get('status', '{}'))
-                    row["nome_rede"] = row.get("nome", "Cluster Oculto")
-                    row["tipo_coordenacao"] = payload.get("tipo_coordenacao", "DESCONHECIDO")
-                    row["nodes"] = payload.get("nodes", [])
-                    row["edges"] = payload.get("edges", [])
-                    row["estatisticas"] = payload.get("estatisticas", {})
-                    row["score_perigoso"] = row.get("severidade", 0)
-                    nodes = row["nodes"]
-                except: pass
-
-            nome_rede = row.get("nome_rede", "Cluster Oculto")
-            signature = frozenset(nodes)
-            if signature in seen_names:
-                continue
-            seen_names.add(signature)
-
-            parsed_networks.append({
-                "id": row.get("id"),
-                "nome_rede": nome_rede,
-                "total_perfis": len(nodes),
-                "tipo_coordenacao": row.get("tipo_coordenacao", "DESCONHECIDO"),
-                "nodes": list(nodes),
-                "edges": row.get("edges", []),
-                "estatisticas": row.get("estatisticas", {}),
-                "score_perigoso": row.get("score_perigoso", 0),
-                "created_at": row.get("created_at")
-            })
-            
-            if len(parsed_networks) >= 10:
-                break
-            
-        return parsed_networks
-    except Exception as e:
-        logger.error(f"Networks Error: {e}")
+        logger.error(f"Summary Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/v1/targets")
 def get_targets(request: Request, limit: int = 50, supa: Client = Depends(get_supa)):
-    """Retorna candidatos monitorados com ALTA VARIABILIDADE (PASA v85.4)."""
+    """Retorna alvos monitorados com métricas de ódio atualizadas."""
     try:
         org_id = request.headers.get("X-Organization-Id")
-        
-        # 1. Busca candidatos ativos escopados
-        query_cand = supa.table('candidatos').select('*').filter('status_monitoramento', 'ilike', 'Ativo').order('nota_relevancia', desc=True)
-        if org_id:
-            query_cand = query_cand.eq('organization_id', org_id)
-        candidates_res = query_cand.execute()
-        candidates = candidates_res.data or []
+        query_cand = supa.table('candidatos').select('*').eq('status_monitoramento', 'Ativo').order('nota_relevancia', desc=True)
+        if org_id: query_cand = query_cand.eq('organization_id', org_id)
+        candidates = query_cand.execute().data or []
 
-        # 2. ALGORITMO DE VARIABILIDADE: Mantém os Top 10 fixos e embaralha o restante
-        top_tier = [c for c in candidates if c.get('nota_relevancia', 0) >= 80]
-        others = [c for c in candidates if c.get('nota_relevancia', 0) < 80]
+        active_usernames = [c.get('username') for c in candidates if c.get('username')]
+        if not active_usernames: return []
+
+        # Amostra recente para estatísticas de ódio
+        h_res = supa.table('comentarios').select('candidato_id, categoria_ia')\
+            .in_('categoria_ia', HATE_CATEGORIES)\
+            .in_('candidato_id', active_usernames)\
+            .order('data_coleta', desc=True).limit(5000).execute().data or []
+            
+        all_res = supa.table('comentarios').select('candidato_id')\
+            .in_('candidato_id', active_usernames)\
+            .order('data_coleta', desc=True).limit(5000).execute().data or []
         
-        import random
-        random.shuffle(others)
-        
-        final_list = top_tier + others
-        
-        # 3. Busca ódio recente escopado para enriquecimento
-        query_h = supa.table('comentarios').select('candidato_id, categoria_ia').eq('is_hate', True)
-        query_all = supa.table('comentarios').select('candidato_id')
-        
-        if org_id:
-            query_h = query_h.eq('organization_id', org_id)
-            query_all = query_all.eq('organization_id', org_id)
-        
-        # Pegamos amostras para garantir que o cruzamento funcione
-        h_res = query_h.order('data_coleta', desc=True).limit(5000).execute()
-        all_res = query_all.order('data_coleta', desc=True).limit(5000).execute()
-        
-        h_data = h_res.data or []
-        all_data = all_res.data or []
-        
-        counts_odio = Counter([h['candidato_id'] for h in h_data])
-        counts_totais = Counter([a['candidato_id'] for a in all_data])
+        counts_odio = Counter([h['candidato_id'] for h in h_res])
+        counts_totais = Counter([a['candidato_id'] for a in all_res])
         
         breakdowns = {}
-        for h in h_data:
+        for h in h_res:
             cid, cat = h['candidato_id'], h['categoria_ia'] or 'OUTROS'
-            if cid not in breakdowns:
-                breakdowns[cid] = Counter()
+            if cid not in breakdowns: breakdowns[cid] = Counter()
             breakdowns[cid][cat] += 1
         
         enriched = []
         for item in candidates:
-            username = item.get('username')
-            # Atualiza contagens baseadas na amostra recente
-            item['comentarios_odio_count'] = counts_odio.get(username, 0)
-            item['comentarios_totais_count'] = counts_totais.get(username, 0)
-            
+            un = item.get('username')
+            item['comentarios_odio_count'] = counts_odio.get(un, 0)
+            item['comentarios_totais_count'] = counts_totais.get(un, 0)
             score, nivel, color = calculate_risk(item)
-            enriched.append({
-                **item, 
-                "score_risco": score, 
-                "nivel_risco": nivel, 
-                "color": color, 
-                "breakdown": dict(breakdowns.get(username, {}))
-            })
-            
-        # Retorna os alvos processados respeitando o limite, mas já embaralhados
+            enriched.append({**item, "score_risco": score, "nivel_risco": nivel, "color": color, "breakdown": dict(breakdowns.get(un, {}))})
         return enriched[:limit]
     except Exception as e:
-        logger.error(f"Targets Error: {e}\n{traceback.format_exc()}")
+        logger.error(f"Targets Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/v1/alerts/active")
 def get_active_alerts(limit: int = 20, supa: Client = Depends(get_supa)):
     try:
-        res = supa.table('comentarios').select('*, candidatos(username)').eq('is_hate', True).order('data_coleta', desc=True).limit(limit).execute()
+        res = supa.table('comentarios').select('*, candidatos(username)')\
+            .in_('categoria_ia', HATE_CATEGORIES)\
+            .order('data_coleta', desc=True).limit(limit).execute()
         return res.data or []
     except Exception as e:
-        logger.error(f"Alerts Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/v1/alerts/false-positive")
 def mark_false_positive(payload: FalsePositiveRequest, supa: Client = Depends(get_supa)):
-    """Marca um comentário como falso positivo e garante sua exclusão da timeline de ódio."""
     try:
-        res = supa.table('comentarios').update({
+        supa.table('comentarios').update({
             "is_hate": False, 
             "processado_ia": True, 
             "categoria_ia": "FALSO_POSITIVO_MANUAL"
         }).eq('id', payload.id).execute()
-        
-        return {"status": "success", "id": payload.id}
+        return {"status": "success"}
     except Exception as e:
-        logger.error(f"False Positive Critical Error: {e}\n{traceback.format_exc()}")
-        raise HTTPException(status_code=500, detail={"error": str(e), "id": payload.id})
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/v1/analytics/marketing-kpis")
 def get_marketing_kpis(supa: Client = Depends(get_supa)):
-    """Retorna KPIs estratégicos e dados para os gráficos de marketing (v86.1)."""
     try:
-        from collections import Counter
-        
-        # O Iceberg (Visível vs Detectado)
-        # Estimativa baseada no volume total de dados e na taxa de detecção
-        total_comments = supa.table('comentarios').select('id', count='exact').limit(1).execute().count or 0
-        hate_comments = supa.table('comentarios').select('id', count='exact').eq('is_hate', True).limit(1).execute().count or 0
-        iceberg_data = {
-            "visible_neutral": total_comments - hate_comments,
-            "detected_hate": hate_comments,
-            "hidden_irony": int(hate_comments * 0.3) # Estimativa de ataques velados (ironia)
-        }
-
-        # Mapa de Vulnerabilidade (Distribuição Geral)
-        res_categories = supa.table('comentarios').select('categoria_ia').eq('is_hate', True).limit(5000).execute()
-        categories = [c['categoria_ia'] for c in (res_categories.data or []) if c.get('categoria_ia')]
-        vulnerability_map = dict(Counter(categories))
-
-        # Economia Tática
-        # Assumindo que 60% foi processado localmente e cada hora humana equivale a ~300 comentários
-        horas_humanas_poupadas = total_comments // 300
-        custo_humano_estimado = horas_humanas_poupadas * 150 # R$ 150/hora
-        economia_data = {
-            "horas_poupadas": horas_humanas_poupadas,
-            "custo_humano_brl": custo_humano_estimado,
-            "ci_investido": int((total_comments * 0.4) * 0.02) # Apenas 40% foram pra nuvem
-        }
-
+        total = supa.table('comentarios').select('id', count='exact').execute().count or 0
+        hate = supa.table('comentarios').select('id', count='exact').in_('categoria_ia', HATE_CATEGORIES).execute().count or 0
+        res_cat = supa.table('comentarios').select('categoria_ia').in_('categoria_ia', HATE_CATEGORIES).limit(5000).execute()
+        categories = [c['categoria_ia'] for c in (res_cat.data or []) if c.get('categoria_ia')]
         return {
-            "iceberg": iceberg_data,
-            "vulnerability_map": vulnerability_map,
-            "roi": economia_data
+            "iceberg": {"visible_neutral": total - hate, "detected_hate": hate, "hidden_irony": int(hate * 0.3)},
+            "vulnerability_map": dict(Counter(categories)),
+            "roi": {"horas_poupadas": total // 300, "custo_humano_brl": (total // 300) * 150}
         }
     except Exception as e:
-        logger.error(f"Marketing KPIs Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/api/v1/analytics/demographics")
-def get_demographics(supa: Client = Depends(get_supa)):
-    """Retorna comparativos demográficos cruzando ódio e perfil do candidato (v86.3)."""
-    try:
-        from collections import defaultdict
-        
-        # Pega amostra de ódio recente
-        res = supa.table('comentarios').select('candidatos(username, sexo, partido, estado, ideologia)').eq('is_hate', True).order('data_coleta', desc=True).limit(5000).execute()
-        data = res.data or []
-        
-        stats = {
-            "sexo": defaultdict(int),
-            "partido": defaultdict(int),
-            "estado": defaultdict(int),
-            "ideologia": defaultdict(int),
-            "top_alvos": defaultdict(int)
-        }
-        
-        for item in data:
-            c = item.get('candidatos')
-            if not c: continue
-            
-            # 1. Normalização do Partido
-            p_raw = str(c.get('partido') or '').strip()
-            p_upper = p_raw.upper().replace(' ', '')
-            
-            if p_upper in ['NÃOINFORMADO', 'NAOINFORMADO', 'SEMPARTIDO', 'N/A', 'NONE', 'NULL', '']:
-                partido = 'Sem Partido'
-            else:
-                partido = p_raw
-
-            # Conta por atributos
-            if c.get('sexo'): stats['sexo'][c['sexo']] += 1
-            if partido: stats['partido'][partido] += 1
-            if c.get('estado'): stats['estado'][c['estado']] += 1
-            if c.get('ideologia'): stats['ideologia'][c['ideologia']] += 1
-            if c.get('username'): stats['top_alvos'][c['username']] += 1
-            
-        # Formata para facilitar renderização no frontend
-        def format_stat(d):
-            return [{"name": k, "value": v} for k, v in sorted(d.items(), key=lambda item: item[1], reverse=True)]
-            
-        return {
-            "sexo": format_stat(stats["sexo"]),
-            "partido": format_stat(stats["partido"])[:10],
-            "estado": format_stat(stats["estado"])[:10],
-            "ideologia": format_stat(stats["ideologia"]),
-            "top_alvos": format_stat(stats["top_alvos"])[:5]
-        }
-    except Exception as e:
-        logger.error(f"Demographics Error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/api/v1/dossiers/generate")
-async def generate_dossier(payload: DossierGenerateRequest, supa: Client = Depends(get_supa)):
-    """Gera um novo relatório estratégico (Gratuito durante o Beta/Stress Test)."""
-    try:
-        from processing.dossie_service import dossie_service
-        
-        # 1. Validação de Saldo (Bypass no Free Tier v86.2)
-        rpc_payload = {
-            "p_user_id": payload.user_id,
-            "p_amount": 0, # Gratuito
-            "p_type": "CONSUMPTION",
-            "p_session_id": None,
-            "p_metadata": {"action": "generate_dossier_free_tier", "target": payload.candidato_id}
-        }
-        
-        # Registra a transação com custo zero para manter auditoria
-        supa.rpc('process_ci_transaction', rpc_payload).execute()
-
-        # 2. Busca dados reais para o dossiê (Top 500 interações do alvo)
-        data_res = supa.table('comentarios')\
-            .select('*, candidatos(username)')\
-            .eq('candidato_id', payload.candidato_id)\
-            .order('data_coleta', desc=True)\
-            .limit(500).execute()
-            
-        data = data_res.data or []
-        if not data:
-            # Reverte a cobrança se não houver dados (Gesto de boa fé tática)
-            supa.rpc('process_ci_transaction', {**rpc_payload, "p_amount": 350, "p_description": "Estorno por Dossiê vazio"}).execute()
-            raise HTTPException(status_code=404, detail="Alvo sem dados coletados suficientes para geração de dossiê.")
-        
-        # 3. Geração Real do PDF
-        timestamp = int(datetime.now().timestamp())
-        # No ambiente Vercel, o diretório de saída deve ser mapeado para Storage ou ser retornado via stream.
-        # Por enquanto, salvamos em public/reports para servir como estático.
-        filename = f"relatorio_{payload.candidato_id}_{timestamp}.pdf"
-        output_path = os.path.join("public", "reports", filename)
-        
-        pdf_path = await dossie_service.generate_dossie(data, output_path, payload.candidato_id)
-        
-        if not pdf_path:
-            raise HTTPException(status_code=500, detail="Erro técnico na geração do motor PDF.")
-
-        # Retorna a URL pública
-        public_url = f"/reports/{filename}"
-
-        return {
-            "status": "success", 
-            "pdf_url": public_url,
-            "hash_integridade": hashlib.sha256(str(timestamp).encode()).hexdigest()[:12]
-        }
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Dossier Generation Error: {e}\n{traceback.format_exc()}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/api/v1/dossiers")
-def list_dossiers(candidato_id: Optional[str] = None, supa: Client = Depends(get_supa)):
-    """Lista relatórios gerados."""
-    try:
-        query = supa.table('dossies').select('*')
-        if candidato_id and candidato_id != "null": 
-            query = query.eq('candidato_id', candidato_id)
-        res = query.order('data_geracao', desc=True).execute()
-        return res.data or []
-    except Exception as e:
-        logger.error(f"List Dossiers Error: {e}")
-        return []
 
 @app.get("/api/v1/analytics/resilience-ranking")
 def get_resilience_ranking(limit: int = 10, supa: Client = Depends(get_supa)):
-    """Ranking de alvos com maior incidência de ódio."""
     try:
-        yesterday = (datetime.now(timezone.utc) - timedelta(days=2)).isoformat()
-        res = supa.table('comentarios').select('candidato_id, is_hate').gte('data_coleta', yesterday).limit(5000).execute()
-        data = res.data or []
-        
+        window = (datetime.now(timezone.utc) - timedelta(days=2)).isoformat()
+        res = supa.table('comentarios').select('candidato_id, categoria_ia').gte('data_coleta', window).limit(5000).execute()
         stats = {}
-        for item in data:
+        for item in (res.data or []):
             cid = item['candidato_id']
-            if cid not in stats:
-                stats[cid] = {'total': 0, 'hate': 0}
+            if cid not in stats: stats[cid] = {'total': 0, 'hate': 0}
             stats[cid]['total'] += 1
-            if item['is_hate']:
-                stats[cid]['hate'] += 1
-            
+            if item.get('categoria_ia') in HATE_CATEGORIES: stats[cid]['hate'] += 1
         ranking = []
         for cid, val in stats.items():
-            res_pct = round((val['total'] - val['hate']) / val['total'] * 100, 1)
-            ranking.append({"candidato_id": cid, "total": val['total'], "alertas": val['hate'], "resiliencia_pct": res_pct})
-            
+            pct = round((val['total'] - val['hate']) / val['total'] * 100, 1)
+            ranking.append({"candidato_id": cid, "total": val['total'], "alertas": val['hate'], "resiliencia_pct": pct})
         return sorted(ranking, key=lambda x: x['alertas'], reverse=True)[:limit]
-    except Exception as e:
-        logger.error(f"Ranking Error: {e}")
-        return []
+    except Exception as e: return []
 
 @app.get("/api/v1/analytics/temporal-series")
 def get_temporal_series(supa: Client = Depends(get_supa)):
-    """Série temporal de alertas."""
     try:
         window = (datetime.now(timezone.utc) - timedelta(days=2)).isoformat()
-        res = supa.table('comentarios').select('data_coleta').eq('is_hate', True).gte('data_coleta', window).limit(2000).execute()
-        data = res.data or []
-        hours = Counter([item['data_coleta'][:13] + ":00:00" for item in data])
+        res = supa.table('comentarios').select('data_coleta').in_('categoria_ia', HATE_CATEGORIES).gte('data_coleta', window).limit(2000).execute()
+        hours = Counter([item['data_coleta'][:13] + ":00:00" for item in (res.data or [])])
         return sorted([{"hora": h, "alertas": v} for h, v in hours.items()], key=lambda x: x['hora'])
-    except Exception as e:
-        logger.error(f"Series Error: {e}")
-        return []
-
-@app.post("/api/v1/audit/validate")
-async def audit_validate(payload: Dict[str, Any] = Body(...), supa: Client = Depends(get_supa)):
-    """Ponto de auditoria manual do frontend."""
-    try:
-        comment_id = payload.get("comment_id")
-        rotulo = payload.get("rotulo_correto")
-        analise_pericial = payload.get("analise_pericial")
-        
-        # Atualiza o comentário original
-        is_hate = rotulo == 'hate'
-        update_data = {
-            "is_hate": is_hate,
-            "processado_ia": True,
-            "categoria_ia": "VALIDADO_MANUALMENTE"
-        }
-        if analise_pericial is not None:
-            update_data["analise_pericial"] = analise_pericial
-            
-        supa.table('comentarios').update(update_data).eq('id', comment_id).execute()
-        
-        return {"status": "success"}
-    except Exception as e:
-        logger.error(f"Audit Validate Error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-# --- COMPATIBILITY ALIASES FOR TESTS ---
-@app.get("/api/v1/trends")
-def trends(supa: Client = Depends(get_supa)):
-    return get_temporal_series(supa)
-
-@app.get("/api/v1/pasa/breakdown")
-def pasa_breakdown(supa: Client = Depends(get_supa)):
-    """Retorna o breakdown de categorias PASA (Compatibility Mode)."""
-    try:
-        res = supa.table('comentarios').select('categoria_ia').eq('is_hate', True).execute()
-        counts = Counter([item.get('categoria_ia') or 'OUTROS' for item in res.data])
-        return dict(counts)
-    except Exception as e:
-        logger.error(f"PASA Breakdown Error: {e}")
-        return {}
-
-@app.post("/api/v1/command")
-def post_command(payload: CommandRequest, supa: Client = Depends(get_supa)):
-    """Recebe comando PAUSE/RESUME e insere na tabela system_commands para ser processado pelo CloudListener."""
-    try:
-        data = {
-            "command": payload.command,
-            "status": "pending",
-            "issued_at": datetime.now(timezone.utc).isoformat(),
-        }
-        res = supa.table('system_commands').insert(data).execute()
-        return {"status": "queued", "id": res.data[0].get('id') if res.data else None}
-    except Exception as e:
-        logger.error(f"Command insertion error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/api/v1/checkout/create-session")
-def create_checkout_session(payload: CheckoutRequest, supa: Client = Depends(get_supa)):
-    try:
-        session_url = payment_manager.create_checkout_session(
-            user_id=payload.user_id or "guest_user", 
-            package_type=payload.package_slug
-        )
-        return {"url": session_url}
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Checkout error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e: return []
 
 @app.get("/api/v1/geo/uf")
 def get_geo_uf(supa: Client = Depends(get_supa)):
-    """Retorna dados de hostilidade por Unidade Federativa."""
     try:
-        # Busca candidatos para mapear UF
         cands = supa.table('candidatos').select('username, estado').execute().data or []
         uf_map = {c.get('username'): (c.get('estado') or 'BR') for c in cands if c.get('username')}
-        
-        # Busca alertas recentes (48h)
         window = (datetime.now(timezone.utc) - timedelta(days=2)).isoformat()
-        coms = supa.table('comentarios').select('candidato_id').eq('is_hate', True).gte('data_coleta', window).limit(2000).execute().data or []
-        
+        coms = supa.table('comentarios').select('candidato_id').in_('categoria_ia', HATE_CATEGORIES).gte('data_coleta', window).limit(2000).execute().data or []
         counts = Counter([uf_map.get(c['candidato_id'], 'BR') for c in coms if c.get('candidato_id')])
-        
-        results = []
-        for uf, val in counts.items():
-            color = RISK_COLORS["CRITICO"] if val > 20 else (RISK_COLORS["ELEVADO"] if val > 5 else RISK_COLORS["MONITORANDO"])
-            results.append({
-                "uf": uf, 
-                "total_hate": val, 
-                "total_alvos": len([k for k, v in uf_map.items() if v == uf]),
-                "color": color
-            })
-            
-        return results
-    except Exception as e:
-        logger.error(f"Geo UF Error: {e}")
-        return []
-
-# Alias for tests
-geo_uf = get_geo_uf
-
-@app.get("/api/v1/ads")
-def list_ads(candidato_id: Optional[str] = None, supa: Client = Depends(get_supa)):
-    """Lista anúncios detectados na Meta Ad Library."""
-    try:
-        query = supa.table('anuncios').select('*')
-        if candidato_id and candidato_id != "null":
-            query = query.eq('candidato_id', candidato_id)
-        res = query.order('data_coleta', desc=True).limit(100).execute()
-        return res.data or []
-    except Exception as e:
-        logger.error(f"List Ads Error: {e}")
-        return []
+        return [{"uf": k, "total_hate": v, "color": RISK_COLORS["CRITICO"] if v > 20 else RISK_COLORS["MONITORANDO"]} for k, v in counts.items()]
+    except Exception as e: return []
 
 @app.get("/api/health")
 def health(supa: Client = Depends(get_supa)):
-    return {"status": "operational", "db": supa is not None, "engine": "FastAPI on Vercel"}
+    return {"status": "operational", "db": supa is not None}
 
-@app.post("/api/v1/auth/register-push-token")
-def register_push_token(payload: PushTokenRegistration, supa: Client = Depends(get_supa)):
+@app.get("/api/v1/networks")
+def get_networks(supa: Client = Depends(get_supa)):
     try:
-        supa.table('user_push_tokens').upsert({**payload.dict(), "updated_at": datetime.now(timezone.utc).isoformat()}, on_conflict="user_id,token").execute()
-        return {"status": "success"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-# --- WORKERS METRICS ENDPOINTS (v20.1+) ---
-
-@app.get("/api/v1/workers/telemetry")
-async def get_workers_telemetry():
-    """Alias para compatibilidade com o frontend (PASA v47.3)."""
-    return await workers_stats()
-
-@app.get("/api/v1/monitor/status")
-async def get_monitor_status(supa: Client = Depends(get_supa)):
-    """Status consolidado do monitoramento para o frontend."""
-    try:
-        # Busca estatísticas básicas de saúde do sistema
-        res = supa.table('worker_sessions').select('status').eq('plataforma', 'instagram').execute()
-        sessions = res.data or []
-        active_sessions = sum(1 for s in sessions if s.get('status') == 'active')
-        
-        return {
-            "status": "operational",
-            "queue_health": {
-                "active_sessions": active_sessions,
-                "total_sessions": len(sessions)
-            },
-            "timestamp": datetime.now(timezone.utc).isoformat()
-        }
-    except Exception as e:
-        logger.error(f"Monitor Status Error: {e}")
-        raise HTTPException(status_code=500, detail=f"Monitor Status Error: {str(e)}")
-
-@app.get("/api/v1/workers/dashboard")
-async def workers_dashboard():
-    """Dashboard consolidado de saúde e desempenho dos workers."""
-    if not metrics_collector:
-        raise HTTPException(status_code=503, detail="Metrics collector not initialized")
-    
-    try:
-        summary = await metrics_collector.get_dashboard_summary()
-        return summary
-    except Exception as e:
-        logger.error(f"Workers Dashboard Error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/api/v1/workers/stats")
-async def workers_stats():
-    """Estatísticas de todos os workers."""
-    if not metrics_collector:
-        raise HTTPException(status_code=503, detail="Metrics collector not initialized")
-    
-    try:
-        all_stats = await metrics_collector.get_all_workers_stats()
-        return {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "workers": all_stats,
-            "total_workers": len(all_stats)
-        }
-    except Exception as e:
-        logger.error(f"Workers Stats Error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/api/v1/workers/{worker_name}/stats")
-async def worker_stats(worker_name: str):
-    """Estatísticas de um worker específico."""
-    if not metrics_collector:
-        raise HTTPException(status_code=503, detail="Metrics collector not initialized")
-    
-    try:
-        stats = await metrics_collector.get_worker_stats(worker_name)
-        if stats.get("status") == "no_data":
-            raise HTTPException(status_code=404, detail=f"No metrics found for worker '{worker_name}'")
-        return stats
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Worker Stats Error ({worker_name}): {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/api/v1/workers/export-metrics")
-async def export_metrics(filepath: str = "data/workers_metrics_export.json"):
-    """Export metrics to JSON file for analysis."""
-    if not metrics_collector:
-        raise HTTPException(status_code=503, detail="Metrics collector not initialized")
-    
-    try:
-        await metrics_collector.export_metrics_json(filepath)
-        return {"status": "success", "filepath": filepath, "timestamp": datetime.now(timezone.utc).isoformat()}
-    except Exception as e:
-        logger.error(f"Export Metrics Error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-# --- SESSIONS ENDPOINTS (v47.5) ---
-
-@app.get("/api/v1/sessions/instagram/status")
-async def get_instagram_session_status(supa: Client = Depends(get_supa)):
-    """Verifica o status da sessão do Instagram (Busca a sessão ATIVA mais recente)."""
-    try:
-        # PASA v49.6: Busca a sessão ATIVA mais recente para suporte a fallback
-        res = supa.table('worker_sessions')\
-            .select('*')\
-            .eq('plataforma', 'instagram')\
-            .eq('status', 'active')\
-            .order('updated_at', desc=True)\
-            .limit(1)\
-            .execute()
-            
-        if not res.data:
-            return {"status": "missing", "message": "Nenhuma sessão ativa encontrada"}
-        
-        session = res.data[0]
-        return {
-            "status": "active",
-            "last_updated": session.get('updated_at'),
-            "is_valid": True,
-            "session_id_preview": session.get('cookies', '')[:15] + "..."
-        }
-    except Exception as e:
-        logger.error(f"Session Status Error: {e}")
-        raise HTTPException(status_code=500, detail=f"Session Status Error: {str(e)}")
-
-@app.get("/api/v1/sessions/instagram")
-async def get_sessions(supa: Client = Depends(get_supa)):
-    """Lista todas as sessões de raspagem do Instagram."""
-    try:
-        res = supa.table('worker_sessions').select('*').eq('plataforma', 'instagram').order('updated_at', desc=True).execute()
+        res = supa.table('redes_coordenadas').select('*').order('created_at', desc=True).limit(10).execute()
         return res.data or []
-    except Exception as e:
-        logger.error(f"Get Sessions Error: {e}")
-        raise HTTPException(status_code=500, detail=f"Get Sessions Error: {str(e)}")
+    except Exception as e: return []
 
-@app.post("/api/v1/sessions/instagram/cookies")
-async def add_session(payload: SessionCookieRequest, supa: Client = Depends(get_supa)):
-    """Adiciona/Injeta novos cookies de sessão (Evita duplicados plataforma+cookies)."""
+@app.get("/api/v1/pasa/breakdown")
+def pasa_breakdown(supa: Client = Depends(get_supa)):
     try:
-        data = {
-            "plataforma": "instagram",
-            "cookies": payload.cookies,
-            "status": "active",
-            "updated_at": datetime.now(timezone.utc).isoformat()
-        }
-        # PASA v49.6: on_conflict agora usa a restrição composta
-        res = supa.table('worker_sessions').upsert(data, on_conflict='plataforma,cookies').execute()
-        return {"status": "success", "data": res.data[0] if res.data else {}}
-    except Exception as e:
-        logger.error(f"Add Session Error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        res = supa.table('comentarios').select('categoria_ia').in_('categoria_ia', HATE_CATEGORIES).execute()
+        return dict(Counter([item.get('categoria_ia') or 'OUTROS' for item in (res.data or [])]))
+    except Exception as e: return {}
 
-@app.patch("/api/v1/sessions/instagram/{session_id}/rotation")
-async def update_rotation(session_id: str, payload: SessionRotationRequest, supa: Client = Depends(get_supa)):
-    """Atualiza configuração de rotação automática de uma sessão."""
+@app.get("/api/v1/analytics/demographics")
+def get_demographics(supa: Client = Depends(get_supa)):
     try:
-        update_data = {}
-        if payload.enabled is not None:
-            update_data["auto_rotate_enabled"] = payload.enabled
-        if payload.intervalHours is not None:
-            update_data["auto_rotate_interval"] = payload.intervalHours
-
-        res = supa.table('worker_sessions').update(update_data).eq('id', session_id).execute()
-        return {"status": "success", "data": res.data[0] if res.data else {}}
-    except Exception as e:
-        logger.error(f"Update Rotation Error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/api/v1/sessions/instagram/rotate")
-async def rotate_now(supa: Client = Depends(get_supa)):
-    """Dispara rotação manual imediata."""
-    return {"status": "success", "message": "Rotação sinalizada para o orquestrador local."}
-
-@app.delete("/api/v1/sessions/instagram/{session_id}")
-async def delete_session(session_id: str, supa: Client = Depends(get_supa)):
-    """Remove uma sessão."""
-    try:
-        supa.table('worker_sessions').delete().eq('id', session_id).execute()
-        return {"status": "success"}
-    except Exception as e:
-        logger.error(f"Delete Session Error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        res = supa.table('comentarios').select('candidatos(username, sexo, partido, estado, ideologia)')\
+            .in_('categoria_ia', HATE_CATEGORIES).order('data_coleta', desc=True).limit(5000).execute()
+        from collections import defaultdict
+        stats = {"sexo": defaultdict(int), "partido": defaultdict(int)}
+        for item in (res.data or []):
+            c = item.get('candidatos')
+            if not c: continue
+            if c.get('sexo'): stats['sexo'][c['sexo']] += 1
+            if c.get('partido'): stats['partido'][c['partido']] += 1
+        return {"sexo": [{"name": k, "value": v} for k, v in stats["sexo"].items()], 
+                "partido": [{"name": k, "value": v} for k, v in stats["partido"].items()]}
+    except Exception as e: return {}
