@@ -27,6 +27,9 @@ _last_updated: 2026-06-05 | branch: main_
 - [x] Otimização de Performance no Cadastro de Candidatos (Fase 8): processamento e escrita em lote (Bulk Upserts) de novos alvos e coletas no WkEscaneiaCandidatos
 - [x] Refinação da Inteligência de Autocura (Fase 4): implementação real do DocFetcher (sincronização remota) e refatoração do AIAdvisor para cascata de IA resiliente
 - [x] Segurança, Governança e Filtros Analíticos (Fase 10): implementação de RLS global, normalização de categorias MCA v2.2 e Shadowban Léxico no frontend
+- [x] Saneamento Determinístico de Gênero e Cargo (PASA v94.0): eliminação de heurísticas nominais em prol de leitura direta por CSV e extensão da taxonomia.
+- [x] Resiliência Anti-Sangria e Circuito Local (PASA v52.5): proteção financeira com fallback imediato para erro se Ollama falhar, evitando gastos não planejados na nuvem.
+- [x] Refatoração Estrutural e Modularização do Frontend (Warroom): isolamento do estado (TargetCard, InvestigationModal, CommentCard) prevenindo UI freezing e re-renders sistêmicos.
 - [x] Integração Nativa Voyant Tools (v92.0): Implementação da Trombone API para triagem fast-drop determinística e redução de burn rate de LLM.
 - [x] Subagente Voyant (SaVoyant v92.3): Conversão da engine léxica em um Subagente autônomo com integração às bases de Linguística Forense.
 

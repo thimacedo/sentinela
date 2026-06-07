@@ -45,6 +45,7 @@ O Sentinela é uma plataforma de monitoramento político com foco em:
 
 [Frontend oficial]
   └── frontend/ (Next.js)
+        └── components/warroom/ (Abas modularizadas: targets, alerts, analise)
 
 [Dashboard local]
   └── local_dashboard.html + SSE do Watchdog
@@ -99,10 +100,10 @@ Mudanças já aplicadas:
 
 Pipeline Event-Driven (Fase 9) com `EventBus` (`core.event_bus`):
 
-- **Triagem local**: `ollama` (llama3.2:1b, < 2s por comentário)
+- **Triagem local**: `ollama` (llama3.2:1b, < 2s por comentário) com auto-start e fallback antissangria (gera "ERRO" em vez de "SUSPEITO" em caso de indisponibilidade).
 - **Perícia cloud**: Sabia-4 (Maritaca, primário) → Mistral → Groq → OpenRouter
 - **Fallback profundo**: `core/fallback_llm.py`
-- **Circuit Breaker**: Providers com 401/403 removidos permanentemente; 429 suspensos por 300s
+- **Circuit Breaker**: Providers com 401/403 removidos permanentemente; 429 suspensos por 300s. Erros locais engatilham alertas WhatsApp.
 
 Notas:
 - LiteRT não integra mais o processamento ativo.
