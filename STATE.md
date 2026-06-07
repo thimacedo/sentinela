@@ -327,3 +327,10 @@ PGMQ deve aparecer apenas como hipótese futura.
 - **Sanitização Determinística via CSV**: Refatoramos o [ground_truth.py](file:///c:/projetos/sentinela/core/ground_truth.py) para ler o sexo diretamente do arquivo [alvos_sanitizacao.csv](file:///c:/projetos/sentinela/alvos_sanitizacao.csv) (coluna `sexo`), extinguindo heurísticas falhas de sufixo no Python.
 - **Flexão de Cargos**: Expandimos a `TAXONOMIA_CARGOS_VALIDOS` em [intelligence_service.py](file:///c:/projetos/sentinela/core/intelligence_service.py) para suportar versões femininas de cargos políticos (ex: `"Deputada Federal"`, `"Governadora"`, `"Ministra"`) e atualizamos o prompt da IA para obedecer à flexão de gênero correspondente.
 - **Sincronização com o Banco**: O script [corrige_perfis_csv.py](file:///c:/projetos/sentinela/scripts/corrige_perfis_csv.py) foi adaptado para ler a nova coluna e atualizou com sucesso 373 registros da tabela `candidatos` do banco de dados remoto Supabase com gênero e cargos políticos flexionados corretos.
+
+## Fallback Local e Gestão Resiliente do Ollama (PASA v52.5 - 2026-06-07)
+
+- **Auto-Start e Processamento Singular**: Atualizamos o [ai_service.py](file:///c:/projetos/sentinela/core/ai_service.py) para injetar ativamente a inicialização do provedor local via `ensure_ollama_running()` ao detectar a necessidade. Integrado com `process_cleaner.py` para assegurar somente uma instância em execução.
+- **Prevenção contra "Sangria de Nuvem"**: Refatorado o fallback de falha crítica na triagem: caso o servidor do Ollama colapse, a tarefa é marcada com `"categoria_ia": "ERRO"` em vez de repassá-la adiante como `"SUSPEITO"`. Isso garante contenção total de custos na malha Cloud (Mistral/Gemini).
+- **Notificação Direta (Circuit Breaker)**: Inserida lógica no tratador de falhas de APIs (`_handle_provider_error`). Ao exceder os _retries_ toleráveis do modelo local (acionando o Circuit Breaker), um aviso é imediatamente encaminhado via `watchdog.send_whatsapp_alert` informando a necessidade de intervenção do operador para destravamento local.
+- **Modelo Utilizado na Execução**: *Gemini 3.1 Pro (High)*, conforme protocolo de uso.
