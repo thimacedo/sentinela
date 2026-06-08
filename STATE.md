@@ -222,8 +222,15 @@ PGMQ deve aparecer apenas como hipótese futura.
 - **Otimização de Dados**: Queries SQL agora utilizam SELECT seletivo, reduzindo overhead de tráfego com o Supabase.
 - **Reward Engine Sync**: Correção na atribuição de XP (+15.0 para insights relevantes) garantindo a progressão do agente.
 
-## Fase 7 - Painel de Auditoria e Admin (2026-06-08)
+## Fase 8 - Inteligência de N-Gramas (2026-06-08)
 
+### 1. Detecção de Comportamento Coordenado (v94.4)
+- **Engine Solenya Rebuilt**: O `BehaviorEngine` foi expandido para suportar extração de N-Gramas (Bigramas e Trigramas).
+- **Slogan Detector**: Implementada a identificação automática de slogans recorrentes na base de dados. O sistema agora agrupa comentários que compartilham sequências de 3 ou mais palavras, mesmo que o restante do texto varie.
+- **Marcação Pericial**: Registros coordenados agora são marcados com `SLOGAN_REPETITIVO` ou `COPY_PASTE_COORDENADO`, incluindo a lista de slogans detectados no campo de metadados.
+
+## Fase 7 - Painel de Auditoria e Admin (2026-06-08)
+...
 ### 1. Terminal Administrativo GOD Mode (v94.3)
 - **Restauração Financeira**: Implementado o endpoint consolidado `/api/v1/admin/finance/dashboard` que fornece KPIs de receita, queima de tokens por módulo e ranking de operadores.
 - **DRE Diário**: O frontend agora exibe um gráfico de fluxo de caixa (Inflow/Outflow) baseado em transações reais de CI (Créditos de Inteligência).
