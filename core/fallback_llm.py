@@ -194,7 +194,10 @@ class FallbackLLM:
     # ---------------------------------------------------------------------
     # API pública
     # ---------------------------------------------------------------------
-    def classify(self, text: str, provider_name: str = None) -> str:
+    # ---------------------------------------------------------------------
+    # API pública
+    # ---------------------------------------------------------------------
+    def classify(self, text: str, provider_name: str = None, comment_id: str = None, candidato_id: str = None) -> str:
         """Classifica *text* usando o provedor selecionado.
 
         Se ``provider_name`` for ``None``, percorre a lista de prioridade.
@@ -260,14 +263,26 @@ class FallbackLLM:
                     res = f"[DUMMY-{name.upper()}] {text}"
                 
                 ai_circuit_breaker.record_success(f"fallback_{name}")
-                self._log_fallback_call(name, "SUCCESS", {"model": model_name, "text_length": len(text)})
+                self._log_fallback_call(name, "SUCCESS", {
+                    "model": model_name, 
+                    "text_length": len(text),
+                    "comment_id": comment_id,
+                    "candidato_id": candidato_id
+                })
                 return res
 
             except requests.exceptions.HTTPError as exc:
                 status_code = exc.response.status_code
                 logger.error(f"Erro HTTP {status_code} no provider {name}: {exc}")
                 ai_circuit_breaker.record_failure(f"fallback_{name}", status_code)
-                self._log_fallback_call(name, "ERROR", {"model": model_name, "error_type": "HTTPError", "status_code": status_code, "error": str(exc)})
+                self._log_fallback_call(name, "ERROR", {
+                    "model": model_name, 
+                    "error_type": "HTTPError", 
+                    "status_code": status_code, 
+                    "error": str(exc),
+                    "comment_id": comment_id,
+                    "candidato_id": candidato_id
+                })
                 
                 # Hard limit: remove provider from rotation
                 if status_code in [400, 401, 402, 403, 404]:
@@ -281,7 +296,13 @@ class FallbackLLM:
             except Exception as exc:
                 logger.error(f"Erro ao usar provider {name}: {exc}")
                 ai_circuit_breaker.record_failure(f"fallback_{name}")
-                self._log_fallback_call(name, "ERROR", {"model": model_name, "error_type": "Exception", "error": str(exc)})
+                self._log_fallback_call(name, "ERROR", {
+                    "model": model_name, 
+                    "error_type": "Exception", 
+                    "error": str(exc),
+                    "comment_id": comment_id,
+                    "candidato_id": candidato_id
+                })
                 
                 # Config error: remove provider
                 if "ausente" in str(exc).lower():

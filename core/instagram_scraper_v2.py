@@ -176,6 +176,7 @@ class InstagramScraperV2:
         max_comments_per_post: int = 50,
         max_age_days: int = 7,
         resume_after_shortcode: str = None,
+        on_post_scraped: Optional[Any] = None,
     ) -> List[Dict[str, Any]]:
         """
         Extrai comentários de um perfil com retry e rotação.
@@ -369,6 +370,14 @@ class InstagramScraperV2:
                             all_comments.extend(post_comments)
                             scraped_count += 1
                             self.stats["posts_scraped"] += 1
+                            
+                            # Callback assíncrona para persistência incremental
+                            if on_post_scraped:
+                                try:
+                                    await on_post_scraped(shortcode, post_comments)
+                                except Exception as e_cb:
+                                    logger.error(f"⚠️ [V2] Falha na callback on_post_scraped para post {shortcode}: {e_cb}")
+                            
                             await asyncio.sleep(random.uniform(6, 18))
                         else:
                             logger.info(f"⏭️ [V2] Post {shortcode} ignorado.")

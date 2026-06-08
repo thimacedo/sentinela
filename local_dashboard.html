@@ -3,1080 +3,372 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sentinela - War Room de Inteligência</title>
+    <title>Decision Room - Sentinela Democrática</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-image: radial-gradient(circle at 10% 20%, rgba(99,102,241,0.04) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(168,85,247,0.04) 0%, transparent 40%), radial-gradient(circle at 50% 50%, rgba(244,63,94,0.01) 0%, transparent 50%); }
-        .mono { font-family: 'JetBrains Mono', monospace; }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(15,23,42,0.3); }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(51,65,85,0.5); border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(71,85,105,0.8); }
-        .glow-red { box-shadow: 0 0 15px rgba(239,68,68,0.15); }
-        .conf-bar { height: 3px; border-radius: 2px; transition: width 0.4s ease; }
-        @keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
-        .skeleton { background: linear-gradient(90deg, rgba(30,41,59,0.6) 25%, rgba(51,65,85,0.4) 50%, rgba(30,41,59,0.6) 75%); background-size: 800px 100%; animation: shimmer 1.4s infinite linear; border-radius: 6px; }
-        .thermo-btn.active { opacity: 1; border-color: rgba(99,102,241,0.5); background-color: rgba(99,102,241,0.1); color: white; }
-        .thermo-btn:not(.active) { opacity: 0.5; }
-        @keyframes copyPop { 0%{transform:scale(1)} 40%{transform:scale(1.1)} 100%{transform:scale(1)} }
-        .copy-pop { animation: copyPop 0.2s ease; }
+        body { background-color: #000; color: #d1d5db; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #111827; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
     </style>
 </head>
-<body class="bg-[#030712] text-slate-100 min-h-screen p-6 flex flex-col gap-6">
+<body class="min-h-screen selection:bg-gray-800">
 
-    <!-- Header Panel -->
-    <header class="bg-slate-900/40 backdrop-blur-2xl border border-slate-800/80 rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-2xl sticky top-0 z-50">
-        <div class="flex items-center gap-4">
-            <div class="bg-gradient-to-tr from-indigo-600 to-violet-500 p-3 rounded-2xl shadow-lg shadow-indigo-500/20">
-                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                </svg>
-            </div>
+    <main class="max-w-[1400px] mx-auto py-6 px-4 space-y-6">
+        
+        <!-- HEADER -->
+        <header class="flex justify-between items-end border-b border-gray-800 pb-4">
             <div>
-                <h1 class="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent flex items-center gap-2">
-                    SENTINELA <span class="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">WAR ROOM</span>
+                <h1 class="text-2xl font-black text-white tracking-tighter uppercase flex items-center gap-3">
+                    <i data-lucide="activity" class="w-6 h-6 text-indigo-500"></i>
+                    Decision Room
                 </h1>
-                <p class="text-slate-400 text-xs mt-0.5">Centro de Governança de Inteligência & Inspeção Real-Time</p>
+                <p class="text-xs text-gray-500 mt-1 tracking-widest uppercase">
+                    Sentinela Democrática // Painel Tático e Gerencial
+                </p>
             </div>
-        </div>
-
-        <div id="critical-alerts-container" class="flex-1 max-w-xl hidden">
-            <div id="critical-alerts-feed" class="flex flex-col gap-2"></div>
-        </div>
-
-        <div class="flex flex-wrap items-center gap-3">
-            <div id="live-indicator" class="hidden flex items-center gap-2 px-3 py-1.5 rounded-xl bg-rose-500/10 border border-rose-500/30">
-                <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
-                <span class="text-[10px] font-black text-rose-400 uppercase tracking-widest">LIVE DATA</span>
-            </div>
-
-            <!-- Painel de Controle do Servidor Principal -->
-            <div class="flex items-center gap-1 bg-slate-950/60 border border-slate-800/80 rounded-xl p-1 shadow-inner">
-                <button id="btn-srv-start" onclick="controlServer('start')" class="hover:bg-emerald-500/10 text-slate-500 hover:text-emerald-400 p-2 rounded-lg transition-all active:scale-95 flex items-center justify-center" title="Iniciar Servidor">
-                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                </button>
-                <button id="btn-srv-stop" onclick="controlServer('stop')" class="hover:bg-rose-500/10 text-slate-500 hover:text-rose-400 p-2 rounded-lg transition-all active:scale-95 flex items-center justify-center" title="Parar Servidor">
-                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-                </button>
-                <button id="btn-srv-restart" onclick="controlServer('restart')" class="hover:bg-amber-500/10 text-slate-500 hover:text-amber-400 p-2 rounded-lg transition-all active:scale-95 flex items-center justify-center" title="Reiniciar Servidor">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.2"/></svg>
-                </button>
-            </div>
-
-            <div class="bg-slate-950/40 border border-slate-800/60 rounded-xl px-4 py-2 flex items-center gap-3">
-                <span class="relative flex h-3 w-3">
-                    <span id="ping-pulse" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span id="ping-dot" class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-                </span>
-                <div class="flex flex-col">
-                    <span class="text-[9px] text-slate-500 uppercase font-bold">Watchdog Status</span>
-                    <span id="watchdog-status-text" class="text-xs font-black text-emerald-400">OPERACIONAL</span>
+            <div class="text-right hidden sm:block">
+                <div class="text-[10px] text-gray-500 uppercase tracking-widest">Motor Autopilot</div>
+                <div class="flex items-center gap-2 justify-end mt-1">
+                    <span id="motor-dot" class="w-2 h-2 rounded-full bg-yellow-500"></span>
+                    <span id="motor-status" class="text-xs font-bold text-yellow-500">CONECTANDO</span>
                 </div>
             </div>
+        </header>
 
-            <button id="btn-refresh" onclick="fetchData()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center gap-2 active:scale-95">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.2"/></svg>
-                Sync <kbd class="ml-1 text-[9px] bg-slate-700 px-1 py-0.5 rounded font-mono">R</kbd>
-            </button>
-        </div>
-    </header>
-
-    <!-- KPI Row -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-slate-900/30 border border-slate-800/60 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
-            <span class="block text-xs font-semibold text-slate-400">Total Comentários</span>
-            <span id="kpi-total-comments" class="block text-2xl font-black text-white mt-1 mono">---</span>
-            <span id="kpi-avg-comments-day" class="text-[10px] text-slate-500 block mt-1">Média: --/dia</span>
-        </div>
-        <div class="bg-slate-900/30 border border-slate-800/60 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
-            <span class="block text-xs font-semibold text-slate-400">Discursos Críticos</span>
-            <span id="kpi-hate-comments" class="block text-2xl font-black text-rose-500 mt-1 mono">---</span>
-            <span id="kpi-hate-pct" class="text-[10px] text-rose-400 font-bold block mt-1">--% de ódio</span>
-        </div>
-        <div class="bg-slate-900/30 border border-slate-800/60 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
-            <span class="block text-xs font-semibold text-slate-400">Alvos Monitorados</span>
-            <span id="kpi-active-targets" class="block text-2xl font-black text-emerald-400 mt-1 mono">---</span>
-            <div class="flex gap-2 text-[10px] text-slate-500 mt-1">
-                <span>P: <b id="kpi-paused-targets" class="text-amber-400">--</b></span>
-                <span>E: <b id="kpi-excluded-targets" class="text-rose-400">--</b></span>
-            </div>
-        </div>
-        <div class="bg-slate-900/30 border border-slate-800/60 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
-            <span class="block text-xs font-semibold text-slate-400">Ciclos do Sistema</span>
-            <span id="kpi-cycles" class="block text-2xl font-black text-violet-400 mt-1 mono">---</span>
-            <div class="flex flex-col gap-0.5 mt-1">
-                <span class="text-[10px] text-slate-500">Reclassificados: <b id="kpi-reclassified" class="text-indigo-400">--</b></span>
-                <span class="text-[10px] text-slate-500">Pendentes: <b id="kpi-pending" class="text-amber-400">--</b></span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main Content -->
-    <main class="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 min-h-0 overflow-y-auto lg:overflow-visible pb-10 lg:pb-0">
-        <!-- Radar (Left) -->
-        <aside class="lg:col-span-3 flex flex-col gap-4 h-[500px] lg:h-[calc(100vh-290px)] lg:min-h-[480px] bg-slate-900/40 backdrop-blur-2xl border border-slate-800/60 rounded-2xl p-5 shadow-2xl">
-            <div class="flex justify-between items-center pb-3 border-b border-slate-800">
-                <h2 class="text-xs font-black uppercase tracking-widest text-slate-400">Radar de Alvos</h2>
-                <span id="targets-count-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 mono">--/--</span>
-            </div>
-            <div class="relative">
-                <input type="text" id="target-search" oninput="filterTargets()" placeholder="Buscar @username..." class="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-indigo-500/50 transition-all text-slate-200">
-                <svg class="w-3.5 h-3.5 text-slate-500 absolute right-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-            </div>
-            <div id="thermo-filters" class="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
-                <button data-filter="ALL" class="thermo-btn active text-[10px] font-bold px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800 text-slate-300 shadow-md">TUDO</button>
-                <button data-filter="QUENTE" class="thermo-btn text-[10px] font-bold px-3 py-1.5 rounded-lg border border-rose-900/50 bg-rose-500/10 text-rose-400 shadow-md">QUENTE</button>
-                <button data-filter="MORNO" class="thermo-btn text-[10px] font-bold px-3 py-1.5 rounded-lg border border-amber-900/50 bg-amber-500/10 text-amber-400 shadow-md">MORNO</button>
-                <button data-filter="FRIO" class="thermo-btn text-[10px] font-bold px-3 py-1.5 rounded-lg border border-blue-900/50 bg-blue-500/10 text-blue-400 shadow-md">FRIO</button>
-            </div>
-            <div id="targets-feed" class="flex-1 overflow-y-auto pr-1 flex flex-col gap-2.5 custom-scrollbar">
-                <div class="skeleton h-20 w-full opacity-20"></div>
-                <div class="skeleton h-20 w-full opacity-10"></div>
-            </div>
-        </aside>
-
-        <!-- Monitor (Center) -->
-        <section class="lg:col-span-6 flex flex-col gap-4 h-[650px] lg:h-[calc(100vh-290px)] lg:min-h-[480px] bg-slate-900/50 border border-slate-800/60 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-md">
-            <div class="p-5 border-b border-slate-800/80 flex justify-between items-center bg-slate-900/20 backdrop-blur-md sticky top-0 z-10">
-                <div class="flex items-center gap-4">
-                    <button id="tab-monitor" onclick="switchTab('monitor')" class="text-xs font-black uppercase tracking-widest text-white border-b-2 border-indigo-500 pb-1 focus:outline-none transition-all">Monitor de Discurso</button>
-                    <button id="tab-logs" onclick="switchTab('logs')" class="text-xs font-black uppercase tracking-widest text-slate-400 hover:text-white pb-1 focus:outline-none transition-all">Console de Logs</button>
-                </div>
-                <div class="flex items-center gap-2" id="monitor-controls">
-                    <div class="relative mr-2">
-                        <input type="text" id="monitor-search-input" oninput="searchMonitor()" placeholder="Busca FTS5..." class="bg-slate-950/80 border border-slate-800 rounded-lg px-3 py-1 text-[10px] w-32 focus:outline-none focus:border-indigo-500/50 transition-all text-slate-200">
-                    </div>
-                    <div id="live-dot" class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30">
-                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                         <span class="text-[9px] font-black text-emerald-400">LIVE</span>
-                    </div>
-                    <button id="btn-hate-only" onclick="toggleHateOnly()" class="text-[9px] font-bold px-3 py-1 rounded-lg border border-slate-700 bg-slate-800 text-slate-400 hover:border-rose-500/50 transition-all">SÓ ÓDIO</button>
-                </div>
-                <div class="flex items-center gap-2 hidden" id="logs-controls">
-                    <button onclick="clearTerminal()" class="text-[9px] font-bold px-3 py-1 rounded-lg border border-slate-700 bg-slate-800 text-rose-400 hover:bg-slate-800/80 hover:border-slate-600 transition-all">LIMPAR</button>
-                </div>
-            </div>
-            <div id="classified-feed" class="flex-1 overflow-y-auto p-5 flex flex-col gap-4 custom-scrollbar">
-                <div class="skeleton h-32 w-full opacity-30"></div>
-                <div class="skeleton h-32 w-full opacity-20"></div>
-                <div class="skeleton h-32 w-full opacity-10"></div>
-            </div>
-            <div id="terminal-feed" class="flex-1 overflow-y-auto p-5 hidden custom-scrollbar bg-[#020617] font-mono text-[11px] flex flex-col gap-1 select-text selection:bg-slate-800">
-                <div class="skeleton h-10 w-full opacity-25"></div>
-                <div class="skeleton h-10 w-full opacity-15"></div>
-                <div class="skeleton h-10 w-full opacity-5"></div>
-            </div>
-        </section>
-
-        <!-- Status (Right) -->
-        <aside class="lg:col-span-3 flex flex-col gap-4 h-auto lg:h-[calc(100vh-290px)] lg:min-h-[480px] overflow-y-auto custom-scrollbar">
-            <!-- Inteligência Analítica (SQL Local Bridge) -->
-            <div class="bg-slate-900/60 border border-indigo-500/30 rounded-2xl p-5 shadow-xl relative group transition-all duration-300">
-                <div class="absolute -right-4 -top-4 w-20 h-20 bg-indigo-500/10 rounded-full blur-2xl group-hover:bg-indigo-500/20 transition-all"></div>
-                <div class="flex justify-between items-start mb-4 cursor-pointer" onclick="toggleAccordion('analytics-panel', this)">
-                    <div class="flex flex-col pointer-events-none">
-                        <h2 class="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 flex items-center gap-2">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                            Inteligência Analítica
-                        </h2>
-                        <span id="ai-degraded-label" class="text-[8px] font-black text-rose-500/60 tracking-widest hidden uppercase mt-0.5">⚠️ Malha Degradada</span>
-                    </div>
-                    <svg class="w-4 h-4 text-slate-500 transform transition-transform duration-300 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                </div>
-                <div id="analytics-panel" class="flex flex-col gap-4 overflow-hidden transition-all duration-300 origin-top">
-                    <!-- Top Attackers -->
-                    <div>
-                        <span class="text-[9px] font-bold text-slate-500 uppercase mb-2 block">Maiores Agressores (Global)</span>
-                        <div id="top-attackers-list" class="flex flex-col gap-1.5 max-h-[300px] overflow-y-auto custom-scrollbar">
-                             <div class="skeleton h-8 w-full opacity-20"></div>
-                        </div>
-                    </div>
-                    <!-- Hate Map -->
-                    <div class="pt-2 border-t border-slate-800/50">
-                        <span class="text-[9px] font-bold text-slate-500 uppercase mb-2 block">Taxa de Crítica por Alvo</span>
-                        <div id="hate-map-list" class="flex flex-col gap-2 max-h-[300px] overflow-y-auto custom-scrollbar">
-                             <div class="skeleton h-12 w-full opacity-10"></div>
-                        </div>
-                    </div>
-                    <!-- Voyant Status (v92.4) -->
-                    <div class="pt-2 border-t border-slate-800/50 flex justify-between items-center">
-                        <span class="text-[9px] font-bold text-slate-500 uppercase">Engine Léxica (Voyant)</span>
-                        <div id="voyant-status-indicator" class="flex items-center gap-1.5">
-                            <span class="w-1.5 h-1.5 rounded-full bg-slate-700"></span>
-                            <span class="text-[9px] font-black text-slate-600 uppercase">CHECKING...</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-5 shadow-xl transition-all duration-300">
-                <div class="flex items-center justify-between mb-4 cursor-pointer" onclick="toggleAccordion('kpi-ai-services-container', this)">
-                    <h2 class="text-xs font-black uppercase tracking-widest text-slate-400 pointer-events-none">Serviços de IA</h2>
-                    <div class="flex items-center gap-2">
-                        <button onclick="event.stopPropagation(); openNewAIModal()" class="text-[10px] font-bold text-violet-400 hover:text-violet-300 transition-colors uppercase tracking-widest">+ Nova</button>
-                        <svg class="w-4 h-4 text-slate-500 transform transition-transform duration-300 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </div>
-                </div>
-                <div id="kpi-ai-services-container" class="overflow-hidden transition-all duration-300 origin-top">
-                    <div id="kpi-ai-services" class="flex flex-col gap-3 max-h-[350px] overflow-y-auto custom-scrollbar pr-1"></div>
-                </div>
-            </div>
+        <!-- MACRO-INDICADORES -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             
-            <div class="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-5 shadow-xl transition-all duration-300">
-                <div class="flex items-center justify-between mb-4 cursor-pointer" onclick="toggleAccordion('kpi-instagram-container', this)">
-                    <h2 class="text-xs font-black uppercase tracking-widest text-slate-400 pointer-events-none">Nós de Coleta</h2>
-                    <svg class="w-4 h-4 text-slate-500 transform transition-transform duration-300 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            <!-- Eficiência -->
+            <div class="bg-gray-900 border border-gray-800 p-4 rounded-xl flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-[10px] text-gray-500 font-bold uppercase tracking-widest flex items-center gap-2">
+                        <i data-lucide="cpu" class="w-3 h-3"></i> Throughput e Eficiência
+                    </span>
                 </div>
-                <div id="kpi-instagram-container" class="overflow-hidden transition-all duration-300 origin-top">
-                    <div id="kpi-instagram" class="flex flex-col gap-3 max-h-[300px] overflow-y-auto custom-scrollbar pr-1"></div>
+                <div>
+                    <div class="flex items-end gap-2">
+                        <span id="stat-classificados" class="text-3xl font-black text-white">-</span>
+                        <span class="text-xs text-gray-500 mb-1">Processados</span>
+                    </div>
+                    <div class="w-full bg-gray-800 h-1.5 mt-4 rounded-full overflow-hidden">
+                        <div id="stat-bar" class="bg-indigo-500 h-full" style="width: 0%"></div>
+                    </div>
+                    <div class="flex justify-between mt-2 text-[10px] text-gray-500">
+                        <span>Fila Restante: <span id="stat-fila" class="text-yellow-500 font-bold">-</span></span>
+                        <span>Termômetro de Carga</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="bg-slate-900/40 border border-slate-800/80 rounded-2xl flex-1 flex flex-col shadow-xl overflow-hidden transition-all duration-300">
-                <div class="p-4 border-b border-slate-800 bg-slate-900/20 flex justify-between items-center cursor-pointer" onclick="toggleAccordion('runs-feed', this)">
-                    <h2 class="text-xs font-black uppercase tracking-widest text-slate-400 pointer-events-none">Telemetria</h2>
-                    <svg class="w-4 h-4 text-slate-500 transform transition-transform duration-300 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            <!-- Risco Global -->
+            <div class="bg-gray-900 border border-gray-800 p-4 rounded-xl flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-[10px] text-gray-500 font-bold uppercase tracking-widest flex items-center gap-2">
+                        <i data-lucide="trending-up" class="w-3 h-3"></i> Índice de Risco Global
+                    </span>
                 </div>
-                <div id="runs-feed" class="flex-1 overflow-y-auto p-4 flex flex-col gap-3 custom-scrollbar origin-top transition-all duration-300 max-h-[300px]"></div>
+                <div>
+                    <div class="flex items-end gap-2">
+                        <span id="stat-risco" class="text-3xl font-black text-red-500">-%</span>
+                        <span class="text-xs text-gray-500 mb-1">Pressão Semântica</span>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-3 leading-relaxed font-sans">
+                        Relação direta de ataques detectados vs volume total. Valores acima de 15% configuram crise reputacional.
+                    </p>
+                </div>
             </div>
-        </aside>
+
+            <!-- Top Alvos -->
+            <div class="bg-gray-900 border border-gray-800 p-4 rounded-xl flex flex-col">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-[10px] text-gray-500 font-bold uppercase tracking-widest flex items-center gap-2">
+                        <i data-lucide="users" class="w-3 h-3"></i> Focos de Crise (Top 3)
+                    </span>
+                </div>
+                <div id="top-targets-container" class="flex-1 flex flex-col justify-center space-y-2">
+                    <div class="text-xs text-gray-600 animate-pulse">Varrendo alvos...</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- MATRIZ & SISTEMA -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Matriz de Auditoria Global -->
+            <div class="lg:col-span-2 bg-gray-900 border border-gray-800 rounded-xl overflow-hidden flex flex-col h-[500px]">
+                <div class="p-4 border-b border-gray-800 bg-black/20 flex justify-between items-center">
+                    <h2 class="text-sm font-bold text-white flex items-center gap-2 uppercase tracking-tight">
+                        <i data-lucide="shield-alert" class="w-4 h-4 text-indigo-500"></i> Matriz de Auditoria Global
+                    </h2>
+                    <div class="flex items-center gap-3">
+                        <button id="btn-toggle-hate" onclick="toggleHateFilter()" class="text-[10px] text-gray-500 uppercase tracking-widest px-2 py-1 border border-gray-700 rounded hover:text-white transition-colors">Ver Todos</button>
+                    </div>
+                </div>
+                <div id="critical-alerts-container" class="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
+                    <div class="text-xs text-gray-600 animate-pulse">Consultando base de dados...</div>
+                </div>
+            </div>
+
+            <!-- Diagnóstico do Motor -->
+            <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden flex flex-col h-[500px]">
+                <div class="p-4 border-b border-gray-800 bg-black/20">
+                    <h2 class="text-sm font-bold text-white flex items-center gap-2 uppercase tracking-tight">
+                        <i data-lucide="alert-octagon" class="w-4 h-4 text-indigo-500"></i> Diagnóstico do Motor
+                    </h2>
+                </div>
+                <div class="p-4 flex-1 flex flex-col justify-between">
+                    <div class="space-y-4">
+                        <div>
+                            <div class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Status da API (Cloud)</div>
+                            <div class="flex items-center gap-2">
+                                <div class="h-1.5 flex-1 bg-gray-800 rounded-full overflow-hidden"><div class="bg-green-500 w-[95%] h-full"></div></div>
+                                <span class="text-xs text-green-500 font-bold">95%</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Bypass Autopilot L3</div>
+                            <div class="flex items-center gap-2">
+                                <div class="h-1.5 flex-1 bg-gray-800 rounded-full overflow-hidden"><div class="bg-indigo-500 w-full h-full"></div></div>
+                                <span class="text-xs text-indigo-500 font-bold">ON</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Gargalo de Fila</div>
+                            <div class="flex items-center gap-2">
+                                <div class="h-1.5 flex-1 bg-gray-800 rounded-full overflow-hidden">
+                                    <div id="diag-fila-bar" class="bg-yellow-500 h-full" style="width:30%"></div>
+                                </div>
+                                <span id="diag-fila-text" class="text-xs text-gray-400">NORMAL</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-8 border-t border-gray-800 pt-4">
+                        <div class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Última Ação do Watchdog</div>
+                        <div id="last-log" class="bg-black p-3 rounded border border-gray-800 text-[10px] text-gray-400 line-clamp-3 leading-relaxed">
+                            Aguardando pulso do servidor...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
     </main>
 
-        <!-- Modal de Detalhes da IA -->
-        <div id="ai-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center hidden opacity-0 transition-all duration-300">
-            <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl p-8 shadow-2xl scale-95 transition-all duration-300" id="ai-modal-content">
-                <div class="flex justify-between items-start mb-6">
-                    <div class="flex flex-col">
-                        <h2 id="modal-ai-name" class="text-2xl font-black text-slate-100 capitalize">IA Details</h2>
-                        <span id="modal-env-var" class="text-[10px] font-mono text-slate-500 mt-1 uppercase tracking-widest">ENV_VAR_NAME</span>
-                    </div>
-                    <button onclick="closeAIModal()" class="p-2 rounded-xl hover:bg-slate-800 transition-colors">
-                        <svg class="w-6 h-6 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
-                </div>
-
-                <div class="space-y-6">
-                    <div class="p-4 rounded-2xl bg-violet-500/5 border border-violet-500/10">
-                        <p id="modal-instructions" class="text-xs leading-relaxed text-slate-400">Instruções básicas para este provedor.</p>
-                        <a id="modal-auth-link" href="#" target="_blank" class="inline-flex items-center gap-2 text-violet-400 font-bold text-[10px] uppercase tracking-wider mt-3 hover:text-violet-300 transition-colors">
-                            Obter nova chave
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                        </a>
-                    </div>
-
-                    <div>
-                        <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2 px-1">API Key / Token</label>
-                        <div class="relative">
-                            <input type="password" id="modal-api-key" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-violet-500/50 transition-all font-mono" placeholder="Insira a nova chave aqui">
-                            <button onclick="toggleKeyVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
-                                <svg class="w-4 h-4" id="eye-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div id="modal-status-feedback" class="hidden p-3 rounded-xl text-[10px] font-bold text-center uppercase tracking-wider"></div>
-
-                    <div class="flex flex-col gap-2">
-                        <button id="btn-update-key" onclick="handleUpdateKey()" class="w-full bg-violet-600 hover:bg-violet-500 text-white font-black py-4 rounded-2xl transition-all shadow-lg shadow-violet-600/20 active:scale-[0.98] disabled:opacity-50 uppercase text-xs tracking-widest">
-                            ATUALIZAR E TESTAR AGORA
-                        </button>
-                        <button id="btn-delete-key" onclick="handleDeleteKey()" class="w-full bg-slate-800/40 hover:bg-rose-900/20 text-slate-500 hover:text-rose-400 font-bold py-3 rounded-2xl transition-all border border-slate-800 hover:border-rose-500/30 active:scale-[0.98] disabled:opacity-50 text-[9px] uppercase tracking-widest">
-                            Deletar Chave e Desativar IA
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
     <script>
-        // v89.0: Resiliência de Conexão (Suporte a file:// e localhost)
-        const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:8001' : '';
+        lucide.createIcons();
+
+        // Configuração Supabase (Key pública anônima)
         const SUPABASE_URL = 'https://vhamejkldzxbeibqeqpk.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoYW1lamtsZHp4YmVpYnFlcXBrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjQ4ODEyNSwiZXhwIjoyMDkyMDY0MTI1fQ.GfvAI7rV8isgdhVeJp4mOUscWpdOqOuBoURGm82VdtY';
         const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        window.isFetchingData = false;
-        window.currentModalAI = null;
+        const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:8001' : '';
 
-        function withTimeout(promise, ms = 8000) {
-            return Promise.race([
-                promise,
-                new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout Supabase')), ms))
-            ]);
+        let showOnlyHate = false;
+        let iaEvaluations = {}; 
+
+        function toggleHateFilter() {
+            showOnlyHate = !showOnlyHate;
+            const btn = document.getElementById('btn-toggle-hate');
+            btn.textContent = showOnlyHate ? "SÓ ÓDIO" : "Ver Todos";
+            btn.className = showOnlyHate ? "text-[10px] text-red-400 uppercase tracking-widest px-2 py-1 border border-red-500/50 bg-red-500/10 rounded transition-colors" : "text-[10px] text-gray-500 uppercase tracking-widest px-2 py-1 border border-gray-700 rounded hover:text-white transition-colors";
+            fetchDashboard();
         }
 
-        let localCandidatesList = [];
-        let lastComments = [];
-        let iaEvaluations = {}; // Cache local de avaliações persistentes
-        let activeThermo = 'ALL';
-        let hateOnly = false;
-        let realtimeSubscription = null;
-
-        function escapeHTML(str) { return str ? str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])) : ''; }
-        function timeAgo(d) {
-            if(!d) return '---';
-            const s = Math.floor((new Date() - new Date(d)) / 1000);
-            if(s < 60) return 'agora';
-            if(s < 3600) return `há ${Math.floor(s/60)}m`;
-            if(s < 86400) return `há ${Math.floor(s/3600)}h`;
-            return new Date(d).toLocaleDateString();
-        }
-
-        async function forceScrape(user) {
-            const btn = document.getElementById(`btn-scr-${user}`);
-            if(btn) btn.classList.add('animate-spin', 'text-indigo-400');
+        async function evaluateIA(id, traceId, engine, feedbackType, category, text) {
             try {
-                await db.from('fila_coleta').upsert({ candidato_id: user, status: 'PENDENTE', prioridade: 1, data_agendada: new Date().toISOString() }, { on_conflict: 'candidato_id,data_agendada' });
-                console.log(`[Queue] Manual: @${user}`);
-            } catch(e) {}
-            setTimeout(() => { if(btn) btn.classList.remove('animate-spin', 'text-indigo-400'); }, 1500);
-        }
+                iaEvaluations[id] = { type: feedbackType };
+                // Otimista
+                fetchDashboard(); 
 
-        function filterTargets() {
-            const term = document.getElementById('target-search').value.toLowerCase().trim();
-            let list = localCandidatesList;
-            if (activeThermo !== 'ALL') list = list.filter(c => (c.termometro || 'FRIO') === activeThermo);
-            if (term) list = list.filter(c => c.username.toLowerCase().includes(term) || (c.nome_completo?.toLowerCase().includes(term)));
-            
-            // PASA v50.1: Mostra apenas os últimos 10 alvos no radar para foco e performance
-            renderTargets(list.slice(0, 10));
-        }
-
-        function renderTargets(list) {
-            const feed = document.getElementById('targets-feed');
-            if(!list.length) { feed.innerHTML = '<p class="text-slate-600 text-[10px] italic text-center py-4">Nenhum alvo encontrado...</p>'; return; }
-            feed.innerHTML = list.map(c => {
-                const color = c.termometro === 'QUENTE' ? 'text-rose-400 border-rose-900/50 bg-rose-500/10' : (c.termometro === 'MORNO' ? 'text-amber-400 border-amber-900/50 bg-amber-500/10' : 'text-blue-400 border-blue-900/50 bg-blue-500/10');
-                return `
-                <div class="bg-slate-900/60 border border-slate-800/60 p-4 rounded-xl flex flex-col gap-3 group relative hover:border-slate-600 transition-all shadow-md">
-                    <div class="flex justify-between items-center">
-                        <span class="font-extrabold text-white text-sm cursor-pointer hover:text-indigo-400 transition-colors" onclick="navigator.clipboard.writeText('@${c.username}'); this.classList.add('text-indigo-400'); setTimeout(()=>this.classList.remove('text-indigo-400'),1000)">@${escapeHTML(c.username)}</span>
-                        <div class="flex items-center gap-3">
-                            <button id="btn-scr-${escapeHTML(c.username)}" onclick="forceScrape('${escapeHTML(c.username)}')" class="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-indigo-400 transition-all bg-slate-800 p-1.5 rounded-md"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path></svg></button>
-                            <span class="text-[10px] font-black px-2 py-1 rounded border uppercase tracking-wider shadow-sm ${color}">${c.termometro || 'FRIO'}</span>
-                        </div>
-                    </div>
-                    <div class="flex justify-between text-xs text-slate-400">
-                        <span class="truncate max-w-[140px] font-medium">${escapeHTML(c.nome_completo || 'Sem nome')}</span>
-                        <span class="font-mono text-[10px] bg-slate-950/50 px-2 py-0.5 rounded-md">${timeAgo(c.last_scraped_at)}</span>
-                    </div>
-                </div>`;
-            }).join('');
-        }
-
-        async function fetchEvaluations() {
-            try {
-                const r = await fetch(API_BASE + '/api/evaluations');
-                if(r.ok) {
-                    const data = await r.json();
-                    iaEvaluations = data.evaluations || {};
-                }
-            } catch(e) {}
-        }
-
-        async function evaluateIA(commentId, traceId, engine, feedbackType, category, text) {
-            try {
-                const resp = await fetch(API_BASE + '/api/evaluate', {
+                await fetch(API_BASE + '/api/evaluate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: commentId, trace_id: traceId, engine, feedback_type: feedbackType, is_correct: (feedbackType === 'VALIDADO'), category, text })
+                    body: JSON.stringify({ 
+                        id: id, trace_id: traceId, engine: engine, 
+                        feedback_type: feedbackType, is_correct: (feedbackType === 'VALIDADO'), 
+                        category: category, text: text 
+                    })
                 });
-                const res = await resp.json();
-                if(res.success) {
-                    iaEvaluations[commentId] = { type: feedbackType };
-                    renderComments(lastComments);
-                }
-            } catch(e) { console.error("Eval error:", e); }
+            } catch(e) { console.error("Erro no feedback:", e); }
         }
 
-        function renderComments(comments) {
-            // v92.5: Deduplicação rigorosa por ID para evitar "falso movimento"
-            const uniqueComments = [];
-            const seenIds = new Set();
-            
-            for (const c of comments) {
-                if (!seenIds.has(c.id)) {
-                    seenIds.add(c.id);
-                    uniqueComments.push(c);
-                }
-            }
-            
-            lastComments = uniqueComments;
-            const list = hateOnly ? uniqueComments.filter(c => c.is_hate) : uniqueComments;
-            const feed = document.getElementById('classified-feed');
-            if(!list.length) { feed.innerHTML = '<p class="text-slate-600 text-xs italic text-center p-10">Vazio...</p>'; return; }
-            feed.innerHTML = list.map(c => {
-                const isProcessed = c.processado_ia === true;
-                const conf = c.confianca_ia || 0;
-                const displayConf = isProcessed ? `${(conf * 100).toFixed(1)}%` : 'FILTRANDO...';
-                const barColor = !isProcessed ? 'bg-slate-800' : (conf >= 0.8 ? 'bg-emerald-500' : (conf >= 0.4 ? 'bg-amber-500' : 'bg-slate-700'));
-                const isHate = c.is_hate === true;
-                const isError = c.categoria_ia === 'ERRO';
-                
-                let badgeClasses = '';
-                if (isError) {
-                    badgeClasses = 'text-purple-400 bg-purple-500/10 border-purple-500/30 shadow-sm shadow-purple-500/20';
-                } else if (isHate) {
-                    badgeClasses = 'text-rose-400 bg-rose-500/10 border-rose-500/30 shadow-sm shadow-rose-500/20';
-                } else {
-                    badgeClasses = 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30 shadow-sm';
-                }
-                
-                let rawEngine = '';
-                if(c.analise_pericial && c.analise_pericial.startsWith('[')) {
-                    const match = c.analise_pericial.match(/^\[([^\]:]+)/);
-                    if(match) rawEngine = match[1];
-                }
-                
-                const engineMap = {
-                    'LEXICAL': 'Filtro Heurístico', 'FALLBACK_LLM': 'Fallback Cloud', 'SYSTEM_FAILURE': 'Falha do Sistema',
-                    'OLLAMA': 'Ollama (Local)', 'MARITACA': 'Maritaca AI (Cloud)', 
-                    'MISTRAL': 'Mistral (Cloud)', 'DEEPSEEK_CHAT': 'DeepSeek (Cloud)', 'GOOGLE_GEMINI': 'Gemini (Cloud)',
-                    'ZHIPU_GLM4': 'Zhipu (Cloud)', 'OPENROUTER': 'OpenRouter (Cloud)'
-                };
-                
-                const engineKey = rawEngine.toUpperCase();
-                const friendlyEngine = engineMap[engineKey] || engineMap[rawEngine] || (isProcessed ? 'IA Geral' : 'Filtro Heurístico');
-                const finalRawEngine = rawEngine || (isProcessed ? 'IA_GERAL' : 'LEXICAL');
+        // SSE Watchdog Logs
+        function setupSSE() {
+            const source = new EventSource(API_BASE + "/api/stream");
+            const motorDot = document.getElementById('motor-dot');
+            const motorStatus = document.getElementById('motor-status');
+            const lastLog = document.getElementById('last-log');
 
-                // Persistência de Avaliação
-                const evalData = iaEvaluations[c.id];
-                let evalHtml = '';
-                if (evalData) {
-                    let label = '', color = '';
-                    if (evalData.type === 'VALIDADO') { label = '✓ Validado'; color = 'text-emerald-500'; }
-                    else if (evalData.type === 'FALSO_POSITIVO') { label = '⚠️ Falso Positivo'; color = 'text-amber-500'; }
-                    else if (evalData.type === 'FALSO_NEGATIVO') { label = '🚨 Falso Negativo'; color = 'text-rose-500'; }
-                    evalHtml = `<span class="text-[10px] font-black uppercase ${color} tracking-tighter bg-slate-900/80 px-2 py-1 rounded-md border border-slate-800">${label}</span>`;
-                } else {
-                    evalHtml = `
-                        <div id="eval-btns-${c.id}" class="flex items-center gap-2">
-                            <button onclick="evaluateIA('${c.id}', '${c.trace_id}', '${finalRawEngine}', 'VALIDADO', '${c.categoria_ia}', '${escapeHTML(c.texto_limpo || c.texto_bruto)}')" class="text-slate-500 hover:text-emerald-400 hover:bg-emerald-500/10 p-1.5 rounded-lg transition-all" title="Correto / Validado">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                            </button>
-                            <button onclick="evaluateIA('${c.id}', '${c.trace_id}', '${finalRawEngine}', 'FALSO_POSITIVO', '${c.categoria_ia}', '${escapeHTML(c.texto_limpo || c.texto_bruto)}')" class="text-slate-500 hover:text-amber-400 hover:bg-amber-500/10 p-1.5 rounded-lg transition-all" title="Falso Positivo (Inocente)">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                            </button>
-                            <button onclick="evaluateIA('${c.id}', '${c.trace_id}', '${finalRawEngine}', 'FALSO_NEGATIVO', '${c.categoria_ia}', '${escapeHTML(c.texto_limpo || c.texto_bruto)}')" class="text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 p-1.5 rounded-lg transition-all" title="Falso Negativo (Ódio Passou)">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            </button>
-                        </div>`;
-                }
-
-                return `
-                <div class="bg-slate-900/60 border ${isHate ? 'border-rose-900/70 glow-red' : 'border-slate-800'} rounded-xl p-5 flex flex-col gap-4 transition-all hover:bg-slate-900/80 shadow-lg">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <div class="font-black text-white text-sm">@${escapeHTML(c.autor_username)}</div>
-                            <div class="text-[11px] text-slate-400 mt-1 font-medium">em <b class="text-slate-200">@${escapeHTML(c.candidato_id)}</b></div>
-                        </div>
-                        <div class="flex flex-col items-end gap-2">
-                            <span class="text-[10px] font-black px-2.5 py-1 rounded-md border ${badgeClasses} uppercase tracking-widest">${c.categoria_ia}</span>
-                            <span class="text-[9px] font-mono text-slate-500 uppercase tracking-tighter font-bold">Motor: ${friendlyEngine}</span>
-                        </div>
-                    </div>
-                    <p class="text-sm text-slate-200 leading-relaxed font-medium bg-slate-950/60 p-4 rounded-xl border border-slate-800/80 italic shadow-inner">"${escapeHTML(c.texto_limpo || c.texto_bruto)}"</p>
-                    <div class="flex flex-col gap-2">
-                        <div class="flex justify-between text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                            <span>Confiança da Decisão</span>
-                            <span class="${conf >= 0.4 ? 'text-slate-100 font-bold' : ''}">${displayConf}</span>
-                        </div>
-                        <div class="w-full bg-slate-950 rounded-full h-[4px] overflow-hidden border border-slate-800/50"><div class="conf-bar ${barColor}" style="width:${conf*100}%"></div></div>
-                    </div>
-                    <div class="flex justify-between items-center border-t border-slate-800/80 pt-3">
-                        <div class="flex items-center gap-4">
-                            ${evalHtml}
-                            <span class="text-[10px] text-slate-400 font-mono bg-slate-950/50 px-2 py-0.5 rounded-md border border-slate-800/50">${c.direcao_odio ? `Alvo: <b class="text-rose-400 font-bold">${c.direcao_odio}</b>` : 'Geral'}</span>
-                        </div>
-                        <span class="text-[10px] text-slate-400 font-mono font-medium">${timeAgo(c.data_coleta)}</span>
-                    </div>
-                </div>`;
-            }).join('');
-        }
-
-        async function setupRealtime() {
-            if(realtimeSubscription) return;
-            
-            console.log("⚡ [Realtime] Iniciando conexão...");
-            realtimeSubscription = db
-                .channel('room-1')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'comentarios' }, payload => {
-                    console.log("🔥 [Realtime Event]", payload.eventType, payload.new?.autor_username);
-                    
-                    if(payload.eventType === 'INSERT') {
-                        lastComments = [payload.new, ...lastComments].slice(0, 40);
-                        renderComments(lastComments);
-                        
-                        const dot = document.getElementById('live-indicator');
-                        if(dot) { 
-                            dot.classList.remove('hidden'); 
-                            setTimeout(()=>dot.classList.add('hidden'), 2000); 
-                        }
-                        fetchKPIs();
-                    } else if(payload.eventType === 'UPDATE') {
-                        const idx = lastComments.findIndex(c => c.id === payload.new.id);
-                        if(idx !== -1) { 
-                            lastComments[idx] = payload.new; 
-                            renderComments(lastComments); 
-                        }
-                        fetchKPIs();
-                    }
-                })
-                .subscribe((status) => {
-                    console.log("📡 [Realtime Status]", status);
-                    if (status === 'SUBSCRIBED') {
-                        console.log("✅ [Realtime] Dashboard sincronizado via WebSocket.");
-                    }
-                    if (status === 'CHANNEL_ERROR' || status === 'CLOSED') {
-                        console.warn("⚠️ [Realtime] Falha na conexão. Tentando reconectar em 5s...");
-                        realtimeSubscription = null;
-                        setTimeout(setupRealtime, 5000);
-                    }
-                });
-        }
-
-        async function fetchLocalAnalytics() {
-            try {
-                const [rAtt, rHate] = await Promise.all([
-                    fetch(API_BASE + '/api/analytics/top-attackers'),
-                    fetch(API_BASE + '/api/analytics/hate-stats')
-                ]);
-                
-                if(rAtt.ok) {
-                    const { attackers } = await rAtt.json();
-                    document.getElementById('top-attackers-list').innerHTML = attackers.map(a => `
-                        <div class="flex items-center justify-between bg-slate-950/40 p-2.5 rounded-lg border border-slate-800/50 hover:border-indigo-500/30 transition-all">
-                            <span class="text-[11px] font-bold text-slate-300">@${escapeHTML(a.autor_username)}</span>
-                            <span class="text-[11px] font-black text-rose-500 bg-rose-500/10 px-2 py-0.5 rounded shadow-sm">${a.total_ataques} Atq</span>
-                        </div>
-                    `).join('') || '<p class="text-[10px] text-slate-600 italic">Sem dados...</p>';
-                }
-                
-                if(rHate.ok) {
-                    const { stats } = await rHate.json();
-                    document.getElementById('hate-map-list').innerHTML = stats.slice(0, 10).map(s => {
-                        const pct = s.taxa_odio_percent || 0;
-                        const barColor = pct > 20 ? 'bg-rose-500' : (pct > 10 ? 'bg-amber-500' : 'bg-emerald-500');
-                        return `
-                        <div class="flex flex-col gap-1.5 p-1">
-                            <div class="flex justify-between text-[10px] font-black uppercase text-slate-400 tracking-tighter">
-                                <span class="truncate max-w-[120px]">@${escapeHTML(s.candidato_id)}</span>
-                                <span class="${pct > 0 ? 'text-rose-400' : ''}">${pct}%</span>
-                            </div>
-                            <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden border border-slate-800/30">
-                                <div class="${barColor} h-full transition-all duration-1000 ease-out shadow-[0_0_8px_rgba(244,63,94,0.2)]" style="width: ${pct}%"></div>
-                            </div>
-                        </div>
-                    `}).join('') || '<p class="text-[10px] text-slate-600 italic">Sem dados...</p>';
-                }
-            } catch(e) { console.error("Analytics Error:", e); }
-        }
-
-        async function searchMonitor() {
-            const q = document.getElementById('monitor-search-input').value.trim();
-            if(!q) { renderComments(lastComments); return; }
-            
-            try {
-                const r = await fetch(API_BASE + `/api/analytics/search?q=${encodeURIComponent(q)}`);
-                if(r.ok) {
-                    const { results } = await r.json();
-                    renderComments(results);
-                }
-            } catch(e) { console.error("Search Error:", e); }
-        }
-
-        async function fetchKPIs() {
-            try {
-                const [
-                    { count: cCount }, 
-                    { count: hCount }, 
-                    { count: aCount }, 
-                    { count: pCount }, 
-                    { count: eCount },
-                    { data: firstComm },
-                    { count: rCount },
-                    { count: pendCount }
-                ] = await withTimeout(Promise.all([
-                    db.from('comentarios').select('*', { count:'exact', head:true }),
-                    db.from('comentarios').select('*', { count:'exact', head:true }).in('categoria_ia', ['ODIO_IDENTITARIO', 'VIOLENCIA_GENERO', 'AMEACA', 'INSULTO_AD_HOMINEM', 'ATAQUE_INSTITUCIONAL', 'DANO_A_IMAGEM', 'MISOGINIA_POLITICA', 'CAMPANHA_COORDENADA', 'NEGATIVO']),
-                    db.from('candidatos').select('*',  { count:'exact', head:true }).ilike('status_monitoramento', 'ATIVO'),
-                    db.from('candidatos').select('*',  { count:'exact', head:true }).ilike('status_monitoramento', 'PAUSADO'),
-                    db.from('candidatos').select('*',  { count:'exact', head:true }).or('status_monitoramento.ilike.EXCLUIDO,status_monitoramento.ilike.DESATIVADO,status_monitoramento.ilike.Inativo'),
-                    db.from('comentarios').select('data_coleta').order('data_coleta', { ascending: true }).limit(1),
-                    db.from('comentarios').select('*', { count:'exact', head:true }).ilike('analise_pericial', '%RE-ANÁLISE%'),
-                    db.from('comentarios').select('*', { count:'exact', head:true }).eq('processado_ia', false)
-                ]), 8000);
-
-                document.getElementById('kpi-total-comments').innerText = (cCount || 0).toLocaleString();
-                document.getElementById('kpi-hate-comments').innerText = (hCount || 0).toLocaleString();
-                
-                const pct = cCount > 0 ? ((hCount / cCount) * 100).toFixed(2) : "0.00";
-                document.getElementById('kpi-hate-pct').innerText = `${pct}% de ódio`;
-                
-                document.getElementById('kpi-active-targets').innerText = (aCount || 0).toLocaleString();
-                document.getElementById('kpi-paused-targets').innerText = (pCount || 0).toLocaleString();
-                document.getElementById('kpi-excluded-targets').innerText = (eCount || 0).toLocaleString();
-                
-                if (document.getElementById('kpi-reclassified')) {
-                    document.getElementById('kpi-reclassified').innerText = (rCount || 0).toLocaleString();
-                }
-                if (document.getElementById('kpi-pending')) {
-                    document.getElementById('kpi-pending').innerText = (pendCount || 0).toLocaleString();
-                }
-
-                if (firstComm && firstComm.length > 0 && cCount > 0) {
-                    const firstDate = new Date(firstComm[0].data_coleta);
-                    const diffDays = Math.max(1, Math.ceil((new Date() - firstDate) / 86400000));
-                    document.getElementById('kpi-avg-comments-day').innerText = `Média: ${(cCount / diffDays).toFixed(1)}/dia`;
-                }
-            } catch (e) { console.error("KPI Error:", e); }
-        }
-
-        async function fetchData() {
-            if (window.isFetchingData) return;
-            window.isFetchingData = true; 
-            try {
-                // 1. Atualiza métricas do Watchdog (API Local)
+            source.onmessage = (event) => {
                 try {
-                    const r = await fetch(API_BASE + '/api/metrics');
-                    if(r.ok) {
-                        const m = await r.json();
-                        
-                        // Painel de Alertas Críticos (v88.9)
-                        const alertsFeed = document.getElementById('critical-alerts-feed');
-                        const alertsContainer = document.getElementById('critical-alerts-container');
-                        let criticalAlerts = [];
-
-                        // Checa sessões do Instagram
-                        if (m.instagram_accounts) {
-                            const expired = Object.entries(m.instagram_accounts).filter(([k, v]) => v === 'expired');
-                            if (expired.length > 0) {
-                                criticalAlerts.push({
-                                    level: 'error',
-                                    title: 'SESSÕES EXPIRADAS',
-                                    msg: `${expired.length} contas do Instagram precisam de renovação de cookies.`
-                                });
-                            }
-                        }
-
-                        if (criticalAlerts.length > 0) {
-                            alertsContainer.classList.remove('hidden');
-                            alertsFeed.innerHTML = criticalAlerts.map(a => `
-                                <div class="flex items-center gap-3 px-4 py-2 rounded-xl ${a.level === 'error' ? 'bg-rose-500/10 border border-rose-500/30 text-rose-400' : 'bg-amber-500/10 border border-amber-500/30 text-amber-400'}">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                                    <div class="flex flex-col">
-                                        <span class="text-[10px] font-black uppercase tracking-widest">${a.title}</span>
-                                        <span class="text-[9px] font-bold opacity-80">${a.msg}</span>
-                                    </div>
-                                </div>
-                            `).join('');
-                        } else {
-                            alertsContainer.classList.add('hidden');
-                        }
-
-                        // Atualiza status textual e cores do indicador
-                        const statusText = document.getElementById('watchdog-status-text');
-                        statusText.innerText = m.status;
-                        
-                        const pingDot = document.getElementById('ping-dot');
-                        const pingPulse = document.getElementById('ping-pulse');
-                        if (m.status === 'OPERACIONAL') {
-                            statusText.className = "text-xs font-black text-emerald-400";
-                            pingDot.className = "relative inline-flex rounded-full h-3 w-3 bg-emerald-500";
-                            pingPulse.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75";
-                        } else if (m.status.startsWith('PARADO') || m.status.startsWith('HIBERNANDO')) {
-                            statusText.className = "text-xs font-black text-rose-500";
-                            pingDot.className = "relative inline-flex rounded-full h-3 w-3 bg-rose-500";
-                            pingPulse.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-500 opacity-75";
-                        } else {
-                            statusText.className = "text-xs font-black text-amber-500";
-                            pingDot.className = "relative inline-flex rounded-full h-3 w-3 bg-amber-500";
-                            pingPulse.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75";
-                        }
-                        
-                        // Atualiza contagem de ciclos
-                        if (document.getElementById('kpi-cycles')) {
-                            document.getElementById('kpi-cycles').innerText = (m.cycle || 0).toLocaleString();
-                        }
-
-                        const degradedLabel = document.getElementById('ai-degraded-label');
-                        if (m.ai_services) {
-                            const blockedCount = Object.values(m.ai_services).filter(v => v === 'BLOQUEADO' || v === 'REMOVIDO').length;
-                            if (blockedCount > 0) {
-                                degradedLabel?.classList.remove('hidden');
-                                if(degradedLabel) degradedLabel.innerText = `⚠️ MALHA DEGRADADA (${blockedCount} OFF)`;
-                            } else {
-                                degradedLabel?.classList.add('hidden');
-                            }
-
-                            // v92.4: Atualiza indicador Voyant (Inteligência Analítica)
-                            const vStatus = m.ai_services?.voyant || 'DOWN';
-                            const vIndicator = document.getElementById('voyant-status-indicator');
-                            if (vIndicator) {
-                                const isOk = vStatus === 'OK';
-                                vIndicator.innerHTML = `
-                                    <span class="w-1.5 h-1.5 rounded-full ${isOk ? 'bg-emerald-500 shadow-emerald-500/40' : 'bg-rose-500 animate-pulse shadow-rose-500/40'}"></span>
-                                    <span class="text-[9px] font-black ${isOk ? 'text-emerald-400' : 'text-rose-400'} uppercase">${isOk ? 'ATIVO' : 'OFFLINE'}</span>
-                                `;
-                            }
-
-                            const sortedServices = Object.entries(m.ai_services)
-                                .filter(([s]) => s !== 'voyant') // v92.4: Voyant tem destaque em Inteligência Analítica
-                                .sort(([a],[b]) => {
-                                    if (a === 'ollama') return -1;
-                                    if (b === 'ollama') return 1;
-                                    return a.localeCompare(b);
-                                });
-                            
-                            const aiServicesContainer = document.getElementById('kpi-ai-services');
-                            if (aiServicesContainer) {
-                                aiServicesContainer.innerHTML = sortedServices.map(([s,st]) => {
-                                    const label = s === 'ollama' ? 'ollama (local)' : `${s} (cloud)`;
-                                    const statusMap = {
-                                        'OK':         { dot: 'bg-emerald-500 shadow-emerald-500/40',          text: 'text-emerald-400', badge: '' },
-                                        'COOLDOWN':   { dot: 'bg-amber-400 shadow-amber-400/40',              text: 'text-amber-400',   badge: 'COOLDOWN' },
-                                        'RATE_LIMIT': { dot: 'bg-amber-500 animate-pulse shadow-amber-500/40', text: 'text-amber-500',  badge: '429' },
-                                        'BLOQUEADO':  { dot: 'bg-rose-500 animate-pulse shadow-rose-500/40',  text: 'text-rose-400',   badge: 'BLOQUEADO' },
-                                        'REMOVIDO':   { dot: 'bg-rose-700 shadow-rose-700/40',                text: 'text-rose-600',   badge: 'REMOVIDO' },
-                                        'DESATIVADO': { dot: 'bg-slate-600 shadow-slate-600/40',              text: 'text-slate-500',  badge: '' },
-                                        'DOWN':       { dot: 'bg-rose-500 animate-pulse shadow-rose-500/40',  text: 'text-rose-400',   badge: 'DOWN' },
-                                    };
-                                    const style = statusMap[st] || statusMap['DOWN'];
-                                    const badgeHtml = style.badge ? `<span class="ml-auto text-[9px] font-black px-1.5 py-0.5 rounded ${style.text} border border-current/30 bg-current/5">${style.badge}</span>` : '';
-                                    const startBtn = (st === 'DOWN' && s === 'ollama') ? `<button onclick="event.stopPropagation(); startAIService('${s}')" class="ml-auto text-[10px] bg-rose-500/10 border border-rose-500/40 text-rose-400 px-2.5 py-1 rounded-md font-black hover:bg-rose-500/20 active:scale-95 transition-all shadow-md">START</button>` : '';
-                                    
-                                    const cursorClass = s !== 'ollama' ? 'cursor-pointer hover:bg-slate-800/80 active:scale-[0.98]' : '';
-                                    const clickAttr = s !== 'ollama' ? `onclick="openAIModal('${s}')"` : '';
-                                    
-                                    return `<div ${clickAttr} class="flex items-center gap-3 w-full bg-slate-900/50 p-2 rounded-lg border border-slate-800/60 transition-all ${cursorClass}"><span class="w-2.5 h-2.5 rounded-full shadow-sm ${style.dot}"></span><span class="text-[11px] font-mono font-bold text-slate-300 uppercase tracking-widest">${label}</span>${badgeHtml}${startBtn}</div>`;
-                                }).join('');
-                            }
-                        }
-
-                        // 5. Nós de Coleta
-                        const igContainer = document.getElementById('kpi-instagram');
-                        if (m.instagram_accounts && igContainer) {
-                            igContainer.innerHTML = Object.entries(m.instagram_accounts).map(([acc, st]) => {
-                                const isOk = st === 'OK';
-                                return `
-                                    <div class="flex items-center gap-3 w-full bg-slate-900/50 p-2 rounded-lg border border-slate-800/60">
-                                        <span class="w-2 h-2 rounded-full ${isOk ? 'bg-emerald-500 shadow-emerald-500/40' : 'bg-rose-500 animate-pulse shadow-rose-500/40'}"></span>
-                                        <span class="text-[10px] font-bold text-slate-300 uppercase tracking-wider">${acc}</span>
-                                        <span class="ml-auto text-[9px] font-black ${isOk ? 'text-emerald-400' : 'text-rose-400'}">${st}</span>
-                                    </div>
-                                `;
-                            }).join('');
-                        }
-                    }
-                } catch(e) { console.error("Metrics fetch error:", e); }
-                
-                // 2. Atualiza KPIs do Supabase (Cloud) e Avaliações/Analytics (Local)
-                await Promise.all([fetchKPIs(), fetchEvaluations(), fetchLocalAnalytics()]);
-                
-                // 3. Atualiza Alvos e Recompensas
-                const [{data:cands}, {data:runs}, {data:coms}] = await withTimeout(Promise.all([
-                    db.from('candidatos').select('*').ilike('status_monitoramento', 'ATIVO').order('last_scraped_at', { ascending: false, nullsFirst: false }),
-                    db.from('worker_rewards').select('*').order('timestamp', { ascending: false }).limit(10),
-                    db.from('comentarios').select('*').order('data_coleta', { ascending: false }).limit(40)
-                ]), 10000);
-                
-                if(cands) { localCandidatesList = cands; document.getElementById('targets-count-badge').innerText = `${cands.length}/${cands.length}`; filterTargets(); }
-                if(runs) document.getElementById('runs-feed').innerHTML = runs.map(r => `<div class="bg-slate-900/50 border border-slate-800/60 p-4 rounded-xl flex flex-col gap-2.5 shadow-sm"><div class="flex justify-between text-xs"><span class="font-black text-slate-200 tracking-wide">${r.worker_id}</span><span class="text-slate-400 font-medium">${timeAgo(r.timestamp)}</span></div><div class="flex justify-between items-center"><span class="text-[10px] font-black px-2 py-1 rounded border border-slate-700 bg-slate-800 shadow-inner text-slate-300 uppercase tracking-widest">${r.tier || 'silver'}</span><span class="text-xs font-black text-emerald-400">+${(r.delta || 0).toFixed(1)} XP</span></div></div>`).join('');
-                if(coms) renderComments(coms);
-                setupRealtime();
-            } catch(e) {
-                console.error("General fetch data error:", e);
-            } finally {
-                window.isFetchingData = false;
-            }
-        }
-
-        async function openAIModal(name) {
-            window.currentModalAI = name;
-            const modal = document.getElementById('ai-modal');
-            const content = document.getElementById('ai-modal-content');
-            
-            try {
-                const r = await fetch(API_BASE + `/api/ai/details/${name}`);
-                if (!r.ok) throw new Error("Erro na comunicação com o Watchdog.");
-                const data = await r.json();
-                if (data.error) throw new Error(data.error);
-                
-                document.getElementById('modal-ai-name').innerText = data.name || name;
-                document.getElementById('modal-env-var').innerText = data.env_var || '---';
-                document.getElementById('modal-api-key').value = data.key || '';
-                document.getElementById('modal-instructions').innerText = data.instructions || 'Sem instruções.';
-                document.getElementById('modal-auth-link').href = data.auth_url || '#';
-                
-                const feedback = document.getElementById('modal-status-feedback');
-                feedback.classList.add('hidden');
-                
-                modal.classList.remove('hidden');
-                setTimeout(() => modal.classList.remove('opacity-0'), 10);
-                setTimeout(() => content.classList.remove('scale-95'), 10);
-            } catch(e) {
-                console.error("Open modal error:", e);
-                alert("Erro ao buscar detalhes da IA: " + e.message);
-            }
-        }
-
-        function closeAIModal() {
-            const modal = document.getElementById('ai-modal');
-            const content = document.getElementById('ai-modal-content');
-            modal.classList.add('opacity-0');
-            content.classList.add('scale-95');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-                window.currentModalAI = null;
-            }, 300);
-        }
-
-        function openNewAIModal() {
-            alert("Para cadastrar nova IA, configure o provedor no core/ai_service.py e adicione a chave no .env. Interface visual de registro em breve.");
-        }
-
-        async function handleUpdateKey() {
-            if(!currentModalAI) return;
-            
-            const btn = document.getElementById('btn-update-key');
-            const feedback = document.getElementById('modal-status-feedback');
-            const key = document.getElementById('modal-api-key').value;
-            const env_var = document.getElementById('modal-env-var').innerText;
-            
-            if(!key) { alert("A chave não pode ser vazia para atualizar."); return; }
-
-            btn.disabled = true;
-            btn.innerText = "VALIDANDO CHAVE...";
-            
-            try {
-                const r = await fetch(API_BASE + '/api/ai/update_key', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name: currentModalAI, env_var, key })
-                });
-                const res = await r.json();
-                
-                feedback.classList.remove('hidden', 'bg-emerald-500/20', 'text-emerald-400', 'bg-rose-500/20', 'text-rose-400');
-                feedback.innerText = res.message.toUpperCase();
-                
-                if(res.success) {
-                    feedback.classList.add('bg-emerald-500/20', 'text-emerald-400');
-                    setTimeout(closeAIModal, 2000);
-                } else {
-                    feedback.classList.add('bg-rose-500/20', 'text-rose-400');
-                }
-            } catch(e) {
-                feedback.classList.remove('hidden');
-                feedback.classList.add('bg-rose-500/20', 'text-rose-400');
-                feedback.innerText = "ERRO DE CONEXÃO COM O WATCHDOG";
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "ATUALIZAR E TESTAR AGORA";
-                fetchData();
-            }
-        }
-
-        async function handleDeleteKey() {
-            if(!currentModalAI) return;
-            const env_var = document.getElementById('modal-env-var').innerText;
-
-            if(!confirm(`⚠️ ATENÇÃO: Deseja apagar a chave de ${currentModalAI}?\n\nIsso desativará este provedor de IA no sistema até que uma nova chave seja inserida.`)) {
-                return;
-            }
-
-            const btn = document.getElementById('btn-delete-key');
-            const feedback = document.getElementById('modal-status-feedback');
-            
-            btn.disabled = true;
-            btn.innerText = "DELETANDO...";
-
-            try {
-                const r = await fetch(API_BASE + '/api/ai/delete_key', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name: currentModalAI, env_var })
-                });
-                const res = await r.json();
-                
-                feedback.classList.remove('hidden', 'bg-emerald-500/20', 'text-emerald-400', 'bg-rose-500/20', 'text-rose-400');
-                feedback.innerText = res.message.toUpperCase();
-                
-                if(res.success) {
-                    feedback.classList.add('bg-emerald-500/20', 'text-emerald-400');
-                    setTimeout(closeAIModal, 2000);
-                } else {
-                    feedback.classList.add('bg-rose-500/20', 'text-rose-400');
-                }
-            } catch(e) {
-                feedback.classList.remove('hidden');
-                feedback.classList.add('bg-rose-500/20', 'text-rose-400');
-                feedback.innerText = "ERRO AO DELETAR";
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Deletar Chave e Desativar IA";
-                fetchData();
-            }
-        }
-
-        function toggleKeyVisibility() {
-            const input = document.getElementById('modal-api-key');
-            input.type = input.type === 'password' ? 'text' : 'password';
-        }
-
-        function toggleHateOnly() {
-            hateOnly = !hateOnly;
-            const b = document.getElementById('btn-hate-only');
-            b.classList.toggle('bg-rose-500/20'); b.classList.toggle('border-rose-500/50'); b.classList.toggle('text-rose-400');
-            renderComments(lastComments);
-        }
-
-        document.getElementById('thermo-filters').addEventListener('click', e => {
-            const b = e.target.closest('[data-filter]'); if(!b) return;
-            activeThermo = b.dataset.filter;
-            document.querySelectorAll('.thermo-btn').forEach(btn => btn.classList.remove('active'));
-            b.classList.add('active'); filterTargets();
-        });
-
-        let activeTab = 'monitor';
-        let logSource = null;
-
-        function switchTab(tab) {
-            activeTab = tab;
-            const tabMon = document.getElementById('tab-monitor');
-            const tabLogs = document.getElementById('tab-logs');
-            const feedMon = document.getElementById('classified-feed');
-            const feedLogs = document.getElementById('terminal-feed');
-            const ctrlMon = document.getElementById('monitor-controls');
-            const ctrlLogs = document.getElementById('logs-controls');
-            
-            if (tab === 'monitor') {
-                tabMon.className = "text-xs font-black uppercase tracking-widest text-white border-b-2 border-indigo-500 pb-1 focus:outline-none transition-all";
-                tabLogs.className = "text-xs font-black uppercase tracking-widest text-slate-400 hover:text-white pb-1 focus:outline-none transition-all";
-                feedMon.classList.remove('hidden');
-                feedLogs.classList.add('hidden');
-                ctrlMon.classList.remove('hidden');
-                ctrlLogs.classList.add('hidden');
-            } else {
-                tabLogs.className = "text-xs font-black uppercase tracking-widest text-white border-b-2 border-indigo-500 pb-1 focus:outline-none transition-all";
-                tabMon.className = "text-xs font-black uppercase tracking-widest text-slate-400 hover:text-white pb-1 focus:outline-none transition-all";
-                feedLogs.classList.remove('hidden');
-                feedMon.classList.add('hidden');
-                ctrlLogs.classList.remove('hidden');
-                ctrlMon.classList.add('hidden');
-                feedLogs.scrollTop = 0;
-            }
-        }
-
-        function setupLogStream() {
-            if (logSource) return;
-            console.log("📡 [Logs] Conectando ao terminal de logs...");
-            logSource = new EventSource(API_BASE + '/api/stream');
-            logSource.onmessage = function(event) {
-                try {
-                    const data = JSON.parse(event.data);
-                    if (data && data.message) appendLogLine(data);
+                    const log = JSON.parse(event.data);
+                    motorDot.className = "w-2 h-2 rounded-full bg-green-500 animate-pulse";
+                    motorStatus.className = "text-xs font-bold text-green-500";
+                    motorStatus.textContent = "OPERACIONAL";
+                    lastLog.textContent = `[${log.time}] ${log.message}`;
                 } catch(e) {}
             };
-            logSource.onerror = function(err) {
-                console.warn("⚠️ [Logs] Conexão com terminal perdida. Reconectando em 5s...");
-                logSource.close();
-                logSource = null;
-                setTimeout(setupLogStream, 5000);
+            source.onerror = () => {
+                motorDot.className = "w-2 h-2 rounded-full bg-red-500";
+                motorStatus.className = "text-xs font-bold text-red-500";
+                motorStatus.textContent = "FALHA";
             };
         }
 
-        function appendLogLine(log) {
-            const terminal = document.getElementById('terminal-feed');
-            const skeletons = terminal.querySelectorAll('.skeleton');
-            skeletons.forEach(s => s.remove());
-            const line = document.createElement('div');
-            let colorClass = 'text-slate-400/80';
-            if (log.level === 'error') colorClass = 'text-rose-400 font-semibold';
-            else if (log.level === 'warn') colorClass = 'text-amber-400';
-            else if (log.level === 'info') colorClass = 'text-emerald-400';
-            line.className = `py-0.5 flex gap-2 leading-relaxed ${colorClass}`;
-            line.innerHTML = `
-                <span class="text-slate-600 font-mono">[${escapeHTML(log.time || '')}]</span>
-                <span class="flex-1 whitespace-pre-wrap break-all">${escapeHTML(log.message)}</span>
-            `;
-            terminal.prepend(line);
-            if (terminal.childNodes.length > 500) terminal.removeChild(terminal.lastChild);
-            if (activeTab === 'logs') terminal.scrollTop = 0;
-        }
+        function escapeHTML(str) { return str ? str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])) : ''; }
 
-        function clearTerminal() {
-            const terminal = document.getElementById('terminal-feed');
-            terminal.innerHTML = '<div class="text-slate-600 italic text-[10px] py-2">Console limpo pelo operador. Aguardando logs...</div>';
-        }
-
-        async function controlServer(action) {
-            console.log(`[Server Control] Enviando comando: ${action}`);
+        // Fetch Data
+        async function fetchDashboard() {
             try {
-                const resp = await fetch(API_BASE + `/api/server/${action}`, { method: 'POST' });
-                const res = await resp.json();
-                console.log(`[Server Control] Resposta de ${action}:`, res.message);
-                setTimeout(fetchData, 1000);
-            } catch(e) {
-                console.error(`Control error for ${action}:`, e);
-            }
-        }
+                // 1. Estatísticas
+                const [{ count: totalAmostra }, { count: totalProcessados }, { count: totalHate }] = await Promise.all([
+                    db.from('comentarios').select('*', { count: 'exact', head: true }),
+                    db.from('comentarios').select('*', { count: 'exact', head: true }).not('categoria_ia', 'is', null),
+                    db.from('comentarios').select('*', { count: 'exact', head: true }).eq('is_hate', true)
+                ]);
 
-        async function startAIService(name) {
-            console.log(`[AI Service] Enviando sinal de início para: ${name}`);
-            try {
-                const resp = await fetch(API_BASE + `/api/services/${name}/start`, { method: 'POST' });
-                const res = await resp.json();
-                console.log(`[AI Service] Resposta:`, res.message);
-                setTimeout(fetchData, 1000);
-            } catch(e) {
-                console.error(`AI Start error for ${name}:`, e);
-            }
-        }
+                const fila = (totalAmostra || 0) - (totalProcessados || 0);
+                const classificados = totalProcessados || 0;
+                const risco = totalAmostra ? (totalHate / totalAmostra) * 100 : 0;
+                const temperatura = totalAmostra ? (classificados / totalAmostra) * 100 : 0;
 
-        function toggleAccordion(targetId, headerElement) {
-            const content = document.getElementById(targetId);
-            const icon = headerElement.querySelector('svg');
-            
-            if (content.style.maxHeight && content.style.maxHeight !== '0px') {
-                content.style.maxHeight = '0px';
-                content.style.opacity = '0';
-                if(icon) icon.style.transform = 'rotate(-90deg)';
-            } else {
-                content.style.maxHeight = content.scrollHeight + 'px';
-                content.style.opacity = '1';
-                if(icon) icon.style.transform = 'rotate(0deg)';
+                document.getElementById('stat-classificados').textContent = classificados.toLocaleString('pt-BR');
+                document.getElementById('stat-fila').textContent = fila.toLocaleString('pt-BR');
+                document.getElementById('stat-risco').textContent = risco.toFixed(1) + '%';
+                document.getElementById('stat-bar').style.width = Math.min(temperatura, 100) + '%';
                 
-                // Remove inline maxHeight after transition to allow dynamic content to grow (up to CSS limits)
-                setTimeout(() => {
-                    if (content.style.maxHeight !== '0px') {
-                        content.style.maxHeight = 'none';
+                const diagBar = document.getElementById('diag-fila-bar');
+                const diagText = document.getElementById('diag-fila-text');
+                if (fila > 5000) {
+                    diagBar.className = "bg-red-500 h-full";
+                    diagBar.style.width = "80%";
+                    diagText.textContent = "ALTO";
+                } else {
+                    diagBar.className = "bg-yellow-500 h-full";
+                    diagBar.style.width = "30%";
+                    diagText.textContent = "NORMAL";
+                }
+
+                // 2. Matriz de Auditoria (TODOS OS DADOS)
+                let query = db.from('comentarios')
+                    .select('id, texto_bruto, categoria_ia, confianca_ia, autor_username, is_hate, processado_ia, trace_id, analise_pericial, candidato_id')
+                    .not('processado_ia', 'is', null)
+                    .order('data_coleta', { ascending: false })
+                    .limit(30);
+                
+                if (showOnlyHate) {
+                    query = query.eq('is_hate', true);
+                }
+
+                const { data: alerts, error: alertError } = await query;
+                if (alertError) console.error("Erro nos alertas:", alertError);
+
+                const alertsContainer = document.getElementById('critical-alerts-container');
+                if (!alerts || alerts.length === 0) {
+                    alertsContainer.innerHTML = `<div class="text-xs text-gray-600 flex items-center gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-green-500"></i> Nenhum dado na auditoria.</div>`;
+                } else {
+                    alertsContainer.innerHTML = alerts.map(a => {
+                        const isHate = a.is_hate;
+                        const borderColor = isHate ? 'border-red-500/50' : 'border-gray-800';
+                        const badgeColor = isHate ? 'bg-red-500/10 text-red-500' : 'bg-gray-800 text-gray-400';
+                        
+                        // Extração rudimentar do nome da Engine do Analise Pericial
+                        let engine = "LEXICAL";
+                        if(a.analise_pericial) {
+                            if (typeof a.analise_pericial === 'string' && a.analise_pericial.startsWith('[')) {
+                                const match = a.analise_pericial.match(/^\\[([^\]:]+)/);
+                                if(match) engine = match[1];
+                            } else if (typeof a.analise_pericial === 'object' && a.analise_pericial.engine) {
+                                engine = a.analise_pericial.engine;
+                            }
+                        } else if (a.processado_ia) {
+                            engine = "IA_GERAL";
+                        }
+
+                        // Sistema de Avaliação
+                        const evalData = iaEvaluations[a.id];
+                        let evalHtml = '';
+                        if (evalData) {
+                            let label = '', color = '';
+                            if (evalData.type === 'VALIDADO') { label = '✓ Validado'; color = 'text-green-500'; }
+                            else if (evalData.type === 'FALSO_POSITIVO') { label = '⚠️ Falso Positivo'; color = 'text-yellow-500'; }
+                            else if (evalData.type === 'FALSO_NEGATIVO') { label = '🚨 Falso Negativo'; color = 'text-red-500'; }
+                            evalHtml = `<span class="text-[10px] font-black uppercase ${color} tracking-tighter bg-black px-2 py-1 rounded border border-gray-800">${label}</span>`;
+                        } else {
+                            const escText = escapeHTML(a.texto_bruto);
+                            const escCat = escapeHTML(a.categoria_ia || '');
+                            evalHtml = `
+                                <div class="flex items-center gap-1">
+                                    <button onclick="evaluateIA('${a.id}', '${a.trace_id || ''}', '${engine}', 'VALIDADO', '${escCat}', '${escText}')" class="text-gray-500 hover:text-green-400 hover:bg-green-500/10 p-1 rounded transition-all" title="Validado (Correto)">
+                                        <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                                    </button>
+                                    <button onclick="evaluateIA('${a.id}', '${a.trace_id || ''}', '${engine}', 'FALSO_POSITIVO', '${escCat}', '${escText}')" class="text-gray-500 hover:text-yellow-400 hover:bg-yellow-500/10 p-1 rounded transition-all" title="Falso Positivo (É Inocente)">
+                                        <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
+                                    </button>
+                                    <button onclick="evaluateIA('${a.id}', '${a.trace_id || ''}', '${engine}', 'FALSO_NEGATIVO', '${escCat}', '${escText}')" class="text-gray-500 hover:text-red-400 hover:bg-red-500/10 p-1 rounded transition-all" title="Falso Negativo (Deixou passar)">
+                                        <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i>
+                                    </button>
+                                </div>`;
+                        }
+
+                        return `
+                        <div class="bg-black border-l-[3px] ${isHate ? 'border-l-red-500' : 'border-l-gray-600'} p-3 rounded-r-lg border ${borderColor} text-sm flex flex-col gap-2">
+                            <div class="flex justify-between items-start gap-4">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-bold ${isHate ? 'text-red-400' : 'text-gray-400'} text-xs">@${a.autor_username || 'unknown'}</span>
+                                    <i data-lucide="arrow-right" class="w-3 h-3 text-gray-600"></i>
+                                    <span class="font-bold text-gray-500 text-[10px]">@${a.candidato_id || 'alvo'}</span>
+                                </div>
+                                <span class="text-[10px] text-gray-500">${((a.confianca_ia || 0) * 100).toFixed(0)}% Match</span>
+                            </div>
+                            <p class="text-gray-300 line-clamp-2 leading-relaxed font-sans">"${escapeHTML(a.texto_bruto)}"</p>
+                            <div class="flex items-center justify-between mt-1 pt-2 border-t border-gray-800/50">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] px-1.5 py-0.5 rounded uppercase font-bold ${badgeColor}">${a.categoria_ia || 'NEUTRO'}</span>
+                                </div>
+                                ${evalHtml}
+                            </div>
+                        </div>
+                        `;
+                    }).join('');
+                    lucide.createIcons();
+                }
+
+                // 3. Top Alvos via Python API
+                try {
+                    const r = await fetch(API_BASE + '/api/analytics/hate-stats');
+                    if (r.ok) {
+                        const { stats } = await r.json();
+                        const top = stats.slice(0, 3);
+                        const topContainer = document.getElementById('top-targets-container');
+                        if (!top || top.length === 0) {
+                            topContainer.innerHTML = '<div class="text-xs text-gray-600">Nenhum foco detectado.</div>';
+                        } else {
+                            topContainer.innerHTML = top.map(t => `
+                                <div class="flex items-center justify-between bg-black/50 p-2 rounded border border-gray-800/50">
+                                    <span class="text-sm font-bold text-gray-300">@${t.candidato_id}</span>
+                                    <span class="text-xs font-bold text-red-400">${t.taxa_odio_percent}% Risco</span>
+                                </div>
+                            `).join('');
+                        }
                     }
-                }, 300);
+                } catch(e) {}
+                
+            } catch (error) {
+                console.error("Dashboard error:", error);
             }
         }
 
-        window.switchTab = switchTab;
-        window.clearTerminal = clearTerminal;
-        window.controlServer = controlServer;
-        window.startAIService = startAIService;
-        window.fetchData = fetchData;
-        window.openAIModal = openAIModal;
-        window.closeAIModal = closeAIModal;
-        window.openNewAIModal = openNewAIModal;
-        window.handleUpdateKey = handleUpdateKey;
-        window.handleDeleteKey = handleDeleteKey;
-        window.toggleKeyVisibility = toggleKeyVisibility;
-        window.toggleHateOnly = toggleHateOnly;
-        window.forceScrape = forceScrape;
-        window.filterTargets = filterTargets;
-        window.searchMonitor = searchMonitor;
-        window.evaluateIA = evaluateIA;
+        setupSSE();
+        fetchDashboard();
+        setInterval(fetchDashboard, 15000);
 
-        fetchData();
-        setupLogStream();
-        setInterval(fetchData, 10000);
     </script>
 </body>
 </html>

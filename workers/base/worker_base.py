@@ -127,6 +127,12 @@ class BaseWorker(ABC):
                         self._consecutive_failures += 1
                     else:
                         self._consecutive_failures = 0
+                    
+                    # PASA v91: Encerra o processo Python autonomamente se a tarefa finalizou (fila vazia)
+                    if getattr(metrics, "error", None) == "no_tasks_available" or metrics.extracted == 0 and getattr(metrics, "error", None) is None:
+                        self.logger.info(f"[{self.worker_id}] Nenhuma tarefa disponível na fila. Encerrando o próprio processo Python para liberar recursos.")
+                        self.is_running = False
+                        break
 
                     # Intervalo dinâmico baseado no tier
                     interval = reward_engine.get_interval(reward.tier)
@@ -151,6 +157,10 @@ class BaseWorker(ABC):
             self.logger.info(f"[{self.worker_id}] Encerrando teardown...")
             await self.teardown()
             self.logger.info(f"[{self.worker_id}] Encerrado.")
+            
+            import sys
+            self.logger.info(f"[{self.worker_id}] Acionando sys.exit(0) para matar o processo Python.")
+            sys.exit(0)
 
     def stop(self) -> None:
         """Sinaliza parada do loop no próximo ciclo."""

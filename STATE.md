@@ -222,6 +222,22 @@ PGMQ deve aparecer apenas como hipótese futura.
 - **Otimização de Dados**: Queries SQL agora utilizam SELECT seletivo, reduzindo overhead de tráfego com o Supabase.
 - **Reward Engine Sync**: Correção na atribuição de XP (+15.0 para insights relevantes) garantindo a progressão do agente.
 
+## Estabilização v94.0 e Persistência Incremental (2026-06-08)
+
+### 1. Persistência Incremental (Fase 8.5)
+- **Callback por Post**: Refatorado o `WkColetaInstagram` para utilizar a callback `on_post_scraped` do `InstagramScraperV2`. Isso garante que cada post coletado seja persistido imediatamente no banco de dados, eliminando a perda de dados em caso de crash durante raspagens longas de perfis grandes.
+- **Checkpoint Intermediário**: Implementada a gravação de checkpoint por shortcode dentro do ciclo de extração, permitindo a retomada exata de onde o worker parou.
+
+### 2. Auditoria de Custos Cloud
+- **Log de Fallback e Rotina**: Integrada a tabela `fallback_logs` no `AIService` para registrar cada chamada bem-sucedida ou falha de provedores Cloud (Mistral, Gemini, Groq, etc.), incluindo `candidato_id` para atribuição financeira precisa por perfil monitorado.
+
+### 3. Decision Room (Dashboard v3)
+- **Simplificação e Performance**: O `local_dashboard.html` foi totalmente reescrito (Decision Room), focando em macro-indicadores de throughput, risco global e triagem rápida. Removida a carga excessiva de componentes legados para garantir fluidez no monitoramento de 24h.
+
+### 4. Melhorias de IA
+- **Proteção contra Loop de Re-análise**: Refinada a lógica de re-análise em lote no `AIService` para evitar processamento infinito de itens com baixa confiança persistente, marcando-os como `FINALIZADA`.
+- **Passagem de Contexto**: Garantida a propagação do `candidato_id` em todo o pipeline de classificação para fins de analytics.
+
 ## Próximos passos OBRIGATÓRIOS
 1. **Rotação de Proxies**: Finalizar a integração real de proxies residenciais no Scraper V2 (AGENTS_SYNC.md).
 2. **Checkpoint por Post**: Implementar persistência intermediária para evitar perda de progresso em coletas de perfis grandes.

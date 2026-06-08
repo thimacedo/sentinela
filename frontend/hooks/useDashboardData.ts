@@ -13,8 +13,8 @@ export function useDashboardStats() {
   return useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: getSummaryStats,
-    refetchInterval: 60000, // 1 minuto
-    staleTime: 30000,
+    refetchInterval: 15000, // 15 segundos (Real-time Warroom)
+    staleTime: 5000,
   });
 }
 
@@ -22,8 +22,8 @@ export function useCandidates(limit = 10) {
   return useQuery({
     queryKey: ['candidates', limit],
     queryFn: () => getTargets(limit),
-    refetchInterval: 120000, // 2 minutos
-    staleTime: 60000,
+    refetchInterval: 30000, // 30 segundos
+    staleTime: 10000,
   });
 }
 

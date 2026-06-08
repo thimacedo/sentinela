@@ -144,7 +144,7 @@ export default function AnaliseTab() {
                 {(index + 1) % 5 === 0 && (
                   <div className="my-6 border border-border-main bg-bg-card rounded-2xl p-4 flex flex-col items-center shadow-sm">
                     <span className="text-[8px] font-black text-text-muted uppercase tracking-widest mb-3">Publicidade Relacionada</span>
-                    <AdSenseSlot adSlot="2020882637" format="horizontal" />
+                    <AdSenseSlot adSlot="2020882637" slotId={`feed-ad-${index}`} format="horizontal" />
                   </div>
                 )}
               </div>

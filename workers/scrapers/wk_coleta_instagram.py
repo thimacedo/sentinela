@@ -156,37 +156,132 @@ class WkColetaInstagram(BaseWorker):
                 target.username, resume_from_shortcode,
             )
 
+        inserted_total = 0
+        duplicated_total = 0
+        comments_count = 0
+
+        # Callback assíncrona para persistência incremental
+        async def handle_post_scraped(shortcode: str, post_comments: List[Dict[str, Any]]):
+            nonlocal inserted_total, duplicated_total, comments_count
+            if not post_comments:
+                return
+
+            comments_count += len(post_comments)
+
+            # ♻️ FILTRO LÉXICO (Pre-AI) - PASA v65.0
+            filtered_comments = lexical_filter.filter_list(post_comments)
+            
+            # 🤖 DETECÇÃO DE COMPORTAMENTO COORDENADO (v71.0)
+            from core.behavior_engine import behavior_engine
+            filtered_comments = behavior_engine.detect_coordinated_clusters(filtered_comments)
+
+            if not filtered_comments:
+                duplicated_total += len(post_comments)
+                return
+
+            # Filtra campos para garantir que apenas colunas existentes sejam enviadas
+            safe_comments = []
+            now = datetime.now(timezone.utc).isoformat()
+            for c in filtered_comments:
+                safe_c = {
+                    "id_externo": c.get("id_externo"),
+                    "texto_bruto": c.get("texto_bruto"),
+                    "autor_username": c.get("autor_username"),
+                    "data_publicacao": c.get("data_publicacao") or now,
+                    "data_coleta": c.get("data_coleta") or now,
+                    "candidato_id": c.get("candidato_id") or target.username,
+                    "post_shortcode": c.get("post_shortcode") or shortcode,
+                    "plataforma": c.get("plataforma") or "INSTAGRAM",
+                    "processado_ia": False,
+                    "tier_used": c.get("tier_used") or 2
+                }
+                if c.get("is_bot"):
+                    pericial_obs = f"[BOT DETECTED] Padrão: {c.get('bot_pattern')}"
+                    safe_c["analise_pericial"] = pericial_obs
+                    safe_c["categoria_ia"] = "CAMPANHA_COORDENADA"
+                safe_comments.append(safe_c)
+
+            # --- BUFFER DE EMERGÊNCIA SQLITE (Zero Loss Policy v65.0) ---
+            local_buffer.save(safe_comments)
+
+            inserted = 0
+            try:
+                # 🛡️ TENTATIVA 1: Upsert Completo (v63.0)
+                res = self.db.table("comentarios").upsert(
+                    clean_null_chars(safe_comments), 
+                    on_conflict="candidato_id,post_shortcode,id_externo",
+                    ignore_duplicates=True
+                ).execute()
+                
+                if res.data:
+                    inserted = len(res.data)
+                    inserted_total += inserted
+                    duplicated_total += len(post_comments) - inserted
+            except Exception as e_upsert:
+                # 🆘 SALVAMENTO DE EMERGÊNCIA (v63.0): Fallback para Schema Mismatch
+                self.logger.warning(f"⚠️ [V2] Erro de Schema no post {shortcode}: {e_upsert}. Iniciando Fallback...")
+                
+                emergency_comments = []
+                for sc in safe_comments:
+                    emergency_comments.append({
+                        "id_externo": sc["id_externo"],
+                        "texto_bruto": sc["texto_bruto"],
+                        "candidato_id": sc["candidato_id"],
+                        "post_shortcode": sc["post_shortcode"],
+                        "autor_username": sc["autor_username"],
+                        "data_publicacao": sc["data_publicacao"],
+                        "data_coleta": sc["data_coleta"],
+                        "plataforma": sc["plataforma"],
+                        "tier_used": sc["tier_used"]
+                    })
+
+                try:
+                    res = self.db.table("comentarios").upsert(
+                        clean_null_chars(emergency_comments),
+                        on_conflict="candidato_id,post_shortcode,id_externo",
+                        ignore_duplicates=True
+                    ).execute()
+                    
+                    if res.data:
+                        inserted = len(res.data)
+                        inserted_total += inserted
+                        duplicated_total += len(post_comments) - inserted
+                except Exception as e2:
+                    self.logger.error(f"❌ [V2] Falha total na persistência incremental do post {shortcode}: {e2}")
+
+            # --- SINALIZAÇÃO DE NOVO DADO (Pipeline Reativo Fase 9) ---
+            if inserted > 0:
+                self.logger.info(f"⚡ [EventBus] Sinalizando AIProcessorWorker: {inserted} novos registros.")
+                local_bus.signal_new_data()
+
+            # 💾 SALVAMENTO DE CHECKPOINT POR POST (Fase 8.5)
+            posts_done = previous_cp.get('posts_done', 0) + 1 if previous_cp else 1
+            await checkpoint.save(
+                last_shortcode=shortcode,
+                posts_done=posts_done,
+                comments_done=inserted_total,
+            )
+            self.logger.info(f"💾 [V2] Checkpoint intermediário salvo para post {shortcode} (+{inserted} novos comentários).")
+
         try:
-            # 1. Scraping (v61.2: Robusto contra retornos de lista ou dict)
+            # 1. Scraping com callback assíncrona
             scrape_data = await self.scraper.scrape_profile(
                 username=target.username,
                 candidato_id=target.candidato_id,
                 max_posts=current_cycle_config.get('max_posts', 3),
                 max_comments_per_post=100,
                 resume_after_shortcode=resume_from_shortcode,  # Fase 8.5: retomada
+                on_post_scraped=handle_post_scraped,
             )
             
             # Sucesso técnico no scrape -> Reseta contador de bloqueios
             self.consecutive_blocks = 0
             
-            if isinstance(scrape_data, list):
-                comments = scrape_data
-                target.post_metas = []
-            elif isinstance(scrape_data, dict):
-                comments = scrape_data.get("comments", [])
+            if isinstance(scrape_data, dict):
                 target.post_metas = scrape_data.get("post_metas", [])
             else:
-                comments = []
                 target.post_metas = []
 
-            # ♻️ FILTRO LÉXICO (Pre-AI) - PASA v65.0
-            if comments:
-                comments = lexical_filter.filter_list(comments)
-                
-                # 🤖 DETECÇÃO DE COMPORTAMENTO COORDENADO (v71.0)
-                from core.behavior_engine import behavior_engine
-                comments = behavior_engine.detect_coordinated_clusters(comments)
-            
         except Exception as e:
             self.consecutive_blocks += 1
             if isinstance(e, ValueError) and "invalid_target" in str(e):
@@ -220,7 +315,7 @@ class WkColetaInstagram(BaseWorker):
         try:
             stats = self.scraper.get_stats()
 
-            if not comments:
+            if comments_count == 0:
                 if stats.get("junk_detected", 0) > 0:
                     self.logger.warning(f"⚠️ [V2] Apenas lixo detectado para @{target.username}. Sinalizando falha de extração.")
                     result = CycleResult(
@@ -235,127 +330,17 @@ class WkColetaInstagram(BaseWorker):
                 )
                 return result
 
-            # 2. Persistência com Resiliência de Schema (v58.3)
-            inserted = 0
-            duplicated = 0
-            inserted_ids = []
+            # Como a persistência incremental já foi concluída na callback,
+            # nós apenas reportamos as estatísticas acumuladas do ciclo.
+            final_extracted = comments_count
             
-            # Filtra campos para garantir que apenas colunas existentes sejam enviadas
-            safe_comments = []
-            for c in comments:
-                safe_c = {
-                    "id_externo": c.get("id_externo"),
-                    "texto_bruto": c.get("texto_bruto"),
-                    "autor_username": c.get("autor_username"),
-                    "data_publicacao": c.get("data_publicacao"),
-                    "data_coleta": c.get("data_coleta"),
-                    "candidato_id": c.get("candidato_id"),
-                    "post_shortcode": c.get("post_shortcode"),
-                    "plataforma": c.get("plataforma"),
-                    "processado_ia": False,
-                    "tier_used": c.get("tier_used")
-                }
-                if c.get("is_bot"):
-                    pericial_obs = f"[BOT DETECTED] Padrão: {c.get('bot_pattern')}"
-                    safe_c["analise_pericial"] = pericial_obs
-                    safe_c["categoria_ia"] = "CAMPANHA_COORDENADA"
-                safe_comments.append(safe_c)
-
-            # --- BUFFER DE EMERGÊNCIA SQLITE (Zero Loss Policy v65.0) ---
-            local_buffer.save(safe_comments)
-
-            try:
-                # 🛡️ TENTATIVA 1: Upsert Completo (v63.0)
-                res = self.db.table("comentarios").upsert(
-                    clean_null_chars(safe_comments), 
-                    on_conflict="candidato_id,post_shortcode,id_externo",
-                    ignore_duplicates=True
-                ).execute()
-                
-                if res.data:
-                    inserted = len(res.data)
-                    duplicated = len(comments) - inserted
-                    inserted_ids = [str(item["id"]) for item in res.data]
-                    # O recovery via sync_with_supabase lidará com o SQLite periodicamente.
-                else:
-                    inserted = 0
-                    duplicated = len(comments)
-
-            except Exception as e:
-                # 🆘 SALVAMENTO DE EMERGÊNCIA (v63.0): Fallback para Schema Mismatch
-                self.logger.warning(f"⚠️ [V2] Erro de Schema Detectado: {e}. Iniciando Fallback de Emergência...")
-                
-                # Remove colunas que costumam causar conflito se não existirem
-                emergency_comments = []
-                for sc in safe_comments:
-                    # Mantém APENAS o core absoluto garantido no banco
-                    emergency_comments.append({
-                        "id_externo": sc["id_externo"],
-                        "texto_bruto": sc["texto_bruto"],
-                        "candidato_id": sc["candidato_id"],
-                        "post_shortcode": sc["post_shortcode"],
-                        "autor_username": sc["autor_username"],
-                        "data_publicacao": sc["data_publicacao"],
-                        "data_coleta": sc["data_coleta"],
-                        "plataforma": sc["plataforma"],
-                        "tier_used": sc["tier_used"]
-                    })
-
-                try:
-                    res = self.db.table("comentarios").upsert(
-                        clean_null_chars(emergency_comments),
-                        on_conflict="candidato_id,post_shortcode,id_externo",
-                        ignore_duplicates=True
-                    ).execute()
-                    
-                    self.logger.info(f"✅ [V2] Salvamento de emergência concluído ({len(res.data)} registros salvos).")
-                    await self._clear_buffer()
-                    inserted = len(res.data)
-                    duplicated = len(comments) - inserted
-                    inserted_ids = [str(item["id"]) for item in res.data]
-                except Exception as e2:
-                    self.logger.error(f"❌ [V2] Falha total na persistência: {e2}")
-                    raise ValueError(f"db_persistence_fatal: {str(e2)}")
-
-            # --- SINALIZAÇÃO DE NOVO DADO (Pipeline Reativo Fase 9) ---
-            if inserted > 0:
-                self.logger.info(f"⚡ [EventBus] Sinalizando AIProcessorWorker: {inserted} novos registros.")
-                local_bus.signal_new_data()
-
-            stats = self.scraper.get_stats()
-            final_extracted = len(comments)
-
-            
-            if final_extracted <= 0 and stats.get("junk_detected", 0) > 0:
-                self.logger.warning(f"⚠️ [V2] Todo o conteúdo extraído de @{target.username} era LIXO. Sinalizando falha e anulando recompensas.")
-                result = CycleResult(
-                    worker_id=self.worker_id, cycle=self.cycle, target=target.username,
-                    source="v2_engine", extracted=0, inserted=0, simulated=False, error="junk_detected",
-                    duration=asyncio.get_event_loop().time() - start_time
-                )
-                return result
-
-            # 💾 SALVAMENTO DE CHECKPOINT POR POST (Fase 8.5)
-            # Salva o progresso parcial após cada bloco de inserção.
-            # O scraper retorna `post_metas` com os shortcodes processados.
-            last_saved_shortcode = None
-            if getattr(target, 'post_metas', None):
-                successful_metas = [m for m in target.post_metas if m.get('shortcode')]
-                if successful_metas:
-                    last_saved_shortcode = successful_metas[-1]['shortcode']
-                    await checkpoint.save(
-                        last_shortcode=last_saved_shortcode,
-                        posts_done=len(successful_metas),
-                        comments_done=inserted,
-                    )
-
             result = CycleResult(
                 worker_id=self.worker_id, cycle=self.cycle, target=target.username,
                 source="v2_engine",
                 extracted=final_extracted,
-                inserted=inserted,
-                duplicated=duplicated,
-                db_success=inserted > 0,
+                inserted=inserted_total,
+                duplicated=duplicated_total,
+                db_success=inserted_total > 0,
                 simulated=False,
                 duration=asyncio.get_event_loop().time() - start_time
             )

@@ -9,6 +9,7 @@ export async function fetchApi(path: string, options: RequestInit = {}) {
   const url = `${API_BASE_URL}${path}`;
   
   const response = await fetch(url, {
+    cache: 'no-store', // Avoid Next.js or browser caching
     ...options,
     headers: {
       'Content-Type': 'application/json',

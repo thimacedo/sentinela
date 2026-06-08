@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 PASA v52.4 - AI Service: Motor de Inteligência Resiliente (Unified Rotation Queue)
 Roteamento dinâmico unificado com atraso rígido anti-429, cache I/O, e fallback integrado.
@@ -271,7 +272,7 @@ class AIService:
         self._rotate_provider(name, f"Falha temporária - {penalty_desc} - {str(exception)[:100]}")
         return False
 
-    async def _execute_provider_call(self, provider: Dict[str, Any], final_system_prompt: str, user_content: str, response_format: str) -> str:
+    async def _execute_provider_call(self, provider: Dict[str, Any], final_system_prompt: str, user_content: str, response_format: str, comment_id: str = None, candidato_id: str = None) -> str:
         """Encapsula o dispatch do cliente (AsyncOpenAI vs FallbackLLM)."""
         self._ensure_clients()
         name = provider["name"]
@@ -295,7 +296,7 @@ class AIService:
                 self.fallback_llm = FallbackLLM()
             
             fallback_text = f"{final_system_prompt}\n\nUser: \"{user_content}\"\n\nResponda estritamente no formato exigido."
-            return await asyncio.to_thread(self.fallback_llm.classify, fallback_text, name)
+            return await asyncio.to_thread(self.fallback_llm.classify, fallback_text, name, comment_id, candidato_id)
 
     async def classify(self, text: str, comment_id: str = "N/A") -> Dict[str, Any]:
         return await self.classify_text(text, comment_id)
@@ -347,7 +348,7 @@ class AIService:
                 
         return None
 
-    async def classify_text(self, text: str, comment_id: str = "N/A", trace_id: str = None, force_cloud: bool = False) -> Dict[str, Any]:
+    async def classify_text(self, text: str, comment_id: str = "N/A", trace_id: str = None, force_cloud: bool = False, candidato_id: str = None) -> Dict[str, Any]:
         self._ensure_clients()
         
         if not isinstance(text, str):
@@ -410,7 +411,7 @@ class AIService:
                 final_system_prompt = self._get_system_prompt(is_local)
                 user_content = f"Texto: \"{text}\""
                 
-                content = await self._execute_provider_call(provider, final_system_prompt, user_content, "json_object")
+                content = await self._execute_provider_call(provider, final_system_prompt, user_content, "json_object", comment_id, candidato_id)
                 res = self._parse_json_response(content)
                 res["name"] = name
                 
@@ -422,10 +423,49 @@ class AIService:
                 
                 trace_log = f" | Trace: {trace_id}" if trace_id else ""
                 logger.info(f"✅ [AI] {name.upper():<15} | ID: {comment_id:<36}{trace_log} | {res['categoria_ia']:<20}")
+                
+                # Inserção de log de custos para chamadas Cloud bem-sucedidas de rotina
+                if name != "ollama":
+                    try:
+                        from core.db import db_client
+                        await asyncio.to_thread(
+                            db_client.client.table('fallback_logs').insert({
+                                'provider': name,
+                                'status': 'SUCCESS',
+                                'payload': {
+                                    'model': provider.get('model'),
+                                    'text_length': len(text),
+                                    'comment_id': comment_id,
+                                    'candidato_id': candidato_id,
+                                    'categoria_ia': res.get('categoria_ia')
+                                }
+                            }).execute
+                        )
+                    except Exception as e_log:
+                        logger.debug("Não foi possível registrar custo da chamada Cloud regular: %s", e_log)
+                
                 return res
 
             except Exception as e:
                 logger.debug("[AI] Falha unificada no provider '%s' para comment_id=%s: %s", name, comment_id, e)
+                # Inserção de log de custos para chamadas Cloud falhas de rotina
+                if name != "ollama":
+                    try:
+                        from core.db import db_client
+                        await asyncio.to_thread(
+                            db_client.client.table('fallback_logs').insert({
+                                'provider': name,
+                                'status': 'ERROR',
+                                'payload': {
+                                    'model': provider.get('model'),
+                                    'error': str(e)[:200],
+                                    'comment_id': comment_id,
+                                    'candidato_id': candidato_id
+                                }
+                            }).execute
+                        )
+                    except Exception as e_log:
+                        pass
                 self._handle_provider_error(provider, e)
                 continue
 
@@ -489,16 +529,13 @@ class AIService:
         return {"is_hate": is_hate, "categoria_ia": category, "confianca_ia": confidence, "analise_pericial": analise}
 
     async def run_batch_classification(self, limit: int = 50) -> int:
-        """Busca comentários não processados no banco e executa a classificação.
-        Otimizado (v90.0): Implementação Híbrida. Processamento individual com concorrência
-        limitada para provedores locais e cloud. Em breve migraremos para Single-Prompt Batch.
-        Fast-Drop Triage (v92.0): lote inspecionado pelo VoyantService antes do gather.
-        Lotes sem vocabulário hostil são marcados como NEUTRO localmente, sem consumir tokens.
-        """
+        # Busca comentarios nao processados no banco e executa a classificacao.
+        # Otimizado (v90.0): Implementacao Hibrida. Processamento individual com concorrencia
+        # limitada para provedores locais e cloud.
         try:
             from core.db import db_client
             res = await asyncio.to_thread(
-                db_client.client.table('comentarios').select('id, texto_bruto, trace_id').eq('processado_ia', False).limit(limit).execute
+                db_client.client.table('comentarios').select('id, texto_bruto, trace_id, candidato_id').eq('processado_ia', False).limit(limit).execute
             )
             items = res.data or []
             if not items:
@@ -551,7 +588,7 @@ class AIService:
             async def _process_single(item):
                 async with semaphore:
                     try:
-                        res_ia = await self.classify_text(item["texto_bruto"], item["id"], trace_id=item.get("trace_id"))
+                        res_ia = await self.classify_text(item["texto_bruto"], item["id"], trace_id=item.get("trace_id"), candidato_id=item.get("candidato_id"))
                         if res_ia and res_ia.get("categoria_ia") != "ERRO":
                             engine_name = res_ia.get("name", "unknown").upper()
                             analise = f"[{engine_name}] {res_ia.get('analise_pericial', '')}"
@@ -593,24 +630,37 @@ class AIService:
             raise e 
 
     async def run_batch_reanalysis(self, limit: int = 20, confidence_threshold: float = 0.6) -> int:
-        """Busca registros já processados mas com baixa confiança para re-análise profunda."""
+        # Busca registros ja processados mas com baixa confianca para re-analise profunda.
         try:
             from core.db import db_client
             res = await asyncio.to_thread(
-                db_client.client.table('comentarios').select('id, texto_bruto, trace_id').eq('processado_ia', True).lt('confianca_ia', confidence_threshold).not_.eq('categoria_ia', 'ERRO').order('data_coleta', desc=True).limit(limit).execute
+                db_client.client.table('comentarios').select('id, texto_bruto, trace_id, candidato_id, analise_pericial').eq('processado_ia', True).lt('confianca_ia', confidence_threshold).not_.eq('categoria_ia', 'ERRO').order('data_coleta', desc=True).limit(limit).execute
             )
             items = res.data or []
             count = 0
             
             for item in items:
+                # Evita loop de reanálise infinita de itens já re-analisados
+                analise_antiga = item.get("analise_pericial") or ""
+                if "[RE-ANÁLISE:" in analise_antiga:
+                    continue
+
                 try:
-                    res_ia = await self.classify_text(item["texto_bruto"], item["id"], trace_id=item.get("trace_id"), force_cloud=True)
+                    res_ia = await self.classify_text(item["texto_bruto"], item["id"], trace_id=item.get("trace_id"), force_cloud=True, candidato_id=item.get("candidato_id"))
                     if res_ia and res_ia.get("categoria_ia") != "ERRO":
                         engine_name = res_ia.get("name", "unknown").upper()
-                        analise = f"[RE-ANÁLISE:{engine_name}] {res_ia.get('analise_pericial', '')}"
+                        nova_confianca = res_ia.get("confianca_ia", 0.0)
+                        
+                        # Evita re-análise infinita marcando como FINALIZADA se a confiança continuou baixa
+                        tag_status = "FINALIZADA" if nova_confianca < confidence_threshold else "CONCLUIDA"
+                        analise = f"[RE-ANÁLISE:{tag_status}:{engine_name}] {res_ia.get('analise_pericial', '')}"
+                        
                         await asyncio.to_thread(
                             db_client.client.table('comentarios').update({
-                                "categoria_ia": res_ia["categoria_ia"], "confianca_ia": res_ia["confianca_ia"], "is_hate": res_ia["is_hate"], "analise_pericial": analise
+                                "categoria_ia": res_ia["categoria_ia"], 
+                                "confianca_ia": nova_confianca, 
+                                "is_hate": res_ia["is_hate"], 
+                                "analise_pericial": analise
                             }).eq("id", item["id"]).execute
                         )
                         count += 1
@@ -628,17 +678,17 @@ class AIService:
         pass
 
     async def run_batch_online_review(self, limit: int = 50) -> int:
-        """Busca comentários marcados como SUSPEITO no banco e executa a reclassificação online (Cloud)."""
+        # Busca comentarios marcados como SUSPEITO no banco e executa a reclassificacao online (Cloud).
         try:
             from core.db import db_client
             res = await asyncio.to_thread(
-                db_client.client.table('comentarios').select('id, texto_bruto, trace_id').eq('categoria_ia', 'SUSPEITO').limit(limit).execute
+                db_client.client.table('comentarios').select('id, texto_bruto, trace_id, candidato_id').eq('categoria_ia', 'SUSPEITO').limit(limit).execute
             )
             items = res.data or []
             count = 0
             for item in items:
                 try:
-                    res_ia = await self.classify_text(item["texto_bruto"], item["id"], trace_id=item.get("trace_id"), force_cloud=True)
+                    res_ia = await self.classify_text(item["texto_bruto"], item["id"], trace_id=item.get("trace_id"), force_cloud=True, candidato_id=item.get("candidato_id"))
                     if res_ia and res_ia.get("categoria_ia") not in ["ERRO", "SUSPEITO"]:
                         engine_name = res_ia.get("name", "unknown").upper()
                         analise = f"[REVISÃO:{engine_name}] {res_ia.get('analise_pericial', '')}"

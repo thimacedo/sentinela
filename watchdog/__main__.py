@@ -201,20 +201,35 @@ def run_doc_fetcher(icon=None, item=None):
     except Exception as e:
         print(f"[Tray] Erro ao disparar DocFetcher: {e}")
 
+def toggle_autopilot_action(icon=None, item=None):
+    try:
+        from core.autopilot.manager import autopilot
+        if autopilot:
+            autopilot.is_active = not autopilot.is_active
+            state.add_log("info", f"[Watchdog] 🤖 Autopilot L3 alterado para: {'ATIVADO' if autopilot.is_active else 'DESATIVADO'}")
+            if icon:
+                icon.menu = build_menu()
+    except Exception as e:
+        print(f"[Tray] Erro ao alternar autopilot: {e}")
+
 def build_menu():
-    with state.lock:
-        status_val = state.status
-        restarts_val = state.restarts
-        errors_val = state.code_errors
-        alerts_val = state.alerts
-        crashes_val = state.fast_crashes
+    try:
+        from core.autopilot.manager import autopilot
+    except ImportError:
+        autopilot = None
+
+    def get_autopilot_status():
+        if AUTOPILOT_ENABLED and autopilot and autopilot.is_active:
+            return "Ativo (L3)"
+        return "Inativo"
 
     return pystray.Menu(
-        item(f"Status: {status_val}", lambda i: None, enabled=False),
-        item(f"Restarts: {restarts_val}", lambda i: None, enabled=False),
-        item(f"Erros de Código: {errors_val}", lambda i: None, enabled=False),
-        item(f"Alertas: {alerts_val}", lambda i: None, enabled=False),
-        item(f"Falhas Rápidas: {crashes_val}", lambda i: None, enabled=False),
+        item(lambda text: f"Status: {state.status}", lambda i: None, enabled=False),
+        item(lambda text: f"Restarts: {state.restarts}", lambda i: None, enabled=False),
+        item(lambda text: f"Erros de Código: {state.code_errors}", lambda i: None, enabled=False),
+        item(lambda text: f"Alertas: {state.alerts}", lambda i: None, enabled=False),
+        item(lambda text: f"Falhas Rápidas: {state.fast_crashes}", lambda i: None, enabled=False),
+        item(lambda text: f"🤖 Autopilot: {get_autopilot_status()}", toggle_autopilot_action),
         pystray.Menu.SEPARATOR,
         item('Abrir Dashboard', open_dashboard),
         item('Iniciar Servidor', start_server_action),
@@ -294,26 +309,6 @@ def quit_tray(icon, item_clicked):
         
     icon.stop()
 
-def update_tray_loop(icon):
-    last_vals = None
-    while icon.visible:
-        try:
-            with state.lock:
-                current_vals = (
-                    state.status,
-                    state.restarts,
-                    state.code_errors,
-                    state.alerts,
-                    state.fast_crashes
-                )
-            
-            if current_vals != last_vals:
-                icon.menu = build_menu()
-                last_vals = current_vals
-        except Exception as e:
-            print(f"[Tray] Erro ao atualizar menu: {e}")
-        time.sleep(2)
-
 def kill_process_on_port(port: int):
     try:
         creationflags = 0x08000000  # CREATE_NO_WINDOW
@@ -341,7 +336,6 @@ def setup_tray():
 
     try:
         icon = pystray.Icon("sentinela_watchdog", image, "Sentinela Watchdog", build_menu())
-        threading.Thread(target=update_tray_loop, args=(icon,), daemon=True).start()
         print("[Watchdog] Iniciando bandeja gráfica...")
         icon.run()
     except Exception as e:
@@ -425,13 +419,16 @@ if __name__ == "__main__":
 
         det_flags = 0x08000000 | 0x00000008 | 0x00000200  # CREATE_NO_WINDOW | DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP
         
+        log_path = os.path.join(PROJECT_ROOT, "runtime_state", "watchdog_bg.log")
+        log_file = open(log_path, "a")
+
         # Dispara o processo em background
         subprocess.Popen(
-            [sys.executable, __file__, "--detached", "--background"],
+            [sys.executable, "-u", __file__, "--detached", "--background"],
             creationflags=det_flags,
             cwd=PROJECT_ROOT,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+            stdout=log_file,
+            stderr=log_file,
             stdin=subprocess.DEVNULL,
             close_fds=True
         )
