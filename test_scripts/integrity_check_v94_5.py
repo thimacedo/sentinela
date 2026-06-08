@@ -26,9 +26,11 @@ async def run_integrity_check():
     
     # 2. Teste de Circuit Breaker v2
     logger.info("Testing Circuit Breaker v2 states...")
+    # O threshold para o scraper_circuit_breaker é 2 falhas
+    scraper_circuit_breaker.record_failure("test_service", status_code=429)
     scraper_circuit_breaker.record_failure("test_service", status_code=429)
     status = scraper_circuit_breaker._get_status("test_service")
-    assert status.state == "OPEN", "Circuit Breaker failed to OPEN on 429"
+    assert status.state == "OPEN", f"Circuit Breaker failed to OPEN. Status: {status.state}"
     logger.info(f"   CB Status: {status.state} (Open until {status.open_until})")
     
     # 3. Teste de Behavior Engine (N-Gramas)

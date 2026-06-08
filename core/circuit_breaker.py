@@ -4,7 +4,7 @@ Implementa máquina de estados (CLOSED, OPEN, HALF_OPEN) com backoff exponencial
 """
 import time
 import logging
-from typing import Dict, Optional, Literal
+from typing import Dict, Optional, Literal, Any
 from dataclasses import dataclass, field
 
 logger = logging.getLogger("CircuitBreaker")
