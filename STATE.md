@@ -222,8 +222,19 @@ PGMQ deve aparecer apenas como hipótese futura.
 - **Otimização de Dados**: Queries SQL agora utilizam SELECT seletivo, reduzindo overhead de tráfego com o Supabase.
 - **Reward Engine Sync**: Correção na atribuição de XP (+15.0 para insights relevantes) garantindo a progressão do agente.
 
-## Estabilização v94.0 e Persistência Incremental (2026-06-08)
+## Fase 4 - Auditoria Massiva e Proxies (2026-06-08)
 
+### 1. Rotação Dinâmica de Proxies (Stealth Mode Final)
+- **Suporte Robusto**: Implementado suporte a proxies residenciais com autenticação `user:pass@host:port` no `core/instagram_scraper_v2.py`.
+- **Auto-Cura 429**: O scraper agora detecta explicitamente erros 429 (Rate Limit) do Instagram, forçando a rotação imediata de IP e sessão para evasão antibot.
+
+### 2. Governança de CI e Auditoria Financeira
+- **Compliance v28.0**: Sincronizada a API com o schema de Governança de CI (`process_ci_transaction`).
+- **Endpoint de Consumo Centralizado**: Criado `/api/v1/ci/consume` para mediar todas as deduções de saldo, prevenindo race conditions no frontend.
+- **Detecção de Fraude**: Implementado log de severidade ALTA para tentativas de consumo com saldo insuficiente ou tokens inválidos, permitindo auditoria pericial de comportamento do usuário.
+
+## Estabilização v94.0 e Persistência Incremental (2026-06-08)
+...
 ### 1. Persistência Incremental (Fase 8.5)
 - **Callback por Post**: Refatorado o `WkColetaInstagram` para utilizar a callback `on_post_scraped` do `InstagramScraperV2`. Isso garante que cada post coletado seja persistido imediatamente no banco de dados, eliminando a perda de dados em caso de crash durante raspagens longas de perfis grandes.
 - **Checkpoint Intermediário**: Implementada a gravação de checkpoint por shortcode dentro do ciclo de extração, permitindo a retomada exata de onde o worker parou.

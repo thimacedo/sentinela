@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ShieldAlert, Loader2, Zap } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { fetchApi } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 
 interface UnlockOverlayProps {
@@ -31,24 +31,29 @@ export default function UnlockOverlay({ balance, onSuccess }: UnlockOverlayProps
         return;
       }
 
-      const { data, error } = await supabase.rpc('process_stn_transaction', {
-        p_user_id: userId,
-        p_amount: -850,
-        p_type: 'CONSUMPTION',
-        p_session_id: null,
-        p_metadata: { action: 'unlock_alerts' }
+      // PASA v94.1 - Centralização via API para Auditoria de Fraude
+      const response = await fetchApi('/api/v1/ci/consume', {
+        method: 'POST',
+        body: JSON.stringify({
+          user_id: userId,
+          amount: 850,
+          type: 'CONSUMPTION',
+          description: 'Desbloqueio de Feed em Tempo Real (24h)'
+        })
       });
 
-      if (error) throw error;
-
-      if (data === true) {
+      if (response.status === 'success') {
         onSuccess();
       } else {
         alert("Falha na transação. Saldo insuficiente.");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert("Erro ao processar transação.");
+      if (err.message?.includes('402')) {
+        alert("Aporte Insuficiente detectado. Saldo bloqueado.");
+      } else {
+        alert("Erro ao processar transação.");
+      }
     } finally {
       setIsProcessing(false);
     }

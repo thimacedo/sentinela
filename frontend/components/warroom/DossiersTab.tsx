@@ -66,17 +66,18 @@ export default function DossiersTab() {
           return;
         }
 
-        const { data, error } = await supabase.rpc('process_stn_transaction', {
-          p_user_id: userId,
-          p_amount: -350,
-          p_type: 'CONSUMPTION',
-          p_session_id: null,
-          p_metadata: { action: 'unlock_dossier', dossier_id: dossier.id, target: dossier.candidato_id }
+        // PASA v94.1 - Centralização via API para Auditoria de Fraude
+        const response = await fetchApi('/api/v1/ci/consume', {
+          method: 'POST',
+          body: JSON.stringify({
+            user_id: userId,
+            amount: 350,
+            type: 'CONSUMPTION',
+            description: `Desbloqueio de Dossiê: @${dossier.candidato_id}`
+          })
         });
 
-        if (error) throw error;
-
-        if (data === true) {
+        if (response.status === 'success') {
           const newUnlocked = { ...unlocked, [dossier.id]: true };
           setUnlocked(newUnlocked);
           localStorage.setItem('sentinela_unlocked_dossiers', JSON.stringify(newUnlocked));
@@ -85,9 +86,13 @@ export default function DossiersTab() {
         } else {
           alert("Falha na transação. Verifique se possui saldo suficiente e tente novamente.");
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error(err);
-        alert("Erro de comunicação com o servidor financeiro.");
+        if (err.message?.includes('402')) {
+          alert("Aporte Insuficiente detectado. Saldo bloqueado.");
+        } else {
+          alert("Erro de comunicação com o servidor financeiro.");
+        }
       } finally {
         setProcessingId(null);
       }

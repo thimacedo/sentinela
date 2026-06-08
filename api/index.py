@@ -163,16 +163,62 @@ async def stripe_webhook(request: Request, supa: Client = Depends(get_supa)):
         ci_amount = metadata.get('ci_amount')
         if user_id and ci_amount:
             try:
-                supa.rpc('process_ci_transaction', {
+                # PASA v94.1 - Compliance com Schema v28.0 (CI Governance)
+                description = f"Compra de pacote via Stripe: {metadata.get('package_type', 'N/A')}"
+                res = supa.rpc('process_ci_transaction', {
                     "p_user_id": user_id,
                     "p_amount": int(ci_amount),
                     "p_type": "PURCHASE",
-                    "p_session_id": session.get('id'),
-                    "p_metadata": metadata
+                    "p_description": description
                 }).execute()
+                
+                if res.data and not res.data.get('success'):
+                    logger.error(f"❌ [CI Fraud] Falha na recarga via Webhook para {user_id}: {res.data.get('message')}")
+                else:
+                    logger.info(f"✅ [CI] Recarga de {ci_amount} CI processada para {user_id}")
+                    
             except Exception as e:
                 logger.error(f"Webhook CI Error: {e}")
     return {"status": "success"}
+
+class CIConsumeRequest(BaseModel):
+    user_id: str
+    amount: int
+    type: str
+    description: str
+
+@app.post("/api/v1/ci/consume")
+async def consume_ci(payload: CIConsumeRequest, supa: Client = Depends(get_supa)):
+    """
+    Endpoint centralizado para consumo de Créditos de Inteligência (CI).
+    Garante o log de tentativas de fraude ou saldo insuficiente.
+    """
+    try:
+        # Garante que o amount seja negativo para consumo
+        amount = -abs(payload.amount)
+        
+        res = supa.rpc('process_ci_transaction', {
+            "p_user_id": payload.user_id,
+            "p_amount": amount,
+            "p_type": payload.type,
+            "p_description": payload.description
+        }).execute()
+        
+        if res.data and not res.data.get('success'):
+            msg = res.data.get('message', 'Erro desconhecido')
+            if "insuficiente" in msg.lower() or "fraude" in msg.lower():
+                logger.warning(f"🚨 [CI Fraud] Tentativa de consumo sem saldo! User: {payload.user_id} | Amount: {amount} | Reason: {msg}")
+                raise HTTPException(status_code=402, detail=msg)
+            else:
+                logger.error(f"❌ [CI Error] Falha no consumo para {payload.user_id}: {msg}")
+                raise HTTPException(status_code=400, detail=msg)
+        
+        return {"status": "success", "new_balance": res.data.get('new_balance')}
+        
+    except HTTPException: raise
+    except Exception as e:
+        logger.error(f"CI Consume Exception: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 # --- UTILS ---
 def calculate_risk(item: Dict[str, Any]):

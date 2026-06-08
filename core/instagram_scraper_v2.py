@@ -225,11 +225,11 @@ class InstagramScraperV2:
                         session.profile = self._generate_stealth_profile()
                     profile = session.profile
                     
+                    # 🛰️ PROXY ROTATION (PASA v94.1)
                     proxy_list_env = os.getenv("PROXY_LIST", "")
                     proxies = [p.strip() for p in proxy_list_env.split(",") if p.strip()]
                     proxy_url = os.getenv("PROXY_URL")
                     
-                    # Rotação real de proxies (PASA v88.4)
                     if proxies:
                         proxy_url = random.choice(proxies)
 
@@ -237,8 +237,23 @@ class InstagramScraperV2:
                         "viewport": {"width": profile["w"], "height": profile["h"]},
                         "user_agent": profile["ua"]
                     }
+                    
                     if proxy_url:
-                        context_kwargs["proxy"] = {"server": proxy_url}
+                        # Suporte robusto a proxies com autenticação embutida na URL
+                        if "@" in proxy_url:
+                            auth_part, server_part = proxy_url.split("@")
+                            auth_part = auth_part.replace("http://", "").replace("https://", "")
+                            username_pwd = auth_part.split(":")
+                            username = username_pwd[0]
+                            password = username_pwd[1] if len(username_pwd) > 1 else ""
+                            protocol = "http://" if "http://" in proxy_url else "https://"
+                            context_kwargs["proxy"] = {
+                                "server": f"{protocol}{server_part}",
+                                "username": username,
+                                "password": password
+                            }
+                        else:
+                            context_kwargs["proxy"] = {"server": proxy_url}
                         
                     context = await browser.new_context(**context_kwargs)
                     

@@ -90,13 +90,15 @@ export default function TargetsTab() {
         setIsAdding(true);
         const userId = localStorage.getItem('sentinela_user_id') || 'guest';
 
-        // Loga a injeção a custo zero
-        await supabase.rpc('process_stn_transaction', {
-          p_user_id: userId,
-          p_amount: 0,
-          p_type: 'CONSUMPTION',
-          p_session_id: null,
-          p_metadata: { action: 'add_target_free_tier', target: cleanUsername }
+        // PASA v94.1 - Centralização via API para Auditoria de Fraude
+        await fetchApi('/api/v1/ci/consume', {
+          method: 'POST',
+          body: JSON.stringify({
+            user_id: userId,
+            amount: 0,
+            type: 'CONSUMPTION',
+            description: `Injeção de Alvo (Free Tier): @${cleanUsername}`
+          })
         });
 
         await supabase.from('candidatos').insert({
