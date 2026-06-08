@@ -21,6 +21,15 @@ class LexicalFilter:
             r'^curtido por',
         ]
         self.compiled_patterns = [re.compile(p, re.IGNORECASE) for p in self.junk_patterns]
+        
+        # PASA v94.5 - Shadowban Léxico
+        # Termos que não descartam o dado (permanecem para perícia), mas ocultam da visão do dashboard.
+        self.shadowban_patterns = [
+            r'bet\d+', r'cassino', r'ganhar dinheiro fácil',
+            r'link na bio', r'vagas de emprego home office',
+            r'trabalhe pelo celular'
+        ]
+        self.compiled_shadowban = [re.compile(p, re.IGNORECASE) for p in self.shadowban_patterns]
 
     def is_junk(self, text: str) -> bool:
         if not text: return True
@@ -41,6 +50,14 @@ class LexicalFilter:
         if not re.search(r'[\w\d]', clean_text, re.UNICODE):
             return True
             
+        return False
+
+    def should_shadowban(self, text: str) -> bool:
+        """Retorna True se o texto deve ser ocultado do dashboard."""
+        if not text: return False
+        for pattern in self.compiled_shadowban:
+            if pattern.search(text):
+                return True
         return False
 
     def filter_list(self, comments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:

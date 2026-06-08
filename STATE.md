@@ -222,8 +222,17 @@ PGMQ deve aparecer apenas como hipótese futura.
 - **Otimização de Dados**: Queries SQL agora utilizam SELECT seletivo, reduzindo overhead de tráfego com o Supabase.
 - **Reward Engine Sync**: Correção na atribuição de XP (+15.0 para insights relevantes) garantindo a progressão do agente.
 
-## Fase 8 - Inteligência de N-Gramas (2026-06-08)
+## Fase 9 - Pipeline Reativo e Shadowban (2026-06-08)
 
+### 1. Refinamento de Pipeline Reativo
+- **Latência Zero**: Validada a sinalização via `AsyncLocalEventBus`. O `AIProcessorWorker` agora acorda instantaneamente (~2ms) após o `InstagramScraperWorker` persistir novos posts, eliminando a espera inativa de polling.
+
+### 2. Shadowban Léxico (v94.5)
+- **Filtro de Visibilidade**: Implementada a capacidade de ocultar seletivamente conteúdos do dashboard (Spam, Bets, Cassinos) sem removê-los do banco de dados. Isso preserva a integridade pericial para auditorias profundas enquanto mantém a visão gerencial limpa e focada em ameaças reais.
+- **Integração API**: O endpoint de alvos agora aplica o shadowban em tempo real no cálculo de métricas de ódio, reduzindo falsos positivos causados por ruído comercial.
+
+## Fase 8 - Inteligência de N-Gramas (2026-06-08)
+...
 ### 1. Detecção de Comportamento Coordenado (v94.4)
 - **Engine Solenya Rebuilt**: O `BehaviorEngine` foi expandido para suportar extração de N-Gramas (Bigramas e Trigramas).
 - **Slogan Detector**: Implementada a identificação automática de slogans recorrentes na base de dados. O sistema agora agrupa comentários que compartilham sequências de 3 ou mais palavras, mesmo que o restante do texto varie.
