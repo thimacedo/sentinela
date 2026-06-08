@@ -426,7 +426,58 @@ def get_demographics(supa: Client = Depends(get_supa)):
                 "partido": [{"name": k, "value": v} for k, v in stats["partido"].items()]}
     except Exception as e: return {}
 
-# --- FINANCE & AUDIT ANALYTICS (v94.2) ---
+# --- FINANCE & AUDIT ANALYTICS (v94.3) ---
+
+@app.get("/api/v1/admin/finance/dashboard")
+def admin_finance_dashboard(supa: Client = Depends(get_supa)):
+    """Consolida KPIs financeiros para o Terminal GOD Mode."""
+    try:
+        # 1. KPIs Globais
+        tx_res = supa.table('ci_transactions').select('amount, type').execute()
+        txs = tx_res.data or []
+        
+        total_purchased = sum(t['amount'] for t in txs if t['amount'] > 0)
+        total_spent = abs(sum(t['amount'] for t in txs if t['amount'] < 0))
+        
+        # Receita estimada: assumindo R$ 1,00 para cada 100 CI (ajustável)
+        estimated_revenue = (total_purchased / 100) * 4.90 
+
+        # 2. Top Spenders
+        users_res = supa.table('profiles').select('id, full_name, saldo_ci').order('saldo_ci', desc=True).limit(10).execute()
+        top_spenders = users_res.data or []
+        # Enriquecer com total gasto por usuário
+        for user in top_spenders:
+            u_tx = [t['amount'] for t in txs if t.get('user_id') == user['id'] and t['amount'] < 0]
+            user['total_stn_spent'] = abs(sum(u_tx))
+
+        # 3. Modules Breakdown (Baseado no tipo de consumo)
+        breakdown = Counter()
+        for t in txs:
+            if t['amount'] < 0:
+                # Tenta extrair o módulo da descrição ou tipo
+                desc = str(t.get('description', 'OUTROS')).upper()
+                if 'DOSSIÊ' in desc: breakdown['DOSSIES'] += abs(t['amount'])
+                elif 'FEED' in desc or 'ALERTA' in desc: breakdown['ALERTAS'] += abs(t['amount'])
+                elif 'ALVO' in desc: breakdown['ALVOS'] += abs(t['amount'])
+                else: breakdown['OUTROS'] += abs(t['amount'])
+
+        # 4. Recent Transactions
+        recent_res = supa.table('ci_transactions').select('*').order('created_at', desc=True).limit(20).execute()
+
+        return {
+            "kpis": {
+                "total_purchased": total_purchased,
+                "total_spent": total_spent,
+                "total_circulating": total_purchased - total_spent,
+                "estimated_revenue_brl": estimated_revenue
+            },
+            "top_spenders": top_spenders,
+            "modules_breakdown": dict(breakdown),
+            "recent_transactions": recent_res.data or []
+        }
+    except Exception as e:
+        logger.error(f"Admin Dashboard Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/v1/analytics/spending/providers")
 def get_spending_by_provider(supa: Client = Depends(get_supa)):

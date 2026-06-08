@@ -13,8 +13,10 @@ import {
   Zap,
   BarChart3,
   Lock,
-  Key
+  Key,
+  ChevronRight
 } from 'lucide-react';
+import Link from 'next/link';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
@@ -186,9 +188,14 @@ export default function AdminFinanceiroPage() {
             <Activity className="w-6 h-6 text-brand-primary" />
             Operações e Faturamento
           </h1>
-          <p className="text-sm text-text-muted font-medium mt-1">
-            Mapeamento em tempo real do ecossistema de Inteligência.
-          </p>
+          <div className="flex items-center gap-4 mt-2">
+            <p className="text-sm text-text-muted font-medium">
+              Mapeamento em tempo real do ecossistema de Inteligência.
+            </p>
+            <Link href="/admin/auditoria" className="flex items-center gap-1 text-[10px] font-black text-indigo-500 uppercase hover:underline">
+              <ShieldAlert className="w-3 h-3" /> Acessar Auditoria SRE <ChevronRight className="w-3 h-3" />
+            </Link>
+          </div>
         </div>
         <div className="flex items-center gap-4 bg-bg-main p-4 rounded-xl border border-border-main">
           <div className="w-12 h-12 bg-emerald-500/10 rounded-full flex items-center justify-center">
