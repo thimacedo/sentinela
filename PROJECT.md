@@ -14,10 +14,10 @@
 ## Milestones
 | # | Name | Scope | Dependencies | Status |
 |---|------|-------|-------------|--------|
-| 1 | Milestone 1: Exploração e Causa Raiz | Investigação de erros na thread guard, loops de hibernação, IA concorrente e exportação para SQLite | none | IN_PROGRESS |
-| 2 | Milestone 2: Estabilização do Loop e Reloader | Proteção contra falhas fatais na thread guard, hibernação responsiva / interrompível e resets automáticos | M1 | PLANNED |
-| 3 | Milestone 3: Desacoplamento e Sincronização Não-Bloqueante | Remover operações pesadas de IA do guard, isolar a sincronização SQLite/Datasette em thread background | M2 | PLANNED |
-| 4 | Milestone 4: Validação e Auditoria | Executar todos os 12 testes pytest (100% pass) e rodar auditoria forense | M3 | PLANNED |
+| 1 | Milestone 1: Exploração e Causa Raiz | Investigação de erros na thread guard, loops de hibernação, IA concorrente e exportação para SQLite | none | ✅ DONE |
+| 2 | Milestone 2: Estabilização do Loop e Reloader | Proteção contra falhas fatais na thread guard, hibernação responsiva / interrompível e resets automáticos | M1 | ✅ DONE |
+| 3 | Milestone 3: Desacoplamento e Sincronização Não-Bloqueante | Remover operações pesadas de IA do guard, isolar a sincronização SQLite/Datasette em thread background | M2 | ✅ DONE |
+| 4 | Milestone 4: Validação e Auditoria | Executar todos os 12 testes pytest (100% pass) e rodar auditoria técnica v94.5 | M3 | ✅ DONE |
 
 ## Interface Contracts
 - `watchdog/state` (WatchdogState): Thread-safe state holder. Keep attributes `should_run`, `status`, `restarts`, `code_errors`, `fast_crashes` updated.

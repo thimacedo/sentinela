@@ -1,5 +1,5 @@
 # STATE.md — Sentinela
-_last_updated: 2026-06-05 | branch: main_
+_last_updated: 2026-06-08 | branch: main | version: v94.5_
 
 ## Status Operacional
 

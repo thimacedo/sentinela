@@ -94,9 +94,9 @@ _last_updated: 2026-06-05 | branch: main_
 - [x] `WkPesquisaAlvos` migrado de `workers/ai/` para `workers/processors/wk_pesquisa_alvos.py` (Fase 9)
 
 ### Administração e analytics
-- [ ] tabelas tabulares de gasto por usuário e por perfil monitorado
-- [ ] shadowban léxico
-- [ ] exportação de dossiês em lote
+- [x] tabelas tabulares de gasto por usuário e por perfil monitorado (Fase 7)
+- [x] shadowban léxico (Fase 9.5)
+- [x] exportação de dossiês em lote (integrado via API v1)
 
 ### Monetização e relatórios
 - [x] executar validação final de lint/testes do frontend (build estático verificado com sucesso)
