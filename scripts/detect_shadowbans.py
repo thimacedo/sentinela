@@ -2,12 +2,13 @@
 PASA v46.2 - Shadowban Detector: Auto-Cure Edition
 Detecta o silêncio, alerta uma vez, e REMOVE a flag se a conta se recuperar.
 """
+import os
 import requests
 from datetime import datetime, timezone
 from core.supabase_service import get_supabase_client
 
-CALLMEBOT_PHONE = "558496066876"
-CALLMEBOT_APIKEY = "8552672"
+CALLMEBOT_PHONE = os.getenv("WHATSAPP_PHONE") or os.getenv("CALLMEBOT_PHONE") or "558496066876"
+CALLMEBOT_APIKEY = os.getenv("WHATSAPP_API_KEY") or os.getenv("CALLMEBOT_APIKEY") or "8552672"
 CALLMEBOT_URL = "https://api.callmebot.com/whatsapp.php"
 
 def detect_shadowbans():

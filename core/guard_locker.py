@@ -24,10 +24,22 @@ class GuardLocker:
         import psutil
         try:
             current_pid = os.getpid()
-            # Proteção v91.0: Também protege o processo pai (wrapper .venv\Scripts\python.exe)
-            # que pode ter o script no cmdline mas é o pai legítimo
-            parent_pid = os.getppid()
-            protected_pids = {current_pid, parent_pid}
+            protected_pids = {current_pid}
+            
+            # PASA v95.0: Protege recursivamente toda a cadeia ancestral do processo
+            # (filho -> pai -> avô -> bisavô) para evitar que o interpretador real
+            # mate o launcher do venv ou o watchdog supervisor no boot.
+            try:
+                curr_proc = psutil.Process(current_pid)
+                while curr_proc:
+                    parent = curr_proc.parent()
+                    if parent:
+                        protected_pids.add(parent.pid)
+                        curr_proc = parent
+                    else:
+                        break
+            except Exception:
+                pass
             
             script_name = f"{self.name}.py" if not self.name.endswith(".py") else self.name
             

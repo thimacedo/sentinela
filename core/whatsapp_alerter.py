@@ -10,8 +10,8 @@ def send_whatsapp_summary(summary_text: str):
     """
     Envia mensagens via CallMeBot API para o WhatsApp.
     """
-    phone = os.getenv("WHATSAPP_PHONE", "558496066876")
-    apikey = os.getenv("WHATSAPP_API_KEY", "8552672")
+    phone = os.getenv("WHATSAPP_PHONE") or os.getenv("CALLMEBOT_PHONE") or "558496066876"
+    apikey = os.getenv("WHATSAPP_API_KEY") or os.getenv("CALLMEBOT_APIKEY") or "8552672"
     
     if not phone or not apikey:
         logger.warning("⚠️ WHATSAPP_PHONE ou WHATSAPP_API_KEY não configurados.")

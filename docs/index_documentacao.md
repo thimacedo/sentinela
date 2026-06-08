@@ -27,7 +27,7 @@ Todos os arquivos abaixo foram corrigidos em 2026-06-07 com paths e nomes de cla
 
 - `docs/database_schema_v58.md` — referência estrutural de banco
 - `docs/project_functions_v58.md` — contexto funcional histórico ainda parcialmente útil
-- `docs/REFATORACAO_FRONTEND.md` — contexto da evolução do frontend
+- `docs/archive/REFATORACAO_FRONTEND.md` — contexto da evolução do frontend (arquivado)
 - `docs/RESILIENCIA_LOGIN_INSTAGRAM.md` — detalhes da operação de login/coleta
 - `docs/PADRONIZACAO_LINGUISTICA_ANALITICA.md` — referência metodológica da classificação
 
@@ -44,8 +44,10 @@ Use apenas para contexto e rastreabilidade:
 - `docs/archive/`
 - `docs/superpowers/`
 - `docs/ARCHITECTURE_PASA_V50.md`
-- `docs/ARCHITECTURE_PASA_V84.md`
-- `docs/ARCHITECTURE_PASA_V86.md`
+- `docs/archive/ARCHITECTURE_PASA_V84.md`
+- `docs/archive/ARCHITECTURE_PASA_V86.md`
+- `docs/archive/PHASE_1_IMPLEMENTATION_SUMMARY.md`
+- `docs/archive/future_modules_plan.md`
 - PRDs e planos de fases antigas
 
 ## 6. Regra de uso

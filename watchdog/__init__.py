@@ -986,8 +986,29 @@ def guard():
             Thread(target=run_sync, daemon=True).start()
 
 
+def kill_process_on_port(port: int):
+    import signal
+    try:
+        creationflags = 0x08000000  # CREATE_NO_WINDOW
+        output = subprocess.check_output("netstat -ano", shell=True, creationflags=creationflags).decode('utf-8', errors='ignore')
+        for line in output.splitlines():
+            if f":{port}" in line and "LISTENING" in line:
+                parts = line.strip().split()
+                pid = int(parts[-1])
+                if pid != os.getpid():
+                    print(f"[SHIELD] Detectada instância antiga na porta {port} (PID {pid}). Encerrando...")
+                    try:
+                        os.kill(pid, signal.SIGTERM)
+                        time.sleep(2)
+                    except Exception as ex:
+                        print(f"[SHIELD] Falha ao encerrar PID {pid}: {ex}")
+    except Exception as e:
+        print(f"[SHIELD] Falha ao checar conexões da porta {port}: {e}")
+
+
 if __name__ == "__main__":
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    kill_process_on_port(8001)
     
     # 🤖 INICIALIZAÇÃO DO AUTOPILOT L3 (PASA v70.0)
     if AUTOPILOT_ENABLED:
@@ -1019,6 +1040,7 @@ if __name__ == "__main__":
 
     def run_datasette_server():
         try:
+            kill_process_on_port(8002)
             python_exe = get_python_executable()
             # v90.9: "uv_run_python" não é executável real — resolve para Python do venv
             if python_exe == "uv_run_python":

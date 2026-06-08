@@ -7,8 +7,8 @@ import urllib.parse
 from workers.core.xp_engine import XP_PENALTY_AUTH_FAIL, XP_PENALTY_TIMEOUT
 
 # Credenciais CallMeBot (Prioriza ENV, fallback para as fornecidas)
-CALLMEBOT_PHONE = os.getenv("CALLMEBOT_PHONE", "558496066876")
-CALLMEBOT_APIKEY = os.getenv("CALLMEBOT_APIKEY", "8552672")
+CALLMEBOT_PHONE = os.getenv("WHATSAPP_PHONE") or os.getenv("CALLMEBOT_PHONE") or "558496066876"
+CALLMEBOT_APIKEY = os.getenv("WHATSAPP_API_KEY") or os.getenv("CALLMEBOT_APIKEY") or "8552672"
 CALLMEBOT_URL = "https://api.callmebot.com/whatsapp.php"
 
 async def send_critical_alert(worker_id: str, run_xp: int, error_details: str):

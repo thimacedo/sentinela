@@ -497,6 +497,7 @@ if __name__ == "__main__":
 
     def run_datasette_server():
         try:
+            kill_process_on_port(8002)
             # v90.9: Prioriza Python do venv, que tem datasette instalado
             project_root_ds = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             venv_python = os.path.join(project_root_ds, ".venv", "Scripts", "python.exe")
