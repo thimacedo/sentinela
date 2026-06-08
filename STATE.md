@@ -222,8 +222,18 @@ PGMQ deve aparecer apenas como hipótese futura.
 - **Otimização de Dados**: Queries SQL agora utilizam SELECT seletivo, reduzindo overhead de tráfego com o Supabase.
 - **Reward Engine Sync**: Correção na atribuição de XP (+15.0 para insights relevantes) garantindo a progressão do agente.
 
-## Fase 4 - Auditoria Massiva e Proxies (2026-06-08)
+## Fase 5 - Refinaria e Analytics (2026-06-08)
 
+### 1. IA Mesh: Majority Vote Reanalysis (v94.2)
+- **Desempate Inteligente**: Implementada a lógica de "Majority Vote" na re-análise de itens com baixa confiança. O sistema agora seleciona 2 provedores Cloud distintos para uma nova perícia, aplicando consenso em caso de concordância ou selecionando o de maior confiança em caso de divergência (`SPLIT:WINNER`).
+- **Confiabilidade**: Aumentada a precisão do pipeline ao eliminar o loop de re-análise simples por um motor de desempate paralelo.
+
+### 2. Analytics Financeiro (Schema v29.0)
+- **Visibilidade de Gastos**: Criada a view `view_spending_by_provider` e a RPC `get_spending_by_target` para permitir a auditoria de custos de IA por candidato monitorado.
+- **Resiliência Cloud**: Nova RPC `get_cloud_error_summary` para mapear falhas e rate limits por provedor, otimizando a fila de rotação.
+
+## Fase 4 - Auditoria Massiva e Proxies (2026-06-08)
+...
 ### 1. Rotação Dinâmica de Proxies (Stealth Mode Final)
 - **Suporte Robusto**: Implementado suporte a proxies residenciais com autenticação `user:pass@host:port` no `core/instagram_scraper_v2.py`.
 - **Auto-Cura 429**: O scraper agora detecta explicitamente erros 429 (Rate Limit) do Instagram, forçando a rotação imediata de IP e sessão para evasão antibot.
