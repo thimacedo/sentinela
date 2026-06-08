@@ -425,3 +425,35 @@ def get_demographics(supa: Client = Depends(get_supa)):
         return {"sexo": [{"name": k, "value": v} for k, v in stats["sexo"].items()], 
                 "partido": [{"name": k, "value": v} for k, v in stats["partido"].items()]}
     except Exception as e: return {}
+
+# --- FINANCE & AUDIT ANALYTICS (v94.2) ---
+
+@app.get("/api/v1/analytics/spending/providers")
+def get_spending_by_provider(supa: Client = Depends(get_supa)):
+    """Retorna o throughput e eficiência por provedor via View."""
+    try:
+        res = supa.table('view_spending_by_provider').select('*').execute()
+        return res.data or []
+    except Exception as e:
+        logger.error(f"Provider Spending Error: {e}")
+        return []
+
+@app.get("/api/v1/analytics/spending/targets")
+def get_spending_by_target(supa: Client = Depends(get_supa)):
+    """Retorna o consumo estimado por candidato via RPC."""
+    try:
+        res = supa.rpc('get_spending_by_target', {}).execute()
+        return res.data or []
+    except Exception as e:
+        logger.error(f"Target Spending Error: {e}")
+        return []
+
+@app.get("/api/v1/analytics/spending/errors")
+def get_cloud_error_summary(supa: Client = Depends(get_supa)):
+    """Retorna o sumário de falhas por provedor via RPC."""
+    try:
+        res = supa.rpc('get_cloud_error_summary', {}).execute()
+        return res.data or []
+    except Exception as e:
+        logger.error(f"Cloud Error Summary Error: {e}")
+        return []

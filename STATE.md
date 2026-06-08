@@ -231,6 +231,7 @@ PGMQ deve aparecer apenas como hipótese futura.
 ### 2. Analytics Financeiro (Schema v29.0)
 - **Visibilidade de Gastos**: Criada a view `view_spending_by_provider` e a RPC `get_spending_by_target` para permitir a auditoria de custos de IA por candidato monitorado.
 - **Resiliência Cloud**: Nova RPC `get_cloud_error_summary` para mapear falhas e rate limits por provedor, otimizando a fila de rotação.
+- **Dashboard Sync**: O "Decision Room" agora exibe o **Investimento Cloud Estimado** em tempo real, calculado com base no volume de tokens e provedores utilizados (v94.2).
 
 ## Fase 4 - Auditoria Massiva e Proxies (2026-06-08)
 ...

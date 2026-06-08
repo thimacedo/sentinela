@@ -93,6 +93,25 @@
                 </div>
             </div>
 
+            <!-- Auditoria Cloud -->
+            <div class="bg-gray-900 border border-gray-800 p-4 rounded-xl flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-[10px] text-gray-500 font-bold uppercase tracking-widest flex items-center gap-2">
+                        <i data-lucide="calculator" class="w-3 h-3"></i> Investimento Cloud (Est.)
+                    </span>
+                </div>
+                <div>
+                    <div class="flex items-end gap-2">
+                        <span id="stat-custo" class="text-3xl font-black text-indigo-400">R$ 0,00</span>
+                        <span class="text-xs text-gray-500 mb-1">Tokens Cloud</span>
+                    </div>
+                    <p class="text-[10px] text-gray-500 mt-3 leading-relaxed font-sans">
+                        Cálculo baseado em volume de tokens processados via IA Mesh (v94.2). 
+                        Média de 1k tokens = $0.002.
+                    </p>
+                </div>
+            </div>
+
         </div>
 
         <!-- MATRIZ & SISTEMA -->
@@ -342,21 +361,33 @@
 
                 // 3. Top Alvos via Python API
                 try {
-                    const r = await fetch(API_BASE + '/api/analytics/hate-stats');
+                    const r = await fetch(API_BASE + '/api/v1/targets'); // Sincronizado com API Oficial
                     if (r.ok) {
-                        const { stats } = await r.json();
-                        const top = stats.slice(0, 3);
+                        const targets = await r.json();
+                        const top = targets.sort((a,b) => b.comentarios_odio_count - a.comentarios_odio_count).slice(0, 3);
                         const topContainer = document.getElementById('top-targets-container');
                         if (!top || top.length === 0) {
                             topContainer.innerHTML = '<div class="text-xs text-gray-600">Nenhum foco detectado.</div>';
                         } else {
                             topContainer.innerHTML = top.map(t => `
                                 <div class="flex items-center justify-between bg-black/50 p-2 rounded border border-gray-800/50">
-                                    <span class="text-sm font-bold text-gray-300">@${t.candidato_id}</span>
-                                    <span class="text-xs font-bold text-red-400">${t.taxa_odio_percent}% Risco</span>
+                                    <span class="text-sm font-bold text-gray-300">@${t.username}</span>
+                                    <span class="text-xs font-bold text-red-400">${t.score_risco}% Risco</span>
                                 </div>
                             `).join('');
                         }
+                    }
+                } catch(e) {}
+
+                // 4. Auditoria Cloud (Custos)
+                try {
+                    const r = await fetch(API_BASE + '/api/v1/analytics/spending/providers');
+                    if (r.ok) {
+                        const data = await r.json();
+                        const totalTokens = data.reduce((acc, curr) => acc + (curr.total_calls * (curr.avg_text_length || 1000) / 4), 0);
+                        const estimatedUSD = totalTokens * (0.002 / 1000); // Média Groq/Gemini Flash
+                        const estimatedBRL = estimatedUSD * 5.30;
+                        document.getElementById('stat-custo').textContent = `R$ ${estimatedBRL.toFixed(2)}`;
                     }
                 } catch(e) {}
                 
