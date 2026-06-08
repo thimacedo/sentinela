@@ -17,6 +17,7 @@ from core.lexical_filter import lexical_filter
 from core.process_cleaner import cleanup_orphans
 from core.checkpoint_manager import CheckpointManager
 from core.event_bus import local_bus
+from core.circuit_breaker import scraper_circuit_breaker
 
 logger = logging.getLogger("worker.ig_v2")
 
@@ -57,6 +58,14 @@ class WkColetaInstagram(BaseWorker):
     async def run_cycle(self) -> CycleResult:
         start_time = asyncio.get_event_loop().time()
         self.cycle += 1
+
+        # 🛡️ CIRCUIT BREAKER (PASA v94.3)
+        if not scraper_circuit_breaker.can_execute("instagram"):
+            self.logger.warning("🚫 [V2] Circuito ABERTO para Instagram. Pulando ciclo para evitar queima de proxies/sessões.")
+            return CycleResult(
+                worker_id=self.worker_id, cycle=self.cycle,
+                source="circuit_breaker", simulated=False, error="circuit_open"
+            )
         
         # --- CONFIGURAÇÃO IMUTÁVEL POR CICLO (Fase 4: SRE Anti-Race Condition) ---
         current_cycle_config = dict(self.config)
@@ -276,6 +285,7 @@ class WkColetaInstagram(BaseWorker):
             
             # Sucesso técnico no scrape -> Reseta contador de bloqueios
             self.consecutive_blocks = 0
+            scraper_circuit_breaker.record_success("instagram")
             
             if isinstance(scrape_data, dict):
                 target.post_metas = scrape_data.get("post_metas", [])
@@ -284,6 +294,14 @@ class WkColetaInstagram(BaseWorker):
 
         except Exception as e:
             self.consecutive_blocks += 1
+            error_str = str(e).lower()
+            status_code = None
+            if "429" in error_str: status_code = 429
+            elif "403" in error_str: status_code = 403
+            elif "404" in error_str: status_code = 404
+            
+            scraper_circuit_breaker.record_failure("instagram", status_code=status_code, error_msg=str(e))
+
             if isinstance(e, ValueError) and "invalid_target" in str(e):
                 self.logger.error(f"🚫 [V2] Alvo @{target.username} marcado como INVÁLIDO (404/Privado/Mismatch).")
                 result = CycleResult(

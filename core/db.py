@@ -52,9 +52,19 @@ class DatabaseClient:
 
     async def update_comment_classification(self, comment_id: str, data: Dict[str, Any]):
         """Atualiza a classificação de um único comentário."""
+        if not db_circuit_breaker.can_execute("supabase"):
+            return
+        
         url = f"{self.url}/rest/v1/comentarios?id=eq.{comment_id}"
-        async with httpx.AsyncClient() as client:
-            await client.patch(url, headers=self.headers, json=data)
+        try:
+            async with httpx.AsyncClient() as client:
+                resp = await client.patch(url, headers=self.headers, json=data)
+                if resp.status_code in [200, 201, 204]:
+                    db_circuit_breaker.record_success("supabase")
+                else:
+                    db_circuit_breaker.record_failure("supabase", resp.status_code)
+        except Exception:
+            db_circuit_breaker.record_failure("supabase")
 
     async def batch_update_comments(self, updates: List[Dict[str, Any]]):
         """
@@ -64,13 +74,18 @@ class DatabaseClient:
         if not self.client or not updates:
             return
 
+        if not db_circuit_breaker.can_execute("supabase"):
+            return
+
         try:
             # O upsert no Supabase funciona como merge se o id_externo estiver presente
             await asyncio.to_thread(
                 self.client.table('comentarios').upsert(updates, on_conflict='id_externo').execute
             )
+            db_circuit_breaker.record_success("supabase")
             print(f"[DB] {len(updates)} comentarios atualizados em lote.")
         except Exception as e:
+            db_circuit_breaker.record_failure("supabase", error_msg=str(e))
             print(f"[DB] Erro no batch_update_comments: {e}")
 
     async def batch_update_ad_classification(self, updates: List[Dict[str, Any]]):

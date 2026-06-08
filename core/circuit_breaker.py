@@ -1,69 +1,123 @@
 """
-PASA v49 - Circuit Breaker
-Impede loops infinitos em falhas de API (Rate Limit, Auth, Server Error).
+PASA v94.3 - Circuit Breaker Avançado (IA Mesh & Resilience)
+Implementa máquina de estados (CLOSED, OPEN, HALF_OPEN) com backoff exponencial.
 """
 import time
 import logging
-from typing import Dict
+from typing import Dict, Optional, Literal
+from dataclasses import dataclass, field
 
 logger = logging.getLogger("CircuitBreaker")
 
+State = Literal["CLOSED", "OPEN", "HALF_OPEN"]
+
+@dataclass
+class ServiceStatus:
+    state: State = "CLOSED"
+    failures: int = 0
+    successes: int = 0
+    last_failure_time: float = 0
+    open_until: float = 0
+    retry_count: int = 0 # Para backoff exponencial
+    last_error: Optional[str] = None
+
 class CircuitBreaker:
-    def __init__(self, failure_threshold: int = 3, cooldown_seconds: int = 300):
+    def __init__(self, failure_threshold: int = 3, base_cooldown: int = 60, max_cooldown: int = 3600):
         self.failure_threshold = failure_threshold
-        self.cooldown_seconds = cooldown_seconds
-        self.failures: Dict[str, int] = {}
-        self.open_until: Dict[str, float] = {}
+        self.base_cooldown = base_cooldown
+        self.max_cooldown = max_cooldown
+        self.services: Dict[str, ServiceStatus] = {}
+
+    def _get_status(self, name: str) -> ServiceStatus:
+        if name not in self.services:
+            self.services[name] = ServiceStatus()
+        return self.services[name]
 
     def can_execute(self, service_name: str) -> bool:
-        """Verifica se o circuito está aberto (bloqueado) para o serviço."""
-        if service_name in self.open_until:
-            if time.time() < self.open_until[service_name]:
-                logger.debug(f"CIRCUITO ABERTO para {service_name}. Bloqueado até {time.ctime(self.open_until[service_name])}")
-                return False
-            else:
-                del self.open_until[service_name]
-                self.failures[service_name] = 0
-                logger.info(f"🔄 [CB] Circuito HALF-OPEN para {service_name}. Tentando novamente...")
+        """Verifica se o circuito permite a execução para o serviço."""
+        status = self._get_status(service_name)
+        now = time.time()
+
+        if status.state == "OPEN":
+            if now >= status.open_until:
+                status.state = "HALF_OPEN"
+                logger.info(f"🔄 [CB] {service_name} transicionou para HALF_OPEN. Testando resiliência...")
+                return True
+            return False
+        
+        if status.state == "HALF_OPEN":
+            # No estado HALF_OPEN, permitimos apenas uma execução por vez (ou taxa reduzida)
+            # Para simplificar aqui, permitimos a execução, mas record_success/failure decidirá o futuro
+            return True
+
         return True
 
     def record_success(self, service_name: str):
-        """Registra sucesso e reseta contadores."""
-        if service_name in self.failures:
-            self.failures.pop(service_name, None)
-            self.open_until.pop(service_name, None)
-            logger.info(f"✅ [CB] Circuito FECHADO para {service_name}. Operação normal.")
+        """Registra sucesso e fecha o circuito."""
+        status = self._get_status(service_name)
+        status.successes += 1
+        
+        if status.state != "CLOSED":
+            logger.info(f"✅ [CB] {service_name} recuperado! Circuito FECHADO.")
+            status.state = "CLOSED"
+            status.failures = 0
+            status.retry_count = 0
+            status.open_until = 0
 
-    def record_failure(self, service_name: str, status_code: int = None):
-        """Registra falha e abre o circuito se o limite for atingido."""
-        self.failures[service_name] = self.failures.get(service_name, 0) + 1
-        count = self.failures[service_name]
+    def record_failure(self, service_name: str, status_code: Optional[int] = None, error_msg: str = ""):
+        """Registra falha e aplica backoff se necessário."""
+        status = self._get_status(service_name)
+        status.failures += 1
+        status.last_failure_time = time.time()
+        status.last_error = error_msg
 
-        # Falhas fatais (Auth) abrem o circuito por 1 hora
+        # Falhas fatais (Auth) abrem o circuito por tempo longo imediatamente
         if status_code in [401, 403]:
-            logger.error(f"[CB] Falha FATAL ({status_code}) em {service_name}. Circuito ABERTO por 1 hora.")
-            self.open_until[service_name] = time.time() + 3600
+            logger.error(f"🚫 [CB] Falha FATAL ({status_code}) em {service_name}. Circuito ABERTO (1h).")
+            status.state = "OPEN"
+            status.open_until = time.time() + 3600
             return
 
-        # Falhas de Rate Limit ou indisponibilidade temporária abrem por 5 minutos
-        if status_code in [429, 503]:
-            cooldown = 300
-            logger.warning(f"[CB] {service_name} indisponível ({status_code}). Circuito ABERTO por {cooldown}s.")
-            self.open_until[service_name] = time.time() + cooldown
-            return
+        # Lógica de abertura do circuito
+        if status.state == "CLOSED":
+            if status.failures >= self.failure_threshold:
+                self._open_circuit(service_name, status, status_code)
+        elif status.state == "HALF_OPEN":
+            # Falhou no teste de recuperação: volta para OPEN com penalidade maior
+            status.retry_count += 1
+            self._open_circuit(service_name, status, status_code)
 
-        # Outras falhas acumulam
-        if count >= self.failure_threshold:
-            logger.warning(f"[CB] {service_name} falhou {count}x seguidas. Circuito ABERTO por {self.cooldown_seconds}s.")
-            self.open_until[service_name] = time.time() + self.cooldown_seconds
+    def _open_circuit(self, name: str, status: ServiceStatus, status_code: Optional[int]):
+        """Abre o circuito com backoff exponencial."""
+        wait_time = min(self.base_cooldown * (2 ** status.retry_count), self.max_cooldown)
+        
+        # Ajuste para Rate Limits
+        if status_code == 429:
+            wait_time = max(wait_time, 300) # Mínimo 5 min para 429
+            
+        status.state = "OPEN"
+        status.open_until = time.time() + wait_time
+        logger.warning(f"💥 [CB] {name} falhou. Circuito ABERTO por {wait_time}s. (Code: {status_code})")
 
-# --- Instâncias Globais dos Circuit Breakers ---
+    def get_metrics(self) -> Dict[str, Any]:
+        """Retorna as métricas de todos os serviços para o Dashboard."""
+        return {
+            name: {
+                "state": s.state,
+                "failures": s.failures,
+                "successes": s.successes,
+                "open_until": s.open_until,
+                "last_error": s.last_error
+            } for name, s in self.services.items()
+        }
 
-# Para os serviços de Inteligência Artificial
-ai_circuit_breaker = CircuitBreaker(failure_threshold=3, cooldown_seconds=300)
+# --- Instâncias Globais dos Circuit Breakers (PASA v94.3) ---
 
-# Para o serviço de Scraping da Zyte
-zyte_circuit_breaker = CircuitBreaker(failure_threshold=2, cooldown_seconds=600) # 10 min de cooldown
+# Para os serviços de Inteligência Artificial (Cloud e Local)
+ai_circuit_breaker = CircuitBreaker(failure_threshold=3, base_cooldown=60)
 
-# Para o serviço de Banco de Dados (Supabase)
-db_circuit_breaker = CircuitBreaker(failure_threshold=5, cooldown_seconds=60)
+# Para o serviço de Scraping (Proxies, Zyte, etc.)
+scraper_circuit_breaker = CircuitBreaker(failure_threshold=2, base_cooldown=300)
+
+# Para o Banco de Dados (Supabase)
+db_circuit_breaker = CircuitBreaker(failure_threshold=5, base_cooldown=30)

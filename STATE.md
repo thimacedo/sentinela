@@ -222,8 +222,20 @@ PGMQ deve aparecer apenas como hipótese futura.
 - **Otimização de Dados**: Queries SQL agora utilizam SELECT seletivo, reduzindo overhead de tráfego com o Supabase.
 - **Reward Engine Sync**: Correção na atribuição de XP (+15.0 para insights relevantes) garantindo a progressão do agente.
 
-## Fase 5 - Refinaria e Analytics (2026-06-08)
+## Fase 6 - Resiliência de Workers (2026-06-08)
 
+### 1. Circuit Breakers Avançados (CBv2)
+- **Máquina de Estados**: Evoluído para suporte a estados explícitos (`CLOSED`, `OPEN`, `HALF_OPEN`). No estado `HALF_OPEN` (TRIAL), o sistema realiza execuções de teste para validar a recuperação do serviço.
+- **Backoff Exponencial**: Implementado tempo de espera crescente para falhas repetidas, protegendo proxies e sessões de IA contra queima desnecessária.
+- **Detecção de Erros Fatais**: Erros 401/403 (Auth/Forbidden) agora abrem o circuito por tempo longo (1h) imediatamente.
+
+### 2. Integração Profunda de SRE
+- **Worker Resilience**: O `WkColetaInstagram` agora consulta o `scraper_circuit_breaker` antes de cada ciclo. Sucessos e falhas técnicos são registrados para alimentar a inteligência de recuperação.
+- **DB Stability**: O `DatabaseClient` agora possui proteção de circuito para evitar overhead no Supabase em caso de instabilidade de rede ou limite de conexões.
+- **Visibilidade no Watchdog**: O dashboard "Decision Room" agora reporta o status preciso de cada provedor de IA e serviço de scraping, diferenciando entre Rate Limit, Cooldown e Teste de Resiliência.
+
+## Fase 5 - Refinaria e Analytics (2026-06-08)
+...
 ### 1. IA Mesh: Majority Vote Reanalysis (v94.2)
 - **Desempate Inteligente**: Implementada a lógica de "Majority Vote" na re-análise de itens com baixa confiança. O sistema agora seleciona 2 provedores Cloud distintos para uma nova perícia, aplicando consenso em caso de concordância ou selecionando o de maior confiança em caso de divergência (`SPLIT:WINNER`).
 - **Confiabilidade**: Aumentada a precisão do pipeline ao eliminar o loop de re-análise simples por um motor de desempate paralelo.

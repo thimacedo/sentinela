@@ -73,6 +73,11 @@ _last_updated: 2026-06-05 | branch: main_
 - [x] Atualizar `AIProcessorWorker` (via `Orchestrator`) para usar `event.wait()` (Reatividade) em vez de polling constante, com timeout de segurança de 1200s.
 - [x] Validar redução de latência entre coleta e classificação (reatividade comprovada: ~2.00ms de overhead real vs espera inativa).
 
+### Resiliência de Workers (Fase 6 - SRE) - Concluído
+- [x] Circuit Breakers v2 com estados finitos e backoff exponencial
+- [x] Integração de resiliência profunda no `DatabaseClient` e `WkColetaInstagram`
+- [x] Visualização de saúde de provedores em tempo real no Dashboard
+
 ### Inteligência
 - [x] saneamento da malha de providers em `config/fallback_providers.yaml`
 - [x] remover referências residuais a LiteRT do código e da operação

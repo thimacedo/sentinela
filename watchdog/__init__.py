@@ -291,7 +291,7 @@ async def get_ai_health():
         active_names = {p["name"] for p in ai_service.providers}
 
         # Inclui também provedores que podem ter sido removidos permanentemente
-        all_known = active_names | set(ai_circuit_breaker.open_until.keys())
+        all_known = active_names | set(ai_circuit_breaker.services.keys())
 
         for name in sorted(all_known):
             if name not in active_names:
@@ -301,8 +301,10 @@ async def get_ai_health():
 
             prov = next((p for p in ai_service.providers if p["name"] == name), None)
             cooldown_until = prov.get("cooldown_until", 0) if prov else 0
-            cb_until = ai_circuit_breaker.open_until.get(name, 0)
-            failures = ai_circuit_breaker.failures.get(name, 0)
+            
+            status = ai_circuit_breaker.services.get(name)
+            cb_until = status.open_until if status else 0
+            failures = status.failures if status else 0
 
             # Determina o status mais restritivo
             if cb_until > now:
@@ -314,6 +316,8 @@ async def get_ai_health():
             elif cooldown_until > now:
                 secs_left = int(cooldown_until - now)
                 result[name] = {"status": "COOLDOWN", "icon": "🟡", "detail": f"Cooldown por mais {secs_left}s"}
+            elif status and status.state == "HALF_OPEN":
+                result[name] = {"status": "TRIAL", "icon": "🔵", "detail": "Testando resiliência (Half-Open)"}
             else:
                 result[name] = {"status": "OK", "icon": "🟢", "detail": "Disponível"}
 
