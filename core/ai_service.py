@@ -629,45 +629,98 @@ class AIService:
         except Exception as e:
             raise e 
 
-    async def run_batch_reanalysis(self, limit: int = 20, confidence_threshold: float = 0.6) -> int:
-        # Busca registros ja processados mas com baixa confianca para re-analise profunda.
+    async def run_batch_reanalysis(self, limit: int = 15, confidence_threshold: float = 0.6) -> int:
+        """
+        PASA v94.2 - Majority Vote Reanalysis (IA Mesh):
+        Busca registros com baixa confiança e realiza uma nova perícia com 2 provedores Cloud
+        distintos para desempate.
+        """
         try:
             from core.db import db_client
+            # Reduzimos o limite para 15 para evitar overhead massivo de tokens Cloud
             res = await asyncio.to_thread(
-                db_client.client.table('comentarios').select('id, texto_bruto, trace_id, candidato_id, analise_pericial').eq('processado_ia', True).lt('confianca_ia', confidence_threshold).not_.eq('categoria_ia', 'ERRO').order('data_coleta', desc=True).limit(limit).execute
+                db_client.client.table('comentarios')
+                .select('id, texto_bruto, trace_id, candidato_id, analise_pericial, categoria_ia')
+                .eq('processado_ia', True)
+                .lt('confianca_ia', confidence_threshold)
+                .not_.eq('categoria_ia', 'ERRO')
+                .order('data_coleta', desc=True)
+                .limit(limit)
+                .execute
             )
             items = res.data or []
             count = 0
             
+            # Filtra provedores cloud disponíveis
+            cloud_providers = [p for p in self.providers if p["name"] != "ollama"]
+            if len(cloud_providers) < 2:
+                logger.warning("⚠️ [AI:Mesh] Menos de 2 provedores Cloud ativos. Abortando re-análise profunda de desempate.")
+                return 0
+
             for item in items:
-                # Evita loop de reanálise infinita de itens já re-analisados
                 analise_antiga = item.get("analise_pericial") or ""
                 if "[RE-ANÁLISE:" in analise_antiga:
                     continue
 
                 try:
-                    res_ia = await self.classify_text(item["texto_bruto"], item["id"], trace_id=item.get("trace_id"), force_cloud=True, candidato_id=item.get("candidato_id"))
-                    if res_ia and res_ia.get("categoria_ia") != "ERRO":
-                        engine_name = res_ia.get("name", "unknown").upper()
-                        nova_confianca = res_ia.get("confianca_ia", 0.0)
-                        
-                        # Evita re-análise infinita marcando como FINALIZADA se a confiança continuou baixa
-                        tag_status = "FINALIZADA" if nova_confianca < confidence_threshold else "CONCLUIDA"
-                        analise = f"[RE-ANÁLISE:{tag_status}:{engine_name}] {res_ia.get('analise_pericial', '')}"
-                        
-                        await asyncio.to_thread(
-                            db_client.client.table('comentarios').update({
-                                "categoria_ia": res_ia["categoria_ia"], 
-                                "confianca_ia": nova_confianca, 
-                                "is_hate": res_ia["is_hate"], 
-                                "analise_pericial": analise
-                            }).eq("id", item["id"]).execute
-                        )
-                        count += 1
+                    # Executa 2 chamadas paralelas com provedores diferentes
+                    p1, p2 = random.sample(cloud_providers, 2)
                     
-                    # PASA v88.2 - Cadência Constante (Persistência sobre Velocidade)
-                    await asyncio.sleep(1.0)
+                    logger.info(f"⚖️ [AI:Mesh] Iniciando desempate para ID {item['id']} ({p1['name']} vs {p2['name']})")
+                    
+                    tasks = [
+                        self._execute_provider_call(p1, self._get_system_prompt(False), f"Texto: \"{item['texto_bruto']}\"", "json_object", item['id'], item['candidato_id']),
+                        self._execute_provider_call(p2, self._get_system_prompt(False), f"Texto: \"{item['texto_bruto']}\"", "json_object", item['id'], item['candidato_id'])
+                    ]
+                    
+                    responses = await asyncio.gather(*tasks, return_exceptions=True)
+                    valid_res = []
+                    for i, r in enumerate(responses):
+                        if isinstance(r, Exception): continue
+                        parsed = self._parse_json_response(r)
+                        parsed["provider"] = [p1, p2][i]["name"]
+                        valid_res.append(parsed)
+
+                    if not valid_res: continue
+
+                    # Lógica de Desempate (Majority Vote / Highest Confidence)
+                    # 1. Se houver consenso de categoria, usa essa categoria com média de confiança.
+                    # 2. Se houver divergência, usa a de maior confiança.
+                    
+                    final_category = valid_res[0]["categoria_ia"]
+                    final_confidence = valid_res[0]["confianca_ia"]
+                    final_is_hate = valid_res[0]["is_hate"]
+                    engine_tag = valid_res[0]["provider"]
+
+                    if len(valid_res) == 2:
+                        if valid_res[0]["categoria_ia"] == valid_res[1]["categoria_ia"]:
+                            final_confidence = (valid_res[0]["confianca_ia"] + valid_res[1]["confianca_ia"]) / 2
+                            engine_tag = f"CONSENSUS:{valid_res[0]['provider']}+{valid_res[1]['provider']}"
+                        else:
+                            # Divergência: pega o de maior confiança
+                            winner = valid_res[0] if valid_res[0]["confianca_ia"] >= valid_res[1]["confianca_ia"] else valid_res[1]
+                            final_category = winner["categoria_ia"]
+                            final_confidence = winner["confianca_ia"]
+                            final_is_hate = winner["is_hate"]
+                            engine_tag = f"SPLIT:WINNER={winner['provider']}"
+                    
+                    tag_status = "FINALIZADA" if final_confidence < confidence_threshold else "CONCLUIDA"
+                    analise = f"[RE-ANÁLISE:{tag_status}:{engine_tag.upper()}] {valid_res[0].get('analise_pericial', '')}"
+                    
+                    await asyncio.to_thread(
+                        db_client.client.table('comentarios').update({
+                            "categoria_ia": final_category, 
+                            "confianca_ia": final_confidence, 
+                            "is_hate": final_is_hate, 
+                            "analise_pericial": analise
+                        }).eq("id", item["id"]).execute
+                    )
+                    count += 1
+                    
+                    await asyncio.sleep(2.0) # Backoff entre itens de re-análise
+                    
                 except Exception as e:
+                    logger.error(f"[AI:Mesh] Erro no desempate do ID {item['id']}: {e}")
                     if "Colapso" in str(e): break
                 
             return count
