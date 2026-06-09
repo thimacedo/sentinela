@@ -66,6 +66,10 @@ _last_updated: 2026-06-05 | branch: main_
 - [x] checkpoint intermediário por post raspado
 - [x] rotação real de proxies no Playwright
 - [x] redução de ciclos com `no_comments_found`
+- [ ] **Coleta Direcionada**: Interface de input para forçar coleta imediata de alvos.
+
+### UI e Operação
+- [ ] **Sala de Controle Granular**: UI para controle de qualquer worker/subagente.
 
 ### Otimização de Pipeline Reativo (Fase 9) - Concluído
 - [x] Implementar `EventBus` centralizado para sinalização em memória (`AsyncLocalEventBus`).

@@ -27,3 +27,8 @@ O Dashboard local (`Decision Room`) apresentou instabilidade operacional, parada
 - **Sintoma:** Dados repetidos, piscando, ou não atualizando.
 - **Causa:** Consulta direta e frequente ao Supabase no frontend, sem verificação de estado.
 - **Contexto de Correção:** Implementação de endpoint de cache (`/api/v1/auditoria`) com ttl de 30s e lógica de idempotência visual (`lastAlertsHash`) no frontend para evitar re-renderizações desnecessárias.
+
+## Solicitações Pendentes (Backlog de UX/Funcionalidade)
+As seguintes funcionalidades foram solicitadas, mas ainda não foram totalmente integradas à interface do Dashboard ou demandam maior complexidade de implementação:
+- **Sala de Controle Granular**: Atualmente temos apenas botões de 'restart' para workers específicos. A solicitação é de uma interface mais abrangente para acionar qualquer worker ou subagente (SA) diretamente.
+- **Coleta Direcionada**: Interface dedicada (input field) para o operador inserir um novo alvo (username/URL) e disparar a coleta imediatamente, sem depender do fluxo automático da fila.
