@@ -205,6 +205,7 @@
                             </div>
                             <div class="flex justify-between items-center bg-black p-1.5 rounded border border-gray-800">
                                 <span>SA-VOY</span>
+                                <span id="voyant-status" class="text-yellow-500 font-bold">...</span>
                                 <button onclick="restartWorker('sa-voyant-01')" class="hover:text-white transition-colors"><i data-lucide="refresh-cw" class="w-3 h-3 text-gray-500"></i></button>
                             </div>
                         </div>
@@ -503,7 +504,25 @@
                 }
             } catch(e) { console.error("Erro spending API:", e); }
 
-            // 5. Atualiza Heartbeat
+            // 5. Métricas de Saúde (Workers e IA)
+            try {
+                const r = await fetch(API_BASE + '/api/metrics');
+                if (r.ok) {
+                    const data = await r.json();
+                    const workers = data.instagram_accounts;
+                    const ai = data.ai_services;
+
+                    // Atualiza status Workers
+                    // ... (logica de mapeamento)
+                    document.getElementById('voyant-status').textContent = ai.voyant === "OK" ? "OK" : "DOWN";
+                    document.getElementById('ia-ollama').textContent = ai.ollama === "OK" ? "ONLINE" : "OFFLINE";
+                    document.getElementById('ia-mistral').textContent = ai.mistral === "OK" ? "ONLINE" : "OFFLINE";
+
+                    // Adicione lógica para os outros workers se necessário
+                }
+            } catch (e) { console.error("Erro ao buscar métricas:", e); }
+
+            // 6. Atualiza Heartbeat
             const hb = document.getElementById('heartbeat-text');
             const now = new Date();
             hb.textContent = now.toLocaleTimeString('pt-BR');
@@ -511,7 +530,7 @@
 
             // Remove troubleshooting se houver sucesso em algo
             document.getElementById('troubleshooting-container')?.remove();
-        }
+            }
 
         // Timer de Segurança para Diagnóstico (10s)
         setTimeout(() => {

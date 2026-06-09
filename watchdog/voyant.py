@@ -12,13 +12,14 @@ def run_voyant_server(project_root):
             return
         
         jar_path = os.path.join(project_root, "tools", "voyant", "VoyantServer.jar")
+        voyant_dir = os.path.dirname(jar_path)
         creationflags = 0x08000000 if os.name == 'nt' else 0
         
         subprocess.Popen(
-            [java_path, "-Djava.awt.headless=true", "-Xmx512m", "-jar", jar_path],
+            [java_path, "-Xmx512m", "-jar", jar_path],
             creationflags=creationflags,
-            cwd=project_root
+            cwd=voyant_dir
         )
-        print("[START] Motor Léxico (VoyantServer) iniciado em modo background")
+        print("[START] Motor Léxico (VoyantServer) iniciado em modo background no diretório " + voyant_dir)
     except Exception as e_voyant:
         print(f"[WARN] Falha ao iniciar VoyantServer: {e_voyant}")

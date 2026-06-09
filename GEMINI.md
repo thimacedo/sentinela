@@ -15,22 +15,14 @@ _last_updated: 2026-05-20_
 5. Estados Finitos: Divida tarefas em passos mínimos e valide cada um.
 
 ## 🛠 DIRETRIZES TÉCNICAS (PASA v50.1)
-- **Integridade de Dados**: Proibido uso de mocks ou dados simulados em produção. Falhe honestamente.
-- **Arquitetura Real**:
-  - Frontend: Next.js 16 (App Router) + Tailwind v4 + Supabase Client (SSR/SSG).
-  - Backend Local: Python (local_server.py) + Workers Scrapy/Playwright.
-  - Banco: Supabase (RLS ativo, Idempotência via `upsert`).
-- **Motores de Coleta (Tiers de Resiliência):**
-  - **Tier 1 (API):** Requisições GraphQL diretas (Primário).
-  - **Tier 2 (DOM):** Playwright renderizado (Secundário).
-  - **Tier 3 (Zyte):** Fallback API/DOM via Zyte (Terciário).
-  - **Tier 4 (Headless Solo):** Playwright autônomo (Último recurso).
-- **Política de Sessão/Block:** Proibido rotação forçada de `sessionid`. Em caso de 429, aplique backoff exponencial (tabela `alvo_backoff`).
-- **Segurança**: ANON_KEY apenas para leitura (Frontend); SERVICE_KEY exclusiva para Backend local.
-- **Proteção Jurídica**: Termos proibidos: "forense", "prova", "evidência". Termos permitidos: "informação", "indício", "análise analítica".
-- **Classificação**: Seguir ESTRITAMENTE o MCA v2.2.
+...
+- **Proteção de Processos**: O `main_runner` (Autopilot) e o `watchdog` operam sob proteção de PIDs (GuardLocker), impedindo encerramento por processos de limpeza.
+- **Circuit Breakers**: Provedores de IA instáveis são isolados automaticamente (Circuit Breaker) para evitar cascata de erros.
+- **Idempotência (Upsert)**: Todas as escritas no Supabase utilizam `on_conflict` (upsert) para evitar erros de chave duplicada.
+- **Cache de Borda**: O Dashboard utiliza API local (`/api/v1/auditoria`) com cache de 30s, garantindo fluidez sem sobrecarga de rede.
+- **Saneamento de Ambiente**: Limpeza periódica de `__pycache__` e detecção de zumbis Java (Voyant) no boot.
 
-## 🔄 FLUXO DE TRABALHO
+--- End of Context from: C:/Projetos/sentinela/GEMINI.md ---
 1. Pesquisar (STATE.md + Git) -> 2. Propor Plano -> 3. Executar -> 4. Validar -> 5. Documentar -> 6. Commit/Push.
 
 ## 🤖 INTEGRAÇÃO DE IA
