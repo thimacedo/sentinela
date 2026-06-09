@@ -11,6 +11,8 @@ import traceback
 import re
 import codecs
 import time
+import random
+import httpx
 from typing import Dict, Any, List, Optional
 from openai import AsyncOpenAI, APIStatusError
 from core.circuit_breaker import ai_circuit_breaker
@@ -115,11 +117,10 @@ class AIService:
 
     def _ensure_clients(self):
         """Inicializa os clientes de IA se ainda não existirem (Lazy Loading v92.9)."""
-        import httpx
         if self.ollama_client is None:
             self.ollama_client = AsyncOpenAI(
                 api_key="ollama",
-                base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1"),
+                base_url=os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434/v1"),
                 max_retries=0,
                 http_client=httpx.AsyncClient(timeout=httpx.Timeout(timeout=120.0, connect=30.0))
             )
@@ -135,14 +136,22 @@ class AIService:
             finetuned_model = os.getenv('FINETUNED_MODEL_NAME', "open-mistral-nemo")
             self.providers = [
                 {"name": "ollama", "client": self.ollama_client, "model": os.getenv("OLLAMA_MODEL", "qwen2.5-coder:3b"), "timeout": 120.0, "cooldown_until": 0.0, "is_async_openai": True},
-                {"name": "google_gemini", "client": None, "model": "gemini-2.5-flash", "timeout": 45.0, "cooldown_until": 0.0, "is_async_openai": False},
                 {"name": "mistral", "client": self.mistral_client, "model": finetuned_model, "timeout": 30.0, "cooldown_until": 0.0, "is_async_openai": True},
             ]
+            
+            # Adicionar Google Gemini apenas se a chave estiver configurada
+            if os.getenv("GEMINI_API_KEY"):
+                self.providers.append({"name": "google_gemini", "client": None, "model": "gemini-2.5-flash", "timeout": 45.0, "cooldown_until": 0.0, "is_async_openai": False})
             
             try:
                 from core.config import FALLBACK_PROVIDERS
                 for prov in FALLBACK_PROVIDERS:
                     if not any(p["name"] == prov["name"] for p in self.providers):
+                        # Pular provedores de fallback se a chave de API obrigatória estiver ausente
+                        api_key_env = prov.get("api_key_env")
+                        if api_key_env and not os.getenv(api_key_env):
+                            continue
+                            
                         self.providers.append({
                             "name": prov["name"],
                             "model": prov.get("model", ""),
@@ -447,7 +456,9 @@ class AIService:
                 return res
 
             except Exception as e:
-                logger.debug("[AI] Falha unificada no provider '%s' para comment_id=%s: %s", name, comment_id, e)
+                logger.error("[AI] Falha unificada no provider '%s' para comment_id=%s: %s", name, comment_id, e)
+                if name == "ollama":
+                    logger.debug(f"Traceback Ollama: {traceback.format_exc()}")
                 # Inserção de log de custos para chamadas Cloud falhas de rotina
                 if name != "ollama":
                     try:
