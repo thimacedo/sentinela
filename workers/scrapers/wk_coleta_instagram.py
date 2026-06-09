@@ -221,12 +221,12 @@ class WkColetaInstagram(BaseWorker):
                     clean_null_chars(safe_comments), 
                     on_conflict="candidato_id,post_shortcode,id_externo",
                     ignore_duplicates=True
-                ).execute()
+                ).execute(returning='minimal')
                 
-                if res.data:
-                    inserted = len(res.data)
-                    inserted_total += inserted
-                    duplicated_total += len(post_comments) - inserted
+                # Se upsert retornar vazio, assume sucesso (duplicados ignorados)
+                inserted = len(res.data) if res.data else 0
+                inserted_total += inserted
+                duplicated_total += len(post_comments) - inserted
             except Exception as e_upsert:
                 # 🆘 SALVAMENTO DE EMERGÊNCIA (v63.0): Fallback para Schema Mismatch
                 self.logger.warning(f"⚠️ [V2] Erro de Schema no post {shortcode}: {e_upsert}. Iniciando Fallback...")
