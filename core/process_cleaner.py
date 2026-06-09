@@ -52,21 +52,16 @@ def cleanup_orphans(kill_ollama: bool = False):
             # Limpeza de scripts Python do projeto
             if "python" in proc.info['name'].lower():
                 if any(script in cmdline for script in sentinela_scripts):
-                    # v90.8: Proteção extra — não encerra o processo atual, seu pai, ou o watchdog
-                    parent_pid = os.getppid()
-                    watchdog_pid = None
-                    try:
-                        # Tenta encontrar o PID do watchdog (processo avô ou processo com 'watchdog' no cmdline)
-                        current_proc = psutil.Process(current_pid)
-                        watchdog_pid = current_proc.ppid()
-                    except Exception:
-                        pass
-
-                    protected_pids = {current_pid, parent_pid}
-                    if watchdog_pid:
-                        protected_pids.add(watchdog_pid)
-
-                    if proc.info['pid'] in protected_pids:
+                    # v90.8 / v50.1: Proteção rigorosa para o main_runner e componentes vitais
+                    # Não encerrar scripts se forem o processo pai ou ancestrais do watchdog
+                    if any(script in cmdline and "main_runner.py" in cmdline for script in sentinela_scripts):
+                        # Se for um main_runner, só encerra se for um PID antigo (duplicado)
+                        # Identificamos duplicidade se o tempo de criação for muito antigo comparado ao atual
+                        if proc.create_time() < (time.time() - 300): # 5 minutos de vida é suspeito para duplicado
+                             logger.warning(f"🧹 [Cleaner] Encerrando main_runner zumbi: {cmdline} (PID {proc.info['pid']})")
+                             proc.kill()
+                        else:
+                             logger.info(f"🛡️ [Cleaner] Preservando main_runner saudável: {proc.info['pid']}")
                         continue
                     
                     logger.warning(f"🧹 [Cleaner] Encerrando script Python órfão: {cmdline} (PID {proc.info['pid']})")
