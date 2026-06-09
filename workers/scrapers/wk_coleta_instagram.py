@@ -221,7 +221,7 @@ class WkColetaInstagram(BaseWorker):
                     clean_null_chars(safe_comments), 
                     on_conflict="candidato_id,post_shortcode,id_externo",
                     ignore_duplicates=True
-                ).execute(returning='minimal')
+                ).execute()
                 
                 # Se upsert retornar vazio, assume sucesso (duplicados ignorados)
                 inserted = len(res.data) if res.data else 0

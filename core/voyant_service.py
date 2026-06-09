@@ -17,6 +17,7 @@ import os
 import json
 import logging
 import asyncio
+import time
 from typing import Optional
 
 import httpx
@@ -109,9 +110,10 @@ TROMBONE_LIMIT = int(os.getenv("VOYANT_TROMBONE_LIMIT", "50"))
 
 # v92.2: Usar 127.0.0.1 para evitar problemas de resolução/fallback de httpx (RuntimeError)
 VOYANT_BASE_URL = os.getenv("VOYANT_BASE_URL", "http://127.0.0.1:8888/trombone")
-VOYANT_TIMEOUT = float(os.getenv("VOYANT_TIMEOUT", "8.0"))
+VOYANT_TIMEOUT = float(os.getenv("VOYANT_TIMEOUT", "25.0"))
 
 
+print(f"[DEBUG] VoyantService loaded from: {__file__}")
 class VoyantService:
     """
     Cliente assíncrono para a API Trombone do VoyantServer local.
@@ -120,10 +122,10 @@ class VoyantService:
     def __init__(self, base_url: str = VOYANT_BASE_URL, timeout: float = VOYANT_TIMEOUT):
         self.base_url = base_url
         self.timeout = timeout
-
-    # ------------------------------------------------------------------
-    # API Pública
-    # ------------------------------------------------------------------
+        self.is_down = False
+        self.last_failed = 0
+        self.failure_count = 0
+        print(f"[DEBUG] VoyantService instance initialized. Attrs: {dir(self)}")
 
     async def ping(self) -> bool:
         """
@@ -138,14 +140,22 @@ class VoyantService:
         except (httpx.RequestError, httpx.TimeoutException):
             return False
 
-    async def extract_corpus_terms(self, texts: list[str]) -> Optional[dict]:
-        """
-        Envia um lote de textos para o Trombone e retorna os top-N termos.
+    async def _handle_failure(self):
+        self.failure_count += 1
+        if self.failure_count >= 3:
+            self.is_down = True
+            self.last_failed = time.time()
+            logger.error("[Voyant] 🛑 Circuit Breaker: Voyant desativado temporariamente devido a falhas consecutivas.")
 
-        Nota de Engenharia (v92.3.1):
-            O parâmetro correto para texto inline é `string`, não `input`.
-            O campo `input` causa erro 500 no DocumentExpander do Trombone.
-        """
+    async def extract_corpus_terms(self, texts: list[str]) -> Optional[dict]:
+        # Verificação do Circuit Breaker
+        if self.is_down:
+            if time.time() - self.last_failed > 600: # Tenta reviver após 10 min
+                self.is_down = False
+                self.failure_count = 0
+            else:
+                return None # Fallback imediato
+
         if not texts:
             return {}
 
@@ -160,8 +170,6 @@ class VoyantService:
             "sort": "RELATIVEFREQ",
         }
         
-        # v92.9: Codificação manual do form body para evitar a criação de SyncByteStream no httpx AsyncClient
-        # Isso previne erros de concorrência e o bug "Attempted to send a sync request with an AsyncClient instance"
         import urllib.parse
         encoded_data = urllib.parse.urlencode([("string", t) for t in clean_texts])
 
@@ -169,21 +177,25 @@ class VoyantService:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 headers = {"Content-Type": "application/x-www-form-urlencoded"}
                 resp = await client.post(self.base_url, params=params, content=encoded_data, headers=headers)
+                
+                if resp.status_code >= 500:
+                    await self._handle_failure()
+                    return None
+                
                 resp.raise_for_status()
-        except httpx.TimeoutException:
-            logger.warning("[Voyant] Timeout ao consultar Trombone (%.1fs).", self.timeout)
+                # Se sucesso, reseta contador
+                self.failure_count = 0
+                
+        except (httpx.TimeoutException, httpx.RequestError):
+            await self._handle_failure()
             return None
-        except httpx.RequestError as exc:
-            logger.warning("[Voyant] Erro de conexão com Trombone: %s", exc)
-            return None
-        except httpx.HTTPStatusError as exc:
-            logger.warning("[Voyant] HTTP %s do Trombone: %s", exc.response.status_code, exc)
+        except httpx.HTTPStatusError:
+            await self._handle_failure()
             return None
 
         try:
             payload = resp.json()
-        except json.JSONDecodeError as exc:
-            logger.warning("[Voyant] Resposta do Trombone não é JSON válido: %s", exc)
+        except json.JSONDecodeError:
             return None
 
         return self._parse_corpus_terms(payload)
@@ -313,5 +325,8 @@ class VoyantService:
         return collocates
 
 
+print(f"[DEBUG] VoyantService class definition: {VoyantService}")
+print(f"[DEBUG] VoyantService attributes: {dir(VoyantService)}")
 # Instância singleton
 voyant_service = VoyantService()
+print(f"[DEBUG] voyant_service instance attributes: {dir(voyant_service)}")

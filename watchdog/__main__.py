@@ -18,6 +18,7 @@ if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
 from watchdog import guard, run_web_server, state, AUTOPILOT_ENABLED
+from watchdog.voyant import run_voyant_server
 try:
     from core.autopilot.manager import autopilot
 except ImportError:
@@ -514,6 +515,7 @@ if __name__ == "__main__":
             print(f"[WARN] Falha ao iniciar Datasette: {e_ds}")
 
     threading.Thread(target=run_datasette_server, daemon=True).start()
+    threading.Thread(target=run_voyant_server, args=(PROJECT_ROOT,), daemon=True).start()
 
     print("[START] Dashboard disponível em: http://localhost:8001")
     print("[SHIELD] SENTINELA DEMOCRÁTICA - WATCHDOG v50.0")

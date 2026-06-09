@@ -98,6 +98,10 @@ class WatchdogState:
         self.fast_crashes = 0
         self.process = None
         self.should_run = True
+        self.should_restart = False  # Flag para reinício global
+        self.auditoria_cache = {"data": [], "timestamp": 0} 
+        self.auditoria_lock = Lock()
+
         
     def add_log(self, level: str, message: str):
         # Filtragem Inteligente para Reduzir "Enxurrada de Erros" no Terminal (v88.9)
@@ -139,6 +143,20 @@ class WatchdogState:
 
 state = WatchdogState()
 
+HATE_CATEGORIES = (
+    "ODIO_IDENTITARIO",
+    "VIOLENCIA_GENERO",
+    "AMEACA",
+    "INSULTO_AD_HOMINEM",
+    "ATAQUE_INSTITUCIONAL",
+    "DANO_A_IMAGEM",
+    "MISOGINIA_POLITICA",
+    "CAMPANHA_COORDENADA",
+    "NEGATIVO"
+)
+
+RISK_COLORS = {"CRITICO": "#ef4444", "ELEVADO": "#f59e0b", "MONITORANDO": "#06b6d4", "CONTROLADO": "#10b981"}
+
 # =========================================================
 # FASTAPI SERVER (Roda em Thread Separada)
 # =========================================================
@@ -152,6 +170,44 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.post("/api/restart_worker")
+async def restart_worker(payload: dict):
+    worker_id = payload.get("worker_id")
+    if not worker_id: return {"status": "error", "message": "worker_id requerido"}
+    from core.event_bus import event_bus
+    await event_bus.publish("control_command", {"command": "restart", "worker_id": worker_id})
+    return {"status": "success", "message": f"Reinício enviado para {worker_id}"}
+
+@app.post("/api/control/add_target")
+async def control_add_target(payload: dict):
+    username = payload.get("username")
+    if not username: return {"status": "error", "message": "Username requerido"}
+    from core.intelligence_service import intelligence_service
+    from core.supabase_service import get_supabase_client
+    result = await intelligence_service.research_and_validate(username)
+    if result:
+        supa = get_supabase_client()
+        supa.table('candidatos').update({'status_monitoramento': 'ATIVO'}).eq('username', username).execute()
+        return {"status": "success", "message": f"Alvo {username} ativado."}
+    return {"status": "error", "message": "Falha na validação."}
+
+@app.post("/api/control/force_scrape")
+async def control_force_scrape(payload: dict):
+    username = payload.get("username")
+    if not username: return {"status": "error", "message": "Username requerido"}
+    from core.queue_manager import queue_manager
+    await queue_manager.add_target_to_queue(username, priority=10)
+    return {"status": "success", "message": f"Raspagem forçada: {username}."}
+
+@app.post("/api/control/remove_target")
+async def control_remove_target(payload: dict):
+    username = payload.get("username")
+    if not username: return {"status": "error", "message": "Username requerido"}
+    from core.supabase_service import get_supabase_client
+    supa = get_supabase_client()
+    supa.table('candidatos').update({'status_monitoramento': 'DESATIVADO'}).eq('username', username).execute()
+    return {"status": "success", "message": f"Monitoramento de {username} desativado."}
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root():
@@ -183,17 +239,41 @@ async def get_top_attackers():
     except Exception as e:
         return {"attackers": [], "error": str(e)}
 
-@app.get("/api/analytics/hate-stats")
-async def get_hate_stats():
-    """Retorna estatísticas de ódio por candidato usando o banco local."""
+@app.get("/api/v1/auditoria")
+async def get_auditoria():
+    """Endpoint cacheado para Matriz de Auditoria."""
+    
+    # TTL de cache: 30 segundos
+    now = time.time()
+    with state.auditoria_lock:
+        if now - state.auditoria_cache["timestamp"] < 30:
+            return {"data": state.auditoria_cache["data"], "cached": True}
+
+    # Cache expirado, busca nova
     try:
-        from workers.ai.sa_consulta_banco import SaConsultaBanco
-        sa = SaConsultaBanco()
-        data = await sa.get_hate_stats()
-        await sa.close()
-        return {"stats": data}
+        from core.supabase_service import get_supabase_client
+        supa = get_supabase_client()
+        
+        # Query encadeada para maior estabilidade
+        res = supa.table('comentarios')\
+            .select('id, texto_bruto, categoria_ia, confianca_ia, autor_username, is_hate, processado_ia, trace_id, analise_pericial, candidato_id')\
+            .order('data_coleta', desc=True)\
+            .limit(30)\
+            .execute()
+        # Filtro em Python para garantir que processado_ia não seja None
+        res.data = [item for item in res.data if item.get('processado_ia') is not None]
+        
+        with state.auditoria_lock:
+            state.auditoria_cache["data"] = res.data
+            state.auditoria_cache["timestamp"] = now
+            
+        return {"data": res.data, "cached": False}
     except Exception as e:
-        return {"stats": [], "error": str(e)}
+        state.add_log("error", f"[Watchdog] Erro ao buscar auditoria cacheada: {e}")
+        # Retorna o que tiver no cache mesmo expirado em caso de erro
+        with state.auditoria_lock:
+            return {"data": state.auditoria_cache["data"], "cached": True, "error": str(e)}
+
 
 @app.get("/api/analytics/search")
 async def search_local(q: str):
@@ -324,6 +404,100 @@ async def get_ai_health():
         return {"providers": result, "timestamp": now}
     except Exception as e:
         return {"providers": {}, "error": str(e)}
+
+from collections import Counter
+from datetime import datetime, timezone, timedelta
+
+# --- ENDPOINTS ADICIONAIS PARA DECISION ROOM (v94.6) ---
+
+@app.get("/api/v1/targets")
+async def get_targets_local(limit: int = 50):
+    """Proxy local para alvos com métricas de ódio (MCA v2.2)."""
+    try:
+        from core.supabase_service import get_supabase_client
+        supa = get_supabase_client()
+        
+        # 1. Busca candidatos ativos
+        candidates = supa.table('candidatos').select('*').eq('status_monitoramento', 'ATIVO').order('nota_relevancia', desc=True).execute().data or []
+        active_usernames = [c.get('username') for c in candidates if c.get('username')]
+        if not active_usernames: return []
+
+        # 2. Amostra de ódio e total
+        h_res = supa.table('comentarios').select('candidato_id, categoria_ia, texto_bruto')\
+            .in_('categoria_ia', HATE_CATEGORIES)\
+            .in_('candidato_id', active_usernames)\
+            .order('data_coleta', desc=True).limit(2000).execute().data or []
+            
+        all_res = supa.table('comentarios').select('candidato_id')\
+            .in_('candidato_id', active_usernames)\
+            .order('data_coleta', desc=True).limit(2000).execute().data or []
+        
+        counts_odio = Counter([h['candidato_id'] for h in h_res])
+        counts_totais = Counter([a['candidato_id'] for a in all_res])
+        
+        # 3. Enriquecimento
+        enriched = []
+        for item in candidates:
+            un = item.get('username')
+            odio = counts_odio.get(un, 0)
+            totais = counts_totais.get(un, 0)
+            
+            # Cálculo simplificado de risco para o dashboard local
+            score = 0
+            if totais > 0:
+                ratio = odio / totais
+                score = min(100, int(ratio * 250) + min(35, odio * 1.5))
+            
+            enriched.append({
+                **item, 
+                "score_risco": score, 
+                "comentarios_odio_count": odio,
+                "comentarios_totais_count": totais
+            })
+            
+        return sorted(enriched, key=lambda x: x['score_risco'], reverse=True)[:limit]
+    except Exception as e:
+        print(f"[Watchdog] Erro ao buscar targets: {e}")
+        return []
+
+@app.get("/api/v1/analytics/spending/providers")
+async def get_spending_providers_local():
+    """Proxy local para auditoria de gastos por provedor com fallback manual."""
+    try:
+        from core.supabase_service import get_supabase_client
+        supa = get_supabase_client()
+
+        # Tenta usar a View (v94.5)
+        try:
+            res = supa.table('view_spending_by_provider').select('*').execute()
+            if res.data: return res.data
+        except:
+            pass # Fallback para query manual
+
+        # Fallback: Agregação manual via Python se a View não existir
+        logs_res = supa.table('fallback_logs').select('provider, status, payload').limit(1000).execute()
+        logs = logs_res.data or []
+
+        stats = {}
+        for l in logs:
+            p = l['provider']
+            if p not in stats:
+                stats[p] = {"provider": p, "total_calls": 0, "success_calls": 0, "error_calls": 0, "avg_text_length": 0}
+
+            stats[p]["total_calls"] += 1
+            if l['status'] == 'SUCCESS': stats[p]["success_calls"] += 1
+            else: stats[p]["error_calls"] += 1
+
+            # Tenta extrair text_length do payload
+            payload = l.get('payload') or {}
+            if isinstance(payload, dict) and 'text_length' in payload:
+                stats[p]["avg_text_length"] = (stats[p]["avg_text_length"] * (stats[p]["total_calls"]-1) + payload['text_length']) / stats[p]["total_calls"]
+
+        return list(stats.values())
+    except Exception as e:
+        print(f"[Watchdog] Erro ao buscar gastos: {e}")
+        return []
+
 
 @app.get("/api/stream")
 async def stream(request: Request):
@@ -635,6 +809,44 @@ async def restart_server():
         state.should_run = True
         state.add_log("info", "[Watchdog] Sinal de reinício recebido com servidor parado. Iniciando...")
         return {"success": True, "message": "Iniciando servidor..."}
+
+@app.post("/api/restart_worker")
+async def restart_worker(payload: dict):
+    worker_id = payload.get("worker_id")
+    if not worker_id: return {"status": "error", "message": "worker_id requerido"}
+    from core.event_bus import event_bus
+    await event_bus.publish("control_command", {"command": "restart", "worker_id": worker_id})
+    return {"status": "success", "message": f"Reinício enviado para {worker_id}"}
+
+@app.post("/api/control/add_target")
+async def control_add_target(payload: dict):
+    username = payload.get("username")
+    if not username: return {"status": "error", "message": "Username requerido"}
+    from core.intelligence_service import intelligence_service
+    from core.supabase_service import get_supabase_client
+    result = await intelligence_service.research_and_validate(username)
+    if result:
+        supa = get_supabase_client()
+        supa.table('candidatos').update({'status_monitoramento': 'ATIVO'}).eq('username', username).execute()
+        return {"status": "success", "message": f"Alvo {username} ativado."}
+    return {"status": "error", "message": "Falha na validação."}
+
+@app.post("/api/control/force_scrape")
+async def control_force_scrape(payload: dict):
+    username = payload.get("username")
+    if not username: return {"status": "error", "message": "Username requerido"}
+    from core.queue_manager import queue_manager
+    await queue_manager.add_target_to_queue(username, priority=10)
+    return {"status": "success", "message": f"Raspagem forçada: {username}."}
+
+@app.post("/api/control/remove_target")
+async def control_remove_target(payload: dict):
+    username = payload.get("username")
+    if not username: return {"status": "error", "message": "Username requerido"}
+    from core.supabase_service import get_supabase_client
+    supa = get_supabase_client()
+    supa.table('candidatos').update({'status_monitoramento': 'DESATIVADO'}).eq('username', username).execute()
+    return {"status": "success", "message": f"Monitoramento de {username} desativado."}
 
 def run_web_server():
     import uvicorn
@@ -1010,6 +1222,30 @@ def kill_process_on_port(port: int):
         print(f"[SHIELD] Falha ao checar conexões da porta {port}: {e}")
 
 
+# ...
+import shutil
+
+def run_voyant_server():
+    print("[DEBUG] Tentando iniciar VoyantServer...")
+    try:
+        kill_process_on_port(8888)
+        java_path = shutil.which("java")
+        if not java_path:
+            print("[WARN] Java não encontrado no PATH. VoyantServer não iniciado.")
+            return
+        print(f"[DEBUG] Java encontrado em: {java_path}")
+        
+        jar_path = os.path.join(PROJECT_ROOT, "tools", "voyant", "VoyantServer.jar")
+        creationflags = 0x08000000 if os.name == 'nt' else 0
+        subprocess.Popen(
+            [java_path, "-Xmx512m", "-jar", jar_path],
+            creationflags=creationflags,
+            cwd=os.path.dirname(jar_path)
+        )
+        print("[START] Motor Léxico (VoyantServer) disponível em: http://127.0.0.1:8888")
+    except Exception as e_voyant:
+        print(f"[WARN] Falha ao iniciar VoyantServer: {e_voyant}")
+
 if __name__ == "__main__":
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     kill_process_on_port(8001)
@@ -1064,6 +1300,9 @@ if __name__ == "__main__":
             print("[START] Explorador SQL (Datasette) disponível em: http://localhost:8002")
         except Exception as e_ds:
             print(f"[WARN] Falha ao iniciar Datasette: {e_ds}")
+
+    voyant_thread = Thread(target=run_voyant_server, daemon=True)
+    voyant_thread.start()
 
     datasette_thread = Thread(target=run_datasette_server, daemon=True)
     datasette_thread.start()

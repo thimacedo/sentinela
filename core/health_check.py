@@ -109,7 +109,6 @@ def ensure_ollama_running():
         if resp.status_code == 200:
             # 2. Se responde, garante que não há DUPLICATAS no nível do SO
             if ensure_ollama_singleton():
-                print("[OK] Ollama já está ativo e único.")
                 return True
     except Exception:
         pass

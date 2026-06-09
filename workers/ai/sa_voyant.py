@@ -13,6 +13,7 @@ from typing import List, Dict, Any, Optional
 from workers.base.subagent_base import BaseSubAgent
 from workers.base.cycle_result import CycleResult
 from core.voyant_service import voyant_service
+print(f"[DEBUG] SaVoyant loaded voyant_service from: {voyant_service}")
 from core.db import db_client
 from core.ai_service import ai_service
 
@@ -200,6 +201,8 @@ class SaVoyant(BaseSubAgent):
     async def _ensure_voyant_connection(self):
         now = time.time()
         if not self._voyant_ok or (now - self._last_voyant_check > _VOYANT_CHECK_COOLDOWN):
+            logger.error(f"[DEBUG] voyant_service object: {voyant_service}")
+            logger.error(f"[DEBUG] voyant_service dir: {dir(voyant_service)}")
             self._voyant_ok = await voyant_service.ping()
             self._last_voyant_check = now
 
@@ -238,9 +241,11 @@ class SaVoyant(BaseSubAgent):
     async def _generate_linguistic_insight(self, voyant_data: Optional[dict], bigrams: list[str]) -> Optional[dict]:
         if not voyant_data and not bigrams: return None
         
+        ratio_display = f"{voyant_data.get('hostile_ratio', 0):.2%}" if voyant_data else 'N/A'
+        
         prompt = f"""
         Estatísticas do Lote:
-        - Ratio Hostil: {voyant_data.get('hostile_ratio', 0):.2% if voyant_data else 'N/A'}
+        - Ratio Hostil: {ratio_display}
         - Slogans (Bigramas): {bigrams}
         
         REGRAS FORENSES: {self._linguistics_context}
@@ -275,4 +280,4 @@ class SaVoyant(BaseSubAgent):
 
     def _success_result(self, collected, processed, xp, metadata) -> CycleResult:
         metadata["xp_delta"] = xp
-        return CycleResult(worker_id=self.worker_id, cycle=self.cycle, status="success", source="sa_voyant", extracted=collected, classified=processed, db_success=True, metadata=metadata)
+        return CycleResult(worker_id=self.worker_id, cycle=self.cycle, source="sa_voyant", extracted=collected, classified=processed, db_success=True, metadata=metadata)

@@ -1,0 +1,30 @@
+# watchdog/__main__.py
+import os
+import sys
+import socket
+import subprocess
+import signal
+import time
+import threading
+import asyncio
+from PIL import Image
+import pystray
+from pystray import MenuItem as item
+
+# Garante o PYTHONPATH
+WATCHDOG_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(WATCHDOG_DIR)
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
+from watchdog import guard, run_web_server, state, AUTOPILOT_ENABLED
+from watchdog.voyant import run_voyant_server
+try:
+    from core.autopilot.manager import autopilot
+except ImportError:
+    pass
+
+ICON_PATH = os.path.join(PROJECT_ROOT, "logo_branco.png")
+DASHBOARD_URL = "http://localhost:8001"
+
+# ... rest of file

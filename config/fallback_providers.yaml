@@ -1,4 +1,4 @@
+# Provedores de Fallback - Sentinela v50.1
+# Removidos provedores inoperantes (Zhipu, Google Gemini sem chave, etc.)
 fallback_providers:
-- name: zhipu_glm4
-  api_key_env: ZHIPU_API_KEY
-  model: glm-4-flash
+  []

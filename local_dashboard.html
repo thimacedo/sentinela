@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Decision Room - Sentinela Democrática</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { background-color: #000; color: #d1d5db; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
@@ -19,27 +19,78 @@
     <main class="max-w-[1400px] mx-auto py-6 px-4 space-y-6">
         
         <!-- HEADER -->
-        <header class="flex justify-between items-end border-b border-gray-800 pb-4">
-            <div>
-                <h1 class="text-2xl font-black text-white tracking-tighter uppercase flex items-center gap-3">
-                    <i data-lucide="activity" class="w-6 h-6 text-indigo-500"></i>
-                    Decision Room
-                </h1>
-                <p class="text-xs text-gray-500 mt-1 tracking-widest uppercase">
-                    Sentinela Democrática // Painel Tático e Gerencial
-                </p>
-            </div>
-            <div class="text-right hidden sm:block">
-                <div class="text-[10px] text-gray-500 uppercase tracking-widest">Motor Autopilot</div>
-                <div class="flex items-center gap-2 justify-end mt-1">
-                    <span id="motor-dot" class="w-2 h-2 rounded-full bg-yellow-500"></span>
-                    <span id="motor-status" class="text-xs font-bold text-yellow-500">CONECTANDO</span>
+        <header class="border-b border-gray-800 pb-4">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h1 class="text-2xl font-black text-white tracking-tighter uppercase flex items-center gap-3">
+                        <i data-lucide="activity" class="w-6 h-6 text-indigo-500"></i>
+                        Decision Room
+                    </h1>
+                    <p class="text-xs text-gray-500 mt-1 tracking-widest uppercase">
+                        Sentinela Democrática // Painel Tático e Gerencial
+                    </p>
+                </div>
+                
+                <!-- STATUS CENTRALIZADOS -->
+                <div class="flex items-center gap-6">
+                    <div class="flex flex-col items-center">
+                        <div class="text-[8px] text-gray-500 uppercase tracking-widest">Supabase</div>
+                        <div class="flex items-center gap-1.5 mt-0.5">
+                            <span id="supa-dot" class="w-1.5 h-1.5 rounded-full bg-gray-700"></span>
+                            <span id="supa-status" class="text-[10px] font-bold text-gray-500">OFFLINE</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="text-[8px] text-gray-500 uppercase tracking-widest">API</div>
+                        <div class="flex items-center gap-1.5 mt-0.5">
+                            <span id="local-dot" class="w-1.5 h-1.5 rounded-full bg-gray-700"></span>
+                            <span id="local-status" class="text-[10px] font-bold text-gray-500">OFFLINE</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="text-[8px] text-gray-500 uppercase tracking-widest">Pulsação</div>
+                        <div id="heartbeat-text" class="text-[10px] font-mono text-indigo-400 mt-1 uppercase tracking-tighter">--:--:--</div>
+                    </div>
+                </div>
+
+                <!-- MOTOR E LOG -->
+                <div class="flex items-center gap-4">
+                    <div class="flex flex-col items-end">
+                        <div class="text-[8px] text-gray-500 uppercase tracking-widest">Motor Watchdog</div>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <span id="motor-dot" class="w-2 h-2 rounded-full bg-yellow-500"></span>
+                            <span id="motor-status" class="text-xs font-bold text-yellow-500">CONECTANDO</span>
+                        </div>
+                    </div>
+                    <div id="last-log" class="flex-1 bg-black p-2 rounded border border-gray-800 text-[10px] text-gray-400 line-clamp-2 leading-relaxed font-mono">
+                        Aguardando pulso...
+                    </div>
                 </div>
             </div>
         </header>
 
+        <!-- Script de Reinicialização -->
+        <script>
+            async function restartWorker(workerId) {
+                try {
+                    const response = await fetch(API_BASE + '/api/restart_worker', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ worker_id: workerId })
+                    });
+                    if (response.ok) {
+                        alert(`Reiniciando ${workerId}...`);
+                    } else {
+                        alert(`Falha ao reiniciar ${workerId}`);
+                    }
+                } catch (e) {
+                    alert(`Erro na conexão: ${e.message}`);
+                }
+            }
+        </script>
+
         <!-- MACRO-INDICADORES -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             
             <!-- Eficiência -->
             <div class="bg-gray-900 border border-gray-800 p-4 rounded-xl flex flex-col justify-between">
@@ -139,41 +190,55 @@
                         <i data-lucide="alert-octagon" class="w-4 h-4 text-indigo-500"></i> Diagnóstico do Motor
                     </h2>
                 </div>
-                <div class="p-4 flex-1 flex flex-col justify-between">
-                    <div class="space-y-4">
-                        <div>
-                            <div class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Status da API (Cloud)</div>
-                            <div class="flex items-center gap-2">
-                                <div class="h-1.5 flex-1 bg-gray-800 rounded-full overflow-hidden"><div class="bg-green-500 w-[95%] h-full"></div></div>
-                                <span class="text-xs text-green-500 font-bold">95%</span>
+                <div class="p-4 flex-1 flex flex-col space-y-4">
+                    <!-- Status dos Workers -->
+                    <div>
+                        <div class="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-2 border-b border-gray-800 pb-1">Workers Coleta/AI</div>
+                        <div class="grid grid-cols-2 gap-2 text-[10px]">
+                            <div class="flex justify-between items-center bg-black p-1.5 rounded border border-gray-800">
+                                <span>IG-V2</span>
+                                <button onclick="restartWorker('ig-v2-01')" class="hover:text-white transition-colors"><i data-lucide="refresh-cw" class="w-3 h-3 text-gray-500"></i></button>
                             </div>
-                        </div>
-                        <div>
-                            <div class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Bypass Autopilot L3</div>
-                            <div class="flex items-center gap-2">
-                                <div class="h-1.5 flex-1 bg-gray-800 rounded-full overflow-hidden"><div class="bg-indigo-500 w-full h-full"></div></div>
-                                <span class="text-xs text-indigo-500 font-bold">ON</span>
+                            <div class="flex justify-between items-center bg-black p-1.5 rounded border border-gray-800">
+                                <span>AI-PROC</span>
+                                <button onclick="restartWorker('ai-processor-01')" class="hover:text-white transition-colors"><i data-lucide="refresh-cw" class="w-3 h-3 text-gray-500"></i></button>
                             </div>
-                        </div>
-                        <div>
-                            <div class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Gargalo de Fila</div>
-                            <div class="flex items-center gap-2">
-                                <div class="h-1.5 flex-1 bg-gray-800 rounded-full overflow-hidden">
-                                    <div id="diag-fila-bar" class="bg-yellow-500 h-full" style="width:30%"></div>
-                                </div>
-                                <span id="diag-fila-text" class="text-xs text-gray-400">NORMAL</span>
+                            <div class="flex justify-between items-center bg-black p-1.5 rounded border border-gray-800">
+                                <span>SA-VOY</span>
+                                <button onclick="restartWorker('sa-voyant-01')" class="hover:text-white transition-colors"><i data-lucide="refresh-cw" class="w-3 h-3 text-gray-500"></i></button>
                             </div>
                         </div>
                     </div>
-                    <div class="mt-8 border-t border-gray-800 pt-4">
-                        <div class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Última Ação do Watchdog</div>
-                        <div id="last-log" class="bg-black p-3 rounded border border-gray-800 text-[10px] text-gray-400 line-clamp-3 leading-relaxed">
-                            Aguardando pulso do servidor...
+                    
+                    <!-- Integridade de IA -->
+                    <div>
+                        <div class="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-2 border-b border-gray-800 pb-1">Malha IA Cloud</div>
+                        <div class="space-y-1">
+                            <div class="flex justify-between items-center text-[10px]">
+                                <span>Ollama Local</span>
+                                <span id="ia-ollama" class="text-green-500 font-bold text-[9px]">ONLINE</span>
+                            </div>
+                            <div class="flex justify-between items-center text-[10px]">
+                                <span>Mistral/Cloud</span>
+                                <span id="ia-mistral" class="text-green-500 font-bold text-[9px]">ONLINE</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Métricas de Crise -->
+                    <!-- Métricas de Crise -->
+                    <div class="mt-auto border-t border-gray-800 pt-3">
+                        <div class="flex justify-between text-[10px] text-gray-400 mb-1">
+                            <span>Erros Críticos (24h)</span>
+                            <span id="diag-erros" class="font-bold text-red-400">0</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-gray-400">
+                            <span>Tempo de Ciclo Médio</span>
+                            <span id="diag-ciclo" class="font-bold text-indigo-400">12.4s</span>
                         </div>
                     </div>
                 </div>
             </div>
-
         </div>
 
     </main>
@@ -184,10 +249,16 @@
         // Configuração Supabase (Key pública anônima)
         const SUPABASE_URL = 'https://vhamejkldzxbeibqeqpk.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoYW1lamtsZHp4YmVpYnFlcXBrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjQ4ODEyNSwiZXhwIjoyMDkyMDY0MTI1fQ.GfvAI7rV8isgdhVeJp4mOUscWpdOqOuBoURGm82VdtY';
-        const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:8001' : '';
+        // Determina a base da API de forma robusta (v94.7)
+        const API_BASE = (window.location.origin && window.location.origin !== 'null') 
+            ? window.location.origin 
+            : 'http://localhost:8001';
 
+        console.log("Decision Room v94.7 - API Base:", API_BASE);
+
+        let lastPulse = new Date();
         let showOnlyHate = false;
         let iaEvaluations = {}; 
 
@@ -242,15 +313,27 @@
 
         function escapeHTML(str) { return str ? str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])) : ''; }
 
+        let lastAlertsHash = ""; // Escopo Global para persistência
+
         // Fetch Data
         async function fetchDashboard() {
+            // 0. Controle de Saúde de Conexão
+            const supaDot = document.getElementById('supa-dot');
+            const supaStatus = document.getElementById('supa-status');
+            const localDot = document.getElementById('local-dot');
+            const localStatus = document.getElementById('local-status');
+
+            // 1. Estatísticas via Supabase (Isolado)
             try {
-                // 1. Estatísticas
                 const [{ count: totalAmostra }, { count: totalProcessados }, { count: totalHate }] = await Promise.all([
                     db.from('comentarios').select('*', { count: 'exact', head: true }),
                     db.from('comentarios').select('*', { count: 'exact', head: true }).not('categoria_ia', 'is', null),
                     db.from('comentarios').select('*', { count: 'exact', head: true }).eq('is_hate', true)
                 ]);
+
+                supaDot.className = "w-1.5 h-1.5 rounded-full bg-green-500";
+                supaStatus.className = "text-[10px] font-bold text-green-500";
+                supaStatus.textContent = "ONLINE";
 
                 const fila = (totalAmostra || 0) - (totalProcessados || 0);
                 const classificados = totalProcessados || 0;
@@ -273,26 +356,36 @@
                     diagBar.style.width = "30%";
                     diagText.textContent = "NORMAL";
                 }
+            } catch (e) { 
+                console.error("Erro estatísticas Supabase:", e);
+                supaDot.className = "w-1.5 h-1.5 rounded-full bg-red-500";
+                supaStatus.className = "text-[10px] font-bold text-red-500";
+                supaStatus.textContent = "OFFLINE";
+            }
 
-                // 2. Matriz de Auditoria (TODOS OS DADOS)
-                let query = db.from('comentarios')
-                    .select('id, texto_bruto, categoria_ia, confianca_ia, autor_username, is_hate, processado_ia, trace_id, analise_pericial, candidato_id')
-                    .not('processado_ia', 'is', null)
-                    .order('data_coleta', { ascending: false })
-                    .limit(30);
+            // 2. Matriz de Auditoria via API Local Cacheada
+            try {
+                const r = await fetch(API_BASE + '/api/v1/auditoria');
+                if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                const { data: alerts, cached } = await r.json();
                 
-                if (showOnlyHate) {
-                    query = query.eq('is_hate', true);
-                }
-
-                const { data: alerts, error: alertError } = await query;
-                if (alertError) console.error("Erro nos alertas:", alertError);
-
                 const alertsContainer = document.getElementById('critical-alerts-container');
+                
+                // Idempotência: Gera hash dos IDs dos alertas
+                const currentAlertsHash = alerts ? alerts.map(a => a.id).join('') : "";
+                
+                if (currentAlertsHash === lastAlertsHash && alertsContainer.children.length > 0) {
+                    // Sem novos dados, não renderiza novamente
+                    return;
+                }
+                lastAlertsHash = currentAlertsHash;
+
                 if (!alerts || alerts.length === 0) {
-                    alertsContainer.innerHTML = `<div class="text-xs text-gray-600 flex items-center gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-green-500"></i> Nenhum dado na auditoria.</div>`;
+                    alertsContainer.innerHTML = `<div class="text-xs text-gray-600 flex items-center gap-2 p-4"><i data-lucide="check-circle-2" class="w-4 h-4 text-green-500"></i> Nenhum dado de auditoria disponível.</div>`;
+                    lucide.createIcons();
                 } else {
                     alertsContainer.innerHTML = alerts.map(a => {
+                        // ... (código de renderização dos alertas igual ao anterior)
                         const isHate = a.is_hate;
                         const borderColor = isHate ? 'border-red-500/50' : 'border-gray-800';
                         const badgeColor = isHate ? 'bg-red-500/10 text-red-500' : 'bg-gray-800 text-gray-400';
@@ -301,7 +394,7 @@
                         let engine = "LEXICAL";
                         if(a.analise_pericial) {
                             if (typeof a.analise_pericial === 'string' && a.analise_pericial.startsWith('[')) {
-                                const match = a.analise_pericial.match(/^\\[([^\]:]+)/);
+                                const match = a.analise_pericial.match(/^\[([^\]:]+)/);
                                 if(match) engine = match[1];
                             } else if (typeof a.analise_pericial === 'object' && a.analise_pericial.engine) {
                                 engine = a.analise_pericial.engine;
@@ -358,43 +451,89 @@
                     }).join('');
                     lucide.createIcons();
                 }
-
-                // 3. Top Alvos via Python API
-                try {
-                    const r = await fetch(API_BASE + '/api/v1/targets'); // Sincronizado com API Oficial
-                    if (r.ok) {
-                        const targets = await r.json();
-                        const top = targets.sort((a,b) => b.comentarios_odio_count - a.comentarios_odio_count).slice(0, 3);
-                        const topContainer = document.getElementById('top-targets-container');
-                        if (!top || top.length === 0) {
-                            topContainer.innerHTML = '<div class="text-xs text-gray-600">Nenhum foco detectado.</div>';
-                        } else {
-                            topContainer.innerHTML = top.map(t => `
-                                <div class="flex items-center justify-between bg-black/50 p-2 rounded border border-gray-800/50">
-                                    <span class="text-sm font-bold text-gray-300">@${t.username}</span>
-                                    <span class="text-xs font-bold text-red-400">${t.score_risco}% Risco</span>
-                                </div>
-                            `).join('');
-                        }
-                    }
-                } catch(e) {}
-
-                // 4. Auditoria Cloud (Custos)
-                try {
-                    const r = await fetch(API_BASE + '/api/v1/analytics/spending/providers');
-                    if (r.ok) {
-                        const data = await r.json();
-                        const totalTokens = data.reduce((acc, curr) => acc + (curr.total_calls * (curr.avg_text_length || 1000) / 4), 0);
-                        const estimatedUSD = totalTokens * (0.002 / 1000); // Média Groq/Gemini Flash
-                        const estimatedBRL = estimatedUSD * 5.30;
-                        document.getElementById('stat-custo').textContent = `R$ ${estimatedBRL.toFixed(2)}`;
-                    }
-                } catch(e) {}
-                
-            } catch (error) {
-                console.error("Dashboard error:", error);
+            } catch (e) { 
+                console.error("Erro Matriz API:", e); 
+                document.getElementById('critical-alerts-container').innerHTML = `<div class="text-xs text-red-500 font-bold uppercase p-4 border border-red-500/20 bg-red-500/5 rounded">Erro ao buscar dados de auditoria: ${e.message}</div>`;
             }
+
+            // 3. Top Alvos via Python API (Isolado)
+            try {
+                const r = await fetch(API_BASE + '/api/v1/targets');
+                if (r.ok) {
+                    localDot.className = "w-1.5 h-1.5 rounded-full bg-green-500";
+                    localStatus.className = "text-[10px] font-bold text-green-500";
+                    localStatus.textContent = "ONLINE";
+
+                    const targets = await r.json();
+                    const top = targets.sort((a,b) => b.comentarios_odio_count - a.comentarios_odio_count).slice(0, 3);
+                    const topContainer = document.getElementById('top-targets-container');
+                    if (!top || top.length === 0) {
+                        topContainer.innerHTML = '<div class="text-xs text-gray-600">Nenhum foco detectado na base.</div>';
+                    } else {
+                        topContainer.innerHTML = top.map(t => `
+                            <div class="flex items-center justify-between bg-black/50 p-2 rounded border border-gray-800/50">
+                                <span class="text-sm font-bold text-gray-300">@${t.username}</span>
+                                <span class="text-xs font-bold text-red-400">${t.score_risco}% Risco</span>
+                            </div>
+                        `).join('');
+                    }
+                } else {
+                    throw new Error(`HTTP ${r.status}`);
+                }
+            } catch(e) { 
+                console.error("Erro targets API:", e); 
+                localDot.className = "w-1.5 h-1.5 rounded-full bg-red-500";
+                localStatus.className = "text-[10px] font-bold text-red-500";
+                localStatus.textContent = "ERROR";
+            }
+
+            // 4. Auditoria Cloud via Python API (Isolado)
+            try {
+                const r = await fetch(API_BASE + '/api/v1/analytics/spending/providers');
+                if (r.ok) {
+                    const data = await r.json();
+                    if (!data || data.length === 0) {
+                        document.getElementById('stat-custo').textContent = "SEM DADOS";
+                        return;
+                    }
+                    const totalTokens = data.reduce((acc, curr) => acc + (curr.total_calls * (curr.avg_text_length || 1000) / 4), 0);
+                    const estimatedUSD = totalTokens * (0.002 / 1000); 
+                    const estimatedBRL = estimatedUSD * 5.30;
+                    document.getElementById('stat-custo').textContent = `R$ ${estimatedBRL.toFixed(2)}`;
+                }
+            } catch(e) { console.error("Erro spending API:", e); }
+
+            // 5. Atualiza Heartbeat
+            const hb = document.getElementById('heartbeat-text');
+            const now = new Date();
+            hb.textContent = now.toLocaleTimeString('pt-BR');
+            hb.className = "text-[10px] font-mono text-green-500 mt-1 uppercase tracking-tighter";
+
+            // Remove troubleshooting se houver sucesso em algo
+            document.getElementById('troubleshooting-container')?.remove();
         }
+
+        // Timer de Segurança para Diagnóstico (10s)
+        setTimeout(() => {
+            if (document.getElementById('stat-classificados').textContent === '-') {
+                const container = document.getElementById('critical-alerts-container');
+                const troubleshooting = `
+                    <div id="troubleshooting-container" class="p-6 bg-red-900/10 border border-red-500/20 rounded-xl space-y-4">
+                        <h3 class="text-red-500 font-bold uppercase text-xs">⚠️ Sistema sem Resposta</h3>
+                        <p class="text-[10px] text-gray-400 leading-relaxed uppercase">
+                            O Dashboard não recebeu dados do Supabase ou da API Local nos primeiros 10 segundos.
+                        </p>
+                        <ul class="text-[10px] text-gray-500 space-y-2 uppercase">
+                            <li>• Verifique se o <span class="text-white">Watchdog</span> está rodando (porta 8001).</li>
+                            <li>• Verifique sua conexão com a Internet (Supabase).</li>
+                            <li>• Tente um <span class="text-white underline cursor-pointer" onclick="location.reload(true)">Hard Refresh (Ctrl+F5)</span>.</li>
+                            <li>• Verifique o Console (F12) por erros de CORS ou Rede.</li>
+                        </ul>
+                    </div>
+                `;
+                container.innerHTML = troubleshooting + container.innerHTML;
+            }
+        }, 10000);
 
         setupSSE();
         fetchDashboard();

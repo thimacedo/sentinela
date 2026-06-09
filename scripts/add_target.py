@@ -9,7 +9,7 @@ if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 os.chdir(PROJECT_ROOT)
 
-from workers.processors.wk_pesquisa_alvos import WkPesquisaAlvos
+from core.intelligence_service import intelligence_service
 
 async def main():
     if len(sys.argv) < 2:
@@ -19,8 +19,7 @@ async def main():
     username = sys.argv[1]
     print(f"🚀 Iniciando processo de inclusão inteligente para @{username}...")
     
-    worker = WkPesquisaAlvos("target_adder", {})
-    result = await worker.research_target(username)
+    result = await intelligence_service.research_and_validate(username)
     
     if result:
         print("\n✅ Inclusão Concluída!")

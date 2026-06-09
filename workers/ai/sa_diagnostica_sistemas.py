@@ -66,7 +66,7 @@ class SaDiagnosticaSistemas(BaseSubAgent):
         try:
             # Reutiliza a cascata de IA (Mistral -> Groq -> Ollama) via chat_completion
             # Passamos o system_prompt específico para o Advisor
-            response = await self.ai_service.chat_completion(
+            response = await ai_service.chat_completion(
                 prompt=user_content,
                 system_prompt=system_prompt,
                 response_format="text" # O Advisor retorna texto livre no formato ANÁLISE/SUGESTÃO
