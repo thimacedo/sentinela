@@ -33,7 +33,7 @@ def cleanup_orphans(kill_ollama: bool = False):
 
     # 2. Limpeza de Processos Python Duplicados (Scripts do Sentinela)
     # Evita que múltiplas instâncias do main_runner ou workers rodem fora do controle do orquestrador
-    sentinela_scripts = ["main_runner.py", "watchdog_duplicate_killer.py", "run_doc_fetcher.py"]
+    sentinela_scripts = ["main_runner.py", "watchdog_duplicate_killer.py", "run_fast_drop.py"]
     
     for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
         try:

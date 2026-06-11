@@ -203,8 +203,8 @@ def run_diagnostica_sistemas(icon=None, item=None):
     except Exception as e:
         print(f"[Tray] Erro ao disparar SaDiagnosticaSistemas: {e}")
 
-def run_doc_fetcher(icon=None, item=None):
-    SCRIPT = os.path.join(PROJECT_ROOT, "scripts", "run_doc_fetcher.py")
+def run_fast_drop(icon=None, item=None):
+    SCRIPT = os.path.join(PROJECT_ROOT, "scripts", "run_fast_drop.py")
     try:
         subprocess.Popen(
             ["cmd", "/k", sys.executable, SCRIPT],
@@ -212,7 +212,7 @@ def run_doc_fetcher(icon=None, item=None):
             creationflags=0x08000000, # CREATE_NO_WINDOW (v50.1)
         )
     except Exception as e:
-        print(f"[Tray] Erro ao disparar DocFetcher: {e}")
+        print(f"[Tray] Erro ao disparar SaFastDrop: {e}")
 
 def toggle_autopilot_action(icon=None, item=None):
     try:
@@ -239,9 +239,9 @@ def build_menu():
     return pystray.Menu(
         item(lambda text: f"Status: {state.status}", lambda i: None, enabled=False),
         item(lambda text: f"Restarts: {state.restarts}", lambda i: None, enabled=False),
-        item(lambda text: f"Erros de Código: {state.code_errors}", lambda i: None, enabled=False),
+        item(lambda text: f"Erros de Codigo: {state.code_errors}", lambda i: None, enabled=False),
         item(lambda text: f"Alertas: {state.alerts}", lambda i: None, enabled=False),
-        item(lambda text: f"Falhas Rápidas: {state.fast_crashes}", lambda i: None, enabled=False),
+        item(lambda text: f"Falhas Rapidas: {state.fast_crashes}", lambda i: None, enabled=False),
         item(lambda text: f"🤖 Autopilot: {get_autopilot_status()}", toggle_autopilot_action),
         pystray.Menu.SEPARATOR,
         item('Abrir Dashboard', open_dashboard),
@@ -249,27 +249,29 @@ def build_menu():
         item('Parar Servidor', stop_server_action),
         item('Reiniciar Servidor', restart_server_action),
         pystray.Menu.SEPARATOR,
-        item('--- SUBAGENTES (SA) ---', lambda i: None, enabled=False),
-        item('▶ Auditoria IA (SaAuditaClassificacoes)', run_audit_agent),
-        item('▶ Revisão Online (SaRevisaoOnline)', run_revisao_online),
-        item('▶ Mineração de Redes (SaMineracaoRedes)', run_mineracao_redes),
-        item('▶ Auditoria Financeira (SaAuditoriaFinanceira)', run_auditoria_financeira),
-        item('▶ Consulta Banco (SaConsultaBanco)', run_consulta_banco),
-        item('▶ Diagnóstico Sistemas (SaDiagnosticaSistemas)', run_diagnostica_sistemas),
-        item('▶ Sincronizar Docs (DocFetcher)', run_doc_fetcher),
-        pystray.Menu.SEPARATOR,
-        item('--- WORKERS (WK) ---', lambda i: None, enabled=False),
-        item('▶ Coleta Instagram (WkColetaInstagram)', run_coleta_instagram),
-        item('▶ Curador de Alvos (WkPesquisaAlvos)', run_pesquisa_alvos),
-        item('▶ Classificador (WkClassificaComentarios)', run_classifica_comentarios),
-        item('▶ Scanner de Candidatos (WkEscaneiaCandidatos)', run_scanner_agent),
-        item('▶ Gerador de Dossiês (WkGeraDossies)', run_dossier_agent),
-        item('▶ Analisador Tendências (WkAnalisaTendencias)', run_analisa_tendencias),
-        item('▶ Aplicador Sugestões (WkAplicaSugestoes)', run_aplica_sugestoes),
-        item('▶ Monitor Alertas (WkGeraAlertas)', run_gera_alertas),
+        item('Subagentes (SA)', pystray.Menu(
+            item('Auditoria IA (SaAuditaClassificacoes)', run_audit_agent),
+            item('Revisao Online (SaRevisaoOnline)', run_revisao_online),
+            item('Pre-Triagem Lexica (SaFastDrop)', run_fast_drop),
+            item('Mineracao de Redes (SaMineracaoRedes)', run_mineracao_redes),
+            item('Auditoria Financeira (SaAuditoriaFinanceira)', run_auditoria_financeira),
+            item('Consulta Banco (SaConsultaBanco)', run_consulta_banco),
+            item('Diagnostico Sistemas (SaDiagnosticaSistemas)', run_diagnostica_sistemas),
+        )),
+        item('Workers (WK)', pystray.Menu(
+            item('Coleta Instagram (WkColetaInstagram)', run_coleta_instagram),
+            item('Curador de Alvos (WkPesquisaAlvos)', run_pesquisa_alvos),
+            item('Classificador (WkClassificaComentarios)', run_classifica_comentarios),
+            item('Scanner de Candidatos (WkEscaneiaCandidatos)', run_scanner_agent),
+            item('Gerador de Dossies (WkGeraDossies)', run_dossier_agent),
+            item('Analisador Tendencias (WkAnalisaTendencias)', run_analisa_tendencias),
+            item('Aplicador Sugestoes (WkAplicaSugestoes)', run_aplica_sugestoes),
+            item('Monitor Alertas (WkGeraAlertas)', run_gera_alertas),
+        )),
         pystray.Menu.SEPARATOR,
         item('Sair', quit_tray),
     )
+
 
 def start_server_action(icon=None, item=None):
     state.should_run = True
