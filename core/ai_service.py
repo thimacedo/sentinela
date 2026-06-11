@@ -781,4 +781,15 @@ class AIService:
         except Exception as e:
             raise e
 
+    async def vision_completion(self, image_b64: str, prompt: str,
+                                cache_key: str | None = None,
+                                mime_type: str = "image/png") -> dict:
+        """
+        Chamada multimodal (imagem + texto) para modelos de visão.
+        Roteia exclusivamente para provedores com suporte a visão (Gemini Flash).
+        NÃO usa Maritaca/Ollama/Mistral.
+        """
+        from core.ai_service_vision_patch import vision_completion as _vision_impl
+        return await _vision_impl(self, image_b64, prompt, cache_key, mime_type)
+
 ai_service = AIService()

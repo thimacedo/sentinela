@@ -400,14 +400,42 @@ class InstagramScraperV2:
                             logger.info(f"⏭️ [V2] Post {shortcode} ignorado.")
                             consecutive_zero_comments += 1
                             if consecutive_zero_comments >= 3:
-                                logger.warning(f"🚨 [V2] 3 posts vazios consecutivos! Ativando Modo de Acesso Monitorado (HITL) no post {shortcode}...")
+                                logger.warning(f"🚨 [V2] 3 posts vazios consecutivos! Ativando auto-recuperação do ScrapeAgent no post {shortcode}...")
+                                try:
+                                    from core.agent_scraper.dom_healing import DOMHealer
+                                    from core.ai_service import ai_service
+                                    healer = DOMHealer(ai_service=ai_service)
+                                    
+                                    logger.info("[V2] Capturando screenshot e fragmento DOM da página...")
+                                    screenshot_b64 = await healer._capture_screenshot(page)
+                                    html_snippet = await healer._extract_html_snippet(page)
+                                    
+                                    heal_res = await healer.heal_selectors(
+                                        page=page,
+                                        selector_name="comment_container",
+                                        screenshot_b64=screenshot_b64,
+                                        html_snippet=html_snippet,
+                                        cache_key=f"heal_{username}_{shortcode}"
+                                    )
+                                    if heal_res.get("success"):
+                                        logger.info(f"✅ [V2] DOM curado com sucesso via IA de visão: {heal_res.get('selector')}")
+                                        try:
+                                            await browser.close()
+                                        except: pass
+                                        raise RuntimeError("hitl_intervention_completed_restarting")
+                                    else:
+                                        logger.warning(f"⚠️ [V2] DOM Healing de visão não obteve sucesso: {heal_res.get('error')}. Iniciando fallback HITL...")
+                                except Exception as e_heal:
+                                    if "hitl_intervention_completed_restarting" in str(e_heal):
+                                        raise e_heal
+                                    logger.error(f"❌ [V2] Falha interna no DOM Healing de visão: {e_heal}. Iniciando fallback HITL...")
+
                                 try:
                                     await browser.close()
                                 except: pass
                                 learned = await self._request_human_intervention(session, shortcode)
                                 if learned:
                                     logger.info(f"✅ Seletor aprendido e salvo com sucesso: {learned}")
-                                # Aborta e deixa o loop de retry externo reiniciar o contexto já com o seletor aprendido
                                 raise RuntimeError("hitl_intervention_completed_restarting")
 
                     await browser.close()

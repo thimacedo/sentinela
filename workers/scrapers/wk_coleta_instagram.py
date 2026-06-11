@@ -44,6 +44,15 @@ class WkColetaInstagram(BaseWorker):
         )
         self.last_activity = time.time()  # v97.0: Heartbeat Watchdog
 
+        # 🤖 Instancia o adaptador do ScrapeAgent
+        from core.agent_scraper.worker_adapter import ScrapeAgentAdapter
+        from core.ai_service import ai_service
+        self.agent_adapter = ScrapeAgentAdapter(
+            scraper=self.scraper,
+            ai_service=ai_service,
+            config=config,
+        )
+
     def describe(self) -> str:
         return "Instagram Scraper V2 - Independente com Playwright"
 
@@ -248,23 +257,23 @@ class WkColetaInstagram(BaseWorker):
             self.logger.info(f"💥 [V2] Checkpoint intermediário salvo para post {shortcode} (+{inserted} novos comentários).")
 
         try:
-            # 1. Scraping com callback assíncrona
-            scrape_data = await self.scraper.scrape_profile(
+            # 1. Scraping com o Loop Cognitivo do ScrapeAgent (OODA)
+            self.logger.info(f"🤖 [ScrapeAgent] Iniciando ciclo cognitivo OODA para @{target.username}...")
+            agent_result = await self.agent_adapter.run_scrape_cycle(
                 username=target.username,
-                candidato_id=target.candidato_id,
                 max_posts=current_cycle_config.get('max_posts', 3),
                 max_comments_per_post=100,
+                candidato_id=target.candidato_id,
                 resume_after_shortcode=resume_from_shortcode,
                 on_post_scraped=handle_post_scraped,
             )
             
+            if not agent_result.success and agent_result.error:
+                raise RuntimeError(agent_result.error)
+            
             self.consecutive_blocks = 0
             scraper_circuit_breaker.record_success("instagram")
-            
-            if isinstance(scrape_data, dict):
-                target.post_metas = scrape_data.get("post_metas", [])
-            else:
-                target.post_metas = []
+            target.post_metas = []
 
         except Exception as e:
             self.consecutive_blocks += 1
