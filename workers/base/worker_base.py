@@ -128,11 +128,9 @@ class BaseWorker(ABC):
                     else:
                         self._consecutive_failures = 0
                     
-                    # PASA v91: Encerra o processo Python autonomamente se a tarefa finalizou (fila vazia)
-                    if getattr(metrics, "error", None) == "no_tasks_available" or metrics.extracted == 0 and getattr(metrics, "error", None) is None:
-                        self.logger.info(f"[{self.worker_id}] Nenhuma tarefa disponível na fila. Encerrando o próprio processo Python para liberar recursos.")
-                        self.is_running = False
-                        break
+                    # PASA v94.9: Não encerrar o worker automaticamente por fila vazia.
+                    # O Watchdog e o Orchestrator agora controlam o ciclo de vida.
+                    # Mantemos o worker em espera para evitar perda de capacidade de resposta.
 
                     # Intervalo dinâmico baseado no tier
                     interval = reward_engine.get_interval(reward.tier)

@@ -34,7 +34,7 @@ class WkAplicaSugestoes:
         self.orchestrator = orchestrator
         self.memory = memory or MemoryStore()
         self.is_active = True
-        self._check_interval = 1800  # 30 minutos
+        self._check_interval = 600  # 10 minutos
 
     async def start(self):
         """Inicia o loop infinito de processamento de sugestões."""

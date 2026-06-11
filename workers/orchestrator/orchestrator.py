@@ -9,20 +9,35 @@ from typing import List, Any
 from workers.base.worker_base import BaseWorker, WorkerMetrics
 from workers.base.reward_engine import RewardEngine, RewardSummary
 from workers.base.memory_store import MemoryStore
-from workers.ai.sa_diagnostica_sistemas import SaDiagnosticaSistemas
 from workers.base.cycle_result import CycleResult
 
 logger = logging.getLogger("orchestrator")
 
 
 class SentinelaOrchestrator:
-    def __init__(self, reward_engine: RewardEngine, ai_advisor: SaDiagnosticaSistemas):
+    # Regras determinísticas para diagnóstico sem LLM (PASA v51.0)
+    _REGRAS_DIAGNOSTICO = {
+        "session": ["session", "login", "cookie", "expired", "auth", "sessao", "sessão"],
+        "dom_change": ["selector", "not found", "element", "dom", "seletor"],
+        "rate_limit": ["429", "rate limit", "too many", "blocked", "bloqueado"],
+        "network": ["timeout", "connection", "refused", "unreachable", "conexão"],
+    }
+    _SUGESTOES_PADRAO = {
+        "session": "Sessão expirada detectada. SUGESTÃO: Verificar e renovar cookies do Instagram via script de export.",
+        "dom_change": "Seletor DOM falhou. SUGESTÃO: Auditar seletores CSS no instagram_scraper_v2.py e atualizar.",
+        "rate_limit": "Rate limit atingido. SUGESTÃO: Aumentar jitter entre requisições e reduzir MAX_POSTS_PER_PROFILE.",
+        "network": "Falha de rede detectada. SUGESTÃO: Verificar conectividade e aguardar recuperação automática.",
+        "unknown": "Erro desconhecido. SUGESTÃO: Verificar logs detalhados em logs/main_runner.json.",
+    }
+
+    def __init__(self, reward_engine: RewardEngine, ai_advisor=None):
         self.reward_engine  = reward_engine
-        self.ai_advisor     = ai_advisor
+        self.ai_advisor     = ai_advisor  # Mantido por compat. mas não usado
+        self.memory         = MemoryStore()
         self.logger         = logging.getLogger("orchestrator")
         self._workers: List[BaseWorker] = []
         self._active_targets: set = set()
-        self._target_timestamps: dict[str, float] = {} # PASA v57.0: Monitor de Alvos
+        self._target_timestamps: dict[str, float] = {}
         self._claim_lock = asyncio.Lock()
         self._banned_until: dict[str, float] = {}
         self._cycle_total = 0
@@ -48,13 +63,15 @@ class SentinelaOrchestrator:
         except Exception as e:
             logger.warning("[orchestrator] Falha ao executar cleanup_orphans na autocura: %s", e)
 
-        # 4. Sincronização de Documentação Técnica (PASA v84.4)
+        # 4. Sincronização de Contexto Forense (PASA v51.0)
+        # Recarrega o cache do CONTEXTO_CLASSIFICACAO.md a cada 100 ciclos
         if self._cycle_total % 100 == 0:
             try:
-                logger.info("[orchestrator] 📄 Sincronizando documentação técnica via DocFetcher...")
-                await self.ai_advisor.fetcher.refresh_all()
+                from core.ai_service import ai_service
+                ai_service.refresh_prompt_cache()
+                logger.debug("[orchestrator] Cache de contexto forense recarregado.")
             except Exception as e:
-                logger.warning("[orchestrator] Falha ao sincronizar docs na autocura: %s", e)
+                logger.warning("[orchestrator] Falha ao recarregar cache forense: %s", e)
                 
         # 5. Pré-Aquecimento Frequente de Filas (v89.2)
         if self._cycle_total % 10 == 0:
@@ -179,17 +196,29 @@ class SentinelaOrchestrator:
         if reward.badges:
             logger.info("[%s] badges: %s", result.worker_id, reward.badges)
 
-        # 6. Gatilho de Diagnóstico (PASA v56.3)
-        # Se o ciclo for vazio (extracted=0) ou degradado, acionamos o Advisor para buscar melhoria no processo.
+        # 6. Diagnóstico determinístico (PASA v51.0 — zero tokens)
         is_empty = result.extracted == 0 and result.target is not None and result.error not in ["purged_by_governance", "no_tasks_available"]
         degraded = reward.score < 40 or reward.tier in ("critical", "db_failed")
 
-        if not result.simulated and (degraded or is_empty):
-            logger.info("[%s] 🧠 Acionando SaDiagnosticaSistemas para diagnóstico (motivo: %s)",
-                        result.worker_id, "vazio" if is_empty else "degradado")
-            await self.ai_advisor.analyze_and_suggest(worker, result)
+        if not result.simulated and (degraded or is_empty) and result.error:
+            error_lower = (result.error or "").lower()
+            tipo = "unknown"
+            for t, palavras in self._REGRAS_DIAGNOSTICO.items():
+                if any(p in error_lower for p in palavras):
+                    tipo = t
+                    break
+            sugestao = self._SUGESTOES_PADRAO[tipo]
+            logger.info("[%s] 💡 Diagnóstico determinístico: tipo=%s | %s", result.worker_id, tipo, sugestao)
+            try:
+                await self.memory.save_suggestion(
+                    worker_id=result.worker_id,
+                    cycle=result.cycle,
+                    suggestion=sugestao
+                )
+            except Exception as e:
+                logger.warning("[orchestrator] Falha ao salvar sugestão: %s", e)
         elif not result.simulated:
-            logger.debug("[%s] SaDiagnosticaSistemas ignorado (tier=%s score=%.1f)", result.worker_id, reward.tier, reward.score)
+            logger.debug("[%s] Diagnóstico ignorado (tier=%s score=%.1f)", result.worker_id, reward.tier, reward.score)
 
         # --- ATIVACAO REATIVA DE SUBAGENTES ANALITICOS (PASA v88.1) ---
         if not result.simulated and "ai-processor" in result.worker_id and result.classifier_success and result.classified > 0:

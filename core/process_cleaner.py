@@ -93,5 +93,24 @@ def ensure_ollama_singleton():
         return False
     return len(ollama_procs) == 1
 
+def enforce_ollama_memory_limit(limit_gb: float = 6.0):
+    """
+    Verifica o consumo de RAM do processo Ollama.
+    Reinicia o serviço caso passe do limite (Garbage Collection forçado).
+    """
+    try:
+        limit_bytes = limit_gb * 1024 * 1024 * 1024
+        for proc in psutil.process_iter(['pid', 'name', 'memory_info']):
+            if proc.info['name'] and "ollama" in proc.info['name'].lower():
+                mem_info = proc.info.get('memory_info')
+                if mem_info:
+                    rss = mem_info.rss
+                    if rss > limit_bytes:
+                        logger.warning(f"🚨 [Ollama Watchdog] Ollama (PID {proc.info['pid']}) consumindo {rss / (1024**3):.2f} GB! Acima do limite de {limit_gb} GB. Reiniciando para liberar memória...")
+                        proc.kill()
+                        time.sleep(2)
+    except Exception as e:
+        logger.error(f"[Ollama Watchdog] Erro ao monitorar RAM do Ollama: {e}")
+
 if __name__ == "__main__":
     cleanup_orphans()

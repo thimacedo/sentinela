@@ -6,11 +6,18 @@ e transmite tudo via SSE para o Dashboard.
 import os
 import sys
 
-# --- AUTO-ANCHORING (v61.5) ---
+# --- AUTO-ANCHORING E VIRTUALENV FIX (v61.5) ---
 WATCHDOG_FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(WATCHDOG_FILE_DIR)
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
+
+# Injeção dinâmica do venv para pythonw base
+venv_site = os.path.join(PROJECT_ROOT, ".venv", "Lib", "site-packages")
+if os.path.exists(venv_site) and venv_site not in sys.path:
+    import site
+    site.addsitedir(venv_site)
+
 os.chdir(PROJECT_ROOT)
 
 import time
@@ -36,7 +43,7 @@ except ImportError:
     check_for_updates = lambda: False
 
 # --- FastAPI Imports ---
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse, StreamingResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -175,9 +182,12 @@ app.add_middleware(
 async def restart_worker(payload: dict):
     worker_id = payload.get("worker_id")
     if not worker_id: return {"status": "error", "message": "worker_id requerido"}
-    from core.event_bus import event_bus
-    await event_bus.publish("control_command", {"command": "restart", "worker_id": worker_id})
-    return {"status": "success", "message": f"Reinício enviado para {worker_id}"}
+    try:
+        from core.event_bus import local_bus
+        local_bus.publish("control_command", {"command": "restart", "worker_id": worker_id})
+        return {"status": "success", "message": f"Reinício enviado localmente para {worker_id}"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 @app.post("/api/control/add_target")
 async def control_add_target(payload: dict):
@@ -339,7 +349,7 @@ async def evaluate_ia(data: dict):
             try:
                 from core.supabase_service import get_supabase_client
                 db = get_supabase_client()
-                db.client.table("comentarios").update({
+                db.table("comentarios").update({
                     "processado_ia": False,
                     "confianca_ia": 0.0,
                     "analise_pericial": f"[RE-ANÁLISE SOLICITADA] {data.get('feedback_type')}",
@@ -587,10 +597,15 @@ async def get_metrics():
 
     def _service_status(url: str) -> str:
         try:
-            resp = httpx.get(url, timeout=2.0)
-            return "OK" if resp.status_code in [200, 404, 401, 405] else "DOWN"
+            resp = httpx.get(url, timeout=4.0, follow_redirects=True)
+            body = resp.text or ''
+            if resp.status_code >= 500:
+                return 'DOWN'
+            if 'SENTINELA DEMOCRÁTICA' in body or 'Watchdog Dashboard' in body:
+                return 'OK'
+            return 'OK' if resp.status_code < 400 else 'DOWN'
         except Exception:
-            return "DOWN"
+            return 'DOWN'
 
     # Checagem de status de IA — usa circuit breakers reais se o runner estiver ativo
     ai_status = {}
@@ -642,6 +657,25 @@ async def get_metrics():
             "ai_services": ai_status,
             **worker_metrics
         }
+
+@app.websocket("/ws/dashboard")
+async def websocket_dashboard(websocket: WebSocket):
+    await websocket.accept()
+    try:
+        while True:
+            metrics = await get_metrics()
+            await websocket.send_json({"type": "metrics", "data": metrics})
+            
+            with state.auditoria_lock:
+                auditoria = state.auditoria_cache.get("data", [])
+            if auditoria:
+                await websocket.send_json({"type": "auditoria", "data": auditoria})
+                
+            await asyncio.sleep(10)
+    except WebSocketDisconnect:
+        pass
+    except Exception as e:
+        state.add_log("error", f"[WebSocket] Erro na conexao: {e}")
 
 @app.post("/api/services/{name}/start")
 async def start_service_endpoint(name: str):
@@ -814,9 +848,12 @@ async def restart_server():
 async def restart_worker(payload: dict):
     worker_id = payload.get("worker_id")
     if not worker_id: return {"status": "error", "message": "worker_id requerido"}
-    from core.event_bus import event_bus
-    await event_bus.publish("control_command", {"command": "restart", "worker_id": worker_id})
-    return {"status": "success", "message": f"Reinício enviado para {worker_id}"}
+    try:
+        from core.event_bus import local_bus
+        local_bus.publish("control_command", {"command": "restart", "worker_id": worker_id})
+        return {"status": "success", "message": f"Reinício enviado localmente para {worker_id}"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 @app.post("/api/control/add_target")
 async def control_add_target(payload: dict):
@@ -992,7 +1029,7 @@ def guard():
     # 🔐 Garante instância única do Watchdog
     watchdog_locker = GuardLocker("watchdog", PROJECT_ROOT)
     if not watchdog_locker.acquire(kill_existing=True):
-        print("🚨 [Watchdog] Outra instância do Watchdog já está ativa. Abortando.")
+        state.add_log("error", "🚨 [Watchdog] Outra instância do Watchdog já está ativa. Abortando.")
         sys.exit(1)
 
     # Garantir que serviços de IA estejam operacionais antes de iniciar o ciclo
@@ -1009,7 +1046,7 @@ def guard():
     consecutive_code_errors = 0
 
     while True:
-        # Checa se deve rodar o processo. Se não, fica em loop de espera
+        # Checa se deve rodar o processo. Se não, fica em espera ativa
         if not state.should_run:
             if not (state.status and state.status.startswith("PARADO -")):
                 state.update_metrics(status="PARADO")
@@ -1019,6 +1056,8 @@ def guard():
             consecutive_code_errors = 0
             state.fast_crashes = 0
             state.update_metrics(status="OPERACIONAL", code_errors=0)
+            # Reinicia a verificação no próximo ciclo se a pausa tiver sido encerrada
+            continue
 
         # 1. Auto Update e Faxina agressiva de processos órfãos (v88.5)
         try:
@@ -1226,14 +1265,13 @@ def kill_process_on_port(port: int):
 import shutil
 
 def run_voyant_server():
-    print("[DEBUG] Tentando iniciar VoyantServer...")
+    state.add_log("info", "[Watchdog] Tentando iniciar VoyantServer...")
     try:
         kill_process_on_port(8888)
         java_path = shutil.which("java")
         if not java_path:
-            print("[WARN] Java não encontrado no PATH. VoyantServer não iniciado.")
+            state.add_log("warn", "[Watchdog] Java não encontrado no PATH. VoyantServer não iniciado.")
             return
-        print(f"[DEBUG] Java encontrado em: {java_path}")
         
         jar_path = os.path.join(PROJECT_ROOT, "tools", "voyant", "VoyantServer.jar")
         creationflags = 0x08000000 if os.name == 'nt' else 0
@@ -1242,13 +1280,34 @@ def run_voyant_server():
             creationflags=creationflags,
             cwd=os.path.dirname(jar_path)
         )
-        print("[START] Motor Léxico (VoyantServer) disponível em: http://127.0.0.1:8888")
+        state.add_log("info", "[Watchdog] Motor Léxico (VoyantServer) disponível em: http://127.0.0.1:8888")
     except Exception as e_voyant:
-        print(f"[WARN] Falha ao iniciar VoyantServer: {e_voyant}")
+        state.add_log("warn", f"[Watchdog] Falha ao iniciar VoyantServer: {e_voyant}")
 
 if __name__ == "__main__":
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    kill_process_on_port(8001)
+    _current_pid = os.getpid()
+    
+    def _safe_kill_port(port: int):
+        import signal
+        try:
+            creationflags = 0x08000000  # CREATE_NO_WINDOW
+            output = subprocess.check_output("netstat -ano", shell=True, creationflags=creationflags).decode('utf-8', errors='ignore')
+            for line in output.splitlines():
+                if f":{port}" in line and "LISTENING" in line:
+                    parts = line.strip().split()
+                    pid = int(parts[-1])
+                    if pid not in (_current_pid, 0):
+                        print(f"[SHIELD] Detectada instância antiga na porta {port} (PID {pid}). Encerrando...")
+                        try:
+                            os.kill(pid, signal.SIGTERM)
+                            time.sleep(2)
+                        except Exception as ex:
+                            print(f"[SHIELD] Falha ao encerrar PID {pid}: {ex}")
+        except Exception as e:
+            print(f"[SHIELD] Falha ao checar conexões da porta {port}: {e}")
+
+    _safe_kill_port(8002)
     
     # 🤖 INICIALIZAÇÃO DO AUTOPILOT L3 (PASA v70.0)
     if AUTOPILOT_ENABLED:
@@ -1297,15 +1356,24 @@ if __name__ == "__main__":
                 stderr=subprocess.DEVNULL,
                 creationflags=creationflags
             )
-            print("[START] Explorador SQL (Datasette) disponível em: http://localhost:8002")
+            state.add_log("info", "[Watchdog] Explorador SQL (Datasette) disponível em: http://localhost:8002")
         except Exception as e_ds:
-            print(f"[WARN] Falha ao iniciar Datasette: {e_ds}")
+            state.add_log("warn", f"[Watchdog] Falha ao iniciar Datasette: {e_ds}")
 
     voyant_thread = Thread(target=run_voyant_server, daemon=True)
     voyant_thread.start()
 
     datasette_thread = Thread(target=run_datasette_server, daemon=True)
     datasette_thread.start()
+    
+    def run_ollama_watchdog():
+        from core.process_cleaner import enforce_ollama_memory_limit
+        while True:
+            enforce_ollama_memory_limit(limit_gb=6.0)
+            time.sleep(60)
+
+    ollama_thread = Thread(target=run_ollama_watchdog, daemon=True)
+    ollama_thread.start()
 
     print("[START] Dashboard disponível em: http://localhost:8001")
     print("[SHIELD] SENTINELA DEMOCRÁTICA - WATCHDOG v50.0")

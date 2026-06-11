@@ -103,7 +103,8 @@ HOSTILE_LEXICON: set[str] = {
 
 # Limiar: se a proporção de termos hostis no vocabulário TF-IDF
 # for inferior a este valor, o lote é marcado como NEUTRO (fast-drop).
-HOSTILE_RATIO_THRESHOLD = float(os.getenv("VOYANT_HOSTILE_THRESHOLD", "0.08"))
+# Ajustado para 0.02 (2%) para maior sensibilidade.
+HOSTILE_RATIO_THRESHOLD = float(os.getenv("VOYANT_HOSTILE_THRESHOLD", "0.02"))
 
 # Quantos termos de alto TF-IDF solicitar ao Trombone por lote.
 TROMBONE_LIMIT = int(os.getenv("VOYANT_TROMBONE_LIMIT", "50"))
@@ -113,7 +114,6 @@ VOYANT_BASE_URL = os.getenv("VOYANT_BASE_URL", "http://127.0.0.1:8888/trombone")
 VOYANT_TIMEOUT = float(os.getenv("VOYANT_TIMEOUT", "25.0"))
 
 
-print(f"[DEBUG] VoyantService loaded from: {__file__}")
 class VoyantService:
     """
     Cliente assíncrono para a API Trombone do VoyantServer local.
@@ -125,7 +125,6 @@ class VoyantService:
         self.is_down = False
         self.last_failed = 0
         self.failure_count = 0
-        print(f"[DEBUG] VoyantService instance initialized. Attrs: {dir(self)}")
 
     async def ping(self) -> bool:
         """
@@ -157,7 +156,7 @@ class VoyantService:
                 return None # Fallback imediato
 
         if not texts:
-            return {}
+            return {"drop": True, "hostile_ratio": 0.0, "hostile_terms": [], "top_terms": {}}
 
         clean_texts = [t.strip() for t in texts if t and t.strip()]
         if not clean_texts:
@@ -325,8 +324,5 @@ class VoyantService:
         return collocates
 
 
-print(f"[DEBUG] VoyantService class definition: {VoyantService}")
-print(f"[DEBUG] VoyantService attributes: {dir(VoyantService)}")
 # Instância singleton
 voyant_service = VoyantService()
-print(f"[DEBUG] voyant_service instance attributes: {dir(voyant_service)}")

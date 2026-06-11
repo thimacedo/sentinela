@@ -1,18 +1,19 @@
 # STATE.md — Sentinela
-_last_updated: 2026-06-09 | branch: main | version: v94.8_
+_last_updated: 2026-06-11 | branch: main | version: v95.0_
 
 ## Status Operacional
 
 | Subsistema | Status | Observação |
 |---|---|---|
-| Coleta | 🟢 Operacional | Scraper V2 com `upsert` idempotente e `returning='minimal'`. |
-| Inteligência | 🟢 Operacional | Malha de IA (Mistral) estável. Circuit Breakers ativos para Ollama e Voyant. |
-| Dashboard | 🟢 Operacional | Painel "Decision Room" v94.7 com API local cacheada (Estratégia B). |
-| Diagnóstico | 🟢 Operacional | Painel de controle de Workers integrado via `/api/metrics`. |
+| Coleta | 🟢 Operacional | Scraper V2 com `upsert` idempotente. |
+| Inteligência | 🟢 Operacional | Malha de IA resiliente + SaFastDrop local (0 Java, 0 LLM). |
+| Dashboard | 🟢 Operacional | Painel "Decision Room" com API local cacheada. |
+| Diagnóstico | 🟢 Operacional | Diagnóstico SRE determinístico local sem LLM para infraestrutura. |
 
-## Histórico Recente de Correções (v94.8)
-1. **Resiliência do Autopilot**: Proteção do `main_runner` contra limpeza agressiva de processos.
-2. **Estabilização Voyant**: Implementação de *Circuit Breaker* léxico e execução silenciosa (*headless*).
-3. **Frontend**: Migração de consulta direta ao Supabase para API local cacheada; remoção de re-renderização redundante (idempotência).
-4. **Sala de Controle**: Adição de comandos de `restart`, `add_target`, `force_scrape` e `remove_target` via Dashboard.
-5. **Correção de Query**: Ajuste de sintaxe para `not.is` em queries de filtro no Supabase.
+## Histórico Recente de Correções (v95.0)
+1. **Refactoring Estratégico v51.0 (Concluído)**:
+   - Expurgo do Java VoyantServer e do `SaVoyant`. Substituído pelo `SaFastDrop` (léxico local em Python puro) sem dependências externas.
+   - Refatoração do `SaDiagnosticaSistemas` e do `Diagnostician` (`diagnostician.py`) para utilizar regras determinísticas locais em falhas comuns (sessão, rede, rate limit, IP block), reservando chamadas de LLM apenas para `DOM_CHANGE`.
+   - WkAplicaSugestoes: Intervalo de autocura reduzido de 30 para 10 minutos.
+   - Faxina arquitetural: Remoção de 8 arquivos órfãos em `core/` (`pasa_auditor.py`, `classification_service.py`, `zyte_checker.py`, `offline_cache.py`, `meta_ad_service.py`, `predictive_service.py`, `firebase_alerter.py`, `firebase_init.py`).
+   - Resolvido o NameError de import do `WkAplicaSugestoes` no `main_runner.py`.

@@ -70,12 +70,10 @@ logger = logging.getLogger("main_runner")
 
 from workers.base.memory_store import MemoryStore
 from workers.base.reward_engine import RewardEngine
-from workers.ai.doc_fetcher import DocFetcher
-from workers.ai.sa_diagnostica_sistemas import SaDiagnosticaSistemas
-from workers.ai.wk_aplica_sugestoes import WkAplicaSugestoes
 from workers.orchestrator.orchestrator import SentinelaOrchestrator
 from core.autopilot.manager import autopilot
 from core.autopilot.cloud_listener import CloudListener, set_current_cycle
+from workers.ai.wk_aplica_sugestoes import WkAplicaSugestoes
 
 # Workers disponíveis (PASA v52.0):
 from workers.scrapers.wk_coleta_instagram import WkColetaInstagram
@@ -85,11 +83,7 @@ from workers.processors.wk_pesquisa_alvos import WkPesquisaAlvos
 def build_orchestrator() -> SentinelaOrchestrator:
     store = MemoryStore()
     engine = RewardEngine(store)
-    fetcher = DocFetcher()
-    # v92.8: Advisor agora é um SubAgente herdeiro de BaseSubAgent
-    advisor = SaDiagnosticaSistemas(memory=store, fetcher=fetcher, worker_id="sa-advisor-01")
-
-    orch = SentinelaOrchestrator(engine, advisor)
+    orch = SentinelaOrchestrator(engine)
 
     # 🚀 ROCKET MODE: Escalonamento de Scrapers
     num_scrapers = int(os.getenv("NUM_SCRAPER_WORKERS", "1"))
@@ -121,18 +115,21 @@ def build_orchestrator() -> SentinelaOrchestrator:
     except ImportError as e:
         logger.warning(f"[main_runner] Erro ao registrar WkClassificaComentarios: {e}")
 
-    # 🔍 REVISÃO ONLINE: Fila secundária e independente para revisão cloud de suspeitos
+    # 🔍 REVISÃO CLOUD: Fila secundária para reclassificação de SUSPEITOS
     try:
         from workers.ai.sa_revisao_online import SaRevisaoOnline
-        from workers.ai.sa_voyant import SaVoyant
-        
         orch.register(SaRevisaoOnline(worker_id="sa-revisao-online-01", config={"batch_size": 20}))
-        logger.info("[main_runner] SaRevisaoOnline registrado com sucesso na fila secundária.")
-        
-        orch.register(SaVoyant(worker_id="sa-voyant-01", config={}))
-        logger.info("[main_runner] SaVoyant (Subagente Linguista) registrado com sucesso.")
+        logger.info("[main_runner] SaRevisaoOnline registrado com sucesso.")
     except ImportError as e:
-        logger.warning(f"[main_runner] Erro ao registrar subagentes de IA: {e}")
+        logger.warning(f"[main_runner] Erro ao registrar SaRevisaoOnline: {e}")
+
+    # ⚡ FAST DROP LOCAL: Pré-triagem léxica sem Java e sem LLM
+    try:
+        from workers.ai.sa_fast_drop import SaFastDrop
+        orch.register(SaFastDrop(worker_id="sa-fast-drop-01", config={}))
+        logger.info("[main_runner] SaFastDrop registrado com sucesso.")
+    except ImportError as e:
+        logger.warning(f"[main_runner] SaFastDrop indisponível (será criado): {e}")
 
     # Motor de Curadoria e Inteligência de Alvos (v84.9)
     researcher_mode = os.getenv("RESEARCHER_MODE", "disabled").strip().lower()

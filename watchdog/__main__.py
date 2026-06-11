@@ -1,4 +1,3 @@
-# watchdog/__main__.py
 import os
 import sys
 import socket
@@ -10,6 +9,19 @@ import asyncio
 from PIL import Image
 import pystray
 from pystray import MenuItem as item
+
+# v52.8: Força invisibilidade total da janela do processo no Windows
+if os.name == 'nt':
+    try:
+        import ctypes
+        # Oculta a janela do console/gui se ela existir
+        kernel32 = ctypes.WinDLL('kernel32')
+        user32 = ctypes.WinDLL('user32')
+        hWnd = kernel32.GetConsoleWindow()
+        if hWnd:
+            user32.ShowWindow(hWnd, 0) # 0 = SW_HIDE
+    except Exception:
+        pass
 
 # Garante o PYTHONPATH
 WATCHDOG_DIR = os.path.dirname(os.path.abspath(__file__))

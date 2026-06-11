@@ -93,23 +93,24 @@ class SaAuditaClassificacoes(BaseSubAgent):
             return {"success": False, "error": str(e)}
 
     async def _fetch_sample(self, confidence_threshold: float, sample_size: int) -> List[Dict[str, Any]]:
-        # Sanitização de tipos para evitar injeção
         try:
             conf = float(confidence_threshold)
-        except ValueError:
+        except (TypeError, ValueError):
             conf = 0.85
 
-        sql = f"""
+        sql = """
             SELECT id, texto_limpo, categoria_ia
-            FROM comentarios 
-            WHERE confianca_ia >= {conf} 
-              AND categoria_ia IS NOT NULL 
-              AND categoria_ia != 'ERRO'
+            FROM comentarios
+            WHERE confianca_ia >= ?
+              AND categoria_ia IS NOT NULL
+              AND categoria_ia <> 'ERRO'
             LIMIT 100
         """
-        pool = await self.db_agent.query(sql)
-        if not pool: return []
-        if len(pool) < sample_size: return pool
+        pool = await self.db_agent.query(sql, [conf])
+        if not pool:
+            return []
+        if len(pool) < sample_size:
+            return pool
         return random.sample(pool, sample_size)
 
     async def _run_audit_loop(self, sample: List[Dict[str, Any]]) -> Tuple[int, int]:

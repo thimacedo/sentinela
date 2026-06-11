@@ -13,7 +13,6 @@ from typing import List, Dict, Any, Optional
 from workers.base.subagent_base import BaseSubAgent
 from workers.base.cycle_result import CycleResult
 from core.voyant_service import voyant_service
-print(f"[DEBUG] SaVoyant loaded voyant_service from: {voyant_service}")
 from core.db import db_client
 from core.ai_service import ai_service
 
@@ -160,8 +159,8 @@ class SaVoyant(BaseSubAgent):
             self._last_processed_ts = new_checkpoint
 
             return self._success_result(len(comments), len(comments) if voyant_data else 0, xp, {
-                "hostile_ratio": voyant_data.get("hostile_ratio", 0) if voyant_data else 0,
-                "insight_title": insight.get("titulo") if insight else None,
+                "hostile_ratio": (voyant_data or {}).get("hostile_ratio", 0),
+                "insight_title": (insight or {}).get("titulo") if insight else None,
                 "bigrams": bigrams[:5],
                 "xp_delta": xp
             })
@@ -201,8 +200,6 @@ class SaVoyant(BaseSubAgent):
     async def _ensure_voyant_connection(self):
         now = time.time()
         if not self._voyant_ok or (now - self._last_voyant_check > _VOYANT_CHECK_COOLDOWN):
-            logger.error(f"[DEBUG] voyant_service object: {voyant_service}")
-            logger.error(f"[DEBUG] voyant_service dir: {dir(voyant_service)}")
             self._voyant_ok = await voyant_service.ping()
             self._last_voyant_check = now
 

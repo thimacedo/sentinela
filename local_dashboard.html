@@ -69,26 +69,6 @@
             </div>
         </header>
 
-        <!-- Script de Reinicialização -->
-        <script>
-            async function restartWorker(workerId) {
-                try {
-                    const response = await fetch(API_BASE + '/api/restart_worker', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ worker_id: workerId })
-                    });
-                    if (response.ok) {
-                        alert(`Reiniciando ${workerId}...`);
-                    } else {
-                        alert(`Falha ao reiniciar ${workerId}`);
-                    }
-                } catch (e) {
-                    alert(`Erro na conexão: ${e.message}`);
-                }
-            }
-        </script>
-
         <!-- MACRO-INDICADORES -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             
@@ -197,10 +177,12 @@
                         <div class="grid grid-cols-2 gap-2 text-[10px]">
                             <div class="flex justify-between items-center bg-black p-1.5 rounded border border-gray-800">
                                 <span>IG-V2</span>
+                                <span id="ig-status" class="text-yellow-500 font-bold">...</span>
                                 <button onclick="restartWorker('ig-v2-01')" class="hover:text-white transition-colors"><i data-lucide="refresh-cw" class="w-3 h-3 text-gray-500"></i></button>
                             </div>
                             <div class="flex justify-between items-center bg-black p-1.5 rounded border border-gray-800">
                                 <span>AI-PROC</span>
+                                <span id="ai-proc-status" class="text-yellow-500 font-bold">...</span>
                                 <button onclick="restartWorker('ai-processor-01')" class="hover:text-white transition-colors"><i data-lucide="refresh-cw" class="w-3 h-3 text-gray-500"></i></button>
                             </div>
                             <div class="flex justify-between items-center bg-black p-1.5 rounded border border-gray-800">
@@ -257,15 +239,29 @@
             ? window.location.origin 
             : 'http://localhost:8001';
 
-        console.log("Decision Room v94.7 - API Base:", API_BASE);
+        console.log("Decision Room v94.8 - API Base:", API_BASE);
 
         let lastPulse = new Date();
         let showOnlyHate = false;
         let iaEvaluations = {}; 
 
+        async function restartWorker(workerId) {
+            try {
+                const response = await fetch(API_BASE + '/api/restart_worker', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ worker_id: workerId })
+                });
+                if (!response.ok) console.error(`Falha ao reiniciar ${workerId}`, response.status);
+            } catch (e) {
+                console.error(`Erro na conexão ao reiniciar ${workerId}: ${e.message}`);
+            }
+        }
+
         function toggleHateFilter() {
             showOnlyHate = !showOnlyHate;
             const btn = document.getElementById('btn-toggle-hate');
+            if (!btn) return;
             btn.textContent = showOnlyHate ? "SÓ ÓDIO" : "Ver Todos";
             btn.className = showOnlyHate ? "text-[10px] text-red-400 uppercase tracking-widest px-2 py-1 border border-red-500/50 bg-red-500/10 rounded transition-colors" : "text-[10px] text-gray-500 uppercase tracking-widest px-2 py-1 border border-gray-700 rounded hover:text-white transition-colors";
             fetchDashboard();
@@ -323,6 +319,10 @@
             const supaStatus = document.getElementById('supa-status');
             const localDot = document.getElementById('local-dot');
             const localStatus = document.getElementById('local-status');
+            const diagBar = document.getElementById('diag-fila-bar');
+            const diagText = document.getElementById('diag-fila-text');
+
+            const setClass = (el, ...classes) => el && (el.className = classes.join(' '));
 
             // 1. Estatísticas via Supabase (Isolado)
             try {
@@ -332,9 +332,9 @@
                     db.from('comentarios').select('*', { count: 'exact', head: true }).eq('is_hate', true)
                 ]);
 
-                supaDot.className = "w-1.5 h-1.5 rounded-full bg-green-500";
-                supaStatus.className = "text-[10px] font-bold text-green-500";
-                supaStatus.textContent = "ONLINE";
+            setClass(supaDot, 'w-1.5', 'h-1.5', 'rounded-full', 'bg-green-500');
+                setClass(supaStatus, 'text-[10px]', 'font-bold', 'text-green-500');
+                supaStatus.textContent = 'ONLINE';
 
                 const fila = (totalAmostra || 0) - (totalProcessados || 0);
                 const classificados = totalProcessados || 0;
@@ -348,41 +348,48 @@
                 
                 const diagBar = document.getElementById('diag-fila-bar');
                 const diagText = document.getElementById('diag-fila-text');
-                if (fila > 5000) {
-                    diagBar.className = "bg-red-500 h-full";
-                    diagBar.style.width = "80%";
-                    diagText.textContent = "ALTO";
-                } else {
-                    diagBar.className = "bg-yellow-500 h-full";
-                    diagBar.style.width = "30%";
-                    diagText.textContent = "NORMAL";
+                if (diagBar && diagText) {
+                    if (fila > 5000) {
+                        setClass(diagBar, 'bg-red-500', 'h-full');
+                        diagBar.style.width = '80%';
+                        diagText.textContent = 'ALTO';
+                    } else {
+                        setClass(diagBar, 'bg-yellow-500', 'h-full');
+                        diagBar.style.width = '30%';
+                        diagText.textContent = 'NORMAL';
+                    }
                 }
-            } catch (e) { 
-                console.error("Erro estatísticas Supabase:", e);
-                supaDot.className = "w-1.5 h-1.5 rounded-full bg-red-500";
-                supaStatus.className = "text-[10px] font-bold text-red-500";
-                supaStatus.textContent = "OFFLINE";
+            } catch (e) {
+                console.error('Erro estatísticas Supabase:', e);
+                setClass(supaDot, 'w-1.5', 'h-1.5', 'rounded-full', 'bg-red-500');
+                setClass(supaStatus, 'text-[10px]', 'font-bold', 'text-red-500');
+                supaStatus.textContent = 'OFFLINE';
             }
 
             // 2. Matriz de Auditoria via API Local Cacheada
             try {
                 const r = await fetch(API_BASE + '/api/v1/auditoria');
                 if (!r.ok) throw new Error(`HTTP ${r.status}`);
-                const { data: alerts, cached } = await r.json();
+                const json = await r.json().catch(() => ({}));
+                let { data: alerts, cached } = json || {};
                 
+                // Aplica o filtro de ódio se estiver ativado
+                if (showOnlyHate && alerts) {
+                    alerts = alerts.filter(a => a.is_hate);
+                }
+
                 const alertsContainer = document.getElementById('critical-alerts-container');
                 
                 // Idempotência: Gera hash dos IDs dos alertas
                 const currentAlertsHash = alerts ? alerts.map(a => a.id).join('') : "";
                 
                 if (currentAlertsHash === lastAlertsHash && alertsContainer.children.length > 0) {
-                    // Sem novos dados, não renderiza novamente
                     return;
                 }
                 lastAlertsHash = currentAlertsHash;
 
                 if (!alerts || alerts.length === 0) {
-                    alertsContainer.innerHTML = `<div class="text-xs text-gray-600 flex items-center gap-2 p-4"><i data-lucide="check-circle-2" class="w-4 h-4 text-green-500"></i> Nenhum dado de auditoria disponível.</div>`;
+                    alertsContainer.innerHTML = `<div class="text-xs text-gray-600 flex items-center gap-2 p-4"><i data-lucide="check-circle-2" class="w-4 h-4 text-green-500"></i> ${showOnlyHate ? 'Nenhum comentário de ódio detectado.' : 'Nenhum dado de auditoria disponível.'}</div>`;
                     lucide.createIcons();
                 } else {
                     alertsContainer.innerHTML = alerts.map(a => {
@@ -453,18 +460,16 @@
                     lucide.createIcons();
                 }
             } catch (e) { 
-                console.error("Erro Matriz API:", e); 
-                document.getElementById('critical-alerts-container').innerHTML = `<div class="text-xs text-red-500 font-bold uppercase p-4 border border-red-500/20 bg-red-500/5 rounded">Erro ao buscar dados de auditoria: ${e.message}</div>`;
+                const alertsContainer = document.getElementById('critical-alerts-container');
+                if (alertsContainer) {
+                    alertsContainer.innerHTML = `<div class="text-xs text-red-500 font-bold uppercase p-4 border border-red-500/20 bg-red-500/5 rounded">Erro ao buscar dados de auditoria: ${e.message}</div>`;
+                }
             }
 
             // 3. Top Alvos via Python API (Isolado)
             try {
                 const r = await fetch(API_BASE + '/api/v1/targets');
                 if (r.ok) {
-                    localDot.className = "w-1.5 h-1.5 rounded-full bg-green-500";
-                    localStatus.className = "text-[10px] font-bold text-green-500";
-                    localStatus.textContent = "ONLINE";
-
                     const targets = await r.json();
                     const top = targets.sort((a,b) => b.comentarios_odio_count - a.comentarios_odio_count).slice(0, 3);
                     const topContainer = document.getElementById('top-targets-container');
@@ -481,11 +486,8 @@
                 } else {
                     throw new Error(`HTTP ${r.status}`);
                 }
-            } catch(e) { 
-                console.error("Erro targets API:", e); 
-                localDot.className = "w-1.5 h-1.5 rounded-full bg-red-500";
-                localStatus.className = "text-[10px] font-bold text-red-500";
-                localStatus.textContent = "ERROR";
+            } catch(e) {
+                console.error("Erro targets API:", e);
             }
 
             // 4. Auditoria Cloud via Python API (Isolado)
@@ -522,15 +524,81 @@
                 }
             } catch (e) { console.error("Erro ao buscar métricas:", e); }
 
-            // 6. Atualiza Heartbeat
-            const hb = document.getElementById('heartbeat-text');
-            const now = new Date();
-            hb.textContent = now.toLocaleTimeString('pt-BR');
-            hb.className = "text-[10px] font-mono text-green-500 mt-1 uppercase tracking-tighter";
-
             // Remove troubleshooting se houver sucesso em algo
             document.getElementById('troubleshooting-container')?.remove();
-            }
+        }
+
+        // WebSocket Heartbeat
+        function setupDashboardWebSocket() {
+            let wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            let host = API_BASE.replace(/^https?:\/\//, '');
+            let wsUrl = `${wsProtocol}//${host}/ws/dashboard`;
+            
+            const ws = new WebSocket(wsUrl);
+            const localDot = document.getElementById('local-dot');
+            const localStatus = document.getElementById('local-status');
+            const hb = document.getElementById('heartbeat-text');
+            
+            ws.onopen = () => {
+                console.log("WebSocket Heartbeat conectado.");
+                if(localDot && localStatus) {
+                    localDot.className = 'w-1.5 h-1.5 rounded-full bg-green-500';
+                    localStatus.className = 'text-[10px] font-bold text-green-500';
+                    localStatus.textContent = 'ONLINE';
+                }
+            };
+            
+            ws.onmessage = (event) => {
+                try {
+                    const now = new Date();
+                    hb.textContent = now.toLocaleTimeString('pt-BR');
+                    hb.className = "text-[10px] font-mono text-green-500 mt-1 uppercase tracking-tighter";
+                    
+                    const payload = JSON.parse(event.data);
+                    if (payload.type === 'metrics') {
+                        // O payload metrics já traz as infos que o fetchDashboard buscava em /api/metrics
+                        const ai = payload.data.ai_services;
+                        if (ai) {
+                            document.getElementById('voyant-status').textContent = ai.voyant === "OK" ? "OK" : "DOWN";
+                            document.getElementById('ia-ollama').textContent = ai.ollama === "OK" ? "ONLINE" : "OFFLINE";
+                            document.getElementById('ia-mistral').textContent = ai.mistral === "OK" ? "ONLINE" : "OFFLINE";
+                        }
+                        
+                        // Atualiza Erros e Ciclo (Valores Reais em vez de estáticos)
+                        document.getElementById('diag-erros').textContent = payload.data.code_errors || 0;
+                        document.getElementById('diag-ciclo').textContent = payload.data.cycle ? payload.data.cycle.toFixed(1) + 's' : '---';
+                        
+                        // Status Workers Coleta/AI (Inferência básica via dados de estado global)
+                        const isRunning = payload.data.cycle > 0;
+                        const igStatus = document.getElementById('ig-status');
+                        const aiProcStatus = document.getElementById('ai-proc-status');
+                        
+                        if(igStatus) {
+                            igStatus.textContent = isRunning ? "ONLINE" : "STANDBY";
+                            igStatus.className = isRunning ? "text-green-500 font-bold" : "text-yellow-500 font-bold";
+                        }
+                        
+                        if(aiProcStatus) {
+                            const isOp = payload.data.status.includes("OPERACIONAL");
+                            aiProcStatus.textContent = isOp ? "ONLINE" : "OFFLINE";
+                            aiProcStatus.className = isOp ? "text-green-500 font-bold" : "text-red-500 font-bold";
+                        }
+                    }
+                    
+                    // Dispara a busca suplementar (Supabase, targets, etc.) em cada pulso do Heartbeat
+                    fetchDashboard();
+                } catch(e) {}
+            };
+            
+            ws.onclose = () => {
+                if(localDot && localStatus) {
+                    localDot.className = 'w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse';
+                    localStatus.className = 'text-[10px] font-bold text-red-500';
+                    localStatus.textContent = 'RECONECTANDO';
+                }
+                setTimeout(setupDashboardWebSocket, 5000);
+            };
+        }
 
         // Timer de Segurança para Diagnóstico (10s)
         setTimeout(() => {
@@ -555,8 +623,8 @@
         }, 10000);
 
         setupSSE();
+        setupDashboardWebSocket();
         fetchDashboard();
-        setInterval(fetchDashboard, 15000);
 
     </script>
 </body>

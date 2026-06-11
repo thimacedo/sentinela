@@ -1,35 +1,46 @@
 # Walkthrough — Estado Atual Auditável
-_last_updated: 2026-06-04_
+_last_updated: 2026-06-11_
 
 Este documento resume apenas o que continua válido após auditoria do código.
 
 ## 1. Pipeline ativo
 
 - Watchdog supervisiona `main_runner.py`
-- Orquestrador registra workers especializados
-- `InstagramScraperWorker` coleta
-- `AIProcessorWorker` classifica backlog e reanalisa baixa confiança
-- `NetworkMiner` consolida rede
-- `Treasurer` calcula indicadores
-- `TargetResearchWorker` só entra no runtime quando `RESEARCHER_MODE` estiver habilitado
+- Orquestrador registra workers especializados:
+  - `WkColetaInstagram` (coleta do Instagram)
+  - `WkClassificaComentarios` (classificador oficial do pipeline via IA)
+  - `SaRevisaoOnline` (revisão de comentários de baixa confiança na nuvem)
+  - `SaFastDrop` (pré-triagem léxica local, zero Java, zero LLM)
+- `WkPesquisaAlvos` (pesquisa de alvos) só entra no runtime se `RESEARCHER_MODE` estiver habilitado
+- `AutopilotManager.pulse()` em background supervisiona a saúde do sistema
+- `WkAplicaSugestoes.start()` em background aplica automaticamente correções de configuração a cada 10 minutos
+- `CloudListener.start()` fornece batimentos cardíacos (heartbeat) e aceita comandos remotos
 
 ## 2. IA ativa
 
 Camadas observadas no código:
 
-1. `ollama` para triagem local
+1. `ollama` para triagem local (opcional)
 2. `maritaca` (Sabia-4) para auditoria e perícia cloud
 3. `huggingface` via MCP para descoberta de modelos e datasets
 4. `mistral`, `groq`, `openrouter` para refino e auditoria cruzada
 5. `FallbackLLM` como recuperação de desastre
 
-## 3. O que mudou na auditoria
+## 3. O que mudou na auditoria (v95.0)
 
-- LiteRT foi removido da documentação central porque não está mais no processamento ativo
-- PGMQ deixou de ser tratado como item implantado; hoje a fila distribuída real é a trava atômica da `fila_coleta`
-- o frontend oficial é `frontend/`
-- o watchdog local virou parte importante da operação diária
-- **v90.4**: Implementada a supressão total de popups de console no Windows via `CREATE_NO_WINDOW`, garantindo operação silenciosa do orquestrador e subagentes.
+- **Expurgo do Java VoyantServer**: O subagente `SaVoyant` foi removido e desativado. Substituído por completo pelo `SaFastDrop` (`workers/ai/sa_fast_drop.py`) que usa processamento de string puro local (`core/lexical_filter.py`), sem qualquer dependência de JVM/HTTP e com custo zero de tokens.
+- **Advisor Determinístico (Zero Tokens)**: O `SaDiagnosticaSistemas` e a classe `Diagnostician` foram refatorados para analisar erros comuns (sessão, rede, rate limit, IP block) por meio de regras determinísticas locais e dicionários de sugestões pré-fabricadas. Apenas erros de `DOM_CHANGE` recorrem a LLM para análise estrutural de seletores falhos.
+- **Autocura Acelerada**: O intervalo de execução do worker `WkAplicaSugestoes` foi reduzido de 30 minutos para 10 minutos, agilizando a autocura do sistema.
+- **Faxina Arquitetural de Arquivos Órfãos**: 8 arquivos obsoletos em `core/` sem qualquer importação ativa no runtime foram purgados definitivamente:
+  - `core/pasa_auditor.py`
+  - `core/classification_service.py`
+  - `core/zyte_checker.py`
+  - `core/offline_cache.py`
+  - `core/meta_ad_service.py`
+  - `core/predictive_service.py`
+  - `core/firebase_alerter.py`
+  - `core/firebase_init.py`
+- **Correção de NameError**: Corrigida a importação em falta do `WkAplicaSugestoes` no boot do `main_runner.py`.
 
 ## 4. Estado da fila
 
@@ -57,61 +68,7 @@ Já foi concluído:
 - atualização dos scripts operacionais auxiliares
 - desativação padrão do `researcher-01`
 
-Ainda pendente:
-
-- simplificar `workers/orchestrator/orchestrator.py`
-- padronizar semântica de idle e `CycleResult`
-
-## 7. Melhorias de Resiliência de Emergência (Fase 4.5)
-
-Foram corrigidos e validados dois problemas operacionais observados nos logs do runner:
-1. **Poda Automática para Erros 400 (Bad Request)**: Provedores de IA que retornarem `HTTP 400` (ex: chaves mal configuradas ou payloads incompatíveis, como verificado com `zhipu_glm4`) agora são removidos permanentemente da fila unificada em tempo de execução, em vez de ficarem retentando e gerando ruído de log.
-2. **Timeout estendido no Playwright**: Aumentamos o timeout na etapa de navegação do `_verify_session` do Instagram de 30s para 45s, mitigando erros causados por instabilidade ou lentidão temporária da rede local.
-3. **Mapeamento de Cores Semânticas de Badge**: Refatoramos o estilo de categoria para que a classificação `ERRO` seja renderizada de forma consistente em **Roxo (Purple)** no `local_dashboard.html` e no componente React `AnaliseTab.tsx`. Isso soluciona o problema onde erros eram coloridos de verde (Neutro) ou vermelho (Ódio), provendo uma distinção visual clara.
-4. **Console de Logs Invertido (Recentes no Topo)**: Modificamos o console de logs no `local_dashboard.html` para realizar `prepend` (inserção no início do DOM) e remover os elementos excedentes do final. Isso faz com que as atualizações mais recentes fiquem fixadas no topo do painel, permitindo o acompanhamento em tempo real sem scroll.
-5. **Persistência de Expurgos de IA (Configuração de Fallback)**: Comentamos os provedores de fallback comprovadamente inoperantes (`deepseek_chat`, `openrouter`, `google_gemini`, `zhipu_glm4`) no arquivo `config/fallback_providers.yaml`. Isso evita que eles sejam recarregados e tentados no boot inicial quando o runner python é reiniciado pelo watchdog.
-6. **Prevenção de Erro 400 no DossierWorker**: Corrigimos a inicialização de `self._status_column` para `None` (em vez de `"status"`) no construtor do [dossier_worker.py](file:///c:/projetos/sentinela/workers/processors/dossier_worker.py#L36). Isso evita que o worker dispare uma query inicial inválida filtrando pela coluna `status` (inexistente) quando a tabela `dossies` do Supabase está vazia, o que causava um erro `HTTP 400 Bad Request`. O worker agora cai diretamente e de forma limpa no fallback seguro (`arquivo_path is null`).
-7. **Limitação Vertical do Dashboard (Desktop)**: Adicionamos as classes `lg:h-screen lg:overflow-hidden` à tag `body` do [local_dashboard.html](file:///c:/projetos/sentinela/local_dashboard.html#L27) para fixar o layout à altura da tela (100vh) no ambiente desktop. Isso impede a barra de rolagem principal da página e permite que cada coluna realize rolagem interna independente, preservando a usabilidade no mobile.
-
-### Validação Executada
-Rodamos o script `test_ai_service.py` que simulou chamadas com provedores de IA reais e de fallback. Durante o teste:
-- O provedor `mistral` retornou erro `401 Unauthorized`.
-- O sistema interceptou, acionou o Circuit Breaker e **podou permanentemente** o provedor da lista ativa.
-- A requisição rotacionou com sucesso para o `groq_llama3` e obteve a classificação `DANO_A_IMAGEM` em JSON estruturado com sucesso absoluto.
-
-## 9. Consolidação de Subagentes, Sanitização e Auditoria de Custos (Fase Recente)
-
-Nesta fase recente de saneamento técnico e monetização, realizamos melhorias críticas no monitoramento e nas garantias de conformidade do projeto:
-
-1. **Verificação de Lint e Build do Frontend**:
-   - Correção do erro no elemento SVG em [QueueTab.tsx](file:///c:/projetos/sentinela/frontend/components/warroom/QueueTab.tsx#L61) (substituindo `class` por `className`), o que resolveu o erro de type-checking do TypeScript.
-   - Build do frontend (`npm run build`) validado e concluído com absoluto sucesso (100% estático e limpo).
-2. **Mapeamento de Custos de IA (Burn Rate)**:
-   - Implementação de gravação de log no [fallback_llm.py](file:///c:/projetos/sentinela/core/fallback_llm.py#L286) para persistir as estatísticas de chamadas bem-sucedidas e erros da malha de IA de fallback na tabela `fallback_logs` do Supabase.
-   - Criação da lógica de cálculo financeiro `_compute_burn_rate()` no subagente [treasurer_agent.py](file:///c:/projetos/sentinela/workers/financial/treasurer_agent.py#L98) para estimar o custo financeiro operacional em USD gasto com chamadas de IA nas últimas 24 horas.
-   - Integração da telemetria de burn rate nos relatórios e auditorias consolidadas pelo subagente financeiro.
-3. **Purgação de Termos Proibidos**:
-   - Expurgo dos termos juridicamente sensíveis ("forense", "prova", "evidência") e atualização de referências obsoletas em [api/index.py](file:///c:/projetos/sentinela/api/index.py#L262), [copilot-instructions.md](file:///c:/projetos/sentinela/copilot-instructions.md#L14), [docs/superpowers/plans/2026-05-16-otimizacao-ingestao-ia.md](file:///c:/projetos/sentinela/docs/superpowers/plans/2026-05-16-otimizacao-ingestao-ia.md), [docs/project_functions_v58.md](file:///c:/projetos/sentinela/docs/project_functions_v58.md#L17) e relatórios históricos de auditoria.
-   - Exclusão de arquivos temporários e de log obsoletos da raiz do workspace (`tmp_litert_*.txt`).
-4. **Vulnerabilidade Identificada no Supabase (RLS Desabilitado)**:
-   - Identificação de que 15 tabelas no banco de dados remoto do Supabase estão com RLS (Row Level Security) desabilitado. O script de remediação foi apresentado para aprovação e posterior aplicação por parte do usuário.
-5. **Monitoramento e Autocura do Pipeline**:
-   - Criação do script de monitoramento e autocura [monitor_pipeline.py](file:///c:/projetos/sentinela/scratch/monitor_pipeline.py) que checa a porta `8001` (Watchdog) e interage via API HTTP (`/api/server/start`) ou subprocesso para restaurar o pipeline se inativo.
-   - Agendamento da verificação periódica de status a cada 10 minutos (via cron do Antigravity).
-   - Teste inicial validou o watchdog e o runner com sucesso completo (Status: `OPERACIONAL`, Score: `95.0`, Trust: `9.5`, Tier: `Gold`, DB/AI: `OK`).
-6. **Resolução e Validação de Erros de Concorrência no Voyant (HTTPX)**:
-   - Correção definitiva de `RuntimeError: Attempted to send a sync request with an AsyncClient instance` em [voyant_service.py](file:///c:/projetos/sentinela/core/voyant_service.py) e [validate_trombone.py](file:///c:/projetos/sentinela/scripts/validate_trombone.py) através da codificação manual do form body (`urllib.parse.urlencode`) transmitido via parâmetro `content`.
-   - Executado teste de inicialização integrada do `VoyantServer.jar` local com o argumento obrigatório `headless=true`.
-   - A validação oficial de contrato via [validate_trombone.py](file:///c:/projetos/sentinela/scripts/validate_trombone.py) completou com 100% de sucesso (5/5 verificações aprovadas), validando conectividade, extração de CorpusTerms (43 termos), cruzamento léxico de hostilidade (ratio 30.23%), e fast-drop de lote neutro (ratio 0.00%) sem falhas de encode Unicode.
-
-7. **Estabilização de Alertas, SRE e AdSense (Fase 10 - /goal)**:
-   - **Correção do AdSense no Frontend**: Refatoramos o [layout.tsx](file:///c:/projetos/sentinela/frontend/app/layout.tsx#L30) para injetar de forma definitiva o script global do AdSense usando o ID padrão de fallback (`ca-pub-1827611269042960`) quando a variável de ambiente `NEXT_PUBLIC_ADSENSE_ID` estiver omitida no build. Alteramos a estratégia para `afterInteractive` para mitigar race conditions no DOM.
-   - **Cura Ancestral no GuardLocker**: Reformulamos o [guard_locker.py](file:///c:/projetos/sentinela/core/guard_locker.py#L22) para realizar uma varredura recursiva ascendente de PIDs usando `psutil.Process.parent()`. Isso protege toda a linhagem do processo legítimo (interpretador real -> launcher venv -> watchdog) de ser rotulada como zumbi no boot, eliminando o loop de suicídio de processos e falhas de boot de interpretadores python.
-   - **Conformidade de Alertas de WhatsApp**: Ajustamos [alert_manager.py](file:///c:/projetos/sentinela/core/alert_manager.py#L9), [whatsapp_alerter.py](file:///c:/projetos/sentinela/core/whatsapp_alerter.py#L13) e [detect_shadowbans.py](file:///c:/projetos/sentinela/scripts/detect_shadowbans.py#L8) para ler de forma flexível tanto `WHATSAPP_PHONE`/`WHATSAPP_API_KEY` quanto `CALLMEBOT_PHONE`/`CALLMEBOT_APIKEY`. Isso garante que usuários preenchendo as variáveis expostas no `.env.example` recebam de fato os alertas em seus telefones, em vez de vazarem para o número padrão de testes.
-   - **Limpeza de Portas do SRE**: Adicionamos `kill_process_on_port(8002)` na inicialização e atualização do Datasette no Watchdog ([__main__.py](file:///c:/projetos/sentinela/watchdog/__main__.py#L499) e [__init__.py](file:///c:/projetos/sentinela/watchdog/__init__.py#L1021)) para prevenir colisões de portas e duplicidade de instâncias de visualização de banco de dados.
-   - **Saneamento Documental**: Arquivamos 5 documentações antigas defasadas (`docs/ARCHITECTURE_PASA_V84.md`, `docs/ARCHITECTURE_PASA_V86.md`, `docs/PHASE_1_IMPLEMENTATION_SUMMARY.md`, `docs/REFATORACAO_FRONTEND.md`, `docs/future_modules_plan.md`) movendo-as para `docs/archive/` e corrigimos o arquivo de índice [index_documentacao.md](file:///c:/projetos/sentinela/docs/index_documentacao.md#L30).
-
-## 8. Uso recomendado
+## 7. Uso recomendado
 
 Para iniciar trabalho novo:
 

@@ -385,6 +385,7 @@ class InstagramScraperV2:
                             all_comments.extend(post_comments)
                             scraped_count += 1
                             self.stats["posts_scraped"] += 1
+                            consecutive_zero_comments = 0
                             
                             # Callback assíncrona para persistência incremental
                             if on_post_scraped:
@@ -396,6 +397,17 @@ class InstagramScraperV2:
                             await asyncio.sleep(random.uniform(6, 18))
                         else:
                             logger.info(f"⏭️ [V2] Post {shortcode} ignorado.")
+                            consecutive_zero_comments += 1
+                            if consecutive_zero_comments >= 3:
+                                logger.warning(f"🚨 [V2] 3 posts vazios consecutivos! Ativando Modo de Acesso Monitorado (HITL) no post {shortcode}...")
+                                try:
+                                    await browser.close()
+                                except: pass
+                                learned = await self._request_human_intervention(session, shortcode)
+                                if learned:
+                                    logger.info(f"✅ Seletor aprendido e salvo com sucesso: {learned}")
+                                # Aborta e deixa o loop de retry externo reiniciar o contexto já com o seletor aprendido
+                                raise RuntimeError("hitl_intervention_completed_restarting")
 
                     await browser.close()
                     logger.info(f"✅ [V2] @{username} finalizado. {len(all_comments)} comentários extraídos.")
@@ -420,47 +432,69 @@ class InstagramScraperV2:
         try:
             post_element = await page.query_selector(selector)
             if post_element:
+                # scroll into view para garantir clique
+                await post_element.scroll_into_view_if_needed()
                 await post_element.click(timeout=15000, force=True)
                 await asyncio.sleep(random.uniform(4, 7))
-                if await page.query_selector("article"): return True
+                # v95.1: Não depende apenas do <article>, procura também main[role="main"] ou divs com role="presentation"
+                if await page.query_selector('article, main[role="main"] header, div[role="dialog"]'): return True
         except Exception as e_click:
             logger.debug("[V2] Falha ao abrir modal por clique (%s): %s", shortcode, e_click)
         try:
             logger.info(f"🔄 [V2] Fallback URL para {shortcode}...")
             await page.goto(f"https://www.instagram.com/p/{shortcode}/", wait_until="domcontentloaded", timeout=30000)
             await asyncio.sleep(random.uniform(5, 8))
-            if await page.query_selector("article") or len(await page.query_selector_all("section")) > 0:
+            
+            # v95.1: Se cair na tela de login, abortar extração deste post imediatamente (Soft Block)
+            login_indicators = await page.query_selector_all('input[name="username"], button[type="submit"]')
+            if len(login_indicators) >= 2:
+                 logger.error(f"🛑 [V2] Login Wall detectado na URL direta do post {shortcode}!")
+                 return False
+
+            if await page.query_selector('article, main[role="main"] header') or len(await page.query_selector_all("section")) > 0:
                 return True
         except Exception as e_fallback:
             logger.debug("[V2] Falha no fallback URL (%s): %s", shortcode, e_fallback)
         return False
 
     async def scroll_comment_column(self, page: Page, scroll_amount: int = 800) -> None:
-        # Tenta rolar usando Javascript direto no DOM para maior precisão (independente de resolução/mouse)
-        scrolled = await page.evaluate("""() => {
-            // Seletores conhecidos para o modal/coluna de comentários do Instagram desktop
-            const selectors = [
-                'article ul.x5yr21d',
-                'div.x5yr21d',
-                'article ul[class*="x5yr21d"]',
-                'div[class*="x5yr21d"]',
-                'article ul'
-            ];
-            
-            for (let sel of selectors) {
-                const el = document.querySelector(sel);
+        # Carrega o seletor aprendido via Human-in-the-Loop, se existir
+        learned_selector = ""
+        learned_path = os.path.join("configs", "learned_selectors.json")
+        if os.path.exists(learned_path):
+            try:
+                with open(learned_path, "r") as f:
+                    learned_selector = json.load(f).get("comment_container", "")
+            except: pass
+
+        # Tenta rolar usando Javascript direto no DOM
+        scrolled = await page.evaluate("""(learned) => {
+            if (learned) {
+                const el = document.querySelector(learned);
                 if (el && el.scrollHeight > el.clientHeight) {
                     el.scrollTop = el.scrollHeight;
                     return true;
                 }
             }
+            
+            // Fallback: Abordagem genérica baseada em detecção de scroll
+            const allElements = document.querySelectorAll('*');
+            for (let i = 0; i < allElements.length; i++) {
+                const el = allElements[i];
+                if ((el.tagName === 'UL' || el.tagName === 'DIV') && el.scrollHeight > el.clientHeight + 10) {
+                    const style = window.getComputedStyle(el);
+                    if (style.overflowY === 'auto' || style.overflowY === 'scroll' || style.overflow === 'hidden') {
+                        el.scrollTop = el.scrollHeight;
+                        return true;
+                    }
+                }
+            }
             return false;
-        }""")
+        }""", learned_selector)
         
         if scrolled:
             logger.debug("📜 [V2] Scroll via JS executado no container de comentários.")
         else:
-            # Fallback para mouse.wheel se nenhum container for detectado
             logger.debug("🖱️ [V2] Nenhum container com scroll ativo encontrado. Aplicando fallback de mouse wheel.")
             await page.mouse.move(random.randint(800, 1200), random.randint(300, 600))
             await page.mouse.wheel(0, scroll_amount + random.randint(-100, 100))
@@ -714,6 +748,82 @@ class InstagramScraperV2:
             logger.error(f"⚠️ [V2] Erro temporário de rede ao verificar sessão {session.label}: {e}")
             # Propaga o erro para que a tentativa sofra retry sem banir a sessão do pool
             raise RuntimeError(f"session_network_error: {e}")
+
+    def _is_night_shift(self) -> bool:
+        """Verifica se está no horário noturno (23h às 05h)."""
+        hour = datetime.now().hour
+        return hour >= 23 or hour < 5
+
+    async def _request_human_intervention(self, session: Session, shortcode: str) -> str:
+        """
+        Inicia uma sessão Chromium visível (headless=False) para o humano clicar na coluna de comentários.
+        Retorna um seletor CSS genérico para ser usado no headless mode.
+        Ignora automaticamente se estiver no Modo Noturno (23h-05h).
+        """
+        if self._is_night_shift():
+            logger.warning(f"🌙 [V2] Modo Noturno ativo. HITL desativado para o post {shortcode}. Abortando silenciosamente.")
+            return ""
+
+        logger.error(f"🚨 [HITL] Iniciando acesso monitorado para o post {shortcode}")
+        try:
+            async with async_playwright() as pw:
+                browser = await pw.chromium.launch(headless=False)
+                context = await browser.new_context(viewport={"width": 1280, "height": 800})
+                await context.add_cookies([{
+                    'name': 'sessionid', 'value': session.session_id,
+                    'domain': '.instagram.com', 'path': '/'
+                }])
+                page = await context.new_page()
+                await page.goto(f"https://www.instagram.com/p/{shortcode}/", wait_until="domcontentloaded", timeout=45000)
+                
+                # Injeta a UI overlay e aguarda o clique do usuário
+                selector = await page.evaluate("""() => {
+                    return new Promise((resolve) => {
+                        const overlay = document.createElement('div');
+                        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;background:rgba(255,0,0,0.95);color:white;z-index:2147483647;text-align:center;padding:20px;font-size:24px;font-family:sans-serif;pointer-events:none;box-shadow: 0 4px 6px rgba(0,0,0,0.5);';
+                        overlay.innerHTML = '<b style="font-size:32px;">🤖 MODO APRENDIZADO SENTINELA</b><br/>O robô travou na extração.<br/><span style="color:#FFFF00;"><b>POR FAVOR, CLIQUE NA ÁREA DA COLUNA DE COMENTÁRIOS</b></span> para ensinar o novo caminho ao sistema.';
+                        document.body.appendChild(overlay);
+                        
+                        const clickHandler = (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            let el = e.target;
+                            
+                            // Procura o contêiner rolável mais próximo
+                            while (el && el !== document.body) {
+                                const style = window.getComputedStyle(el);
+                                if (el.scrollHeight > el.clientHeight && (style.overflowY === 'auto' || style.overflowY === 'scroll')) {
+                                    break;
+                                }
+                                el = el.parentElement;
+                            }
+                            if (!el || el === document.body) el = e.target; // Fallback para o clicado diretamente
+                            
+                            // Gera um seletor CSS aproximado
+                            let classes = Array.from(el.classList).filter(c => c.length > 2).slice(0, 2).join('.');
+                            let selector = el.tagName.toLowerCase() + (classes ? '.' + classes : '');
+                            
+                            overlay.innerHTML = '<b style="font-size:32px;">✅ APRENDIDO COM SUCESSO!</b><br/>Você pode fechar esta janela agora. O Sentinela retomará o modo invisível.';
+                            overlay.style.background = 'rgba(0,128,0,0.95)';
+                            
+                            setTimeout(() => resolve(selector), 3000);
+                        };
+                        document.addEventListener('click', clickHandler, {capture: true, once: true});
+                    });
+                }""")
+                
+                await browser.close()
+                
+                if selector:
+                    os.makedirs("configs", exist_ok=True)
+                    learned_path = os.path.join("configs", "learned_selectors.json")
+                    with open(learned_path, "w") as f:
+                        json.dump({"comment_container": selector}, f)
+                    return selector
+                return ""
+        except Exception as e:
+            logger.error(f"❌ [HITL] Falha no acesso monitorado: {e}")
+            return ""
 
     def get_stats(self) -> Dict[str, Any]:
         """Retorna estatísticas acumuladas do scraper."""
