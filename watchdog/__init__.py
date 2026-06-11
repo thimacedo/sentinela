@@ -1262,27 +1262,6 @@ def kill_process_on_port(port: int):
 
 
 # ...
-import shutil
-
-def run_voyant_server():
-    state.add_log("info", "[Watchdog] Tentando iniciar VoyantServer...")
-    try:
-        kill_process_on_port(8888)
-        java_path = shutil.which("java")
-        if not java_path:
-            state.add_log("warn", "[Watchdog] Java não encontrado no PATH. VoyantServer não iniciado.")
-            return
-        
-        jar_path = os.path.join(PROJECT_ROOT, "tools", "voyant", "VoyantServer.jar")
-        creationflags = 0x08000000 if os.name == 'nt' else 0
-        subprocess.Popen(
-            [java_path, "-Xmx512m", "-jar", jar_path],
-            creationflags=creationflags,
-            cwd=os.path.dirname(jar_path)
-        )
-        state.add_log("info", "[Watchdog] Motor Léxico (VoyantServer) disponível em: http://127.0.0.1:8888")
-    except Exception as e_voyant:
-        state.add_log("warn", f"[Watchdog] Falha ao iniciar VoyantServer: {e_voyant}")
 
 if __name__ == "__main__":
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -1359,9 +1338,6 @@ if __name__ == "__main__":
             state.add_log("info", "[Watchdog] Explorador SQL (Datasette) disponível em: http://localhost:8002")
         except Exception as e_ds:
             state.add_log("warn", f"[Watchdog] Falha ao iniciar Datasette: {e_ds}")
-
-    voyant_thread = Thread(target=run_voyant_server, daemon=True)
-    voyant_thread.start()
 
     datasette_thread = Thread(target=run_datasette_server, daemon=True)
     datasette_thread.start()

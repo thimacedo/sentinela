@@ -123,7 +123,7 @@ class AutopilotManager:
             return {"failure_rate": 0, "total_cycles": 0, "empty_cycles": 0, "errors": []}
 
     async def _handle_degradation(self, metrics: Dict[str, Any]):
-        """Protocolo de intervenção baseado no diagnóstico de IA (OODA: Decidir → Agir)."""
+        """Protocolo de intervenção delegada ao Agente de SRE (Watchdog v52.0)."""
         self._intervention_count += 1
         logger.info(f"🛠️ [Autopilot] Intervenção #{self._intervention_count} iniciada.")
 
@@ -134,85 +134,26 @@ class AutopilotManager:
         except Exception as e:
             logger.warning(f"⚠️ [Autopilot] Falha no cleanup: {e}")
 
-        # Passo 2: Diagnóstico semântico via IA (se disponível)
-        if self.diagnostician and metrics.get("errors"):
+        # Passo 2: Executa diagnóstico e autocura via SREAgent
+        if metrics.get("errors"):
             log_segment = "\n".join(str(e) for e in metrics["errors"][:20])
-            diagnosis = await self.diagnostician.analyze_log_segment(log_segment)
-            error_type = diagnosis.get("type") or diagnosis.get("categoria_ia", "UNKNOWN")
-            confidence = diagnosis.get("confidence") or diagnosis.get("confianca_ia", 0.0)
+            
+            # Obtém a classificação determinística local
+            from core.autopilot.diagnostician import _classify_error
+            error_type = _classify_error(log_segment)
+            
+            # Delega a autocura ao Agente de SRE
+            from core.autopilot.sre_agent import sre_agent
+            result = await sre_agent.diagnose_and_heal(error_type, log_segment)
 
-            logger.info(f"🧠 [Autopilot] Diagnóstico: {error_type} (confiança: {confidence:.2%})")
-            self._log_event("autopilot_diagnosis", f"Tipo: {error_type}", {
-                "diagnosis": diagnosis,
+            self._log_event("sre_agent_intervention", f"Cura executada: {error_type}", {
+                "error_type": error_type,
                 "metrics": metrics,
                 "intervention": self._intervention_count,
+                "result": result
             })
-
-            # Passo 3: Aplicar correção baseada no tipo de erro
-            if error_type == "DOM_CHANGE" and confidence > 0.5 and self.patcher:
-                await self._apply_dom_fix(diagnosis)
-
-            elif error_type == "SESSION_EXPIRED":
-                await self._trigger_session_healing()
-
-            elif error_type == "IP_BLOCK":
-                logger.warning("🛡️ [Autopilot] IP bloqueado detectado. Aumentando jitter para próximo ciclo.")
-                os.environ["AUTOPILOT_FORCE_JITTER"] = "true"
         else:
-            logger.info("🚀 [Autopilot] Intervenção básica (Cleanup) concluída. Sem dados de erro para diagnóstico semântico.")
-
-    async def _apply_dom_fix(self, diagnosis: dict):
-        """Tenta corrigir seletor CSS/XPath quebrado via IA + Patcher."""
-        logger.info("🔧 [Autopilot] Tentando auto-corrigir seletor CSS via Patcher...")
-        new_selector = diagnosis.get("new_selector") or diagnosis.get("analise_pericial", "")
-
-        if new_selector and len(new_selector) > 5:
-            old_selector = "div._aabd, div._ac7v div"  # Seletor atual do grid Instagram
-            success = self.patcher.update_selector(
-                scraper_file="core/instagram_scraper_v2.py",
-                old_selector=old_selector,
-                new_selector=new_selector
-            )
-            if success:
-                logger.info(f"✅ [Autopilot] Hot-fix aplicado! Novo seletor: '{new_selector}'")
-                self._log_event("hotfix_applied", f"Seletor atualizado para: {new_selector}", {
-                    "old_selector": old_selector, "new_selector": new_selector
-                })
-            else:
-                logger.warning("⚠️ [Autopilot] Hot-fix falhou. Seletor original não encontrado.")
-        else:
-            logger.warning("⚠️ [Autopilot] Diagnóstico não retornou seletor válido para correção automática.")
-
-    async def _trigger_session_healing(self):
-        """Aciona o SessionHealer para renovar sessões expiradas (com cooldown de 6h anti-detecção)."""
-        now = datetime.now(timezone.utc)
-        elapsed_heal = (now - self.last_session_heal).total_seconds()
-        cooldown_seconds = 21600  # 6 horas
-        
-        if elapsed_heal < cooldown_seconds:
-            remaining = int((cooldown_seconds - elapsed_heal) / 60)
-            logger.warning(
-                f"🕒 [Autopilot] SessionHealer em cooldown anti-detecção. "
-                f"Próxima renovação disponível em ~{remaining} min. Aguardando..."
-            )
-            return
-        
-        logger.warning("🔑 [Autopilot] Sessão expirada detectada. Acionando SessionHealer com re-login forçado...")
-        try:
-            from core.autopilot.session_healer import SessionHealer
-            healer = SessionHealer()
-            success = await healer.heal(force=True)
-            if success:
-                self.last_session_heal = now
-                logger.info("✅ [Autopilot] SessionHealer renovou as sessões com sucesso.")
-                self._log_event("session_healer", "Sessões renovadas pelo SessionHealer (forçado).", {
-                    "cooldown_next_available_minutes": cooldown_seconds // 60
-                })
-            else:
-                logger.error("❌ [Autopilot] SessionHealer não conseguiu renovar as sessões. Intervenção humana necessária.")
-                self._log_event("session_healer", "Falha na renovação de sessão. Requer ação manual.", {})
-        except Exception as e:
-            logger.error(f"💥 [Autopilot] Erro ao acionar SessionHealer: {e}")
+            logger.info("🚀 [Autopilot] Intervenção básica (Cleanup) concluída. Sem dados de erro para SREAgent.")
 
     def _log_event(self, event_type: str, description: str, metadata: dict) -> None:
         """Registra evento de auditoria no Supabase."""
