@@ -37,7 +37,7 @@ except ImportError:
     pass
 
 ICON_PATH = os.path.join(PROJECT_ROOT, "logo_branco.png")
-DASHBOARD_URL = "http://localhost:8001"
+DASHBOARD_URL = "http://127.0.0.1:8001"
 
 def open_dashboard(icon=None, item=None):
     try:
@@ -531,11 +531,16 @@ if __name__ == "__main__":
     threading.Thread(target=run_datasette_server, daemon=True).start()
     threading.Thread(target=run_voyant_server, args=(PROJECT_ROOT,), daemon=True).start()
 
-    print("[START] Dashboard disponível em: http://localhost:8001")
+    print("[START] Dashboard disponível em: http://127.0.0.1:8001")
     print("[SHIELD] SENTINELA DEMOCRÁTICA - WATCHDOG v50.0")
 
     # Inicia o monitoramento (guard) em thread de background
     threading.Thread(target=guard, daemon=True).start()
 
-    # Roda a interface da bandeja na thread principal
-    setup_tray()
+    # Roda a interface da bandeja na thread principal se não estiver em background
+    if "--background" in sys.argv or "--detached" in sys.argv:
+        print("[Watchdog] Rodando em modo background/headless. Pulando bandeja gráfica...")
+        while True:
+            time.sleep(1)
+    else:
+        setup_tray()

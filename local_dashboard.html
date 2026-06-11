@@ -235,9 +235,9 @@
         const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // Determina a base da API de forma robusta (v94.7)
-        const API_BASE = (window.location.origin && window.location.origin !== 'null') 
+        const API_BASE = (window.location.origin && window.location.origin !== 'null' && window.location.origin.startsWith('http')) 
             ? window.location.origin 
-            : 'http://localhost:8001';
+            : 'http://127.0.0.1:8001';
 
         console.log("Decision Room v94.8 - API Base:", API_BASE);
 

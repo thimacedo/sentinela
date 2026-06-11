@@ -764,7 +764,7 @@ async def update_ai_key(data: dict):
             state.add_log("info", f"✅ Nova chave para {name} VALIDADA com sucesso.")
             # Dispara restart para o runner herdar a chave
             try:
-                requests.post("http://localhost:8001/api/server/restart", timeout=2.0)
+                requests.post("http://127.0.0.1:8001/api/server/restart", timeout=2.0)
             except: pass
             return {"success": True, "message": f"Chave de {name} atualizada e validada. Reiniciando runner..."}
         else:
@@ -797,7 +797,7 @@ async def delete_ai_key(data: dict):
         
         # 3. Dispara restart para o runner refletir a mudança
         try:
-            requests.post("http://localhost:8001/api/server/restart", timeout=2.0)
+            requests.post("http://127.0.0.1:8001/api/server/restart", timeout=2.0)
         except: pass
         
         return {"success": True, "message": f"Chave de {name} removida. Provedor desativado."}
@@ -1351,7 +1351,7 @@ if __name__ == "__main__":
     ollama_thread = Thread(target=run_ollama_watchdog, daemon=True)
     ollama_thread.start()
 
-    print("[START] Dashboard disponível em: http://localhost:8001")
+    print("[START] Dashboard disponível em: http://127.0.0.1:8001")
     print("[SHIELD] SENTINELA DEMOCRÁTICA - WATCHDOG v50.0")
     
     guard()
