@@ -29,7 +29,7 @@ PROJECT_ROOT = os.path.dirname(WATCHDOG_DIR)
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-from watchdog import guard, run_web_server, state, AUTOPILOT_ENABLED
+from watchdog import guard, run_web_server, state, AUTOPILOT_ENABLED, get_python_executable
 from watchdog.voyant import run_voyant_server
 try:
     from core.autopilot.manager import autopilot
@@ -437,9 +437,10 @@ if __name__ == "__main__":
         log_path = os.path.join(PROJECT_ROOT, "runtime_state", "watchdog_bg.log")
         log_file = open(log_path, "a")
 
+        python_bin = get_python_executable()
         # Dispara o processo em background
         subprocess.Popen(
-            [sys.executable, "-u", __file__, "--detached", "--background"],
+            [python_bin, "-u", __file__, "--detached", "--background"],
             creationflags=det_flags,
             cwd=PROJECT_ROOT,
             stdout=log_file,

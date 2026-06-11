@@ -15,11 +15,18 @@ def check_instagram_accounts():
     """
     status = {}
     try:
-        import asyncio
-        from core.db import db_client
-        # Consulta síncrona/async usando o driver
-        res = db_client.client.table('worker_sessions').select('username, status').execute()
-        sessions = res.data or []
+        from core.config import settings
+        url = f"{settings.SUPABASE_URL}/rest/v1/worker_sessions?select=username,status"
+        headers = {
+            "apikey": settings.SUPABASE_KEY,
+            "Authorization": f"Bearer {settings.SUPABASE_KEY}"
+        }
+        # Timeout estrito de 3 segundos para evitar travamento síncrono no boot
+        resp = httpx.get(url, headers=headers, timeout=3.0)
+        if resp.status_code == 200:
+            sessions = resp.json() or []
+        else:
+            sessions = []
         
         expired_count = 0
         for s in sessions:
@@ -100,8 +107,8 @@ def _get_health_url(base_url: str, default_origin: str, path: str) -> str:
 def ensure_ollama_running():
     from core.process_cleaner import ensure_ollama_singleton
     
-    base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-    health_url = _get_health_url(base_url, "http://localhost:11434", "/api/tags")
+    base_url = os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434")
+    health_url = _get_health_url(base_url, "http://127.0.0.1:11434", "/api/tags")
     
     # 1. Checa se o serviço responde HTTP
     try:
