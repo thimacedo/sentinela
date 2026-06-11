@@ -329,6 +329,7 @@ class InstagramScraperV2:
                     
                     scraped_count = 0
                     consecutive_old_posts = 0
+                    consecutive_zero_comments = 0
                     
                     for meta in post_metas:
                         if self.shutdown_event and self.shutdown_event.is_set():

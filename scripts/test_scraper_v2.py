@@ -64,7 +64,7 @@ async def test_scraper_v2():
             for i, c in enumerate(comments_list[:3]):
                 print(f"  {i}: [{c['autor_username']}] {c['texto_bruto'][:60]}...")
         
-        stats = scraper.get_stats()
+        stats = scraper.stats
         print(f"\n[*] Estatísticas: {stats}")
         
     except Exception as e:
