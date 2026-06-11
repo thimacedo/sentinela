@@ -244,6 +244,42 @@
         let lastPulse = new Date();
         let showOnlyHate = false;
         let iaEvaluations = {}; 
+        let autoStartAttempted = false;
+
+        async function checkAndTriggerAutoStart(status) {
+            if (autoStartAttempted) return;
+
+            // Identifica se o agente está parado ou inativo (iniciando com "PARADO" ou "HIBERNANDO")
+            if (status && (status.startsWith("PARADO") || status.startsWith("HIBERNANDO"))) {
+                autoStartAttempted = true;
+                console.warn(`[Watchdog] Agente inativo (status: ${status}). Disparando ativação automática...`);
+                
+                // Atualiza visualmente para informar ao operador
+                const motorStatus = document.getElementById('motor-status');
+                const motorDot = document.getElementById('motor-dot');
+                if (motorStatus && motorDot) {
+                    motorStatus.textContent = "ATIVANDO MOTOR...";
+                    motorStatus.className = "text-xs font-bold text-yellow-500 animate-pulse";
+                    motorDot.className = "w-2 h-2 rounded-full bg-yellow-500 animate-pulse";
+                }
+
+                try {
+                    const response = await fetch(API_BASE + '/api/server/start', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    if (response.ok) {
+                        console.log("[Watchdog] Sinal de inicialização automática enviado com sucesso.");
+                        // Dispara fetchDashboard imediato para obter as novas métricas e refletir o status ativo
+                        setTimeout(fetchDashboard, 1500);
+                    } else {
+                        console.error("[Watchdog] Falha ao enviar sinal de inicialização automática:", response.status);
+                    }
+                } catch (e) {
+                    console.error("[Watchdog] Erro ao enviar sinal de inicialização automática:", e);
+                }
+            }
+        }
 
         async function restartWorker(workerId) {
             try {
@@ -521,6 +557,26 @@
                     document.getElementById('ia-mistral').textContent = ai.mistral === "OK" ? "ONLINE" : "OFFLINE";
 
                     // Adicione lógica para os outros workers se necessário
+                    
+                    // Sincroniza o status do Motor Watchdog caso o SSE não tenha atualizado
+                    const motorStatus = document.getElementById('motor-status');
+                    const motorDot = document.getElementById('motor-dot');
+                    if (motorStatus && motorDot) {
+                        if (data.status === "OPERACIONAL") {
+                            motorStatus.textContent = "OPERACIONAL";
+                            motorStatus.className = "text-xs font-bold text-green-500";
+                            motorDot.className = "w-2 h-2 rounded-full bg-green-500 animate-pulse";
+                        } else {
+                            motorStatus.textContent = data.status || "PARADO";
+                            motorStatus.className = "text-xs font-bold text-red-500";
+                            motorDot.className = "w-2 h-2 rounded-full bg-red-500";
+                        }
+                    }
+
+                    // Gatilho de inicialização automática
+                    if (data.status) {
+                        checkAndTriggerAutoStart(data.status);
+                    }
                 }
             } catch (e) { console.error("Erro ao buscar métricas:", e); }
 
@@ -582,6 +638,26 @@
                             const isOp = payload.data.status.includes("OPERACIONAL");
                             aiProcStatus.textContent = isOp ? "ONLINE" : "OFFLINE";
                             aiProcStatus.className = isOp ? "text-green-500 font-bold" : "text-red-500 font-bold";
+                        }
+
+                        // Sincroniza o status do Motor Watchdog caso o SSE não tenha atualizado
+                        const motorStatus = document.getElementById('motor-status');
+                        const motorDot = document.getElementById('motor-dot');
+                        if (motorStatus && motorDot) {
+                            if (payload.data.status === "OPERACIONAL") {
+                                motorStatus.textContent = "OPERACIONAL";
+                                motorStatus.className = "text-xs font-bold text-green-500";
+                                motorDot.className = "w-2 h-2 rounded-full bg-green-500 animate-pulse";
+                            } else {
+                                motorStatus.textContent = payload.data.status || "PARADO";
+                                motorStatus.className = "text-xs font-bold text-red-500";
+                                motorDot.className = "w-2 h-2 rounded-full bg-red-500";
+                            }
+                        }
+
+                        // Gatilho de inicialização automática
+                        if (payload.data.status) {
+                            checkAndTriggerAutoStart(payload.data.status);
                         }
                     }
                     
