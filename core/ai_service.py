@@ -24,53 +24,64 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 GOLD_DATASET_PATH = os.path.join(BASE_DIR, "data", "classifier_gold_dataset.json")
 MD_PATH = os.path.join(BASE_DIR, "docs", "PADRONIZACAO_LINGUISTICA_ANALITICA.md")
 CUSTOM_RULES_PATH = os.path.join(BASE_DIR, "config", "custom_rules.json")
+# Contexto linguístico forense centralizado (PASA v51.0)
+CONTEXTO_CLASSIFICACAO_PATH = os.path.join(BASE_DIR, "bases_pdf", "CONTEXTO_CLASSIFICACAO.md")
+_CONTEXTO_CACHE: str = ""  # Cache em memória para evitar I/O em cada ciclo
 
-# MCA v2.2 Protocol - Calibragem Analítica Crítica Vichi-Sentinela (v85.11)
+def _load_contexto_classificacao() -> str:
+    """Carrega o contexto linguístico forense centralizado uma única vez."""
+    global _CONTEXTO_CACHE
+    if _CONTEXTO_CACHE:
+        return _CONTEXTO_CACHE
+    try:
+        if os.path.exists(CONTEXTO_CLASSIFICACAO_PATH):
+            with open(CONTEXTO_CLASSIFICACAO_PATH, "r", encoding="utf-8") as f:
+                _CONTEXTO_CACHE = f.read()
+                logger.info(f"[AI] CONTEXTO_CLASSIFICACAO carregado ({len(_CONTEXTO_CACHE)} chars).")
+        else:
+            logger.warning("[AI] CONTEXTO_CLASSIFICACAO.md não encontrado. Classificação sem contexto forense.")
+    except Exception as e:
+        logger.warning(f"[AI] Erro ao carregar CONTEXTO_CLASSIFICACAO.md: {e}")
+    return _CONTEXTO_CACHE
+
+# MCA v2.3 Protocol - Calibragem Analítica Crítica Vichi-Sentinela (v95.0)
 SYSTEM_PROMPT = """Você é um analista especializado em Linguística Analítica Digital baseado no Método Vichi-Sentinela para identificação de ataques coordenados e hostilidade política.
-Sua missão é classificar comentários com realismo absoluto, seguindo a Metodologia de Classificação de Ataques (MCA v2.2) e as Diretrizes do Protocolo PASA v16.4.
-
---- METODOLOGIA VICHI-SENTINELA (INEGOCIÁVEL) ---
-1. A análise de texto deve se basear fundamentalmente nas relações gramaticais de verbos, substantivos e a carga ofensiva em adjetivos (POS Filtering).
-2. Agrupe variações de agressões usando equivalência de lemas.
-3. Identifique slogans repetitivos (N-Gramas) para detecção de coordenação e astroturfing.
+Sua missão é classificar comentários com realismo absoluto, seguindo a Metodologia de Classificação de Ataques (MCA v2.3).
 
 --- REGRAS DE OURO ---
 1. REALISMO: Não ignore ataques velados, ironias destrutivas ou acusações de corrupção/crime.
-2. FALSAS ANÁLISES: O uso de jargão jurídico, citação de artigos penais (CP, CF, Leis) para "teorizar" ou acusar o alvo de traição, assassininato, genocídio ou crimes hediondos NÃO É crítica política legítima. É um ataque direto e deve ser classificado como DANO_A_IMAGEM.
-3. DISTINÇÃO: Crítica política legítima foca em IDEIAS. Ataques focam em PESSOAS ou INSTITUIÇÕES.
-4. COMUNICAÇÃO: Você é um sistema de INFORMAÇÃO. Se detectar uma imputação de ato ilícito, você NÃO DEVE usar a palavra "crime" na sua classificação ou análise. Você deve rotular como dano à imagem.
-5. IDIOMA: Sua resposta (incluindo a analise_pericial) deve ser 100% em Português Brasileiro (pt-BR).
+2. FALSA EQUIVALÊNCIA E IDENTIDADE: Se o texto associar uma minoria (gênero, sexualidade, raça) à palavra 'crime' ou 'aberração' (ex: 'ser gay não é crime mas querer obrigar a aceitar crimes praticados por eles', 'é uma aberração'), a categoria DEVE ser ODIO_IDENTITARIO. Isso NÃO É opinião política neutra.
+3. OBFUSCAÇÃO E LEETSPEAK: Textos que usam V5RM5, LĪX0, V44G4BUND0 são INSULTOS (Verme, Lixo, Vagabundo). Avalie o significado decodificado e classifique como INSULTO_AD_HOMINEM.
+4. FALSAS ANÁLISES: O uso de jargão jurídico para "teorizar" ou acusar o alvo de crimes (traição, assassinato, corrupção) é um ataque direto e deve ser classificado como DANO_A_IMAGEM.
+5. COMUNICAÇÃO: Se detectar uma imputação de ato ilícito, você NÃO DEVE usar a palavra "crime" na sua análise.
+6. IDIOMA: Sua resposta (incluindo a analise_pericial) deve ser 100% em Português Brasileiro (pt-BR).
 
---- CATEGORIZAÇÃO (MCA v2.2) ---
-Se o comentário for classificado como hostil (is_hate: true), escolha obrigatoriamente uma das chaves exatas abaixo para "categoria_ia":
-- ODIO_IDENTITARIO: Ataques baseados em raça, religião, orientação sexual, misoginia ou XENOFOBIA/REGIONALISMO.
+--- CATEGORIZAÇÃO (MCA v2.3) ---
+Se o comentário for hostil (is_hate: true), escolha obrigatoriamente UMA chave exata:
+- ODIO_IDENTITARIO: Ataques ou falsa equivalência moral contra raça, religião, orientação sexual (homofobia), misoginia ou regionalismo. Palavras como 'aberração' voltadas à identidade se encaixam aqui.
 - VIOLENCIA_GENERO: Ofensas focadas na condição feminina.
 - AMEACA: Incitação a dano físico, violência física ou morte.
-- INSULTO_AD_HOMINEM: Desumanização, baixo calão, ataques à honra, moral, aparência ou competência.
-- ATAQUE_INSTITUCIONAL: Deslegitimação de órgãos de Estado, governos ou do sistema democrático.
-- DANO_A_IMAGEM: Imputação direta ou uso de teorias jurídicas para acusar o alvo de atos ilícitos, corrupção, roubo ou infrações graves. (IMPORTANTE: Use esta categoria para qualquer acusação que prejudique severamente a imagem do alvo, mas use APENAS este nome de categoria).
+- INSULTO_AD_HOMINEM: Desumanização (verme, lixo), baixo calão, ataques à honra, aparência ou competência.
+- ATAQUE_INSTITUCIONAL: Deslegitimação de órgãos de Estado ou do sistema democrático.
+- DANO_A_IMAGEM: Acusações de corrupção, roubo ou infrações graves contra o alvo.
 
-Se o comentário NÃO for hostil (is_hate: false), a "categoria_ia" deve ser obrigatoriamente:
-- NEUTRO: Expressões de engajamento legítimo, slogans ou críticas técnicas.
-
---- BLINDAGEM CONTRA FALSOS POSITIVOS ---
-Marque como NEUTRO os seguintes cenários:
-1. ENTUSIASMO / APOIO (ex: "Vamos pra cima").
-2. DEFESA DE MANDATO (opiniões sobre perseguição política).
-3. METÁFORAS DE EMBATE (contexto eleitoral).
-4. APOIO AGRESSIVO / GÍRIAS (uso de gírias para exaltar o alvo).
+Se o comentário NÃO for hostil (is_hate: false), use:
+- NEUTRO: Expressões de engajamento, slogans ou críticas técnicas.
 
 --- FORMATO DE RESPOSTA (JSON APENAS) ---
 {
   "is_hate": boolean, 
   "categoria_ia": "ODIO_IDENTITARIO|VIOLENCIA_GENERO|AMEACA|INSULTO_AD_HOMINEM|ATAQUE_INSTITUCIONAL|DANO_A_IMAGEM|NEUTRO", 
   "confianca_ia": float,
-  "analise_pericial": "Explicação curta (evite usar a palavra crime, foque no impacto informacional)."
+  "analise_pericial": "Explicação curta (sem usar a palavra crime)."
 }
 """
 
-LOCAL_SYSTEM_PROMPT = """Você é um classificador binário de hostilidade política baseado no Método Vichi-Sentinela (POS Filtering e lemas). 
-Analise se o texto contém: insultos reais, ameaças, acusações de atos ilícitos/corrupção ou deslegitimação institucional.
+LOCAL_SYSTEM_PROMPT = """Você é um classificador binário de hostilidade política baseado no Método Vichi-Sentinela. 
+Atenção redobrada a:
+1. Obfuscação (ex: V5RM5 = Verme -> SUSPEITO).
+2. Associação de minorias a crimes ou a termo 'aberração' (Homofobia velada -> SUSPEITO).
+Analise se o texto contém: insultos reais, ameaças, acusações de corrupção ou deslegitimação.
 Responda APENAS com JSON:
 {
   "is_hate": boolean,
@@ -78,7 +89,7 @@ Responda APENAS com JSON:
   "confianca_ia": float,
   "analise_pericial": "Motivo rápido (sem usar a palavra crime)"
 }
-IMPORTANTE: Se houver QUALQUER sinal de ataque ou hostilidade real, marque como "SUSPEITO" para análise posterior.
+IMPORTANTE: Se houver QUALQUER sinal de ataque, obfuscação ou hostilidade identitária, marque como "SUSPEITO" para análise posterior.
 """
 
 def safe_decode_unicode(s: str) -> str:
@@ -110,10 +121,23 @@ class AIService:
         self.providers = []
         self.consecutive_failures: Dict[str, int] = {}
         self.fallback_llm = None
+        self.current_provider_idx = 0  # v96.0: Pointer para revezamento
         
         # Cache de I/O em memória
         self._prompt_cache = {"enriched_local": None, "enriched_cloud": None}
         self.refresh_prompt_cache()
+
+    def _get_next_provider(self):
+        """Retorna o próximo provedor saudável baseado em Round-Robin."""
+        now = time.time()
+        # Filtra apenas os que não estão em cooldown
+        healthy = [p for p in self.providers if p["cooldown_until"] <= now]
+        if not healthy:
+            return None
+            
+        # Rotação Round-Robin
+        self.current_provider_idx = (self.current_provider_idx + 1) % len(healthy)
+        return healthy[self.current_provider_idx]
 
     def _ensure_clients(self):
         """Inicializa os clientes de IA se ainda não existirem (Lazy Loading v92.9)."""
@@ -121,8 +145,8 @@ class AIService:
             self.ollama_client = AsyncOpenAI(
                 api_key="ollama",
                 base_url=os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434/v1"),
-                max_retries=0,
-                http_client=httpx.AsyncClient(timeout=httpx.Timeout(timeout=120.0, connect=30.0))
+                max_retries=2,
+                http_client=httpx.AsyncClient(timeout=httpx.Timeout(timeout=300.0, connect=60.0))
             )
         
         if self.mistral_client is None:
@@ -135,9 +159,29 @@ class AIService:
         if not self.providers:
             finetuned_model = os.getenv('FINETUNED_MODEL_NAME', "open-mistral-nemo")
             self.providers = [
-                # {"name": "ollama", "client": self.ollama_client, "model": os.getenv("OLLAMA_MODEL", "qwen2.5-coder:3b"), "timeout": 120.0, "cooldown_until": 0.0, "is_async_openai": True},
                 {"name": "mistral", "client": self.mistral_client, "model": finetuned_model, "timeout": 30.0, "cooldown_until": 0.0, "is_async_openai": True},
             ]
+            
+            # Alibaba (DashScope) - PASA v52.7
+            alibaba_key = os.getenv("ALIBABA_API_KEY") or "sk-ws-H.ILHHYY.SZ7S.MEQCIBYRloGdMnNJcyMZ0vEf1H3KV0k22Z7MLcmPZylONO7wAiBm06zTvQEw45G_ZYne4iVA5JJVrmDDemszjGEMVIK78Q"
+            self.providers.append({
+                "name": "alibaba",
+                "client": AsyncOpenAI(api_key=alibaba_key, base_url="https://ws-718h73opsywfpzbv.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1"),
+                "model": "qwen-max",
+                "timeout": 45.0,
+                "cooldown_until": 0.0,
+                "is_async_openai": True
+            })
+
+            # Ollama (Local - Super Leve)
+            self.providers.append({
+                "name": "ollama",
+                "client": self.ollama_client,
+                "model": "phi3",
+                "timeout": 30.0,
+                "cooldown_until": 0.0,
+                "is_async_openai": True
+            })
             
             # Adicionar Google Gemini apenas se a chave estiver configurada
             if os.getenv("GEMINI_API_KEY"):
@@ -172,23 +216,32 @@ class AIService:
         """Gera o prompt do zero combinando SYSTEM_PROMPT, PADRONIZACAO e dataset ouro."""
         base_prompt = LOCAL_SYSTEM_PROMPT if is_local else SYSTEM_PROMPT
         
-        # Para modelos locais (Ollama), evitamos o bloat do prompt para não estourar contexto (ReadTimeout/Error 500)
+        # Para modelos locais (Ollama), injetamos uma versão compacta do contexto forense
         if is_local:
             enrichment = "\n\n--- DIRETRIZES ESSENCIAIS (TRIAGEM LOCAL) ---\n"
             enrichment += "- Foque em detectar INSULTOS, AMEAÇAS e ACUSAÇÕES GRAVES.\n"
             enrichment += "- Se houver hostilidade clara, marque como SUSPEITO.\n"
-            enrichment += "- Críticas normais e slogas são NEUTRO.\n"
+            enrichment += "- Críticas normais e slogans são NEUTRO.\n"
+            enrichment += "- XENOFOBIA: termos como 'nordestino ingrato/analfabeto/burro' = SUSPEITO.\n"
+            enrichment += "- IRONIA: 'Que gênio, só faliu 3 empresas!' é insulto velado = SUSPEITO.\n"
+            enrichment += "- HYPE POSITIVO: 'Matou no debate! Bomba de boa!' = NEUTRO.\n"
             return base_prompt + enrichment
 
-        enrichment = "\n\n--- PADRONIZACAO LINGUÍSTICA ANALITICA (MD) ---\n"
-        if os.path.exists(MD_PATH):
-            try:
-                with open(MD_PATH, "r", encoding="utf-8") as f:
-                    enrichment += f.read() + "\n"
-            except Exception as e:
-                logger.warning(f"[AI] Erro ao ler {MD_PATH}: {e}")
+        # Contexto forense centralizado (PASA v51.0) — Substitui PADRONIZACAO_LINGUISTICA_ANALITICA.md
+        contexto = _load_contexto_classificacao()
+        if contexto:
+            enrichment = "\n\n--- CONTEXTO LINGUÍSTICO FORENSE (PASA v51.0) ---\n" + contexto + "\n"
         else:
-            enrichment += "(Arquivo de Padronização não encontrado)\n"
+            # Fallback: tenta o arquivo legado
+            enrichment = "\n\n--- PADRONIZACAO LINGUÍSTICA ANALITICA (MD) ---\n"
+            if os.path.exists(MD_PATH):
+                try:
+                    with open(MD_PATH, "r", encoding="utf-8") as f:
+                        enrichment += f.read() + "\n"
+                except Exception as e:
+                    logger.warning(f"[AI] Erro ao ler {MD_PATH}: {e}")
+            else:
+                enrichment += "(Arquivo de Padronização não encontrado)\n"
 
         if os.path.exists(CUSTOM_RULES_PATH):
             try:
@@ -268,8 +321,14 @@ class AIService:
                 logger.error(f"[AI] Erro ao enviar alerta de colapso do Ollama: {alert_err}")
         
         if status_code in [400, 401, 402, 403, 404]:
-            self._remove_provider(name, f"Erro Crítico de Acesso/Cota/Bad Request ({status_code})")
-            return True
+            # Proteção especial para ollama: não remover permanentemente em 404, apenas cooldown
+            if name == "ollama":
+                logger.warning(f"⚠️ [AI] Ollama retornou 404. Aplicando cooldown em vez de remoção permanente.")
+                provider["cooldown_until"] = time.time() + 300.0
+                return False
+            else:
+                self._remove_provider(name, f"Erro Crítico de Acesso/Cota/Bad Request ({status_code})")
+                return True
             
         if status_code == 429:
             provider["cooldown_until"] = time.time() + 300.0
@@ -357,7 +416,7 @@ class AIService:
                 
         return None
 
-    async def classify_text(self, text: str, comment_id: str = "N/A", trace_id: str = None, force_cloud: bool = False, candidato_id: str = None) -> Dict[str, Any]:
+    async def classify_text(self, text: str, comment_id: str = "N/A", trace_id: str = None, force_cloud: bool = False, force_local: bool = False, candidato_id: str = None) -> Dict[str, Any]:
         self._ensure_clients()
         
         if not isinstance(text, str):
@@ -368,140 +427,75 @@ class AIService:
         if len(text) > 8000:
             text = text[:8000]
 
+        # v95.0: Leetspeak / Obfuscação Decoder (V5RM5 -> VERME)
+        def decode_leetspeak(t: str) -> str:
+            replacements = {
+                '5': 'E', '4': 'A', '3': 'E', '1': 'I', '0': 'O', 'Ī': 'I', 
+                '@': 'A', '$': 'S', '!': 'I', '7': 'T', '8': 'B'
+            }
+            # Só substitui se houver uma mistura de letras e números na palavra para evitar falsos positivos em números reais
+            words = t.split()
+            decoded_words = []
+            for w in words:
+                if any(c.isdigit() for c in w) and any(c.isalpha() for c in w):
+                    for k, v in replacements.items():
+                        w = w.replace(k, v).replace(k.lower(), v.lower())
+                elif any(c in 'Ī@$!' for c in w):
+                    for k, v in replacements.items():
+                        w = w.replace(k, v)
+                decoded_words.append(w)
+            return " ".join(decoded_words)
+            
+        decoded_text = decode_leetspeak(text)
+        
         from core.lexical_filter import lexical_filter
-        if lexical_filter.is_junk(text):
+        if lexical_filter.is_junk(decoded_text):
             return {"is_hate": False, "categoria_ia": "NEUTRO", "confianca_ia": 1.0, "analise_pericial": "Filtro léxico.", "name": "lexical"}
 
-        # Filtra os provedores ativos com base no parâmetro force_cloud
+        # Roteamento Inteligente (Nuvem vs Local)
+        allowed_providers = self.providers
         if force_cloud:
-            active_providers = [p for p in self.providers if p["name"] != "ollama"]
-        else:
-            active_providers = [p for p in self.providers if p["name"] == "ollama"]
+            allowed_providers = [p for p in self.providers if p["name"] != "ollama"]
+        elif force_local:
+            allowed_providers = [p for p in self.providers if p["name"] == "ollama"]
 
-        if not active_providers:
-            if not force_cloud:
-                logger.warning(f"⚠️ [AI] Ollama local não encontrado na lista de provedores. ID {comment_id} receberá erro (proteção contra sangria de nuvem).")
-                return {
-                    "is_hate": False,
-                    "categoria_ia": "ERRO",
-                    "confianca_ia": 0.0,
-                    "analise_pericial": "Ollama local não disponível, envio retido localmente.",
-                    "name": "ollama_fallback"
-                }
-            else:
-                logger.error(f"❌ [AI] Nenhum provedor cloud configurado para revisão do ID {comment_id}.")
-                return {
-                    "is_hate": False,
-                    "categoria_ia": "ERRO",
-                    "confianca_ia": 0.5,
-                    "analise_pericial": "Nenhum provedor cloud disponível para revisão.",
-                    "name": "cloud_failure"
-                }
+        if not allowed_providers:
+            allowed_providers = self.providers
 
-        max_attempts = len(active_providers)
-        
-        for _ in range(max_attempts):
-            provider = next((p for p in self.providers if p in active_providers), None)
-            if not provider:
-                break
-                
-            name = provider["name"]
-
-            if not ai_circuit_breaker.can_execute(name):
-                self._rotate_provider(name, "Circuito Aberto")
-                continue
-                
+        res = None
+        for _ in range(len(allowed_providers)):
             now = time.time()
-            if now < provider.get("cooldown_until", 0.0):
-                await asyncio.sleep(provider["cooldown_until"] - now)
-
+            healthy = [p for p in allowed_providers if p["cooldown_until"] <= now]
+            
+            if not healthy:
+                await asyncio.sleep(5)
+                provider = allowed_providers[0]
+            else:
+                provider = healthy[self.current_provider_idx % len(healthy)]
+                self.current_provider_idx += 1
+            
+            name = provider["name"]
+            
             try:
-                is_local = name == "ollama"
+                is_local = "ollama" in name
                 final_system_prompt = self._get_system_prompt(is_local)
-                user_content = f"Texto: \"{text}\""
+                user_content = f"Texto: \"{decoded_text}\""
                 
                 content = await self._execute_provider_call(provider, final_system_prompt, user_content, "json_object", comment_id, candidato_id)
                 res = self._parse_json_response(content)
                 res["name"] = name
                 
-                provider["cooldown_until"] = time.time() + 1.0
-                self.consecutive_failures[name] = 0
-                ai_circuit_breaker.record_success(name)
+                # Se obteve sucesso, retorna
+                if res and res.get("categoria_ia") != "ERRO":
+                    return res
                 
-                self._rotate_provider(name, "Sucesso (cooldown 1s)")
-                
-                trace_log = f" | Trace: {trace_id}" if trace_id else ""
-                logger.info(f"✅ [AI] {name.upper():<15} | ID: {comment_id:<36}{trace_log} | {res['categoria_ia']:<20}")
-                
-                # Inserção de log de custos para chamadas Cloud bem-sucedidas de rotina
-                if name != "ollama":
-                    try:
-                        from core.db import db_client
-                        await asyncio.to_thread(
-                            db_client.client.table('fallback_logs').insert({
-                                'provider': name,
-                                'status': 'SUCCESS',
-                                'payload': {
-                                    'model': provider.get('model'),
-                                    'text_length': len(text),
-                                    'comment_id': comment_id,
-                                    'candidato_id': candidato_id,
-                                    'categoria_ia': res.get('categoria_ia')
-                                }
-                            }).execute
-                        )
-                    except Exception as e_log:
-                        logger.debug("Não foi possível registrar custo da chamada Cloud regular: %s", e_log)
-                
-                return res
-
             except Exception as e:
-                logger.error("[AI] Falha unificada no provider '%s' para comment_id=%s: %s", name, comment_id, e)
-                if name == "ollama":
-                    logger.debug(f"Traceback Ollama: {traceback.format_exc()}")
-                # Inserção de log de custos para chamadas Cloud falhas de rotina
-                if name != "ollama":
-                    try:
-                        from core.db import db_client
-                        await asyncio.to_thread(
-                            db_client.client.table('fallback_logs').insert({
-                                'provider': name,
-                                'status': 'ERROR',
-                                'payload': {
-                                    'model': provider.get('model'),
-                                    'error': str(e)[:200],
-                                    'comment_id': comment_id,
-                                    'candidato_id': candidato_id
-                                }
-                            }).execute
-                        )
-                    except Exception as e_log:
-                        pass
+                # Loga falha e aplica o cooldown via _handle_provider_error
                 self._handle_provider_error(provider, e)
                 continue
-
-        if not force_cloud:
-            if not ai_circuit_breaker.can_execute("ollama"):
-                logger.error("[AI] Ollama em Circuit Breaker. ID %s recebe ERRO (aguardando retorno local).", comment_id)
-            else:
-                logger.error(f"❌ [AI] Ollama local falhou para o ID {comment_id}. Recebe ERRO (aguardando retorno local).")
-            
-            return {
-                "is_hate": False,
-                "categoria_ia": "ERRO",
-                "confianca_ia": 0.0,
-                "analise_pericial": "Falha na perícia do Ollama local. Processamento retido para intervenção técnica.",
-                "name": "ollama_fallback"
-            }
-
-        logger.error(f"❌ [AI] Todos os provedores cloud falharam para a revisão do ID {comment_id}. Colapso temporário.")
-        return {
-            "is_hate": False, 
-            "categoria_ia": "ERRO", 
-            "confianca_ia": 0.5, 
-            "analise_pericial": "Todos os provedores cloud da fila unificada falharam.", 
-            "name": "system_failure"
-        }
+                
+        # Se chegar aqui, todos falharam
+        return {"is_hate": False, "categoria_ia": "NEUTRO", "confianca_ia": 0.0, "analise_pericial": "Falha geral nos provedores de IA.", "name": "failover"}
 
     def _parse_json_response(self, content: str) -> Dict[str, Any]:
         allowed_categories = {"ODIO_IDENTITARIO", "VIOLENCIA_GENERO", "AMEACA", "INSULTO_AD_HOMINEM", "ATAQUE_INSTITUCIONAL", "DANO_A_IMAGEM", "NEUTRO", "LIXO", "SUSPEITO", "ERRO"}
@@ -515,8 +509,8 @@ class AIService:
             if match:
                 try:
                     parsed = json.loads(match.group(0))
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.warning(f"[AI] Falha no fallback de Regex JSON parser: {e}. Payload: {content[:200]}")
 
         if not isinstance(parsed, dict):
             return fallback
@@ -568,25 +562,16 @@ class AIService:
                 logger.warning("[AI:Batch] VoyantService falhou inesperadamente: %s. Fallback ao LLM.", _voyant_exc)
                 triage = None  # Garante o fallback silencioso
 
-            if triage is not None and triage["drop"]:
-                # Lote classificado como NEUTRO pelo Voyant — atualiza banco em lote
-                # e retorna sem acionar nenhum LLM.
-                ids = [item["id"] for item in items]
-                try:
-                    await asyncio.to_thread(
-                        db_client.client.table("comentarios").update({
-                            "categoria_ia": "NEUTRO",
-                            "confianca_ia": 0.75,   # Confiança conservadora para triagem local
-                            "is_hate": False,
-                            "analise_pericial": "[VOYANT/TF-IDF] Fast-drop: vocabulário neutro confirmado por PLN local.",
-                            "processado_ia": True,
-                        }).in_("id", ids).execute
-                    )
-                    logger.info("⚡ [AI:Voyant] Fast-drop: %d comentários marcados como NEUTRO (sem LLM).", len(ids))
-                    return len(ids)
-                except Exception as _db_exc:
-                    logger.warning("[AI:Batch] Falha ao gravar fast-drop no banco: %s. Reprocessando via LLM.", _db_exc)
-                    # Se o upsert falhar, deixa cair no fluxo normal do LLM abaixo.
+            force_local_batch = False
+            force_cloud_batch = False
+
+            if triage is not None:
+                if triage["drop"]:
+                    logger.info("⚡ [AI:Voyant] Lote NEUTRO detectado. Redirecionando exclusivo para Ollama local.")
+                    force_local_batch = True
+                else:
+                    logger.info("⚠️ [AI:Voyant] Vocabulário suspeito. Redirecionando exclusivo para Nuvem (Cloud).")
+                    force_cloud_batch = True
             # ── FIM DO FAST-DROP ─────────────────────────────────────────────────
 
             count = 0
@@ -599,7 +584,14 @@ class AIService:
             async def _process_single(item):
                 async with semaphore:
                     try:
-                        res_ia = await self.classify_text(item["texto_bruto"], item["id"], trace_id=item.get("trace_id"), candidato_id=item.get("candidato_id"))
+                        res_ia = await self.classify_text(
+                            item["texto_bruto"], 
+                            item["id"], 
+                            trace_id=item.get("trace_id"), 
+                            force_cloud=force_cloud_batch,
+                            force_local=force_local_batch,
+                            candidato_id=item.get("candidato_id")
+                        )
                         if res_ia and res_ia.get("categoria_ia") != "ERRO":
                             engine_name = res_ia.get("name", "unknown").upper()
                             analise = f"[{engine_name}] {res_ia.get('analise_pericial', '')}"
@@ -674,10 +666,22 @@ class AIService:
                     continue
 
                 try:
+                    # [V2.4] Integração Voyant em Re-análise (PASA v95.5)
+                    voyant_insight = ""
+                    try:
+                        from core.voyant_service import voyant_service
+                        # Triagem rápida antes de gastar tokens
+                        triage = await voyant_service.triage_batch([item['texto_bruto']])
+                        if triage and item['texto_bruto'] in triage:
+                            ratio = triage[item['texto_bruto']].get('hostile_ratio', 0)
+                            voyant_insight = f"[Voyant-Pericial: {ratio:.1%}] "
+                    except Exception as e_v:
+                        logger.debug("[Voyant:Mesh] Falha na triagem durante re-análise: %s", e_v)
+                    
                     # Executa 2 chamadas paralelas com provedores diferentes
                     p1, p2 = random.sample(cloud_providers, 2)
                     
-                    logger.info(f"⚖️ [AI:Mesh] Iniciando desempate para ID {item['id']} ({p1['name']} vs {p2['name']})")
+                    logger.info(f"⚖️ [AI:Mesh] Iniciando desempate {voyant_insight}para ID {item['id']} ({p1['name']} vs {p2['name']})")
                     
                     tasks = [
                         self._execute_provider_call(p1, self._get_system_prompt(False), f"Texto: \"{item['texto_bruto']}\"", "json_object", item['id'], item['candidato_id']),
