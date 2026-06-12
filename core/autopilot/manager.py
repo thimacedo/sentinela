@@ -45,6 +45,16 @@ class AutopilotManager:
             self.diagnostician = None
             self.patcher = None
 
+        # ── v98.2: Inicia vigilância proativa de gaps de coleta ──────────────
+        # O SRE Agent passa a monitorar silêncios no banco (não só erros de processo).
+        # Roda como asyncio.Task dentro do mesmo event loop do Autopilot.
+        try:
+            from core.autopilot.sre_agent import sre_agent as _sre
+            _sre.start_proactive_watch()
+            logger.info("👁️ [Autopilot] Vigilância proativa de coleta ativada (SRE Agent v98.2).")
+        except Exception as e_watch:
+            logger.warning("⚠️ [Autopilot] Falha ao iniciar vigilância proativa: %s", e_watch)
+
     async def pulse(self):
         """Ciclo de vida do Autopilot — Loop OODA a cada 5 minutos."""
         while self.is_active:

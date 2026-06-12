@@ -1,27 +1,36 @@
 """
-SREAgent — Agente de IA para Autocura e Resiliência Operacional (PASA v52.0)
+SREAgent — Agente de IA para Autocura e Resiliência Operacional (PASA v98.2)
 ═══════════════════════════════════════════════════════════════════════════
 Loop cognitivo de baixo custo (regras determinísticas + LLM sob demanda)
 que gerencia e executa ferramentas de SRE para restabelecer a saúde do pipeline.
+
+v98.2: Adicionada vigilância proativa de coleta (run_proactive_watch).
+       O SRE Agent agora detecta silêncios no banco — não apenas erros de processo.
 """
 import logging
 import os
 import asyncio
-import time
 from datetime import datetime, timezone
-from typing import Dict, Any, List
+from typing import Dict, Any, Optional
 
 logger = logging.getLogger("core.autopilot.sre_agent")
+
+# Minutos sem coleta antes de considerar o sistema parado
+_HEARTBEAT_MAX_GAP_MIN = int(os.getenv("HEARTBEAT_MAX_GAP_MIN", "90"))
+# Intervalo do loop de vigilância proativa (segundos)
+_PROACTIVE_WATCH_INTERVAL = int(os.getenv("SRE_WATCH_INTERVAL_S", "1200"))  # 20 min
 
 
 class SREAgent:
     """
     Agente de SRE Autônomo com registro de ferramentas e OODA loop reativo.
+    v98.2: inclui vigilância proativa de gaps de coleta.
     """
 
     def __init__(self, db_client=None, ai_service=None):
         self._db = db_client
         self._ai = ai_service
+        self._watch_task: Optional[asyncio.Task] = None
 
     @property
     def db(self):
@@ -57,7 +66,22 @@ class SREAgent:
         except ImportError:
             pass
 
-    # 🛠️ REGISTRO DE FERRAMENTAS (TOOLS)
+    def _record_event(self, event_type: str, severity: str, description: str, metadata: dict = None):
+        """Grava um evento em system_events para rastreabilidade."""
+        try:
+            self.db.table("system_events").insert({
+                "event_type": event_type,
+                "source": "sre_agent",
+                "severity": severity,
+                "description": description,
+                "metadata": metadata or {},
+                "created_at": datetime.now(timezone.utc).isoformat(),
+            }).execute()
+        except Exception as e:
+            logger.warning("[SRE Agent] Falha ao gravar system_event: %s", e)
+
+    # ─── FERRAMENTAS ──────────────────────────────────────────────────────────
+
     async def tool_restart_worker(self, worker_id: str) -> str:
         """Reinicia um worker específico via EventBus."""
         self.log_action(f"Chamando restart_worker para '{worker_id}'")
@@ -96,14 +120,11 @@ class SREAgent:
         self.log_action(f"Chamando cooldown_target para '{username}' por {duration_minutes} minutos")
         try:
             self.db.table("candidatos").update({"status_monitoramento": "DESATIVADO"}).eq("username", username).execute()
-            # Registra o cooldown na tabela de eventos do sistema
-            self.db.table("system_events").insert({
-                "event_type": "cooldown_target",
-                "source": "sre_agent",
-                "severity": "warning",
-                "description": f"Perfil {username} colocado em cooldown por {duration_minutes} min.",
-                "metadata": {"username": username, "duration_minutes": duration_minutes}
-            }).execute()
+            self._record_event(
+                "cooldown_target", "warning",
+                f"Perfil {username} colocado em cooldown por {duration_minutes} min.",
+                {"username": username, "duration_minutes": duration_minutes}
+            )
             return f"Sucesso: Perfil {username} desativado temporariamente no Supabase."
         except Exception as e:
             return f"Erro ao colocar perfil em cooldown: {e}"
@@ -114,12 +135,118 @@ class SREAgent:
         try:
             os.environ["NUM_SCRAPER_WORKERS"] = str(concurrency)
             os.environ["AUTOPILOT_FORCE_JITTER"] = "true"
-            # Define valores em formato global para novos sub-processos
             return f"Sucesso: Variáveis de ambiente NUM_SCRAPER_WORKERS={concurrency} aplicadas."
         except Exception as e:
             return f"Erro ao ajustar variáveis: {e}"
 
-    # 🧠 LOOP COGNITIVO OODA
+    async def tool_check_collection_health(self) -> Dict[str, Any]:
+        """
+        [v98.2] Verifica o gap de coleta consultando o banco diretamente.
+        Retorna status e gap em minutos. Se crítico, dispara restart automático.
+        """
+        self.log_thought("Verificando saúde da coleta no banco...")
+        try:
+            result = self.db.table("comentarios") \
+                .select("data_coleta") \
+                .order("data_coleta", desc=True) \
+                .limit(1) \
+                .execute()
+
+            if not result.data:
+                gap_min = 9999
+                ultima = None
+            else:
+                ultima_str = result.data[0]["data_coleta"]
+                ultima = datetime.fromisoformat(ultima_str.replace("Z", "+00:00"))
+                gap_min = (datetime.now(timezone.utc) - ultima).total_seconds() / 60
+
+            status = "ok" if gap_min <= _HEARTBEAT_MAX_GAP_MIN else "critico"
+
+            logger.info(
+                "[SRE Agent] Saúde da coleta: gap=%.0fmin | threshold=%dmin | status=%s",
+                gap_min, _HEARTBEAT_MAX_GAP_MIN, status
+            )
+
+            if status == "critico":
+                descricao = (
+                    f"Coleta parada há {round(gap_min)} minutos "
+                    f"(threshold: {_HEARTBEAT_MAX_GAP_MIN}min). "
+                    f"Última: {ultima.strftime('%d/%m %H:%M') if ultima else 'nunca'}. "
+                    "Disparando restart automático."
+                )
+                self.log_action(f"⚠️ {descricao}")
+                self._record_event("COLETA_PARADA", "critical", descricao, {
+                    "gap_minutes": round(gap_min),
+                    "ultima_coleta": ultima.isoformat() if ultima else None,
+                    "trigger": "sre_agent_proactive_watch",
+                    "action": "restart_main_runner",
+                })
+                await self._notify_whatsapp(descricao)
+                restart_result = await self.tool_restart_main_runner()
+                self.log_action(f"Restart: {restart_result}")
+
+            return {"status": status, "gap_min": round(gap_min), "ultima_coleta": str(ultima)}
+
+        except Exception as e:
+            logger.error("[SRE Agent] Erro ao checar saúde da coleta: %s", e)
+            return {"status": "erro", "gap_min": -1, "error": str(e)}
+
+    async def _notify_whatsapp(self, message: str):
+        """Envia alerta WhatsApp via CallMeBot (se WHATSAPP_PHONE configurado)."""
+        phone = os.getenv("WHATSAPP_PHONE", "")
+        api_key = os.getenv("WHATSAPP_API_KEY", "")
+        if not phone or not api_key:
+            return
+        try:
+            import urllib.request
+            import urllib.parse
+            texto = f"🚨 [Sentinela SRE] {message}"
+            url = (
+                f"https://api.callmebot.com/whatsapp.php"
+                f"?phone={phone}&apikey={api_key}"
+                f"&text={urllib.parse.quote(texto)}"
+            )
+            urllib.request.urlopen(url, timeout=8)
+            logger.info("[SRE Agent] Alerta WhatsApp enviado.")
+        except Exception as e:
+            logger.warning("[SRE Agent] Falha ao enviar WhatsApp: %s", e)
+
+    # ─── VIGILÂNCIA PROATIVA ──────────────────────────────────────────────────
+
+    async def run_proactive_watch(self):
+        """
+        [v98.2] Loop de vigilância autônoma — iniciado pelo Watchdog em background.
+        Checa o gap de coleta a cada SRE_WATCH_INTERVAL_S segundos (padrão: 20min).
+        Não precisa ser chamado por erro — detecta silêncios por conta própria.
+        """
+        logger.info(
+            "[SRE Agent] 👁️ Vigilância proativa iniciada (intervalo: %ds | threshold: %dmin)",
+            _PROACTIVE_WATCH_INTERVAL, _HEARTBEAT_MAX_GAP_MIN
+        )
+        while True:
+            try:
+                await self.tool_check_collection_health()
+            except Exception as e:
+                logger.error("[SRE Agent] Erro no loop de vigilância proativa: %s", e)
+            await asyncio.sleep(_PROACTIVE_WATCH_INTERVAL)
+
+    def start_proactive_watch(self, loop: asyncio.AbstractEventLoop = None):
+        """
+        Inicia o loop de vigilância proativa como task assíncrona.
+        Chamado pelo Watchdog no boot para garantir monitoramento contínuo.
+        """
+        if self._watch_task and not self._watch_task.done():
+            logger.debug("[SRE Agent] Vigilância proativa já está rodando.")
+            return
+        try:
+            lp = loop or asyncio.get_event_loop()
+            self._watch_task = lp.create_task(self.run_proactive_watch())
+            logger.info("[SRE Agent] ✅ Task de vigilância proativa registrada.")
+        except RuntimeError:
+            logger.debug("[SRE Agent] Sem event loop para iniciar vigilância proativa.")
+
+    # ─── LOOP COGNITIVO OODA ──────────────────────────────────────────────────
+
     async def diagnose_and_heal(self, error_type: str, logs: str) -> str:
         """
         Observa e orienta o diagnóstico, escolhe e executa a melhor ferramenta.
@@ -139,10 +266,15 @@ class SREAgent:
             self.log_thought("Rate limit atingido. Aumentando jitter operacional...")
             return await self.tool_adjust_concurrency_and_jitter(concurrency=1, delay_seconds=10)
 
+        if error_type == "COLETA_PARADA":
+            self.log_thought("Silêncio de coleta detectado. Verificando saúde e reiniciando...")
+            result = await self.tool_check_collection_health()
+            return f"Verificação de saúde: {result}"
+
         # 2. IA sob demanda (DOM_CHANGE ou UNKNOWN)
         if error_type in ["DOM_CHANGE", "UNKNOWN"]:
             self.log_thought("Erro estrutural ou desconhecido. Consultando malha de IA...")
-            
+
             system_prompt = (
                 "Você é o Agente de SRE Autônomo do Sentinela. Sua missão é ler logs de erro e escolher a melhor ferramenta.\n"
                 "Ferramentas Disponíveis:\n"
@@ -150,9 +282,10 @@ class SREAgent:
                 "2. rotate_session(): executa re-login de cookies expirados.\n"
                 "3. adjust_concurrency_and_jitter(): reduz velocidade se houver rate limit / bloqueio.\n"
                 "4. cooldown_target(username): desativa perfil se houver erro contínuo associado a um perfil específico.\n"
+                "5. check_collection_health(): verifica gap de coleta e reinicia se necessário.\n"
                 "\n"
                 "Responda APENAS com JSON no formato:\n"
-                '{"tool": "restart_main_runner|rotate_session|adjust_concurrency_and_jitter|cooldown_target", '
+                '{"tool": "restart_main_runner|rotate_session|adjust_concurrency_and_jitter|cooldown_target|check_collection_health", '
                 '"target_param": "username se for cooldown, ou vazio", "reason": "explicação curta"}'
             )
 
@@ -164,13 +297,16 @@ class SREAgent:
                     tool_name = res.get("tool")
                     reason = res.get("reason", "Sem justificativa.")
                     self.log_thought(f"Decisão da IA: ferramenta '{tool_name}' devido a: {reason}")
-                    
+
                     if tool_name == "rotate_session":
                         return await self.tool_rotate_session()
                     elif tool_name == "adjust_concurrency_and_jitter":
                         return await self.tool_adjust_concurrency_and_jitter(concurrency=1, delay_seconds=10)
                     elif tool_name == "cooldown_target" and res.get("target_param"):
                         return await self.tool_cooldown_target(res["target_param"])
+                    elif tool_name == "check_collection_health":
+                        result = await self.tool_check_collection_health()
+                        return str(result)
                     elif tool_name == "restart_main_runner":
                         return await self.tool_restart_main_runner()
                     else:
