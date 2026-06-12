@@ -317,16 +317,23 @@ class WkColetaInstagram(BaseWorker):
             stats = self.scraper.stats
 
             if comments_count == 0:
+                error_reason = "no_comments_found"
                 if stats.get("junk_detected", 0) > 0:
                     self.logger.warning(f"⚠️ [V2] Apenas lixo detectado para @{target.username}. Sinalizando falha de extração.")
-                    result = CycleResult(
-                        worker_id=self.worker_id, cycle=self.cycle, target=target.username,
-                        source="v2_engine", extracted=0, simulated=False, error="junk_detected"
-                    )
-                    return result
+                    error_reason = "junk_detected"
+                elif stats.get("posts_found", 0) == 0:
+                    self.logger.warning(f"⚠️ [V2] Nenhum post encontrado na página do perfil @{target.username}.")
+                    error_reason = "no_posts_found"
+                elif stats.get("errors", 0) > 0:
+                    self.logger.warning(f"⚠️ [V2] Erros de Playwright/Extração detectados ({stats.get('errors')} erros) durante a raspagem de @{target.username}.")
+                    error_reason = "playwright_error"
+                elif stats.get("posts_scraped", 0) > 0:
+                    self.logger.warning(f"⚠️ [V2] Posts abertos com sucesso, mas nenhum comentário encontrado para @{target.username}.")
+                    error_reason = "no_comments_in_posts"
+                
                 result = CycleResult(
                     worker_id=self.worker_id, cycle=self.cycle, target=target.username,
-                    source="v2_engine", extracted=0, simulated=False, error="no_comments_found"
+                    source="v2_engine", extracted=0, simulated=False, error=error_reason
                 )
                 return result
 

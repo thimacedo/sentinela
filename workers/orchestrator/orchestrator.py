@@ -21,12 +21,20 @@ class SentinelaOrchestrator:
         "dom_change": ["selector", "not found", "element", "dom", "seletor"],
         "rate_limit": ["429", "rate limit", "too many", "blocked", "bloqueado"],
         "network": ["timeout", "connection", "refused", "unreachable", "conexão"],
+        "no_posts": ["no_posts_found"],
+        "empty_posts": ["no_comments_in_posts"],
+        "playwright_fault": ["playwright_error"],
+        "junk_data": ["junk_detected"],
     }
     _SUGESTOES_PADRAO = {
         "session": "Sessão expirada detectada. SUGESTÃO: Verificar e renovar cookies do Instagram via script de export.",
         "dom_change": "Seletor DOM falhou. SUGESTÃO: Auditar seletores CSS no instagram_scraper_v2.py e atualizar.",
         "rate_limit": "Rate limit atingido. SUGESTÃO: Aumentar jitter entre requisições e reduzir MAX_POSTS_PER_PROFILE.",
         "network": "Falha de rede detectada. SUGESTÃO: Verificar conectividade e aguardar recuperação automática.",
+        "no_posts": "Nenhum post foi localizado na página do perfil. SUGESTÃO: O perfil pode ser privado, não possuir publicações ou a página do Instagram falhou no carregamento inicial.",
+        "empty_posts": "Os posts foram acessados com sucesso, mas não continham nenhum comentário. SUGESTÃO: O perfil do candidato está sem engajamento recente ou os comentários estão desativados.",
+        "playwright_fault": "Erro de execução do navegador/Playwright. SUGESTÃO: Reiniciar processos zumbis do Chromium ou verificar integridade da instalação do driver.",
+        "junk_data": "Apenas dados irrelevantes ou lixo de renderização detectados. SUGESTÃO: Verificar se a conta do Instagram caiu em checkpoint de segurança ou desafio CAPTCHA.",
         "unknown": "Erro desconhecido. SUGESTÃO: Verificar logs detalhados em logs/main_runner.json.",
     }
 

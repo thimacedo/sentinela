@@ -16,6 +16,7 @@ _last_updated: 2026-06-12 | branch: main | version: v97.6_
    - Forçada a coleta do candidato prioritário `@benmendes` com prioridade 0 para furar a fila do orquestrador.
    - Validada a atuação em tempo real do SRE Agent do Watchdog, que aplicou com sucesso a autocura (restart do runner principal) ao detectar erro desconhecido e crash de IPC do Playwright (EPIPE).
    - Validada a auto-recuperação de seletores DOM (DOM Healing) via visão computacional do Gemini 2.5 Flash, seguido de cache hit para evitar gastos desnecessários de tokens.
+   - Implementado o **Diagnóstico Granular de Coleta Zero**: O worker `WkColetaInstagram` agora analisa as estatísticas de raspagem e Playwright para classificar coletas vazias de forma detalhada (`no_posts_found`, `no_comments_in_posts`, `playwright_error`, `junk_detected`). O `SentinelaOrchestrator` mapeia esses erros para sugestões de autocura específicas e determinísticas salvas no banco.
 
 ## Histórico Recente de Correções (v97.5)
 1. **Coleta Direcionada e Sala de Controle (Concluído)**:
