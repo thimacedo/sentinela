@@ -1,5 +1,5 @@
 # STATE.md — Sentinela
-_last_updated: 2026-06-12 | branch: main | version: v97.7_
+_last_updated: 2026-06-12 | branch: main | version: v98.0_
 
 ## Status Operacional
 
@@ -9,6 +9,14 @@ _last_updated: 2026-06-12 | branch: main | version: v97.7_
 | Inteligência | 🟢 Operacional | Malha de IA resiliente + SaFastDrop local. |
 | Dashboard | 🟢 Operacional | Painel "Decision Room" com auto-start, telemetria real via DB e Coleta Direcionada. |
 | SRE / Autocura | 🟢 Operacional | Agente de SRE Autônomo (`sre_agent.py`) ativo em background com desvio headless. |
+
+## Histórico Recente de Correções (v98.0)
+1. **Benchmark de Scrapers + 4 Camadas Anti-Detecção (Concluído)**:
+   - Realizado benchmark técnico de 11 repositórios de scraping do Instagram (drawrowfly, MRISOON, instagram4j e outros).
+   - **Fase 1 — Wait Strategy**: Substituído `asyncio.sleep` fixo por `page.wait_for_selector()` e `page.wait_for_response()` no `_scrape_post()`, eliminando race conditions onde o DOM era lido antes dos comentários XHR carregarem.
+   - **Fase 2 — API Interna com Paginação**: Implementado `_fetch_comments_via_api()` que chama `i.instagram.com/api/v1/media/{pk}/comments/` via `httpx` com loop de paginação por `next_max_id`. CSRF token e session_id são capturados automaticamente pelo `_handle_response()`. Resolve `pk` do post via cache XHR ou extração DOM (`_resolve_pk_from_dom()`). Fallback para DOM/XHR legacy se a API retornar 0.
+   - **Fase 3 — User-Agents Android**: Adicionado pool de User-Agents do app Android do Instagram ao `_generate_stealth_profile()` (Samsung Galaxy, Pixel 8, Xiaomi). Peso 40% Android / 60% Web Desktop. Headers Mobile (`x-ig-app-id`, `Sec-Ch-Ua-Mobile`) ajustados por tipo de perfil.
+   - **Sticky Proxy Binding**: `_get_next_session()` agora deriva um `sticky_proxy_id` SHA256 determinístico por sessão. Suporte ao `PROXY_URL_TEMPLATE` com `{SESSION_ID}` para proxies residenciais (Webshare/IPRoyal). Cada sessão IG sempre usa o mesmo IP residencial durante todo o `scrape_profile()`, eliminando fragmentação de IP que sinaliza bot.
 
 ## Histórico Recente de Correções (v97.7)
 1. **Resiliência do DOM Scraper (Instagram Web v97.7) (Concluído)**:

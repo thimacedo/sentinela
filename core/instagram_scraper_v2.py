@@ -1,20 +1,29 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 import logging
 import os
 import random
 import re
+import urllib.parse
 from dataclasses import dataclass, field
 from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, List, Optional, Tuple
 
+import httpx
 from playwright.async_api import Page, BrowserContext, async_playwright, Browser, TimeoutError as PlaywrightTimeoutError
 
 from core.ai_service import ai_service
 
 logger = logging.getLogger("instagram_scraper_v2")
+
+# ── Constantes da API Interna do Instagram Web ────────────────────────────────
+_IG_APP_ID = "936619743392459"   # App ID público do cliente web do Instagram
+_IG_API_BASE = "https://i.instagram.com"
+_IG_COMMENTS_PATH = "/api/v1/media/{pk}/comments/"
+_IG_API_TIMEOUT = 15            # segundos por request HTTP
 
 @dataclass
 class Session:
@@ -40,16 +49,22 @@ class InstagramScraperV2:
     def __init__(self, headless: bool = True, max_retries: int = 3, db_client: Optional[Any] = None, shutdown_event: Optional[asyncio.Event] = None):
         self.headless = headless
         self.max_retries = max_retries
-        self.db = db_client 
-        self.shutdown_event = shutdown_event 
+        self.db = db_client
+        self.shutdown_event = shutdown_event
         self.sessions: List[Session] = self._load_sessions()
         self.current_session_idx = 0
         self.captured_data: List[Dict[str, Any]] = []
+        # Cache de pk (ID numérico) resolvido por shortcode — evita re-resolução
+        self._pk_cache: Dict[str, str] = {}
+        # Credenciais HTTP capturadas pelo interceptador de rede (Fase 1/2)
+        self._csrf_token: Optional[str] = None
+        self._session_id_active: Optional[str] = None
         self.stats = {
             "posts_found": 0,
             "posts_scraped": 0,
             "comments_extracted": 0,
             "api_calls": 0,
+            "api_comments_calls": 0,   # chamadas à API interna de comentários
             "browser_renders": 0,
             "session_rotations": 0,
             "junk_detected": 0,
@@ -83,41 +98,110 @@ class InstagramScraperV2:
         if not available:
             logger.error("❌ [V2] Todas as sessões estão bloqueadas (cooldown ativo)!")
             raise RuntimeError("all_sessions_blocked")
-        
+
         session = available[self.current_session_idx % len(available)]
         self.current_session_idx += 1
+
+        # ── Sticky Proxy Binding (PASA v98.0) ──────────────────────────────────
+        # Deriva um ID de proxy determinístico do label da sessão.
+        # Garante que SESSION_1 → sempre IP A, SESSION_2 → sempre IP B.
+        # Troca de sessão IG = troca de IP residencial, sem fragmentação mid-session.
+        if not hasattr(session, "sticky_proxy_id"):
+            session.sticky_proxy_id = hashlib.sha256(session.label.encode()).hexdigest()[:10]
         return session
 
     async def _handle_response(self, response):
-        """Interceptador de rede para capturar JSONs de interesse."""
+        """Interceptador de rede para capturar JSONs de interesse e credenciais HTTP."""
         url = response.url
-        if "graphql" in url or "comments" in url or "web_profile_info" in url:
+
+        # ── Fase 1: Captura proativa de CSRF e App-ID dos headers de qualquer request IG ──
+        if "instagram.com" in url:
+            try:
+                req_headers = response.request.headers
+                # Extrai o csrf do cookie da requisição saindo
+                raw_cookie = req_headers.get("cookie", "")
+                csrf_match = re.search(r'csrftoken=([^;]+)', raw_cookie)
+                if csrf_match and not self._csrf_token:
+                    self._csrf_token = csrf_match.group(1)
+                    logger.debug("[V2] CSRF token capturado via interceptador: %s...", self._csrf_token[:8])
+                # Captura sessionid ativo
+                sid_match = re.search(r'sessionid=([^;]+)', raw_cookie)
+                if sid_match and not self._session_id_active:
+                    self._session_id_active = sid_match.group(1)
+            except Exception:
+                pass
+
+        # ── Captura de pk (media_id) a partir de respostas de comentários ──
+        if "comments" in url or "graphql" in url or "web_profile_info" in url:
             try:
                 content_type = response.headers.get("content-type", "")
                 if "json" in content_type:
                     data = await response.json()
                     self.captured_data.append({"url": url, "data": data})
                     self.stats["api_calls"] += 1
+                    # Tenta extrair pk de respostas de media info
+                    self._try_extract_pk_from_data(data)
             except Exception as e:
                 logger.debug("[V2] Falha ao processar response JSON (%s): %s", url, e)
 
+    def _try_extract_pk_from_data(self, data: Any) -> None:
+        """Tenta extrair pares shortcode→pk de respostas JSON capturadas."""
+        if not isinstance(data, dict):
+            return
+        # Padrão xdt_api / GraphQL
+        for key in ("xdt_api__v1__media__shortcode__web_info", "shortcode_media", "media"):
+            if key in data:
+                item = data[key]
+                items_list = item.get("items", [item]) if isinstance(item, dict) else []
+                for it in items_list:
+                    if isinstance(it, dict):
+                        pk = str(it.get("pk", "") or it.get("id", ""))
+                        sc = it.get("code", "") or it.get("shortcode", "")
+                        if pk and sc:
+                            self._pk_cache[sc] = pk
+                            logger.debug("[V2] pk resolvido via XHR: %s → %s", sc, pk)
+        # Recursão leve (1 nível)
+        for v in data.values():
+            if isinstance(v, dict):
+                self._try_extract_pk_from_data(v)
+
     def _generate_stealth_profile(self) -> Dict[str, Any]:
-        """Gera perfis de dispositivos e cabeçalhos HTTP realistas e aleatórios (PASA v85.10)."""
+        """
+        Gera perfis de dispositivos e cabeçalhos HTTP realistas (PASA v98.0).
+        Fase 3: inclui User-Agents do app Android do Instagram para reduzir detecção de bot.
+        """
         chrome_major = random.choice([122, 123, 124, 125])
         chrome_build = random.randint(5000, 6400)
         chrome_patch = random.randint(100, 200)
         chrome_ver = f"{chrome_major}.0.{chrome_build}.{chrome_patch}"
-
         safari_ver = f"17.{random.choice([3, 4, 5])}"
 
+        # ── Fase 3: Pool de User-Agents — Web Desktop + Android IG App ────────
+        # Os UAs do app Android são mais confiáveis porque o IG os reconhece como
+        # clientes legítimos e não aplica o mesmo nível de bot detection do Web.
+        android_devices = [
+            ("samsung", "SM-G991B", "o1s", "exynos2100", "33", "420dpi", "1080x2400"),
+            ("samsung", "SM-S918B", "dm3q", "snapdragon8gen2", "33", "480dpi", "1080x2340"),
+            ("google", "Pixel 8", "shiba", "tensor3", "34", "420dpi", "1080x2400"),
+            ("xiaomi", "23049RAD8G", "gold", "snapdragon8gen2", "33", "440dpi", "1080x2400"),
+        ]
+        ig_version = random.choice(["275.0.0.27.98", "278.0.0.15.105", "281.0.0.23.110"])
+        ig_version_code = random.choice(["453759104", "459228834", "463123456"])
+        dev = random.choice(android_devices)
+        android_ig_ua = (
+            f"Instagram {ig_version} Android ({dev[4]}/{dev[4]}; {dev[5]}; "
+            f"{dev[6]}; {dev[0]}; {dev[1]}; {dev[2]}; {dev[3]}; pt_BR; {ig_version_code})"
+        )
+
         os_templates = [
-            # Windows Chrome
+            # Windows Chrome (Desktop Web)
             {
                 "ua": f"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{chrome_ver} Safari/537.36",
                 "w": random.choice([1920, 1366, 1536, 1440, 1600]),
                 "h": random.choice([1080, 768, 864, 900, 1200]),
                 "platform": "Win32",
-                "vendor": "Google Inc."
+                "vendor": "Google Inc.",
+                "mobile": False
             },
             # Edge no Windows
             {
@@ -125,7 +209,8 @@ class InstagramScraperV2:
                 "w": 1920,
                 "h": 1080,
                 "platform": "Win32",
-                "vendor": "Google Inc."
+                "vendor": "Google Inc.",
+                "mobile": False
             },
             # macOS Chrome
             {
@@ -133,7 +218,8 @@ class InstagramScraperV2:
                 "w": random.choice([1440, 1680, 2560, 2880]),
                 "h": random.choice([900, 1050, 1600, 1800]),
                 "platform": "MacIntel",
-                "vendor": "Google Inc."
+                "vendor": "Google Inc.",
+                "mobile": False
             },
             # macOS Safari
             {
@@ -141,11 +227,24 @@ class InstagramScraperV2:
                 "w": 1440,
                 "h": 900,
                 "platform": "MacIntel",
-                "vendor": "Apple Computer, Inc."
-            }
+                "vendor": "Apple Computer, Inc.",
+                "mobile": False
+            },
+            # Fase 3: Android Instagram App (simula acesso mobile real)
+            {
+                "ua": android_ig_ua,
+                "w": random.choice([360, 390, 412, 414]),
+                "h": random.choice([640, 800, 820, 896]),
+                "platform": "Linux armv8l",
+                "vendor": "",
+                "mobile": True
+            },
         ]
 
-        profile = random.choice(os_templates)
+        # Peso: 60% Web, 40% Android (evita suspeita por uso excessivo do UA mobile)
+        weights = [1, 1, 1, 1, 1.5]  # Android com peso ligeiramente maior
+        profile = random.choices(os_templates, weights=weights, k=1)[0]
+        is_mobile = profile.get("mobile", False)
 
         headers = {
             "Accept-Language": random.choice([
@@ -153,11 +252,12 @@ class InstagramScraperV2:
                 "pt-BR,pt;q=0.9,en-US;q=0.9",
                 "en-US,en;q=0.9,pt-BR;q=0.8,pt;q=0.7"
             ]),
-            "Sec-Ch-Ua": f'"{chrome_major}";v="{chrome_major}", "Not(A:Brand";v="24", "Chromium";v="{chrome_major}"',
-            "Sec-Ch-Ua-Mobile": "?1" if "Mobile" in profile["ua"] else "?0",
-            "Sec-Ch-Ua-Platform": f'"{profile["platform"]}"',
+            "Sec-Ch-Ua-Mobile": "?1" if is_mobile else "?0",
             "Upgrade-Insecure-Requests": "1"
         }
+        if not is_mobile:
+            headers["Sec-Ch-Ua"] = f'"{chrome_major}";v="{chrome_major}", "Not(A:Brand";v="24", "Chromium";v="{chrome_major}"'
+            headers["Sec-Ch-Ua-Platform"] = f'"{profile["platform"]}"'
 
         return {
             "ua": profile["ua"],
@@ -165,6 +265,7 @@ class InstagramScraperV2:
             "h": profile["h"],
             "platform": profile["platform"],
             "vendor": profile["vendor"],
+            "mobile": is_mobile,
             "headers": headers
         }
 
@@ -224,13 +325,28 @@ class InstagramScraperV2:
                     if not session.profile:
                         session.profile = self._generate_stealth_profile()
                     profile = session.profile
-                    
-                    # 🛰️ PROXY ROTATION (PASA v94.1)
+
+                    # 🛰️ PROXY BINDING (PASA v98.0 — Sticky Session)
+                    # Prioridade: PROXY_URL_TEMPLATE (sticky) > PROXY_LIST (roundrobin) > PROXY_URL (fixo)
+                    # Para constância: use PROXY_URL_TEMPLATE com residencial Webshare/IPRoyal.
+                    # Exemplo: http://user-res-session-{SESSION_ID}:pass@proxy.webshare.io:10000
+                    proxy_template = os.getenv("PROXY_URL_TEMPLATE", "")
                     proxy_list_env = os.getenv("PROXY_LIST", "")
                     proxies = [p.strip() for p in proxy_list_env.split(",") if p.strip()]
                     proxy_url = os.getenv("PROXY_URL")
-                    
-                    if proxies:
+
+                    sticky_id = getattr(session, "sticky_proxy_id", "") or \
+                        hashlib.sha256(session.label.encode()).hexdigest()[:10]
+
+                    if proxy_template and "{SESSION_ID}" in proxy_template:
+                        # Modo Sticky: SESSION_1 sempre → mesmo IP residencial durante todo o scrape
+                        proxy_url = proxy_template.replace("{SESSION_ID}", sticky_id)
+                        logger.info(
+                            "📍 [V2] Sticky proxy ativo para %s → session_id=%s",
+                            session.label, sticky_id
+                        )
+                    elif proxies:
+                        # Modo roundrobin legado (mantido para compatibilidade com PROXY_LIST)
                         proxy_url = random.choice(proxies)
 
                     context_kwargs = {
@@ -546,18 +662,29 @@ class InstagramScraperV2:
         if not await self.open_post_modal(page, shortcode): return [], None
 
         post_date_iso = None
+
+        # ── Fase 1: wait_for_selector antes de extrair data ──────────────────
+        # Aguarda o elemento de tempo aparecer (substitui sleep fixo por espera inteligente)
+        try:
+            await page.wait_for_selector(
+                'article time, main time, div[role="dialog"] time',
+                timeout=12000
+            )
+        except Exception:
+            logger.debug("[V2] Timeout aguardando timestamp do post %s", shortcode)
+
         for _ in range(5):
             if page.is_closed(): break
             post_date_iso = await page.evaluate("""() => {
                 let el = document.querySelector('article a[href*="/p/"] time, article a[href*="/reel/"] time, article a time');
                 if (!el) {
-                    el = document.querySelector('article time');
+                    el = document.querySelector('article time, div[role="dialog"] time');
                 }
                 return el ? el.getAttribute('datetime') : null;
             }""")
             if post_date_iso:
                 break
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.8)
 
         if post_date_iso:
             post_dt = datetime.fromisoformat(post_date_iso.replace('Z', '+00:00'))
@@ -565,12 +692,47 @@ class InstagramScraperV2:
                 await self.close_post_modal(page)
                 return [], post_date_iso
 
+        # ── Fase 1: wait_for_response — aguarda XHR de comentários antes de extrair ──
+        # Isso elimina a race condition onde o DOM era lido antes dos comentários carregarem.
+        try:
+            async def _is_comments_response(resp):
+                return (
+                    ("comments" in resp.url or "graphql" in resp.url)
+                    and resp.status == 200
+                    and "json" in resp.headers.get("content-type", "")
+                )
+            await page.wait_for_response(_is_comments_response, timeout=8000)
+            logger.debug("[V2] XHR de comentários detectado para post %s", shortcode)
+        except Exception:
+            # Fallback: scroll manual para forçar carregamento
+            logger.debug("[V2] Sem XHR de comentários em 8s para %s — aplicando scroll manual.", shortcode)
+
+        # Scrolls para carregar mais comentários no DOM
         for _ in range(random.randint(2, 4)):
             await self.scroll_comment_column(page, scroll_amount=random.randint(1000, 1500))
-        
-        comments = self._parse_captured_json(shortcode)
-        if not comments: comments = await self._extract_from_scripts(page, shortcode)
-        if not comments: comments = await self._extract_from_dom(page, shortcode)
+
+        # ── Fase 2: Tenta extrair via API interna primeiro (mais completo) ──
+        pk = self._pk_cache.get(shortcode)
+        if not pk:
+            # Resolve pk direto do DOM se ainda não capturado pelo interceptador
+            pk = await self._resolve_pk_from_dom(page, shortcode)
+
+        comments: List[Dict[str, Any]] = []
+        if pk and (self._csrf_token or self._session_id_active):
+            logger.info("[V2] 🚀 Tentando extração via API interna (pk=%s) para post %s", pk, shortcode)
+            comments = await self._fetch_comments_via_api(pk, shortcode, max_comments)
+            if comments:
+                logger.info("[V2] ✅ API interna retornou %d comentários para %s", len(comments), shortcode)
+            else:
+                logger.info("[V2] ⚠️ API interna retornou 0. Usando fallback DOM/XHR.")
+
+        # Fallbacks clássicos se a API não retornou nada
+        if not comments:
+            comments = self._parse_captured_json(shortcode)
+        if not comments:
+            comments = await self._extract_from_scripts(page, shortcode)
+        if not comments:
+            comments = await self._extract_from_dom(page, shortcode)
 
         await self.close_post_modal(page)
         
@@ -656,6 +818,158 @@ class InstagramScraperV2:
                 return results.slice(0, {limit + 3});
             }}
         """)
+
+    async def _resolve_pk_from_dom(self, page: Page, shortcode: str) -> Optional[str]:
+        """Extrai o ID numérico (pk) do post diretamente do DOM ou de scripts inline."""
+        if shortcode in self._pk_cache:
+            return self._pk_cache[shortcode]
+        try:
+            pk = await page.evaluate("""
+                (sc) => {
+                    // Tenta via __additionalDataLoaded / window._sharedData
+                    if (window.__additionalDataLoaded) {
+                        for (const [k, v] of Object.entries(window.__additionalDataLoaded)) {
+                            const m = v?.graphql?.shortcode_media || v?.media;
+                            if (m && (m.shortcode === sc || m.code === sc)) return String(m.id || m.pk);
+                        }
+                    }
+                    // Tenta via scripts JSON inline
+                    const scripts = Array.from(document.querySelectorAll('script[type="application/json"]'));
+                    for (const s of scripts) {
+                        try {
+                            const d = JSON.parse(s.innerText);
+                            const search = (obj) => {
+                                if (!obj || typeof obj !== 'object') return null;
+                                if ((obj.shortcode === sc || obj.code === sc) && (obj.id || obj.pk)) {
+                                    return String(obj.id || obj.pk);
+                                }
+                                for (const v of Object.values(obj)) {
+                                    const r = search(v);
+                                    if (r) return r;
+                                }
+                                return null;
+                            };
+                            const found = search(d);
+                            if (found) return found;
+                        } catch(e) {}
+                    }
+                    return null;
+                }
+            """, shortcode)
+            if pk:
+                self._pk_cache[shortcode] = pk
+                logger.debug("[V2] pk resolvido via DOM: %s → %s", shortcode, pk)
+            return pk
+        except Exception as e:
+            logger.debug("[V2] Falha ao resolver pk via DOM para %s: %s", shortcode, e)
+            return None
+
+    async def _fetch_comments_via_api(
+        self,
+        pk: str,
+        shortcode: str,
+        max_comments: int = 50
+    ) -> List[Dict[str, Any]]:
+        """
+        Fase 2: Extrai comentários via API interna do Instagram (i.instagram.com).
+        Técnica identificada no benchmark (MRISOON/no-cookie-scraper).
+        Usa paginação nativa por next_max_id — sem limite de 1 tela.
+        """
+        url = f"{_IG_API_BASE}{_IG_COMMENTS_PATH.format(pk=pk)}"
+        session_id = self._session_id_active or ""
+        csrf = self._csrf_token or ""
+
+        if not session_id:
+            logger.debug("[V2] Sem session_id capturado; pulando API interna para %s", shortcode)
+            return []
+
+        # Headers que imitam o cliente web do Instagram (x-ig-app-id é público)
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Linux; Android 13; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Mobile Safari/537.36 Instagram/281.0",
+            "x-ig-app-id": _IG_APP_ID,
+            "x-asbd-id": "198387",
+            "x-ig-www-claim": "0",
+            "Accept": "*/*",
+            "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8",
+            "Referer": f"https://www.instagram.com/p/{shortcode}/",
+            "Origin": "https://www.instagram.com",
+            "Cookie": f"sessionid={session_id}; csrftoken={csrf}",
+        }
+        if csrf:
+            headers["x-csrftoken"] = csrf
+
+        all_comments: List[Dict[str, Any]] = []
+        next_max_id: Optional[str] = None
+        page_num = 0
+
+        async with httpx.AsyncClient(timeout=_IG_API_TIMEOUT, follow_redirects=True) as client:
+            while len(all_comments) < max_comments:
+                params: Dict[str, str] = {"can_support_threading": "true", "permalink_enabled": "false"}
+                if next_max_id:
+                    params["min_id"] = next_max_id
+
+                try:
+                    resp = await client.get(url, headers=headers, params=params)
+                    self.stats["api_comments_calls"] += 1
+
+                    if resp.status_code == 429:
+                        logger.warning("[V2] Rate limit (429) na API interna para pk=%s. Parando paginação.", pk)
+                        break
+                    if resp.status_code in (401, 403):
+                        logger.warning("[V2] Acesso negado (%d) na API interna. Sessão pode estar expirada.", resp.status_code)
+                        break
+                    if resp.status_code != 200:
+                        logger.debug("[V2] API interna retornou %d para pk=%s", resp.status_code, pk)
+                        break
+
+                    data = resp.json()
+                    page_num += 1
+
+                    raw_comments = data.get("comments", [])
+                    if not raw_comments:
+                        break
+
+                    now_iso = datetime.now(timezone.utc).isoformat()
+                    for c in raw_comments:
+                        user = c.get("user", {}) or {}
+                        texto = (c.get("text") or "").strip()
+                        if not texto or len(texto) < 2:
+                            continue
+                        all_comments.append({
+                            "id_externo": f"ig_{c.get('pk') or c.get('id', '')}",
+                            "texto": texto,
+                            "autor": user.get("username", "unknown"),
+                            "timestamp": datetime.fromtimestamp(
+                                c.get("created_at", 0), timezone.utc
+                            ).isoformat() if c.get("created_at") else now_iso,
+                        })
+
+                    logger.debug(
+                        "[V2] API interna pág %d: +%d comentários (total %d)",
+                        page_num, len(raw_comments), len(all_comments)
+                    )
+
+                    # Paginação por cursor (next_max_id)
+                    next_max_id = data.get("next_max_id") or data.get("next_min_id")
+                    if not next_max_id:
+                        break  # Sem mais páginas
+
+                    # Backoff leve entre páginas para evitar rate limit
+                    await asyncio.sleep(random.uniform(0.8, 2.0))
+
+                except (httpx.TimeoutException, httpx.NetworkError) as e_net:
+                    logger.warning("[V2] Erro de rede na API interna (pk=%s): %s", pk, e_net)
+                    break
+                except Exception as e_api:
+                    logger.error("[V2] Erro inesperado na API interna (pk=%s): %s", pk, e_api)
+                    break
+
+        if all_comments:
+            logger.info(
+                "[V2] 📊 API interna: %d comentários extraídos em %d páginas para %s",
+                len(all_comments), page_num, shortcode
+            )
+        return all_comments
 
     def _parse_captured_json(self, shortcode: str) -> List[Dict[str, Any]]:
         comments = []
