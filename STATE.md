@@ -1,5 +1,5 @@
 # STATE.md — Sentinela
-_last_updated: 2026-06-12 | branch: main | version: v97.5_
+_last_updated: 2026-06-12 | branch: main | version: v97.6_
 
 ## Status Operacional
 
@@ -9,6 +9,13 @@ _last_updated: 2026-06-12 | branch: main | version: v97.5_
 | Inteligência | 🟢 Operacional | Malha de IA resiliente + SaFastDrop local. |
 | Dashboard | 🟢 Operacional | Painel "Decision Room" com auto-start, telemetria real via DB e Coleta Direcionada. |
 | SRE / Autocura | 🟢 Operacional | Agente de SRE Autônomo (`sre_agent.py`) ativo em background com desvio headless. |
+
+## Histórico Recente de Correções (v97.6)
+1. **Coleta Monitorada e Resiliência de SRE (Concluído)**:
+   - Criado o script utilitário `scratch/monitor_coleta.py` para disparar e monitorar a coleta de candidatos através de SSE (Server-Sent Events) no Watchdog.
+   - Forçada a coleta do candidato prioritário `@benmendes` com prioridade 0 para furar a fila do orquestrador.
+   - Validada a atuação em tempo real do SRE Agent do Watchdog, que aplicou com sucesso a autocura (restart do runner principal) ao detectar erro desconhecido e crash de IPC do Playwright (EPIPE).
+   - Validada a auto-recuperação de seletores DOM (DOM Healing) via visão computacional do Gemini 2.5 Flash, seguido de cache hit para evitar gastos desnecessários de tokens.
 
 ## Histórico Recente de Correções (v97.5)
 1. **Coleta Direcionada e Sala de Controle (Concluído)**:
