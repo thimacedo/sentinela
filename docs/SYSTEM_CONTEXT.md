@@ -1,5 +1,5 @@
 # Sentinela — Contexto do Sistema
-_last_updated: 2026-06-12 | versão: v97.6_
+_last_updated: 2026-06-12 | versão: v98.0_
 
 ## 1. Missão
 
@@ -17,7 +17,7 @@ O Sentinela é uma plataforma de monitoramento político com foco em:
 [Watchdog Local] (Porta 8001 + logs SSE)
   ├── Agente de SRE Autônomo (core/autopilot/sre_agent.py - OODA e Autocura)
   └── main_runner.py (Orquestrador v97.6)
-        ├── WkColetaInstagram (InstagramScraperV2 + DOM Healing + Diagnóstico Zero)
+        ├── WkColetaInstagram (InstagramScraperV2 + API Interna + DOM Healing + Diagnóstico Zero + Sticky Proxy)
         ├── WkClassificaComentarios (Cascata: Ollama local -> Sabia-4 -> Cloud)
         ├── SaRevisaoOnline (Fila secundária / Nuvem)
         ├── SaFastDrop (Linguística Forense / Triagem local fast-drop sem JVM)
@@ -187,3 +187,38 @@ A arquitetura foi migrada para subagentes especializados executados de forma rea
 - **SaAuditaClassificacoes** (`workers/ai/sa_audita_classificacoes.py`): Subagente de curadoria cruzada anti-alucinação. Consome o `SaConsultaBanco` e efetua reclassificações via cascata de IA com circuit breaker para calcular o drift do modelo, gerando sugestões de prioridade `HIGH` em `worker_suggestions`.
 - **SaMineracaoRedes** (`workers/analytics/sa_mineracao_redes.py`): Analisa grafos de hostilidade e detecta campanhas coordenadas organizadas (clusters de ataque) em processos filhos separados (`ProcessPoolExecutor`), persistindo os dados e gerando relatórios físicos para o frontend com claims atômicos concorrentes.
 - **SaAuditoriaFinanceira** (`workers/financial/sa_auditoria_financeira.py`): Efetua auditoria de saldos de CI inconsistentes, monitora conectividade do Stripe e gera relatórios DRE consolidados diários.
+
+## 12. Extrator Multi-Camada de Comentários (v98.0)
+
+O `InstagramScraperV2` (`core/instagram_scraper_v2.py`) opera com **4 camadas de extracão** em ordem de prioridade:
+
+| Camada | Método | Quando ativa | Retorno esperado |
+|---|---|---|---|
+| **1. API Interna** | `_fetch_comments_via_api()` via `httpx` | Quando `pk` e `session_id` estão disponíveis | JSON completo com paginação `next_max_id` |
+| **2. XHR Interceptado** | `_parse_captured_json()` | Sempre (em paralelo) | JSON de `graphql/comments` capturado pelo Playwright |
+| **3. Scripts Inline** | `_extract_from_scripts()` | Fallback | Tags `<script type="application/json">` com comentários |
+| **4. DOM Visual** | `_extract_from_dom()` | Último recurso | Links de perfil + spans `dir="auto"` |
+
+### Captura Proativa de Credenciais HTTP
+
+O interceptador `_handle_response()` monitora **todas** as respostas do Instagram e extrai automaticamente:
+- `csrftoken` (do cookie da requisição)
+- `sessionid` ativo
+- `pk` (ID numérico do post) via `_try_extract_pk_from_data()` nos XHRs de mídia
+
+Iso elimina a necessidade de etapas manuais de resolução antes de chamar a API interna.
+
+### Wait Strategy (Fase 1)
+
+Substitui sleeps fixos por esperas inteligentes:
+- `wait_for_selector('article time, ...')` — aguarda timestamp do post antes de ler data
+- `wait_for_response(lambda r: 'comments' in r.url)` — aguarda XHR de comentários antes de extrair
+
+### Sticky Proxy Binding
+
+Variáveis de ambiente suportadas (por ordem de prioridade):
+1. `PROXY_URL_TEMPLATE` com `{SESSION_ID}` — **sticky residencial** (recomendado)
+2. `PROXY_LIST` — roundrobin (legado)
+3. `PROXY_URL` — fixo (legado)
+
+Cada sessão do Instagram (`SESSION_1`, `SESSION_2`, ...) recebe um `sticky_proxy_id` SHA256 determinístico. O IP residencial é mantido estável durante todo o `scrape_profile()` e só é trocado junto com a troca de sessão.

@@ -122,3 +122,32 @@ Para iniciar trabalho novo:
   - Refatorada a função `_extract_from_dom` em `core/instagram_scraper_v2.py` para ler os usernames via links de perfil (`a[href*="/"]`) e spans com `dir="auto"`.
 - **Validação e Testes**:
   - Criado o script `scratch/test_coleta_direta.py` que validou com sucesso a extração em tempo real de 10 comentários de posts ativos no perfil da `@janjalula`.
+
+## 11. Benchmark de Scrapers + 4 Camadas Anti-Detecção (v98.0)
+
+- **Benchmark Técnico (11 repositórios)**:
+  - Analisados drawrowfly/instagram-scraper, MRISOON/no-cookie-scraper, instagram4j, postaddictme/php-scraper, houzz-scraper e outros.
+  - Causa raiz principal dos 0 comentários: **ausência de paginação** (só 1 tela de comentários) + **race condition** (DOM lido antes do XHR de comentários carregar).
+
+- **Fase 1 — Wait Strategy**:
+  - Substituído `asyncio.sleep` fixo por `wait_for_selector('article time, ...')` com timeout 12s antes de ler a data do post.
+  - Aguarda XHR de comentários com `wait_for_response()` (timeout 8s) antes de extrair — elimina race condition.
+
+- **Fase 2 — API Interna com Paginação**:
+  - `_handle_response()` agora captura proativamente CSRF token e session_id de todos os requests ao Instagram.
+  - `_try_extract_pk_from_data()` extrai pares shortcode→pk dos XHRs interceptados e salva em `_pk_cache`.
+  - `_resolve_pk_from_dom()` resolve pk via `window.__additionalDataLoaded` e scripts JSON inline.
+  - `_fetch_comments_via_api()` chama `i.instagram.com/api/v1/media/{pk}/comments/` via `httpx` com loop de paginação por `next_max_id`. Extrai todos os comentários, não apenas os da primeira tela.
+  - Fallback completo para pipeline DOM/XHR legacy se a API retornar vazio ou erro.
+
+- **Fase 3 — User-Agents Android**:
+  - Pool de UAs do app Instagram Android (Samsung S21/S23, Pixel 8, Xiaomi) com versões reais (275.0/278.0/281.0).
+  - Peso 40% Android / 60% Web Desktop — o IG reconhece UAs Android como clientes legítimos.
+  - Headers condicionais: `Sec-Ch-Ua-Mobile: ?1` e campos `x-ig-app-id` para perfis mobile.
+
+- **Sticky Proxy Binding (análise externa validada)**:
+  - `_get_next_session()` gera `sticky_proxy_id` SHA256(label)[:10] determinístico por sessão.
+  - Nova variável `PROXY_URL_TEMPLATE` com `{SESSION_ID}` para proxies residenciais (Webshare/IPRoyal ~$10–15/mês).
+  - `SESSION_1` → sempre IP A, `SESSION_2` → sempre IP B durante todo `scrape_profile()`.
+  - Troca de sessão IG = troca de IP — sem fragmentação mid-session que sinaliza bot.
+  - Retrocompatível: `PROXY_LIST` e `PROXY_URL` continuam funcionando normalmente.

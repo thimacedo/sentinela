@@ -1,7 +1,14 @@
 # ROADMAP.md — Sentinela
-_last_updated: 2026-06-12 | branch: main | version: v97.7_
+_last_updated: 2026-06-12 | branch: main | version: v98.0_
 
 ## Concluído
+
+### Extração Avançada e Anti-Detecção (v98.0)
+- [x] **Benchmark de Scrapers**: Análise técnica de 11 repositórios (drawrowfly, MRISOON, instagram4j) para identificar gaps e melhores práticas de extração
+- [x] **Fase 1 — Wait Strategy**: Substituido `asyncio.sleep` fixo por `wait_for_selector()` e `wait_for_response()` para eliminar race condition onde DOM era lido antes dos XHRs de comentários carregarem
+- [x] **Fase 2 — API Interna com Paginação**: Implementado `_fetch_comments_via_api()` chamando `i.instagram.com/api/v1/media/{pk}/comments/` via `httpx` com loop `next_max_id`. CSRF/session capturados automaticamente pelo interceptador; pk resolvido via XHR cache e DOM
+- [x] **Fase 3 — User-Agents Android**: Pool de UAs do app Instagram Android (Samsung, Pixel, Xiaomi, versões 275–281) integrado ao stealth profile. Peso 40% Android / 60% Web Desktop
+- [x] **Sticky Proxy Binding**: `_get_next_session()` gera `sticky_proxy_id` SHA256 determinístico. `PROXY_URL_TEMPLATE` com `{SESSION_ID}` para proxies residenciais — cada sessão IG usa sempre o mesmo IP durante todo o `scrape_profile()`
 
 ### Núcleo operacional e SRE (v97.7)
 - [x] Resiliência de DOM Scraper: correção e adaptação de extração de comentários baseada em links de perfil, contornando a exclusão de elementos h3 no Instagram Web (v97.7)
@@ -125,6 +132,7 @@ _last_updated: 2026-06-12 | branch: main | version: v97.7_
 ### Operação
 - [ ] consolidar documentação viva por domínio
 - [x] reduzir artefatos históricos conflitantes no workspace (limpeza de drift e termos restritos concluída)
+- [ ] **Contratar proxy residencial** (Webshare ou IPRoyal, ~$10–15/mês) e configurar `PROXY_URL_TEMPLATE` no `.env` para ativar o Sticky Proxy Binding implementado na v98.0
 
 ---
 

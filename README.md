@@ -32,7 +32,7 @@ O fluxo atual observado no código é:
 
 Workers ativos no runtime moderno:
 
-- `workers/scrapers/wk_coleta_instagram.py` (`WkColetaInstagram`) — coleta Instagram com fila atômica e diagnóstico granular de coleta zero
+- `workers/scrapers/wk_coleta_instagram.py` (`WkColetaInstagram`) — coleta Instagram com fila atômica, diagnóstico granular de coleta zero e extrator multi-camada (API interna + DOM Healing + fallback DOM)
 - `workers/processors/wk_classifica_comentarios.py` (`WkClassificaComentarios`) — classificador oficial e reanálise de baixa confiança
 - `workers/analytics/sa_mineracao_redes.py` (`SaMineracaoRedes`) — mineração de rede e clusters reativos
 - `workers/financial/sa_auditoria_financeira.py` (`SaAuditoriaFinanceira`) — auditoria e telemetria financeira
@@ -71,11 +71,20 @@ O frontend oficial está em `frontend/` com Next.js.
 
 ## Documentação recomendada
 
-- `STATE.md` — estado operacional auditado v97.6
+- `STATE.md` — estado operacional auditado v98.0
 - `ROADMAP.md` — roadmap limpo e pendências reais
 - `docs/SYSTEM_CONTEXT.md` — mapa técnico atualizado
+- `docs/ARCH_AUTOHEALING.md` — arquitetura de autocura e extração resiliente
 - `docs/DOCUMENTATION_AUDIT.md` — classificação da documentação: válida, parcial, histórica ou lixo operacional
 - `docs/index_documentacao.md` — índice de leitura
+
+## Variáveis de ambiente de proxy (v98.0)
+
+| Variável | Descrição | Exemplo |
+|---|---|---|
+| `PROXY_URL_TEMPLATE` | **Recomendado.** URL de proxy residencial com `{SESSION_ID}` para sticky binding por sessão | `http://user-res-session-{SESSION_ID}:senha@proxy.webshare.io:10000` |
+| `PROXY_LIST` | Lista separada por vírgula de proxies em roundrobin (legado) | `http://p1:s@h:p,http://p2:s@h:p` |
+| `PROXY_URL` | Proxy único fixo (legado) | `http://user:senha@proxy:3128` |
 
 ## Regras práticas
 
