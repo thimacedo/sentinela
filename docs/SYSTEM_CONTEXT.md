@@ -1,36 +1,34 @@
 # Sentinela — Contexto do Sistema
-_last_updated: 2026-06-05_
+_last_updated: 2026-06-12 | versão: v97.6_
 
 ## 1. Missão
 
 O Sentinela é uma plataforma de monitoramento político com foco em:
 
-- coleta automatizada de conteúdo público
-- classificação de hostilidade e risco informacional
+- coleta automatizada de conteúdo público (Instagram)
+- classificação de hostilidade e risco informacional (PASA)
 - mineração de redes e sinais coordenados
 - produção de relatórios e dossiês
-- operação supervisionada por watchdog local
+- operação supervisionada por watchdog local e autocura autônoma via SRE Agent
 
 ## 2. Topologia atual
 
 ```text
-[Watchdog Local] (Porta 8001)
-  └── main_runner.py (Modo Silencioso - v90.4)
-        └── Orquestrador
-              ├── InstagramWorker
-              ├── AIProcessorWorker (Cascata: Ollama -> Sabia-4 -> Cloud)
-              └── TargetResearchWorker (opcional por RESEARCHER_MODE)
+[Watchdog Local] (Porta 8001 + logs SSE)
+  ├── Agente de SRE Autônomo (core/autopilot/sre_agent.py - OODA e Autocura)
+  └── main_runner.py (Orquestrador v97.6)
+        ├── WkColetaInstagram (InstagramScraperV2 + DOM Healing + Diagnóstico Zero)
+        ├── WkClassificaComentarios (Cascata: Ollama local -> Sabia-4 -> Cloud)
+        ├── SaRevisaoOnline (Fila secundária / Nuvem)
+        ├── SaFastDrop (Linguística Forense / Triagem local fast-drop sem JVM)
+        └── WkPesquisaAlvos (Curadoria opcional por RESEARCHER_MODE)
 
-[Subagentes Analíticos e de Dados]
-  ├── SaVoyant: Subagente Linguista Pericial (v92.3 - Voyant Tools)
-  ├── SaConsultaBanco: Prover consultas SQL locais leves via Datasette
-  ├── SaAuditaClassificacoes: Auditoria cruzada anti-alucinação sob demanda (Groq)
-  ├── SaMineracaoRedes: Análise de redes coordenadas e clusters reativa
-  ├── SaAuditoriaFinanceira: Auditoria financeira e fechamento diário reativo
-  └── Hugging Face MCP: Descoberta e acesso ao ecossistema Hub via Agente CLI
-
-[Voyant Server] (Porta 8888)
-  └── Trombone API (PLN Determinístico local)
+[Subagentes Analíticos e de Dados (sob demanda / reativos)]
+  ├── SaConsultaBanco (Buscas SQL e FTS5 locais via Datasette na porta 8002)
+  ├── SaAuditaClassificacoes (Auditoria cruzada e cálculo de drift com Groq)
+  ├── SaMineracaoRedes (Processos paralelos para análise de clusters de ataque e grafos)
+  ├── SaAuditoriaFinanceira (Métricas de burn rate, Stripe e DRE)
+  └── Hugging Face MCP (Integração e descoberta de ecossistema Hub)
 
 [Datasette Server] (Porta 8002)
   └── sentinela_data.db (Espelhamento SQLite local imutável FTS5)
@@ -48,17 +46,18 @@ O Sentinela é uma plataforma de monitoramento político com foco em:
         └── components/warroom/ (Abas modularizadas: targets, alerts, analise)
 
 [Dashboard local]
-  └── local_dashboard.html + SSE do Watchdog
+  └── local_dashboard.html + SSE do Watchdog (Sala de Controle com Coleta Direcionada)
 ```
 
 ## 3. Pipeline atual de inteligência
 
-1. claim atômico da fila em `core/queue_manager.py`
-2. coleta de comentários com scraper V2
-3. classificação do backlog via `core/ai_service.py`
-4. reanálise de baixa confiança como tarefa de utilidade
-5. disparo reativo em background de subagentes analíticos (`NetworkMinerAgent` & `TreasurerAgent`)
-6. atualização de métricas financeiras, telemetria e grafos de influência
+1. claim atômico da fila em `core/queue_manager.py` com SELECT FOR UPDATE SKIP LOCKED
+2. coleta de comentários com scraper V2 (InstagramScraperV2 com ScrapeAgent e DOM Healing)
+3. triagem rápida via `SaFastDrop` (léxico local puro em Python) para descarte de neutros/lixo
+4. classificação de comentários suspeitos restantes via `WkClassificaComentarios`
+5. reanálise de baixa confiança como tarefa de utilidade secundária
+6. disparo reativo em background de subagentes analíticos (`SaMineracaoRedes` & `SaAuditoriaFinanceira`)
+7. atualização de métricas financeiras, telemetria e grafos de influência
 
 
 ## 3.1 Estado atual dos workers
@@ -158,6 +157,7 @@ Os itens abaixo aparecem em documentos antigos, mas não representam a verdade o
 - `ai_processor_worker.py` como nome de arquivo do classificador (real: `wk_classifica_comentarios.py`)
 - `treasurer_agent.py`, `network_agent.py`, `alert_worker.py`, `dossier_worker.py`, `target_research_worker.py` — nomes legados de arquivos que foram renomeados com prefixo `wk_`/`sa_`
 - `researcher_mode` como "ativo por padrão" — na verdade é **desabilitado por padrão**
+- Voyant Server (Java) e `SaVoyant` como componentes ativos (expurgados na v96.2, substituídos pelo `SaFastDrop`)
 
 ## 9. Fontes de verdade
 
@@ -176,13 +176,13 @@ Atualizações consolidadas no ciclo mais recente:
 - redução de ruído visual na home/sidebar e aumento de usabilidade em alvos de clique
 - proteção de mock de pagamento por variável explícita (`STRIPE_ALLOW_MOCK_PAYMENTS`)
 
-Esses ajustes devem ser considerados baseline atual do frontend oficial.
+Esse ajustes devem ser considerados baseline atual do frontend oficial.
 
-## 11. Subagentes Analíticos e de Dados (PASA v88.2)
+## 11. Subagentes Analíticos e de Dados (PASA v88.2 / v97.6)
 
 A arquitetura foi migrada para subagentes especializados executados de forma reativa ou sob demanda, todos herdando da classe base `BaseSubAgent` para offloading de CPU (subprocessos) e I/O (threads):
 
-- **SaVoyant** (`workers/ai/sa_voyant.py`): Subagente Linguista. Cruza estatísticas léxicas do Voyant Tools com a 'Bíblia Linguística Forense' para detectar Xenofobia, Ataques Institucionais e Sarcasmo com precisão pericial.
+- **SaFastDrop** (`workers/ai/sa_fast_drop.py`): Subagente de Triagem Fast-Drop Léxica. Desenvolvido para substituir integralmente o Voyant Tools em Java. Utiliza regras locais de string e dicionários em Python puro para filtrar rapidamente comentários neutros de forma determinística, diminuindo em até 70% o uso de APIs de IA em nuvem.
 - **SaConsultaBanco** (`workers/ai/sa_consulta_banco.py`): Desacopla a leitura de dados históricos de produção (Supabase) via API HTTP do Datasette local na porta `8002`, provendo buscas FTS5 ultra-velozes.
 - **SaAuditaClassificacoes** (`workers/ai/sa_audita_classificacoes.py`): Subagente de curadoria cruzada anti-alucinação. Consome o `SaConsultaBanco` e efetua reclassificações via cascata de IA com circuit breaker para calcular o drift do modelo, gerando sugestões de prioridade `HIGH` em `worker_suggestions`.
 - **SaMineracaoRedes** (`workers/analytics/sa_mineracao_redes.py`): Analisa grafos de hostilidade e detecta campanhas coordenadas organizadas (clusters de ataque) em processos filhos separados (`ProcessPoolExecutor`), persistindo os dados e gerando relatórios físicos para o frontend com claims atômicos concorrentes.

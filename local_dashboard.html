@@ -199,11 +199,11 @@
                                 <span id="researcher-status" class="text-yellow-500 font-bold">...</span>
                             </div>
                             <div class="col-span-2 mt-1 flex flex-wrap gap-2">
-                                <button onclick="restartWorker('ig-v2-01')" class="text-[9px] bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 px-2 py-1 rounded uppercase tracking-wider">Reiniciar IG</button>
-                                <button onclick="restartWorker('ai-processor-01')" class="text-[9px] bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 px-2 py-1 rounded uppercase tracking-wider">Reiniciar AI</button>
-                                <button onclick="restartWorker('sa-fast-drop-01')" class="text-[9px] bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 px-2 py-1 rounded uppercase tracking-wider">Reiniciar FAST</button>
-                                <button onclick="restartWorker('sa-revisao-online-01')" class="text-[9px] bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 px-2 py-1 rounded uppercase tracking-wider">Reiniciar REV</button>
-                                <button onclick="restartWorker('researcher-01')" class="text-[9px] bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 px-2 py-1 rounded uppercase tracking-wider">Reiniciar RES</button>
+                                <button onclick="doRestartWorker(this, 'ig-v2-01')" class="text-[9px] bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 px-2 py-1 rounded uppercase tracking-wider">Reiniciar IG</button>
+                                <button onclick="doRestartWorker(this, 'ai-processor-01')" class="text-[9px] bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 px-2 py-1 rounded uppercase tracking-wider">Reiniciar AI</button>
+                                <button onclick="doRestartWorker(this, 'sa-fast-drop-01')" class="text-[9px] bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 px-2 py-1 rounded uppercase tracking-wider">Reiniciar FAST</button>
+                                <button onclick="doRestartWorker(this, 'sa-revisao-online-01')" class="text-[9px] bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 px-2 py-1 rounded uppercase tracking-wider">Reiniciar REV</button>
+                                <button onclick="doRestartWorker(this, 'researcher-01')" class="text-[9px] bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 px-2 py-1 rounded uppercase tracking-wider">Reiniciar RES</button>
                             </div>
                         </div>
                     </div>
@@ -324,6 +324,41 @@
             }
         }
 
+        async function requestWithFeedback(url, payload, onSuccess, onError) {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const result = await response.json().catch(() => ({}));
+            if (response.ok && result.status === 'success') {
+                if (onSuccess) onSuccess(result);
+            } else {
+                if (onError) onError(result);
+            }
+            return result;
+        }
+
+        async function doRestartWorker(buttonEl, workerId) {
+            const originalText = buttonEl.textContent;
+            buttonEl.disabled = true;
+            if (!buttonEl.dataset.originalText) buttonEl.dataset.originalText = originalText;
+            buttonEl.textContent = 'Reiniciando...';
+            try {
+                await requestWithFeedback(
+                    API_BASE + '/api/restart_worker',
+                    { worker_id: workerId },
+                    () => {},
+                    () => {}
+                );
+            } catch (e) {
+                console.error(`Erro ao reiniciar ${workerId}:`, e);
+            } finally {
+                buttonEl.disabled = false;
+                buttonEl.textContent = buttonEl.dataset.originalText || originalText;
+            }
+        }
+
         async function triggerForceScrape() {
             const input = document.getElementById('force-scrape-username');
             const btn = document.getElementById('btn-force-scrape');
@@ -343,21 +378,19 @@
             lucide.createIcons();
             
             try {
-                const response = await fetch(API_BASE + '/api/control/force_scrape', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: username })
-                });
-                const result = await response.json();
-                
-                if (response.ok && result.status === 'success') {
-                    statusDiv.textContent = `Sucesso: raspagem agendada para @${username}.`;
-                    statusDiv.className = "text-[9px] uppercase font-bold text-green-500 mt-1.5";
-                    input.value = '';
-                } else {
-                    statusDiv.textContent = `Erro: ${result.message || 'Falha ao engatilhar'}`;
-                    statusDiv.className = "text-[9px] uppercase font-bold text-red-500 mt-1.5";
-                }
+                await requestWithFeedback(
+                    API_BASE + '/api/control/force_scrape',
+                    { username },
+                    () => {
+                        statusDiv.textContent = `Sucesso: raspagem agendada para @${username}.`;
+                        statusDiv.className = "text-[9px] uppercase font-bold text-green-500 mt-1.5";
+                        input.value = '';
+                    },
+                    (result) => {
+                        statusDiv.textContent = `Erro: ${result.message || 'Falha ao engatilhar'}`;
+                        statusDiv.className = "text-[9px] uppercase font-bold text-red-500 mt-1.5";
+                    }
+                );
             } catch (e) {
                 statusDiv.textContent = `Erro: ${e.message}`;
                 statusDiv.className = "text-[9px] uppercase font-bold text-red-500 mt-1.5";

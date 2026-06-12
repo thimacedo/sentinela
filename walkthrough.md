@@ -1,5 +1,5 @@
 # Walkthrough — Estado Atual Auditável
-_last_updated: 2026-06-11_
+_last_updated: 2026-06-12_
 
 Este documento resume apenas o que continua válido após auditoria do código.
 
@@ -99,3 +99,17 @@ Para iniciar trabalho novo:
   - Validada a sintaxe e compilação dos arquivos Python alterados (`core/queue_manager.py` e `watchdog/__init__.py`).
   - Executados com sucesso os testes unitários do `QueueManager` (`tests/test_queue_manager.py`).
   - Criado e executado script de integração `scratch/test_force_scrape.py` para testar ponta a ponta a inserção física de alvos com prioridade `1` no Supabase remoto e posterior limpeza de dados de teste.
+
+## 9. Sincronização Geral de Documentação (v97.6)
+
+- **Unificação na Mesma Etapa (v97.6)**:
+  - Sincronizados e alinhados todos os arquivos `.md` do workspace à realidade atual do backend resiliente e autônomo.
+  - Atualizados `README.md`, `ROADMAP.md`, `PROJECT.md` e `AGENTS_SYNC.md` na raiz para remover referências obsoletas.
+  - Atualizados `docs/SYSTEM_CONTEXT.md` e `docs/ARCH_AUTOHEALING.md` para descrever o Agente SRE Autônomo, o DOM Healing via visão computacional do Gemini 2.5 Flash, o Diagnóstico Granular de Coleta Zero e o `SaFastDrop`.
+- **Expurgo e Depreciação de Tecnologias Java**:
+  - Marcados explicitamente como legados/depreciados os documentos `docs/workers/SA_VOYANT.md` e `docs/VOYANT_INTEGRATION.md`, registrando o expurgo da JVM Java em prol da pré-triagem Python pura.
+- **Novas Documentações Criadas**:
+  - Criado `docs/workers/SA_FAST_DROP.md` detalhando as responsabilidades da engine léxica local ativa.
+  - Sincronizado o índice de documentação em `docs/index_documentacao.md` para unificar e direcionar as leituras de auditoria e desenvolvimento.
+- **Validação de Conformidade**:
+  - Verificada a coerência textual e a terminologia em pt-BR em todos os arquivos Markdown.

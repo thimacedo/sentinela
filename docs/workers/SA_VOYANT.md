@@ -1,5 +1,10 @@
-# 🕵️ Subagente: SaVoyant (Linguística Pericial)
-**Versão:** PASA v92.5
+# 🕵️ [DEPRECADO / HISTÓRICO] Subagente: SaVoyant (Linguística Pericial)
+
+> [!WARNING]
+> **ESTE SUBAGENTE FOI DESCONTINUADO NA VERSÃO v96.2.**
+> Toda a triagem fast-drop e análise léxica determinística foi substituída por completo pelo subagente **SaFastDrop** (`workers/ai/sa_fast_drop.py`), rodando em Python puro local, sem nenhuma dependência do VoyantServer (Java/JVM) na porta 8888. Este documento é mantido apenas como histórico de design e para fins de auditoria.
+
+**Versão Histórica:** PASA v92.5
 **Diretório:** `workers/ai/sa_voyant.py`
 **Interface de Dados:** `core/voyant_service.py`
 

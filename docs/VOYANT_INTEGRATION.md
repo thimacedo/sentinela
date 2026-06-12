@@ -1,4 +1,8 @@
-# Voyant Tools - Integração e Funcionamento (Sentinela v50.1)
+# [DEPRECADO / HISTÓRICO] Voyant Tools - Integração e Funcionamento (Sentinela v50.1)
+
+> [!WARNING]
+> **ESTA INTEGRAÇÃO COM VOYANT SERVER (JAVA) FOI TOTALMENTE EXPURGADA NA VERSÃO v96.2.**
+> O servidor java `VoyantServer.jar` e a Trombone API local foram removidos do Watchdog e do pipeline ativo de triagem para liberar recursos de CPU e RAM no boot. Toda a triagem rápida léxica local agora é executada deterministicamente pelo subagente **SaFastDrop** (`workers/ai/sa_fast_drop.py`) em Python puro e sem dependências de rede ou JVM. Este arquivo serve exclusivamente para documentar o histórico de desenvolvimento.
 
 O Voyant Tools é um componente de infraestrutura utilizado como motor de NLP (Processamento de Linguagem Natural) determinístico de alta performance para análise léxica.
 

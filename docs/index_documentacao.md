@@ -1,6 +1,6 @@
 # Índice de Documentação — Sentinela
 
-Este índice foi atualizado em `2026-06-07` para refletir o estado real do workspace após a auditoria documental v90.8.
+Este índice foi atualizado em `2026-06-12` para refletir o estado real do workspace na versão `v97.6`.
 
 ## 1. Fonte de verdade
 
@@ -12,16 +12,18 @@ Este índice foi atualizado em `2026-06-07` para refletir o estado real do works
 
 ## 2. Documentação de workers (docs/workers/)
 
-Todos os arquivos abaixo foram corrigidos em 2026-06-07 com paths e nomes de classe corretos:
+Todos os arquivos abaixo estão sincronizados com a versão `v97.6` com caminhos e classes corretas:
 
-| Worker | Arquivo |
-|--------|---------|
-| Classificador oficial | `docs/workers/AI_PROCESSOR_WORKER.md` → `workers/processors/wk_classifica_comentarios.py` |
-| Treasurer | `docs/workers/TREASURER_AGENT.md` → `workers/financial/sa_auditoria_financeira.py` |
-| Network Miner | `docs/workers/NETWORK_MINER_AGENT.md` → `workers/analytics/sa_mineracao_redes.py` |
-| Alerts | `docs/workers/ALERT_WORKER.md` → `workers/processors/wk_gera_alertas.py` |
-| Dossier | `docs/workers/DOSSIER_WORKER.md` → `workers/processors/wk_gera_dossies.py` |
-| Target Research | `docs/workers/TARGET_RESEARCH_WORKER.md` → `workers/processors/wk_pesquisa_alvos.py` |
+| Worker / Subagente | Arquivo de Documentação | Código de Produção |
+|---|---|---|
+| Scraper Instagram | `docs/ARCH_AUTOHEALING.md` (Coleta) | `workers/scrapers/wk_coleta_instagram.py` |
+| Classificador Oficial | `docs/workers/AI_PROCESSOR_WORKER.md` | `workers/processors/wk_classifica_comentarios.py` |
+| Pré-Triagem Fast-Drop | `docs/workers/SA_FAST_DROP.md` | `workers/ai/sa_fast_drop.py` |
+| Auditoria Financeira | `docs/workers/TREASURER_AGENT.md` | `workers/financial/sa_auditoria_financeira.py` |
+| Mineração de Redes | `docs/workers/NETWORK_MINER_AGENT.md` | `workers/analytics/sa_mineracao_redes.py` |
+| Geração de Alertas | `docs/workers/ALERT_WORKER.md` | `workers/processors/wk_gera_alertas.py` |
+| Geração de Dossiês | `docs/workers/DOSSIER_WORKER.md` | `workers/processors/wk_gera_dossies.py` |
+| Curadoria de Alvos | `docs/workers/TARGET_RESEARCH_WORKER.md` | `workers/processors/wk_pesquisa_alvos.py` |
 
 ## 3. Documentação ainda útil
 
@@ -37,12 +39,15 @@ Todos os arquivos abaixo foram corrigidos em 2026-06-07 com paths e nomes de cla
 - `task.md` — checklist operacional da rodada atual
 - `docs/operations/INSTAGRAM_SCRAPER_V2.md` — referência de coleta
 
-## 5. Documentação histórica
+## 5. Documentação histórica (Depreciada / Legada)
 
 Use apenas para contexto e rastreabilidade:
 
 - `docs/archive/`
 - `docs/superpowers/`
+- `docs/workers/SA_VOYANT.md` (Substituído pelo SaFastDrop na v96.2)
+- `docs/VOYANT_INTEGRATION.md` (Expurgado na v96.2)
+- `docs/DOCUMENTACAO_INFRA_V50.1.md`
 - `docs/ARCHITECTURE_PASA_V50.md`
 - `docs/archive/ARCHITECTURE_PASA_V84.md`
 - `docs/archive/ARCHITECTURE_PASA_V86.md`
@@ -61,4 +66,4 @@ Antes de iniciar qualquer trabalho:
 
 ---
 
-_Última atualização do índice: 2026-06-07 (v90.8)_
+_Última atualização do índice: 2026-06-12 (v97.6)_

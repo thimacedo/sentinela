@@ -1,43 +1,55 @@
-# 🧠 DOCUMENTAÇÃO: AUTOCURA PROFUNDA (v50)
+# 🧠 DOCUMENTAÇÃO: AUTOCURA E RESILIÊNCIA OPERACIONAL (v97.6)
 
-O sistema Sentinela Democrática v50 implementa uma arquitetura de **Autonomia Biológica**, onde cada componente é capaz de diagnosticar e tratar seus próprios sintomas antes de escalar uma falha para o nível superior.
-
----
-
-## 🛡️ Camadas de Autocura
-
-### 1. Nível de Infraestrutura (Watchdog)
-*   **Médico de Plantão**: Analisa o `stderr` do servidor para diferenciar falhas.
-*   **Gestão de OOM**: Interrompe o sistema e envia alerta fatal se a RAM esgotar.
-*   **Cura de Dependências**: Executa `pip install` e limpa cache se detectar `ImportError`.
-*   **Anti-Spam Categorizado**: Bloqueia alertas repetitivos no WhatsApp com cooldowns inteligentes.
-
-### 2. Nível de Coleta (Instagram Workers)
-*   **Regeneração de Navegador**: O motor Playwright (`scraper_headless.py`) reinicia o Chrome internamente se o grid vier vazio ou houver crash de processo.
-*   **Rotação de Sessão**: Se o Worker detectar um *Login Wall*, ele invalida o cookie atual no Supabase e recruta uma nova sessão ativa automaticamente.
-*   **Resiliência DB**: Inserção de dados com 3 retentativas e backoff exponencial.
-
-### 3. Nível de Inteligência (AI Service)
-*   **Cascata Cloud (Circuit Breaker)**: Ordem de execução `Groq -> Mistral -> OpenRouter`.
-*   **Isolamento Local**: 100% cloud-only para evitar Out of Memory (OOM) no servidor local.
+O sistema Sentinela Democrática implementa uma arquitetura de **Autonomia Biológica**, onde falhas operacionais e de infraestrutura são monitoradas, diagnosticadas e tratadas de forma reativa e autônoma, sem necessidade de intervenção humana constante.
 
 ---
 
-## 📊 Verificação de Persistência (Protocolo Diamond)
+## 🛡️ Camadas de Autocura e Resiliência
 
-O sistema utiliza a tabela `worker_runs` como fonte de verdade para a saúde operacional:
+### 1. Nível de Infraestrutura e Processos (Watchdog & SRE Agent)
+O Watchdog atua como supervisor global da aplicação e hospeda o **Agente de SRE Autônomo** (`core/autopilot/sre_agent.py`):
+*   **Loop Cognitivo OODA**: O SRE Agent executa um loop de Observação, Orientação, Decisão e Ação que monitora os logs em tempo real.
+*   **Tratamento Determinístico de Falhas**: Erros de rede, timeouts ou rate-limits comuns são mitigados com custo zero de tokens.
+*   **Cura por Tool Calling**: Sob falhas complexas ou desconhecidas, o SRE Agent executa ações atômicas de cura por registro de ferramentas:
+    *   `restart_main_runner`: Restart do orquestrador principal ao detectar crash de comunicação IPC (`EPIPE`) do Playwright.
+    *   `restart_worker`: Reinício de threads ou instâncias específicas.
+    *   `rotate_session` (via `SessionHealer`): Invalidação e rotatividade de sessões sob detecção de bloqueios.
+    *   `cooldown_target`: Cooldown temporário de alvos que estejam gerando excesso de rate limit.
+*   **Bypass Headless de Console**: O Watchdog ignora chamadas de UI no boot quando desanexado do console, evitando travamento silencioso de DLLs gráficas de bandeja no Windows.
+*   **Estabilização IPv6**: Uso direto do endereço local IPv4 (`127.0.0.1:8001`) nas requisições internas, contornando falhas de resolução de nome IPv6 `[::1]` no Windows.
 
-1.  **Sucesso Honesto**: O worker só reporta `success=True` se persistir dados ou validar que não há novos itens.
-2.  **Rastreabilidade de Erros**: O campo `error_details` no Supabase armazena o diagnóstico capturado pela autocura.
-3.  **Idempotência**: Todos os `upserts` utilizam IDs determinísticos (UUID v5) para evitar duplicidade de comentários.
+### 2. Nível de Coleta e Scraper (DOM Healing)
+A coleta é governada pelo `wk_coleta_instagram.py` que se apoia no `InstagramScraperV2` e no loop cognitivo do `ScrapeAgent`:
+*   **DOM Healing (Autocura de Seletores)**: Se a estrutura DOM do Instagram mudar e o Playwright não encontrar um botão ou elemento crítico de scrap, o ScrapeAgent aciona a visão computacional do **Gemini 2.5 Flash** para examinar um screenshot da página em tempo real.
+*   **Cache de Seletores Aprendidos**: Uma vez que o Gemini Flash deduz o novo seletor CSS correto para interagir, o sistema armazena a regra no arquivo `configs/learned_selectors.json` (Cache Hit). Ciclos de coleta posteriores usarão diretamente o seletor aprendido sem incorrer em novas chamadas de API de visão (economia de burn rate).
+*   **Comportamento Humano Estocástico**: Motor de persona (`persona_mode.py`) que imita cliques, velocidades e scrolls humanos para prevenir ativamente o banimento e desafios CAPTCHA.
+
+### 3. Diagnóstico Granular de Coleta Zero
+Para fins de observabilidade, coletas que retornam 0 comentários não são mais tratadas como falha genérica. O worker `WkColetaInstagram` analisa os contadores locais e clasifica a causa exata em seu `CycleResult`:
+*   `no_posts_found`: O perfil pesquisado não possui publicações visíveis ou é privado.
+*   `no_comments_in_posts`: Posts encontrados com sucesso, mas nenhum comentário recente existe.
+*   `playwright_error`: Falha técnica de renderização ou rede do navegador.
+*   `junk_detected`: Detecção de bloqueios, desafios visuais ou páginas corrompidas.
+
+O orquestrador (`SentinelaOrchestrator`) mapeia esses códigos deterministicamente e salva sugestões específicas de autocura no banco (tabela `worker_suggestions`).
+
+### 4. Nível de Inteligência (Cascata PASA e SaFastDrop)
+*   **SaFastDrop**: Filtro léxico ultra-veloz em Python puro local. Substitui por completo a dependência do antigo Voyant Server em Java (JVM), reduzindo custos de memória.
+*   **Circuit Breakers**: Desativação em tempo real de provedores de IA sob erros de autorização (401/403) e cooldowns exponenciais (300s) em caso de limite de cota (429), desviando o tráfego analítico para o Ollama local e para o `FallbackLLM`.
 
 ---
 
-## 🚀 Como Testar a Autonomia
+## 📊 Rastreabilidade e Persistência
 
-Para disparar um teste de validação manual:
-```powershell
-python run_worker.py --target lulaoficial --force
-```
+1.  **Métricas Atômicas**: Gravadas na tabela `worker_runs` e `worker_metrics` do Supabase remoto a cada ciclo.
+2.  **Transações Seguras**: Locks de concorrência horizontal no Supabase via `SELECT FOR UPDATE SKIP LOCKED` e claim de fila concorrente.
+3.  **Idempotência**: Todas as escritas e cadastros no Supabase usam `on_conflict` (upsert) para evitar duplicidade e manter a integridade dos dados históricos.
 
-Monitore o comportamento em tempo real em: `http://localhost:8000`
+---
+
+## 🚀 Validação de Resiliência
+
+Para forçar testes e validar o comportamento de autocura:
+*   Para monitorar o stream SSE em tempo real: `python scratch/monitor_coleta.py`
+*   Para acionar a autocura sob um alvo forçado: `python scratch/set_priority.py` (insere candidato com prioridade 0)
+*   Dashboard local em: `http://127.0.0.1:8001` (Sala de Controle)

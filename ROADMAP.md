@@ -1,9 +1,17 @@
 # ROADMAP.md — Sentinela
-_last_updated: 2026-06-05 | branch: main_
+_last_updated: 2026-06-12 | branch: main | version: v97.6_
 
 ## Concluído
 
-### Núcleo operacional
+### Núcleo operacional e SRE (v97.6)
+- [x] Diagnóstico Granular de Coleta Zero: detecção e classificação em logs/DB de causas de raspagem vazia (v97.6)
+- [x] Sala de Controle e Coleta Direcionada no Dashboard local com triggerForceScrape e fila prioritária no Supabase (v97.5)
+- [x] DOM Healing e Visão Computacional: regeneração de seletores CSS via Gemini 2.5 Flash e cache aprendido local (v97.2)
+- [x] ScrapeAgent: Loop Cognitivo OODA, ferramentas de comportamento humano estocástico e priorização de alvos (v97.0)
+- [x] Agente de SRE Autônomo: Watchdog v52.0 reativo com tool calling para autocura, restart automático por crash IPC (EPIPE) do Playwright (v96.2)
+- [x] Resiliência de Inicialização: desvio Headless sem janelas para processos desanexados, bypass de setup_tray e conexão IPv6 local estabilizada (v96.2)
+
+### Núcleo operacional antigo (v94.0 e anteriores)
 - [x] Watchdog local com stream de logs via SSE
 - [x] Controle remoto do runner com start, stop e restart
 - [x] `AIProcessorWorker` como classificador oficial do pipeline

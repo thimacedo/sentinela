@@ -19,25 +19,26 @@ O fluxo atual observado no código é:
 2. o orquestrador registra workers especializados
 3. a fila usa claim atômico com `SELECT FOR UPDATE SKIP LOCKED` via RPCs do Supabase
 4. o scraper coleta comentários e metadados
-- `AIProcessorWorker` classifica backlog com cascata:
+5. `WkClassificaComentarios` classifica backlog com cascata:
    - `ollama` para triagem local
    - `maritaca` (Sabia-4) e `huggingface` (MCP) na camada cloud
    - `mistral`, `groq` e `openrouter` como provedores de auditoria
    - `FallbackLLM` como recuperação de desastre
-6. `network-miner` consolida redes
-7. `treasurer` atualiza indicadores financeiros
-8. `researcher` atualiza heurísticas semânticas a partir das bases documentais
+6. `sa-mineracao-redes` consolida redes e clusters de ataque
+7. `sa-auditoria-financeira` atualiza indicadores financeiros e DRE
+8. `sa-fast-drop` realiza triagem léxica local sem JVM de forma ultra-veloz
 
 ## Estado atual dos workers
 
 Workers ativos no runtime moderno:
 
-- `workers/scrapers/ig_worker_v2.py` — coleta Instagram com fila atômica
-- `workers/processors/ai_processor_worker.py` — classificador oficial e reanálise de baixa confiança
-- `workers/analytics/network_worker.py` — mineração de rede e clusters
-- `workers/financial/treasurer_worker.py` — auditoria e telemetria financeira
-- `workers/ai/target_research_worker.py` — curadoria de alvos, agora controlado por modo explícito
-- `workers/orchestrator/orchestrator.py` — coordenação do runtime moderno
+- `workers/scrapers/wk_coleta_instagram.py` (`WkColetaInstagram`) — coleta Instagram com fila atômica e diagnóstico granular de coleta zero
+- `workers/processors/wk_classifica_comentarios.py` (`WkClassificaComentarios`) — classificador oficial e reanálise de baixa confiança
+- `workers/analytics/sa_mineracao_redes.py` (`SaMineracaoRedes`) — mineração de rede e clusters reativos
+- `workers/financial/sa_auditoria_financeira.py` (`SaAuditoriaFinanceira`) — auditoria e telemetria financeira
+- `workers/processors/wk_pesquisa_alvos.py` (`WkPesquisaAlvos`) — curadoria de alvos, controlado por modo explícito
+- `workers/ai/sa_fast_drop.py` (`SaFastDrop`) — triagem fast-drop local léxica sem dependências externas
+- `workers/orchestrator/orchestrator.py` — coordenação e autocura reativa do runtime moderno
 
 Refatorações já concluídas nesta frente:
 
@@ -70,10 +71,10 @@ O frontend oficial está em `frontend/` com Next.js.
 
 ## Documentação recomendada
 
-- `STATE.md` — estado operacional auditado
+- `STATE.md` — estado operacional auditado v97.6
 - `ROADMAP.md` — roadmap limpo e pendências reais
-- `docs/SYSTEM_CONTEXT.md` — mapa técnico atual
-- `docs/DOCUMENTATION_AUDIT.md` — auditoria do que serve, do que está defasado e do que é legado
+- `docs/SYSTEM_CONTEXT.md` — mapa técnico atualizado
+- `docs/DOCUMENTATION_AUDIT.md` — classificação da documentação: válida, parcial, histórica ou lixo operacional
 - `docs/index_documentacao.md` — índice de leitura
 
 ## Regras práticas
@@ -82,7 +83,8 @@ O frontend oficial está em `frontend/` com Next.js.
 2. Considere `ROADMAP.md` como fonte de verdade de planejamento.
 3. Trate `docs/archive/` e specs antigas como histórico, não como contrato atual.
 4. LiteRT não faz mais parte do pipeline de processamento ativo.
-5. O classificador oficial em produção é `workers/processors/ai_processor_worker.py`.
+5. O classificador oficial em produção é `workers/processors/wk_classifica_comentarios.py`.
+6. O Voyant Server (Java) e o `SaVoyant` foram totalmente expurgados na v96.2, substituídos pelo `SaFastDrop` (Python local).
 
 ## Observação importante
 
