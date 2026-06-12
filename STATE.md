@@ -1,5 +1,5 @@
 # STATE.md — Sentinela
-_last_updated: 2026-06-12 | branch: main | version: v97.2_
+_last_updated: 2026-06-12 | branch: main | version: v97.5_
 
 ## Status Operacional
 
@@ -7,8 +7,20 @@ _last_updated: 2026-06-12 | branch: main | version: v97.2_
 |---|---|---|
 | Coleta | 🟢 Operacional | ScrapeAgent (OODA loop, DOM Healing e Priorização Cognitiva) ativo. |
 | Inteligência | 🟢 Operacional | Malha de IA resiliente + SaFastDrop local. |
-| Dashboard | 🟢 Operacional | Painel "Decision Room" com auto-start e fallback de rede robusto (127.0.0.1). |
+| Dashboard | 🟢 Operacional | Painel "Decision Room" com auto-start, telemetria real via DB e Coleta Direcionada. |
 | SRE / Autocura | 🟢 Operacional | Agente de SRE Autônomo (`sre_agent.py`) ativo em background com desvio headless. |
+
+## Histórico Recente de Correções (v97.5)
+1. **Coleta Direcionada e Sala de Controle (Concluído)**:
+   - Adicionado painel visual dinâmico com input e botão de ação instantânea no `local_dashboard.html`.
+   - O botão de envio exibe feedback visual imediato (<100ms) ao operador usando spinners e ícones atualizados do Lucide.
+   - Implementada a função AJAX `triggerForceScrape()` direcionada ao endpoint `/api/control/force_scrape` do Watchdog na porta `8001`.
+   - Atualizado o método `add_target_to_queue()` no `core/queue_manager.py` para upsertar alvos prioritários na `fila_coleta` com prioridade `1` (fila prioritária).
+   - Corrigido bug de coluna inexistente (`username`) no insert da tabela `fila_coleta` do Supabase.
+   - Atualizada a lista de status de workers/subagentes no painel de Diagnóstico do `local_dashboard.html` para refletir a arquitetura moderna de microsserviços: `IG-V2` (Coleta), `AI-PROC` (IA), `SA-FAST` (Triage), `SA-REV` (Cloud) e `RESEARCHER` (Alvos).
+   - Implementada a função `fetchWorkerStatus()` no frontend que consulta diretamente o histórico de batimentos na tabela `worker_metrics` do Supabase via cliente JS anônimo.
+   - Integrada a telemetria ao loop do dashboard chamando `fetchWorkerStatus()` a cada pulso do dashboard (`fetchDashboard()`).
+   - Removidas com segurança as referências obsoletas ao `voyant-status` no JavaScript para evitar erros fatais de `TypeError` (DOM ausente) no navegador.
 
 ## Histórico Recente de Correções (v97.2)
 1. **Consolidação do DOM Healing e Visão Computacional (Concluído)**:

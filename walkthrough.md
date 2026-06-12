@@ -79,3 +79,23 @@ Para iniciar trabalho novo:
 2. leia `docs/SYSTEM_CONTEXT.md`
 3. leia `ROADMAP.md`
 4. valide no código
+
+## 8. Frente 1 — Coleta Direcionada & Sala de Controle (v97.5)
+
+- **Coleta Direcionada (Furar Fila)**:
+  - Adicionado painel visual dinâmico com input e botão de ação instantânea no `local_dashboard.html`.
+  - O botão de envio exibe feedback visual imediato (<100ms) ao operador usando spinners e ícones atualizados do Lucide.
+  - Implementada a função AJAX `triggerForceScrape()` direcionada ao endpoint `/api/control/force_scrape` do Watchdog na porta `8001`.
+  - Atualizado o método `add_target_to_queue()` no `core/queue_manager.py` para upsertar alvos prioritários na `fila_coleta` com prioridade `1` (fila prioritária).
+  - Corrigido bug de coluna inexistente (`username`) no insert da tabela `fila_coleta` do Supabase.
+
+- **Sala de Controle Granular (Telemetria Real)**:
+  - Atualizada a lista de status de workers/subagentes no painel de Diagnóstico do `local_dashboard.html` para refletir a arquitetura moderna de microsserviços: `IG-V2` (Coleta), `AI-PROC` (IA), `SA-FAST` (Triage), `SA-REV` (Cloud) e `RESEARCHER` (Alvos).
+  - Implementada a função `fetchWorkerStatus()` no frontend que consulta diretamente o histórico de batimentos na tabela `worker_metrics` do Supabase via cliente JS anônimo.
+  - Integrada a telemetria ao loop do dashboard chamando `fetchWorkerStatus()` a cada pulso do dashboard (`fetchDashboard()`).
+  - Removidas com segurança as referências obsoletas ao `voyant-status` no JavaScript para evitar erros fatais de `TypeError` (DOM ausente) no navegador.
+
+- **Validação e Testes**:
+  - Validada a sintaxe e compilação dos arquivos Python alterados (`core/queue_manager.py` e `watchdog/__init__.py`).
+  - Executados com sucesso os testes unitários do `QueueManager` (`tests/test_queue_manager.py`).
+  - Criado e executado script de integração `scratch/test_force_scrape.py` para testar ponta a ponta a inserção física de alvos com prioridade `1` no Supabase remoto e posterior limpeza de dados de teste.

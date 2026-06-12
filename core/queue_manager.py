@@ -522,3 +522,89 @@ class QueueManager:
                 "last_scraped_at": datetime.now(timezone.utc).isoformat(),
             }).eq("username", target.username).execute
         )
+
+    async def add_target_to_queue(self, username: str, priority: int = 1) -> bool:
+        """
+        Insere ou atualiza um alvo na fila de coleta com alta prioridade para forçar a raspagem (force_scrape).
+        """
+        username = username.strip().lstrip("@").lower()
+        if not username:
+            return False
+            
+        try:
+            db_real = self._get_db_client()
+            
+            # Verifica se o candidato existe na tabela de candidatos
+            cand_res = await asyncio.to_thread(
+                db_real.table("candidatos").select("username").eq("username", username).limit(1).execute
+            )
+            if not cand_res.data:
+                # Se não existir, cadastra-o como ativo temporário para coleta
+                await asyncio.to_thread(
+                    db_real.table("candidatos").insert({
+                        "username": username,
+                        "status_monitoramento": "ATIVO",
+                        "nota_relevancia": 50,
+                        "cargo": "ANALISE_SOLICITADA",
+                        "identidade_validada": False
+                    }).execute
+                )
+                logger.info(f"[Queue] Novo candidato cadastrado via force_scrape: @{username}")
+            else:
+                # Se já existe, garante que seu status de monitoramento seja ATIVO
+                await asyncio.to_thread(
+                    db_real.table("candidatos").update({
+                        "status_monitoramento": "ATIVO"
+                    }).eq("username", username).execute
+                )
+
+            # Insere ou atualiza na fila_coleta
+            existing = await asyncio.to_thread(
+                db_real.table("fila_coleta")
+                .select("id, status")
+                .eq("candidato_id", username)
+                .in_("status", ["PENDENTE", "EM_CURSO"])
+                .limit(1)
+                .execute
+            )
+            
+            LOCAL_TZ = timezone(timedelta(hours=-3))
+            now_iso = datetime.now(LOCAL_TZ).isoformat()
+            
+            if existing.data:
+                # Atualiza a prioridade para furar a fila
+                queue_id = existing.data[0]["id"]
+                await asyncio.to_thread(
+                    db_real.table("fila_coleta").update({
+                        "status": "PENDENTE",
+                        "prioridade": priority,
+                        "updated_at": now_iso
+                    }).eq("id", queue_id).execute
+                )
+                logger.info(f"[Queue] Alvo @{username} já estava na fila. Prioridade atualizada para {priority}.")
+            else:
+                # Insere novo item pendente com prioridade alta
+                await asyncio.to_thread(
+                    db_real.table("fila_coleta").insert({
+                        "candidato_id": username,
+                        "status": "PENDENTE",
+                        "prioridade": priority,
+                        "created_at": now_iso,
+                        "updated_at": now_iso
+                    }).execute
+                )
+                logger.info(f"[Queue] Alvo @{username} inserido na fila_coleta com prioridade {priority}.")
+                
+            return True
+        except Exception as e:
+            logger.error(f"[Queue] Erro ao adicionar @{username} à fila: {e}")
+            return False
+
+
+# Instância global para importação direta no Watchdog e outros serviços
+try:
+    from core.supabase_service import get_supabase_client
+    queue_manager = QueueManager(get_supabase_client())
+except Exception:
+    queue_manager = None
+

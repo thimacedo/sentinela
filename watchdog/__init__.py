@@ -207,7 +207,7 @@ async def control_force_scrape(payload: dict):
     username = payload.get("username")
     if not username: return {"status": "error", "message": "Username requerido"}
     from core.queue_manager import queue_manager
-    await queue_manager.add_target_to_queue(username, priority=10)
+    await queue_manager.add_target_to_queue(username, priority=1)
     return {"status": "success", "message": f"Raspagem forçada: {username}."}
 
 @app.post("/api/control/remove_target")
@@ -873,7 +873,7 @@ async def control_force_scrape(payload: dict):
     username = payload.get("username")
     if not username: return {"status": "error", "message": "Username requerido"}
     from core.queue_manager import queue_manager
-    await queue_manager.add_target_to_queue(username, priority=10)
+    await queue_manager.add_target_to_queue(username, priority=1)
     return {"status": "success", "message": f"Raspagem forçada: {username}."}
 
 @app.post("/api/control/remove_target")

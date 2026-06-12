@@ -25,11 +25,11 @@ _last_updated: 2026-06-04_
 
 ## Pendências reais
 
-- [x] Corrigir sistema de alertas de WhatsApp (CallMeBot) — usuários reportam que não estão recebendo notificações.
-- [x] Resolver loop de auto-exclusão no `GuardLocker`: o processo está se identificando como zumbi e se matando no boot.
-- [x] Validar fluxo completo de coleta e classificação no Tray.
-- [x] Estabilizar Datasette (porta 8002) no Watchdog.
-- [x] Implementar integração nativa Voyant Tools (v92.0) com triagem fast-drop no pipeline de IA.
+- [x] Frente 1 — Coleta Direcionada & Sala de Controle:
+  - [x] Adicionar painel visual de Coleta Direcionada no `local_dashboard.html`
+  - [x] Atualizar painel de Sala de Controle Granular no `local_dashboard.html` com todos os workers modernos
+  - [x] Implementar consulta ao `worker_metrics` do Supabase no Javascript do dashboard para telemetria em tempo real
+  - [x] Implementar função `triggerForceScrape()` para chamar `/api/control/force_scrape` no dashboard
 - [x] revisar documentação metodológica histórica (limpar arquivamento obsoleto)
 
 ## Melhorias de Resiliência Concluídas
