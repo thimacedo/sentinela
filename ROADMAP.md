@@ -44,9 +44,11 @@ _last_updated: 2026-06-05 | branch: main_
 - [x] Circuit breaker para IA
 - [x] `db_circuit_breaker` para Supabase
 - [x] buffer/checkpoint de scraping em estágio operacional
+- [x] **Coleta Direcionada**: Interface de input para forçar coleta imediata de alvos (v97.5).
 
 ### UX e operação
 - [x] local_dashboard.html refeito com UI Premium, Glassmorphism e responsividade absoluta (Mobile-first, com colunas flexíveis de `calc(100vh-290px)`, telemetria e alvos roláveis e auto-reload automático de 10s com trava de concorrência).
+- [x] **Sala de Controle Granular**: UI para telemetria em tempo real baseada em banco de dados e controle de workers/subagentes modernos (v97.5).
 - [x] frontend oficial em `frontend/`
 - [x] dashboard financeiro com Recharts
 - [x] robustez do carregamento AdSense com retry até script estar pronto
@@ -66,10 +68,8 @@ _last_updated: 2026-06-05 | branch: main_
 - [x] checkpoint intermediário por post raspado
 - [x] rotação real de proxies no Playwright
 - [x] redução de ciclos com `no_comments_found`
-- [ ] **Coleta Direcionada**: Interface de input para forçar coleta imediata de alvos.
 
 ### UI e Operação
-- [ ] **Sala de Controle Granular**: UI para controle de qualquer worker/subagente.
 
 ### Otimização de Pipeline Reativo (Fase 9) - Concluído
 - [x] Implementar `EventBus` centralizado para sinalização em memória (`AsyncLocalEventBus`).
