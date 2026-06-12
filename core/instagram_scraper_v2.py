@@ -994,45 +994,62 @@ class InstagramScraperV2:
         return comments
 
     async def _extract_from_dom(self, page: Page, shortcode: str) -> List[Dict[str, Any]]:
+        """
+        Extrai comentários diretamente do DOM renderizado.
+        v98.1: Adiciona filtro de timestamps relativos do Instagram
+        (ex: '20h', '1d · Edited', '5w') que compartilham o atributo dir=auto
+        com textos de comentários reais, causando falsos positivos.
+        """
         return await page.evaluate("""
             () => {
                 const results = [];
-                // Seleciona links que apontam para caminhos de perfil
+
+                // Regex para detectar timestamps relativos do Instagram
+                // Cobre: "20h", "1d", "5w", "3m", "1d · Edited", "Just now", "Agora", "edited"
+                const TS_RE = /^(\\d+[smhdw]|just\\s*now|\\d+\\s*(hour|day|week|min|second)s?|\\d+[smhdw]\\s*[·•·].*|agora|edited)$/i;
+
                 const links = Array.from(document.querySelectorAll('a[href*="/"]'));
                 const seen_pairs = new Set();
-                
+
                 links.forEach(link => {
                     try {
                         const url = new URL(link.href);
                         const path = url.pathname.replace(/\\//g, '');
                         if (!path || path.length < 3) return;
-                        
+
                         const text = link.innerText.trim();
-                        // Verifica se o texto do link condiz com o nome de usuário do perfil
-                        if (text.toLowerCase() === path.toLowerCase() && !['explore', 'reels', 'direct', 'emails'].includes(path)) {
+                        // O texto do link deve ser idêntico ao path (= username do perfil)
+                        if (
+                            text.toLowerCase() === path.toLowerCase() &&
+                            !['explore', 'reels', 'direct', 'emails', 'stories', 'accounts'].includes(path)
+                        ) {
                             const username = text;
-                            
+
                             // Navega até 5 níveis acima para encontrar o container do comentário
                             let node = link;
                             let commentText = "";
                             for (let i = 0; i < 5; i++) {
                                 if (!node.parentElement) break;
                                 node = node.parentElement;
-                                
-                                // Busca spans de texto do comentário
-                                const spans = Array.from(node.querySelectorAll('span'));
+
+                                const spans = Array.from(node.querySelectorAll('span[dir="auto"]'));
                                 for (let span of spans) {
-                                    if (span.getAttribute('dir') === 'auto') {
-                                        const txt = span.innerText.trim();
-                                        if (txt && txt !== username && txt.length > 1) {
-                                            commentText = txt;
-                                            break;
-                                        }
-                                    }
+                                    // Exclui spans dentro de elementos <time> (timestamps)
+                                    if (span.closest('time')) continue;
+
+                                    const txt = span.innerText.trim();
+
+                                    if (!txt) continue;
+                                    if (txt === username) continue;
+                                    if (txt.length < 3) continue;          // mínimo 3 chars
+                                    if (TS_RE.test(txt)) continue;         // timestamp relativo
+
+                                    commentText = txt;
+                                    break;
                                 }
                                 if (commentText) break;
                             }
-                            
+
                             if (username && commentText) {
                                 const pair_key = `${username}:${commentText}`;
                                 if (!seen_pairs.has(pair_key)) {
