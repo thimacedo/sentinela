@@ -1,9 +1,10 @@
 # ROADMAP.md — Sentinela
-_last_updated: 2026-06-12 | branch: main | version: v97.6_
+_last_updated: 2026-06-12 | branch: main | version: v97.7_
 
 ## Concluído
 
-### Núcleo operacional e SRE (v97.6)
+### Núcleo operacional e SRE (v97.7)
+- [x] Resiliência de DOM Scraper: correção e adaptação de extração de comentários baseada em links de perfil, contornando a exclusão de elementos h3 no Instagram Web (v97.7)
 - [x] Diagnóstico Granular de Coleta Zero: detecção e classificação em logs/DB de causas de raspagem vazia (v97.6)
 - [x] Sala de Controle e Coleta Direcionada no Dashboard local com triggerForceScrape e fila prioritária no Supabase (v97.5)
 - [x] DOM Healing e Visão Computacional: regeneração de seletores CSS via Gemini 2.5 Flash e cache aprendido local (v97.2)

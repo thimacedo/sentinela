@@ -1,14 +1,21 @@
 # STATE.md — Sentinela
-_last_updated: 2026-06-12 | branch: main | version: v97.6_
+_last_updated: 2026-06-12 | branch: main | version: v97.7_
 
 ## Status Operacional
 
 | Subsistema | Status | Observação |
 |---|---|---|
-| Coleta | 🟢 Operacional | ScrapeAgent (OODA loop, DOM Healing e Priorização Cognitiva) ativo. |
+| Coleta | 🟢 Operacional | ScrapeAgent (OODA loop, DOM Healing e Priorização Cognitiva) ativo com extração resiliente de DOM. |
 | Inteligência | 🟢 Operacional | Malha de IA resiliente + SaFastDrop local. |
 | Dashboard | 🟢 Operacional | Painel "Decision Room" com auto-start, telemetria real via DB e Coleta Direcionada. |
 | SRE / Autocura | 🟢 Operacional | Agente de SRE Autônomo (`sre_agent.py`) ativo em background com desvio headless. |
+
+## Histórico Recente de Correções (v97.7)
+1. **Resiliência do DOM Scraper (Instagram Web v97.7) (Concluído)**:
+   - Identificada a causa raiz de falsos-positivos de 0 comentários na coleta: o Instagram Web removeu o uso de tags `h3` na representação de usernames dos autores dos comentários.
+   - A indisponibilidade da API do Gemini 2.5 Flash de visão (erro HTTP 503 por sobrecarga) impediu a auto-recuperação visual via DOM Healing, ativando HITL fallbacks repetitivos.
+   - Refatorada a função `_extract_from_dom` no `core/instagram_scraper_v2.py` substituindo seletores baseados em `h3` por um algoritmo robusto de detecção de links de usernames de perfis (`a[href*="/"]`) e spans com `dir="auto"`.
+   - Validada a extração bem-sucedida em tempo real via script `scratch/test_coleta_direta.py` coletando posts ativos do perfil `@janjalula` sem erros e sem custos extras.
 
 ## Histórico Recente de Correções (v97.6)
 1. **Coleta Monitorada e Resiliência de SRE (Concluído)**:

@@ -683,20 +683,51 @@ class InstagramScraperV2:
         return await page.evaluate("""
             () => {
                 const results = [];
-                const h3s = Array.from(document.querySelectorAll('article h3'));
-                h3s.forEach(h => {
-                    const username = h.innerText.trim();
-                    if (!username || username.includes(' ')) return;
-                    let node = h;
-                    for(let i = 0; i < 6; i++) { if(node.parentElement) node = node.parentElement; }
-                    const spans = Array.from(node.querySelectorAll('span[dir="auto"]'));
-                    for(let span of spans) {
-                        const txt = span.innerText.trim();
-                        if (txt && txt !== username && txt.length > 2) {
-                            results.push({ autor: username, texto: txt });
-                            break;
+                // Seleciona links que apontam para caminhos de perfil
+                const links = Array.from(document.querySelectorAll('a[href*="/"]'));
+                const seen_pairs = new Set();
+                
+                links.forEach(link => {
+                    try {
+                        const url = new URL(link.href);
+                        const path = url.pathname.replace(/\\//g, '');
+                        if (!path || path.length < 3) return;
+                        
+                        const text = link.innerText.trim();
+                        // Verifica se o texto do link condiz com o nome de usuário do perfil
+                        if (text.toLowerCase() === path.toLowerCase() && !['explore', 'reels', 'direct', 'emails'].includes(path)) {
+                            const username = text;
+                            
+                            // Navega até 5 níveis acima para encontrar o container do comentário
+                            let node = link;
+                            let commentText = "";
+                            for (let i = 0; i < 5; i++) {
+                                if (!node.parentElement) break;
+                                node = node.parentElement;
+                                
+                                // Busca spans de texto do comentário
+                                const spans = Array.from(node.querySelectorAll('span'));
+                                for (let span of spans) {
+                                    if (span.getAttribute('dir') === 'auto') {
+                                        const txt = span.innerText.trim();
+                                        if (txt && txt !== username && txt.length > 1) {
+                                            commentText = txt;
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (commentText) break;
+                            }
+                            
+                            if (username && commentText) {
+                                const pair_key = `${username}:${commentText}`;
+                                if (!seen_pairs.has(pair_key)) {
+                                    seen_pairs.add(pair_key);
+                                    results.push({ autor: username, texto: commentText });
+                                }
+                            }
                         }
-                    }
+                    } catch(e) {}
                 });
                 return results;
             }

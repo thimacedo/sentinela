@@ -113,3 +113,12 @@ Para iniciar trabalho novo:
   - Sincronizado o índice de documentação em `docs/index_documentacao.md` para unificar e direcionar as leituras de auditoria e desenvolvimento.
 - **Validação de Conformidade**:
   - Verificada a coerência textual e a terminologia em pt-BR em todos os arquivos Markdown.
+
+## 10. Resiliência do DOM Scraper (v97.7)
+
+- **Engenharia Reversa e Correção de Seletores**:
+  - Identificada mudança no DOM do Instagram Web que removeu tags `h3` nos comentários, quebrando o fallback do scraper e retornando 0 comentários.
+  - Criado script de inspeção `scratch/inspect_dom.py` para mapear o HTML real do post autenticado.
+  - Refatorada a função `_extract_from_dom` em `core/instagram_scraper_v2.py` para ler os usernames via links de perfil (`a[href*="/"]`) e spans com `dir="auto"`.
+- **Validação e Testes**:
+  - Criado o script `scratch/test_coleta_direta.py` que validou com sucesso a extração em tempo real de 10 comentários de posts ativos no perfil da `@janjalula`.
