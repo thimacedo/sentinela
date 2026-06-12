@@ -16,7 +16,7 @@ from typing import Dict, Any, Optional
 logger = logging.getLogger("core.autopilot.sre_agent")
 
 # Minutos sem coleta antes de considerar o sistema parado
-_HEARTBEAT_MAX_GAP_MIN = int(os.getenv("HEARTBEAT_MAX_GAP_MIN", "90"))
+_HEARTBEAT_MAX_GAP_MIN = int(os.getenv("HEARTBEAT_MAX_GAP_MIN", "15"))
 # Intervalo do loop de vigilância proativa (segundos)
 _PROACTIVE_WATCH_INTERVAL = int(os.getenv("SRE_WATCH_INTERVAL_S", "1200"))  # 20 min
 

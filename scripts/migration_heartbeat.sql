@@ -27,7 +27,7 @@ SELECT cron.schedule(
     DECLARE
         v_ultima_coleta  timestamptz;
         v_gap_min        numeric;
-        v_max_gap_min    int := 90;  -- máximo de minutos tolerado sem coleta
+        v_max_gap_min    int := 15;  -- máximo de minutos tolerado sem coleta
     BEGIN
         SELECT MAX(data_coleta) INTO v_ultima_coleta FROM comentarios;
         v_gap_min := EXTRACT(EPOCH FROM (now() - v_ultima_coleta)) / 60.0;

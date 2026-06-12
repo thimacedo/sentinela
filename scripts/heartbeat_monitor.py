@@ -41,7 +41,7 @@ from dotenv import load_dotenv
 load_dotenv(ROOT / ".env")
 
 # ── Configuração ─────────────────────────────────────────────────
-MAX_GAP_MIN      = int(os.getenv("HEARTBEAT_MAX_GAP_MIN", "90"))
+MAX_GAP_MIN      = int(os.getenv("HEARTBEAT_MAX_GAP_MIN", "15"))
 WATCHDOG_URL     = os.getenv("WATCHDOG_URL", "http://127.0.0.1:8001")
 WATCHDOG_TIMEOUT = int(os.getenv("WATCHDOG_TIMEOUT_S", "5"))
 WHATSAPP_PHONE   = os.getenv("WHATSAPP_PHONE", "")
