@@ -610,15 +610,33 @@ class InstagramScraperV2:
             try:
                 with open(learned_path, "r") as f:
                     learned_selector = json.load(f).get("comment_container", "")
+                
+                # Validação rápida para evitar envenenamento por frases descritivas
+                if learned_selector:
+                    import re
+                    is_invalid = (
+                        not re.match(r"^[a-zA-Z0-9.\#\[\]:>\+,\~\*\s\-\_\(\)\'\=\^\$\|\"]+$", learned_selector)
+                        or len(learned_selector.split()) > 5
+                    )
+                    if is_invalid:
+                        logger.error(f"🗑️ [V2] Detectado seletor aprendido corrompido no cache: '{learned_selector}'. Limpando cache...")
+                        try:
+                            os.remove(learned_path)
+                        except: pass
+                        learned_selector = ""
             except: pass
 
         # Tenta rolar usando Javascript direto no DOM
         scrolled = await page.evaluate("""(learned) => {
             if (learned) {
-                const el = document.querySelector(learned);
-                if (el && el.scrollHeight > el.clientHeight) {
-                    el.scrollTop = el.scrollHeight;
-                    return true;
+                try {
+                    const el = document.querySelector(learned);
+                    if (el && el.scrollHeight > el.clientHeight) {
+                        el.scrollTop = el.scrollHeight;
+                        return true;
+                    }
+                } catch (err) {
+                    console.error("Erro no querySelector aprendido:", err);
                 }
             }
             

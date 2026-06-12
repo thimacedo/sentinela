@@ -46,12 +46,13 @@ logger = logging.getLogger("agent_scraper.dom_healing")
 
 def validate_css_selector(selector: str) -> bool:
     """
-    Validação básica de seletor CSS retornado pela IA.
+    Validação robusta de seletor CSS retornado pela IA.
 
     Critérios:
         - Não vazio
         - Não contém JavaScript (on*, javascript:)
-        - Não contém expressões inválidas
+        - Apenas caracteres válidos em seletores CSS (proíbe acentuação comum em português)
+        - Sem frases longas (no máximo 5 termos separados por espaço)
         - Comprimento razoável (1-200 chars)
     """
     if not selector or len(selector) < 1 or len(selector) > 200:
@@ -63,9 +64,19 @@ def validate_css_selector(selector: str) -> bool:
         if re.search(pattern, selector, re.IGNORECASE):
             return False
 
+    # Apenas caracteres válidos em CSS
+    # Não permite acentuação comum (á, é, í, ó, ú, ç, ã, õ), comum em explicações textuais da IA
+    allowed_pattern = re.compile(r"^[a-zA-Z0-9.\#\[\]:>\+,\~\*\s\-\_\(\)\'\=\^\$\|\"]+$")
+    if not allowed_pattern.match(selector):
+        return False
+
+    # Evita que frases longas que contêm apenas caracteres válidos passem (ex: "Could not find comments container")
+    if len(selector.split()) > 5:
+        return False
+
     # Verifica se parece um seletor CSS válido (heurística)
     # Seletor CSS geralmente contém: ., #, >, +, [, :, div, span, etc.
-    css_chars = set(".#[]:>+,~* ")
+    css_chars = set(".#[]:>+,~*")
     has_css_char = any(c in css_chars for c in selector)
     is_simple_tag = selector.isalpha() and selector.islower()
 
