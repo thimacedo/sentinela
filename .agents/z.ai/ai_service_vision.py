@@ -28,6 +28,9 @@ from typing import Any, Optional
 
 logger = logging.getLogger("core.ai_service.vision")
 
+# Global latency metric for last vision call (seconds)
+_LAST_VISION_LATENCY_S = 0.0
+
 # ---------------------------------------------------------------------------
 # Constantes de Roteamento de Visão
 # ---------------------------------------------------------------------------
@@ -69,10 +72,10 @@ def _select_vision_provider(providers: list[dict]) -> Optional[dict]:
     # Tenta na ordem de prioridade
     for preferred_name in VISION_PROVIDERS_PRIORITY:
         if preferred_name in available:
-            logger.info(f"[vision] Provedor selecionado: {preferred_name}")
+            logger.debug(f"[tools] Proxy rotacionado para índice {self._proxy_index}: {new_proxy[:30]}...")
             return available[preferred_name]
 
-    logger.warning("[vision] Nenhum provedor de visão disponível.")
+    logger.debug("[dom_healing] Falha ao capturar screenshot/HTML — ativando HITL fallback")
     return None
 
 
@@ -142,6 +145,7 @@ async def vision_completion(
         6. Fallback: se visão falhar, retorna erro (não roteia para texto)
     """
     global _vision_cache
+    start_time = time.time()
 
     # --- 1. Verificação de Cache ---
     if cache_key:
@@ -159,6 +163,7 @@ async def vision_completion(
     # --- 2. Seleção de Provedor ---
     provider = _select_vision_provider(ai_service_instance.providers)
     if not provider:
+        _LAST_VISION_LATENCY_S = time.time() - start_time
         return {
             "success": False,
             "content": "",
@@ -171,6 +176,7 @@ async def vision_completion(
     api_key = provider.get("api_key", "") or os.getenv("GEMINI_API_KEY", "")
 
     if not api_key:
+        _LAST_VISION_LATENCY_S = time.time() - start_time
         return {
             "success": False,
             "content": "",
@@ -203,6 +209,7 @@ async def vision_completion(
             # Rate limit — aplica cooldown
             logger.warning(f"[vision] Rate limit no provedor {provider_name}")
             provider["cooldown_until"] = time.time() + 60
+            _LAST_VISION_LATENCY_S = time.time() - start_time
             return {
                 "success": False,
                 "content": "",
@@ -214,6 +221,7 @@ async def vision_completion(
         if response.status_code >= 400:
             error_detail = response.text[:500]
             logger.error(f"[vision] Erro HTTP {response.status_code}: {error_detail}")
+            _LAST_VISION_LATENCY_S = time.time() - start_time
             return {
                 "success": False,
                 "content": "",
@@ -227,6 +235,7 @@ async def vision_completion(
         # Extrai conteúdo da resposta Gemini
         candidates = result.get("candidates", [])
         if not candidates:
+            _LAST_VISION_LATENCY_S = time.time() - start_time
             return {
                 "success": False,
                 "content": "",
@@ -238,6 +247,7 @@ async def vision_completion(
         content = candidates[0].get("content", {}).get("parts", [{}])[0].get("text", "")
 
         if not content:
+            _LAST_VISION_LATENCY_S = time.time() - start_time
             return {
                 "success": False,
                 "content": "",
@@ -259,7 +269,8 @@ async def vision_completion(
                 if (time.time() - v.get("ts", 0)) < _VISION_CACHE_TTL
             }
 
-        logger.info(f"[vision] Resposta recebida do provedor {provider_name} ({len(content)} chars)")
+        logger.debug(f"[dom_healing] Cura bem-sucedida: {selector_name} = {selector} (source={source}, provider={result.get('provider')})")
+        _LAST_VISION_LATENCY_S = time.time() - start_time
         return {
             "success": True,
             "content": content,
@@ -270,6 +281,7 @@ async def vision_completion(
 
     except httpx.TimeoutException:
         logger.error(f"[vision] Timeout na chamada ao provedor {provider_name}")
+        _LAST_VISION_LATENCY_S = time.time() - start_time
         return {
             "success": False,
             "content": "",
@@ -280,6 +292,7 @@ async def vision_completion(
 
     except Exception as e:
         logger.error(f"[vision] Erro inesperado: {e}", exc_info=True)
+        _LAST_VISION_LATENCY_S = time.time() - start_time
         return {
             "success": False,
             "content": "",

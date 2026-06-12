@@ -1,7 +1,7 @@
 """
-ScrapeAgent — Agente de IA Autônomo para Coleta de Dados
+"Agente de IA Autônono para Coleta de Dados
 =========================================================
-Diretório de isolamento lógico conforme GEMINI.md e AGENTS_SYNC.md.
+Pacote lógico isolado em .agents/z.ai para o ScrapeAgent.
 
 Componentes:
     - agent.py: Loop cognitivo OODA (Observar, Orientar, Decidir, Agir)
@@ -11,8 +11,11 @@ Componentes:
     - persona_mode.py: Simulação de comportamento humano (experimental)
     - worker_adapter.py: Adaptador para integração com wk_coleta_instagram.py
 
-Padrão seguido: core/autopilot/sre_agent.py (loop OODA com filtros determinísticos)
+Integração com core:
+    O adaptador aceita quaisquer scraper/ai_service existentes e
+    NÃO exige importação hardcoded para core.agent_scraper.* para
+    manter compatibilidade com o diretório atual.
 """
-from core.agent_scraper.agent import ScrapeAgent
+from .agent import ScrapeAgent
 
 __all__ = ["ScrapeAgent"]

@@ -185,7 +185,7 @@ class AIService:
             
             # Adicionar Google Gemini apenas se a chave estiver configurada
             if os.getenv("GEMINI_API_KEY"):
-                self.providers.append({"name": "google_gemini", "client": None, "model": "gemini-2.5-flash", "timeout": 45.0, "cooldown_until": 0.0, "is_async_openai": False})
+                self.providers.append({"name": "gemini-2.5-flash", "client": None, "model": "gemini-2.5-flash", "timeout": 45.0, "cooldown_until": 0.0, "is_async_openai": False})
             
             try:
                 from core.config import FALLBACK_PROVIDERS

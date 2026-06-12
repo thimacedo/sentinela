@@ -1,5 +1,5 @@
 # STATE.md — Sentinela
-_last_updated: 2026-06-11 | branch: main | version: v97.0_
+_last_updated: 2026-06-12 | branch: main | version: v97.2_
 
 ## Status Operacional
 
@@ -9,6 +9,13 @@ _last_updated: 2026-06-11 | branch: main | version: v97.0_
 | Inteligência | 🟢 Operacional | Malha de IA resiliente + SaFastDrop local. |
 | Dashboard | 🟢 Operacional | Painel "Decision Room" com auto-start e fallback de rede robusto (127.0.0.1). |
 | SRE / Autocura | 🟢 Operacional | Agente de SRE Autônomo (`sre_agent.py`) ativo em background com desvio headless. |
+
+## Histórico Recente de Correções (v97.2)
+1. **Consolidação do DOM Healing e Visão Computacional (Concluído)**:
+   - Sincronizado o nome do provedor de visão no `core/ai_service.py` de `"google_gemini"` para `"gemini-2.5-flash"` para compatibilidade com o roteador em `core/ai_service_vision_patch.py`.
+   - Implementada a inicialização tardia com `_ensure_clients()` na chamada de `vision_completion` para evitar que a lista de provedores seja vazia sob chamadas diretas ou isoladas.
+   - Corrigidos erros de compilação e sintaxe no `worker_adapter.py`.
+   - Adicionado script de teste de integração `scratch/test_dom_healing.py`, validando com sucesso a comunicação com o Gemini Flash e o salvamento em `configs/learned_selectors.json`.
 
 ## Histórico Recente de Correções (v97.0)
 1. **ScrapeAgent — Agente Cognitivo de Scraping (Concluído)**:

@@ -165,8 +165,14 @@ class ScrapeAgent:
         self._ai_service = ai_service
         self._config = config or {}
 
-        # Importa ferramentas
-        from core.agent_scraper.tools import ScrapeAgentTools
+        # Importa ferramentas pelo pacote local para evitar acoplamento rígido
+        # a caminhos absolutos específicos do core. Isso reduz risco de
+        # quebra por refatorações no core mantendo o contrato do ScrapeAgent.
+        try:
+            from .tools import ScrapeAgentTools  # type: ignore[import]
+        except ImportError:
+            from tools import ScrapeAgentTools  # type: ignore[import]  # fallback path
+
         self._tools = ScrapeAgentTools(
             scraper_instance=scraper,
             ai_service=ai_service,

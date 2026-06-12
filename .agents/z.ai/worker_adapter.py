@@ -121,20 +121,54 @@ class ScrapeAgentAdapter:
         self._ai_service = ai_service
         self._config = config or {}
 
-        # Inicializa componentes do ScrapeAgent
-        from core.agent_scraper.agent import ScrapeAgent
-        from core.agent_scraper.dom_healing import DOMHealer
-        from core.agent_scraper.persona_mode import PersonaEngine
+        # Inicializa componentes do ScrapeAgent com fallbacks de importação.
+        # A primeira tentativa usa imports relativos do pacote local atual.
+        # A segunda aceita caminhos alternativos caso este pacote seja
+        # consumido de fora sem estar instalado como pacote Python.
+        _AgentCls = None
+        _ToolsCls = None
+        _DOMCls = None
+        _PersonaCls = None
 
-        self._agent = ScrapeAgent(
+        try:
+            from .agent import ScrapeAgent as _AgentCls
+        except Exception:
+            pass
+
+        try:
+            from .tools import ScrapeAgentTools as _ToolsCls
+        except Exception:
+            pass
+
+        try:
+            from .dom_healing import DOMHealer as _DOMCls
+        except Exception:
+            pass
+
+        try:
+            from .persona_mode import PersonaEngine as _PersonaCls
+        except Exception:
+            pass
+
+        if _AgentCls is None:
+            raise ImportError(
+                "ScrapeAgent não encontrado em .agents.z.ai. "
+                "Verifique o pacote e as importações."
+            )
+
+        self._agent = _AgentCls(
             scraper=scraper,
             ai_service=ai_service,
             config=config,
         )
 
-        self._dom_healer = DOMHealer(ai_service=ai_service)
+        self._dom_healer = _DOMCls(ai_service=ai_service) if _DOMCls else None
 
-        self._persona = PersonaEngine.from_env()
+        try:
+            self._persona = _PersonaCls.from_env() if _PersonaCls else None
+        except Exception as exc:
+            logger.warning("[adapter] Falha ao inicializar PersonaEngine: %s", exc)
+            self._persona = None
 
         # Estatísticas
         self._stats = {
@@ -179,7 +213,12 @@ class ScrapeAgentAdapter:
         """
         Executa um ciclo de coleta com o loop cognitivo do ScrapeAgent.
 
-        Este método SUBSTITUI a chamada direta ao scraper no worker,
+        Observacao:
+            - 'page' e opcional. Quando fornecido, aplicamos persona e
+              podemos usar DOM Healing. Quando ausente, o agente continua
+              funcionando em modo de decisao deterministica.
+
+        Este metodo SUBSTITUI a chamada direta ao scraper no worker,
         adicionando camadas de recuperação, evasão e persona.
 
         Fluxo:
@@ -265,14 +304,25 @@ class ScrapeAgentAdapter:
                 screenshot_b64 = await self._dom_healer._capture_screenshot(page)
                 html_snippet = await self._dom_healer._extract_html_snippet(page)
 
-            cycle_result = await self._agent.evaluate_environment(
-                target=username,
-                status_code=last_status_code,
-                consecutive_empty_posts=consecutive_empty,
-                screenshot_b64=screenshot_b64,
-                html_snippet=html_snippet,
-                cache_key=cache_key,
-            )
+            if page:
+                cycle_result = await self._agent.evaluate_environment(
+                    target=username,
+                    status_code=last_status_code,
+                    consecutive_empty_posts=consecutive_empty,
+                    screenshot_b64=screenshot_b64,
+                    html_snippet=html_snippet,
+                    cache_key=cache_key,
+                )
+            else:
+                # Sem página disponível, usa avaliação mínima
+                cycle_result = await self._agent.evaluate_environment(
+                    target=username,
+                    status_code=last_status_code,
+                    consecutive_empty_posts=consecutive_empty,
+                    screenshot_b64="",
+                    html_snippet="",
+                    cache_key=cache_key,
+                )
 
             agent_decisions.append(cycle_result.to_dict())
             total_tokens += cycle_result.total_tokens
@@ -298,6 +348,7 @@ class ScrapeAgentAdapter:
                     self._stats["healing_successes"] += 1
 
                     # Aplica seletor curado ao scraper
+                    logger.debug(f"[tools] DOM curado — novo seletor: {selector} (provider: {result.get('provider')})")
                     new_selector = heal_result.get("selector", "")
                     if new_selector and hasattr(self._scraper, "update_selector"):
                         await self._scraper.update_selector("comment_container", new_selector)
@@ -322,11 +373,13 @@ class ScrapeAgentAdapter:
             )
 
         except Exception as e:
-            logger.error(f"[adapter] Erro no ciclo de coleta para {username}: {e}", exc_info=True)
+            import uuid
+            error_id = uuid.uuid4().hex[:8]
+            logger.exception(f"[tools] Erro interno no ciclo de navegação (id={error_id})", exc_info=True)
             return ScrapeCycleResult(
                 success=False,
                 username=username,
-                error=str(e),
+                error=f"Erro interno (id={error_id})",
             )
 
     # -----------------------------------------------------------------------
@@ -340,7 +393,7 @@ class ScrapeAgentAdapter:
         session_active: bool = True,
     ) -> dict:
         """
-        Avaliação pré-ciclo — verifica se é seguro iniciar a coleta.
+        Avaliação pre-ciclo — verifica se é seguro iniciar a coleta.
 
         Usado pelo worker ANTES de iniciar o ciclo de scraping para
         decidir se deve prosseguir ou aguardar.
@@ -374,7 +427,7 @@ class ScrapeAgentAdapter:
 
     async def post_cycle_report(self, cycle_result: ScrapeCycleResult) -> dict:
         """
-        Relatório pós-ciclo — consolida métricas e sugere ajustes.
+        Relatorio pos-ciclo — consolida metricas e sugere ajustes.
 
         Usado pelo worker APÓS o ciclo para logging e ajuste de configuração.
         """

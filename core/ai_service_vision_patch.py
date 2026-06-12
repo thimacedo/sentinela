@@ -143,6 +143,9 @@ async def vision_completion(
     """
     global _vision_cache
 
+    if hasattr(ai_service_instance, "_ensure_clients"):
+        ai_service_instance._ensure_clients()
+
     # --- 1. Verificação de Cache ---
     if cache_key:
         cached = _vision_cache.get(cache_key)

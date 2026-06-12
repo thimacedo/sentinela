@@ -38,7 +38,14 @@ Camadas observadas no código:
 - **Faxina Arquitetural de Arquivos Órfãos**: 8 arquivos obsoletos em `core/` sem qualquer importação ativa no runtime foram purgados definitivamente.
 - **Correção de NameError**: Corrigida a importação em falta do `WkAplicaSugestoes` no boot do `main_runner.py`.
 
-## 4. Estado da fila
+## 4. Consolidação do DOM Healing e Visão Computacional (v97.2)
+
+- **Correção de Bugs e Indentação no Adaptador**: Corrigidos erros de sintaxe de merge e logging em `worker_adapter.py`.
+- **Roteamento de Visão no Gemini Flash**: Mudança do nome do provedor de `"google_gemini"` para `"gemini-2.5-flash"` em `core/ai_service.py` para sincronizar perfeitamente com os nomes esperados pela API de Visão do Gemini.
+- **Prevenção de Ciclo de Vida Vazio**: Adicionada a chamada `_ensure_clients()` no patch de visão (`core/ai_service_vision_patch.py`) para garantir que os providers estejam instanciados sob chamadas isoladas ao método `vision_completion`.
+- **Testes de Integração Automatizados**: Criação do script de teste [test_dom_healing.py](file:///c:/Projetos/sentinela/scratch/test_dom_healing.py), que obteve sucesso na inferência de seletores HTML via visão com o modelo remoto Gemini Flash e salvou corretamente o resultado em `configs/learned_selectors.json`.
+
+## 5. Estado da fila
 
 O código atual já suporta:
 
