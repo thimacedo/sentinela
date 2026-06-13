@@ -151,3 +151,19 @@ Para iniciar trabalho novo:
   - `SESSION_1` → sempre IP A, `SESSION_2` → sempre IP B durante todo `scrape_profile()`.
   - Troca de sessão IG = troca de IP — sem fragmentação mid-session que sinaliza bot.
   - Retrocompatível: `PROXY_LIST` e `PROXY_URL` continuam funcionando normalmente.
+
+## 12. Resiliência de Cache do DOM Healing (v98.1)
+
+- **Causa Raiz do Travamento**:
+  - Em casos de falha do modelo de visão (Gemini) em encontrar seletores (ex: comentários vazios devido a bloqueios de rede ou alteração no layout), a resposta da IA trazia mensagens textuais explicativas em português ("Não é possível identificar...").
+  - A heurística de validação de seletores aceitava qualquer string com espaços, fazendo com que a mensagem textual fosse salva como seletor CSS no arquivo persistido `configs/learned_selectors.json`.
+  - A leitura subsequente no scraper causava um `SyntaxError` de QuerySelector no Playwright, derrubando o worker e travando o runner. O Watchdog reiniciava o main_runner em loop infinito sem sucesso, pois o cache corrompido continuava persistido.
+
+- **Mitigações Implementadas**:
+  - **Validação de Sintaxe Restrita**: Criada validação regex que bloqueia caracteres acentuados ou fora do padrão ASCII de seletores CSS em `validate_css_selector`.
+  - **Autocura Automática de Cache**: Se o scraper detectar que o seletor carregado de `configs/learned_selectors.json` possui um padrão inválido (acentos ou mais de 5 palavras), o arquivo de cache é deletado do disco na hora e o scraper volta aos seletores padrão.
+  - **Try/Catch no Browser**: Adicionado tratamento de erro no runtime do Playwright para que seletores inválidos não quebrem a execução do script no evaluate do browser.
+
+- **Validação**:
+  - Executados testes via [test_dom_healing.py](file:///c:/Projetos/sentinela/scratch/test_dom_healing.py), demonstrando o salvamento e validação de seletores válidos com sucesso.
+  - O arquivo `configs/learned_selectors.json` foi limpo e restabelecido com uma chave válida.

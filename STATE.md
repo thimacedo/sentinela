@@ -1,5 +1,5 @@
 # STATE.md — Sentinela
-_last_updated: 2026-06-12 | branch: main | version: v98.0_
+_last_updated: 2026-06-12 | branch: main | version: v98.1_
 
 ## Status Operacional
 
@@ -9,6 +9,15 @@ _last_updated: 2026-06-12 | branch: main | version: v98.0_
 | Inteligência | 🟢 Operacional | Malha de IA resiliente + SaFastDrop local. |
 | Dashboard | 🟢 Operacional | Painel "Decision Room" com auto-start, telemetria real via DB e Coleta Direcionada. |
 | SRE / Autocura | 🟢 Operacional | Agente de SRE Autônomo (`sre_agent.py`) ativo em background com desvio headless. |
+
+## Histórico Recente de Correções (v98.1)
+1. **Resiliência de Cache do DOM Healing (Concluído)**:
+   - **Causa Raiz**: O modelo de visão Gemini Flash, ao não identificar o container de comentários, retornava mensagens textuais em português (ex: *"Não é possível identificar o container CSS de 'comment"*). Devido a uma falha na heurística de validação de seletores (que aceitava espaços), a mensagem era salva como um seletor CSS no arquivo `configs/learned_selectors.json`.
+   - **Envenenamento de Cache**: O scraper lia o seletor aprendido do cache e tentava executá-lo no Playwright. Isso causava um `SyntaxError` Javascript fatal que derrubava o worker. O watchdog então reiniciava o main_runner em loop infinito (pois o cache em disco continuava corrompido).
+   - **Correção 1 — Validação Estrita**: Refatorada a função `validate_css_selector` no `core/agent_scraper/dom_healing.py` para proibir qualquer caractere fora da tabela ASCII padrão de CSS (bloqueando acentuação) e limitar a no máximo 5 tokens com espaço.
+   - **Correção 2 — Autocura de Cache**: Atualizado o `scroll_comment_column` no `core/instagram_scraper_v2.py` para validar o seletor lido do arquivo no Python. Se for detectado um formato inválido, ele limpa o arquivo no disco de forma proativa.
+   - **Correção 3 — Tratamento de Exceções**: Adicionado bloco `try/catch` no Javascript do `page.evaluate` para impedir que seletores incorretos causem uma quebra catastrófica de processamento no Playwright.
+   - **Validação**: Executado com sucesso o script `scratch/test_dom_healing.py` provando o funcionamento correto e salvamento de seletor válido.
 
 ## Histórico Recente de Correções (v98.0)
 1. **Benchmark de Scrapers + 4 Camadas Anti-Detecção (Concluído)**:
