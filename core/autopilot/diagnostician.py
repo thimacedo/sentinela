@@ -17,6 +17,7 @@ _REGRAS: Dict[str, list] = {
     "NETWORK":         ["timeout", "connection", "refused", "unreachable", "conexão", "conection error", "net::err"],
     "IP_BLOCK":        ["ip block", "challenge", "captcha", "checkpoint", "banned"],
     "CODE_BUG":        ["attributeerror", "typeerror", "indexerror", "keyerror", "nameerror", "exception"],
+    "NORMAL_EMPTY":    ["no_posts_found", "no_comments_found", "no_posts", "no_comments", "junk_detected"],
 }
 
 _SUGESTOES: Dict[str, str] = {
@@ -25,6 +26,7 @@ _SUGESTOES: Dict[str, str] = {
     "NETWORK":         "Falha de rede transitória. Aguardar recuperação automática.",
     "IP_BLOCK":        "IP bloqueado. Verificar configuração de proxy ou aguardar cooldown.",
     "CODE_BUG":        "Erro de código detectado. Revisar logs detalhados e corrigir.",
+    "NORMAL_EMPTY":    "Perfil vazio, privado ou sem posts/comentários recentes.",
     "UNKNOWN":         "Erro desconhecido. Verificar logs detalhados.",
 }
 

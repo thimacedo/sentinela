@@ -271,6 +271,10 @@ class SREAgent:
             result = await self.tool_check_collection_health()
             return f"Verificação de saúde: {result}"
 
+        if error_type == "NORMAL_EMPTY":
+            self.log_thought("Perfil sem posts ou comentários (erro de negócio). Nenhuma ação necessária.")
+            return "Nenhuma ação de SRE necessária: comportamento normal de perfil vazio ou privado."
+
         # 2. IA sob demanda (DOM_CHANGE ou UNKNOWN)
         if error_type in ["DOM_CHANGE", "UNKNOWN"]:
             self.log_thought("Erro estrutural ou desconhecido. Consultando malha de IA...")
