@@ -108,15 +108,38 @@ class AutopilotManager:
             if not data:
                 return {"failure_rate": 0, "total_cycles": 0, "empty_cycles": 0, "errors": []}
 
-            total_collected = sum(m.get("items_collected", 0) for m in data)
-            total_failed = sum(m.get("items_failed", 0) for m in data)
-            total_cycles = len(data)
-            empty_cycles = sum(1 for m in data if m.get("items_collected", 0) == 0)
-            all_errors = []
+            # Filtra ciclos ociosos/Idle (no_tasks_available) de workers secundários
+            active_data = []
             for m in data:
-                errs = m.get("errors") or []
+                err_val = str(m.get("error") or m.get("erro") or "").lower()
+                # Se for erro indicando fila vazia ou ociosidade, desconsidera do cálculo de falha
+                if any(t in err_val for t in ["no_tasks", "no_tasks_available", "no_tasks_found", "no_tasks_in_queue"]):
+                    continue
+                # Se for worker secundário de IA/triagem e coletou 0 sem falhas, considera ocioso e desconsidera
+                w_id = str(m.get("worker_id") or "").lower()
+                is_scraper = any(s in w_id for s in ["ig", "instagram", "scraper", "coleta"])
+                if not is_scraper and m.get("items_collected", 0) == 0 and m.get("items_failed", 0) == 0:
+                    continue
+                active_data.append(m)
+
+            if not active_data:
+                return {"failure_rate": 0, "total_cycles": 0, "empty_cycles": 0, "errors": []}
+
+            total_collected = sum(m.get("items_collected", 0) for m in active_data)
+            total_failed = sum(m.get("items_failed", 0) for m in active_data)
+            total_cycles = len(active_data)
+            empty_cycles = sum(1 for m in active_data if m.get("items_collected", 0) == 0)
+            
+            all_errors = []
+            for m in active_data:
+                # Captura erros tanto do campo 'errors' quanto de 'error'/'erro'
+                errs = m.get("errors")
                 if isinstance(errs, list):
                     all_errors.extend(errs)
+                else:
+                    single_err = m.get("error") or m.get("erro")
+                    if single_err:
+                        all_errors.append(single_err)
 
             total = total_collected + total_failed
             failure_rate = total_failed / total if total > 0 else 0

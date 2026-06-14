@@ -288,6 +288,7 @@ class InstagramScraperV2:
         """
         all_comments = []
         retry_count = 0
+        blocked_attempts = 0
         _resume_done = resume_after_shortcode is None  # True se sem checkpoint
 
         while retry_count < self.max_retries:
@@ -389,6 +390,7 @@ class InstagramScraperV2:
                     if not await self._verify_session(page, session):
                         logger.warning(f"⚠️ [V2] Sessão {session.label} expirada ou inválida. Cooldown 30min...")
                         session.blocked_until = datetime.now(timezone.utc) + timedelta(minutes=30)
+                        blocked_attempts += 1
                         retry_count += 1
                         await browser.close()
                         continue
@@ -407,6 +409,7 @@ class InstagramScraperV2:
                     if "login" in current_url or "scraping_warning" in current_url or "challenge" in current_url:
                         logger.warning(f"⚠️ [V2] Login wall ou Scraping Warning detectado antecipadamente para {session.label} na URL: {current_url}")
                         session.blocked = True
+                        blocked_attempts += 1
                         retry_count += 1
                         await browser.close()
                         continue
@@ -565,11 +568,17 @@ class InstagramScraperV2:
 
             except Exception as e:
                 logger.error(f"💥 [V2] Erro na tentativa {retry_count+1}: {e}")
+                if "all_sessions_blocked" in str(e):
+                    raise e
                 self.stats["errors"] += 1
                 retry_count += 1
                 wait_seconds = min((2 ** retry_count) + random.uniform(4, 12), 120)
                 logger.warning("[V2] Aplicando backoff de %.1fs antes da próxima tentativa.", wait_seconds)
                 await asyncio.sleep(wait_seconds)
+
+        if not all_comments and blocked_attempts > 0 and blocked_attempts >= retry_count:
+            logger.error("❌ [V2] Todas as tentativas de scraping resultaram em bloqueio, redirecionamento ou sessão inválida.")
+            raise RuntimeError("all_sessions_blocked")
 
         return {"comments": all_comments, "post_metas": []}
 
