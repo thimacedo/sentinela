@@ -93,7 +93,17 @@ def get_last_coleta_gap_min() -> float:
 
 
 def watchdog_is_alive() -> bool:
-    """Testa se o Watchdog responde na porta 8001."""
+    """Testa se o Watchdog está ativo via socket na porta 8009 ou HTTP."""
+    # Checagem primária via socket na porta 8009 (independe de lentidão do Uvicorn)
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.settimeout(1.0)
+    try:
+        s.connect(("127.0.0.1", 8009))
+        s.close()
+        return True
+    except Exception:
+        pass
+
     try:
         urllib.request.urlopen(
             f"{WATCHDOG_URL}/api/status",
