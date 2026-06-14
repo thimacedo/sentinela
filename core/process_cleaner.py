@@ -9,10 +9,43 @@ logger = logging.getLogger("core.process_cleaner")
 
 def cleanup_orphans(kill_ollama: bool = False):
     """
-    Limpa processos órfãos e duplicados (PASA v88.5).
+    Limpa processos órfãos e duplicados (PASA v98.4).
     """
     current_pid = os.getpid()
     
+    # Coleta PIDs protegidos para evitar matar o próprio watchdog ou main_runner legítimos
+    protected_pids = {current_pid}
+    
+    # 1. Protege recursivamente toda a cadeia ancestral do processo atual
+    try:
+        curr_proc = psutil.Process(current_pid)
+        while curr_proc:
+            parent = curr_proc.parent()
+            if parent:
+                protected_pids.add(parent.pid)
+                curr_proc = parent
+            else:
+                break
+    except Exception:
+        pass
+        
+    # 2. Protege PIDs ativos salvos nos arquivos de lock de runtime
+    project_root = "C:\\Projetos\\sentinela"
+    lock_dir = os.path.join(project_root, "runtime_state")
+    for lock_name in ["watchdog.lock", "main_runner.lock"]:
+        lock_file = os.path.join(lock_dir, lock_name)
+        if os.path.exists(lock_file):
+            try:
+                with open(lock_file, "r") as f:
+                    content = f.read().strip()
+                    if content.isdigit():
+                        pid_val = int(content)
+                        # Só protege se o processo correspondente estiver de fato vivo
+                        if psutil.pid_exists(pid_val):
+                            protected_pids.add(pid_val)
+            except Exception:
+                pass
+
     # 1. Limpeza de Navegadores (Playwright)
     if os.name == 'nt': # Windows
         try:
@@ -37,8 +70,8 @@ def cleanup_orphans(kill_ollama: bool = False):
     
     for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
         try:
-            # Ignora o processo atual
-            if proc.info['pid'] == current_pid:
+            # Ignora o processo atual e os PIDs protegidos
+            if proc.info['pid'] in protected_pids:
                 continue
                 
             cmdline = " ".join(proc.info['cmdline'] or [])
@@ -53,19 +86,18 @@ def cleanup_orphans(kill_ollama: bool = False):
             if "python" in proc.info['name'].lower():
                 if any(script in cmdline for script in sentinela_scripts):
                     # v90.8 / v50.1: Proteção rigorosa para o main_runner e componentes vitais
-                    # Não encerrar scripts se forem o processo pai ou ancestrais do watchdog
                     if any(script in cmdline and "main_runner.py" in cmdline for script in sentinela_scripts):
-                        # Se for um main_runner, só encerra se for um PID antigo (duplicado)
-                        # Identificamos duplicidade se o tempo de criação for muito antigo comparado ao atual
-                        if proc.create_time() < (time.time() - 300): # 5 minutos de vida é suspeito para duplicado
+                        # Se for um main_runner, só encerra se não estiver na lista de protegidos e for antigo (duplicado)
+                        if proc.info['pid'] not in protected_pids and proc.create_time() < (time.time() - 300):
                              logger.warning(f"🧹 [Cleaner] Encerrando main_runner zumbi: {cmdline} (PID {proc.info['pid']})")
                              proc.kill()
                         else:
-                             logger.info(f"🛡️ [Cleaner] Preservando main_runner saudável: {proc.info['pid']}")
+                             logger.info(f"🛡️ [Cleaner] Preservando main_runner saudável/protegido: {proc.info['pid']}")
                         continue
                     
-                    logger.warning(f"🧹 [Cleaner] Encerrando script Python órfão: {cmdline} (PID {proc.info['pid']})")
-                    proc.kill()
+                    if proc.info['pid'] not in protected_pids:
+                        logger.warning(f"🧹 [Cleaner] Encerrando script Python órfão: {cmdline} (PID {proc.info['pid']})")
+                        proc.kill()
                     
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
             continue

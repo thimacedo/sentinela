@@ -402,6 +402,15 @@ class InstagramScraperV2:
                         retry_count += 1
                         continue
 
+                    # Detecção antecipada de bloqueios / Scraping Warnings / Captchas
+                    current_url = page.url
+                    if "login" in current_url or "scraping_warning" in current_url or "challenge" in current_url:
+                        logger.warning(f"⚠️ [V2] Login wall ou Scraping Warning detectado antecipadamente para {session.label} na URL: {current_url}")
+                        session.blocked = True
+                        retry_count += 1
+                        await browser.close()
+                        continue
+
                     try:
                         error_header = await page.query_selector("h2")
                         if error_header:
@@ -420,13 +429,6 @@ class InstagramScraperV2:
                         logger.warning(f"⚠️ [V2] Timeout aguardando elementos principais do perfil: {e_wait}")
 
                     await asyncio.sleep(random.uniform(3, 6))
-
-                    if "login" in page.url:
-                        logger.warning(f"⚠️ [V2] Login wall detectado para {session.label}")
-                        session.blocked = True
-                        retry_count += 1
-                        await browser.close()
-                        continue
 
                     post_metas = await self._extract_shortcodes(page, max_posts)
                     self.stats["posts_found"] = len(post_metas)
@@ -1140,8 +1142,8 @@ class InstagramScraperV2:
             await asyncio.sleep(random.uniform(2, 4))
             
             current_url = page.url
-            if "accounts/login" in current_url:
-                logger.warning(f"⚠️ [V2] Redirecionamento de login detectado para {session.label}.")
+            if "accounts/login" in current_url or "scraping_warning" in current_url or "challenge" in current_url:
+                logger.warning(f"⚠️ [V2] Redirecionamento de login, scraping_warning ou challenge detectado para {session.label} na URL: {current_url}")
                 return False
                 
             # Verifica a presença explícita do formulário de login no DOM
