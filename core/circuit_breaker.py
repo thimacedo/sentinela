@@ -63,6 +63,22 @@ class CircuitBreaker:
             status.failures = 0
             status.retry_count = 0
             status.open_until = 0
+            
+            try:
+                from core.supabase_service import get_supabase_client
+                db = get_supabase_client()
+                db.table("telemetry_events").insert({
+                    "event_type": "circuit_state_changed",
+                    "source_module": "circuit_breaker",
+                    "status": "circuit_closed",
+                    "metadata": {
+                        "breaker": service_name,
+                        "from_state": "OPEN/HALF_OPEN",
+                        "to_state": "CLOSED"
+                    }
+                }).execute()
+            except Exception as e:
+                logger.error(f"[CB] Falha ao gravar telemetria: {e}")
 
     def record_failure(self, service_name: str, status_code: Optional[int] = None, error_msg: str = ""):
         """Registra falha e aplica backoff se necessário."""
@@ -98,6 +114,24 @@ class CircuitBreaker:
         status.state = "OPEN"
         status.open_until = time.time() + wait_time
         logger.warning(f"💥 [CB] {name} falhou. Circuito ABERTO por {wait_time}s. (Code: {status_code})")
+        
+        try:
+            from core.supabase_service import get_supabase_client
+            db = get_supabase_client()
+            db.table("telemetry_events").insert({
+                "event_type": "circuit_state_changed",
+                "source_module": "circuit_breaker",
+                "status": "circuit_open",
+                "metadata": {
+                    "breaker": name,
+                    "from_state": "CLOSED/HALF_OPEN",
+                    "to_state": "OPEN",
+                    "wait_time_s": wait_time,
+                    "status_code": status_code
+                }
+            }).execute()
+        except Exception as e:
+            logger.error(f"[CB] Falha ao gravar telemetria de abertura: {e}")
 
     def get_metrics(self) -> Dict[str, Any]:
         """Retorna as métricas de todos os serviços para o Dashboard."""

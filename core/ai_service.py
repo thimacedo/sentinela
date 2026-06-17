@@ -186,7 +186,11 @@ class AIService:
             # Adicionar Google Gemini apenas se a chave estiver configurada
             if os.getenv("GEMINI_API_KEY"):
                 self.providers.append({"name": "gemini-2.5-flash", "client": None, "model": "gemini-2.5-flash", "timeout": 45.0, "cooldown_until": 0.0, "is_async_openai": False})
-            
+
+            # Adicionar Claude 3.5 Sonnet (para Fallback de Visão ou Texto via Patch)
+            if os.getenv("ANTHROPIC_API_KEY"):
+                self.providers.append({"name": "claude-3-5-sonnet", "api_key": os.getenv("ANTHROPIC_API_KEY"), "client": None, "model": "claude-3-5-sonnet", "timeout": 45.0, "cooldown_until": 0.0, "is_async_openai": False})
+
             try:
                 from core.config import FALLBACK_PROVIDERS
                 for prov in FALLBACK_PROVIDERS:
@@ -611,6 +615,29 @@ class AIService:
                             if res_ia.get("categoria_ia") == "SUSPEITO":
                                 from core.event_bus import local_bus
                                 local_bus.signal_new_suspects()
+
+                            # --- TELEMETRIA DE ROTEAMENTO (PASA v98.5) ---
+                            try:
+                                from core.supabase_service import get_supabase_client
+                                db = get_supabase_client()
+                                
+                                route_decision = "unrouted_llm"
+                                if triage is not None:
+                                    route_decision = "voyant_local" if force_local_batch else "voyant_cloud"
+                                
+                                db.table("telemetry_events").insert({
+                                    "event_type": "classification_resolved",
+                                    "source_module": "ai_service",
+                                    "provider_name": res_ia.get("name", "unknown").lower(),
+                                    "status": "success",
+                                    "metadata": {
+                                        "route": route_decision,
+                                        "category": res_ia["categoria_ia"],
+                                        "confidence": res_ia["confianca_ia"]
+                                    }
+                                }).execute()
+                            except Exception as e:
+                                logger.error(f"[AI:Batch] Falha ao registrar telemetria: {e}")
                                 
                             return True
                     except Exception as e:

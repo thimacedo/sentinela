@@ -88,6 +88,34 @@ class BehaviorEngine:
                             ref["cluster_size"] = len(ids)
                             ref["slogans_detectados"] = [cl.get("narrative_core")]
                             
+                    # --- TELEMETRIA DE CLUSTERS & PERSISTÊNCIA (PASA v98.5) ---
+                    try:
+                        from core.supabase_service import get_supabase_client
+                        db = get_supabase_client()
+                        db.table("telemetry_events").insert({
+                            "event_type": "cluster_detected",
+                            "source_module": "behavior_engine",
+                            "status": "success",
+                            "metadata": {
+                                "cluster_id": cluster_id,
+                                "size": len(ids),
+                                "narrative_core": cl.get("narrative_core"),
+                                "comment_ids": [index_map[sid].get("id") for sid in ids if sid in index_map and index_map[sid].get("id")]
+                            }
+                        }).execute()
+                        
+                        # Persiste as tags no banco de dados para os itens reais
+                        db_ids = [index_map[sid].get("id") for sid in ids if sid in index_map and index_map[sid].get("id")]
+                        if db_ids:
+                            db.table("comentarios").update({
+                                "is_bot": True,
+                                "bot_pattern": "COORDENACAO_SEMANTICA",
+                                "cluster_id": cluster_id
+                            }).in_("id", db_ids).execute()
+                            
+                    except Exception as e_telemetry:
+                        logger.error(f"[Solenya] Falha ao registrar cluster_detected na telemetria: {e_telemetry}")
+                            
         except Exception as e:
             logger.error(f"[Solenya] Erro na inferência cognitiva de clusters: {e}")
 

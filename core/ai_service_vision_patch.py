@@ -316,6 +316,22 @@ async def vision_completion(
                 "error": "Conteúdo vazio na resposta do modelo de visão.",
             }
 
+        # --- TELEMETRIA DE VISÃO (PASA v98.5) ---
+        try:
+            from core.supabase_service import get_supabase_client
+            db = get_supabase_client()
+            db.table("telemetry_events").insert({
+                "event_type": "vision_resolved",
+                "source_module": "ai_service_vision_patch",
+                "provider_name": provider_name,
+                "status": "success",
+                "metadata": {
+                    "is_fallback": provider_name != VISION_PROVIDERS_PRIORITY[0]
+                }
+            }).execute()
+        except Exception as e:
+            logger.error(f"[vision] Falha ao registrar telemetria: {e}")
+
         # --- 5. Cache da Resposta ---
         if cache_key:
             _vision_cache[cache_key] = {
