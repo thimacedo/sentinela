@@ -7,6 +7,25 @@ import psutil # Necessário para inspeção granular
 
 logger = logging.getLogger("core.process_cleaner")
 
+def _emit_kill_telemetry(action: str, pid: int, process_name: str, cmdline: str):
+    """Emite evento de SRE Action quando mata zumbis."""
+    try:
+        from core.supabase_service import get_supabase_client
+        db = get_supabase_client()
+        db.table("telemetry_events").insert({
+            "event_type": "sre_action",
+            "source_module": "process_cleaner",
+            "status": "success",
+            "metadata": {
+                "action": action,
+                "pid": pid,
+                "process_name": process_name,
+                "cmdline": cmdline[:200]
+            }
+        }).execute()
+    except Exception as e:
+        logger.debug(f"[Cleaner] Falha ao registrar telemetria SRE: {e}")
+
 def cleanup_orphans(kill_ollama: bool = False):
     """
     Limpa processos órfãos e duplicados (PASA v98.4).
@@ -81,6 +100,7 @@ def cleanup_orphans(kill_ollama: bool = False):
                 if kill_ollama:
                     logger.warning(f"🧹 [Cleaner] Encerrando Ollama (PID {proc.info['pid']})")
                     proc.kill()
+                    _emit_kill_telemetry("kill_ollama", proc.info['pid'], proc.info['name'], cmdline)
             
             # Limpeza de scripts Python do projeto
             if "python" in proc.info['name'].lower():
@@ -91,6 +111,7 @@ def cleanup_orphans(kill_ollama: bool = False):
                         if proc.info['pid'] not in protected_pids and proc.create_time() < (time.time() - 300):
                              logger.warning(f"🧹 [Cleaner] Encerrando main_runner zumbi: {cmdline} (PID {proc.info['pid']})")
                              proc.kill()
+                             _emit_kill_telemetry("kill_zombie_main_runner", proc.info['pid'], proc.info['name'], cmdline)
                         else:
                              logger.info(f"🛡️ [Cleaner] Preservando main_runner saudável/protegido: {proc.info['pid']}")
                         continue
@@ -98,6 +119,7 @@ def cleanup_orphans(kill_ollama: bool = False):
                     if proc.info['pid'] not in protected_pids:
                         logger.warning(f"🧹 [Cleaner] Encerrando script Python órfão: {cmdline} (PID {proc.info['pid']})")
                         proc.kill()
+                        _emit_kill_telemetry("kill_orphan_script", proc.info['pid'], proc.info['name'], cmdline)
                     
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
             continue

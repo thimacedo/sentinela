@@ -318,17 +318,21 @@ async def vision_completion(
 
         # --- TELEMETRIA DE VISÃO (PASA v98.5) ---
         try:
-            from core.supabase_service import get_supabase_client
-            db = get_supabase_client()
-            db.table("telemetry_events").insert({
-                "event_type": "vision_resolved",
-                "source_module": "ai_service_vision_patch",
-                "provider_name": provider_name,
-                "status": "success",
-                "metadata": {
-                    "is_fallback": provider_name != VISION_PROVIDERS_PRIORITY[0]
-                }
-            }).execute()
+            is_fallback = provider_name != VISION_PROVIDERS_PRIORITY[0]
+            if is_fallback:
+                from core.supabase_service import get_supabase_client
+                db = get_supabase_client()
+                db.table("telemetry_events").insert({
+                    "event_type": "vision_fallback_triggered",
+                    "source_module": "ai_service_vision_patch",
+                    "provider_name": provider_name,
+                    "status": "success",
+                    "metadata": {
+                        "from_provider": VISION_PROVIDERS_PRIORITY[0],
+                        "to_provider": provider_name,
+                        "reason": "unavailable_or_rate_limit"
+                    }
+                }).execute()
         except Exception as e:
             logger.error(f"[vision] Falha ao registrar telemetria: {e}")
 

@@ -92,19 +92,9 @@ class BehaviorEngine:
                     try:
                         from core.supabase_service import get_supabase_client
                         db = get_supabase_client()
-                        db.table("telemetry_events").insert({
-                            "event_type": "cluster_detected",
-                            "source_module": "behavior_engine",
-                            "status": "success",
-                            "metadata": {
-                                "cluster_id": cluster_id,
-                                "size": len(ids),
-                                "narrative_core": cl.get("narrative_core"),
-                                "comment_ids": [index_map[sid].get("id") for sid in ids if sid in index_map and index_map[sid].get("id")]
-                            }
-                        }).execute()
                         
-                        # Persiste as tags no banco de dados para os itens reais
+                        # 1. Persiste as tags no banco de dados para os itens reais PRIMEIRO
+                        # Garantimos que a funcionalidade core não dependa do sucesso da telemetria
                         db_ids = [index_map[sid].get("id") for sid in ids if sid in index_map and index_map[sid].get("id")]
                         if db_ids:
                             db.table("comentarios").update({
@@ -113,8 +103,24 @@ class BehaviorEngine:
                                 "cluster_id": cluster_id
                             }).in_("id", db_ids).execute()
                             
-                    except Exception as e_telemetry:
-                        logger.error(f"[Solenya] Falha ao registrar cluster_detected na telemetria: {e_telemetry}")
+                        # 2. Emite a telemetria (Fire-and-Forget)
+                        try:
+                            db.table("telemetry_events").insert({
+                                "event_type": "cluster_detected",
+                                "source_module": "behavior_engine",
+                                "status": "success",
+                                "metadata": {
+                                    "cluster_id": cluster_id,
+                                    "size": len(ids),
+                                    "narrative_core": cl.get("narrative_core"),
+                                    "comment_ids": db_ids
+                                }
+                            }).execute()
+                        except Exception as e_telemetry:
+                            logger.error(f"[Solenya] Falha cosmética ao registrar telemetria: {e_telemetry}")
+                            
+                    except Exception as e_db:
+                        logger.error(f"[Solenya] Falha CRÍTICA ao persistir cluster no banco: {e_db}")
                             
         except Exception as e:
             logger.error(f"[Solenya] Erro na inferência cognitiva de clusters: {e}")
