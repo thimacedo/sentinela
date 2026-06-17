@@ -7,13 +7,14 @@ from core.ai_service import ai_service
 
 logger = logging.getLogger("core.behavior_engine")
 
+
 class BehaviorEngine:
     """
     Módulo Solenya (v95.0) - Agente de Inteligência e Disinformation Analysis.
     Substituiu a contagem burra de N-Gramas (SpaCy) por Avaliação Semântica Larga
     via LLMs para detectar campanhas coordenadas de desinformação através do contexto.
     """
-    
+
     def __init__(self):
         pass
 
@@ -25,7 +26,7 @@ class BehaviorEngine:
         Decide: Consulta à IA de triagem rápida se os discursos possuem mesma intenção sintática dissimulada.
         Act: Etiqueta o cluster.
         """
-        if len(comments) < 3: 
+        if len(comments) < 3:
             return comments
 
         # Prepara Lote Textual
@@ -36,7 +37,7 @@ class BehaviorEngine:
             if len(txt) > 5:
                 batch_text += f"[{idx}] {txt}\n"
                 index_map[str(idx)] = c
-                
+
         if not batch_text:
             return comments
 
@@ -71,60 +72,87 @@ class BehaviorEngine:
                 temperature=0.0
             )
             data = json.loads(response.choices[0].message.content)
-            
+
             clusters = data.get("clusters", [])
             for cl in clusters:
                 ids = cl.get("ids", [])
-                if len(ids) >= 3:
-                    cluster_id = f"solenya_cog_{random.randint(1000, 9999)}"
-                    logger.info(f"🤖 [Solenya] Swarm Semântico Detectado! IDs: {ids} | Núcleo: {cl.get('narrative_core')}")
-                    
-                    for string_id in ids:
-                        if string_id in index_map:
-                            ref = index_map[string_id]
-                            ref["is_bot"] = True
-                            ref["bot_pattern"] = "COORDENACAO_SEMANTICA"
-                            ref["cluster_id"] = cluster_id
-                            ref["cluster_size"] = len(ids)
-                            ref["slogans_detectados"] = [cl.get("narrative_core")]
-                            
-                    # --- TELEMETRIA DE CLUSTERS & PERSISTÊNCIA (PASA v98.5) ---
+                if len(ids) < 3:
+                    continue
+
+                cluster_id = f"solenya_cog_{random.randint(1000, 9999)}"
+                logger.info(f"🤖 [Solenya] Swarm Semântico Detectado! IDs: {ids} | Núcleo: {cl.get('narrative_core')}")
+
+                for string_id in ids:
+                    if string_id in index_map:
+                        ref = index_map[string_id]
+                        ref["is_bot"] = True
+                        ref["bot_pattern"] = "COORDENACAO_SEMANTICA"
+                        ref["cluster_id"] = cluster_id
+                        ref["cluster_size"] = len(ids)
+                        ref["slogans_detectados"] = [cl.get("narrative_core")]
+
+                db_ids = [
+                    index_map[sid].get("id")
+                    for sid in ids
+                    if sid in index_map and index_map[sid].get("id")
+                ]
+
+                # --- PERSISTÊNCIA CRÍTICA (PASA v98.6) ---
+                # Isolada em seu próprio try/except, SEM dependência da telemetria.
+                # Bug corrigido (v98.5 -> v98.6): antes, este update vinha DEPOIS
+                # do insert de telemetria dentro do MESMO try/except. Se o insert
+                # em telemetry_events falhasse (RLS, rede, schema desalinhado),
+                # o except capturava e o update em `comentarios` NUNCA executava
+                # — uma falha cosmética de telemetria silenciosamente impedia a
+                # marcação real do cluster (is_bot/cluster_id), que é o dado que
+                # o produto de fato depende. Telemetria nunca deve poder
+                # bloquear a operação principal.
+                if db_ids:
                     try:
                         from core.supabase_service import get_supabase_client
                         db = get_supabase_client()
-                        
-                        # 1. Persiste as tags no banco de dados para os itens reais PRIMEIRO
-                        # Garantimos que a funcionalidade core não dependa do sucesso da telemetria
-                        db_ids = [index_map[sid].get("id") for sid in ids if sid in index_map and index_map[sid].get("id")]
-                        if db_ids:
-                            db.table("comentarios").update({
-                                "is_bot": True,
-                                "bot_pattern": "COORDENACAO_SEMANTICA",
-                                "cluster_id": cluster_id
-                            }).in_("id", db_ids).execute()
-                            
-                        # 2. Emite a telemetria (Fire-and-Forget)
-                        try:
-                            db.table("telemetry_events").insert({
-                                "event_type": "cluster_detected",
-                                "source_module": "behavior_engine",
-                                "status": "success",
-                                "metadata": {
-                                    "cluster_id": cluster_id,
-                                    "size": len(ids),
-                                    "narrative_core": cl.get("narrative_core"),
-                                    "comment_ids": db_ids
-                                }
-                            }).execute()
-                        except Exception as e_telemetry:
-                            logger.error(f"[Solenya] Falha cosmética ao registrar telemetria: {e_telemetry}")
-                            
-                    except Exception as e_db:
-                        logger.error(f"[Solenya] Falha CRÍTICA ao persistir cluster no banco: {e_db}")
-                            
+                        db.table("comentarios").update({
+                            "is_bot": True,
+                            "bot_pattern": "COORDENACAO_SEMANTICA",
+                            "cluster_id": cluster_id
+                        }).in_("id", db_ids).execute()
+                    except Exception as e_persist:
+                        # Esta falha é grave (dado real não foi marcado) e
+                        # merece log de erro alto, mas ainda não deve abortar
+                        # o loop — outros clusters do mesmo lote devem seguir
+                        # sendo processados independentemente.
+                        logger.error(
+                            f"[Solenya] FALHA CRÍTICA ao persistir cluster {cluster_id} "
+                            f"em comentarios (dado NÃO marcado como bot): {e_persist}"
+                        )
+
+                # --- TELEMETRIA (PASA v98.6) ---
+                # Bloco independente e descartável: se falhar, não afeta o
+                # dado real persistido acima. Roda depois de propósito, para
+                # garantir que a operação crítica já foi tentada primeiro.
+                try:
+                    from core.telemetry import emit_telemetry
+                    emit_telemetry(
+                        event_type="cluster_detected",
+                        source_module="behavior_engine",
+                        status="success",
+                        metadata={
+                            "cluster_id": cluster_id,
+                            "size": len(ids),
+                            "narrative_core": cl.get("narrative_core"),
+                            "comment_ids": db_ids,
+                        },
+                    )
+                except Exception as e_telemetry:
+                    logger.warning(
+                        f"[Solenya] Falha ao registrar cluster_detected na telemetria "
+                        f"(cluster {cluster_id} já foi persistido normalmente): {e_telemetry}"
+                    )
+
         except Exception as e:
             logger.error(f"[Solenya] Erro na inferência cognitiva de clusters: {e}")
 
         return comments
+
 
 behavior_engine = BehaviorEngine()
