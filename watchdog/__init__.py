@@ -970,6 +970,24 @@ def send_whatsapp_alert(message: str, category: str = "runtime") -> None:
         last_alert_times[category] = now
         state.update_metrics(alerts=state.alerts + 1)
         state.add_log("info", f"[Watchdog] 📲 Alerta WhatsApp ({category}) enviado.")
+        
+        # --- TELEMETRIA SRE (PASA v98.5) ---
+        try:
+            from core.supabase_service import get_supabase_client
+            db = get_supabase_client()
+            db.table("telemetry_events").insert({
+                "event_type": "sre_action",
+                "source_module": "watchdog",
+                "status": "success",
+                "metadata": {
+                    "action": "whatsapp_alert",
+                    "category": category,
+                    "message": message[:100]
+                }
+            }).execute()
+        except Exception as e_telemetry:
+            state.add_log("error", f"[Watchdog] Falha ao registrar telemetria SRE: {e_telemetry}")
+            
     except Exception as e:
         state.add_log("error", f"[Watchdog] Falha ao enviar alerta: {e}")
 
