@@ -139,6 +139,65 @@ class SREAgent:
         except Exception as e:
             return f"Erro ao ajustar variáveis: {e}"
 
+    async def tool_kill_duplicate_processes(self) -> str:
+        """
+        [v98.3] Ferramenta autônoma de SRE para matar instâncias zumbis ou duplicadas do main_runner.
+        Substitui o antigo script procedimental watchdog_duplicate_killer.
+        """
+        self.log_action("Chamando tool_kill_duplicate_processes")
+        try:
+            import os
+            import subprocess
+            
+            # Utiliza powershell nativo no Win ou ps/grep no Linux para identificar
+            if os.name == 'nt':
+                cmd = "powershell -Command \"Get-CimInstance Win32_Process -Filter 'Name=\\'python.exe\'' | Where-Object {$_.CommandLine -match 'main_runner.py'} | Select-Object ProcessId | ConvertTo-Json\""
+                flags = 0x08000000 
+                result = subprocess.run(cmd, capture_output=True, text=True, shell=True, creationflags=flags)
+            else:
+                cmd = "ps aux | grep main_runner.py | grep -v grep | awk '{print $2}'"
+                result = subprocess.run(cmd, capture_output=True, text=True, shell=True)
+            
+            pids = []
+            if result.returncode == 0 and result.stdout.strip():
+                if os.name == 'nt':
+                    import json
+                    try:
+                        data = json.loads(result.stdout)
+                        if isinstance(data, dict): data = [data]
+                        pids = [int(item.get("ProcessId", 0)) for item in data if item.get("ProcessId")]
+                    except: pass
+                else:
+                    pids = [int(p) for p in result.stdout.strip().split('\n') if p.isdigit()]
+            
+            current_pid = os.getpid()
+            killed = 0
+            
+            # Mantém apenas um processo (preferencialmente o atual se for main_runner, ou o primeiro)
+            keeper_pid = current_pid if current_pid in pids else (pids[0] if pids else None)
+            
+            for pid in pids:
+                if pid != keeper_pid and pid != current_pid:
+                    try:
+                        if os.name == 'nt':
+                            subprocess.run(f"taskkill /PID {pid} /F", shell=True, capture_output=True, creationflags=0x08000000)
+                        else:
+                            subprocess.run(f"kill -9 {pid}", shell=True, capture_output=True)
+                        killed += 1
+                        logger.info(f"[SRE Agent] Morto processo duplicado PID {pid}")
+                    except: pass
+
+            if killed > 0:
+                msg = f"Sucesso: {killed} processos zumbis/duplicados encerrados."
+                self._record_event("ZOMBIE_KILL", "warning", msg, {"pids_killed": killed})
+                return msg
+            else:
+                return "Nenhum processo duplicado encontrado para ser encerrado."
+                
+        except Exception as e:
+            logger.error(f"[SRE Agent] Erro na ferramenta duplicate_killer: {e}")
+            return f"Erro ao executar duplicate_killer: {e}"
+
     async def tool_check_collection_health(self) -> Dict[str, Any]:
         """
         [v98.2] Verifica o gap de coleta consultando o banco diretamente.

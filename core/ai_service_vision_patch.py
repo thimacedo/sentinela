@@ -32,10 +32,11 @@ logger = logging.getLogger("core.ai_service.vision")
 # Constantes de Roteamento de Visão
 # ---------------------------------------------------------------------------
 # Apenas provedores com suporte nativo a multimodalidade são elegíveis.
-# Ordem de preferência: Gemini Flash (mais rápido/barato) > outros futuros.
+# Ordem de preferência: Gemini Flash (mais rápido/barato) > Claude 3.5 Sonnet > outros.
 VISION_PROVIDERS_PRIORITY = [
     "gemini-2.5-flash",
     "gemini-flash",
+    "claude-3-5-sonnet",
     "gemini",
 ]
 
@@ -83,8 +84,6 @@ def _build_gemini_vision_payload(
 ) -> dict:
     """
     Constrói o payload no formato Gemini API para chamada multimodal.
-
-    O formato Gemini usa `contents` com `parts` contendo texto e imagem inline.
     """
     return {
         "contents": [
@@ -105,6 +104,40 @@ def _build_gemini_vision_payload(
             "maxOutputTokens": 256,  # Seletor CSS é curto
             "topP": 0.8,
         },
+    }
+
+def _build_claude_vision_payload(
+    image_b64: str,
+    prompt: str,
+    mime_type: str = "image/png",
+) -> dict:
+    """
+    Constrói o payload no formato Anthropic API (Messages) para chamada multimodal.
+    """
+    # Mapeia mime types se necessário. A API espera "image/jpeg", "image/png", "image/gif", or "image/webp"
+    media_type = mime_type if mime_type in ["image/jpeg", "image/png", "image/gif", "image/webp"] else "image/png"
+    return {
+        "messages": [
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "image",
+                        "source": {
+                            "type": "base64",
+                            "media_type": media_type,
+                            "data": image_b64
+                        }
+                    },
+                    {
+                        "type": "text",
+                        "text": prompt
+                    }
+                ]
+            }
+        ],
+        "max_tokens": 256,
+        "temperature": 0.1
     }
 
 
@@ -182,25 +215,49 @@ async def vision_completion(
             "error": f"API key não configurada para provedor de visão: {provider_name}",
         }
 
-    # --- 3. Construção do Payload ---
-    payload = _build_gemini_vision_payload(image_b64, prompt, mime_type)
-
-    # --- 4. Chamada HTTP ---
+    # --- 3. Construção do Payload e 4. Chamada HTTP ---
     try:
         import httpx
 
-        # Endpoint Gemini: generateContent
-        url = (
-            f"https://generativelanguage.googleapis.com/v1beta/"
-            f"models/{provider_name}:generateContent?key={api_key}"
-        )
-
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.post(
-                url,
-                json=payload,
-                headers={"Content-Type": "application/json"},
+        if "claude" in provider_name.lower():
+            payload = _build_claude_vision_payload(image_b64, prompt, mime_type)
+            api_key = provider.get("api_key", "") or os.getenv("ANTHROPIC_API_KEY", "")
+            
+            if not api_key:
+                 return {
+                    "success": False,
+                    "content": "",
+                    "provider": provider_name,
+                    "cached": False,
+                    "error": f"API key não configurada para provedor Claude: {provider_name}",
+                 }
+            
+            url = "https://api.anthropic.com/v1/messages"
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.post(
+                    url,
+                    json=payload,
+                    headers={
+                        "x-api-key": api_key,
+                        "anthropic-version": "2023-06-01",
+                        "content-type": "application/json"
+                    },
+                )
+        else:
+            # Fallback natural (Gemini)
+            payload = _build_gemini_vision_payload(image_b64, prompt, mime_type)
+            url = (
+                f"https://generativelanguage.googleapis.com/v1beta/"
+                f"models/{provider_name}:generateContent?key={api_key}"
             )
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.post(
+                    url,
+                    json=payload,
+                    headers={"Content-Type": "application/json"},
+                )
 
         if response.status_code == 429:
             # Rate limit — aplica cooldown
@@ -227,18 +284,28 @@ async def vision_completion(
 
         result = response.json()
 
-        # Extrai conteúdo da resposta Gemini
-        candidates = result.get("candidates", [])
-        if not candidates:
-            return {
-                "success": False,
-                "content": "",
-                "provider": provider_name,
-                "cached": False,
-                "error": "Resposta sem candidates do modelo de visão.",
-            }
-
-        content = candidates[0].get("content", {}).get("parts", [{}])[0].get("text", "")
+        # Extrai conteúdo da resposta baseada no provedor
+        if "claude" in provider_name.lower():
+            if not result.get("content") or len(result["content"]) == 0:
+                return {
+                    "success": False,
+                    "content": "",
+                    "provider": provider_name,
+                    "cached": False,
+                    "error": "Resposta sem content do modelo de visão (Claude).",
+                }
+            content = result["content"][0].get("text", "")
+        else:
+            candidates = result.get("candidates", [])
+            if not candidates:
+                return {
+                    "success": False,
+                    "content": "",
+                    "provider": provider_name,
+                    "cached": False,
+                    "error": "Resposta sem candidates do modelo de visão (Gemini).",
+                }
+            content = candidates[0].get("content", {}).get("parts", [{}])[0].get("text", "")
 
         if not content:
             return {

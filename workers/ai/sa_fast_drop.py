@@ -78,12 +78,46 @@ class SaFastDrop(BaseSubAgent):
             ids_spam = []
 
             for c in comentarios:
+                # 1. OBSERVE
                 texto = c.get("texto_limpo") or c.get("texto_bruto") or ""
+                
+                # 2. ORIENT: Filtros determinísticos locais (Custo Zero)
                 if lexical_filter.is_junk(texto):
                     ids_lixo.append(c["id"])
+                    continue
                 elif lexical_filter.should_shadowban(texto):
                     ids_spam.append(c["id"])
-                # Comentários que não são lixo nem spam: deixa para o WkClassificaComentarios
+                    continue
+                
+                # 3. DECIDE: Análise Cognitiva Leve (Roteada para LLM rápido caso passe pelo regex e seja curto)
+                # O Fast Drop agora atua como um Agente OODA completo, avaliando spam sutil antes da esteira cara.
+                if len(texto) < 15:
+                    try:
+                        from core.ai_service import ai_service
+                        prompt = f"""Você é o Agente de Triagem (FastDrop) do Sentinela.
+Sua única função é dizer se o comentário abaixo é:
+1. LIXO/SPAM/ELOGIO BÁSICO (Drop)
+2. POTENCIAL_ATAQUE/AMBIGUO/DISCURSO DE ODIO (Keep)
+
+Comentário: "{texto}"
+Retorne APENAS 'DROP' ou 'KEEP'. Não justifique."""
+                        
+                        resp = await ai_service.mistral_client.chat.completions.create(
+                            model="open-mistral-nemo",
+                            messages=[{"role": "user", "content": prompt}],
+                            max_tokens=10,
+                            temperature=0.0
+                        )
+                        decision = resp.choices[0].message.content.strip().upper()
+                        if "DROP" in decision:
+                            logger.debug(f"[SaFastDrop] OODA [Decide]: Drop cognitivo -> {texto}")
+                            ids_lixo.append(c["id"])
+                            continue
+                    except Exception as e:
+                        logger.debug(f"[SaFastDrop] OODA [Decide]: Falha na IA rápida, repassando. {e}")
+                        pass
+                
+                # 4. ACT (Neste caso, não fazer nada é encaminhar para o WkClassificaComentarios)
 
             descartados = 0
 

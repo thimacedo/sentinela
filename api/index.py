@@ -289,7 +289,7 @@ def get_targets(request: Request, limit: int = 50, supa: Client = Depends(get_su
         if not active_usernames: return []
 
         # Amostra recente para estatísticas de ódio
-        h_res = supa.table('comentarios').select('candidato_id, categoria_ia, texto_bruto')\
+        h_res = supa.table('comentarios').select('candidato_id, categoria_ia')\
             .in_('categoria_ia', HATE_CATEGORIES)\
             .in_('candidato_id', active_usernames)\
             .order('data_coleta', desc=True).limit(5000).execute().data or []
@@ -304,13 +304,6 @@ def get_targets(request: Request, limit: int = 50, supa: Client = Depends(get_su
         breakdowns = {}
         for h in h_res:
             cid, cat = h['candidato_id'], h['categoria_ia'] or 'OUTROS'
-            
-            # PASA v94.5 - Shadowban Léxico
-            # Se o texto estiver presente, verificamos se deve ser ocultado
-            text = h.get('texto_bruto')
-            if text and lexical_filter.should_shadowban(text):
-                continue
-
             if cid not in breakdowns: breakdowns[cid] = Counter()
             breakdowns[cid][cat] += 1
         
@@ -318,15 +311,8 @@ def get_targets(request: Request, limit: int = 50, supa: Client = Depends(get_su
         for item in candidates:
             un = item.get('username')
             
-            # PASA v94.5 - Shadowban Léxico na agregação do dashboard
-            # Filtra itens que devem ser ocultados da contagem de ódio do dashboard
-            # Nota: Isso não remove do banco, apenas limpa a visão gerencial.
-            raw_hate_for_target = [h for h in h_res if h['candidato_id'] == un]
-            
-            # TODO: Otimizar para buscar texto_bruto apenas se necessário ou via SQL
-            # Por enquanto, assumimos que h_res pode não ter texto_bruto para economia de banda.
-            # Se tiver, aplicamos o shadowban.
-            
+            # PASA v94.5 - Shadowban Léxico delegado à pipeline de escrita (worker), 
+            # API agregada não baixa texto_bruto por eficiência de payload.
             item['comentarios_odio_count'] = counts_odio.get(un, 0)
             item['comentarios_totais_count'] = counts_totais.get(un, 0)
             score, nivel, color = calculate_risk(item)

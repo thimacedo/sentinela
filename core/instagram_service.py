@@ -136,8 +136,21 @@ class InstagramService:
             
             # Padrão Novo (Comet/xdt)
             if "xdt_api__v1__media" in data_str:
-                # TODO: Implementar parser profundo para xdt_
-                pass
+                try:
+                    edges = data.get("data", {}).get("xdt_api__v1__media", {}).get("comments", {}).get("edges", [])
+                    for edge in edges:
+                        node = edge.get("node", {})
+                        if node:
+                            comment = {
+                                "id": node.get("pk"),
+                                "texto": node.get("text"),
+                                "autor": node.get("user", {}).get("username"),
+                                "timestamp": node.get("created_at")
+                            }
+                            if comment["texto"] and comment["autor"]:
+                                comments.append(comment)
+                except Exception as e:
+                    logger.debug(f"[IGService] Erro no parser xdt: {e}")
             
             # Padrão Clássico (edge_media_to_parent_comment)
             if "edge_media_to_parent_comment" in data_str:
