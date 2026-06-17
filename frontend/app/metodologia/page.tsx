@@ -3,10 +3,45 @@
 import Link from 'next/link';
 import { BookOpen, ShieldCheck, Cpu, Database } from 'lucide-react';
 import AdSenseSlot from '@/components/ads/AdSenseSlot';
+import { JsonLd } from '@/components/JsonLd';
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://sentinelademocratica.com.br"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Metodologia Científica",
+      "item": "https://sentinelademocratica.com.br/metodologia"
+    }
+  ]
+};
+
+const webPageSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "Metodologia Científica do Observatório",
+  "description": "Protocolo Analítico MCA v2.2 (Multi-Channel Assessment) utilizado pelo Sentinela Democrática para monitoramento de ódio em plataformas sociais.",
+  "url": "https://sentinelademocratica.com.br/metodologia",
+  "publisher": {
+    "@type": "Organization",
+    "name": "Sentinela Democrática",
+    "url": "https://sentinelademocratica.com.br"
+  }
+};
 
 export default function MetodologiaPage() {
   return (
     <div className="max-w-4xl mx-auto py-12 px-4 space-y-10">
+      <JsonLd data={breadcrumbSchema} />
+      <JsonLd data={webPageSchema} />
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
         <div>

@@ -30,46 +30,45 @@ class IntelligenceService:
 
     async def research_and_validate(self, username: str) -> Optional[Dict[str, Any]]:
         """
-        Executa o pipeline completo de inteligencia para um alvo.
+        Executa o pipeline completo de inteligência para um alvo usando o framework OODA.
         """
         username = username.lower().strip().replace('@', '')
-        logger.info(f"Inteligencia: Analisando @{username}...")
+        logger.info(f"OODA [Intelligence]: Analisando @{username}...")
 
-        # 1. Coleta basica via Instagram
+        # 1. OBSERVE: Coleta os sinais vitais brutos do alvo
         ig_res = await self._fetch_ig_basic_info(username)
         
-        # Se falhou mas temos um motivo claro (404 ou Privado), podemos validar negativamente ja
+        # 2. ORIENT: Interpreta a saúde do perfil antes de gastar recursos avançados
         if not ig_res or not ig_res.get("valid"):
             reason = ig_res.get("reason") if ig_res else "unknown_error"
             
             if reason in ["404_not_found", "account_private", "header_not_found"]:
-                logger.warning(f"Inteligencia: @{username} negado por {reason}.")
+                logger.warning(f"OODA [Orient]: @{username} negado por {reason}. Baixa confiança inicial.")
+                # DECIDE & ACT Early (Abortar)
                 final_data = {
                     "username": username,
                     "identidade_validada": False,
                     "status_monitoramento": "DESATIVADO",
-                    "motivo_desativacao": f"Perfil inacessivel no Instagram: {reason}",
+                    "motivo_desativacao": f"Perfil inacessível no Instagram: {reason}",
                     "atualizado_em": datetime.now(timezone.utc).isoformat()
                 }
                 await db_client.upsert_candidate(final_data)
                 return final_data
             
-            logger.warning(f"Inteligencia: @{username} inacessivel temporariamente ({reason}).")
+            logger.warning(f"OODA [Orient]: @{username} inacessível temporariamente ({reason}). Reagendar.")
             return None
 
-        # 2. Pesquisa em Fontes Oficiais
-        ig_data = ig_res # Para compatibilidade com os metodos abaixo
+        ig_data = ig_res
+        
+        # 3. DECIDE: Determinar a real identidade e cruzar com dados oficiais
         official_data = await self._search_official_sources(username, ig_data.get("display_name"))
-
-        # 3. Consolidacao e Validacao de Escopo via IA
         enriched = await self._enrich_and_validate(username, ig_data, official_data)
         
-        # 4. Decisao de Governanca
         is_valid = enriched.get("identidade_validada", False)
         status = "ATIVO" if is_valid else "DESATIVADO"
         motivo = enriched.get("motivo_rejeicao") if not is_valid else None
 
-        # 5. Consolidacao Final
+        # 4. ACT: Aplicar as restrições e salvar o veredito final
         final_data = {
             "username": username,
             "nome_completo": enriched.get("nome_completo") or ig_data.get("display_name"),
@@ -85,8 +84,8 @@ class IntelligenceService:
             "atualizado_em": datetime.now(timezone.utc).isoformat()
         }
 
-        # 6. Persistencia
         await db_client.upsert_candidate(final_data)
+        logger.info(f"OODA [Act]: Conclusão para @{username} salva (Válido: {is_valid})")
         
         final_data["_quality"] = enriched.get("quality_confidence", 0.5)
         return final_data

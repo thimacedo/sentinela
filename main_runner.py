@@ -77,6 +77,9 @@ from workers.ai.wk_aplica_sugestoes import WkAplicaSugestoes
 
 # Workers disponíveis (PASA v52.0):
 from workers.scrapers.wk_coleta_instagram import WkColetaInstagram
+from workers.scrapers.wk_coleta_bluesky import WkColetaBluesky
+from workers.scrapers.wk_coleta_reddit import WkColetaReddit
+from workers.scrapers.wk_coleta_telegram import WkColetaTelegram
 from workers.processors.wk_pesquisa_alvos import WkPesquisaAlvos
 
 
@@ -99,6 +102,12 @@ def build_orchestrator() -> SentinelaOrchestrator:
                 "headless": os.getenv("PLAYWRIGHT_HEADLESS", "true").lower() == "true"
             },
         ))
+
+    # 🚀 API SCRAPERS LEVES (Bluesky & Reddit & Telegram)
+    # Como não usam navegadores, 1 única instância é suficiente para escalar horizontalmente nas APIs
+    orch.register(WkColetaBluesky(worker_id="bsky-01", config={}))
+    orch.register(WkColetaReddit(worker_id="reddit-01", config={}))
+    orch.register(WkColetaTelegram(worker_id="telegram-01", config={}))
 
     # 🧠 AI PROCESSOR: Worker dedicado para classificação PASA
     # Este worker consome o backlog deixado pelos scrapers
@@ -180,7 +189,57 @@ def setup_signal_handlers(
                 pass
 
 
+def check_and_prompt_envs():
+    """Valida se todas as credenciais essenciais estão presentes no .env. Se não, solicita interativamente."""
+    required_envs = {
+        "SUPABASE_URL": "URL do projeto Supabase (https://supabase.com/dashboard)",
+        "SUPABASE_KEY": "Chave (anon/service_role) do Supabase",
+        "BSKY_USER": "Seu e-mail ou handle do Bluesky",
+        "BSKY_PASS": "App Password do Bluesky (https://bsky.app/settings/app-passwords)",
+        "TG_API_ID": "API ID do Telegram (https://my.telegram.org)",
+        "TG_API_HASH": "API Hash do Telegram (https://my.telegram.org)",
+        "REDDIT_CLIENT_ID": "Client ID do aplicativo Reddit (https://www.reddit.com/prefs/apps)",
+        "REDDIT_CLIENT_SECRET": "Client Secret do aplicativo Reddit"
+    }
+    
+    missing_envs = {}
+    for key, help_text in required_envs.items():
+        val = os.getenv(key)
+        # Verifica se está vazio ou se possui os placeholders padrão do .env.example
+        if not val or "your_" in val.lower():
+            missing_envs[key] = help_text
+
+    if missing_envs:
+        print("\n" + "="*60)
+        print("🚨 SENTINELA SETUP: CREDENCIAIS AUSENTES 🚨")
+        print("="*60)
+        print("Parece que você está rodando o Sentinela sem todas as chaves de API necessárias.")
+        
+        if not sys.stdin.isatty():
+            print("Execução em modo headless detectada. Abortando. Configure as chaves no arquivo .env.")
+            sys.exit(1)
+            
+        print("Por favor, preencha as chaves abaixo para salvar automaticamente no seu arquivo .env:")
+        
+        with open(".env", "a", encoding="utf-8") as f:
+            for key, help_text in missing_envs.items():
+                print(f"\n👉 [{key}]")
+                print(f"Obtenha em: {help_text}")
+                value = input(f"Cole o valor para {key} (ou Enter para ignorar temporariamente): ").strip()
+                if value:
+                    f.write(f"\n{key}={value}")
+                    os.environ[key] = value
+                    
+        # Recarrega para garantir que as libs as vejam
+        load_dotenv(override=True)
+        print("\n✅ Credenciais salvas no arquivo .env!")
+        print("="*60 + "\n")
+
+
 async def main() -> None:
+    # 0. Verificação das variáveis de ambiente antes de qualquer boot complexo
+    check_and_prompt_envs()
+
     logger.info("[main_runner] Sentinela iniciando...")
     
     # v90.7: Log de emergência para diagnosticar crash de boot

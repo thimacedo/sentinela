@@ -3,18 +3,19 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchApi } from '@/lib/api';
-import { 
-  Activity, 
-  TrendingUp, 
-  Users, 
-  Coins, 
+import {
+  Activity,
+  TrendingUp,
+  Users,
+  Coins,
   ArrowUpRight,
   ShieldCheck,
   Zap,
   BarChart3,
   Lock,
   Key,
-  ChevronRight
+  ChevronRight,
+  ShieldAlert
 } from 'lucide-react';
 import Link from 'next/link';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';

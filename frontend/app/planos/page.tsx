@@ -2,14 +2,56 @@ import PricingGrid from '@/components/pricing/PricingGrid';
 import TokenExplanation from '@/components/pricing/TokenExplanation';
 import Link from 'next/link';
 import { ArrowLeft, ShieldAlert } from 'lucide-react';
+import { JsonLd } from '@/components/JsonLd';
 
 export const metadata = {
   title: 'Protocolos de Acesso - Sentinela Democrática',
 };
 
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://sentinelademocratica.com.br"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Protocolos de Acesso",
+      "item": "https://sentinelademocratica.com.br/planos"
+    }
+  ]
+};
+
+const softwareApplicationSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Sentinela Engine",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web",
+  "url": "https://sentinelademocratica.com.br/planos",
+  "description": "Sistema de monitoramento cívico profundo via IAs distribuídas para análise de ameaças institucionais e discursos de ódio.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "BRL"
+  },
+  "provider": {
+    "@type": "Organization",
+    "name": "Sentinela Democrática",
+    "url": "https://sentinelademocratica.com.br"
+  }
+};
+
 export default function PlanosPage() {
   return (
     <div className="min-h-screen bg-bg-main">
+      <JsonLd data={breadcrumbSchema} />
+      <JsonLd data={softwareApplicationSchema} />
       {/* Navbar simplificada */}
       <nav className="border-b border-border-main bg-bg-card">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">

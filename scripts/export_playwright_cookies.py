@@ -119,6 +119,14 @@ async def renew_account_cookies(browser, account: dict):
             await page.wait_for_selector(password_selector, timeout=15000)
             await page.type(password_selector, password, delay=150)
             
+            # Salva screenshot com campos preenchidos para debug (PASA v98.8)
+            try:
+                os.makedirs("scratch", exist_ok=True)
+                await page.screenshot(path=f"scratch/debug_login_filled_{user}.png")
+                print(f"[DEBUG] Screenshot com campos preenchidos salvo para {user}")
+            except Exception as e_snap:
+                print(f"Não foi possível tirar screenshot de debug preenchido: {e_snap}")
+
             # Clicar em entrar e esperar navegação
             import random
             submit_btn = await page.query_selector('button[type="submit"]')
@@ -136,6 +144,13 @@ async def renew_account_cookies(browser, account: dict):
                 await page.wait_for_load_state("networkidle", timeout=25000)
             except:
                 await page.wait_for_timeout(8000)
+
+            # Salva screenshot após submissão de login para debug (PASA v98.8)
+            try:
+                await page.screenshot(path=f"scratch/debug_login_after_submit_{user}.png")
+                print(f"[DEBUG] Screenshot após clique em Entrar salvo para {user}")
+            except Exception as e_snap:
+                print(f"Não foi possível tirar screenshot de debug após submit: {e_snap}")
                 
             print("Formulário de login submetido com sucesso")
             logged_in = True
@@ -191,18 +206,27 @@ async def renew_account_cookies(browser, account: dict):
 
         # 4. Capturar cookies e salvar no .env
         # Garante que o contexto está estável navegando para a home antes de capturar
+        # Tira screenshot de debug antes de qualquer redirecionamento ou navegação (PASA v98.8)
         try:
-            current_url = page.url
-            if "accounts/login" not in current_url and not page.is_closed():
-                # Navega para a home para estabilizar qualquer redirecionamento SPA pendente
-                try:
-                    await page.goto('https://www.instagram.com/', wait_until='domcontentloaded', timeout=20000)
-                    await page.wait_for_timeout(3000)
-                except Exception:
-                    pass  # Ignora erros de navegação, tenta coletar assim mesmo
-        except Exception:
-            pass
-        
+            os.makedirs("scratch", exist_ok=True)
+            screenshot_path = f"scratch/debug_login_{user}.png"
+            await page.screenshot(path=screenshot_path)
+            print(f"[DEBUG] Screenshot de login para {user} salvo em {screenshot_path}")
+        except Exception as e_snap:
+            print(f"Não foi possível tirar screenshot de debug: {e_snap}")
+
+        # Comentada a navegação para a home para preservar a tela de erro/challenge original
+        # try:
+        #     current_url = page.url
+        #     if "accounts/login" not in current_url and not page.is_closed():
+        #         try:
+        #             await page.goto('https://www.instagram.com/', wait_until='domcontentloaded', timeout=20000)
+        #             await page.wait_for_timeout(3000)
+        #         except Exception:
+        #             pass
+        # except Exception:
+        #     pass
+
         try:
             cookies = await context.cookies()
         except Exception as e_cookies:

@@ -6,6 +6,54 @@ import signal
 import time
 import threading
 import asyncio
+
+# ── LOCK DE SOCKET RÁPIDO NO TOPO (Anti-Duplicação v98.7) ──────────────
+def is_watchdog_running():
+    """Tenta conectar na porta 8009 para ver se o watchdog já está ouvindo."""
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.settimeout(0.5)
+    try:
+        s.connect(("127.0.0.1", 8009))
+        s.close()
+        return True
+    except Exception:
+        return False
+
+def kill_process_on_port(port: int):
+    try:
+        creationflags = 0x08000000  # CREATE_NO_WINDOW
+        output = subprocess.check_output("netstat -ano", shell=True, creationflags=creationflags).decode('utf-8', errors='ignore')
+        for line in output.splitlines():
+            if f":{port}" in line and "LISTENING" in line:
+                parts = line.strip().split()
+                pid = int(parts[-1])
+                if pid != os.getpid():
+                    print(f"[SHIELD] Detectada instância antiga do Watchdog (PID {pid}) na porta {port}. Encerrando...")
+                    try:
+                        os.kill(pid, signal.SIGTERM)
+                        time.sleep(2)
+                    except Exception as ex:
+                        print(f"[SHIELD] Falha ao encerrar PID {pid}: {ex}")
+    except Exception as e:
+        print(f"[SHIELD] Falha ao checar conexões da porta {port}: {e}")
+
+# 1. Verifica de imediato se já existe watchdog saudável rodando
+if is_watchdog_running():
+    print("[Watchdog] Já existe uma instância saudável do Watchdog rodando. Encerrando...")
+    sys.exit(0)
+
+# 2. Mata processos zumbis na porta de lock
+kill_process_on_port(8009)
+
+# 3. Adquire o lock definitivo de socket no topo
+_lock_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+try:
+    _lock_socket.bind(("127.0.0.1", 8009))
+    _lock_socket.listen(5)
+except OSError:
+    print("[Watchdog] Já existe uma instância do Watchdog rodando na porta 8009. Encerrando...")
+    sys.exit(0)
+
 from PIL import Image
 import pystray
 from pystray import MenuItem as item
@@ -419,10 +467,8 @@ def release_boot_lock(fd):
 if __name__ == "__main__":
     BOOT_LOCK_PATH = os.path.join(PROJECT_ROOT, "runtime_state", "watchdog_boot.lock")
 
-    # 1. Verifica se já está rodando
-    if is_watchdog_running():
-        print("[Watchdog] Já existe uma instância do Watchdog rodando. Encerrando...")
-        sys.exit(0)
+    # 1. Instância já validada pelo lock rápido de topo
+    pass
 
     # 2. Auto-desacoplamento no Windows para ocultar o terminal (apenas se --background for passado)
     if sys.platform.startswith("win") and "--background" in sys.argv and "--detached" not in sys.argv:
@@ -467,16 +513,8 @@ if __name__ == "__main__":
             sys.exit(1)
         sys.exit(0)
 
-    # 3. Processo principal (seja detached em background ou interativo em foreground)
-    # Tenta obter o socket lock de instância única definitivo
-    kill_process_on_port(8009)
-    _lock_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    try:
-        _lock_socket.bind(("127.0.0.1", 8009))
-        _lock_socket.listen(5)  # Habilita escuta para permitir testes de conexão (connect)
-    except OSError:
-        print("[Watchdog] Já existe uma instância do Watchdog rodando na porta 8009. Encerrando...")
-        sys.exit(0)
+    # 3. Socket lock de instância única já garantido no topo
+    pass
 
     # 4. Execução do Watchdog
     os.chdir(PROJECT_ROOT)
