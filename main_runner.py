@@ -194,12 +194,6 @@ def check_and_prompt_envs():
     required_envs = {
         "SUPABASE_URL": "URL do projeto Supabase (https://supabase.com/dashboard)",
         "SUPABASE_KEY": "Chave (anon/service_role) do Supabase",
-        "BSKY_USER": "Seu e-mail ou handle do Bluesky",
-        "BSKY_PASS": "App Password do Bluesky (https://bsky.app/settings/app-passwords)",
-        "TG_API_ID": "API ID do Telegram (https://my.telegram.org)",
-        "TG_API_HASH": "API Hash do Telegram (https://my.telegram.org)",
-        "REDDIT_CLIENT_ID": "Client ID do aplicativo Reddit (https://www.reddit.com/prefs/apps)",
-        "REDDIT_CLIENT_SECRET": "Client Secret do aplicativo Reddit"
     }
     
     missing_envs = {}
