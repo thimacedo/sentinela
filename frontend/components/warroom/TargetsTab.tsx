@@ -104,7 +104,7 @@ export default function TargetsTab() {
         await supabase.from('candidatos').insert({
           username: cleanUsername,
           estado: 'BR',
-          status_monitoramento: 'Ativo'
+          status_monitoramento: 'ATIVO'
         });
 
         refreshBalance();

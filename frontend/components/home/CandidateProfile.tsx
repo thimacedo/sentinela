@@ -166,7 +166,7 @@ export default function CandidateProfile({
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-2">
             <h3 className="text-3xl font-black text-text-main tracking-tighter">@{candidateData.username}</h3>
-            {candidateData.status_monitoramento === 'Ativo' && (
+            {candidateData.status_monitoramento === 'ATIVO' && (
               <span className="flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold uppercase rounded-full border border-emerald-500/20">
                 <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
                 Ativo

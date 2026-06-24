@@ -281,7 +281,7 @@ def get_targets(request: Request, limit: int = 50, supa: Client = Depends(get_su
     """Retorna alvos monitorados com métricas de ódio atualizadas."""
     try:
         org_id = request.headers.get("X-Organization-Id")
-        query_cand = supa.table('candidatos').select('*').eq('status_monitoramento', 'Ativo').order('nota_relevancia', desc=True)
+        query_cand = supa.table('candidatos').select('*').eq('status_monitoramento', 'ATIVO').order('nota_relevancia', desc=True)
         if org_id: query_cand = query_cand.eq('organization_id', org_id)
         candidates = query_cand.execute().data or []
 
