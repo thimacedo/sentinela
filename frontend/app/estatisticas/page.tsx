@@ -258,15 +258,22 @@ export default function DemographicsMarketingPage() {
             </div>
           </div>
           <div className="h-[250px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                {/* @ts-ignore - Recharts prop typings for Pie activeIndex/activeShape are outdated */}
-                <Pie activeIndex={activeIndex} activeShape={renderActiveShape} data={ideologia} cx="50%" cy="50%" innerRadius={70} outerRadius={95} paddingAngle={5} dataKey="value" onMouseEnter={onPieEnter} stroke="none">
-                  {ideologia.map((entry: any, index: number) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
-                </Pie>
-                <Tooltip content={<CustomTooltip />} />
-              </PieChart>
-            </ResponsiveContainer>
+            {ideologia && ideologia.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  {/* @ts-ignore - Recharts prop typings for Pie activeIndex/activeShape are outdated */}
+                  <Pie activeIndex={activeIndex} activeShape={renderActiveShape} data={ideologia} cx="50%" cy="50%" innerRadius={70} outerRadius={95} paddingAngle={5} dataKey="value" onMouseEnter={onPieEnter} stroke="none">
+                    {ideologia.map((entry: any, index: number) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+                  </Pie>
+                  <Tooltip content={<CustomTooltip />} />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center border-2 border-dashed border-border-main/50 rounded-2xl">
+                <Filter className="w-8 h-8 text-text-muted/30 mb-2" />
+                <p className="text-xs text-text-muted font-bold uppercase tracking-widest text-center px-4">Analisando espectro ideológico...</p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -282,20 +289,27 @@ export default function DemographicsMarketingPage() {
             </div>
           </div>
           <div className="h-[250px] w-full mt-6">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={sexo} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
-                <defs>
-                  <linearGradient id="colorGender0" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#ec4899" stopOpacity={0.8}/><stop offset="95%" stopColor="#ec4899" stopOpacity={0.2}/></linearGradient>
-                  <linearGradient id="colorGender1" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/><stop offset="95%" stopColor="#3b82f6" stopOpacity={0.2}/></linearGradient>
-                </defs>
-                <XAxis dataKey="name" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} dy={10} fontWeight="bold" />
-                <YAxis hide />
-                <Tooltip cursor={{ fill: '#334155', opacity: 0.05 }} content={<CustomTooltip />} />
-                <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={50} animationDuration={1500}>
-                  {sexo.map((entry: any, index: number) => <Cell key={`cell-${index}`} fill={`url(#colorGender${index % 2})`} stroke={index === 0 ? '#ec4899' : '#3b82f6'} strokeWidth={1} />)}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+            {sexo && sexo.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={sexo} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
+                  <defs>
+                    <linearGradient id="colorGender0" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#ec4899" stopOpacity={0.8}/><stop offset="95%" stopColor="#ec4899" stopOpacity={0.2}/></linearGradient>
+                    <linearGradient id="colorGender1" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/><stop offset="95%" stopColor="#3b82f6" stopOpacity={0.2}/></linearGradient>
+                  </defs>
+                  <XAxis dataKey="name" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} dy={10} fontWeight="bold" />
+                  <YAxis hide />
+                  <Tooltip cursor={{ fill: '#334155', opacity: 0.05 }} content={<CustomTooltip />} />
+                  <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={50} animationDuration={1500}>
+                    {sexo.map((entry: any, index: number) => <Cell key={`cell-${index}`} fill={`url(#colorGender${index % 2})`} stroke={index === 0 ? '#ec4899' : '#3b82f6'} strokeWidth={1} />)}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center border-2 border-dashed border-border-main/50 rounded-2xl">
+                <Users className="w-8 h-8 text-text-muted/30 mb-2" />
+                <p className="text-xs text-text-muted font-bold uppercase tracking-widest text-center px-4">Analisando segmentação demográfica...</p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -309,19 +323,26 @@ export default function DemographicsMarketingPage() {
             </div>
           </div>
           <div className="h-[280px] w-full mt-4">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={partido} layout="vertical" margin={{ top: 0, right: 30, left: 10, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorParty" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#3b82f6" stopOpacity={0.8}/><stop offset="100%" stopColor="#8b5cf6" stopOpacity={0.8}/></linearGradient>
-                </defs>
-                <XAxis type="number" hide />
-                <YAxis dataKey="name" type="category" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} width={80} fontWeight="bold" />
-                <Tooltip cursor={{ fill: '#334155', opacity: 0.05 }} content={<CustomTooltip />} />
-                <Bar dataKey="value" fill="url(#colorParty)" radius={[0, 6, 6, 0]} barSize={20} animationDuration={1500}>
-                  {partido.map((entry: any, index: number) => <Cell key={`cell-${index}`} fill="url(#colorParty)" />)}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+            {partido && partido.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={partido} layout="vertical" margin={{ top: 0, right: 30, left: 10, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorParty" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#3b82f6" stopOpacity={0.8}/><stop offset="100%" stopColor="#8b5cf6" stopOpacity={0.8}/></linearGradient>
+                  </defs>
+                  <XAxis type="number" hide />
+                  <YAxis dataKey="name" type="category" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} width={80} fontWeight="bold" />
+                  <Tooltip cursor={{ fill: '#334155', opacity: 0.05 }} content={<CustomTooltip />} />
+                  <Bar dataKey="value" fill="url(#colorParty)" radius={[0, 6, 6, 0]} barSize={20} animationDuration={1500}>
+                    {partido.map((entry: any, index: number) => <Cell key={`cell-${index}`} fill="url(#colorParty)" />)}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center border-2 border-dashed border-border-main/50 rounded-2xl">
+                <BarChart3 className="w-8 h-8 text-text-muted/30 mb-2" />
+                <p className="text-xs text-text-muted font-bold uppercase tracking-widest text-center px-4">Cruzando dados partidários...</p>
+              </div>
+            )}
           </div>
         </div>
 
