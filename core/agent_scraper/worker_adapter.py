@@ -32,6 +32,8 @@ import os
 import time
 from typing import Any, Optional
 
+from core.exceptions import DOMHealerRestartSignal
+
 logger = logging.getLogger("agent_scraper.worker_adapter")
 
 
@@ -54,6 +56,7 @@ class ScrapeCycleResult:
         agent_tokens: int = 0,
         agent_decisions: list[dict] | None = None,
         error: str | None = None,
+        is_control_signal: bool = False,
     ):
         self.success = success
         self.username = username
@@ -65,6 +68,7 @@ class ScrapeCycleResult:
         self.agent_tokens = agent_tokens
         self.agent_decisions = agent_decisions or []
         self.error = error
+        self.is_control_signal = is_control_signal
 
     def to_dict(self) -> dict:
         return {
@@ -78,6 +82,7 @@ class ScrapeCycleResult:
             "agent_tokens": self.agent_tokens,
             "agent_decisions": self.agent_decisions,
             "error": self.error,
+            "is_control_signal": self.is_control_signal,
         }
 
 
@@ -327,6 +332,35 @@ class ScrapeAgentAdapter:
                 error=last_error if not healing_success else None,
             )
 
+        except (RuntimeError, DOMHealerRestartSignal) as e:
+            if isinstance(e, DOMHealerRestartSignal) or \
+               (isinstance(e, RuntimeError) and "hitl_intervention_completed" in str(e)):
+                username_context = username or "unknown"
+                self._stats["healer_restarts"] = self._stats.get("healer_restarts", 0) + 1
+                logger.warning(
+                    f"🔄 [Adapter] DOM Healing restart solicitado para @{username_context}",
+                    extra={
+                        "username": username_context,
+                        "healer_restart_count": self._stats["healer_restarts"]
+                    }
+                )
+                return ScrapeCycleResult(
+                    success=False,
+                    username=username_context,
+                    comments_collected=0,
+                    posts_processed=0,
+                    error="healer_restart_requested",
+                    persona_time_s=persona_time,
+                    is_control_signal=True,
+                )
+            
+            logger.error(f"[adapter] Erro Runtime/Sinal não tratado no ciclo para {username}: {e}", exc_info=True)
+            return ScrapeCycleResult(
+                success=False,
+                username=username,
+                error=str(e),
+            )
+            
         except Exception as e:
             logger.error(f"[adapter] Erro no ciclo de coleta para {username}: {e}", exc_info=True)
             return ScrapeCycleResult(

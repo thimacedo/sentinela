@@ -270,6 +270,15 @@ class WkColetaInstagram(BaseWorker):
             )
             
             if not agent_result.success and agent_result.error:
+                if getattr(agent_result, 'is_control_signal', False) or agent_result.error == "healer_restart_requested":
+                    self.logger.info(f"🔄 [Worker] Ciclo de healing concluído para @{target.username}. Retomando sem penalidade.")
+                    result = CycleResult(
+                        worker_id=self.worker_id, cycle=self.cycle, target=target.username,
+                        source="v2_engine", extracted=0, simulated=False, 
+                        error="healer_restart", db_success=False
+                    )
+                    result.is_control_signal = True
+                    return result
                 raise RuntimeError(agent_result.error)
             
             self.consecutive_blocks = 0
@@ -376,7 +385,7 @@ class WkColetaInstagram(BaseWorker):
                     err = result.error
                     if err in ('junk_detected', 'invalid_target: 404_not_found'):
                         final_status = 'SEM_DADOS_RECENTES'
-                    elif err in ('all_sessions_blocked', 'shutdown_requested'):
+                    elif err in ('all_sessions_blocked', 'shutdown_requested', 'healer_restart'):
                         final_status = 'PENDENTE'
                     else:
                         final_status = 'FALHA'

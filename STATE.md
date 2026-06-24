@@ -1,14 +1,23 @@
 # STATE.md — Sentinela
-_last_updated: 2026-06-12 | branch: main | version: v98.1_
+_last_updated: 2026-06-24 | branch: main | version: v98.2_
 
 ## Status Operacional
 
 | Subsistema | Status | Observação |
 |---|---|---|
-| Coleta | 🟢 Operacional | ScrapeAgent (OODA loop, DOM Healing e Priorização Cognitiva) ativo com extração resiliente de DOM. |
+| Coleta | 🟢 Operacional | ScrapeAgent ativo (OODA, DOM Healing c/ SelectorValidator, LoginWallDetector e Métricas persistidas). |
 | Inteligência | 🟢 Operacional | Malha de IA resiliente + SaFastDrop local. |
 | Dashboard | 🟢 Operacional | Painel "Decision Room" com auto-start, telemetria real via DB e Coleta Direcionada. |
 | SRE / Autocura | 🟢 Operacional | Agente de SRE Autônomo (`sre_agent.py`) ativo em background com desvio headless. |
+
+## Histórico Recente de Correções (v98.2)
+1. **Refatoração Tipo-Segura (Type-Safe) de Exceções e Sinais de Controle (Concluído)**:
+   - **Exceções customizadas**: Criados arquivos de exceções customizadas em `core/exceptions.py`, substituindo *string matching* de erros no orquestrador por tipos específicos (`DOMHealerRestartSignal`, `SessionExpiredError`, `ChallengeRequiredError`, etc.).
+   - **Cura funcional de DOM**: Refatorado o `dom_healing.py` e o seletor de cura para instanciar e utilizar o `SelectorValidator` (`core/selector_validator.py`), testando os seletores gerados pela IA no DOM vivo da página e retornando erros caso falhem em visibilidade/conteúdo.
+   - **Evitando Falsos Bloqueios (Circuit Breaker)**: O Worker (`wk_coleta_instagram.py`) e o Adaptador (`worker_adapter.py`) foram atualizados para interceptar sinais de controle como `DOMHealerRestartSignal` e classificá-los semântica e imediatamente como status `PENDENTE` em vez de falhas de scraping, impedindo que o auto-healing acione falsos-positivos no circuit breaker de rede.
+   - **Métricas e Monitoramento**: Desenvolvidas as classes `MetricsCollector` em `core/scrape_metrics.py` e `HealingAttemptTracker` em `core/healing_attempt_tracker.py` para limitar tentativas de healing consecutivas e salvar relatórios detalhados em disco JSON.
+   - **Login Wall e Precedência**: Criado o `LoginWallDetector` (`core/login_wall_detector.py`) com regex robustas de URL, títulos e conteúdo, corrigindo bugs latentes de precedência de operadores lógicos (`and`/`or` no check antigo).
+   - **Validação**: Todos os testes unitários e de integração básicos (`test_dom_healing.py` e `test_scrape_agent.py`) foram executados e passaram com 100% de sucesso.
 
 ## Histórico Recente de Correções (v98.1)
 1. **Resiliência de Cache do DOM Healing (Concluído)**:

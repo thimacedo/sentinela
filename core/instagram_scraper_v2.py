@@ -16,6 +16,7 @@ import httpx
 from playwright.async_api import Page, BrowserContext, async_playwright, Browser, TimeoutError as PlaywrightTimeoutError
 
 from core.ai_service import ai_service
+from core.exceptions import DOMHealerRestartSignal
 
 logger = logging.getLogger("instagram_scraper_v2")
 
@@ -543,12 +544,18 @@ class InstagramScraperV2:
                                         try:
                                             await browser.close()
                                         except: pass
-                                        raise RuntimeError("hitl_intervention_completed_restarting")
+                                        raise DOMHealerRestartSignal(
+                                            reason="vision_healing_success",
+                                            username=username,
+                                            shortcode=shortcode
+                                        )
                                     else:
                                         logger.warning(f"⚠️ [V2] DOM Healing de visão não obteve sucesso: {heal_res.get('error')}. Iniciando fallback HITL...")
                                 except Exception as e_heal:
-                                    if "hitl_intervention_completed_restarting" in str(e_heal):
+                                    if isinstance(e_heal, DOMHealerRestartSignal):
                                         raise e_heal
+                                    if "hitl_intervention_completed_restarting" in str(e_heal):
+                                        raise DOMHealerRestartSignal(reason="legacy_hitl", username=username, shortcode=shortcode)
                                     logger.error(f"❌ [V2] Falha interna no DOM Healing de visão: {e_heal}. Iniciando fallback HITL...")
 
                                 try:
@@ -557,7 +564,11 @@ class InstagramScraperV2:
                                 learned = await self._request_human_intervention(session, shortcode)
                                 if learned:
                                     logger.info(f"✅ Seletor aprendido e salvo com sucesso: {learned}")
-                                raise RuntimeError("hitl_intervention_completed_restarting")
+                                raise DOMHealerRestartSignal(
+                                    reason="hitl_fallback_completed",
+                                    username=username,
+                                    shortcode=shortcode
+                                )
 
                     await browser.close()
                     logger.info(f"✅ [V2] @{username} finalizado. {len(all_comments)} comentários extraídos.")
@@ -567,7 +578,7 @@ class InstagramScraperV2:
                     }
 
             except Exception as e:
-                if "hitl_intervention_completed_restarting" in str(e):
+                if isinstance(e, DOMHealerRestartSignal) or "hitl_intervention_completed_restarting" in str(e):
                     logger.info("🔄 [V2] Reiniciando coleta de perfil após autocura (DOM Healing/HITL) com novos seletores...")
                     await asyncio.sleep(random.uniform(2, 4))
                     continue

@@ -225,6 +225,7 @@ class DOMHealer:
                 screenshot_b64=screenshot_b64,
                 html_snippet=html_snippet,
                 selector_name=selector_name,
+                page=page,
                 cache_key=cache_key,
             )
 
@@ -257,6 +258,7 @@ class DOMHealer:
         screenshot_b64: str,
         html_snippet: str,
         selector_name: str,
+        page: Any = None,
         cache_key: str | None = None,
     ) -> dict:
         """
@@ -306,8 +308,26 @@ class DOMHealer:
                 "success": False,
                 "selector": None,
                 "source": "vision",
-                "error": f"Seletor inválido retornado pela IA: '{selector}'",
+                "error": f"Seletor sintaticamente inválido retornado pela IA: '{selector}'",
             }
+            
+        # Validação funcional no DOM vivo
+        if page:
+            try:
+                from core.selector_validator import SelectorValidator
+                validator = SelectorValidator(min_elements=1, max_elements=200, sample_size=5)
+                val_res = await validator.validate_functional(page, selector, selector_name)
+                
+                if not val_res["valid"]:
+                    self._healing_stats["vision_failures"] += 1
+                    return {
+                        "success": False,
+                        "selector": None,
+                        "source": "vision",
+                        "error": f"Seletor falhou na validação funcional ({val_res['stage']}): {val_res.get('reason')}",
+                    }
+            except Exception as e:
+                logger.warning(f"[dom_healing] Aviso durante validação funcional de seletor: {e}")
 
         # Persiste seletor aprendido
         await self._save_learned_selector(selector_name, selector)
