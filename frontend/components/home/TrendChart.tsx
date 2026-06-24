@@ -24,7 +24,7 @@ export default function TrendChart() {
     time: new Date(item.hora).toLocaleTimeString('pt-BR', { hour: '2-digit' }) + 'h',
     alertas: item.alertas || 0,
     volume: item.total || 0
-  })).slice(-12);
+  }));
 
   // 2. QUALITATIVO: Distribuição MCA v2.2 (Radar de Perigo)
   const mcaBreakdown = stats?.pasa_breakdown || {
@@ -76,7 +76,7 @@ export default function TrendChart() {
                 <Activity className="w-5 h-5 text-brand-primary" />
                 Pulso de Hostilidade
               </h2>
-              <p className="text-[10px] text-text-muted font-bold uppercase tracking-widest mt-1">Análise Quantitativa / 12 Horas</p>
+              <p className="text-[10px] text-text-muted font-bold uppercase tracking-widest mt-1">Análise Quantitativa / Último Período</p>
             </div>
             <div className="flex items-center gap-2 px-3 py-1 bg-brand-primary/10 rounded-full border border-brand-primary/20">
                <div className="w-1.5 h-1.5 bg-brand-primary rounded-full animate-pulse" />
