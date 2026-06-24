@@ -65,9 +65,10 @@ export default function TrendChart() {
 
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className={`grid grid-cols-1 ${timelineData.length > 0 ? 'lg:grid-cols-3' : 'lg:grid-cols-2'} gap-8`}>
         
         {/* Gráfico 1: Evolução Temporal (Quantitativo) */}
+        {timelineData.length > 0 && (
         <div className="lg:col-span-2 bg-bg-card border border-border-main rounded-3xl p-8 shadow-sm relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-32 h-32 bg-brand-primary/5 rounded-full -mr-16 -mt-16 blur-3xl" />
           <div className="flex justify-between items-center mb-8 relative z-10">
@@ -105,6 +106,7 @@ export default function TrendChart() {
             </ResponsiveContainer>
           </div>
         </div>
+        )}
 
         {/* Gráfico 2: Perfil Qualitativo (Radar MCA) */}
         <div className="bg-bg-card border border-border-main rounded-3xl p-8 shadow-sm flex flex-col relative overflow-hidden">
