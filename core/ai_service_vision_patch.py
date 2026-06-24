@@ -259,16 +259,16 @@ async def vision_completion(
                     headers={"Content-Type": "application/json"},
                 )
 
-        if response.status_code == 429:
-            # Rate limit — aplica cooldown
-            logger.warning(f"[vision] Rate limit no provedor {provider_name}")
+        if response.status_code == 429 or response.status_code == 503:
+            # Rate limit ou Unavailable — aplica cooldown
+            logger.warning(f"[vision] Status {response.status_code} no provedor {provider_name}")
             provider["cooldown_until"] = time.time() + 60
             return {
                 "success": False,
                 "content": "",
                 "provider": provider_name,
                 "cached": False,
-                "error": f"Rate limit no provedor {provider_name}. Cooldown 60s.",
+                "error": f"Status {response.status_code} no provedor {provider_name}. Cooldown 60s.",
             }
 
         if response.status_code >= 400:

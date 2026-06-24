@@ -567,6 +567,11 @@ class InstagramScraperV2:
                     }
 
             except Exception as e:
+                if "hitl_intervention_completed_restarting" in str(e):
+                    logger.info("🔄 [V2] Reiniciando coleta de perfil após autocura (DOM Healing/HITL) com novos seletores...")
+                    await asyncio.sleep(random.uniform(2, 4))
+                    continue
+
                 logger.error(f"💥 [V2] Erro na tentativa {retry_count+1}: {e}")
                 if "all_sessions_blocked" in str(e):
                     raise e
@@ -1180,9 +1185,9 @@ class InstagramScraperV2:
         Retorna um seletor CSS genérico para ser usado no headless mode.
         Ignora automaticamente se estiver no Modo Noturno (23h-05h).
         """
-        if self._is_night_shift():
-            logger.warning(f"🌙 [V2] Modo Noturno ativo. HITL desativado para o post {shortcode}. Abortando silenciosamente.")
-            return ""
+        # [PATCH] Ignora intervenção humana completamente em YOLO mode/Background
+        logger.warning(f"🚨 [V2] Intervenção Humana ignorada: Processo operando em Background/Headless. Abortando silenciosamente para o post {shortcode}.")
+        return ""
 
         logger.error(f"🚨 [HITL] Iniciando acesso monitorado para o post {shortcode}")
         try:

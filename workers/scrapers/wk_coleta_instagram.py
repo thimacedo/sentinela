@@ -187,8 +187,9 @@ class WkColetaInstagram(BaseWorker):
                     "candidato_id": c.get("candidato_id") or target.username,
                     "post_shortcode": c.get("post_shortcode") or shortcode,
                     "plataforma": c.get("plataforma") or "INSTAGRAM",
-                    "processado_ia": False,
-                    "tier_used": c.get("tier_used") or 2
+                    "sentimento": None, # Campo opcional no schema
+                    "is_hate": False,   # Valor padrão
+                    "is_spam": False    # Valor padrão
                 }
                 if c.get("is_bot"):
                     pericial_obs = f"[BOT DETECTED] Padrão: {c.get('bot_pattern')}"

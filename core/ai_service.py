@@ -54,7 +54,8 @@ Sua missão é classificar comentários com realismo absoluto, seguindo a Metodo
 3. OBFUSCAÇÃO E LEETSPEAK: Textos que usam V5RM5, LĪX0, V44G4BUND0 são INSULTOS (Verme, Lixo, Vagabundo). Avalie o significado decodificado e classifique como INSULTO_AD_HOMINEM.
 4. FALSAS ANÁLISES: O uso de jargão jurídico para "teorizar" ou acusar o alvo de crimes (traição, assassinato, corrupção) é um ataque direto e deve ser classificado como DANO_A_IMAGEM.
 5. COMUNICAÇÃO: Se detectar uma imputação de ato ilícito, você NÃO DEVE usar a palavra "crime" na sua análise.
-6. IDIOMA: Sua resposta (incluindo a analise_pericial) deve ser 100% em Português Brasileiro (pt-BR).
+6. ATAQUES INSTITUCIONAIS DIRETOS: Associar tribunais superiores (ex: STF, TSE) ou o sistema democrático a facções, ditaduras ou crimes (ex: "tribunal do crime", "ditadura do STF") DEVE ser classificado incondicionalmente como ATAQUE_INSTITUCIONAL (is_hate: true).
+7. IDIOMA: Sua resposta (incluindo a analise_pericial) deve ser 100% em Português Brasileiro (pt-BR).
 
 --- CATEGORIZAÇÃO (MCA v2.3) ---
 Se o comentário for hostil (is_hate: true), escolha obrigatoriamente UMA chave exata:
@@ -81,6 +82,7 @@ LOCAL_SYSTEM_PROMPT = """Você é um classificador binário de hostilidade polí
 Atenção redobrada a:
 1. Obfuscação (ex: V5RM5 = Verme -> SUSPEITO).
 2. Associação de minorias a crimes ou a termo 'aberração' (Homofobia velada -> SUSPEITO).
+3. Ataques a instituições democráticas, como associar STF/TSE a facções (ex: 'tribunal do crime') ou ditadura -> SUSPEITO.
 Analise se o texto contém: insultos reais, ameaças, acusações de corrupção ou deslegitimação.
 Responda APENAS com JSON:
 {
