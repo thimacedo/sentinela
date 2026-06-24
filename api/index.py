@@ -246,7 +246,7 @@ def summary(request: Request, supa: Client = Depends(get_supa)):
     try:
         org_id = request.headers.get("X-Organization-Id")
         now_utc = datetime.now(timezone.utc)
-        query_c = supa.table('candidatos').select('id', count='exact').eq('status_monitoramento', 'Ativo')
+        query_c = supa.table('candidatos').select('id', count='exact').eq('status_monitoramento', 'ATIVO')
         if org_id: query_c = query_c.eq('organization_id', org_id)
         c_res = query_c.execute()
         

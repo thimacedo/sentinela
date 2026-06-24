@@ -35,7 +35,7 @@ export function useSystemInformation() {
         const { count: monitorados } = await supabase
           .from('candidatos')
           .select('id', { count: 'exact', head: true })
-          .eq('status_monitoramento', 'Ativo');
+          .eq('status_monitoramento', 'ATIVO');
 
         const { count: total_amostra } = await supabase
           .from('comentarios')
