@@ -167,3 +167,17 @@ Para iniciar trabalho novo:
 - **Validação**:
   - Executados testes via [test_dom_healing.py](file:///c:/Projetos/sentinela/scratch/test_dom_healing.py), demonstrando o salvamento e validação de seletores válidos com sucesso.
   - O arquivo `configs/learned_selectors.json` foi limpo e restabelecido com uma chave válida.
+
+## 13. Tratamento de Exceção e Reinício de Coleta após DOM Healing (v98.1.1)
+
+- **Causa Raiz da Interrupção de Coleta**:
+  - O scraper do Instagram (`core/instagram_scraper_v2.py`) ao concluir a autocura do DOM (DOM Healing) ou após ignorar o HITL (Human-In-The-Loop) em background, disparava `raise RuntimeError("hitl_intervention_completed_restarting")`.
+  - Esta exceção propagava e era interpretada pelo loop principal de tentativas do scraper e pelo worker (`workers/scrapers/wk_coleta_instagram.py`) como uma falha comum do Playwright/rede/bloqueio.
+  - Como consequência, a tentativa de scraping consumia uma unidade de `retry_count`, disparava um tempo de espera longo (backoff) de até 120 segundos, rotacionava a sessão e reiniciava o perfil do zero. Após esgotar o limite baixo de tentativas do worker (`max_retries`), a coleta do perfil era encerrada retornando 0 comentários extraídos e inseridos de forma errônea.
+
+- **Mitigações Implementadas**:
+  - **Tratamento Específico de Exceção**: Inserido um bloco `except Exception` direcionado na linha 570 de [instagram_scraper_v2.py](file:///c:/Projetos/sentinela/core/instagram_scraper_v2.py#L570-L574) que intercepta especificamente `"hitl_intervention_completed_restarting"`.
+  - **Reinício Limpo e Imediato**: Quando essa exceção é interceptada, o scraper loga a reinicialização limpa, dorme apenas um jitter curto de 2 a 4 segundos e reinicia imediatamente a coleta do perfil no loop principal (`continue`) sem contar como erro de retry e sem aplicar backoffs longos.
+
+- **Validação**:
+  - Validada a coleta local de posts e comentários usando o script de teste [test_coleta_direta.py](file:///c:/Projetos/sentinela/scratch/test_coleta_direta.py), que obteve êxito extraindo comentários do perfil `@janjalula` sob cookies ativos (`SESSION_1`).
