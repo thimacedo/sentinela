@@ -285,10 +285,21 @@ class QueueManager:
             )
             current_pending = count_res.count or 0
 
-            if current_pending >= min_pending:
+            # Obter total de candidatos ativos
+            total_cand_res = await asyncio.to_thread(
+                db_real.table("candidatos")
+                .select("id", count="exact")
+                .filter("status_monitoramento", "ilike", "Ativo")
+                .execute
+            )
+            total_ativos = total_cand_res.count or 0
+            
+            dynamic_min = max(int(total_ativos * 0.5), 10)
+
+            if current_pending >= dynamic_min:
                 return  # Fila saudável, nada a fazer
 
-            logger.info(f"🔄 [Queue] Apenas {current_pending} itens pendentes. Repopulando fila...")
+            logger.info(f"🔄 [Queue] Apenas {current_pending} pendentes (Threshold: {dynamic_min}). Repopulando...")
 
             # Busca candidatos ativos mais antigos para reinserir
             candidatos_res = await asyncio.to_thread(
@@ -300,21 +311,19 @@ class QueueManager:
                 .execute
             )
 
+            # Puxa itens já na fila para evitar N+1 queries na verificação
+            active_queue_res = await asyncio.to_thread(
+                self.db.table("fila_coleta")
+                .select("candidato_id")
+                .in_("status", ["PENDENTE", "EM ANDAMENTO"])
+                .execute
+            )
+            in_queue_usernames = {row["candidato_id"] for row in (active_queue_res.data or [])}
+
             reinseridos = 0
             for cand in (candidatos_res.data or []):
                 username = cand.get("username")
-                if not username:
-                    continue
-                # Verifica se já existe na fila como PENDENTE
-                check = await asyncio.to_thread(
-                    self.db.table("fila_coleta")
-                    .select("id")
-                    .eq("candidato_id", cand["username"])
-                    .eq("status", "PENDENTE")
-                    .limit(1)
-                    .execute
-                )
-                if check.data:
+                if not username or username in in_queue_usernames:
                     continue
 
                 termometro = cand.get("termometro", "MORNO")

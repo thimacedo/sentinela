@@ -77,11 +77,12 @@ class StealthEngine:
         os.makedirs("logs", exist_ok=True)
         log_path = os.path.abspath("logs/chromedriver_stealth.log")
         
+        os.environ['WDM_CACHE_VALID_RANGE'] = '1'
         try:
-            driver_path = ChromeDriverManager(driver_version="149.0.7827.197").install()
+            driver_path = ChromeDriverManager().install()
             service = ChromeService(driver_path, log_output=log_path)
         except Exception as e:
-            print(f"Failed to get specific version, trying latest: {e}")
+            print(f"Failed to get driver via WDM: {e}")
             service = ChromeService(ChromeDriverManager().install(), log_output=log_path)
             
         # Não usar CREATE_NO_WINDOW porque binários patched crasham se não tiverem handles válidos
