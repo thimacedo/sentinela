@@ -33,9 +33,8 @@ class SaInstagramStealth(BaseSubAgent):
         
         # O motor principal
         self.scraper = StealthEngine(config_path="config/config.json")
+        self.scraper.config["headless"] = True  # Força headless para rodar oculto via Tray (evita crash no ProcessPool/pythonw)
         self.agent = StealthAgentOODA(scraper_instance=self.scraper, ai_service=ai_service)
-        self.checkpoint = CheckpointManager(worker_id=worker_id)
-        
     def describe(self) -> str:
         return "Instagram Stealth Agent (OODA) - Compatibilidade Legada Autônoma"
 
@@ -96,16 +95,15 @@ class SaInstagramStealth(BaseSubAgent):
         
     async def run_cycle(self) -> CycleResult:
         """Puxa tarefas da fila e aplica resiliência (Circuit Breaker/Checkpoint)"""
-        if not scraper_circuit_breaker.can_execute():
+        if not scraper_circuit_breaker.can_execute("instagram_stealth"):
             logger.warning("Circuit Breaker aberto, abortando ciclo stealth.")
-            return CycleResult.failure("Circuit_Breaker_Open")
+            return CycleResult(worker_id=self.worker_id, cycle=0, error="Circuit_Breaker_Open", failed=1)
 
-        tasks = await self.queue.claim_tasks("coleta_instagram", limit=1)
-        if not tasks:
-            return CycleResult.idle()
+        target_obj = await self.queue.claim_next_target_atomic(self.worker_id)
+        if not target_obj:
+            return CycleResult(worker_id=self.worker_id, cycle=0, target=None)
 
-        task = tasks[0]
-        target = task["target_id"]
+        target = target_obj.username
         
         try:
             # Login OODA se necessário
@@ -122,11 +120,13 @@ class SaInstagramStealth(BaseSubAgent):
             await asyncio.sleep(pacing_delay)
             
             # Marca tarefa como concluída
-            await self.queue.complete_task(task["id"], {"status": "success"})
-            return CycleResult.success(1, 0)
+            if getattr(target_obj, 'queue_id', None):
+                await self.queue.release_atomic(target_obj.queue_id, "CONCLUIDO", self.worker_id)
+            return CycleResult(worker_id=self.worker_id, cycle=0, target=target, db_success=True)
             
         except Exception as e:
-            scraper_circuit_breaker.record_failure()
+            scraper_circuit_breaker.record_failure("instagram_stealth", str(e))
             logger.error(f"Erro em {target}: {e}")
-            await self.queue.fail_task(task["id"], str(e))
-            return CycleResult.failure(str(e))
+            if getattr(target_obj, 'queue_id', None):
+                await self.queue.release_atomic(target_obj.queue_id, "FALHA", self.worker_id)
+            return CycleResult(worker_id=self.worker_id, cycle=0, target=target, error=str(e), failed=1)

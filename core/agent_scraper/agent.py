@@ -25,6 +25,7 @@ Integração:
 from __future__ import annotations
 
 import asyncio
+import collections
 import logging
 import os
 import time
@@ -182,7 +183,8 @@ class ScrapeAgent:
         }
 
         # Histórico recente para contexto do LLM
-        self._recent_decisions: list[CycleResult] = []
+        # Fix Bug B: deque(maxlen) elimina pop(0) O(n) e o append manual de controle de tamanho
+        self._recent_decisions: collections.deque[CycleResult] = collections.deque(maxlen=5)
         self._max_history = 5
 
         # Configuração
@@ -254,10 +256,8 @@ class ScrapeAgent:
                 self._stats["cognitive_decisions"] += 1
             self._stats["total_tokens_used"] += cycle_result.total_tokens
 
-            # Mantém histórico
+            # Mantém histórico (deque com maxlen=5 descarta automaticamente os mais antigos)
             self._recent_decisions.append(cycle_result)
-            if len(self._recent_decisions) > self._max_history:
-                self._recent_decisions.pop(0)
 
             logger.info(
                 f"[agent] Ciclo #{self._stats['total_cycles']} concluído: "
@@ -462,8 +462,15 @@ class ScrapeAgent:
             tokens = response.get("tokens_used", 0)
 
             # Parse da resposta JSON
+            # Fix Bug C: LLM frequentemente envolve JSON em backticks mesmo com response_format="json".
+            # Sem strip, json.loads lança JSONDecodeError — capturado pelo except externo mas
+            # loga um erro enganoso que dificulta o diagnóstico real.
             import json
-            llm_decision = json.loads(content)
+            import re as _re
+            content_clean = _re.sub(r"```(?:json)?\s*|\s*```", "", content).strip()
+            json_match = _re.search(r"\{.*\}", content_clean, _re.DOTALL)
+            content_clean = json_match.group(0) if json_match else content_clean
+            llm_decision = json.loads(content_clean)
 
             tool_name = llm_decision.get("tool", "flag_cooldown_session")
             params = llm_decision.get("params", {})
@@ -555,6 +562,11 @@ class ScrapeAgent:
             obs_type = ObservationType.DOM_INTEGRITY
         elif status_code >= 400:
             obs_type = ObservationType.HTTP_STATUS
+        elif status_code == 200 or status_code == 0:
+            # Fix Bug A: status_code=0 (sem erro HTTP) e status_code=200 são ambientes saudáveis.
+            # Entrar em HTTP_STATUS nesses casos causava um tool call get_block_severity
+            # desnecessário — overhead sem benefício. Retorna HEALTHY diretamente via SESSION_VALIDITY.
+            obs_type = ObservationType.SESSION_VALIDITY
         else:
             obs_type = ObservationType.HTTP_STATUS
 

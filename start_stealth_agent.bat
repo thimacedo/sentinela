@@ -8,6 +8,5 @@ echo Pressione Ctrl+C a qualquer momento para cancelar.
 echo.
 
 cd /d "%~dp0"
-python scripts\run_sa_instagram_stealth.py
+start /B .venv\Scripts\pythonw.exe scripts\run_sa_instagram_stealth.py
 
-pause
