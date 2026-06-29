@@ -58,6 +58,7 @@ class StealthEngine:
             options.add_argument("--window-size=1920,1080")
         
         # Stealth settings integradas do scrape_working.py
+        options.add_argument("--start-maximized")
         options.add_argument("--remote-debugging-port=0")  # Porta aleatória livre (Fix crash)
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
@@ -195,6 +196,7 @@ class StealthEngine:
 
             except Exception as e:
                 print(f"[ERRO] Falha ao logar com {username}: {e}")
+                import time; time.sleep(15)  # [DEBUG] Manter janela aberta por 15s para visualização
                 # Reiniciar driver caso tenha crashado, para tentar a próxima conta num browser limpo
                 if self.driver:
                     try:

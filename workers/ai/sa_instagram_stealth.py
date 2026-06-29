@@ -33,7 +33,7 @@ class SaInstagramStealth(BaseSubAgent):
         
         # O motor principal
         self.scraper = StealthEngine(config_path="config/config.json")
-        self.scraper.config["headless"] = True  # Força headless para rodar oculto via Tray (evita crash no ProcessPool/pythonw)
+        self.scraper.config["headless"] = False  # [DEBUG] Força GUI visível para diagnosticar login
         self.agent = StealthAgentOODA(scraper_instance=self.scraper, ai_service=ai_service)
     def describe(self) -> str:
         return "Instagram Stealth Agent (OODA) - Compatibilidade Legada Autônoma"
