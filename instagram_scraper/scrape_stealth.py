@@ -265,11 +265,18 @@ class StealthEngine:
         # Wait for posts to load
         # Wait for posts to load or private profile indicator
         try:
-            # Espera até 10s pelo grid de posts OU pelo cadeado de perfil privado
+            # Espera até 10s pelo grid de posts OU pelo cadeado de perfil privado OU botão Entrar
             WebDriverWait(self.driver, 10).until(
                 lambda d: d.find_elements(By.XPATH, "//div[contains(@class, '_aagv')]") or \
-                          d.find_elements(By.XPATH, "//*[contains(text(), 'Este perfil é privado') or contains(text(), 'This account is private')]")
+                          d.find_elements(By.XPATH, "//*[contains(text(), 'Este perfil é privado') or contains(text(), 'This account is private')]") or \
+                          d.find_elements(By.XPATH, "//a[@href='/accounts/login/' or contains(text(), 'Entrar') or contains(text(), 'Log In')]")
             )
+            
+            # Se foi deslogado, aborta
+            if self.driver.find_elements(By.XPATH, "//a[@href='/accounts/login/' or contains(text(), 'Entrar') or contains(text(), 'Log In')]"):
+                print("[ERRO FATAL] Sessão foi deslogada forçadamente pelo Instagram ao acessar o perfil!")
+                self.logged_in = False
+                raise WebDriverException("Sessão invalidada pelo Instagram.")
             
             # Se encontrou o texto de perfil privado, retorna lista vazia suavemente
             if self.driver.find_elements(By.XPATH, "//*[contains(text(), 'Este perfil é privado') or contains(text(), 'This account is private')]"):
@@ -299,7 +306,17 @@ class StealthEngine:
         self.driver.get(post_url)
         self.random_delay(3, 5)
         try:
-            self.wait.until(EC.presence_of_element_located((By.XPATH, "//article")))
+            # Verifica se foi deslogado subitamente ou se a página carregou
+            WebDriverWait(self.driver, 10).until(
+                lambda d: d.find_elements(By.XPATH, "//article") or \
+                          d.find_elements(By.XPATH, "//a[@href='/accounts/login/' or contains(text(), 'Entrar') or contains(text(), 'Log In')]")
+            )
+            
+            if self.driver.find_elements(By.XPATH, "//a[@href='/accounts/login/' or contains(text(), 'Entrar') or contains(text(), 'Log In')]"):
+                print("[ERRO FATAL] Sessão foi deslogada forçadamente pelo Instagram!")
+                self.logged_in = False
+                raise WebDriverException("Sessão invalidada pelo Instagram.")
+                
         except TimeoutException:
             print(f"    Post did not load properly.")
             return []
