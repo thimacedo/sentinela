@@ -154,23 +154,19 @@ class StealthEngine:
                 self.driver.get("https://www.instagram.com/accounts/login/")
                 self.random_delay(3, 5)
 
-                username_input = self.wait.until(EC.presence_of_element_located((By.NAME, "username")))
-                password_input = self.wait.until(EC.presence_of_element_located((By.NAME, "password")))
+                username_input = self.wait.until(EC.presence_of_element_located((By.XPATH, "//input[@name='username' or @name='email']")))
+                password_input = self.wait.until(EC.presence_of_element_located((By.XPATH, "//input[@name='password' or @name='pass']")))
 
                 username_input.clear()
-                for char in username:
-                    username_input.send_keys(char)
-                    time.sleep(random.uniform(0.05, 0.2))
+                username_input.send_keys(username)
                 self.random_delay(0.5, 1.5)
 
+                password_input = self.wait.until(EC.presence_of_element_located((By.XPATH, "//input[@name='password' or @name='pass']")))
                 password_input.clear()
-                for char in password:
-                    password_input.send_keys(char)
-                    time.sleep(random.uniform(0.05, 0.2))
+                password_input.send_keys(password)
                 self.random_delay(0.5, 1.5)
 
-                login_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[@type='submit']")))
-                login_button.click()
+                password_input.send_keys(Keys.RETURN)
                 self.random_delay(5, 8)
 
                 # Tratamento de Popups
@@ -198,9 +194,11 @@ class StealthEngine:
                 if self.driver:
                     try:
                         self.driver.save_screenshot(f"logs/debug_crash_{username}.png")
-                        print(f"[DEBUG] Screenshot salva em logs/debug_crash_{username}.png")
+                        with open(f"logs/debug_crash_{username}.html", "w", encoding="utf-8") as f:
+                            f.write(self.driver.page_source)
+                        print(f"[DEBUG] Screenshot e HTML salvos em logs/debug_crash_{username}")
                     except Exception as ss_err:
-                        print(f"[DEBUG] Falha ao salvar screenshot: {ss_err}")
+                        print(f"[DEBUG] Falha ao salvar debug info: {ss_err}")
                 import time; time.sleep(15)  # [DEBUG] Manter janela aberta por 15s para visualização
                 # Reiniciar driver caso tenha crashado, para tentar a próxima conta num browser limpo
                 if self.driver:
