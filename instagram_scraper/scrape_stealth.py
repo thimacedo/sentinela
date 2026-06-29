@@ -51,18 +51,41 @@ class StealthEngine:
     def init_driver(self):
         options = webdriver.ChromeOptions()
         if self.config.get("headless", False):
-            options.add_argument("--headless=new")
-        # Stealth settings
+            # Hack: O binário Chromium v149 patched do usuário sofre crash fatal (GetHandleVerifier)
+            # ao tentar rodar em qualquer modo headless (--headless ou --headless=new).
+            # Solução: Rodar no modo GUI nativo, mas mover a janela para fora da tela invisível.
+            options.add_argument("--window-position=-32000,-32000")
+            options.add_argument("--window-size=1920,1080")
+        
+        # Stealth settings integradas do scrape_working.py
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--disable-blink-features=AutomationControlled")
         options.add_experimental_option("excludeSwitches", ["enable-automation"])
         options.add_experimental_option('useAutomationExtension', False)
-        options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+        options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.7827.197 Safari/537.36")
+        
         if self.config.get("use_proxy") and self.config.get("proxy"):
             options.add_argument(f'--proxy-server={self.config["proxy"]}')
-        # Use webdriver-manager to get the correct driver
-        service = ChromeService(ChromeDriverManager().install())
+        
+        # Configuração do Service com fix pythonw.exe + webdriver-manager específico (v149)
+        import subprocess
+        from selenium.webdriver.chrome.service import Service as ChromeService
+        from webdriver_manager.chrome import ChromeDriverManager
+        
+        # Garante que o diretório de logs existe
+        os.makedirs("logs", exist_ok=True)
+        log_path = os.path.abspath("logs/chromedriver_stealth.log")
+        
+        try:
+            driver_path = ChromeDriverManager(driver_version="149.0.7827.197").install()
+            service = ChromeService(driver_path, log_output=log_path)
+        except Exception as e:
+            print(f"Failed to get specific version, trying latest: {e}")
+            service = ChromeService(ChromeDriverManager().install(), log_output=log_path)
+            
+        # Não usar CREATE_NO_WINDOW porque binários patched crasham se não tiverem handles válidos
+        # O log_output cria file handles reais, o que impede o crash do GetHandleVerifier no pythonw.exe
         self.driver = webdriver.Chrome(service=service, options=options)
         self.driver.set_page_load_timeout(self.config.get("page_load_timeout", 30))
         self.wait = WebDriverWait(self.driver, self.config.get("element_wait_timeout", 10))
@@ -76,77 +99,102 @@ class StealthEngine:
             max_sec = self.config.get("max_delay", 5)
         time.sleep(random.uniform(min_sec, max_sec))
 
+    def get_available_accounts(self) -> List[Dict[str, str]]:
+        accounts = []
+        if os.getenv("IG_USER") and os.getenv("IG_PASS"):
+            accounts.append({"username": os.getenv("IG_USER"), "password": os.getenv("IG_PASS")})
+        for i in range(1, 11):
+            user = os.getenv(f"IG_USER_{i}")
+            pwd = os.getenv(f"IG_PASS_{i}")
+            if user and pwd:
+                accounts.append({"username": user, "password": pwd})
+        return accounts
+
     def login(self):
-        if self.load_session():
+        accounts = self.get_available_accounts()
+        if not accounts:
+            if not self.config.get("username") or not self.config.get("password"):
+                raise ValueError("Nenhuma conta do Instagram configurada no .env (IG_USER ou IG_USER_1).")
+            accounts = [{"username": self.config.get("username"), "password": self.config.get("password")}]
+
+        for idx, account in enumerate(accounts):
+            username = account["username"]
+            password = account["password"]
+            print(f"\n[LOGIN] Tentando login com a conta [{idx+1}/{len(accounts)}]: {username}")
+
+            self.config["username"] = username
+            self.config["password"] = password
+            self.session_file = f"data/session_{username}.pkl"
+
+            # Tenta reaproveitar sessão existente
+            if self.load_session():
+                try:
+                    self.driver.get("https://www.instagram.com/")
+                    self.random_delay(2, 4)
+                    self.wait.until(EC.presence_of_element_located((By.XPATH, "//a[contains(@href, '/explore/')]")))
+                    self.logged_in = True
+                    print(f"[OK] Sessão carregada e validada para {username}.")
+                    return
+                except (TimeoutException, WebDriverException):
+                    print(f"[AVISO] Sessão expirada para {username}. Tentando login do zero.")
+
+            # Login do zero
             try:
-                self.driver.get("https://www.instagram.com/")
-                self.random_delay(2, 4)
-                self.wait.until(EC.presence_of_element_located((By.XPATH, "//span[text()='Search']/ancestor::a")))
+                if not self.driver:
+                    self.init_driver()
+                self.driver.get("https://www.instagram.com/accounts/login/")
+                self.random_delay(3, 5)
+
+                username_input = self.wait.until(EC.presence_of_element_located((By.NAME, "username")))
+                password_input = self.wait.until(EC.presence_of_element_located((By.NAME, "password")))
+
+                username_input.clear()
+                for char in username:
+                    username_input.send_keys(char)
+                    time.sleep(random.uniform(0.05, 0.2))
+                self.random_delay(0.5, 1.5)
+
+                password_input.clear()
+                for char in password:
+                    password_input.send_keys(char)
+                    time.sleep(random.uniform(0.05, 0.2))
+                self.random_delay(0.5, 1.5)
+
+                login_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[@type='submit']")))
+                login_button.click()
+                self.random_delay(5, 8)
+
+                # Tratamento de Popups
+                try:
+                    not_now = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[contains(text(), 'Not Now') or contains(text(), 'Agora não')]")), message="Not Now 1")
+                    not_now.click()
+                    self.random_delay(2, 3)
+                except TimeoutException:
+                    pass
+                try:
+                    not_now2 = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[contains(text(), 'Not Now') or contains(text(), 'Agora não')]")), message="Not Now 2")
+                    not_now2.click()
+                    self.random_delay(2, 3)
+                except TimeoutException:
+                    pass
+
+                self.wait.until(EC.presence_of_element_located((By.XPATH, "//a[contains(@href, '/explore/')]")), message="Login verification failed")
                 self.logged_in = True
-                print("Loaded session and verified login.")
+                print(f"[OK] Login manual com {username} efetuado com sucesso!")
+                self.save_session()
                 return
-            except (TimeoutException, WebDriverException):
-                print("Saved session expired or invalid. Logging in again.")
-        if not self.config.get("username") or not self.config.get("password"):
-            raise ValueError("Username and password must be provided in config or environment variables.")
-        print("Logging into Instagram...")
-        self.driver.get("https://www.instagram.com/accounts/login/")
-        self.random_delay(3, 5)
-        # Wait for username field
-        username_input = self.wait.until(
-            EC.presence_of_element_located((By.NAME, "username"))
-        )
-        password_input = self.wait.until(
-            EC.presence_of_element_located((By.NAME, "password"))
-        )
-        # Type credentials with human-like delays
-        username_input.clear()
-        for char in self.config["username"]:
-            username_input.send_keys(char)
-            time.sleep(random.uniform(0.05, 0.2))
-        self.random_delay(0.5, 1.5)
-        password_input.clear()
-        for char in self.config["password"]:
-            password_input.send_keys(char)
-            time.sleep(random.uniform(0.05, 0.2))
-        self.random_delay(0.5, 1.5)
-        # Click login button
-        login_button = self.wait.until(
-            EC.element_to_be_clickable((By.XPATH, "//button[@type='submit']"))
-        )
-        login_button.click()
-        self.random_delay(5, 8)
-        # Handle "Save Login Info?" popup if appears
-        try:
-            not_now_button = self.wait.until(
-                EC.element_to_be_clickable((By.XPATH, "//button[contains(text(), 'Not Now') or contains(text(), 'Agora não')]")),
-                message="Not Now button not found"
-            )
-            not_now_button.click()
-            self.random_delay(2, 3)
-        except TimeoutException:
-            pass  # Popup didn't appear
-        # Handle "Turn on Notifications?" popup
-        try:
-            not_now_button2 = self.wait.until(
-                EC.element_to_be_clickable((By.XPATH, "//button[contains(text(), 'Not Now') or contains(text(), 'Agora não')]")),
-                message="Second Not Now button not found"
-            )
-            not_now_button2.click()
-            self.random_delay(2, 3)
-        except TimeoutException:
-            pass
-        # Verify login successful
-        try:
-            self.wait.until(
-                EC.presence_of_element_located((By.XPATH, "//span[text()='Search']/ancestor::a")),
-                message="Login verification failed"
-            )
-            self.logged_in = True
-            print("Login successful!")
-            self.save_session()
-        except TimeoutException:
-            raise Exception("Login failed - check credentials or if additional verification is required.")
+
+            except Exception as e:
+                print(f"[ERRO] Falha ao logar com {username}: {e}")
+                # Reiniciar driver caso tenha crashado, para tentar a próxima conta num browser limpo
+                if self.driver:
+                    try:
+                        self.driver.quit()
+                    except:
+                        pass
+                    self.driver = None
+
+        raise Exception("Nenhuma das contas Instagram configuradas no .env obteve sucesso de login.")
 
     def save_session(self):
         """Save current session cookies to file."""
