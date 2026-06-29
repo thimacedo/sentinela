@@ -5,14 +5,16 @@ from typing import Optional
 
 logger = logging.getLogger("ntfy_client")
 
-# Fallback para o tópico caso não exista no .env
+# Fallbacks caso não existam no .env
+NTFY_BASE_URL = os.getenv("NTFY_URL", "https://ntfy.sh").rstrip("/")
 NTFY_TOPIC = os.getenv("NTFY_TOPIC", "sentinela")
-NTFY_URL = f"https://ntfy.sh/{NTFY_TOPIC}"
+NTFY_URL = f"{NTFY_BASE_URL}/{NTFY_TOPIC}"
+NTFY_TOKEN = os.getenv("NTFY_TOKEN", "")  # opcional, para tópicos privados
 
 def send_notification(title: str, message: str, tags: str = "robot", priority: str = "default") -> bool:
     """
     Envia uma notificação para o canal ntfy oficial.
-    
+
     :param title: Título da notificação
     :param message: Corpo da mensagem
     :param tags: Tags/Emojis separados por vírgula (ex: 'robot', 'x', 'warning')
@@ -23,8 +25,11 @@ def send_notification(title: str, message: str, tags: str = "robot", priority: s
         "Tags": tags,
         "Priority": priority
     }
-    
-    # Executa de forma sincrona, idealmente em background task (to_thread) 
+
+    if NTFY_TOKEN:
+        headers["Authorization"] = f"Bearer {NTFY_TOKEN}"
+
+    # Executa de forma sincrona, idealmente em background task (to_thread)
     # se chamado de async loop.
     try:
         response = requests.post(NTFY_URL, data=message.encode('utf-8'), headers=headers, timeout=5)
