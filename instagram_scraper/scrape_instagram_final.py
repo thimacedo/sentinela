@@ -6,7 +6,7 @@ import time
 from pathlib import Path
 from dotenv import load_dotenv
 import instaloader
-import requests
+from core.ntfy_client import send_notification as send_ntfy_message
 
 # Load environment variables from .env in the sentinel directory
 env_path = Path(r"C:\Projetos\sentinela\.env")
@@ -15,24 +15,8 @@ load_dotenv(dotenv_path=env_path)
 # Configuration
 IG_USER = os.getenv("IG_USER")
 IG_PASS = os.getenv("IG_PASS")
-NTFY_TOPIC = "sentinela"
-NTFY_URL = f"https://ntfy.sh/{NTFY_TOPIC}"
 DATA_DIR = Path(r"C:\Projetos\sentinela\instagram_scraper\data")
 DATA_DIR.mkdir(parents=True, exist_ok=True)
-
-# Helper function to send ntfy notifications
-def send_ntfy_message(title, message, tags="info", priority="default"):
-    """Send a notification to ntfy"""
-    headers = {
-        "Title": title,
-        "Tags": tags,
-        "Priority": priority
-    }
-    try:
-        requests.post(NTFY_URL, data=message.encode('utf-8'), headers=headers)
-        print(f"[NTFY] Sent: {title}")
-    except Exception as e:
-        print(f"[NTFailed to send ntfy notification: {e}")
 
 def main():
     start_time = datetime.now()
