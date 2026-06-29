@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import asyncio
 from core.supabase_service import get_supabase_client
+from core.ntfy_client import send_notification
 
 logger = logging.getLogger("EventBus")
 
@@ -107,7 +108,15 @@ class EventBus:
                 "p_msg_id":     msg_id,
             }).execute()
         except Exception as exc:
-            logger.error(f"[EventBus] Falha ao dar ack msg {msg_id}: {exc}")
+            logger.error(f"[EventBus] Falha ao excluir msg '{msg_id}': {exc}")
+            
+    def notify(self, title: str, message: str, tags: str = "robot", priority: str = "default") -> bool:
+        """
+        Envia uma notificação oficial pelo canal Ntfy do Sentinela.
+        Disponível para todos os workers que possuem instância do EventBus.
+        """
+        return send_notification(title, message, tags, priority)
+
 
     def move_dead_letters(self, queue: str, max_retries: int = 3) -> int:
         """Chama manualmente ou via CleanupWorker para drenar mensagens zumbis."""

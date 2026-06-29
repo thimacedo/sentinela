@@ -1,0 +1,12 @@
+{
+  "username": "tempareiapodcast",
+  "password": "tempareia102030",
+  "session_file": "data/session.pkl",
+  "min_delay": 2,
+  "max_delay": 5,
+  "headless": false,
+  "use_proxy": false,
+  "proxy": "",
+  "page_load_timeout": 30,
+  "element_wait_timeout": 10
+}

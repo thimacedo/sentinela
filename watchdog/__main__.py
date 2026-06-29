@@ -163,6 +163,18 @@ def run_scanner_agent(icon=None, item=None):
     except Exception as e:
         print(f"[Tray] Erro ao disparar ScannerAgent: {e}")
 
+def run_sa_instagram_stealth(icon=None, item=None):
+    SCRIPT = os.path.join(PROJECT_ROOT, "scripts", "run_sa_instagram_stealth.py")
+    try:
+        subprocess.Popen(
+            ["cmd", "/k", sys.executable, SCRIPT],
+            cwd=PROJECT_ROOT,
+            creationflags=0x08000000, # CREATE_NO_WINDOW (v50.1)
+        )
+    except Exception as e:
+        print(f"[Tray] Erro ao disparar SaInstagramStealth: {e}")
+
+
 def run_coleta_instagram(icon=None, item=None):
     SCRIPT = os.path.join(PROJECT_ROOT, "scripts", "run_coleta_instagram.py")
     try:
@@ -298,6 +310,7 @@ def build_menu():
         item('Reiniciar Servidor', restart_server_action),
         pystray.Menu.SEPARATOR,
         item('Subagentes (SA)', pystray.Menu(
+            item('Instagram Stealth (SaInstagramStealth)', run_sa_instagram_stealth),
             item('Auditoria IA (SaAuditaClassificacoes)', run_audit_agent),
             item('Revisao Online (SaRevisaoOnline)', run_revisao_online),
             item('Pre-Triagem Lexica (SaFastDrop)', run_fast_drop),
