@@ -263,8 +263,19 @@ class StealthEngine:
         self.driver.get(profile_url)
         self.random_delay(3, 5)
         # Wait for posts to load
+        # Wait for posts to load or private profile indicator
         try:
-            self.wait.until(EC.presence_of_element_located((By.XPATH, "//div[contains(@class, '_aagv')]")))
+            # Espera até 10s pelo grid de posts OU pelo cadeado de perfil privado
+            WebDriverWait(self.driver, 10).until(
+                lambda d: d.find_elements(By.XPATH, "//div[contains(@class, '_aagv')]") or \
+                          d.find_elements(By.XPATH, "//*[contains(text(), 'Este perfil é privado') or contains(text(), 'This account is private')]")
+            )
+            
+            # Se encontrou o texto de perfil privado, retorna lista vazia suavemente
+            if self.driver.find_elements(By.XPATH, "//*[contains(text(), 'Este perfil é privado') or contains(text(), 'This account is private')]"):
+                print(f"[AVISO] O perfil {username} é PRIVADO. Pulando coleta de posts.")
+                return []
+                
         except TimeoutException:
             print(f"Timeout waiting for posts for {username}")
             return []
