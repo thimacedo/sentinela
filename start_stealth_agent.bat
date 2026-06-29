@@ -1,12 +1,5 @@
 @echo off
-echo ===================================================
-echo   Sentinela - Inicializando Agente Stealth (OODA)
-echo ===================================================
-echo.
-echo Este comando ira acionar o run_sa_instagram_stealth.py
-echo Pressione Ctrl+C a qualquer momento para cancelar.
-echo.
-
-cd /d "%~dp0"
-start /B .venv\Scripts\pythonw.exe scripts\run_sa_instagram_stealth.py
+echo Iniciando Sentinela Stealth Agent em background (bandeja do sistema)...
+start "" ".venv\Scripts\pythonw.exe" "scripts\run_sa_instagram_stealth.py"
+exit
 

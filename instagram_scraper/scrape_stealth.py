@@ -91,8 +91,9 @@ class StealthEngine:
             print(f"Failed to get driver via WDM: {e}")
             service = ChromeService(ChromeDriverManager().install(), log_output=log_path)
             
-        # Não usar CREATE_NO_WINDOW porque binários patched crasham se não tiverem handles válidos
-        # O log_output cria file handles reais, o que impede o crash do GetHandleVerifier no pythonw.exe
+        # Garante que a janela preta do chromedriver não apareça
+        service.creation_flags = subprocess.CREATE_NO_WINDOW
+        
         self.driver = webdriver.Chrome(service=service, options=options)
         self.driver.set_page_load_timeout(self.config.get("page_load_timeout", 30))
         self.wait = WebDriverWait(self.driver, self.config.get("element_wait_timeout", 10))
