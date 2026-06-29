@@ -194,7 +194,13 @@ class StealthEngine:
                 return
 
             except Exception as e:
-                print(f"[ERRO] Falha ao logar com {username}: {e}")
+                print(f"[ERRO] Falha ao logar com {username}: Tipo: {type(e).__name__} | Detalhes: {e}")
+                if self.driver:
+                    try:
+                        self.driver.save_screenshot(f"logs/debug_crash_{username}.png")
+                        print(f"[DEBUG] Screenshot salva em logs/debug_crash_{username}.png")
+                    except Exception as ss_err:
+                        print(f"[DEBUG] Falha ao salvar screenshot: {ss_err}")
                 import time; time.sleep(15)  # [DEBUG] Manter janela aberta por 15s para visualização
                 # Reiniciar driver caso tenha crashado, para tentar a próxima conta num browser limpo
                 if self.driver:
