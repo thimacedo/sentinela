@@ -1,14 +1,21 @@
 # STATE.md — Sentinela
-_last_updated: 2026-06-29 | branch: main | version: v98.4_
+_last_updated: 2026-06-29 | branch: main | version: v98.5_
 
 ## Status Operacional
 
 | Subsistema | Status | Observação |
 |---|---|---|
-| Coleta | 🟢 Operacional | ScrapeAgent ativo (OODA, DOM Healing c/ SelectorValidator, LoginWallDetector e Métricas persistidas). |
+| Coleta | 🟢 Operacional | ScrapeAgent ativo (OODA, DOM Healing c/ SelectorValidator, LoginWallDetector e Métricas persistidas) + WkColetaTwitter. |
 | Inteligência | 🟢 Operacional | Malha de IA resiliente + SaFastDrop local. |
 | Dashboard | 🟢 Operacional | Painel "Decision Room" com auto-start, telemetria real via DB e Coleta Direcionada. |
 | SRE / Autocura | 🟢 Operacional | Agente de SRE Autônomo (`sre_agent.py`) ativo em background com desvio headless. |
+
+## Histórico Recente de Correções (v98.5)
+1. **Integração do Twitter/X Scraper - Xquik (Concluído)**:
+   - **Novo Worker:** Desenvolvida a classe `WkColetaTwitter` (`workers/scrapers/wk_coleta_twitter.py`) para coleta de publicações de candidatos via API Xquik. O worker suporta autenticação via chave `XQUIK_API_KEY` do `.env`.
+   - **Resiliência e Circuit Breaker:** Integrado o status do worker do Twitter ao `scraper_circuit_breaker` de rede e ao fluxo do `QueueManager` (locks atômicos de concorrência e release/rotate automáticos).
+   - **Padrão de Coleta:** Mapeados os tweets coletados para o schema `comentarios` do banco Supabase sob a plataforma `TWITTER` com limpeza de caracteres nulos, filtragem léxica e detecção de bots coordenada via `behavior_engine`.
+   - **Registro Principal:** Registrada a classe `WkColetaTwitter` de forma ativa nas instâncias do orquestrador em `main_runner.py`.
 
 ## Histórico Recente de Correções (v98.4)
 1. **Resiliência e Correção de Bugs do ScrapeAgent Stealth (Concluído)**:

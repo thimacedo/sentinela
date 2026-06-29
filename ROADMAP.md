@@ -1,7 +1,12 @@
 # ROADMAP.md — Sentinela
-_last_updated: 2026-06-29 | branch: main | version: v98.4_
+_last_updated: 2026-06-29 | branch: main | version: v98.5_
 
 ## Concluído
+
+### Integração do Twitter/X Scraper - Xquik (v98.5)
+- [x] **Implementação do Worker**: Desenvolvimento do worker `WkColetaTwitter` integrado à API Xquik.
+- [x] **Compatibilidade do Schema**: Mapeamento e normalização dos dados recebidos da API Xquik para a tabela de `comentarios` com a plataforma `TWITTER`.
+- [x] **Segurança e Registro**: Injeção da verificação da chave `XQUIK_API_KEY` do `.env` e registro na malha de scrapers concorrentes leves em `main_runner.py`.
 
 ### Resiliência de Scraping e Telemetria (v98.4)
 - [x] **Correção de UnboundLocalError no Login**: Remoção de import local redundante no bloco de erro do `StealthEngine` que sombreava a variável global `time` e causava falhas fatais no login do Instagram.
