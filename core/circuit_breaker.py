@@ -120,7 +120,7 @@ class CircuitBreaker:
             db = get_supabase_client()
             db.table("system_events").insert({
                 "event_type": "circuit_state_changed",
-                "source_module": "circuit_breaker",
+                "source": "circuit_breaker",
                 "status": "circuit_open",
                 "metadata": {
                     "breaker": name,
