@@ -91,7 +91,8 @@ class SaInstagramStealth(BaseSubAgent):
             # Persistência Zero Loss Policy
             await local_buffer.insert_record("instagram_comments", c)
             
-        local_bus.publish("NEW_DATA_AVAILABLE", {"source": "sa_ig_stealth", "count": len(comments)})
+        if len(comments) > 0:
+            local_bus.signal_new_data()
         
     async def run_cycle(self) -> CycleResult:
         """Puxa tarefas da fila e aplica resiliência (Circuit Breaker/Checkpoint)"""

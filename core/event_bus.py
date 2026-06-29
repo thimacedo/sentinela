@@ -16,6 +16,20 @@ class AsyncLocalEventBus:
         self.new_comments_event = asyncio.Event()
         self.new_suspects_event = asyncio.Event()
 
+    def publish(self, queue: str, payload: dict) -> None:
+        """
+        Método de compatibilidade para chamadas legadas/SRE de controle.
+        Sinaliza novos dados se for NEW_DATA_AVAILABLE, e previne AttributeError para control_command.
+        """
+        logger.info(f"[AsyncLocalEventBus] Evento publicado no barramento local: {queue} -> {payload}")
+        if queue == "NEW_DATA_AVAILABLE":
+            self.signal_new_data()
+        elif queue == "control_command":
+            # O SRE ou Watchdog envia isso para reiniciar workers individuais.
+            # Como rodam em processos separados no Windows, comandos locais in-memory de reinício não surtem efeito prático.
+            # O SRE geralmente reinicia o main_runner inteiro para recuperação de saúde.
+            logger.warning(f"[AsyncLocalEventBus] control_command local recebido para {payload.get('worker_id')}, mas reinício individual in-memory de worker não é suportado inter-processo.")
+
     def signal_new_data(self):
         """Notifica que há novos comentários coletados (Scraper -> AIProcessor)."""
         self.new_comments_event.set()

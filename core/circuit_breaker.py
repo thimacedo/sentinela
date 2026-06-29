@@ -69,12 +69,14 @@ class CircuitBreaker:
                 db = get_supabase_client()
                 db.table("system_events").insert({
                     "event_type": "circuit_state_changed",
-                    "source_module": "circuit_breaker",
-                    "status": "circuit_closed",
+                    "source": "circuit_breaker",
+                    "severity": "info",
+                    "description": f"Circuito de {service_name} foi fechado (recuperado).",
                     "metadata": {
                         "breaker": service_name,
                         "from_state": "OPEN/HALF_OPEN",
-                        "to_state": "CLOSED"
+                        "to_state": "CLOSED",
+                        "status": "circuit_closed"
                     }
                 }).execute()
             except Exception as e:
@@ -121,13 +123,15 @@ class CircuitBreaker:
             db.table("system_events").insert({
                 "event_type": "circuit_state_changed",
                 "source": "circuit_breaker",
-                "status": "circuit_open",
+                "severity": "warning",
+                "description": f"Circuito de {name} foi aberto por {wait_time}s devido a falhas.",
                 "metadata": {
                     "breaker": name,
                     "from_state": "CLOSED/HALF_OPEN",
                     "to_state": "OPEN",
                     "wait_time_s": wait_time,
-                    "status_code": status_code
+                    "status_code": status_code,
+                    "status": "circuit_open"
                 }
             }).execute()
         except Exception as e:

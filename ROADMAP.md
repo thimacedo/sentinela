@@ -1,7 +1,13 @@
 # ROADMAP.md — Sentinela
-_last_updated: 2026-06-12 | branch: main | version: v98.0_
+_last_updated: 2026-06-29 | branch: main | version: v98.4_
 
 ## Concluído
+
+### Resiliência de Scraping e Telemetria (v98.4)
+- [x] **Correção de UnboundLocalError no Login**: Remoção de import local redundante no bloco de erro do `StealthEngine` que sombreava a variável global `time` e causava falhas fatais no login do Instagram.
+- [x] **Barramento Local Tolerante (EventBus)**: Injeção do método `publish` na classe `AsyncLocalEventBus` para processar chamadas de controle in-memory com segurança, evitando falhas de `AttributeError` originárias do Watchdog/SRE Agent.
+- [x] **Alinhamento da Reatividade do Subagente**: Correção da notificação de dados no subagente Instagram Stealth para acionar diretamente `local_bus.signal_new_data()`.
+- [x] **Correção de Telemetria do Circuit Breaker**: Ajuste da persistência do status do disjuntor na tabela `system_events`, adequando os inserts ao schema real (remoção dos campos inexistentes `status` e `source_module`).
 
 ### Extração Avançada e Anti-Detecção (v98.0)
 - [x] **Benchmark de Scrapers**: Análise técnica de 11 repositórios (drawrowfly, MRISOON, instagram4j) para identificar gaps e melhores práticas de extração

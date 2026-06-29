@@ -218,7 +218,7 @@ class StealthEngine:
                         print(f"[DEBUG] Screenshot e HTML salvos em logs/debug_crash_{username}")
                     except Exception as ss_err:
                         print(f"[DEBUG] Falha ao salvar debug info: {ss_err}")
-                import time; time.sleep(15)  # [DEBUG] Manter janela aberta por 15s para visualização
+                time.sleep(15)  # [DEBUG] Manter janela aberta por 15s para visualização
                 # Reiniciar driver caso tenha crashado, para tentar a próxima conta num browser limpo
                 if self.driver:
                     try:

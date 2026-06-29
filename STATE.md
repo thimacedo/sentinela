@@ -1,5 +1,5 @@
 # STATE.md — Sentinela
-_last_updated: 2026-06-28 | branch: main | version: v98.3_
+_last_updated: 2026-06-29 | branch: main | version: v98.4_
 
 ## Status Operacional
 
@@ -9,6 +9,13 @@ _last_updated: 2026-06-28 | branch: main | version: v98.3_
 | Inteligência | 🟢 Operacional | Malha de IA resiliente + SaFastDrop local. |
 | Dashboard | 🟢 Operacional | Painel "Decision Room" com auto-start, telemetria real via DB e Coleta Direcionada. |
 | SRE / Autocura | 🟢 Operacional | Agente de SRE Autônomo (`sre_agent.py`) ativo em background com desvio headless. |
+
+## Histórico Recente de Correções (v98.4)
+1. **Resiliência e Correção de Bugs do ScrapeAgent Stealth (Concluído)**:
+   - **Correção 1:** Corrigido bug de `UnboundLocalError: cannot access local variable 'time'` no login do Instagram Stealth (`instagram_scraper/scrape_stealth.py`) causado pelo sombreamento de escopo local da variável `time` por causa de um import local redundante no bloco except de debug.
+   - **Correção 2:** Adicionado método `publish` compatível e tolerante no barramento local (`core/event_bus.py` - `AsyncLocalEventBus`) para evitar quebras por `AttributeError` sob chamadas de controle ou sinalizações in-memory (como as emitidas pelo SRE Agent e Watchdog).
+   - **Correção 3:** Atualizada a chamada de reatividade em `workers/ai/sa_instagram_stealth.py` para invocar diretamente `local_bus.signal_new_data()` em vez de chamar `.publish` in-memory.
+   - **Correção 4:** Corrigidas as inserções de eventos de telemetria de mudança de estado do circuit breaker na tabela `system_events` (`core/circuit_breaker.py`), removendo as colunas inexistentes `status` e `source_module`, adequando os campos ao schema real da tabela (`source`, `severity`, `description`, `metadata`).
 
 ## Histórico Recente de Correções (v98.3)
 1. **Auditoria Crítica do ScrapeAgent (Concluído)**:
