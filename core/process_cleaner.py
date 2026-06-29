@@ -12,7 +12,7 @@ def _emit_kill_telemetry(action: str, pid: int, process_name: str, cmdline: str)
     try:
         from core.supabase_service import get_supabase_client
         db = get_supabase_client()
-        db.table("telemetry_events").insert({
+        db.table("system_events").insert({
             "event_type": "sre_action",
             "source_module": "process_cleaner",
             "status": "success",

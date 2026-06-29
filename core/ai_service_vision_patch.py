@@ -322,7 +322,7 @@ async def vision_completion(
             if is_fallback:
                 from core.supabase_service import get_supabase_client
                 db = get_supabase_client()
-                db.table("telemetry_events").insert({
+                db.table("system_events").insert({
                     "event_type": "vision_fallback_triggered",
                     "source_module": "ai_service_vision_patch",
                     "provider_name": provider_name,

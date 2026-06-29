@@ -975,7 +975,7 @@ def send_whatsapp_alert(message: str, category: str = "runtime") -> None:
         try:
             from core.supabase_service import get_supabase_client
             db = get_supabase_client()
-            db.table("telemetry_events").insert({
+            db.table("system_events").insert({
                 "event_type": "sre_action",
                 "source_module": "watchdog",
                 "status": "success",

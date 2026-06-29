@@ -627,7 +627,7 @@ class AIService:
                                 if triage is not None:
                                     route_decision = "voyant_local" if force_local_batch else "voyant_cloud"
                                 
-                                db.table("telemetry_events").insert({
+                                db.table("system_events").insert({
                                     "event_type": "classification_resolved",
                                     "source_module": "ai_service",
                                     "provider_name": res_ia.get("name", "unknown").lower(),
