@@ -183,9 +183,20 @@ class StealthEngine:
                 except TimeoutException:
                     pass
 
-                self.wait.until(EC.presence_of_element_located((By.XPATH, "//a[contains(@href, '/explore/')]")), message="Login verification failed")
+                try:
+                    self.wait.until(EC.presence_of_element_located((By.XPATH, "//a[contains(@href, '/explore/')]")), message="Login verification failed")
+                except TimeoutException:
+                    if "recaptcha" in self.driver.page_source.lower() or "challenge" in self.driver.current_url:
+                        print(f"[AVISO] CAPTCHA ou Challenge detectado para {username}! Você tem 2 minutos para resolver manualmente na janela do Chrome.")
+                        WebDriverWait(self.driver, 120).until(
+                            EC.presence_of_element_located((By.XPATH, "//a[contains(@href, '/explore/')]")),
+                            message="Falha ao aguardar resolução manual do Captcha"
+                        )
+                    else:
+                        raise
+                
                 self.logged_in = True
-                print(f"[OK] Login manual com {username} efetuado com sucesso!")
+                print(f"[OK] Login com {username} efetuado com sucesso!")
                 self.save_session()
                 return
 
