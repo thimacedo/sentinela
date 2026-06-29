@@ -137,7 +137,19 @@ scratch/
 bases_pesquisas/
 
 # 9. Motores Locais (Binários e Cache)
+# -----------------------------------------------------------------
 tools/voyant/
 !tools/voyant/README.md
+
+# 10. Lixo de shell e artefatos descartaveis
+# -----------------------------------------------------------------
+# Artefatos de comandos pip interrompidos (criam arquivos '=versao')
+=*
+# Logs/sentinelas de smoke tests manuais
+pythonw_success*.txt
+# Cookies pickles do Instagram (credenciais)
+data/*.pkl
+# Pasta de quarentena para arquivos em limpeza
+.trash/
 
 
