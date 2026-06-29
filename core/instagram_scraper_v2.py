@@ -359,9 +359,9 @@ class InstagramScraperV2:
                     if proxy_url:
                         # Suporte robusto a proxies com autenticação embutida na URL
                         if "@" in proxy_url:
-                            auth_part, server_part = proxy_url.split("@")
+                            auth_part, server_part = proxy_url.rsplit("@", 1)
                             auth_part = auth_part.replace("http://", "").replace("https://", "")
-                            username_pwd = auth_part.split(":")
+                            username_pwd = auth_part.split(":", 1)
                             username = username_pwd[0]
                             password = username_pwd[1] if len(username_pwd) > 1 else ""
                             protocol = "http://" if "http://" in proxy_url else "https://"
@@ -409,7 +409,7 @@ class InstagramScraperV2:
                     current_url = page.url
                     if "login" in current_url or "scraping_warning" in current_url or "challenge" in current_url:
                         logger.warning(f"⚠️ [V2] Login wall ou Scraping Warning detectado antecipadamente para {session.label} na URL: {current_url}")
-                        session.blocked = True
+                        session.blocked_until = datetime.now(timezone.utc) + timedelta(minutes=30)
                         blocked_attempts += 1
                         retry_count += 1
                         await browser.close()
@@ -1187,7 +1187,8 @@ class InstagramScraperV2:
 
     def _is_night_shift(self) -> bool:
         """Verifica se está no horário noturno (23h às 05h)."""
-        hour = datetime.now().hour
+        from zoneinfo import ZoneInfo
+        hour = datetime.now(ZoneInfo("America/Fortaleza")).hour
         return hour >= 23 or hour < 5
 
     async def _request_human_intervention(self, session: Session, shortcode: str) -> str:

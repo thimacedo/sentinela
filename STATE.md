@@ -1,5 +1,5 @@
 # STATE.md — Sentinela
-_last_updated: 2026-06-24 | branch: main | version: v98.2_
+_last_updated: 2026-06-28 | branch: main | version: v98.3_
 
 ## Status Operacional
 
@@ -9,6 +9,16 @@ _last_updated: 2026-06-24 | branch: main | version: v98.2_
 | Inteligência | 🟢 Operacional | Malha de IA resiliente + SaFastDrop local. |
 | Dashboard | 🟢 Operacional | Painel "Decision Room" com auto-start, telemetria real via DB e Coleta Direcionada. |
 | SRE / Autocura | 🟢 Operacional | Agente de SRE Autônomo (`sre_agent.py`) ativo em background com desvio headless. |
+
+## Histórico Recente de Correções (v98.3)
+1. **Auditoria Crítica do ScrapeAgent (Concluído)**:
+   - **Correção 1:** Adicionado o import de `Any` em `wk_coleta_instagram.py` para prevenir `NameError` no worker.
+   - **Correção 2:** Ajustada a atribuição incorreta de `session.blocked` para `session.blocked_until` em `instagram_scraper_v2.py` ao detectar muros de login, garantindo o cooldown efetivo da sessão no pool.
+   - **Correção 3:** Inserido o campo `tier_used` na montagem do dict `safe_c`, prevenindo `KeyError` no fallback SQLite.
+   - **Correção 4:** O `shutdown_event` agora é propagado corretamente no método `setup()` do worker para o scraper instanciado.
+   - **Correção 5:** O parser de credenciais de proxy agora utiliza `rsplit("@", 1)` e `split(":", 1)`, impedindo crashes com proxies cujas credenciais contêm `:` ou URLs com múltiplos `@`.
+   - **Correção 6:** O cálculo de horário noturno agora utiliza `zoneinfo.ZoneInfo("America/Fortaleza")`, prevenindo bloqueios prematuros motivados pelo timezone UTC do servidor host.
+   - **Correção 7:** Aplicado fallback em `texto_bruto` garantindo a persistência do texto caso ele venha derivado das extrações DOM (`texto`).
 
 ## Histórico Recente de Correções (v98.2)
 1. **Refatoração Tipo-Segura (Type-Safe) de Exceções e Sinais de Controle (Concluído)**:

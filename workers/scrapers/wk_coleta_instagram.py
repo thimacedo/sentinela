@@ -4,7 +4,7 @@ import logging
 import asyncio
 import os
 import time
-from typing import List, Dict
+from typing import List, Dict, Any
 from datetime import datetime, timezone
 
 from workers.base.worker_base import BaseWorker
@@ -57,6 +57,7 @@ class WkColetaInstagram(BaseWorker):
         return "Instagram Scraper V2 - Independente com Playwright"
 
     async def setup(self) -> None:
+        self.scraper.shutdown_event = getattr(self, "shutdown_event", None)
         logger.info(f"🚀 Worker {self.worker_id} configurado.")
         try:
             cleanup_orphans()
@@ -180,13 +181,14 @@ class WkColetaInstagram(BaseWorker):
             for c in filtered_comments:
                 safe_c = {
                     "id_externo": c.get("id_externo"),
-                    "texto_bruto": c.get("texto_bruto"),
+                    "texto_bruto": c.get("texto_bruto") or c.get("texto", ""),
                     "autor_username": c.get("autor_username"),
                     "data_publicacao": c.get("data_publicacao") or now,
                     "data_coleta": c.get("data_coleta") or now,
                     "candidato_id": c.get("candidato_id") or target.username,
                     "post_shortcode": c.get("post_shortcode") or shortcode,
                     "plataforma": c.get("plataforma") or "INSTAGRAM",
+                    "tier_used": c.get("tier_used", 2),
                     "sentimento": None, # Campo opcional no schema
                     "is_hate": False,   # Valor padrão
                     "is_spam": False    # Valor padrão
