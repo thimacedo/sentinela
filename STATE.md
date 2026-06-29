@@ -16,6 +16,9 @@ _last_updated: 2026-06-29 | branch: main | version: v98.5_
    - **Resiliência e Circuit Breaker:** Integrado o status do worker do Twitter ao `scraper_circuit_breaker` de rede e ao fluxo do `QueueManager` (locks atômicos de concorrência e release/rotate automáticos).
    - **Padrão de Coleta:** Mapeados os tweets coletados para o schema `comentarios` do banco Supabase sob a plataforma `TWITTER` com limpeza de caracteres nulos, filtragem léxica e detecção de bots coordenada via `behavior_engine`.
    - **Registro Principal:** Registrada a classe `WkColetaTwitter` de forma ativa nas instâncias do orquestrador em `main_runner.py`.
+2. **Correção de Concorrência Crítica de Locks na Fila (Concluído)**:
+   - **Problema:** O método `pre_warm_queues()` do `QueueManager` limpava **todos** os locks de coleta da fila atômica (`timeout_minutes=0`) indiscriminadamente. Como ele era chamado periodicamente a cada 10 ciclos de autocura do orquestrador principal (`_perform_self_healing`), ele derrubava locks legítimos e ativos de scrapers em andamento, causando colisões de coleta.
+   - **Correção:** Refatorado `pre_warm_queues()` para aceitar o argumento `force_release`. No boot inicial do orquestrador, ele limpa tudo (`force_release=True`/`timeout_minutes=0`). Nas limpezas periódicas subsequentes do orquestrador, ele limpa apenas locks expirados por inatividade há mais de 30 minutos (`force_release=False`/`timeout_minutes=30`).
 
 ## Histórico Recente de Correções (v98.4)
 1. **Resiliência e Correção de Bugs do ScrapeAgent Stealth (Concluído)**:

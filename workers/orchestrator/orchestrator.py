@@ -87,7 +87,7 @@ class SentinelaOrchestrator:
                 from core.queue_manager import QueueManager
                 from core.db import db_client
                 queue_manager = QueueManager(db_client.client)
-                await queue_manager.pre_warm_queues()
+                await queue_manager.pre_warm_queues(force_release=False)
             except Exception as e:
                 logger.warning("[orchestrator] Falha ao pré-aquecer filas na autocura: %s", e)
 
@@ -285,7 +285,7 @@ class SentinelaOrchestrator:
             from core.queue_manager import QueueManager
             from core.db import db_client
             queue_manager = QueueManager(db_client.client)
-            await queue_manager.pre_warm_queues()
+            await queue_manager.pre_warm_queues(force_release=True)
         except Exception as e:
             logger.error(f"[orchestrator] Falha no pré-aquecimento das filas: {e}")
 

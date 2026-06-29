@@ -249,7 +249,7 @@ class QueueManager:
             logger.error(f"❌ [Queue] Erro ao consultar fila_coleta: {e}")
         return None
 
-    async def pre_warm_queues(self) -> None:
+    async def pre_warm_queues(self, force_release: bool = False) -> None:
         """
         Pré-aquecimento das filas de trabalho (v89.2).
         Popula a fila_coleta e garante alvos prontos ANTES dos workers iniciarem.
@@ -259,10 +259,11 @@ class QueueManager:
         # 1. Garante que a fila_coleta tenha o mínimo necessário
         await self._ensure_queue_populated(min_pending=50)
         
-        # 2. Limpeza de locks órfãos que possam travar o boot
-        unlocked = await self.release_stale_locks(timeout_minutes=0) # 0 força liberação de tudo no boot
+        # 2. Limpeza de locks órfãos/expirados
+        timeout = 0 if force_release else 30
+        unlocked = await self.release_stale_locks(timeout_minutes=timeout)
         if unlocked > 0:
-            logger.info(f"🔓 [Queue] {unlocked} locks órfãos liberados no boot.")
+            logger.info(f"🔓 [Queue] {unlocked} locks expirados/órfãos liberados (timeout={timeout}min).")
 
         logger.info("✅ [Queue] Filas aquecidas e prontas para operação.")
 
