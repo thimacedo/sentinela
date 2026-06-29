@@ -154,19 +154,27 @@ class StealthEngine:
                 self.driver.get("https://www.instagram.com/accounts/login/")
                 self.random_delay(3, 5)
 
+                # Username char-by-char com re-busca para evitar StaleElementReference (React DOM updates)
                 username_input = self.wait.until(EC.presence_of_element_located((By.XPATH, "//input[@name='username' or @name='email']")))
-                password_input = self.wait.until(EC.presence_of_element_located((By.XPATH, "//input[@name='password' or @name='pass']")))
-
                 username_input.clear()
-                username_input.send_keys(username)
+                for char in username:
+                    inp = self.wait.until(EC.presence_of_element_located((By.XPATH, "//input[@name='username' or @name='email']")))
+                    inp.send_keys(char)
+                    time.sleep(random.uniform(0.05, 0.2))
                 self.random_delay(0.5, 1.5)
 
+                # Password char-by-char com re-busca
                 password_input = self.wait.until(EC.presence_of_element_located((By.XPATH, "//input[@name='password' or @name='pass']")))
                 password_input.clear()
-                password_input.send_keys(password)
+                for char in password:
+                    inp = self.wait.until(EC.presence_of_element_located((By.XPATH, "//input[@name='password' or @name='pass']")))
+                    inp.send_keys(char)
+                    time.sleep(random.uniform(0.05, 0.2))
                 self.random_delay(0.5, 1.5)
-
-                password_input.send_keys(Keys.RETURN)
+                
+                # Re-busca a senha para dar ENTER
+                inp = self.wait.until(EC.presence_of_element_located((By.XPATH, "//input[@name='password' or @name='pass']")))
+                inp.send_keys(Keys.RETURN)
                 self.random_delay(5, 8)
 
                 # Tratamento de Popups
