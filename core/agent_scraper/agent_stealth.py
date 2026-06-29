@@ -17,10 +17,25 @@ class StealthAgentOODA:
         self.state = "INIT"
 
     async def observe(self, context: Dict) -> Dict:
-        """Coleta o estado atual (ex: URL atual, presença de popup)."""
+        """Coleta o estado atual (ex: URL atual, presença de popup, bloqueios)."""
         logger.info("Observing current DOM state...")
-        # Simula extração de estado
-        return {"current_url": "https://www.instagram.com/", "has_modal": False, "context": context}
+        
+        current_url = context.get("current_url", "https://www.instagram.com/")
+        status_code = context.get("status_code", 200)
+        
+        # Detecta bloqueio baseado em status HTTP ou keywords na URL
+        blocked = False
+        if status_code in (403, 429):
+            blocked = True
+        elif any(keyword in current_url.lower() for keyword in ["login", "challenge", "checkpoint", "scraping_warning"]):
+            blocked = True
+            
+        return {
+            "current_url": current_url, 
+            "has_modal": context.get("has_modal", False), 
+            "blocked": blocked,
+            "context": context
+        }
 
     async def orient(self, observation: Dict) -> str:
         """Determina a próxima ação com base na observação."""
