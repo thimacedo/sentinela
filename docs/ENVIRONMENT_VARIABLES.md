@@ -148,6 +148,18 @@ cp .env.example .env
 
 ---
 
+### 2.2. Twitter/X (Coleta)
+
+#### `XQUIK_API_KEY` ⭐ **REQUISITO PARA TWITTER**
+- **Tipo**: String
+- **Descrição**: Chave de API da plataforma Xquik para busca e extração de tweets
+- **Segurança**: 🔴 **NÃO expor publicamente**
+- **Exemplo**: `xq_YOUR_KEY_HERE`
+- **Onde encontrar**: Painel de controle em [xquik.com](https://xquik.com)
+- **Usado por**: `WkColetaTwitter` (`workers/scrapers/wk_coleta_twitter.py`)
+
+---
+
 ### 3. Inteligência Artificial (IA)
 
 #### `IA_PROVIDER` ⭐ **OBRIGATÓRIO PARA IA**
