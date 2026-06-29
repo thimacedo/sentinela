@@ -10,25 +10,25 @@
 }
 
 :root {
-  /* Tema Editorial Claro (Default) */
-  --brand-primary: #3b82f6; /* Blue 500 */
-  --bg-main: #f8fafc;
-  --bg-card: #ffffff;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --border-main: #e2e8f0;
-  --tactical-accent: #3b82f6;
+  /* Tema Editorial Claro (Premium Indigo) */
+  --brand-primary: #4F46E5; /* Indigo 600 */
+  --bg-main: #F8FAFC;
+  --bg-card: rgba(255, 255, 255, 0.85);
+  --text-main: #0F172A;
+  --text-muted: #475569; /* Slate 600 para contraste WCAG AA */
+  --border-main: #E2E8F0;
+  --tactical-accent: #4F46E5;
 }
 
 [data-theme='dark'] {
-  /* Tema Editorial Escuro */
-  --brand-primary: #60a5fa; /* Blue 400 */
-  --bg-main: #020617;
-  --bg-card: #0f172a;
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --border-main: #1e293b;
-  --tactical-accent: #60a5fa;
+  /* Tema Editorial Escuro (Glassmorphism Deep Slate) */
+  --brand-primary: #6366F1; /* Indigo 500 */
+  --bg-main: #0B0F19; /* Canvas Escuro Premium */
+  --bg-card: rgba(17, 24, 39, 0.7);
+  --text-main: #F8FAFC;
+  --text-muted: #94A3B8;
+  --border-main: #1E293B;
+  --tactical-accent: #6366F1;
 }
 
 body {
@@ -39,16 +39,34 @@ body {
   min-height: 100vh;
 }
 
-/* Efeito Glassmorphism Adaptativo v60.2 */
+/* Efeito Glassmorphism Adaptativo Premium */
 .glass-card {
   background: var(--bg-card);
+  backdrop-filter: blur(12px);
   border: 1px solid var(--border-main);
   box-shadow: 0 4px 20px -2px rgb(0 0 0 / 0.05);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 [data-theme='dark'] .glass-card {
-  background: rgba(15, 23, 42, 0.8);
-  backdrop-filter: blur(12px);
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.03);
   box-shadow: 0 10px 30px -10px rgb(0 0 0 / 0.5);
+}
+
+/* Efeito de Card Premium e Interativo */
+.card-premium {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-premium:hover {
+  transform: translateY(-4px);
+  border-color: rgba(99, 102, 241, 0.4);
+  box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.1), 0 8px 10px -6px rgba(99, 102, 241, 0.1);
+}
+
+[data-theme='dark'] .card-premium:hover {
+  border-color: rgba(99, 102, 241, 0.5);
+  box-shadow: 0 12px 30px -5px rgba(99, 102, 241, 0.2);
 }
