@@ -58,6 +58,7 @@ class StealthEngine:
             options.add_argument("--window-size=1920,1080")
         
         # Stealth settings integradas do scrape_working.py
+        options.add_argument("--remote-debugging-port=0")  # Porta aleatória livre (Fix crash)
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--disable-gpu")
