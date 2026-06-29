@@ -165,7 +165,7 @@ class WkColetaTelegram(BaseWorker):
             # Detecção de Comportamento Coordenado
             try:
                 from core.behavior_engine import behavior_engine
-                filtered_comments = behavior_engine.detect_coordinated_clusters(filtered_comments)
+                filtered_comments = await behavior_engine.detect_coordinated_clusters(filtered_comments)
             except Exception as e:
                 self.logger.warning(f"⚠️ [Telegram] Falha na detecção de bots, prosseguindo com fluxo normal: {e}")
 

@@ -170,7 +170,7 @@ class WkColetaInstagram(BaseWorker):
             
             # 🤖 DETECÇÃO DE COMPORTAMENTO COORDENADO (v71.0)
             from core.behavior_engine import behavior_engine
-            filtered_comments = behavior_engine.detect_coordinated_clusters(filtered_comments)
+            filtered_comments = await behavior_engine.detect_coordinated_clusters(filtered_comments)
 
             if not filtered_comments:
                 duplicated_total += len(post_comments)
