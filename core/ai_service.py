@@ -458,6 +458,18 @@ class AIService:
         if lexical_filter.is_junk(decoded_text):
             return {"is_hate": False, "categoria_ia": "NEUTRO", "confianca_ia": 1.0, "analise_pericial": "Filtro léxico.", "name": "lexical"}
 
+        # Roteamento via DSPy se ativado (PASA v98.6)
+        if os.getenv("USE_DSPY", "false").lower() == "true":
+            try:
+                from core.dspy_integration import DSpyClassifierEngine
+                engine = DSpyClassifierEngine(self)
+                res_dspy = await engine.classificar(decoded_text, force_local=force_local, force_cloud=force_cloud)
+                if res_dspy and res_dspy.get("success", False):
+                    res_dspy["name"] = "dspy-mesh"
+                    return res_dspy
+            except Exception as e_dspy:
+                logger.warning(f"[AI] Falha no roteamento DSPy: {e_dspy}. Prosseguindo com fallback clássico...")
+
         # Roteamento Inteligente (Nuvem vs Local)
         allowed_providers = self.providers
         if force_cloud:
@@ -602,6 +614,16 @@ class AIService:
                             engine_name = res_ia.get("name", "unknown").upper()
                             analise = f"[{engine_name}] {res_ia.get('analise_pericial', '')}"
                             
+                            # Análise linguística via Stanza (PASA v98.6)
+                            analise_ling = {}
+                            try:
+                                from core.stanza_nlp import stanza_nlp
+                                com_hostil = res_ia.get("is_hate", False) or res_ia.get("categoria_ia") == "SUSPEITO"
+                                analise_ling = stanza_nlp.processar_texto(item["texto_bruto"], include_dependencies=com_hostil)
+                            except Exception as e_nlp:
+                                logger.warning(f"[AI:Stanza] Falha no processamento do Stanza: {e_nlp}")
+                                analise_ling = {"error": str(e_nlp)}
+
                             # Atualiza no banco
                             await asyncio.to_thread(
                                 db_client.client.table('comentarios').update({
@@ -609,7 +631,8 @@ class AIService:
                                     "confianca_ia": res_ia["confianca_ia"], 
                                     "is_hate": res_ia["is_hate"], 
                                     "analise_pericial": analise, 
-                                    "processado_ia": True
+                                    "processado_ia": True,
+                                    "analise_linguistica": analise_ling
                                 }).eq("id", item["id"]).execute
                             )
                             

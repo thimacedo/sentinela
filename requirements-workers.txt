@@ -119,3 +119,6 @@ typer
 wrapt
 openai>=1.0.0
 datasette
+stanza
+dspy
+
