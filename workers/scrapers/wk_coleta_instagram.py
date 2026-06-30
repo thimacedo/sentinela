@@ -157,12 +157,11 @@ class WkColetaInstagram(BaseWorker):
         inserted_total = 0
         duplicated_total = 0
         comments_count = 0
-
+        
         async def handle_post_scraped(shortcode: str, post_comments: List[Dict[str, Any]]):
             nonlocal inserted_total, duplicated_total, comments_count
             if not post_comments:
                 return
-
             comments_count += len(post_comments)
 
             # ♻️ FILTRO LÉXICO (Pre-AI) - PASA v65.0
