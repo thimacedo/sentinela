@@ -1,14 +1,22 @@
 # STATE.md — Sentinela
-_last_updated: 2026-06-29 | branch: main | version: v98.5_
+_last_updated: 2026-06-30 | branch: main | version: v98.6_
 
 ## Status Operacional
 
 | Subsistema | Status | Observação |
 |---|---|---|
 | Coleta | 🟢 Operacional | ScrapeAgent ativo (OODA, DOM Healing c/ SelectorValidator, LoginWallDetector e Métricas persistidas) + WkColetaTwitter. |
-| Inteligência | 🟢 Operacional | Malha de IA resiliente + SaFastDrop local. |
+| Inteligência | 🟢 Operacional | Malha de IA resiliente + SaFastDrop local + Integração Stanza/DSPy. |
 | Dashboard | 🟢 Operacional | Painel "Decision Room" com auto-start, telemetria real via DB e Coleta Direcionada. |
 | SRE / Autocura | 🟢 Operacional | Agente de SRE Autônomo (`sre_agent.py`) ativo em background com desvio headless. |
+
+## Histórico Recente de Correções (v98.6)
+1. **Integração do Stanford NLP (Stanza, DSPy e GloVe) (Concluído)**:
+   - **Stanza Engine:** Implementada a classe `StanzaNLPEngine` (`core/stanza_nlp.py`) para processamento linguístico em CPU (`use_gpu=False`). Realiza lematização e extração de POS tags do Método Vichi-Sentinela. Os metadados são persistidos em tempo real na nova coluna `analise_linguistica` (JSONB) no Supabase remoto.
+   - **Geração de N-Gramas:** A contagem pericial de bigramas e trigramas agora respeita estritamente os limites de sentenças delimitados pela rede neural do Stanza.
+   - **DSPy Integration:** Estruturada a assinatura `ClassificarComentarioPASA` (`core/dspy_integration.py`) baseada no protocolo MCA v2.3. Um adaptador de LM customizado (`SentinelaLM`) mapeia as chamadas estruturadas do DSPy para a cascata interna de provedores do `ai_service`, preservando circuit breakers, retry e redundâncias.
+   - **DataMiner & GloVe:** Refatorada a clusterização temática do `DataMiner` (`processing/data_miner.py`) para operar sobre os lemmas unificados. Adicionado suporte em memória a embeddings densos locais do GloVe, com fallback automático a TF-IDF lematizado.
+   - **Migration DDL:** Aplicada com sucesso a coluna `analise_linguistica` no Supabase remoto via injeção benigna na RPC `exec_sql`.
 
 ## Histórico Recente de Correções (v98.5)
 1. **Integração do Twitter/X Scraper - Xquik (Concluído)**:
