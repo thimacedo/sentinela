@@ -23,6 +23,7 @@
 13. [Troubleshooting](#troubleshooting)
 14. [Performance e Otimizações](#performance-e-otimizações)
 15. [Escalabilidade](#escalabilidade)
+16. [Integração Stanford NLP (Stanza & DSPy)](#integração-stanford-nlp-stanza--dspy)
 
 ---
 
@@ -619,7 +620,24 @@ self.providers.sort(key=lambda p: 0 if p["name"]=="groq" else 1)
 
 ---
 
+## 🔗 Integração Stanford NLP (Stanza & DSPy)
+
+A partir da versão **v98.6 (PASA v52.4)**, o `AIService` foi integrado aos novos componentes de processamento linguístico:
+*   **Stanford Stanza:** Executa a normalização e lematização morfossintática offline em CPU (`use_gpu=False`). A saída estruturada (lemmas, tags POS, dependências sintáticas) é persistida em tempo real na coluna `analise_linguistica` (JSONB) no Supabase.
+*   **DSPy structured classification:** Roteamento alternativo estruturado via assinaturas tipadas (`ClassificarComentarioPASA`), ativado pela flag `USE_DSPY=true`. As chamadas síncronas do DSPy são encapsuladas em uma thread isolada para evitar deadlocks de loops de eventos asyncio.
+
+Para detalhes completos da arquitetura, fluxo de dados e governança de DDL, consulte o documento técnico:
+👉 [Stanford NLP Integration Docs](file:///c:/projetos/sentinela/docs/core/STANFORD_NLP_INTEGRATION.md)
+
+---
+
 ## 📝 Changelog
+
+### v98.6 (PASA v52.4)
+- ✅ Integração com Stanza NLP Engine (Lemmas, POS tags e dependências UD no JSONB)
+- ✅ Integração com DSPy Structured Predictor (Chain of Thought tipado)
+- ✅ Omissão de `response_format` para chamadas textuais das APIs OpenAI-like (Mistral/Alibaba)
+- ✅ Suporte ao GloVe local com fallback automático para TF-IDF lematizado no `DataMiner`
 
 ### v52.3 (Junho 2026)
 - ✅ Cascata de 4 provedores cloud + FallbackLLM
