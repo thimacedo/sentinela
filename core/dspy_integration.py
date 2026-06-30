@@ -50,17 +50,22 @@ class SentinelaLM(dspy.LM):
         self.force_cloud = force_cloud
         self.provider = "sentinela-mesh"
 
-    def __call__(self, prompt: str, **kwargs) -> List[str]:
+    def __call__(self, prompt: str = None, messages: List[Dict[str, Any]] = None, **kwargs) -> List[str]:
         """
         Executa a chamada síncrona/assíncrona através do loop de eventos.
         O DSPy espera receber uma lista de strings contendo a resposta da IA.
         """
         import asyncio
         
+        # Reconstrói ou extrai o prompt final com base no formato enviado pelo DSPy
+        prompt_final = prompt
+        if not prompt_final and messages:
+            prompt_final = "\n".join([f"{msg.get('role', 'user')}: {msg.get('content', '')}" for msg in messages])
+            
+        if not prompt_final:
+            prompt_final = ""
+        
         async def _run():
-            # Converte parâmetros do DSPy para o formato do nosso ai_service se necessário
-            # Roda na cascata do ai_service usando _execute_provider_call direta ou classify_text
-            # Para simplificar, escolhemos o provedor saudável da fila e rodamos o prompt gerado pelo DSPy
             self.ai_service._ensure_clients()
             
             allowed = self.ai_service.providers
@@ -82,7 +87,7 @@ class SentinelaLM(dspy.LM):
                     content = await self.ai_service._execute_provider_call(
                         provider=provider,
                         system_prompt="Você é um assistente de IA estruturado. Responda estritamente ao prompt fornecido.",
-                        user_content=prompt,
+                        user_content=prompt_final,
                         response_format="text" # O DSPy monta a estrutura no próprio prompt
                     )
                     if content:
@@ -94,20 +99,32 @@ class SentinelaLM(dspy.LM):
             # Fallback
             return ["{}"]
 
-        # Executa no loop de eventos correntemente ativo
-        try:
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
-                # Se o loop já está rodando (estamos em uma thread assíncrona do worker),
-                # rodamos via task síncrona usando o helper loop.create_task ou run_coroutine_threadsafe
-                import nest_asyncio
-                nest_asyncio.apply() # Garante reentrância se necessário
-            
-            fut = asyncio.run_coroutine_threadsafe(_run(), loop)
-            return fut.result(timeout=60.0)
-        except RuntimeError:
-            # Caso não haja event loop ativo na thread atual
-            return asyncio.run(_run())
+        # Executa a corrotina assíncrona em uma thread dedicada para evitar colisões
+        # e deadlocks de loops de eventos já em execução (dispensa nest_asyncio)
+        import threading
+        import queue
+
+        res_queue = queue.Queue()
+
+        def run_in_thread():
+            try:
+                new_loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(new_loop)
+                result = new_loop.run_until_complete(_run())
+                res_queue.put((True, result))
+                new_loop.close()
+            except Exception as e_thread:
+                res_queue.put((False, e_thread))
+
+        thread = threading.Thread(target=run_in_thread)
+        thread.start()
+        success, res_val = res_queue.get(timeout=60.0)
+        thread.join()
+
+        if success:
+            return res_val
+        else:
+            raise res_val
 
 
 # ─────────────────────────────────────────────────────────────────────────────

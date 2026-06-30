@@ -356,13 +356,16 @@ class AIService:
             ensure_ollama_running()
         
         if provider.get("is_async_openai", False):
-            response = await provider["client"].chat.completions.create(
-                model=provider["model"],
-                messages=[{"role": "system", "content": final_system_prompt}, {"role": "user", "content": user_content}],
-                response_format={"type": response_format},
-                temperature=0.0,
-                timeout=provider.get("timeout", 15.0)
-            )
+            kwargs = {
+                "model": provider["model"],
+                "messages": [{"role": "system", "content": final_system_prompt}, {"role": "user", "content": user_content}],
+                "temperature": 0.0,
+                "timeout": provider.get("timeout", 15.0)
+            }
+            if response_format and response_format != "text":
+                kwargs["response_format"] = {"type": response_format}
+                
+            response = await provider["client"].chat.completions.create(**kwargs)
             return response.choices[0].message.content
         else:
             if self.fallback_llm is None:
