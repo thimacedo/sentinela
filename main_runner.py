@@ -59,7 +59,7 @@ file_handler.setFormatter(json_formatter)
 root_logger.addHandler(file_handler)
 
 # Enable INFO for principais loggers
-for important_logger in ["main_runner", "orchestrator", "queue_manager", "worker.ig_v2", "worker.twitter", "worker.bluesky", "worker.reddit", "worker.telegram", "worker.researcher", "instagram_scraper_v2", "core.ai_service", "worker.ai_processor", "core.autopilot"]:
+for important_logger in ["main_runner", "orchestrator", "queue_manager", "worker.ig_v2", "worker.twitter", "worker.researcher", "instagram_scraper_v2", "core.ai_service", "worker.ai_processor", "core.autopilot"]:
     logging.getLogger(important_logger).setLevel(logging.INFO)
 
 # Silenciar bibliotecas barulhentas
@@ -75,11 +75,8 @@ from core.autopilot.manager import autopilot
 from core.autopilot.cloud_listener import CloudListener, set_current_cycle
 from workers.ai.wk_aplica_sugestoes import WkAplicaSugestoes
 
-# Workers disponíveis (PASA v52.0):
+# Workers disponíveis (PASA v98.8):
 from workers.scrapers.wk_coleta_instagram import WkColetaInstagram
-from workers.scrapers.wk_coleta_bluesky import WkColetaBluesky
-from workers.scrapers.wk_coleta_reddit import WkColetaReddit
-from workers.scrapers.wk_coleta_telegram import WkColetaTelegram
 from workers.scrapers.wk_coleta_twitter import WkColetaTwitter
 from workers.processors.wk_pesquisa_alvos import WkPesquisaAlvos
 
@@ -104,11 +101,7 @@ def build_orchestrator() -> SentinelaOrchestrator:
             },
         ))
 
-    # 🚀 API SCRAPERS LEVES (Bluesky & Reddit & Telegram & Twitter)
-    # Como não usam navegadores, 1 única instância é suficiente para escalar horizontalmente nas APIs
-    orch.register(WkColetaBluesky(worker_id="bsky-01", config={}))
-    orch.register(WkColetaReddit(worker_id="reddit-01", config={}))
-    orch.register(WkColetaTelegram(worker_id="telegram-01", config={}))
+    # 🚀 API TWITTER SCRAPER
     orch.register(WkColetaTwitter(worker_id="twitter-01", config={}))
 
     # 🧠 AI PROCESSOR: Worker dedicado para classificação PASA

@@ -1,14 +1,21 @@
 # STATE.md — Sentinela
-_last_updated: 2026-07-01 | branch: main | version: v98.7_
+_last_updated: 2026-07-01 | branch: main | version: v98.8_
 
 ## Status Operacional
 
 | Subsistema | Status | Observação |
 |---|---|---|
-| Coleta | 🟡 Instável/Auth | Falha de saldo Xquik (Twitter) e falta de credenciais no .env (Bluesky, Reddit, Telegram). Instagram funcional sob sessões ativas. |
+| Coleta | 🟡 Instável/Auth | Falha de saldo Xquik (Twitter). Scrapers secundários (Bluesky, Reddit, Telegram) desativados e removidos. Instagram funcional sob sessões ativas. |
 | Inteligência | 🟢 Operacional | Malha de IA resiliente + SaFastDrop local + Integração Stanza/DSPy. |
 | Dashboard | 🟢 Operacional | Painel "Decision Room" com auto-start, telemetria real via DB e Coleta Direcionada. |
 | SRE / Autocura | 🟢 Operacional | Agente de SRE Autônomo (`sre_agent.py`) ativo em background com desvio headless. |
+
+## Histórico Recente de Correções (v98.8)
+1. **Eliminação de Módulos de Baixa Relevância (Concluído)**:
+   - **Remoção de Arquivos:** Excluídos permanentemente os arquivos de workers de coleta secundários: [wk_coleta_bluesky.py](file:///c:/projetos/sentinela/workers/scrapers/wk_coleta_bluesky.py), [wk_coleta_reddit.py](file:///c:/projetos/sentinela/workers/scrapers/wk_coleta_reddit.py) e [wk_coleta_telegram.py](file:///c:/projetos/sentinela/workers/scrapers/wk_coleta_telegram.py).
+   - **Limpeza do Orquestrador:** Modificado o orquestrador principal [main_runner.py](file:///c:/projetos/sentinela/main_runner.py) para omitir os imports, registros de execução e loggers correspondentes a essas 3 plataformas, reduzindo overhead de inicialização e dependências órfãs.
+   - **Limpeza de Scripts Auxiliares:** Atualizado o script de auditoria rápida [audit_scrapers.py](file:///c:/projetos/sentinela/scratch/audit_scrapers.py) para monitorar apenas as coletas ativas (Twitter e Instagram).
+
 
 ## Histórico Recente de Correções (v98.7)
 1. **Auditoria e Diagnóstico Completo de Scrapers (Concluído)**:
