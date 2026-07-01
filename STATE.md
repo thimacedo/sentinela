@@ -1,14 +1,25 @@
 # STATE.md — Sentinela
-_last_updated: 2026-06-30 | branch: main | version: v98.6_
+_last_updated: 2026-07-01 | branch: main | version: v98.7_
 
 ## Status Operacional
 
 | Subsistema | Status | Observação |
 |---|---|---|
-| Coleta | 🟢 Operacional | ScrapeAgent ativo (OODA, DOM Healing c/ SelectorValidator, LoginWallDetector e Métricas persistidas) + WkColetaTwitter. |
+| Coleta | 🟡 Instável/Auth | Falha de saldo Xquik (Twitter) e falta de credenciais no .env (Bluesky, Reddit, Telegram). Instagram funcional sob sessões ativas. |
 | Inteligência | 🟢 Operacional | Malha de IA resiliente + SaFastDrop local + Integração Stanza/DSPy. |
 | Dashboard | 🟢 Operacional | Painel "Decision Room" com auto-start, telemetria real via DB e Coleta Direcionada. |
 | SRE / Autocura | 🟢 Operacional | Agente de SRE Autônomo (`sre_agent.py`) ativo em background com desvio headless. |
+
+## Histórico Recente de Correções (v98.7)
+1. **Auditoria e Diagnóstico Completo de Scrapers (Concluído)**:
+   - **Script de Diagnóstico Rápido:** Criado o script [audit_scrapers.py](file:///c:/projetos/sentinela/scratch/audit_scrapers.py) para auditar concorrentemente e com timeouts seguros os setups e ciclos de todas as plataformas de coleta (Instagram, Bluesky, Reddit, Telegram, Twitter/X).
+   - **Identificação de Problemas:**
+     - *Twitter/X (Xquik):* Identificado erro **402 Payment Required** (Credits = 0) na conta cadastrada no `.env`.
+     - *Bluesky, Reddit, Telegram:* Identificada falha de `auth_missing` causada por variáveis de ambiente ausentes no `.env` (`BSKY_PASS`, `REDDIT_CLIENT_ID`/`SECRET`, `TG_API_ID`/`HASH`).
+     - *Instagram:* Identificada latência e expirações de sessão no Playwright Web.
+   - **Validação de Playwright:** Criado o script [test_playwright.py](file:///c:/projetos/sentinela/scratch/test_playwright.py) que confirmou o pleno funcionamento do navegador Chromium headless local.
+   - **Relatório Forense:** Gerado o relatório de coleta em [analise_coleta_sentinela.md](file:///C:/Users/THIAGO/.gemini/antigravity/brain/cf932e9c-ddda-4639-b3fc-d8e478b1ea52/analise_coleta_sentinela.md).
+
 
 ## Histórico Recente de Correções (v98.6)
 1. **Integração do Stanford NLP (Stanza, DSPy e GloVe) (Concluído)**:
