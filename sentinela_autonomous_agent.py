@@ -50,8 +50,19 @@ from dotenv import load_dotenv
 class NtfyNotifier:
     """Notificador especializado Ntfy com suporte UTF-8 MIME Header (PASA v98.9)."""
     def __init__(self, ntfy_url: Optional[str] = None, enabled: bool = True):
-        self.ntfy_url = ntfy_url or os.getenv("NTFY_URL") or "https://ntfy.sh/sentinela"
         self.enabled = enabled and (os.getenv("NTFY_ENABLED", "true").lower() == "true")
+        
+        if ntfy_url:
+            self.ntfy_url = ntfy_url
+        else:
+            env_url = os.getenv("NTFY_URL", "https://ntfy.sh").rstrip("/")
+            env_topic = os.getenv("NTFY_TOPIC", "sentinela")
+            import urllib.parse
+            parsed = urllib.parse.urlparse(env_url)
+            if parsed.path.strip("/") != "":
+                self.ntfy_url = env_url
+            else:
+                self.ntfy_url = f"{env_url}/{env_topic}"
 
     def notify(self, title: str, message: str, tags: str = "robot", priority: str = "default") -> bool:
         if not self.enabled:
