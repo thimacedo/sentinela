@@ -22,6 +22,22 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+try:
+    import pystray
+    from PIL import Image, ImageDraw
+    TRAY_AVAILABLE = True
+except ImportError:
+    TRAY_AVAILABLE = False
+
+def create_status_image(color: str) -> "Image.Image":
+    """Gera uma imagem de circulo colorido em memoria para o status da bandeja."""
+    if not TRAY_AVAILABLE:
+        return None
+    image = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(image)
+    draw.ellipse((8, 8, 56, 56), fill=color)
+    return image
+
 
 # =============================================================================
 # CONFIGURACAO
@@ -332,8 +348,16 @@ class SupabaseHealthChecker:
 
     async def check_sessions(self, session_pool) -> Dict[str, int]:
         try:
-            total = len(session_pool._sessions) if hasattr(session_pool, "_sessions") else 0
-            available = sum(1 for s in session_pool._sessions if s.is_available) if hasattr(session_pool, "_sessions") else 0
+            sessions = []
+            if hasattr(session_pool, "_sessions"):
+                sessions = session_pool._sessions
+            elif hasattr(session_pool, "sessions"):
+                sessions = session_pool.sessions
+            elif isinstance(session_pool, list):
+                sessions = session_pool
+                
+            total = len(sessions)
+            available = sum(1 for s in sessions if getattr(s, "is_available", True))
             blocked = total - available
             return {"total": total, "available": available, "blocked": blocked}
         except Exception as e:
@@ -427,9 +451,10 @@ class TargetState:
 class SmartQueueManager:
     """Gerenciador inteligente de fila com controle de fluxo e backoff."""
 
-    def __init__(self, base_queue_manager, config: CollectorConfig):
+    def __init__(self, base_queue_manager, config: CollectorConfig, worker_id: str = "sentinela_auto_worker"):
         self.base_queue = base_queue_manager
         self.cfg = config
+        self.worker_id = worker_id
         self.target_states: Dict[str, TargetState] = {}
         self.global_empty_cycles = 0
         self.last_successful_insertion: Optional[datetime] = None
@@ -443,7 +468,7 @@ class SmartQueueManager:
         """Pega próximo alvo da fila, respeitando backoff e estado."""
         max_attempts = 5
         for attempt in range(max_attempts):
-            target = await self.base_queue.claim_next_target_atomic()
+            target = await self.base_queue.claim_next_target_atomic(self.worker_id)
             if not target:
                 return None
 
@@ -455,8 +480,8 @@ class SmartQueueManager:
                 # Alvo em backoff, libera e pega próximo
                 await self.base_queue.release_atomic(
                     target.queue_id, 
-                    "BACKOFF", 
-                    f"smart_queue: {state.status} until {state.backoff_until}"
+                    "PENDENTE", 
+                    self.worker_id
                 )
                 continue
 
@@ -514,6 +539,9 @@ class AutonomousCollector:
         self.cycle_count = 0
         self.consecutive_blocks = 0
         self.is_running = False
+        self.is_paused = False
+        self.tray_icon = None
+        self.tray_thread = None
         self._setup_logging()
 
     def _setup_logging(self):
@@ -679,8 +707,16 @@ class AutonomousCollector:
         self.logger.info(f"Intervalo entre ciclos: {self.cfg.cycle_interval_seconds}s")
         self.logger.info(f"Max ciclos: {self.cfg.max_cycles or 'infinito'}")
 
+        # Inicializa o icone na system tray se disponivel
+        self.start_tray_icon()
+
         try:
             while self.is_running:
+                if self.is_paused:
+                    self.logger.info("[Agent] Operacao pausada via bandeja do sistema. Aguardando...")
+                    await asyncio.sleep(5)
+                    continue
+
                 self.cycle_count += 1
 
                 # Verifica saude do sistema
@@ -715,7 +751,7 @@ class AutonomousCollector:
 
                     # Inicializa SmartQueueManager se ainda nao existir
                     if not hasattr(self, '_smart_queue'):
-                        self._smart_queue = SmartQueueManager(worker.queue, self.cfg)
+                        self._smart_queue = SmartQueueManager(worker.queue, self.cfg, worker.worker_id)
 
                     # Verifica pausa global
                     should_pause, pause_reason = self._smart_queue.should_pause_globally()
@@ -836,6 +872,97 @@ class AutonomousCollector:
     def stop(self):
         self.is_running = False
         self.logger.info("[Agent] Sinal de parada recebido.")
+        if self.tray_icon:
+            try:
+                self.tray_icon.stop()
+            except:
+                pass
+
+    def start_tray_icon(self):
+        """Inicializa e executa o icone de bandeja em thread dedicada."""
+        if not TRAY_AVAILABLE:
+            self.logger.warning("[Tray] pystray ou PIL nao disponiveis. Ignorando tray icon.")
+            return
+
+        try:
+            self.logger.info("[Tray] Inicializando icone na bandeja...")
+            icon_image = create_status_image("#4CAF50") # Verde inicial
+
+            menu = pystray.Menu(
+                pystray.MenuItem("Status", self._on_tray_status),
+                pystray.MenuItem("Pausar/Retomar", self._on_tray_toggle_pause),
+                pystray.Menu.SEPARATOR,
+                pystray.MenuItem("Parar", self._on_tray_stop),
+                pystray.MenuItem("Sair (Remover Icone)", self._on_tray_exit)
+            )
+
+            self.tray_icon = pystray.Icon(
+                "sentinela_agent",
+                icon_image,
+                title="Sentinela — Inicializando",
+                menu=menu
+            )
+
+            import threading
+            self.tray_thread = threading.Thread(target=self.tray_icon.run, daemon=True)
+            self.tray_thread.start()
+
+            # Thread para atualizar periodicamente o tooltip e a cor do icone
+            threading.Thread(target=self._update_tray_loop, daemon=True).start()
+
+        except Exception as e:
+            self.logger.error(f"[Tray] Falha ao iniciar tray icon: {e}")
+
+    def _on_tray_status(self, icon, item):
+        status_msg = (
+            f"Sentinela v1.2\n"
+            f"Status: {'Pausado' if self.is_paused else 'Rodando'}\n"
+            f"Ciclos: {self.cycle_count}\n"
+            f"Blocos consecutivos: {self.consecutive_blocks}\n"
+            f"Alvos: {len(self._smart_queue.target_states) if hasattr(self, '_smart_queue') else 0} rastreados"
+        )
+        icon.notify(status_msg, title="Sentinela — Status")
+
+    def _on_tray_toggle_pause(self, icon, item):
+        self.is_paused = not self.is_paused
+        status = "Pausado" if self.is_paused else "Retomado"
+        self.logger.info(f"[Tray] Agente {status} via menu tray.")
+        icon.notify(f"Agente {status} com sucesso.", title="Sentinela")
+
+    def _on_tray_stop(self, icon, item):
+        self.logger.info("[Tray] Parando agente via menu tray.")
+        self.stop()
+        icon.notify("Parando agente de forma amigavel...", title="Sentinela")
+
+    def _on_tray_exit(self, icon, item):
+        self.logger.info("[Tray] Removendo icone da bandeja.")
+        icon.stop()
+        self.tray_icon = None
+
+    def _update_tray_loop(self):
+        while self.is_running and self.tray_icon:
+            try:
+                # Cores e textos conforme estado
+                color = "#4CAF50" # Verde (HEALTHY / RUNNING)
+                title = f"Sentinela — Rodando | Ciclo #{self.cycle_count}"
+
+                if self.is_paused:
+                    color = "#FFC107" # Amarelo (PAUSED)
+                    title = "Sentinela — Pausado"
+                elif self.consecutive_blocks >= self.cfg.max_consecutive_blocks:
+                    color = "#F44336" # Vermelho (BLOCKED)
+                    title = "Sentinela — Bloqueado/Suspenso"
+                elif hasattr(self, '_smart_queue'):
+                    stats = self._smart_queue.get_stats()
+                    if stats.get("global_empty_cycles", 0) >= 5:
+                        color = "#FFC107" # Amarelo (DEGRADED)
+                        title = "Sentinela — Sem atividade recente"
+
+                self.tray_icon.icon = create_status_image(color)
+                self.tray_icon.title = title
+            except Exception as e:
+                self.logger.debug(f"[Tray] Erro ao atualizar icone: {e}")
+            time.sleep(5)
 
 
 # =============================================================================
@@ -870,11 +997,42 @@ def main():
         cfg.ntfy_url = args.ntfy_url
     cfg.log_level = args.log_level
 
+    # Inicializa dependencias se as libs do projeto estiverem disponiveis
+    worker_factory = None
+    db_client = None
+    session_pool = None
+
+    try:
+        from core.supabase_client import get_supabase_client
+        from workers.scrapers.wk_coleta_instagram import WkColetaInstagram
+        from core.instagram_scraper_v2 import InstagramScraperV2
+
+        db_client = get_supabase_client()
+        
+        worker_config = {
+            "headless": True,
+            "max_retries": 3,
+            "max_posts": cfg.max_posts,
+            "max_comments": cfg.max_comments_per_post,
+            "max_age_days": cfg.max_age_days
+        }
+        worker_factory = lambda: WkColetaInstagram(worker_id="sentinela_auto_worker", config=worker_config)
+        
+        scraper = InstagramScraperV2()
+        session_pool = scraper.sessions
+    except Exception as e_deps:
+        print(f"⚠️ [Deps] Nao foi possivel carregar as dependencias completas do projeto: {e_deps}")
+        print("Executando em modo monitoramento de fila basico...")
+
     # Cria e executa agente
     agent = AutonomousCollector(cfg)
 
     try:
-        asyncio.run(agent.run())
+        asyncio.run(agent.run(
+            worker_factory=worker_factory,
+            db_client=db_client,
+            session_pool=session_pool
+        ))
     except KeyboardInterrupt:
         agent.stop()
         print("\nAgente interrompido.")

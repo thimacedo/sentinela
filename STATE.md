@@ -1,17 +1,24 @@
 # STATE.md — Sentinela
-_last_updated: 2026-07-03 | branch: main | version: v98.9_
+_last_updated: 2026-07-03 | branch: main | version: v99.0_
 
 ## Status Operacional
 
 | Subsistema | Status | Observação |
 |---|---|---|
-| Coleta | 🟢 Operacional | Instagram funcional e validado. Twitter sob erro 402 (saldo Xquik zerado, esperado). Demais scrapers secundários desativados. |
+| Coleta | 🟢 Operacional | Agente autônomo L4 operacional ativo e rodando em background com injeção de dependências reais, bandeja do sistema e PauseRecovery. |
 | Inteligência | 🟢 Operacional | Malha de IA resiliente + SaFastDrop local + Adaptações de Failover ativos. |
 | Dashboard | 🟢 Operacional | Painel "Decision Room" com telemetria real via DB e Coleta Direcionada. |
 | SRE / Autocura | 🟢 Operacional | Agente de SRE Autônomo (`sre_agent.py`) verificado e 100% funcional. |
 
+## Histórico Recente de Correções (v99.0)
+1. **Implantação Definitiva do Agente Autônomo L4 (Concluído)**:
+   - **Ícone na System Tray (v1.2):** Implementamos a integração do ícone de bandeja de sistema interativo via `pystray` e `pillow`, desenhando círculos coloridos em memória indicando os estados operacionais (`HEALTHY` = verde, `DEGRADED`/`PAUSED` = amarelo, `BLOCKED` = vermelho). Adicionado menu interativo para exibir Status, Pausar/Retomar, Parar e Sair.
+   - **Injeção de Dependências Dinâmica no Boot:** Corrigida a inicialização standalone do agente para importar e injetar o Supabase client (`get_supabase_client`), o worker real (`WkColetaInstagram` com `worker_config` contendo limites do CLI) e o pool de sessões (`InstagramScraperV2().sessions`), garantindo execução completa do ciclo de coleta e classificação em produção.
+   - **Flexibilidade no Check de Sessões:** Ajustamos o método `check_sessions` no health checker para extrair de forma tolerante a lista de sessões de objetos de pool, do scraper ou de listas Python padrão.
+   - **Locks e Worker IDs alinhados:** Parametrizamos a inicialização do `SmartQueueManager` com o `worker.worker_id` para garantir que as requisições de liberação de locks (`release_atomic`) usem o mesmo identificador do claim, evitando alvos presos.
+   - **Inicialização Real em Background:** Paramos a tarefa anterior obsoleta e disparamos o agente real definitivo (`task-603`) que agora roda na fila de produção em background.
+
 ## Histórico Recente de Correções (v98.9)
-1. **Auditoria Geral e Correções Críticas de Persistência (Concluído)**:
    - **Correção de Chaves no Upsert:** Ajustadas as chamadas de `.upsert()` em [local_buffer.py](file:///c:/projetos/sentinela/core/local_buffer.py), [wk_coleta_instagram.py](file:///c:/projetos/sentinela/workers/scrapers/wk_coleta_instagram.py), [wk_coleta_twitter.py](file:///c:/projetos/sentinela/workers/scrapers/wk_coleta_twitter.py) e [cloud_scrape_cycle.py](file:///c:/projetos/sentinela/scripts/cloud_scrape_cycle.py) para utilizar `on_conflict="id_externo"`, respeitando a restrição única correta do Supabase remoto e evitando falhas de chave primária duplicada.
    - **Remoção de Campos Órfãos no Sync:** Removido o campo inexistente `is_spam` do mapeamento de dados do Instagram. Atualizada a lógica de autocura/fallback em [local_buffer.py](file:///c:/projetos/sentinela/core/local_buffer.py) para remover os campos `is_spam` e `sentimento` antes da persistência, resolvendo o erro `PGRST204` de Schema mismatch.
    - **Ajuste de Timeout de Auditoria:** Ampliado o timeout do ciclo do Instagram no script de auditoria rápida [audit_scrapers.py](file:///c:/projetos/sentinela/scratch/audit_scrapers.py) para 120s, permitindo o tempo de inicialização do Playwright e carregamento de rede.
