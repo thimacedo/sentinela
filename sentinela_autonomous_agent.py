@@ -727,7 +727,70 @@ class AutonomousCollector:
                             priority="high",
                             tags=["pause_button"],
                         )
-                        await asyncio.sleep(self.cfg.cycle_interval_seconds * 5)
+                        
+                        # Recuperação inteligente de pausa global (v1.2)
+                        self.logger.info("[PauseRecovery] Iniciando pausa global. Verificando a cada 30s...")
+                        pause_start = datetime.now(timezone.utc)
+                        recovery_timeout = timedelta(hours=1)
+                        retomado = False
+                        
+                        while not retomado:
+                            now = datetime.now(timezone.utc)
+                            # 1. Timeout máximo de 1 hora
+                            if (now - pause_start) > recovery_timeout:
+                                self.logger.warning("[PauseRecovery] Timeout de 1h atingido. Forçando retomada...")
+                                for state in self._smart_queue.target_states.values():
+                                    state.status = "ACTIVE"
+                                    state.backoff_until = None
+                                    state.consecutive_empty_cycles = 0
+                                self._smart_queue.global_empty_cycles = 0
+                                
+                                await self.ntfy.send(
+                                    title="Sentinela — Timeout de Pausa",
+                                    message="Timeout de pausa atingido (1h). Forçando retomada e limpando cooldowns.",
+                                    priority="high",
+                                    tags=["alarm_clock"]
+                                )
+                                retomado = True
+                                break
+                            
+                            # 2. Verifica se algum alvo voltou para ACTIVE
+                            ativos = 0
+                            for state in self._smart_queue.target_states.values():
+                                if state.can_process():
+                                    ativos += 1
+                                    
+                            # 3. Verifica se tem algum item novo PENDENTE na fila do Supabase
+                            pending_in_db = 0
+                            try:
+                                if db_client:
+                                    res_pending = await asyncio.to_thread(
+                                        db_client.table("fila_coleta")
+                                        .select("id", count="exact")
+                                        .eq("status", "PENDENTE")
+                                        .execute
+                                    )
+                                    pending_in_db = res_pending.count or 0
+                            except Exception as e_pending:
+                                self.logger.debug(f"[PauseRecovery] Falha ao verificar fila: {e_pending}")
+                                
+                            self.logger.info(
+                                f"[PauseRecovery] Verificação: {ativos} alvos ACTIVE | {pending_in_db} pendentes na fila"
+                            )
+                            
+                            if ativos > 0 or pending_in_db > 0:
+                                self.logger.info(f"[PauseRecovery] RETOMANDO! {ativos} alvos prontos, {pending_in_db} pendentes.")
+                                await self.ntfy.send(
+                                    title="Sentinela — Retomada",
+                                    message=f"Sistema retomado. Alvos ativos={ativos}, pendentes={pending_in_db}.",
+                                    priority="default",
+                                    tags=["play_button"]
+                                )
+                                self._smart_queue.global_empty_cycles = 0
+                                retomado = True
+                                break
+                                
+                            await asyncio.sleep(30)
                         continue
 
                     target = await self._smart_queue.claim_next_target_smart()
