@@ -20,9 +20,10 @@ def send_notification(title: str, message: str, tags: str = "robot", priority: s
     :param tags: Tags/Emojis separados por vírgula (ex: 'robot', 'x', 'warning')
     :param priority: 'max', 'high', 'default', 'low', 'min'
     """
+    from email.header import Header
     headers = {
-        "Title": title,
-        "Tags": tags,
+        "Title": Header(title, 'utf-8').encode(),
+        "Tags": Header(tags, 'utf-8').encode(),
         "Priority": priority
     }
 
