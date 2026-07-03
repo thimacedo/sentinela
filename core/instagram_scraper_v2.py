@@ -460,6 +460,17 @@ class InstagramScraperV2:
                             logger.info(f"💾 Diagnóstico salvo em scratch/scrape_empty_{username}.png e .html")
                         except Exception as e_diag:
                             logger.error(f"Falha ao salvar diagnóstico: {e_diag}")
+
+                        # Detecção de login wall silencioso (PASA v98.9 - autocura avançada)
+                        has_login_fields = await page.query_selector('input[name="username"], input[name="password"]')
+                        has_login_buttons = await page.query_selector('button:has-text("Entrar"), a[href*="login"]')
+                        if has_login_fields or has_login_buttons:
+                            logger.warning(f"⚠️ [V2] Login wall silencioso detectado no perfil para {session.label}. Invalidando sessão...")
+                            session.blocked_until = datetime.now(timezone.utc) + timedelta(minutes=30)
+                            blocked_attempts += 1
+                            retry_count += 1
+                            await browser.close()
+                            continue
                     
                     scraped_count = 0
                     consecutive_old_posts = 0
