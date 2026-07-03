@@ -1,409 +1,821 @@
-#!/usr/bin/env python
+
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Agente Autônomo Sentinela v1.0 — Orquestrador Operacional Autónomo (YOLO/PASA v98.9)
-Gerencia o ciclo completo de coleta de dados e inteligência de IA.
+AGENTE AUTONOMO SENTINELA v1.0
+Orquestrador Operacional de Coleta
 """
 
 from __future__ import annotations
-import os
-import sys
+
 import argparse
 import asyncio
-import logging
-import random
-import requests
 import hashlib
-from datetime import datetime, timezone, timedelta
-from typing import Any, Dict, List, Optional, Callable
+import json
+import logging
+import os
+import sys
+import time
+import traceback
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from email.header import Header
+from typing import Any, Dict, List, Optional, Tuple
 
-# --- AUTO-ANCHORING ---
-PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
-os.chdir(PROJECT_ROOT)
-if PROJECT_ROOT not in sys.path:
-    sys.path.insert(0, PROJECT_ROOT)
 
-if sys.platform.startswith("win"):
-    try:
-        sys.stdout.reconfigure(encoding='utf-8', errors='backslashreplace')
-        sys.stderr.reconfigure(encoding='utf-8', errors='backslashreplace')
-    except AttributeError:
-        pass
+# =============================================================================
+# CONFIGURACAO
+# =============================================================================
 
-# Configuração mínima de logs
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-    handlers=[
-        logging.StreamHandler(sys.stdout),
-        logging.FileHandler("logs/sentinela_autonomous_agent.log", encoding="utf-8")
-    ]
-)
-logger = logging.getLogger("autonomous_agent")
+@dataclass
+class CollectorConfig:
+    base_path: Path = field(default_factory=lambda: Path(r"C:\projetos\sentinela"))
+    env_file: Path = field(default_factory=lambda: Path(r"C:\projetos\sentinela\.env"))
+    max_posts: int = 10
+    max_comments_per_post: int = 50
+    max_age_days: int = 7
+    high_activity_profiles: List[str] = field(default_factory=lambda: ["janjalula", "lulaoficial"])
+    high_activity_max_posts: int = 20
+    high_activity_max_comments: int = 100
+    high_activity_max_age: int = 3
+    min_insertion_rate_percent: float = 10.0
+    max_consecutive_blocks: int = 3
+    max_locks_orphaned: int = 5
+    session_cooldown_seconds: int = 1800
+    circuit_breaker_cooldown_seconds: int = 300
+    cycle_interval_seconds: int = 60
+    ntfy_url: str = "https://ntfy.sh/sentinela-monitor"
+    ntfy_enabled: bool = True
+    log_level: str = "INFO"
+    log_file: Path = field(default_factory=lambda: Path("logs/autonomous_agent.log"))
+    dry_run: bool = False
+    max_cycles: int = 0
 
-from dotenv import load_dotenv
-
-# --- Classes de Suporte ---
-
-class NtfyNotifier:
-    """Notificador especializado Ntfy com suporte UTF-8 MIME Header (PASA v98.9)."""
-    def __init__(self, ntfy_url: Optional[str] = None, enabled: bool = True):
-        self.enabled = enabled and (os.getenv("NTFY_ENABLED", "true").lower() == "true")
+    @classmethod
+    def from_env(cls, env_path: Optional[Path] = None) -> "CollectorConfig":
+        cfg = cls()
+        if env_path and env_path.exists():
+            with open(env_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    if "=" in line:
+                        key, val = line.split("=", 1)
+                        os.environ[key.strip()] = val.strip().strip('"\'')
+        cfg.max_posts = int(os.getenv("SENTINELA_MAX_POSTS", cfg.max_posts))
+        cfg.max_comments_per_post = int(os.getenv("SENTINELA_MAX_COMMENTS", cfg.max_comments_per_post))
+        cfg.max_age_days = int(os.getenv("SENTINELA_MAX_AGE_DAYS", cfg.max_age_days))
         
-        if ntfy_url:
-            self.ntfy_url = ntfy_url
-        else:
-            env_url = os.getenv("NTFY_URL", "https://ntfy.sh").rstrip("/")
-            env_topic = os.getenv("NTFY_TOPIC", "sentinela")
+        env_url = os.getenv("NTFY_URL")
+        env_topic = os.getenv("NTFY_TOPIC")
+        if env_url:
+            env_url = env_url.rstrip("/")
             import urllib.parse
             parsed = urllib.parse.urlparse(env_url)
             if parsed.path.strip("/") != "":
-                self.ntfy_url = env_url
+                cfg.ntfy_url = env_url
+            elif env_topic:
+                cfg.ntfy_url = f"{env_url}/{env_topic}"
             else:
-                self.ntfy_url = f"{env_url}/{env_topic}"
+                cfg.ntfy_url = f"{env_url}/sentinela"
+        
+        cfg.ntfy_enabled = os.getenv("NTFY_ENABLED", "true").lower() == "true"
+        cfg.log_level = os.getenv("LOG_LEVEL", cfg.log_level)
+        cfg.dry_run = os.getenv("DRY_RUN", "false").lower() == "true"
+        cfg.cycle_interval_seconds = int(os.getenv("CYCLE_INTERVAL", cfg.cycle_interval_seconds))
+        return cfg
 
-    def notify(self, title: str, message: str, tags: str = "robot", priority: str = "default") -> bool:
+
+# =============================================================================
+# CLASSES DE ESTADO
+# =============================================================================
+
+@dataclass
+class CycleMetrics:
+    cycle_number: int = 0
+    target_username: str = ""
+    start_time: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    end_time: Optional[datetime] = None
+    duration_seconds: float = 0.0
+    posts_found: int = 0
+    posts_processed: int = 0
+    comments_extracted: int = 0
+    comments_inserted: int = 0
+    comments_duplicated: int = 0
+    insertion_rate_percent: float = 0.0
+    success: bool = False
+    error: Optional[str] = None
+    error_details: Optional[str] = None
+    login_wall_detected: bool = False
+    rate_limit_detected: bool = False
+    dom_empty_detected: bool = False
+    extraction_failure: bool = False
+    session_rotated: bool = False
+    lock_cleaned: bool = False
+    dom_healing_triggered: bool = False
+    circuit_breaker_opened: bool = False
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "cycle": self.cycle_number,
+            "target": self.target_username,
+            "duration_sec": round(self.duration_seconds, 2),
+            "posts_found": self.posts_found,
+            "posts_processed": self.posts_processed,
+            "comments_extracted": self.comments_extracted,
+            "comments_inserted": self.comments_inserted,
+            "comments_duplicated": self.comments_duplicated,
+            "insertion_rate_pct": round(self.insertion_rate_percent, 1),
+            "success": self.success,
+            "error": self.error,
+            "login_wall": self.login_wall_detected,
+            "rate_limit": self.rate_limit_detected,
+            "dom_empty": self.dom_empty_detected,
+            "extraction_failure": self.extraction_failure,
+            "session_rotated": self.session_rotated,
+            "lock_cleaned": self.lock_cleaned,
+            "dom_healing": self.dom_healing_triggered,
+            "circuit_open": self.circuit_breaker_opened,
+        }
+
+
+@dataclass
+class SystemHealth:
+    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    queue_total: int = 0
+    queue_completed: int = 0
+    queue_pending: int = 0
+    queue_locked: int = 0
+    queue_failed: int = 0
+    locks_orphaned: int = 0
+    sessions_total: int = 0
+    sessions_available: int = 0
+    sessions_blocked: int = 0
+    circuit_breaker_open: bool = False
+    circuit_breaker_service: str = ""
+    consecutive_blocks: int = 0
+    status: str = "HEALTHY"
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "timestamp": self.timestamp.isoformat(),
+            "queue": {
+                "total": self.queue_total,
+                "completed": self.queue_completed,
+                "pending": self.queue_pending,
+                "locked": self.queue_locked,
+                "failed": self.queue_failed,
+                "locks_orphaned": self.locks_orphaned,
+            },
+            "sessions": {
+                "total": self.sessions_total,
+                "available": self.sessions_available,
+                "blocked": self.sessions_blocked,
+            },
+            "circuit_breaker": {
+                "open": self.circuit_breaker_open,
+                "service": self.circuit_breaker_service,
+            },
+            "consecutive_blocks": self.consecutive_blocks,
+            "status": self.status,
+        }
+
+
+# =============================================================================
+# NOTIFICADOR NTFY
+# =============================================================================
+
+class NtfyNotifier:
+    def __init__(self, url: str, enabled: bool = True):
+        self.url = url
+        self.enabled = enabled
+        self._last_notification_time: Optional[datetime] = None
+        self._min_interval_seconds: int = 5
+
+    async def send(self, title: str, message: str, priority: str = "default",
+                   tags: Optional[List[str]] = None) -> bool:
         if not self.enabled:
-            return False
+            return True
+        now = datetime.now(timezone.utc)
+        if self._last_notification_time:
+            elapsed = (now - self._last_notification_time).total_seconds()
+            if elapsed < self._min_interval_seconds:
+                await asyncio.sleep(self._min_interval_seconds - elapsed)
         try:
-            # Envio HTTP POST com headers MIME-encoded para aceitar emojis sem estourar latin-1
-            headers = {
-                "Title": Header(title, 'utf-8').encode(),
-                "Tags": Header(tags, 'utf-8').encode(),
-                "Priority": priority
-            }
-            response = requests.post(
-                self.ntfy_url,
-                data=message.encode('utf-8'),
-                headers=headers,
-                timeout=5
-            )
-            return response.status_code == 200
+            import aiohttp
+            headers = {"Title": title, "Priority": priority}
+            if tags:
+                headers["Tags"] = ",".join(tags)
+            async with aiohttp.ClientSession() as session:
+                async with session.post(self.url, headers=headers, data=message.encode("utf-8")) as resp:
+                    success = resp.status == 200
+                    if success:
+                        self._last_notification_time = datetime.now(timezone.utc)
+                    return success
+        except ImportError:
+            try:
+                import requests
+                headers = {"Title": title, "Priority": priority}
+                if tags:
+                    headers["Tags"] = ",".join(tags)
+                resp = requests.post(self.url, headers=headers, data=message.encode("utf-8"), timeout=10)
+                success = resp.status_code == 200
+                if success:
+                    self._last_notification_time = datetime.now(timezone.utc)
+                return success
+            except Exception as e:
+                logging.error(f"[Ntfy] Falha: {e}")
+                return False
         except Exception as e:
-            logger.error(f"⚠️ [Ntfy] Falha ao enviar notificação para {self.ntfy_url}: {e}")
+            logging.error(f"[Ntfy] Falha: {e}")
             return False
 
+    async def notify_cycle_start(self, cycle: int, target: str) -> bool:
+        return await self.send(
+            title=f"Ciclo #{cycle} — @{target}",
+            message=f"Iniciando coleta de @{target}",
+            priority="low",
+            tags=["rocket"],
+        )
+
+    async def notify_cycle_complete(self, metrics: CycleMetrics) -> bool:
+        emoji = "OK" if metrics.success else "ERRO"
+        priority = "default" if metrics.success else "high"
+        tags = ["white_check_mark"] if metrics.success else ["warning"]
+        lines = [
+            f"{emoji} Ciclo #{metrics.cycle_number} — @{metrics.target_username}",
+            "",
+            f"Duracao: {metrics.duration_seconds:.1f}s",
+            f"Posts: {metrics.posts_processed}/{metrics.posts_found}",
+            f"Comentarios: {metrics.comments_extracted} extraidos | {metrics.comments_inserted} novos | {metrics.comments_duplicated} duplicados",
+            f"Taxa de insercao: {metrics.insertion_rate_percent:.1f}%",
+        ]
+        if metrics.error:
+            lines.append(f"Erro: {metrics.error}")
+        if metrics.login_wall_detected:
+            lines.append("Login Wall detectado — sessao rotacionada")
+        if metrics.rate_limit_detected:
+            lines.append("Rate Limit — aguardando cooldown")
+        if metrics.extraction_failure:
+            lines.append("Falha estrutural — circuit breaker acionado")
+        if metrics.dom_healing_triggered:
+            lines.append("DOM Healing acionado")
+        return await self.send(
+            title=f"{emoji} Ciclo #{metrics.cycle_number} — @{metrics.target_username}",
+            message="\n".join(lines),
+            priority=priority,
+            tags=tags,
+        )
+
+    async def notify_health_alert(self, health: SystemHealth) -> bool:
+        emoji_map = {"HEALTHY": "OK", "DEGRADED": "ATENCAO", "CRITICAL": "CRITICO", "PAUSED": "PAUSA"}
+        priority_map = {"HEALTHY": "low", "DEGRADED": "high", "CRITICAL": "urgent", "PAUSED": "default"}
+        emoji = emoji_map.get(health.status, "?")
+        priority = priority_map.get(health.status, "default")
+        lines = [
+            f"{emoji} Estado: {health.status}",
+            "",
+            f"Fila: {health.queue_total} total | {health.queue_pending} pendentes | {health.queue_locked} em curso | {health.queue_failed} falhas",
+            f"Locks orfaos: {health.locks_orphaned}",
+            f"Sessoes: {health.sessions_available}/{health.sessions_total} disponiveis",
+        ]
+        if health.circuit_breaker_open:
+            lines.append(f"Circuit Breaker ABERTO para {health.circuit_breaker_service}")
+        return await self.send(
+            title=f"Sentinela — {health.status}",
+            message="\n".join(lines),
+            priority=priority,
+            tags=["heartbeat"],
+        )
+
+
+# =============================================================================
+# VERIFICADOR DE SAUDE SUPABASE
+# =============================================================================
 
 class SupabaseHealthChecker:
-    """Monitor de integridade de filas, sessões e recursos de banco de dados."""
-    def __init__(self, db_client: Any):
+    def __init__(self, db_client):
         self.db = db_client
 
-    async def check_health(self) -> Dict[str, Any]:
-        health = {
-            "status": "HEALTHY",
-            "pending_count": 0,
-            "locked_count": 0,
-            "blocked_sessions_count": 0,
-            "details": []
-        }
+    async def check_queue_health(self) -> Dict[str, int]:
         try:
-            # 1. Consulta fila_coleta
-            res = await asyncio.to_thread(
-                self.db.table("fila_coleta").select("status,locked_by").execute
+            import asyncio
+            result = await asyncio.to_thread(
+                self.db.table("fila_coleta").select("status,locked_by", count="exact").execute
             )
-            for item in res.data or []:
-                if item["status"] == "PENDENTE":
-                    health["pending_count"] += 1
-                if item["locked_by"] is not None:
-                    health["locked_count"] += 1
-
-            if health["locked_count"] > 5:
-                health["status"] = "DEGRADED"
-                health["details"].append(f"Detectados {health['locked_count']} locks ativos na fila_coleta.")
-
-            # 2. Consulta sessões do Instagram
-            from core.instagram_scraper_v2 import InstagramScraperV2
-            scraper = InstagramScraperV2()
-            total_sessions = len(scraper.sessions)
-            available_sessions = len([s for s in scraper.sessions if s.is_available])
-            health["blocked_sessions_count"] = total_sessions - available_sessions
-
-            if total_sessions > 0 and available_sessions == 0:
-                health["status"] = "CRITICAL"
-                health["details"].append("Zero sessões de Instagram disponíveis no pool.")
-            elif available_sessions < (total_sessions * 0.5):
-                if health["status"] != "CRITICAL":
-                    health["status"] = "DEGRADED"
-                health["details"].append(f"Mais de 50% das sessões bloqueadas ({health['blocked_sessions_count']}/{total_sessions}).")
-
+            data = result.data if hasattr(result, "data") else []
+            stats = {"total": 0, "completed": 0, "pending": 0, "locked": 0, "failed": 0, "orphaned": 0}
+            for row in data:
+                stats["total"] += 1
+                status = row.get("status", "")
+                if status == "CONCLUIDO":
+                    stats["completed"] += 1
+                elif status == "EM_CURSO":
+                    stats["locked"] += 1
+                    locked_at = row.get("locked_at")
+                    if locked_at:
+                        try:
+                            lock_time = datetime.fromisoformat(locked_at.replace("Z", "+00:00"))
+                            if datetime.now(timezone.utc) - lock_time > timedelta(minutes=30):
+                                stats["orphaned"] += 1
+                        except:
+                            pass
+                elif status in ("FALHADO", "ERRO"):
+                    stats["failed"] += 1
+                else:
+                    stats["pending"] += 1
+            return stats
         except Exception as e:
-            health["status"] = "CRITICAL"
-            health["details"].append(f"Erro ao acessar banco de dados Supabase: {e}")
+            logging.error(f"[HealthChecker] Falha ao verificar fila: {e}")
+            return {"total": 0, "completed": 0, "pending": 0, "locked": 0, "failed": 0, "orphaned": 0}
+
+    async def check_sessions(self, session_pool) -> Dict[str, int]:
+        try:
+            total = len(session_pool._sessions) if hasattr(session_pool, "_sessions") else 0
+            available = sum(1 for s in session_pool._sessions if s.is_available) if hasattr(session_pool, "_sessions") else 0
+            blocked = total - available
+            return {"total": total, "available": available, "blocked": blocked}
+        except Exception as e:
+            logging.error(f"[HealthChecker] Falha ao verificar sessoes: {e}")
+            return {"total": 0, "available": 0, "blocked": 0}
+
+    async def release_orphaned_locks(self) -> int:
+        try:
+            import asyncio
+            result = await asyncio.to_thread(
+                self.db.rpc("fila_coleta_release_stale", {"stale_minutes": 30}).execute
+            )
+            return getattr(result, "count", 0) or 0
+        except Exception as e:
+            logging.error(f"[HealthChecker] Falha ao liberar locks: {e}")
+            return 0
+
+
+
+
+# =============================================================================
+# CONTROLE DE FLUXO DA FILA v1.1
+# =============================================================================
+
+@dataclass
+class TargetState:
+    """Estado de processamento de um alvo específico."""
+    username: str
+    first_seen: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    last_processed: Optional[datetime] = None
+    cycles_attempted: int = 0
+    cycles_successful: int = 0
+    cycles_empty: int = 0  # Ciclos onde 0 comentários novos foram inseridos
+    total_comments_inserted: int = 0
+    consecutive_empty_cycles: int = 0
+    status: str = "ACTIVE"  # ACTIVE, BACKOFF, EXHAUSTED, BLOCKED
+    backoff_until: Optional[datetime] = None
+    last_error: Optional[str] = None
+
+    def record_cycle(self, metrics: CycleMetrics):
+        self.cycles_attempted += 1
+        self.last_processed = datetime.now(timezone.utc)
+
+        if metrics.success and metrics.comments_inserted > 0:
+            self.cycles_successful += 1
+            self.total_comments_inserted += metrics.comments_inserted
+            self.consecutive_empty_cycles = 0
+            self.status = "ACTIVE"
+        elif metrics.success and metrics.comments_inserted == 0:
+            self.cycles_empty += 1
+            self.consecutive_empty_cycles += 1
+            # Se 3+ ciclos vazios consecutivos, considera alvo esgotado temporariamente
+            if self.consecutive_empty_cycles >= 3:
+                self.status = "EXHAUSTED"
+                self.backoff_until = datetime.now(timezone.utc) + timedelta(hours=2)
+        else:
+            # Falha
+            self.last_error = metrics.error
+            self.consecutive_empty_cycles += 1
+            if metrics.login_wall_detected or metrics.rate_limit_detected:
+                self.status = "BLOCKED"
+                self.backoff_until = datetime.now(timezone.utc) + timedelta(minutes=30)
+            elif metrics.extraction_failure:
+                self.status = "BACKOFF"
+                self.backoff_until = datetime.now(timezone.utc) + timedelta(minutes=15)
+
+    def can_process(self) -> bool:
+        if self.status in ("EXHAUSTED", "BLOCKED", "BACKOFF"):
+            if self.backoff_until and datetime.now(timezone.utc) < self.backoff_until:
+                return False
+            # Backoff expirou, volta para ACTIVE
+            self.status = "ACTIVE"
+            self.consecutive_empty_cycles = 0
+        return True
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "username": self.username,
+            "status": self.status,
+            "cycles_attempted": self.cycles_attempted,
+            "cycles_successful": self.cycles_successful,
+            "cycles_empty": self.cycles_empty,
+            "consecutive_empty": self.consecutive_empty_cycles,
+            "total_inserted": self.total_comments_inserted,
+            "last_processed": self.last_processed.isoformat() if self.last_processed else None,
+            "backoff_until": self.backoff_until.isoformat() if self.backoff_until else None,
+            "last_error": self.last_error,
+        }
+
+
+class SmartQueueManager:
+    """Gerenciador inteligente de fila com controle de fluxo e backoff."""
+
+    def __init__(self, base_queue_manager, config: CollectorConfig):
+        self.base_queue = base_queue_manager
+        self.cfg = config
+        self.target_states: Dict[str, TargetState] = {}
+        self.global_empty_cycles = 0
+        self.last_successful_insertion: Optional[datetime] = None
+
+    def get_or_create_state(self, username: str) -> TargetState:
+        if username not in self.target_states:
+            self.target_states[username] = TargetState(username=username)
+        return self.target_states[username]
+
+    async def claim_next_target_smart(self) -> Optional[Any]:
+        """Pega próximo alvo da fila, respeitando backoff e estado."""
+        max_attempts = 5
+        for attempt in range(max_attempts):
+            target = await self.base_queue.claim_next_target_atomic()
+            if not target:
+                return None
+
+            state = self.get_or_create_state(target.username)
+
+            if state.can_process():
+                return target
+            else:
+                # Alvo em backoff, libera e pega próximo
+                await self.base_queue.release_atomic(
+                    target.queue_id, 
+                    "BACKOFF", 
+                    f"smart_queue: {state.status} until {state.backoff_until}"
+                )
+                continue
+
+        return None
+
+    def record_cycle_result(self, username: str, metrics: CycleMetrics):
+        """Registra resultado do ciclo no estado do alvo."""
+        state = self.get_or_create_state(username)
+        state.record_cycle(metrics)
+
+        if metrics.comments_inserted > 0:
+            self.last_successful_insertion = datetime.now(timezone.utc)
+            self.global_empty_cycles = 0
+        else:
+            self.global_empty_cycles += 1
+
+    def should_pause_globally(self) -> Tuple[bool, str]:
+        """Determina se o sistema inteiro deve pausar por falta de atividade."""
+        # Se 10+ ciclos globais vazios, sugere pausa longa
+        if self.global_empty_cycles >= 10:
+            return True, f"{self.global_empty_cycles} ciclos globais sem insercoes. Possivel bloqueio massivo."
+
+        # Se todos os alvos conhecidos estão em backoff/exhausted
+        if self.target_states:
+            all_blocked = all(s.status in ("EXHAUSTED", "BLOCKED", "BACKOFF") for s in self.target_states.values())
+            if all_blocked:
+                return True, "Todos os alvos em backoff. Aguardando recuperacao."
+
+        return False, ""
+
+    def get_stats(self) -> Dict[str, Any]:
+        """Estatísticas do gerenciador inteligente."""
+        statuses = {}
+        for state in self.target_states.values():
+            statuses[state.status] = statuses.get(state.status, 0) + 1
+
+        return {
+            "targets_tracked": len(self.target_states),
+            "status_distribution": statuses,
+            "global_empty_cycles": self.global_empty_cycles,
+            "last_successful_insertion": self.last_successful_insertion.isoformat() if self.last_successful_insertion else None,
+        }
+
+# =============================================================================
+# ORQUESTRADOR AUTONOMO
+# =============================================================================
+
+class AutonomousCollector:
+    """Agente autonomo que gerencia o ciclo completo de coleta."""
+
+    def __init__(self, config: Optional[CollectorConfig] = None):
+        self.cfg = config or CollectorConfig.from_env()
+        self.ntfy = NtfyNotifier(self.cfg.ntfy_url, self.cfg.ntfy_enabled)
+        self.health_checker: Optional[SupabaseHealthChecker] = None
+        self.cycle_count = 0
+        self.consecutive_blocks = 0
+        self.is_running = False
+        self._setup_logging()
+
+    def _setup_logging(self):
+        level = getattr(logging, self.cfg.log_level.upper(), logging.INFO)
+        self.cfg.log_file.parent.mkdir(parents=True, exist_ok=True)
+        logging.basicConfig(
+            level=level,
+            format="%(asctime)s [%(levelname)s] %(message)s",
+            handlers=[
+                logging.FileHandler(self.cfg.log_file, encoding="utf-8"),
+                logging.StreamHandler(sys.stdout),
+            ],
+        )
+        self.logger = logging.getLogger("AutonomousCollector")
+
+    def _get_limits_for_target(self, username: str) -> Tuple[int, int, int]:
+        """Retorna (max_posts, max_comments, max_age_days) conforme perfil."""
+        if username.lower() in [p.lower() for p in self.cfg.high_activity_profiles]:
+            return (
+                self.cfg.high_activity_max_posts,
+                self.cfg.high_activity_max_comments,
+                self.cfg.high_activity_max_age,
+            )
+        return self.cfg.max_posts, self.cfg.max_comments_per_post, self.cfg.max_age_days
+
+    async def check_system_health(self, db_client, session_pool) -> SystemHealth:
+        """Verifica saude geral do sistema e toma acoes corretivas."""
+        health = SystemHealth()
+        self.health_checker = SupabaseHealthChecker(db_client)
+
+        # Verifica fila
+        queue_stats = await self.health_checker.check_queue_health()
+        health.queue_total = queue_stats["total"]
+        health.queue_completed = queue_stats["completed"]
+        health.queue_pending = queue_stats["pending"]
+        health.queue_locked = queue_stats["locked"]
+        health.queue_failed = queue_stats["failed"]
+        health.locks_orphaned = queue_stats["orphaned"]
+
+        # Libera locks orfaos se necessario
+        if health.locks_orphaned > self.cfg.max_locks_orphaned:
+            self.logger.warning(f"[Health] {health.locks_orphaned} locks orfaos detectados. Liberando...")
+            released = await self.health_checker.release_orphaned_locks()
+            self.logger.info(f"[Health] {released} locks liberados.")
+            health.lock_cleaned = True
+            health.locks_orphaned = max(0, health.locks_orphaned - released)
+
+        # Verifica sessoes
+        session_stats = await self.health_checker.check_sessions(session_pool)
+        health.sessions_total = session_stats["total"]
+        health.sessions_available = session_stats["available"]
+        health.sessions_blocked = session_stats["blocked"]
+
+        # Verifica circuit breaker (se disponivel)
+        try:
+            from core.circuit_breaker import scraper_circuit_breaker
+            health.circuit_breaker_open = not scraper_circuit_breaker.can_execute("instagram")
+            health.circuit_breaker_service = "instagram"
+        except:
+            pass
+
+        # Determina status
+        health.consecutive_blocks = self.consecutive_blocks
+        if self.consecutive_blocks >= self.cfg.max_consecutive_blocks:
+            health.status = "PAUSED"
+        elif health.circuit_breaker_open or health.sessions_available == 0:
+            health.status = "CRITICAL"
+        elif health.locks_orphaned > 0 or health.sessions_blocked > health.sessions_available:
+            health.status = "DEGRADED"
+        else:
+            health.status = "HEALTHY"
 
         return health
 
+    async def execute_collection_cycle(self, worker, target) -> CycleMetrics:
+        """Executa um ciclo de coleta com monitoramento completo."""
+        metrics = CycleMetrics()
+        metrics.cycle_number = self.cycle_count
+        metrics.target_username = target.username
+        metrics.start_time = datetime.now(timezone.utc)
 
-class CollectorConfig:
-    """Configurações operacionais do agente."""
-    def __init__(self, **kwargs):
-        self.max_posts = kwargs.get("max_posts", int(os.getenv("SENTINELA_MAX_POSTS", "3")))
-        self.max_comments = kwargs.get("max_comments", int(os.getenv("SENTINELA_MAX_COMMENTS", "50")))
-        self.max_age_days = kwargs.get("max_age_days", int(os.getenv("SENTINELA_MAX_AGE_DAYS", "7")))
-        self.cycle_interval = kwargs.get("cycle_interval", int(os.getenv("CYCLE_INTERVAL", "60")))
-        self.dry_run = kwargs.get("dry_run", os.getenv("DRY_RUN", "false").lower() == "true")
-        self.ntfy_url = kwargs.get("ntfy_url", os.getenv("NTFY_URL"))
+        self.logger.info(f"[Cycle #{self.cycle_count}] Iniciando coleta de @{target.username}")
+        await self.ntfy.notify_cycle_start(self.cycle_count, target.username)
 
-    @classmethod
-    def from_env(cls, env_path: Optional[Path] = None) -> CollectorConfig:
-        if env_path and env_path.exists():
-            load_dotenv(env_path, override=True)
-        else:
-            load_dotenv(override=True)
-        return cls()
+        try:
+            # Obtem limites para o alvo
+            max_posts, max_comments, max_age = self._get_limits_for_target(target.username)
+            self.logger.info(f"[Cycle #{self.cycle_count}] Limites: posts={max_posts}, comments={max_comments}, age={max_age}d")
 
+            # Executa coleta
+            if self.cfg.dry_run:
+                self.logger.info("[Cycle] MODO DRY-RUN: simulando coleta")
+                result = type("obj", (object,), {
+                    "success": True,
+                    "comments": [],
+                    "post_metas": [],
+                    "comments_collected": 0,
+                    "posts_processed": 0,
+                })()
+            else:
+                # Configura limites no worker
+                worker.max_posts = max_posts
+                worker.max_comments_per_post = max_comments
+                worker.max_age_days = max_age
+                result = await worker.run_cycle()
 
-class AutonomousCollector:
-    """Coração do sistema: orquestrador autônomo de ciclos de processamento."""
-    def __init__(self, config: CollectorConfig, db_client: Optional[Any] = None):
-        self.config = config
-        self.db = db_client
-        self.notifier = NtfyNotifier(ntfy_url=config.ntfy_url)
-        self.consecutive_blocks = 0
-        self.cycle_count = 0
+            # Processa resultado
+            metrics.end_time = datetime.now(timezone.utc)
+            metrics.duration_seconds = (metrics.end_time - metrics.start_time).total_seconds()
 
-    async def run(
-        self,
-        worker_factory: Callable[[], Any],
-        db_client: Any,
-        max_cycles: Optional[int] = None
-    ) -> None:
-        """Loop principal de processamento autônomo."""
-        self.db = db_client
-        checker = SupabaseHealthChecker(db_client)
-        from core.queue_manager import QueueManager
-        queue_mgr = QueueManager(db_client)
+            if hasattr(result, "success") and result.success:
+                metrics.success = True
+                metrics.comments_extracted = getattr(result, "extracted", 0)
+                metrics.comments_inserted = getattr(result, "inserted", 0)
+                metrics.comments_duplicated = getattr(result, "duplicated", 0)
+                metrics.posts_processed = getattr(result, "posts_processed", 0)
 
-        logger.info("🛰️ [Autopilot] Sentinela Autonomous Collector v1.0 Inicializado.")
-        self.notifier.notify(
-            "🛰️ Sentinela: Autopilot Iniciado",
-            "Orquestrador Autônomo L4 operacional no workspace.",
-            tags="satellite,robot",
-            priority="high"
-        )
+                # Calcula taxa de insercao
+                if metrics.comments_extracted > 0:
+                    metrics.insertion_rate_percent = (metrics.comments_inserted / metrics.comments_extracted) * 100
 
-        while max_cycles is None or self.cycle_count < max_cycles:
-            self.cycle_count += 1
-            start_time = datetime.now()
-            logger.info(f"🔄 [Autopilot] Iniciando Ciclo #{self.cycle_count}...")
+                self.logger.info(f"[Cycle #{self.cycle_count}] Sucesso: {metrics.comments_inserted} novos comentarios inseridos")
+                self.consecutive_blocks = 0  # Reseta contador de blocos
 
-            # 1. Análise de Saúde (Diagnóstico)
-            health = await checker.check_health()
-            logger.info(f"📊 [Saúde] Status: {health['status']} | Locks: {health['locked_count']} | Pendentes: {health['pending_count']}")
+            else:
+                # Falha
+                metrics.success = False
+                metrics.error = getattr(result, "error", "unknown_error")
+                self.consecutive_blocks += 1
+                self.logger.warning(f"[Cycle #{self.cycle_count}] Falha: {metrics.error}")
 
-            if health["status"] == "CRITICAL":
-                warn_msg = f"Sistema em estado CRÍTICO!\nDetalhes: {', '.join(health['details'])}"
-                logger.error(f"🚨 {warn_msg}")
-                self.notifier.notify("🚨 Alerta Crítico: Saúde do Sistema", warn_msg, tags="warning,skull", priority="max")
-                logger.info("⏸️ Aguardando cooldown de 5 minutos...")
-                await asyncio.sleep(300)
-                continue
+                # Detecta tipo de falha
+                if "extraction_failure" in str(metrics.error).lower():
+                    metrics.extraction_failure = True
+                elif "login" in str(metrics.error).lower() or "auth" in str(metrics.error).lower():
+                    metrics.login_wall_detected = True
+                elif "rate" in str(metrics.error).lower() or "429" in str(metrics.error):
+                    metrics.rate_limit_detected = True
+                elif "dom" in str(metrics.error).lower() or "empty" in str(metrics.error).lower():
+                    metrics.dom_empty_detected = True
 
-            elif health["status"] == "DEGRADED":
-                # Auto-recuperação de locks
-                logger.warning("⚠️ [Autocura] Sistema degradado. Executando limpeza automática de locks...")
-                unlocked = await queue_mgr.release_stale_locks(timeout_minutes=15)
-                logger.info(f"🔓 [Autocura] {unlocked} locks órfãos liberados.")
-                self.notifier.notify(
-                    "⚠️ Alerta: Sistema Degradado",
-                    f"Locks órfãos detectados e limpos automaticamente: {unlocked}.\nContinuando operação.",
-                    tags="tools,warning",
-                    priority="default"
-                )
+        except Exception as e:
+            metrics.end_time = datetime.now(timezone.utc)
+            metrics.duration_seconds = (metrics.end_time - metrics.start_time).total_seconds()
+            metrics.success = False
+            metrics.error = type(e).__name__
+            metrics.error_details = str(e)
+            self.consecutive_blocks += 1
+            self.logger.error(f"[Cycle #{self.cycle_count}] Excecao: {e}")
+            self.logger.error(traceback.format_exc())
 
-            # 2. Busca Próximo Alvo
-            from core.queue_manager import Target
-            target: Optional[Target] = None
-            try:
-                # Usa o fluxo oficial de extração de fila com lock
-                target = await queue_mgr._get_from_fila_coleta(
-                    blocked=set(),
-                    seen_queue_ids=set(),
-                    seen_targets=set(),
-                    active_targets=set()
-                )
-            except Exception as e_queue:
-                logger.error(f"❌ Erro ao consultar fila: {e_queue}")
+        # Notifica resultado
+        await self.ntfy.notify_cycle_complete(metrics)
+        return metrics
 
-            if not target:
-                logger.info("😴 Fila de coleta vazia ou sem alvos prontos. Dormindo um ciclo...")
-                await asyncio.sleep(self.config.cycle_interval)
-                continue
+    async def run(self, worker_factory=None, db_client=None, session_pool=None):
+        """Loop principal do agente autonomo."""
+        self.is_running = True
+        self.logger.info("=" * 60)
+        self.logger.info("AGENTE AUTONOMO SENTINELA v1.0 — Iniciando operacao")
+        self.logger.info("=" * 60)
+        self.logger.info(f"Modo: {'DRY-RUN' if self.cfg.dry_run else 'PRODUCAO'}")
+        self.logger.info(f"Intervalo entre ciclos: {self.cfg.cycle_interval_seconds}s")
+        self.logger.info(f"Max ciclos: {self.cfg.max_cycles or 'infinito'}")
 
-            logger.info(f"🎯 [Alvo] Selecionado para raspagem: @{target.username} (Fila ID: {target.queue_id})")
-            self.notifier.notify(
-                f"🚀 Ciclo #{self.cycle_count} — @{target.username}",
-                f"Iniciando coleta de comentários.\nFila ID: {target.queue_id}",
-                tags="incoming_envelope,robot",
-                priority="low"
-            )
+        try:
+            while self.is_running:
+                self.cycle_count += 1
 
-            # 3. Execução da Coleta
-            extracted_count = 0
-            inserted_count = 0
-            duplicate_count = 0
-            cycle_error = None
-            
-            try:
-                if self.config.dry_run:
-                    logger.info(f"[Dry-Run] Simulando raspagem de @{target.username}...")
-                    await asyncio.sleep(2)
-                    extracted_count = 10
-                    inserted_count = 3
-                    duplicate_count = 7
-                else:
-                    # Instancia worker real da fábrica
+                # Verifica saude do sistema
+                if db_client and session_pool:
+                    health = await self.check_system_health(db_client, session_pool)
+
+                    # Log de estatísticas do SmartQueueManager a cada 5 ciclos
+                    if self.cycle_count % 5 == 0 and hasattr(self, '_smart_queue'):
+                        sq_stats = self._smart_queue.get_stats()
+                        self.logger.info(f"[SmartQueue] {sq_stats}")
+                    self.logger.info(f"[Health] Status: {health.status} | Fila: {health.queue_pending} pendentes | Sessoes: {health.sessions_available}/{health.sessions_total}")
+
+                    if health.status == "PAUSED":
+                        self.logger.warning(f"[Health] Sistema PAUSADO por {self.cfg.max_consecutive_blocks} blocos consecutivos. Aguardando {self.cfg.cycle_interval_seconds * 2}s...")
+                        await self.ntfy.notify_health_alert(health)
+                        await asyncio.sleep(self.cfg.cycle_interval_seconds * 2)
+                        continue
+
+                    if health.status == "CRITICAL":
+                        self.logger.error("[Health] Sistema em estado CRITICO. Aguardando recuperacao...")
+                        await self.ntfy.notify_health_alert(health)
+                        await asyncio.sleep(self.cfg.circuit_breaker_cooldown_seconds)
+                        continue
+
+                    if health.status == "DEGRADED":
+                        self.logger.warning("[Health] Sistema DEGRADADO. Continuando com cautela...")
+                        await self.ntfy.notify_health_alert(health)
+
+                # Obtem proximo alvo da fila (com controle inteligente)
+                if worker_factory:
                     worker = worker_factory()
-                    worker.db = self.db
-                    worker.config.update({
-                        "max_posts": self.config.max_posts,
-                        "max_comments_per_post": self.config.max_comments,
-                    })
 
-                    # Callback incremental para sincronia direta
-                    from core.local_buffer import SQLiteBuffer
-                    buffer = SQLiteBuffer()
+                    # Inicializa SmartQueueManager se ainda nao existir
+                    if not hasattr(self, '_smart_queue'):
+                        self._smart_queue = SmartQueueManager(worker.queue, self.cfg)
 
-                    async def on_post_scraped(shortcode, comments):
-                        # Envia dados no buffer para persistir Supabase
-                        for c in comments:
-                            buffer.add_comment(c)
-                        sincronizados = buffer.sync_to_supabase()
-                        logger.info(f"Sincronia Incremental: {sincronizados} novos comentários salvos.")
+                    # Verifica pausa global
+                    should_pause, pause_reason = self._smart_queue.should_pause_globally()
+                    if should_pause:
+                        self.logger.warning(f"[SmartQueue] PAUSA GLOBAL: {pause_reason}")
+                        await self.ntfy.send(
+                            title="Sentinela — Pausa Global",
+                            message=f"Sistema pausado: {pause_reason}",
+                            priority="high",
+                            tags=["pause_button"],
+                        )
+                        await asyncio.sleep(self.cfg.cycle_interval_seconds * 5)
+                        continue
 
-                    # Roda o scrape de perfil diretamente
-                    from core.instagram_scraper_v2 import InstagramScraperV2
-                    scraper = InstagramScraperV2(headless=worker.config.get("headless", True), db_client=self.db)
-                    
-                    res_scrape = await scraper.scrape_profile(
-                        username=target.username,
-                        candidato_id=target.username,
-                        max_posts=self.config.max_posts,
-                        max_comments_per_post=self.config.max_comments,
-                        max_age_days=self.config.max_age_days,
-                        on_post_scraped=on_post_scraped
-                    )
+                    target = await self._smart_queue.claim_next_target_smart()
 
-                    # Força sincronização de restos
-                    sincronizados_finais = buffer.sync_to_supabase()
-                    
-                    # Processa retorno
-                    comments = res_scrape.get("comments", [])
-                    extracted_count = len(comments)
-                    inserted_count = sincronizados_finais
-                    duplicate_count = max(0, extracted_count - inserted_count)
-                    
-                    self.consecutive_blocks = 0  # Sucesso zera contador de blocos
+                    if not target:
+                        self.logger.info("[Cycle] Nenhum alvo disponivel na fila. Aguardando...")
+                        await asyncio.sleep(self.cfg.cycle_interval_seconds)
+                        continue
 
-            except Exception as e_scrape:
-                cycle_error = str(e_scrape)
-                logger.error(f"💥 Falha no scraping do perfil @{target.username}: {e_scrape}")
-                
-                # Se detectou bloqueio/limites
-                if "all_sessions_blocked" in cycle_error or "ExtractionFailure" in cycle_error:
-                    self.consecutive_blocks += 1
-                
-                # Libera o alvo de forma segura (PATCH 4)
-                target.error = "scrape_failed"
+                    # Executa ciclo de coleta
+                    metrics = await self.execute_collection_cycle(worker, target)
 
-            # 4. Rotação do Alvo (Atualização de Frequência e liberação)
-            try:
-                await queue_mgr.rotate_target(target)
-            except Exception as e_rot:
-                logger.error(f"❌ Falha ao rotacionar alvo: {e_rot}")
+                    # Registra resultado no controle inteligente de fluxo
+                    self._smart_queue.record_cycle_result(target.username, metrics)
+                    self.logger.info(f"[Cycle #{self.cycle_count}] Finalizado em {metrics.duration_seconds:.1f}s | Status: {'OK' if metrics.success else 'FALHA'}")
+                else:
+                    self.logger.warning("[Cycle] worker_factory nao fornecido. Modo monitoramento apenas.")
+                    await asyncio.sleep(self.cfg.cycle_interval_seconds)
 
-            # 5. Execução do Ciclo de Classificação de IA (Se houveram novos inseridos)
-            classified_count = 0
-            if inserted_count > 0 or not self.config.dry_run:
-                try:
-                    from workers.processors.wk_classifica_comentarios import WkClassificaComentarios
-                    ai_worker = WkClassificaComentarios(worker_id=f"auto-ai-{self.cycle_count}", config={})
-                    ai_worker.db = self.db
-                    
-                    # Roda o ciclo de classificação
-                    class_res = await ai_worker.run_cycle()
-                    classified_count = class_res.get("classified", 0) if isinstance(class_res, dict) else 0
-                    logger.info(f"🧠 [IA] Classificados {classified_count} comentários pendentes.")
-                except Exception as e_ai:
-                    logger.error(f"❌ Falha no ciclo de IA: {e_ai}")
+                # Verifica limite de ciclos
+                if self.cfg.max_cycles > 0 and self.cycle_count >= self.cfg.max_cycles:
+                    self.logger.info(f"[Cycle] Limite de {self.cfg.max_cycles} ciclos atingido. Encerrando.")
+                    break
 
-            # 6. Relatório do Ciclo (Métricas detalhadas)
-            duration = (datetime.now() - start_time).total_seconds()
-            rate = (inserted_count / extracted_count * 100) if extracted_count > 0 else 0.0
-            
-            report_msg = (
-                f"Duração: {duration:.1f}s\n"
-                f"Posts: {self.config.max_posts}\n"
-                f"Comentários: {extracted_count} extraídos | {inserted_count} novos | {duplicate_count} duplicados\n"
-                f"Taxa de inserção: {rate:.1f}%\n"
-                f"Classificados IA: {classified_count}\n"
+                # Intervalo entre ciclos
+                await asyncio.sleep(self.cfg.cycle_interval_seconds)
+
+        except KeyboardInterrupt:
+            self.logger.info("[Agent] Interrompido pelo usuario.")
+        except Exception as e:
+            self.logger.error(f"[Agent] Erro fatal: {e}")
+            self.logger.error(traceback.format_exc())
+            await self.ntfy.send(
+                title="Sentinela — ERRO FATAL",
+                message=f"Agente autonomo encerrou com erro: {e}",
+                priority="urgent",
+                tags=["skull"],
             )
-            if cycle_error:
-                report_msg += f"⚠️ Erro: {cycle_error}\n"
+        finally:
+            self.is_running = False
+            self.logger.info("[Agent] Agente autonomo finalizado.")
 
-            status_emoji = "❌" if cycle_error else "✅"
-            self.notifier.notify(
-                f"{status_emoji} Ciclo #{self.cycle_count} Concluído — @{target.username}",
-                report_msg,
-                tags="white_check_mark,robot" if not cycle_error else "x,warning",
-                priority="default" if not cycle_error else "high"
-            )
-
-            # Decisão de Suspensão / Escalonamento (PAUSED)
-            if self.consecutive_blocks >= 3:
-                logger.critical("🛑 [Autopilot] 3 bloqueios seguidos detectados! Pausando orquestrador autônomo.")
-                self.notifier.notify(
-                    "🛑 Alerta: Orquestrador Suspenso",
-                    "A execução automática foi suspensa após 3 falhas seguidas de extração/bloqueio. Requer intervenção de operador.",
-                    tags="octagonal_sign,red_circle",
-                    priority="max"
-                )
-                # Dorme por 30 minutos em modo de hibernação
-                await asyncio.sleep(1800)
-                self.consecutive_blocks = 0
-                continue
-
-            # Intervalo entre ciclos
-            logger.info(f"😴 Dormindo por {self.config.cycle_interval}s antes do próximo ciclo...")
-            await asyncio.sleep(self.config.cycle_interval)
+    def stop(self):
+        self.is_running = False
+        self.logger.info("[Agent] Sinal de parada recebido.")
 
 
-# --- Modo Standalone (Execução CLI) ---
+# =============================================================================
+# ENTRY POINT
+# =============================================================================
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Sentinela Autonomous Collector v1.0")
-    parser.add_argument("--dry-run", action="store_true", help="Executa em modo simulação (sem raspar de verdade)")
-    parser.add_argument("--max-cycles", type=int, default=None, help="Número máximo de ciclos a executar")
-    parser.add_argument("--env", type=str, default=".env", help="Caminho do arquivo .env")
-    parser.add_argument("--interval", type=int, default=None, help="Intervalo em segundos entre ciclos")
-    parser.add_argument("--ntfy-url", type=str, default=None, help="Tópico/URL do canal Ntfy")
+def main():
+    parser = argparse.ArgumentParser(
+        description="Agente Autonomo Sentinela v1.0 — Orquestrador de Coleta",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="Exemplos:\n  python sentinela_autonomous_agent.py\n  python sentinela_autonomous_agent.py --env .env.producao --dry-run\n  python sentinela_autonomous_agent.py --max-cycles 10",
+    )
+    parser.add_argument("--env", help="Caminho do arquivo .env")
+    parser.add_argument("--dry-run", action="store_true", help="Modo simulacao (nao coleta)")
+    parser.add_argument("--max-cycles", type=int, default=0, help="Maximo de ciclos (0=infinito)")
+    parser.add_argument("--interval", type=int, help="Intervalo entre ciclos em segundos")
+    parser.add_argument("--ntfy-url", help="URL do topico Ntfy")
+    parser.add_argument("--log-level", default="INFO", choices=["DEBUG", "INFO", "WARNING", "ERROR"])
     args = parser.parse_args()
 
-    # Inicializa variáveis
-    cfg = CollectorConfig.from_env(Path(args.env))
+    # Carrega configuracao
+    env_path = Path(args.env) if args.env else None
+    cfg = CollectorConfig.from_env(env_path)
+
     if args.dry_run:
         cfg.dry_run = True
+    if args.max_cycles:
+        cfg.max_cycles = args.max_cycles
     if args.interval:
-        cfg.cycle_interval = args.interval
+        cfg.cycle_interval_seconds = args.interval
     if args.ntfy_url:
         cfg.ntfy_url = args.ntfy_url
+    cfg.log_level = args.log_level
 
-    from core.supabase_client import get_supabase_client
-    from workers.scrapers.wk_coleta_instagram import WkColetaInstagram
-    db = get_supabase_client()
+    # Cria e executa agente
+    agent = AutonomousCollector(cfg)
 
-    # Instancia e roda o orquestrador
-    collector = AutonomousCollector(cfg)
-    
     try:
-        asyncio.run(
-            collector.run(
-                worker_factory=WkColetaInstagram,
-                db_client=db,
-                max_cycles=args.max_cycles
-            )
-        )
+        asyncio.run(agent.run())
     except KeyboardInterrupt:
-        logger.info("👋 Agente autônomo encerrado manualmente pelo operador.")
+        agent.stop()
+        print("\nAgente interrompido.")
+
+
+if __name__ == "__main__":
+    main()
