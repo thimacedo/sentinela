@@ -16,7 +16,7 @@ import httpx
 from playwright.async_api import Page, BrowserContext, async_playwright, Browser, TimeoutError as PlaywrightTimeoutError
 
 from core.ai_service import ai_service
-from core.exceptions import DOMHealerRestartSignal
+from core.exceptions import DOMHealerRestartSignal, ExtractionFailure
 
 logger = logging.getLogger("instagram_scraper_v2")
 
@@ -287,6 +287,18 @@ class InstagramScraperV2:
             Se fornecido, o scraper pula todos os posts cujo shortcode é anterior
             ao checkpoint, evitando reprocessamento após crash.
         """
+        # Reset de stats para metricas por-ciclo precisas
+        self.stats = {
+            "posts_found": 0,
+            "posts_scraped": 0,
+            "comments_extracted": 0,
+            "api_calls": 0,
+            "api_comments_calls": 0,
+            "browser_renders": 0,
+            "session_rotations": 0,
+            "junk_detected": 0,
+            "errors": 0
+        }
         all_comments = []
         retry_count = 0
         blocked_attempts = 0
@@ -574,7 +586,10 @@ class InstagramScraperV2:
                     logger.info(f"✅ [V2] @{username} finalizado. {len(all_comments)} comentários extraídos.")
                     return {
                         "comments": all_comments,
-                        "post_metas": post_metas
+                        "post_metas": post_metas,
+                        "success": True,
+                        "comments_collected": len(all_comments),
+                        "posts_processed": scraped_count
                     }
 
             except Exception as e:
@@ -596,7 +611,13 @@ class InstagramScraperV2:
             logger.error("❌ [V2] Todas as tentativas de scraping resultaram em bloqueio, redirecionamento ou sessão inválida.")
             raise RuntimeError("all_sessions_blocked")
 
-        return {"comments": all_comments, "post_metas": []}
+        return {
+            "comments": all_comments,
+            "post_metas": [],
+            "success": len(all_comments) > 0,
+            "comments_collected": len(all_comments),
+            "posts_processed": 0
+        }
 
     async def open_post_modal(self, page: Page, shortcode: str) -> bool:
         if page.is_closed(): return False
@@ -780,6 +801,20 @@ class InstagramScraperV2:
             comments = await self._extract_from_dom(page, shortcode)
 
         await self.close_post_modal(page)
+
+        # Se todos os métodos falharam, registra falha estrutural (PASA v98.9)
+        if not comments:
+            self.stats["errors"] += 1
+            logger.error(
+                "❌ [V2] Falha estrutural de extração no post %s: "
+                "API interna, captured JSON, scripts inline e DOM falharam.",
+                shortcode
+            )
+            raise ExtractionFailure(
+                f"All extraction methods failed for post {shortcode}. "
+                f"API_Active={self._session_id_active is not None}, "
+                f"CSRF={self._csrf_token is not None}"
+            )
         
         now = datetime.now(timezone.utc).isoformat()
         normalized = []

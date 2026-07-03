@@ -511,14 +511,27 @@ class QueueManager:
             nova_prioridade = 1 if termometro == "QUENTE" else (5 if termometro in ("FRIO", "MORNO") else 3)
             is_error = hasattr(target, "error") and target.error
             is_empty = is_error and target.error in ["junk_detected", "invalid_target: 404_not_found"]
-            
-            await asyncio.to_thread(
-                self.db.table("fila_coleta").update({
-                    "status": "SEM_DADOS_RECENTES" if is_empty else "CONCLUIDO",
-                    "prioridade": nova_prioridade,
-                    "updated_at": now_iso
-                }).eq("id", target.queue_id).execute
-            )
+            final_status = "SEM_DADOS_RECENTES" if is_empty else "CONCLUIDO"
+
+            # Libera o lock atômico antes de atualizar status (PATCH v1.0)
+            try:
+                await self._release_atomic(target.queue_id, final_status, "rotate_target")
+                logger.debug("[Queue] Lock atômico liberado para queue_id=%s", target.queue_id)
+            except Exception as e_rel:
+                logger.warning("[Queue] Falha ao liberar lock atômico em rotate_target: %s", e_rel)
+                # Fallback: atualiza diretamente limpando locked_by
+                try:
+                    await asyncio.to_thread(
+                        self.db.table("fila_coleta").update({
+                            "status": final_status,
+                            "prioridade": nova_prioridade,
+                            "locked_by": None,
+                            "locked_at": None,
+                            "updated_at": now_iso
+                        }).eq("id", target.queue_id).execute
+                    )
+                except Exception as e2:
+                    logger.error("[Queue] Fallback de release também falhou: %s", e2)
             
         logger.info(f"[Queue] Rotação finalizada para @{target.username} -> {termometro}")
 

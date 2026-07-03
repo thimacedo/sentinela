@@ -231,3 +231,8 @@ class AIServiceError(ScrapeException):
             f"AI Service error ({service}): {reason}",
             context=context
         )
+
+
+class ExtractionFailure(ScrapeException):
+    """Levantada quando todos os métodos de extração de comentários falham para um post."""
+    pass
