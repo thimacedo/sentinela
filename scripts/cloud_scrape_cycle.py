@@ -161,7 +161,7 @@ async def run_cloud_cycle(max_targets: int = 5, max_posts: int = 2, max_comments
 
             res = db.table("comentarios").upsert(
                 clean_null_chars(safe_comments),
-                on_conflict="candidato_id,post_shortcode,id_externo",
+                on_conflict="id_externo",
                 ignore_duplicates=True
             ).execute()
 

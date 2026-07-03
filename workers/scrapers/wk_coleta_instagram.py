@@ -188,9 +188,7 @@ class WkColetaInstagram(BaseWorker):
                     "post_shortcode": c.get("post_shortcode") or shortcode,
                     "plataforma": c.get("plataforma") or "INSTAGRAM",
                     "tier_used": c.get("tier_used", 2),
-                    "sentimento": None, # Campo opcional no schema
                     "is_hate": False,   # Valor padrão
-                    "is_spam": False    # Valor padrão
                 }
                 if c.get("is_bot"):
                     pericial_obs = f"[BOT DETECTED] Padrão: {c.get('bot_pattern')}"
@@ -206,7 +204,7 @@ class WkColetaInstagram(BaseWorker):
                 # 🛡️ TENTATIVA 1: Upsert Completo (v63.0)
                 res = self.db.table("comentarios").upsert(
                     clean_null_chars(safe_comments), 
-                    on_conflict="candidato_id,post_shortcode,id_externo",
+                    on_conflict="id_externo",
                     ignore_duplicates=True
                 ).execute()
                 
@@ -233,7 +231,7 @@ class WkColetaInstagram(BaseWorker):
                 try:
                     res = self.db.table("comentarios").upsert(
                         clean_null_chars(emergency_comments),
-                        on_conflict="candidato_id,post_shortcode,id_externo",
+                        on_conflict="id_externo",
                         ignore_duplicates=True
                     ).execute()
                     

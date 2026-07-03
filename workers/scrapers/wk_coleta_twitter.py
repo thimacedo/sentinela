@@ -200,7 +200,7 @@ class WkColetaTwitter(BaseWorker):
                 try:
                     res = self.db.table("comentarios").upsert(
                         clean_null_chars(safe_comments), 
-                        on_conflict="candidato_id,post_shortcode,id_externo",
+                        on_conflict="id_externo",
                         ignore_duplicates=True
                     ).execute()
                     

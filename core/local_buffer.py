@@ -143,7 +143,7 @@ class LocalBuffer:
         try:
             res = db_client.table("comentarios").upsert(
                 clean_null_chars(clean_pending), 
-                on_conflict="candidato_id,post_shortcode,id_externo", 
+                on_conflict="id_externo", 
                 ignore_duplicates=True
             ).execute()
             
@@ -160,11 +160,13 @@ class LocalBuffer:
                     for p in clean_pending:
                         p.pop("analise_pericial", None)
                         p.pop("trace_id", None)
+                        p.pop("is_spam", None)
+                        p.pop("sentimento", None)
                         fallback_pending.append(p)
                     
                     res = db_client.table("comentarios").upsert(
                         clean_null_chars(fallback_pending),
-                        on_conflict="candidato_id,post_shortcode,id_externo",
+                        on_conflict="id_externo",
                         ignore_duplicates=True
                     ).execute()
                     
