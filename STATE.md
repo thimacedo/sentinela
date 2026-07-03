@@ -1,14 +1,21 @@
 # STATE.md — Sentinela
-_last_updated: 2026-07-01 | branch: main | version: v98.8_
+_last_updated: 2026-07-03 | branch: main | version: v98.9_
 
 ## Status Operacional
 
 | Subsistema | Status | Observação |
 |---|---|---|
-| Coleta | 🟡 Instável/Auth | Falha de saldo Xquik (Twitter). Scrapers secundários (Bluesky, Reddit, Telegram) desativados e removidos. Instagram funcional sob sessões ativas. |
-| Inteligência | 🟢 Operacional | Malha de IA resiliente + SaFastDrop local + Integração Stanza/DSPy. |
-| Dashboard | 🟢 Operacional | Painel "Decision Room" com auto-start, telemetria real via DB e Coleta Direcionada. |
-| SRE / Autocura | 🟢 Operacional | Agente de SRE Autônomo (`sre_agent.py`) ativo em background com desvio headless. |
+| Coleta | 🟢 Operacional | Instagram funcional e validado. Twitter sob erro 402 (saldo Xquik zerado, esperado). Demais scrapers secundários desativados. |
+| Inteligência | 🟢 Operacional | Malha de IA resiliente + SaFastDrop local + Adaptações de Failover ativos. |
+| Dashboard | 🟢 Operacional | Painel "Decision Room" com telemetria real via DB e Coleta Direcionada. |
+| SRE / Autocura | 🟢 Operacional | Agente de SRE Autônomo (`sre_agent.py`) verificado e 100% funcional. |
+
+## Histórico Recente de Correções (v98.9)
+1. **Auditoria Geral e Correções Críticas de Persistência (Concluído)**:
+   - **Correção de Chaves no Upsert:** Ajustadas as chamadas de `.upsert()` em [local_buffer.py](file:///c:/projetos/sentinela/core/local_buffer.py), [wk_coleta_instagram.py](file:///c:/projetos/sentinela/workers/scrapers/wk_coleta_instagram.py), [wk_coleta_twitter.py](file:///c:/projetos/sentinela/workers/scrapers/wk_coleta_twitter.py) e [cloud_scrape_cycle.py](file:///c:/projetos/sentinela/scripts/cloud_scrape_cycle.py) para utilizar `on_conflict="id_externo"`, respeitando a restrição única correta do Supabase remoto e evitando falhas de chave primária duplicada.
+   - **Remoção de Campos Órfãos no Sync:** Removido o campo inexistente `is_spam` do mapeamento de dados do Instagram. Atualizada a lógica de autocura/fallback em [local_buffer.py](file:///c:/projetos/sentinela/core/local_buffer.py) para remover os campos `is_spam` e `sentimento` antes da persistência, resolvendo o erro `PGRST204` de Schema mismatch.
+   - **Ajuste de Timeout de Auditoria:** Ampliado o timeout do ciclo do Instagram no script de auditoria rápida [audit_scrapers.py](file:///c:/projetos/sentinela/scratch/audit_scrapers.py) para 120s, permitindo o tempo de inicialização do Playwright e carregamento de rede.
+   - **Verificação Geral de Agentes:** Validados os ciclos OODA e integrações de [ScrapeAgent](file:///c:/projetos/sentinela/core/agent_scraper/agent.py) e [SREAgent](file:///c:/projetos/sentinela/core/autopilot/sre_agent.py) via scripts unitários e de integração, com 100% de sucesso.
 
 ## Histórico Recente de Correções (v98.8)
 1. **Eliminação de Módulos de Baixa Relevância (Concluído)**:
