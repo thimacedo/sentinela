@@ -84,15 +84,22 @@ def do_repopulate():
             termometro = cand.get("termometro", "MORNO")
             prioridade = 2 if termometro == "QUENTE" else (1 if termometro == "MORNO" else 0)
             
-            # Insere na fila
-            db.table("fila_coleta").insert({
-                "candidato_id": username,
-                "status": "PENDENTE",
-                "prioridade": prioridade,
-                "created_at": datetime.now(timezone.utc).isoformat()
-            }).execute()
-            inserted_count += 1
-            print(f"     [+] Enfileirado: @{username} (Prioridade: {prioridade})")
+            # Insere na fila tratando erros individuais
+            try:
+                db.table("fila_coleta").insert({
+                    "candidato_id": username,
+                    "status": "PENDENTE",
+                    "prioridade": prioridade,
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                }).execute()
+                inserted_count += 1
+                print(f"     [+] Enfileirado: @{username} (Prioridade: {prioridade})")
+            except Exception as e_row:
+                # Se for erro de duplicata de chave única, apenas informa de forma limpa
+                if "23505" in str(e_row) or "duplicate" in str(e_row).lower():
+                    print(f"     [-] @{username} já agendado para hoje (duplicata ignorada).")
+                else:
+                    print(f"     [-] Erro ao enfileirar @{username}: {e_row}")
             
         print(f"✅ Repopulação concluída. {inserted_count} novos alvos inseridos na fila como PENDENTE.")
     except Exception as e:

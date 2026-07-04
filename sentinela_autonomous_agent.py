@@ -21,6 +21,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+from core.exceptions import ExtractionFailure
 
 try:
     import pystray
@@ -728,6 +729,14 @@ class AutonomousCollector:
                 elif "dom" in str(metrics.error).lower() or "empty" in str(metrics.error).lower():
                     metrics.dom_empty_detected = True
 
+        except ExtractionFailure as ef:
+            metrics.end_time = datetime.now(timezone.utc)
+            metrics.duration_seconds = (metrics.end_time - metrics.start_time).total_seconds()
+            metrics.success = False
+            metrics.error = "ExtractionFailure"
+            metrics.error_details = str(ef)
+            self.consecutive_blocks += 1
+            self.logger.error(f"[Cycle #{self.cycle_count}] Falha na extração de dados (ExtractionFailure): {ef}")
         except Exception as e:
             metrics.end_time = datetime.now(timezone.utc)
             metrics.duration_seconds = (metrics.end_time - metrics.start_time).total_seconds()
@@ -735,7 +744,7 @@ class AutonomousCollector:
             metrics.error = type(e).__name__
             metrics.error_details = str(e)
             self.consecutive_blocks += 1
-            self.logger.error(f"[Cycle #{self.cycle_count}] Excecao: {e}")
+            self.logger.error(f"[Cycle #{self.cycle_count}] Exceção: {e}")
             self.logger.error(traceback.format_exc())
 
         # Notifica resultado
