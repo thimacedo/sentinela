@@ -23,6 +23,13 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 from core.exceptions import ExtractionFailure
 
+if sys.platform.startswith("win"):
+    try:
+        sys.stdout.reconfigure(encoding='utf-8', errors='backslashreplace')
+        sys.stderr.reconfigure(encoding='utf-8', errors='backslashreplace')
+    except AttributeError:
+        pass
+
 try:
     import pystray
     from PIL import Image, ImageDraw
