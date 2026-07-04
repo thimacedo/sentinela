@@ -4,6 +4,17 @@ from typing import List, Dict, Any
 
 logger = logging.getLogger("core.lexical_filter")
 
+# FIX v1.0: Padroes de contexto benigno para fast-drop de celebracoes
+BENIGN_CONTEXT_PATTERNS = [
+    r'\bparab[eé]ns\b.*\b(?:anivers[áa]rio|amigo|irm[ãa]o|vida)\b',
+    r'\bfeliz\s+anivers[áa]rio\b',
+    r'\btudo\s+de\s+bom\b.*\b(?:pra\s+voc[êe]|amigo)\b',
+    r'\bDeus\s+aben[çc]oe\b.*\b(?:vida|fam[íi]lia)\b',
+    r'\bmuitos\s+anos\s+de\s+vida\b',
+]
+_compiled_benign_patterns = [re.compile(p, re.IGNORECASE) for p in BENIGN_CONTEXT_PATTERNS]
+
+
 class LexicalFilter:
     """
     Filtro de densidade léxica para descartar 'lixo' antes de gastar tokens de IA (PASA v65.0).
@@ -50,6 +61,19 @@ class LexicalFilter:
         if not re.search(r'[\w\d]', clean_text, re.UNICODE):
             return True
             
+        return False
+
+    def is_benign(self, text: str) -> bool:
+        """
+        FIX v1.0: Detecta se o texto eh de um contexto claramente benigno
+        (aniversario, celebracao, agradecimento) para evitar falsos positivos
+        no pipeline de classificacao.
+        """
+        if not text:
+            return False
+        for pattern in _compiled_benign_patterns:
+            if pattern.search(text):
+                return True
         return False
 
     def should_shadowban(self, text: str) -> bool:
