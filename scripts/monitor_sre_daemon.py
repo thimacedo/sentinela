@@ -108,7 +108,7 @@ def monitor_cycle():
         state = status.get("status", "UNKNOWN")
         consecutive_blocks = status.get("consecutive_blocks", 0)
         
-        # Verifica timeout do Heartbeat (lag > 120s indica congelamento)
+        # Verifica timeout do Heartbeat (lag > 120s indica congelamento, tolerância de 400s no Modo Noturno)
         if hb_str:
             # Exemplo: 2026-07-04T07:02:52.728732+00:00 ou similar
             hb_clean = hb_str.split(".")[0].replace("Z", "")
@@ -121,7 +121,12 @@ def monitor_cycle():
                 
             lag = (datetime.now(timezone.utc) - hb_dt).total_seconds()
             
-            if lag > 120:
+            # Ajusta threshold de lag dinamicamente conforme horário
+            current_hour = datetime.now().hour
+            is_night = current_hour >= 23 or current_hour < 5
+            max_lag = 400 if is_night else 120
+            
+            if lag > max_lag:
                 logger.error(f"🚨 [SRE] Agente congelado! Heartbeat inativo ha {lag:.1f}s. Forcando reinicializacao...")
                 # Mata processo zumbi e reinicia
                 try:
