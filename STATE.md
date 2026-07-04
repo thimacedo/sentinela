@@ -22,6 +22,11 @@ _last_updated: 2026-07-04 | branch: main | version: v100.0_
    - **cj_sre_backup_sync:** Sincroniza em lote (bulk upsert) comentários acumulados localmente no SQLite para o Supabase de forma resiliente e com autocura de schema.
 4. **Notificação Robusta Ntfy:**
    - Criado o módulo `core/ntfy.py` que codifica todos os cabeçalhos (Title e Tags) usando formato MIME Header para compatibilidade total de emojis e acentuação no Windows (latin-1).
+5. **Suíte de Testes e Validação Integrada:**
+   - Corrigido e integrado o script `sentinela_test_suite.py` rodando com sucesso no ambiente virtual `.venv` local com aprovação de 11/11 testes unitários, estáticos, de dependências e de rede.
+   - Injetado o tratamento e importação explícita de `ExtractionFailure` no loop de ciclo do agente autônomo.
+   - Organizado o pipeline de SRE copiando os cronjobs de monitoramento e sincronização para a pasta unificada `workers/sre/`.
+   - Depurado o script `sentinela_correcao.py` e o utilitário de repopulação `sentinela_diagnostico_repop.py` para ignorar conflitos de chaves primárias duplicadas (`23505` Unique Violations) na fila do Supabase de forma elegante.
 
 ## Histórico Recente de Correções (v99.2)
 1. **Correção do Módulo de IA Solenya (Concluído)**:
