@@ -40,6 +40,71 @@ def create_status_image(color: str) -> "Image.Image":
     return image
 
 
+# ============================================================
+# [PATCH v1.0] GRACEFUL SHUTDOWN - Libera locks ao encerrar
+# ============================================================
+import signal
+import atexit
+import sys
+
+_agent_instance = None  # Referencia ao agente para shutdown
+
+def _register_agent_instance(agent):
+    """Registra a instancia do agente para graceful shutdown."""
+    global _agent_instance
+    _agent_instance = agent
+
+def _graceful_shutdown():
+    """Libera locks e salva estado ao encerrar."""
+    global _agent_instance
+    if _agent_instance is not None:
+        try:
+            if hasattr(_agent_instance, "current_target") and _agent_instance.current_target:
+                target = _agent_instance.current_target
+                if hasattr(_agent_instance, "_smart_queue") and _agent_instance._smart_queue:
+                    import asyncio
+                    try:
+                        # Executa a liberação de forma segura no loop de eventos ativo ou cria um loop temporário
+                        loop = asyncio.get_event_loop()
+                        if loop.is_running():
+                            asyncio.create_task(_agent_instance._smart_queue.base_queue.release_atomic(
+                                queue_id=target.id,
+                                status="PENDENTE",
+                                worker_id="sentinela_auto_worker"
+                            ))
+                        else:
+                            loop.run_until_complete(_agent_instance._smart_queue.base_queue.release_atomic(
+                                queue_id=target.id,
+                                status="PENDENTE",
+                                worker_id="sentinela_auto_worker"
+                            ))
+                    except Exception as e_loop:
+                        print(f"[Shutdown] Erro ao obter loop: {e_loop}")
+                print(f"[Shutdown] Lock liberado para @{target.username}")
+            if hasattr(_agent_instance, "last_health") and hasattr(_agent_instance, "save_status"):
+                _agent_instance.save_status(_agent_instance.last_health)
+                print("[Shutdown] Status salvo em agent.status.json")
+        except Exception as e:
+            print(f"[Shutdown] Erro ao liberar lock: {e}")
+
+def _signal_handler(signum, frame):
+    """Handler para sinais de terminacao."""
+    sig_name = {signal.SIGINT: "SIGINT (Ctrl+C)", signal.SIGTERM: "SIGTERM (kill)"}.get(signum, f"Signal {signum}")
+    print(f"[Signal] Recebido {sig_name}, encerrando graciosamente...")
+    _graceful_shutdown()
+    sys.exit(0)
+
+atexit.register(_graceful_shutdown)
+try:
+    signal.signal(signal.SIGINT, _signal_handler)
+    signal.signal(signal.SIGTERM, _signal_handler)
+except (ValueError, OSError):
+    pass
+# ============================================================
+# FIM DO PATCH GRACEFUL SHUTDOWN
+# ============================================================
+
+
 # =============================================================================
 # CONFIGURACAO
 # =============================================================================
@@ -534,6 +599,8 @@ class AutonomousCollector:
     """Agente autonomo que gerencia o ciclo completo de coleta."""
 
     def __init__(self, config: Optional[CollectorConfig] = None):
+        # [PATCH] Registrar instancia para graceful shutdown
+        _register_agent_instance(self)
         self.cfg = config or CollectorConfig.from_env()
         self.ntfy = NtfyNotifier(self.cfg.ntfy_url, self.cfg.ntfy_enabled)
         self.health_checker: Optional[SupabaseHealthChecker] = None
@@ -948,22 +1015,6 @@ class AutonomousCollector:
             )
         finally:
             self.is_running = False
-            
-            # PREVENÇÃO DE LOCKS ÓRFÃOS (Fase 1 SRE)
-            if getattr(self, 'current_target', None) and hasattr(self, '_smart_queue'):
-                target = self.current_target
-                self.logger.warning(f"⚠️ [Shutdown] Liberando lock do alvo ativo @{target.username} antes de encerrar...")
-                try:
-                    # Executa a liberação de forma assíncrona
-                    await self._smart_queue.base_queue.release_atomic(
-                        queue_id=target.id,
-                        status="PENDENTE",
-                        worker_id="sentinela_auto_worker"
-                    )
-                    self.logger.info(f"✅ [Shutdown] Lock de @{target.username} liberado com sucesso!")
-                except Exception as e_release:
-                    self.logger.error(f"❌ [Shutdown] Falha ao liberar lock de @{target.username}: {e_release}")
-            
             self.logger.info("[Agent] Agente autonomo finalizado.")
 
     def stop(self):
@@ -1126,16 +1177,6 @@ def main():
 
     # Cria e executa agente
     agent = AutonomousCollector(cfg)
-
-    # Registro de sinais de Graceful Shutdown (SIGINT, SIGTERM)
-    import signal
-    def handle_shutdown_signal(signum, frame):
-        print(f"\n[Signal] Recebido sinal {signum}. Iniciando encerramento gracioso...")
-        agent.stop()
-        raise KeyboardInterrupt()
-
-    signal.signal(signal.SIGINT, handle_shutdown_signal)
-    signal.signal(signal.SIGTERM, handle_shutdown_signal)
 
     try:
         asyncio.run(agent.run(
