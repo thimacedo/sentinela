@@ -178,3 +178,7 @@ _last_updated: 2026-07-03 | branch: main | version: v99.0_
    - **Ícone Dinâmico IDLE (Cor Azul)**: Implementada a cor azul (`#2196F3`) e tooltip dedicado para sinalizar o estado `IDLE` na system tray do Windows quando o agente estiver saudável mas não houver mais alvos pendentes de processamento.
    - **Heartbeat Persistente (`agent.status.json`)**: Configurada a gravação contínua e assíncrona do arquivo de métricas de telemetria `agent.status.json` na raiz do projeto, permitindo auditorias externas do estado atual em tempo de execução.
    - **Notificação de Alerta de Fila Baixa**: Adicionado gatilho de notificação automática no Ntfy caso a contagem de tarefas pendentes na `fila_coleta` caia para menos de 10 alvos.
+
+## Histórico Recente de Correções (v99.2)
+1. **Correção do Módulo de IA Solenya (Concluído)**:
+   - **Inicialização de Clientes de IA**: Corrigido erro de inferência cognitiva `'NoneType' object has no attribute 'chat'` no analisador de desinformação em [behavior_engine.py](file:///C:/Projetos/sentinela/core/behavior_engine.py#L66-L69). Adicionada chamada explícita ao `ai_service._ensure_clients()` antes do acesso ao `mistral_client`, garantindo o lazy-loading correto dos handlers de LLM.

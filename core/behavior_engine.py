@@ -64,6 +64,9 @@ class BehaviorEngine:
         Se não houver coordenação de no mínimo 3 IDs no mesmo cluster, retorne "clusters": [].
         """
         try:
+            # Garante que os clients de IA do ai_service foram inicializados
+            ai_service._ensure_clients()
+            
             # Invoca modelo de triagem veloz (Mistral/Flash)
             response = await ai_service.mistral_client.chat.completions.create(
                 model="open-mistral-nemo",
