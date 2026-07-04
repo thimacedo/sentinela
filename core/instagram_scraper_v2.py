@@ -893,6 +893,33 @@ class InstagramScraperV2:
                 continue
             if ' and others' in texto_lower or ' e outras ' in texto_lower or ' e outros ' in texto_lower:
                 continue
+                
+            # REGRA IMUTÁVEL DE SEGURANÇA (PASA v50.1 / SRE): Bloqueio de vazamentos de metadados, curtidas e posts do próprio candidato
+            texto_strip = texto.strip()
+            autor_clean = (c.get("autor_username") or c.get("autor") or "").replace(".rn", "").lower()
+            candidato_clean = username.replace(".rn", "").lower() if username else ""
+            
+            # A. Descarta se for string literais de interface ou marcação de tempo isoladas
+            if texto_strip in ["Meta", "1d", "2d", "3d", "4d", "5d", "6d", "7d", "1w", "2w", "3w", "4w"]:
+                continue
+            import re
+            if re.match(r'^\d+\s*(day|hour|min|second)s?\s*ago$', texto_strip, re.IGNORECASE):
+                continue
+            if re.match(r'^[a-z0-9_.]+\.{3,}$', texto_strip, re.IGNORECASE):
+                continue
+                
+            # B. Descarta se for menção cruzada de engajamento do DOM (ex: autor '167razoesrn', texto 'allysonbezerra.rn')
+            if re.match(r'^[a-z0-9_.]+$', texto_strip, re.IGNORECASE):
+                if texto_lower == candidato_clean or texto_lower == (username or "").lower() or autor_clean == candidato_clean:
+                    continue
+                    
+            # C. Descarta se for post/legenda original do próprio candidato vazada na lista de comentários
+            if autor_clean == candidato_clean and (candidato_clean in texto_lower or "\n" in texto):
+                continue
+                
+            # D. Descarta se o texto for composto unicamente do nome do autor (erro de parsing do DOM)
+            if texto_lower == autor_clean:
+                continue
             
             # v99.2: Geração de ID determinístico unificado com base em atributos imutáveis para evitar duplicatas
             data_pub = c.get("data_publicacao") or c.get("timestamp") or post_date_iso or now
