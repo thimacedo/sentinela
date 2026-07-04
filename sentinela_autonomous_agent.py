@@ -754,6 +754,7 @@ class AutonomousCollector:
     async def run(self, worker_factory=None, db_client=None, session_pool=None):
         """Loop principal do agente autonomo."""
         self.is_running = True
+        self.current_target = None
         self.logger.info("=" * 60)
         self.logger.info("AGENTE AUTONOMO SENTINELA v1.0 — Iniciando operacao")
         self.logger.info("=" * 60)
@@ -910,12 +911,18 @@ class AutonomousCollector:
                         await asyncio.sleep(self.cfg.cycle_interval_seconds)
                         continue
 
+                    # Salva alvo ativo para SRE Graceful Shutdown
+                    self.current_target = target
+
                     # Executa ciclo de coleta
                     metrics = await self.execute_collection_cycle(worker, target)
 
                     # Registra resultado no controle inteligente de fluxo
                     self._smart_queue.record_cycle_result(target.username, metrics)
                     self.logger.info(f"[Cycle #{self.cycle_count}] Finalizado em {metrics.duration_seconds:.1f}s | Status: {'OK' if metrics.success else 'FALHA'}")
+                    
+                    # Limpa alvo ativo
+                    self.current_target = None
                 else:
                     self.logger.warning("[Cycle] worker_factory nao fornecido. Modo monitoramento apenas.")
                     await asyncio.sleep(self.cfg.cycle_interval_seconds)
@@ -941,6 +948,22 @@ class AutonomousCollector:
             )
         finally:
             self.is_running = False
+            
+            # PREVENÇÃO DE LOCKS ÓRFÃOS (Fase 1 SRE)
+            if getattr(self, 'current_target', None) and hasattr(self, '_smart_queue'):
+                target = self.current_target
+                self.logger.warning(f"⚠️ [Shutdown] Liberando lock do alvo ativo @{target.username} antes de encerrar...")
+                try:
+                    # Executa a liberação de forma assíncrona
+                    await self._smart_queue.base_queue.release_atomic(
+                        queue_id=target.id,
+                        status="PENDENTE",
+                        worker_id="sentinela_auto_worker"
+                    )
+                    self.logger.info(f"✅ [Shutdown] Lock de @{target.username} liberado com sucesso!")
+                except Exception as e_release:
+                    self.logger.error(f"❌ [Shutdown] Falha ao liberar lock de @{target.username}: {e_release}")
+            
             self.logger.info("[Agent] Agente autonomo finalizado.")
 
     def stop(self):
@@ -1103,6 +1126,16 @@ def main():
 
     # Cria e executa agente
     agent = AutonomousCollector(cfg)
+
+    # Registro de sinais de Graceful Shutdown (SIGINT, SIGTERM)
+    import signal
+    def handle_shutdown_signal(signum, frame):
+        print(f"\n[Signal] Recebido sinal {signum}. Iniciando encerramento gracioso...")
+        agent.stop()
+        raise KeyboardInterrupt()
+
+    signal.signal(signal.SIGINT, handle_shutdown_signal)
+    signal.signal(signal.SIGTERM, handle_shutdown_signal)
 
     try:
         asyncio.run(agent.run(
