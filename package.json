@@ -9,7 +9,7 @@
   },
   "scripts": {
     "test": "playwright test tests/",
-    "api": ".venv\\Scripts\\uvicorn api.index:app --reload --host 0.0.0.0 --port 8000 --reload-exclude scratch --reload-exclude .agents --reload-exclude logs --reload-exclude runtime_state",
+    "api": ".venv\\Scripts\\uvicorn api.index:app --reload --host 0.0.0.0 --port 8000 --reload-exclude scratch --reload-exclude .agents --reload-exclude logs --reload-exclude runtime_state --reload-exclude agent.status.json --reload-exclude *.tmp --reload-exclude *.db --reload-exclude *.db-journal",
     "dev": "concurrently \"npm run api\" \"npm run dev --prefix frontend\" --names \"Backend,Frontend\" --prefix-colors \"blue,green\"",
     "build": "cd frontend && npm install && npm run build"
   },
