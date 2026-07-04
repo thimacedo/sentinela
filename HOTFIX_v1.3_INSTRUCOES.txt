@@ -1,0 +1,232 @@
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  HOTFIX v1.3 — INSTRUCOES MANUAIS DE CORRECAO                             ║
+║  Aplicar em: sentinela_autonomous_agent.py                                  ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+SITUACAO: Agente em VERMELHO, apenas 2 ciclos, nao recupera
+
+═══════════════════════════════════════════════════════════════════════════════
+PATCH 1: Corrigir should_pause_globally() — Verificar fila Supabase
+═══════════════════════════════════════════════════════════════════════════════
+
+ARQUIVO: sentinela_autonomous_agent.py
+CLASSE: SmartQueueManager
+METODO: should_pause_globally()
+
+LOCALIZE:
+    def should_pause_globally(self) -> Tuple[bool, str]:
+        """Determina se o sistema inteiro deve pausar por falta de atividade."""
+        # Se 10+ ciclos globais vazios, sugere pausa longa
+        if self.global_empty_cycles >= 10:
+            return True, f"{self.global_empty_cycles} ciclos globais sem insercoes. Possivel bloqueio massivo."
+
+        # Se todos os alvos conhecidos estao em backoff/exhausted
+        if self.target_states:
+            all_blocked = all(s.status in ("EXHAUSTED", "BLOCKED", "BACKOFF") for s in self.target_states.values())
+            if all_blocked:
+                return True, "Todos os alvos em backoff. Aguardando recuperacao."
+
+        return False, ""
+
+SUBSTITUA POR:
+    def should_pause_globally(self) -> Tuple[bool, str]:
+        """Determina se o sistema inteiro deve pausar por falta de atividade."""
+
+        # [HOTFIX v1.3] ANTES de pausar, verifica se ha NOVOS itens na fila Supabase
+        # que ainda nao foram processados (nao estao no target_states)
+        try:
+            import asyncio
+            if hasattr(self.base_queue, 'db'):
+                result = asyncio.get_event_loop().run_until_complete(
+                    asyncio.to_thread(
+                        self.base_queue.db.table("fila_coleta")
+                        .select("id", count="exact")
+                        .is_("locked_by", "null")
+                        .not_.in_("status", ["CONCLUIDO", "SEM_DADOS_RECENTES"])
+                        .execute
+                    )
+                )
+                pending_count = getattr(result, "count", 0)
+                if pending_count > len(self.target_states):
+                    return False, f"{pending_count} itens pendentes na fila — continuando"
+        except Exception:
+            pass  # Fallback para comportamento anterior
+
+        # Se 10+ ciclos globais vazios, sugere pausa longa
+        if self.global_empty_cycles >= 10:
+            return True, f"{self.global_empty_cycles} ciclos globais sem insercoes. Possivel bloqueio massivo."
+
+        # Se todos os alvos conhecidos estao em backoff/exhausted
+        if self.target_states:
+            all_blocked = all(s.status in ("EXHAUSTED", "BLOCKED", "BACKOFF") for s in self.target_states.values())
+            if all_blocked:
+                return True, "Todos os alvos em backoff. Aguardando recuperacao."
+
+        return False, ""
+
+
+═══════════════════════════════════════════════════════════════════════════════
+PATCH 2: Reduzir timeout de pausa global (1h → 10min)
+═══════════════════════════════════════════════════════════════════════════════
+
+ARQUIVO: sentinela_autonomous_agent.py
+CLASSE: AutonomousCollector
+METODO: _pause_global_recovery()
+
+LOCALIZE:
+        max_pause_duration = 3600  # Timeout maximo: 1 hora
+
+SUBSTITUA POR:
+        max_pause_duration = 600  # [HOTFIX v1.3] Timeout reduzido: 10 minutos
+
+
+═══════════════════════════════════════════════════════════════════════════════
+PATCH 3: Reduzir intervalo de verificacao (30s → 10s)
+═══════════════════════════════════════════════════════════════════════════════
+
+ARQUIVO: sentinela_autonomous_agent.py
+CLASSE: AutonomousCollector
+METODO: _pause_global_recovery()
+
+LOCALIZE:
+        check_interval = 30  # Verifica a cada 30 segundos
+
+SUBSTITUA POR:
+        check_interval = 10  # [HOTFIX v1.3] Verifica a cada 10 segundos
+
+
+═══════════════════════════════════════════════════════════════════════════════
+PATCH 4: Adicionar recuperacao automatica de circuit breaker
+═══════════════════════════════════════════════════════════════════════════════
+
+ARQUIVO: sentinela_autonomous_agent.py
+CLASSE: AutonomousCollector
+METODO: check_system_health()
+
+LOCALIZE (logo apos):
+        health = SystemHealth()
+        self.health_checker = SupabaseHealthChecker(db_client)
+
+INSIRA DEPOIS:
+
+        # [HOTFIX v1.3] Recuperacao automatica de circuit breaker
+        try:
+            from core.circuit_breaker import scraper_circuit_breaker
+            if not scraper_circuit_breaker.can_execute("instagram"):
+                cb_state = scraper_circuit_breaker._states.get("instagram")
+                if cb_state:
+                    opened_at = getattr(cb_state, "opened_at", None)
+                    if opened_at:
+                        elapsed = (datetime.now(timezone.utc) - opened_at).total_seconds()
+                        if elapsed > 600:  # 10 minutos
+                            self.logger.info("[HOTFIX v1.3] Circuit breaker aberto ha mais de 10min. Resetando...")
+                            scraper_circuit_breaker.reset()
+                            await self.ntfy.send(
+                                title="Sentinela — Recuperacao",
+                                message="Circuit breaker resetado automaticamente apos 10min.",
+                                priority="default",
+                                tags=["arrows_counterclockwise"],
+                            )
+        except Exception as e:
+            self.logger.debug(f"[HOTFIX v1.3] Erro ao verificar CB: {e}")
+
+
+═══════════════════════════════════════════════════════════════════════════════
+PATCH 5: Adicionar recuperacao de sessoes bloqueadas
+═══════════════════════════════════════════════════════════════════════════════
+
+ARQUIVO: sentinela_autonomous_agent.py
+CLASSE: AutonomousCollector
+METODO: check_system_health()
+
+LOCALIZE:
+        health.sessions_total = session_stats["total"]
+        health.sessions_available = session_stats["available"]
+        health.sessions_blocked = session_stats["blocked"]
+
+INSIRA DEPOIS:
+
+        # [HOTFIX v1.3] Recuperacao de sessoes bloqueadas
+        if health.sessions_available == 0 and health.sessions_blocked > 0:
+            self.logger.warning(f"[HOTFIX v1.3] Todas as {health.sessions_blocked} sessoes bloqueadas. Tentando recuperacao...")
+            try:
+                if hasattr(session_pool, '_sessions'):
+                    recovered = 0
+                    for session in session_pool._sessions:
+                        if hasattr(session, 'blocked_until') and session.blocked_until:
+                            blocked_age = (datetime.now(timezone.utc) - session.blocked_until).total_seconds()
+                            if blocked_age > 1800:  # Bloqueada ha mais de 30min
+                                session.blocked_until = None
+                                session.is_available = True
+                                recovered += 1
+                    if recovered > 0:
+                        self.logger.info(f"[HOTFIX v1.3] {recovered} sessoes recuperadas.")
+                        await self.ntfy.send(
+                            title="Sentinela — Recuperacao",
+                            message=f"{recovered} sessoes Instagram recuperadas apos cooldown.",
+                            priority="default",
+                            tags=["key"],
+                        )
+            except Exception as e:
+                self.logger.error(f"[HOTFIX v1.3] Erro ao recuperar sessoes: {e}")
+
+
+═══════════════════════════════════════════════════════════════════════════════
+PATCH 6: Modo IDLE (azul) quando fila vazia, nao vermelho
+═══════════════════════════════════════════════════════════════════════════════
+
+ARQUIVO: sentinela_autonomous_agent.py
+CLASSE: TrayIconManager
+METODO: _get_status_color()
+
+LOCALIZE:
+    def _get_status_color(self) -> str:
+        """Retorna cor baseada no estado do agente."""
+        if not self.agent.is_running:
+            return "gray"
+        if self.agent.consecutive_blocks >= 3:
+            return "red"
+        if self.agent.consecutive_blocks > 0:
+            return "yellow"
+        return "green"
+
+SUBSTITUA POR:
+    def _get_status_color(self) -> str:
+        """Retorna cor baseada no estado do agente."""
+        if not self.agent.is_running:
+            return "gray"
+        # [HOTFIX v1.3] Se fila vazia (0 alvos pendentes), mostra AZUL (IDLE) nao vermelho
+        if hasattr(self.agent, '_smart_queue'):
+            sq_stats = self.agent._smart_queue.get_stats()
+            if sq_stats.get('targets_tracked', 0) == 0:
+                return "blue"  # IDLE — nao ha trabalho, mas nao eh erro
+        if self.agent.consecutive_blocks >= 3:
+            return "red"
+        if self.agent.consecutive_blocks > 0:
+            return "yellow"
+        return "green"
+
+
+═══════════════════════════════════════════════════════════════════════════════
+RESUMO DAS CORES DO ICONE (apos hotfix)
+═══════════════════════════════════════════════════════════════════════════════
+
+  🔵 AZUL    = IDLE — Fila vazia, nao ha trabalho (NAO eh erro)
+  🟢 VERDE   = RUNNING — Coletando normalmente
+  🟡 AMARELO = DEGRADED — Alguns blocos, mas funcionando
+  🔴 VERMELHO = CRITICAL — Circuit breaker aberto ou todas as sessoes bloqueadas
+  ⚪ CINZA   = STOPPED — Agente parado
+
+
+═══════════════════════════════════════════════════════════════════════════════
+ACAO IMEDIATA RECOMENDADA
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Pare o agente atual (clique direito no icone → Parar)
+2. Aplique os 6 patches acima manualmente no arquivo
+3. Reinicie o agente
+4. Monitore o Ntfy — deve receber notificacoes de recuperacao
+
+Se o problema persistir, execute o diagnostico:
+    python sentinela_recovery.py --fix

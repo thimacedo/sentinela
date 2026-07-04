@@ -1,5 +1,5 @@
 # STATE.md — Sentinela
-_last_updated: 2026-07-03 | branch: main | version: v99.0_
+_last_updated: 2026-07-04 | branch: main | version: v100.0_
 
 ## Status Operacional
 
@@ -8,7 +8,31 @@ _last_updated: 2026-07-03 | branch: main | version: v99.0_
 | Coleta | 🟢 Operacional | Agente autônomo L4 operacional ativo e rodando em background com injeção de dependências reais, bandeja do sistema e PauseRecovery. |
 | Inteligência | 🟢 Operacional | Malha de IA resiliente + SaFastDrop local + Adaptações de Failover ativos. |
 | Dashboard | 🟢 Operacional | Painel "Decision Room" com telemetria real via DB e Coleta Direcionada. |
-| SRE / Autocura | 🟢 Operacional | Agente de SRE Autônomo (`sre_agent.py`) verificado e 100% funcional. |
+| SRE / Autocura | 🟢 Operacional | Agente de SRE Autônomo com WkDeadLetterQueue, WkSessaoAutonoma e Cronjobs cj_sre_* 100% funcionais. |
+
+## Histórico Recente de Correções (v100.0 — Fase 1 SRE & Resiliência)
+1. **Implantação da Dead Letter Queue (WkDeadLetterQueue):**
+   - Implementada a persistência de alvos em quarentena de falhas locais via SQLite em `runtime_state/buffer.db` (tabela `fila_dlq`).
+   - O worker `sre-dlq-01` varre a DLQ periodicamente, re-enfileira alvos no Supabase que atingiram o cooldown de 24h e dispara alertas urgentes via Ntfy se o item falhar persistentemente 3x seguidas.
+2. **Cura Automática de Sessões (WkSessaoAutonoma):**
+   - Criada a autocura automatizada que monitora a tabela `scraping_accounts` do Supabase e realiza login Playwright headless simulando o navegador web em caso de bloqueio.
+   - Atualizado o scraper `InstagramScraperV2` para ler sessões ativas diretamente de `scraping_accounts` do Supabase.
+3. **Cronjobs Periódicos de SRE:**
+   - **cj_sre_health_check:** Monitora o heartbeat do agente autônomo e varre/destrava automaticamente alvos presos em `EM_CURSO` por mais de 30min na `fila_coleta` do Supabase.
+   - **cj_sre_backup_sync:** Sincroniza em lote (bulk upsert) comentários acumulados localmente no SQLite para o Supabase de forma resiliente e com autocura de schema.
+4. **Notificação Robusta Ntfy:**
+   - Criado o módulo `core/ntfy.py` que codifica todos os cabeçalhos (Title e Tags) usando formato MIME Header para compatibilidade total de emojis e acentuação no Windows (latin-1).
+
+## Histórico Recente de Correções (v99.2)
+1. **Correção do Módulo de IA Solenya (Concluído)**:
+   - **Inicialização de Clientes de IA**: Corrigido erro de inferência cognitiva `'NoneType' object has no attribute 'chat'` no analisador de desinformação em [behavior_engine.py](file:///C:/Projetos/sentinela/core/behavior_engine.py#L66-L69). Adicionada chamada explícita ao `ai_service._ensure_clients()` antes do acesso ao `mistral_client`, garantindo o lazy-loading correto dos handlers de LLM.
+
+## Histórico Recente de Correções (v99.1)
+1. **Agente Autônomo Autossustentável (Concluído)**:
+   - **Auto-Repopulação a cada Ciclo**: Integrada a chamada de `_ensure_queue_populated()` a cada iteração do loop principal do agente autônomo, prevenindo o esgotamento silencioso da fila do Supabase.
+   - **Ícone Dinâmico IDLE (Cor Azul)**: Implementada a cor azul (`#2196F3`) e tooltip dedicado para sinalizar o estado `IDLE` na system tray do Windows quando o agente estiver saudável mas não houver mais alvos pendentes de processamento.
+   - **Heartbeat Persistente (`agent.status.json`)**: Configurada a gravação contínua e assíncrona do arquivo de métricas de telemetria `agent.status.json` na raiz do projeto, permitindo auditorias externas do estado atual em tempo de execução.
+   - **Notificação de Alerta de Fila Baixa**: Adicionado gatilho de notificação automática no Ntfy caso a contagem de tarefas pendentes na `fila_coleta` caia para menos de 10 alvos.
 
 ## Histórico Recente de Correções (v99.0)
 1. **Implantação Definitiva do Agente Autônomo L4 (Concluído)**:

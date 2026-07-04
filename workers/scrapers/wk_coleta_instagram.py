@@ -388,6 +388,20 @@ class WkColetaInstagram(BaseWorker):
                         final_status = 'PENDENTE'
                     else:
                         final_status = 'FALHA'
+                        # Registra na Dead Letter Queue (DLQ) para resiliência (v100.0)
+                        try:
+                            from core.skills.dead_letter_queue import dead_letter_queue
+                            await dead_letter_queue.add_failed_target(
+                                target_username=target.username,
+                                error_type="extraction_failure",
+                                error_message=str(err),
+                                stack_trace=getattr(result, "stack_trace", "") or "Falha de extracao no InstagramScraperV2",
+                                original_target_id=getattr(target, "candidato_id", None),
+                                queue_id=target.queue_id,
+                                platform="INSTAGRAM"
+                            )
+                        except Exception as e_dlq:
+                            logger.warning("[V2] Falha ao enviar alvo para a DLQ: %s", e_dlq)
                 try:
                     await self.queue.release_atomic(target.queue_id, final_status, self.worker_id)
                 except Exception as e_rel:

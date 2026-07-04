@@ -73,8 +73,10 @@ class InstagramScraperV2:
         }
 
     def _load_sessions(self) -> List[Session]:
-        """Carrega sessões das variáveis de ambiente."""
+        """Carrega sessões das variáveis de ambiente e da tabela scraping_accounts do Supabase."""
         sessions = []
+        
+        # 1. Carrega do .env (legado/fallbacks)
         for i in range(1, 11):
             sid = os.getenv(f"INSTAGRAM_SESSIONID_{i}") or (os.getenv("INSTAGRAM_SESSIONID") if i == 1 else None)
             if sid:
@@ -89,6 +91,20 @@ class InstagramScraperV2:
             sid = re.search(r'sessionid=([^;]+)', cookie_full)
             if sid:
                 sessions.append(Session(label="COOKIE_FULL", session_id=sid.group(1)))
+
+        # 2. Carrega dinamicamente do Supabase remoto
+        try:
+            from core.supabase_client import get_supabase_client
+            db = get_supabase_client()
+            res = db.table("scraping_accounts").select("username, session_id, status").eq("status", "ACTIVE").execute()
+            if res.data:
+                for acc in res.data:
+                    u = acc.get("username")
+                    sid = acc.get("session_id")
+                    if u and sid:
+                        sessions.append(Session(label=f"DB_{u}", session_id=sid))
+        except Exception as e:
+            logger.debug(f"[V2] Não foi possível carregar contas dinâmicas do Supabase: {e}")
 
         logger.info(f"🔑 [V2] {len(sessions)} sessões carregadas.")
         return sessions

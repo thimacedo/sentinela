@@ -149,6 +149,17 @@ def build_orchestrator() -> SentinelaOrchestrator:
     else:
         logger.info("[main_runner] Researcher desabilitado (RESEARCHER_MODE=disabled).")
 
+    # 🛡️ SRE & RESILIÊNCIA: DLQ Manager e SessionHealer (v100.0)
+    try:
+        from workers.sre.wk_dead_letter_queue import WkDeadLetterQueue
+        from workers.sre.wk_sessao_autonoma import WkSessaoAutonoma
+        
+        orch.register(WkDeadLetterQueue(worker_id="sre-dlq-01", config={}))
+        orch.register(WkSessaoAutonoma(worker_id="sre-sessao-01", config={}))
+        logger.info("[main_runner] Workers de SRE (WkDeadLetterQueue e WkSessaoAutonoma) registrados com sucesso.")
+    except Exception as e_sre:
+        logger.warning(f"[main_runner] Falha ao registrar workers de SRE: {e_sre}")
+
     logger.info(f"[main_runner] Workers registrados: {orch.worker_ids}")
     return orch
 
