@@ -37,5 +37,5 @@ def send_notification(title: str, message: str, tags: str = "robot", priority: s
         response.raise_for_status()
         return True
     except Exception as e:
-        logger.error(f"Falha ao enviar notificação ntfy para {NTFY_URL}: {e}")
+        logger.exception(f"Falha ao enviar notificação ntfy para {NTFY_URL}: {e}")
         return False
