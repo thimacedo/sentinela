@@ -1,1 +1,1 @@
-<Arquivo grande omitido - será enviado via arquivo local>
+<Muito grande - vou usar abordagem alternativa>
