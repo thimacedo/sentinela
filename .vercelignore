@@ -54,12 +54,13 @@ __pycache__/
 .pytest_cache/
 node_modules/
 
-# 6. Ignorar artefatos de build que vazaram
+# 6. Ignorar artefatos de build que vazaram e ferramentas locais
 __next.*
 index.txt
 _not-found.txt
 dashboard.txt
 _next/
 _not-found/
+.antigravitycli/
 
 # core/ e models/ DEVEM SER INCLUÍDOS pois a API depende deles.

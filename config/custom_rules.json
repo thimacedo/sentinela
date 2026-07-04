@@ -8,6 +8,8 @@
     "Identificar deslegitimação de órgãos de Estado como ATAQUE_INSTITUCIONAL"
   ],
   "mitigate_false_positives": [
+    "Textos que contêm parabéns, feliz aniversário ou desejos de felicidades são NEUTRO, a menos que contenham ataques explícitos",
+    "Expressões de agradecimento ou saudações benignas (ex: 'Deus abençoe', 'Bom dia') devem ser marcadas como NEUTRO",
     "Evitar marcação de expressões comuns em comunidades específicas como ofensivas sem contexto",
     "Não marcar como 'DANO_A_IMAGEM' críticas construtivas",
     "Não classificar linguagem que visa desafiar estruturas sociais existentes como ofensiva"

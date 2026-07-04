@@ -5,8 +5,6 @@ import { useAlerts, useDashboardStats } from '@/hooks/useDashboardData';
 import NewsHeader from '@/components/home/NewsHeader';
 import AdSenseSlot from '@/components/ads/AdSenseSlot';
 import Link from 'next/link';
-import HighlightCards from '@/components/home/HighlightCards';
-
 import EventTimeline from '@/components/home/EventTimeline';
 import InsightBox from '@/components/home/InsightBox';
 import CandidateProfile from '@/components/home/CandidateProfile';
@@ -50,8 +48,7 @@ export default function HomePage() {
         {/* Section 1.5: Activity Trend (From SaaS Logic) */}
         <TrendChart />
 
-        {/* Section 2: Highlights */}
-        <HighlightCards />
+        {/* Section 2 removida para evitar redundância de Destaques e Linha do Tempo */}
         {/* Anúncio AdSense */}
         <AdSenseSlot adSlot="2020882637" format="horizontal" />
 

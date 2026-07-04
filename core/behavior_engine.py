@@ -29,14 +29,32 @@ class BehaviorEngine:
         if len(comments) < 3:
             return comments
 
+        try:
+            from core.ai_service import ContextClassifier
+        except ImportError:
+            ContextClassifier = None
+
         # Prepara Lote Textual
         batch_text = ""
         index_map = {}
-        for idx, c in enumerate(comments):
+        
+        # Filtra comentários com contextos claramente positivos
+        valid_comments = []
+        for c in comments:
             txt = c.get("texto_bruto", "").strip()
             if len(txt) > 5:
-                batch_text += f"[{idx}] {txt}\n"
-                index_map[str(idx)] = c
+                # Se ContextClassifier estiver disponível e detectar contexto positivo, ignora o comentário
+                if ContextClassifier and ContextClassifier.is_positive_context(txt):
+                    continue
+                valid_comments.append(c)
+
+        if len(valid_comments) < 3:
+            return comments
+
+        for idx, c in enumerate(valid_comments):
+            txt = c.get("texto_bruto", "").strip()
+            batch_text += f"[{idx}] {txt}\n"
+            index_map[str(idx)] = c
 
         if not batch_text:
             return comments
