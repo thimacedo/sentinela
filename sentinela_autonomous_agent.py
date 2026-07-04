@@ -624,9 +624,11 @@ class AutonomousCollector:
         try:
             pending_count = health.queue_pending if health else 0
             status_data = {
+                "pid": os.getpid(),
                 "cycle_count": self.cycle_count,
                 "status": health.status if health else "RUNNING",
                 "last_heartbeat": datetime.now(timezone.utc).isoformat(),
+                "updated_at": datetime.now(timezone.utc).isoformat(),
                 "pending_queue": pending_count,
                 "consecutive_blocks": self.consecutive_blocks,
                 "sessions": {
@@ -638,8 +640,11 @@ class AutonomousCollector:
             if hasattr(self, '_smart_queue'):
                 status_data["smart_queue"] = self._smart_queue.get_stats()
                 
-            # Escreve o heartbeat persistente
-            Path("agent.status.json").write_text(json.dumps(status_data, indent=2, ensure_ascii=False), encoding="utf-8")
+            # Escrita atômica: temporário + replace para evitar corrupção por escrita concorrente
+            temp_path = Path("agent.status.json.tmp")
+            final_path = Path("agent.status.json")
+            temp_path.write_text(json.dumps(status_data, indent=2, ensure_ascii=False), encoding="utf-8")
+            os.replace(str(temp_path), str(final_path))
         except Exception as e:
             self.logger.debug(f"[Agent] Erro ao salvar status: {e}")
 
@@ -1068,14 +1073,51 @@ class AutonomousCollector:
         except Exception as e:
             self.logger.error(f"[Tray] Falha ao iniciar tray icon: {e}")
 
+    def _read_status_safely(self) -> Tuple[Dict[str, Any], bool]:
+        """Lê o status do agent.status.json sem cache, validando o PID e a idade do arquivo."""
+        try:
+            status_path = Path("agent.status.json")
+            if not status_path.exists():
+                return {}, False
+                
+            # Força leitura direta do arquivo
+            with open(status_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                
+            # Valida PID e idade (máximo 30s)
+            file_pid = data.get("pid")
+            updated_str = data.get("updated_at") or data.get("last_heartbeat")
+            
+            if file_pid != os.getpid():
+                return data, False  # Instância distinta (ou antiga)
+                
+            if updated_str:
+                hb_clean = updated_str.split(".")[0].replace("Z", "")
+                if "T" in hb_clean:
+                    hb_dt = datetime.strptime(hb_clean, "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc)
+                else:
+                    hb_dt = datetime.strptime(hb_clean, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+                lag = (datetime.now(timezone.utc) - hb_dt).total_seconds()
+                if lag > 30:
+                    return data, False  # Informações obsoletas (stale)
+                    
+            return data, True
+        except Exception:
+            return {}, False
+
     def _on_tray_status(self, icon, item):
-        status_msg = (
-            f"Sentinela v1.2\n"
-            f"Status: {'Pausado' if self.is_paused else 'Rodando'}\n"
-            f"Ciclos: {self.cycle_count}\n"
-            f"Blocos consecutivos: {self.consecutive_blocks}\n"
-            f"Alvos: {len(self._smart_queue.target_states) if hasattr(self, '_smart_queue') else 0} rastreados"
-        )
+        data, is_valid = self._read_status_safely()
+        if not is_valid:
+            status_msg = "Sentinela — Informações desatualizadas (STALE)\nStatus: Desconectado"
+        else:
+            status_msg = (
+                f"Sentinela v1.2\n"
+                f"PID: {data.get('pid', 'N/A')}\n"
+                f"Status: {data.get('status', 'UNKNOWN')}\n"
+                f"Ciclos: {data.get('cycle_count', 0)}\n"
+                f"Blocos: {data.get('consecutive_blocks', 0)}\n"
+                f"Fila Pendente: {data.get('pending_queue', 0)}"
+            )
         icon.notify(status_msg, title="Sentinela — Status")
 
     def _on_tray_toggle_pause(self, icon, item):
@@ -1097,25 +1139,26 @@ class AutonomousCollector:
     def _update_tray_loop(self):
         while self.is_running and self.tray_icon:
             try:
-                # Cores e textos conforme estado
-                color = "#4CAF50" # Verde (HEALTHY / RUNNING)
-                title = f"Sentinela — Rodando | Ciclo #{self.cycle_count}"
-
-                if self.is_paused:
-                    color = "#FFC107" # Amarelo (PAUSED)
-                    title = "Sentinela — Pausado"
-                elif self.last_health and self.last_health.queue_pending == 0:
-                    color = "#2196F3" # Azul (IDLE)
-                    title = "Sentinela — Sem alvos pendentes (IDLE)"
-                elif self.consecutive_blocks >= self.cfg.max_consecutive_blocks:
-                    color = "#F44336" # Vermelho (BLOCKED)
-                    title = "Sentinela — Bloqueado/Suspenso"
-                elif hasattr(self, '_smart_queue'):
-                    stats = self._smart_queue.get_stats()
-                    if stats.get("global_empty_cycles", 0) >= 5:
-                        color = "#FFC107" # Amarelo (DEGRADED)
-                        title = "Sentinela — Sem atividade recente"
-
+                data, is_valid = self._read_status_safely()
+                if not is_valid:
+                    color = "#F44336"  # Vermelho (STALE/INATIVO)
+                    title = "Sentinela — Status Desatualizado (STALE)"
+                else:
+                    color = "#4CAF50"  # Verde (HEALTHY / RUNNING)
+                    cycle = data.get("cycle_count", 0)
+                    title = f"Sentinela — Rodando | Ciclo #{cycle}"
+                    
+                    status_str = data.get("status", "RUNNING")
+                    if self.is_paused or status_str == "PAUSED":
+                        color = "#FFC107"  # Amarelo (PAUSED)
+                        title = "Sentinela — Pausado"
+                    elif data.get("pending_queue", 0) == 0:
+                        color = "#2196F3"  # Azul (IDLE)
+                        title = "Sentinela — Sem alvos pendentes (IDLE)"
+                    elif data.get("consecutive_blocks", 0) >= self.cfg.max_consecutive_blocks:
+                        color = "#F44336"  # Vermelho (BLOCKED)
+                        title = "Sentinela — Bloqueado/Suspenso"
+                
                 self.tray_icon.icon = create_status_image(color)
                 self.tray_icon.title = title
             except Exception as e:
