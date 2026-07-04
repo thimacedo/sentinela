@@ -1,12 +1,22 @@
 {
-  "cycle_count": 1,
+  "pid": 4812,
+  "cycle_count": 9,
   "status": "HEALTHY",
-  "last_heartbeat": "2026-07-04T02:11:23.374519+00:00",
-  "pending_queue": 0,
+  "last_heartbeat": "2026-07-04T17:38:45.628054+00:00",
+  "updated_at": "2026-07-04T17:38:45.628054+00:00",
+  "pending_queue": 972,
   "consecutive_blocks": 0,
   "sessions": {
     "available": 3,
     "blocked": 0,
     "total": 3
+  },
+  "smart_queue": {
+    "targets_tracked": 8,
+    "status_distribution": {
+      "ACTIVE": 8
+    },
+    "global_empty_cycles": 1,
+    "last_successful_insertion": "2026-07-04T17:36:11.905487+00:00"
   }
 }

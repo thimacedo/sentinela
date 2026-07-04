@@ -12,278 +12,80 @@
 # Error details
 
 ```
-Error: expect(received).toHaveLength(expected)
+Error: expect(received).toBeLessThan(expected)
 
-Expected length: 0
-Received length: 2
-Received array:  ["Failed to load resource: the server responded with a status of 404 (Not Found)", "Failed to load resource: the server responded with a status of 400 ()"]
+Expected: < 400
+Received:   500
 ```
 
 # Page snapshot
 
 ```yaml
-- generic [active] [ref=e1]:
-  - generic [ref=e2]:
-    - complementary [ref=e3]:
+- generic:
+  - generic [active]:
+    - generic [ref=e3]:
       - generic [ref=e4]:
-        - heading "SENTINELAAI" [level=1] [ref=e5]
-        - button "Recolher menu" [ref=e6]:
-          - img [ref=e7]
-      - navigation [ref=e9]:
-        - button "INÍCIO" [ref=e10]:
-          - img [ref=e11]
-          - generic [ref=e14]: INÍCIO
-        - button "ANÁLISE" [ref=e15]:
-          - img [ref=e16]
-          - generic [ref=e18]: ANÁLISE
-        - button "CANDIDATOS" [ref=e19]:
-          - img [ref=e20]
-          - generic [ref=e25]: CANDIDATOS
-        - button "ALERTAS" [ref=e26]:
-          - img [ref=e27]
-          - generic [ref=e29]: ALERTAS
-        - button "TENDÊNCIAS" [ref=e30]:
-          - img [ref=e31]
-          - generic [ref=e34]: TENDÊNCIAS
-        - button "RELATÓRIOS" [ref=e35]:
-          - img [ref=e36]
-          - generic [ref=e39]: RELATÓRIOS
-      - generic [ref=e40]:
-        - generic [ref=e43]: Monitor Ativo
-        - generic [ref=e44]: OBSERVATÓRIO CÍVICO
-    - main [ref=e45]:
-      - generic [ref=e47]:
-        - generic [ref=e48]:
-          - heading "Central de Alertas" [level=1] [ref=e49]
-          - paragraph [ref=e50]: Monitoramento crítico de incidentes de hostilidade e ataques coordenados. Cada alerta representa um pulso de atividade que requer atenção técnica.
-        - generic [ref=e51]:
-          - generic [ref=e52]:
-            - generic [ref=e53]:
-              - generic [ref=e54]:
-                - heading "Alertas de Segurança" [level=2] [ref=e55]:
-                  - img [ref=e56]
-                  - text: Alertas de Segurança
-                - paragraph [ref=e58]: Incidentes Críticos em Tempo Real
-              - generic [ref=e59]:
-                - img [ref=e60]
-                - generic [ref=e62]: Live Monitor
-            - generic [ref=e63]:
-              - generic [ref=e64]:
-                - generic [ref=e66]:
-                  - generic [ref=e67]:
-                    - generic [ref=e68]:
-                      - generic [ref=e69]: SA
-                      - generic [ref=e70]:
-                        - generic [ref=e71]:
-                          - generic [ref=e72]: "@salatiel_de_souza"
-                          - generic [ref=e73]: • alvo afetado
-                        - generic [ref=e74]:
-                          - img [ref=e75]
-                          - text: 28/05/2026, 09:16:34
-                    - generic [ref=e77]: ATAQUE_INSTITUCIONAL
-                  - paragraph [ref=e79]: "\"Se juntou com a esquerda e o PT, da nisso aí 😂😂😂\""
-                  - generic [ref=e80]:
-                    - generic [ref=e81]:
-                      - generic [ref=e82]: "Confiança da IA:"
-                      - generic [ref=e83]: 90.0%
-                    - button "Investigar" [ref=e84]:
-                      - img [ref=e85]
-                      - text: Investigar
-                - generic [ref=e89]:
-                  - generic [ref=e90]:
-                    - generic [ref=e91]:
-                      - generic [ref=e92]: AL
-                      - generic [ref=e93]:
-                        - generic [ref=e94]:
-                          - generic [ref=e95]: "@alexandreramagem22"
-                          - generic [ref=e96]: • alvo afetado
-                        - generic [ref=e97]:
-                          - img [ref=e98]
-                          - text: 28/05/2026, 09:02:06
-                    - generic [ref=e100]: INSULTO_AD_HOMINEM
-                  - paragraph [ref=e102]: "\"CHUPA LULA!!!!\""
-                  - generic [ref=e103]:
-                    - generic [ref=e104]:
-                      - generic [ref=e105]: "Confiança da IA:"
-                      - generic [ref=e106]: 90.0%
-                    - button "Investigar" [ref=e107]:
-                      - img [ref=e108]
-                      - text: Investigar
-                - generic [ref=e112]:
-                  - generic [ref=e113]:
-                    - generic [ref=e114]:
-                      - generic [ref=e115]: DE
-                      - generic [ref=e116]:
-                        - generic [ref=e117]:
-                          - generic [ref=e118]: "@deltandallagnol"
-                          - generic [ref=e119]: • alvo afetado
-                        - generic [ref=e120]:
-                          - img [ref=e121]
-                          - text: 28/05/2026, 08:52:40
-                    - generic [ref=e123]: INSULTO_AD_HOMINEM
-                  - paragraph [ref=e125]: "\"apareça Lulinha ......kd vc\""
-                  - generic [ref=e126]:
-                    - generic [ref=e127]:
-                      - generic [ref=e128]: "Confiança da IA:"
-                      - generic [ref=e129]: 90.0%
-                    - button "Investigar" [ref=e130]:
-                      - img [ref=e131]
-                      - text: Investigar
-                - generic [ref=e135]:
-                  - generic [ref=e136]:
-                    - generic [ref=e137]:
-                      - generic [ref=e138]: DE
-                      - generic [ref=e139]:
-                        - generic [ref=e140]:
-                          - generic [ref=e141]: "@deltandallagnol"
-                          - generic [ref=e142]: • alvo afetado
-                        - generic [ref=e143]:
-                          - img [ref=e144]
-                          - text: 28/05/2026, 08:52:40
-                    - generic [ref=e146]: ATAQUE_INSTITUCIONAL
-                  - paragraph [ref=e148]: "\"INSS?? ...ou melhor uma turminha do \"governo\"\""
-                  - generic [ref=e149]:
-                    - generic [ref=e150]:
-                      - generic [ref=e151]: "Confiança da IA:"
-                      - generic [ref=e152]: 90.0%
-                    - button "Investigar" [ref=e153]:
-                      - img [ref=e154]
-                      - text: Investigar
-                - generic [ref=e157]:
-                  - generic [ref=e158]:
-                    - generic [ref=e159]:
-                      - generic [ref=e160]:
-                        - generic [ref=e161]: DE
-                        - generic [ref=e162]:
-                          - generic [ref=e163]:
-                            - generic [ref=e164]: "@deltandallagnol"
-                            - generic [ref=e165]: • alvo afetado
-                          - generic [ref=e166]:
-                            - img [ref=e167]
-                            - text: 28/05/2026, 08:52:40
-                      - generic [ref=e169]: ATAQUE_INSTITUCIONAL
-                    - paragraph [ref=e171]: "\"É isso que a Globo , e o povo apoia , PT roubando estas pessoas\""
-                    - generic [ref=e172]:
-                      - generic [ref=e173]:
-                        - generic [ref=e174]: "Confiança da IA:"
-                        - generic [ref=e175]: 90.0%
-                      - button "Investigar" [ref=e176]:
-                        - img [ref=e177]
-                        - text: Investigar
-                  - generic [ref=e180]:
-                    - generic [ref=e181]: Publicidade Cívica Relacionada
-                    - insertion [ref=e183]:
-                      - iframe [ref=e185]:
-                        
-                - generic [ref=e187]:
-                  - generic [ref=e188]:
-                    - generic [ref=e189]:
-                      - generic [ref=e190]: DE
-                      - generic [ref=e191]:
-                        - generic [ref=e192]:
-                          - generic [ref=e193]: "@deltandallagnol"
-                          - generic [ref=e194]: • alvo afetado
-                        - generic [ref=e195]:
-                          - img [ref=e196]
-                          - text: 28/05/2026, 08:52:40
-                    - generic [ref=e198]: ATAQUE_INSTITUCIONAL
-                  - paragraph [ref=e200]: "\"Lulinha e INSS precisam ser corretamente investigados! Deus fará uma grande limpeza no Brasil! 🙏🏻🇧🇷\""
-                  - generic [ref=e201]:
-                    - generic [ref=e202]:
-                      - generic [ref=e203]: "Confiança da IA:"
-                      - generic [ref=e204]: 90.0%
-                    - button "Investigar" [ref=e205]:
-                      - img [ref=e206]
-                      - text: Investigar
-                - generic [ref=e210]:
-                  - generic [ref=e211]:
-                    - generic [ref=e212]:
-                      - generic [ref=e213]: JA
-                      - generic [ref=e214]:
-                        - generic [ref=e215]:
-                          - generic [ref=e216]: "@janjalula"
-                          - generic [ref=e217]: • alvo afetado
-                        - generic [ref=e218]:
-                          - img [ref=e219]
-                          - text: 28/05/2026, 08:44:21
-                    - generic [ref=e221]: ATAQUE_INSTITUCIONAL
-                  - paragraph [ref=e223]: "\"Muito orgulho da nossa primeira dama , diferente da outra que só sabia andar com maquiador e tirar as moedas da alvorada.\""
-                  - generic [ref=e224]:
-                    - generic [ref=e225]:
-                      - generic [ref=e226]: "Confiança da IA:"
-                      - generic [ref=e227]: 90.0%
-                    - button "Investigar" [ref=e228]:
-                      - img [ref=e229]
-                      - text: Investigar
-                - generic [ref=e233]:
-                  - generic [ref=e234]:
-                    - generic [ref=e235]:
-                      - generic [ref=e236]: SU
-                      - generic [ref=e237]:
-                        - generic [ref=e238]:
-                          - generic [ref=e239]: "@supremotribunalfederal"
-                          - generic [ref=e240]: • alvo afetado
-                        - generic [ref=e241]:
-                          - img [ref=e242]
-                          - text: 28/05/2026, 05:28:12
-                    - generic [ref=e244]: INSULTO_AD_HOMINEM
-                  - paragraph [ref=e246]: "\"Rato-mor!!!!\""
-                  - generic [ref=e247]:
-                    - generic [ref=e248]:
-                      - generic [ref=e249]: "Confiança da IA:"
-                      - generic [ref=e250]: 95.0%
-                    - button "Investigar" [ref=e251]:
-                      - img [ref=e252]
-                      - text: Investigar
-                - generic [ref=e256]:
-                  - generic [ref=e257]:
-                    - generic [ref=e258]:
-                      - generic [ref=e259]: SU
-                      - generic [ref=e260]:
-                        - generic [ref=e261]:
-                          - generic [ref=e262]: "@supremotribunalfederal"
-                          - generic [ref=e263]: • alvo afetado
-                        - generic [ref=e264]:
-                          - img [ref=e265]
-                          - text: 28/05/2026, 05:28:12
-                    - generic [ref=e267]: INSULTO_AD_HOMINEM
-                  - paragraph [ref=e269]: "\"Xandão e réu 😂😂😂😂😂😂#stfgabinetedocrime\""
-                  - generic [ref=e270]:
-                    - generic [ref=e271]:
-                      - generic [ref=e272]: "Confiança da IA:"
-                      - generic [ref=e273]: 95.0%
-                    - button "Investigar" [ref=e274]:
-                      - img [ref=e275]
-                      - text: Investigar
-                - generic [ref=e278]:
-                  - generic [ref=e279]:
-                    - generic [ref=e280]:
-                      - generic [ref=e281]:
-                        - generic [ref=e282]: SU
-                        - generic [ref=e283]:
-                          - generic [ref=e284]:
-                            - generic [ref=e285]: "@supremotribunalfederal"
-                            - generic [ref=e286]: • alvo afetado
-                          - generic [ref=e287]:
-                            - img [ref=e288]
-                            - text: 28/05/2026, 05:28:12
-                      - generic [ref=e290]: MISOGINIA_POLITICA
-                    - paragraph [ref=e292]: "\"Mas é um homem que se diz cuidar das mulheres, uai\""
-                    - generic [ref=e293]:
-                      - generic [ref=e294]:
-                        - generic [ref=e295]: "Confiança da IA:"
-                        - generic [ref=e296]: 95.0%
-                      - button "Investigar" [ref=e297]:
-                        - img [ref=e298]
-                        - text: Investigar
-                  - generic [ref=e301]:
-                    - generic [ref=e302]: Publicidade Cívica Relacionada
-                    - insertion [ref=e304]
-              - generic [ref=e311]: Carregando mais incidentes...
-          - insertion [ref=e313]
-  - button "Open Next.js Dev Tools" [ref=e320] [cursor=pointer]:
-    - img [ref=e321]
-  - alert [ref=e324]
+        - generic [ref=e5]:
+          - navigation [ref=e6]:
+            - button "previous" [disabled] [ref=e7]:
+              - img "previous" [ref=e8]
+            - generic [ref=e10]:
+              - generic [ref=e11]: 1/
+              - text: "1"
+            - button "next" [disabled] [ref=e12]:
+              - img "next" [ref=e13]
+          - img
+        - generic [ref=e15]:
+          - link "Next.js 16.2.6 (stale) Turbopack" [ref=e16] [cursor=pointer]:
+            - /url: https://nextjs.org/docs/messages/version-staleness
+            - img [ref=e17]
+            - generic "There is a newer version (16.2.10) available, upgrade recommended!" [ref=e19]: Next.js 16.2.6 (stale)
+            - generic [ref=e20]: Turbopack
+          - img
+      - generic [ref=e21]:
+        - dialog "Runtime Error" [ref=e22]:
+          - generic [ref=e25]:
+            - generic [ref=e26]:
+              - generic [ref=e27]:
+                - generic [ref=e29]: Runtime Error
+                - generic [ref=e30]:
+                  - button "Copy Error Info" [ref=e31] [cursor=pointer]:
+                    - img [ref=e32]
+                  - button "No related documentation found" [disabled] [ref=e34]:
+                    - img [ref=e35]
+                  - button "Attach Node.js inspector" [ref=e37] [cursor=pointer]:
+                    - img [ref=e38]
+              - generic [ref=e47]: "An unexpected Turbopack error occurred. Please see the output of `next dev` for more details."
+            - generic [ref=e50]:
+              - paragraph [ref=e51]:
+                - text: Call Stack
+                - generic [ref=e52]: "2"
+              - button "Show 2 ignore-listed frame(s)" [ref=e53] [cursor=pointer]:
+                - text: Show 2 ignore-listed frame(s)
+                - img [ref=e54]
+          - generic [ref=e56]: "1"
+          - generic [ref=e57]: "2"
+        - contentinfo [ref=e58]:
+          - region "Error feedback" [ref=e59]:
+            - paragraph [ref=e60]:
+              - link "Was this helpful?" [ref=e61] [cursor=pointer]:
+                - /url: https://nextjs.org/telemetry#error-feedback
+            - button "Mark as helpful" [ref=e62] [cursor=pointer]:
+              - img [ref=e63]
+            - button "Mark as not helpful" [ref=e66] [cursor=pointer]:
+              - img [ref=e67]
+    - generic [ref=e73] [cursor=pointer]:
+      - button "Open Next.js Dev Tools" [ref=e74]:
+        - img [ref=e75]
+      - generic [ref=e78]:
+        - button "Open issues overlay" [ref=e79]:
+          - generic [ref=e80]:
+            - generic [ref=e81]: "0"
+            - generic [ref=e82]: "1"
+          - generic [ref=e83]: Issue
+        - button "Collapse issues badge" [ref=e84]:
+          - img [ref=e85]
+  - alert [ref=e87]
 ```
 
 # Test source
@@ -335,13 +137,13 @@ Received array:  ["Failed to load resource: the server responded with a status o
   44 |                 !e.includes('A `require()` style import is forbidden') // Ignorar warnings de linter
   45 |             );
   46 |             
-  47 |             expect(response?.status()).toBeLessThan(400);
+> 47 |             expect(response?.status()).toBeLessThan(400);
+     |                                        ^ Error: expect(received).toBeLessThan(expected)
   48 |             
   49 |             if (filteredErrors.length > 0) {
   50 |                 console.error(`Erros na rota ${route}:`, filteredErrors);
   51 |             }
-> 52 |             expect(filteredErrors).toHaveLength(0);
-     |                                    ^ Error: expect(received).toHaveLength(expected)
+  52 |             expect(filteredErrors).toHaveLength(0);
   53 |         });
   54 |     }
   55 | 

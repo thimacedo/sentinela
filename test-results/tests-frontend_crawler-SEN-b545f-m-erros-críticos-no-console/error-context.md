@@ -12,74 +12,7 @@
 # Error details
 
 ```
-Error: expect(received).toHaveLength(expected)
-
-Expected length: 0
-Received length: 2
-Received array:  ["Failed to load resource: the server responded with a status of 404 (Not Found)", "Failed to load resource: the server responded with a status of 404 (Not Found)"]
-```
-
-# Page snapshot
-
-```yaml
-- generic [active] [ref=e1]:
-  - generic [ref=e2]:
-    - complementary [ref=e3]:
-      - generic [ref=e4]:
-        - heading "SENTINELAAI" [level=1] [ref=e5]
-        - button "Recolher menu" [ref=e6]:
-          - img [ref=e7]
-      - navigation [ref=e9]:
-        - button "INÍCIO" [ref=e10]:
-          - img [ref=e11]
-          - generic [ref=e14]: INÍCIO
-        - button "ANÁLISE" [ref=e15]:
-          - img [ref=e16]
-          - generic [ref=e18]: ANÁLISE
-        - button "CANDIDATOS" [ref=e19]:
-          - img [ref=e20]
-          - generic [ref=e25]: CANDIDATOS
-        - button "ALERTAS" [ref=e26]:
-          - img [ref=e27]
-          - generic [ref=e29]: ALERTAS
-        - button "TENDÊNCIAS" [ref=e30]:
-          - img [ref=e31]
-          - generic [ref=e34]: TENDÊNCIAS
-        - button "RELATÓRIOS" [ref=e35]:
-          - img [ref=e36]
-          - generic [ref=e39]: RELATÓRIOS
-      - generic [ref=e40]:
-        - generic [ref=e43]: Monitor Ativo
-        - generic [ref=e44]: OBSERVATÓRIO CÍVICO
-    - main [ref=e45]:
-      - generic [ref=e47]:
-        - generic [ref=e48]:
-          - heading "Análise de Rede" [level=1] [ref=e49]
-          - paragraph [ref=e50]: Mapeamento de comportamentos coordenados e clusters de influência. Identifique redes artificiais e padrões de automação no discurso digital.
-        - generic [ref=e52]:
-          - generic [ref=e53]:
-            - generic [ref=e54]:
-              - heading "Tendências e Redes Coordenadas" [level=2] [ref=e55]:
-                - img [ref=e56]
-                - text: Tendências e Redes Coordenadas
-              - paragraph [ref=e59]: Mapeamento de Influência e Narrativas
-            - generic [ref=e60]:
-              - img [ref=e61]
-              - generic [ref=e67]: Módulo Solenya v71.0
-          - table [ref=e69]:
-            - rowgroup [ref=e70]:
-              - row "Identificação do Cluster Perfis Suspeitos Detecção Nível de Risco" [ref=e71]:
-                - columnheader "Identificação do Cluster" [ref=e72]
-                - columnheader "Perfis Suspeitos" [ref=e73]
-                - columnheader "Detecção" [ref=e74]
-                - columnheader "Nível de Risco" [ref=e75]
-            - rowgroup [ref=e76]:
-              - row "MAPEANDO CONEXÕES OCULTAS..." [ref=e77]:
-                - cell "MAPEANDO CONEXÕES OCULTAS..." [ref=e78]
-          - generic [ref=e79]: Algoritmo de Detecção de Padrões Coordenados Ativo
-  - button "Open Next.js Dev Tools" [ref=e85] [cursor=pointer]:
-    - img [ref=e86]
-  - alert [ref=e89]
+Error: page.waitForTimeout: Target page, context or browser has been closed
 ```
 
 # Test source
@@ -119,7 +52,8 @@ Received array:  ["Failed to load resource: the server responded with a status o
   32 |             const response = await page.goto(`${LOCAL_URL}${route}`, { waitUntil: 'domcontentloaded' });
   33 |             
   34 |             // Aguarda um pouco para os componentes montarem
-  35 |             await page.waitForTimeout(2000);
+> 35 |             await page.waitForTimeout(2000);
+     |                        ^ Error: page.waitForTimeout: Target page, context or browser has been closed
   36 |             
   37 |             // Ignorar erros conhecidos ou de terceiros (AdSense, falhas de rede de anúncios, extensões)
   38 |             const filteredErrors = errors.filter(e => 
@@ -136,8 +70,7 @@ Received array:  ["Failed to load resource: the server responded with a status o
   49 |             if (filteredErrors.length > 0) {
   50 |                 console.error(`Erros na rota ${route}:`, filteredErrors);
   51 |             }
-> 52 |             expect(filteredErrors).toHaveLength(0);
-     |                                    ^ Error: expect(received).toHaveLength(expected)
+  52 |             expect(filteredErrors).toHaveLength(0);
   53 |         });
   54 |     }
   55 | 

@@ -6,7 +6,7 @@
 
 # Test info
 
-- Name: tests\frontend_crawler.spec.ts >> SENTINELA | Frontend Crawler & Button Tester >> Deve renderizar a rota / sem erros críticos no console
+- Name: tests\frontend_crawler.spec.ts >> SENTINELA | Frontend Crawler & Button Tester >> Deve renderizar a rota /relatorios sem erros críticos no console
 - Location: tests\frontend_crawler.spec.ts:22:13
 
 # Error details
