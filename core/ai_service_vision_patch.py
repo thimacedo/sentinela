@@ -176,6 +176,15 @@ async def vision_completion(
     """
     global _vision_cache
 
+    if os.getenv("VISION_PROVIDER") == "none":
+        return {
+            "success": False,
+            "content": "",
+            "provider": "none",
+            "cached": False,
+            "error": "Visão desabilitada via VISION_PROVIDER=none no .env",
+        }
+
     if hasattr(ai_service_instance, "_ensure_clients"):
         ai_service_instance._ensure_clients()
 

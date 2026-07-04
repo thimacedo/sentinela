@@ -1073,24 +1073,48 @@ class AutonomousCollector:
         except Exception as e:
             self.logger.error(f"[Tray] Falha ao iniciar tray icon: {e}")
 
-    def _read_status_safely(self) -> Tuple[Dict[str, Any], bool]:
-        """Lê o status do agent.status.json sem cache, validando o PID e a idade do arquivo."""
+    def _read_status_safely(self) -> Tuple[Dict[str, Any], bool, bool]:
+        """
+        Lê o status do agent.status.json sem cache.
+        Retorna (data, is_valid, is_background).
+        """
         try:
             status_path = Path("agent.status.json")
             if not status_path.exists():
-                return {}, False
+                return {}, False, False
                 
             # Força leitura direta do arquivo
             with open(status_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
                 
-            # Valida PID e idade (máximo 30s)
             file_pid = data.get("pid")
             updated_str = data.get("updated_at") or data.get("last_heartbeat")
             
-            if file_pid != os.getpid():
-                return data, False  # Instância distinta (ou antiga)
+            if not file_pid:
+                return data, False, False
                 
+            # Verifica se o PID do arquivo está ativo no SO (Windows)
+            is_active = False
+            try:
+                import ctypes
+                PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
+                handle = ctypes.windll.kernel32.OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, False, file_pid)
+                if handle:
+                    ctypes.windll.kernel32.CloseHandle(handle)
+                    is_active = True
+            except Exception:
+                try:
+                    os.kill(file_pid, 0)
+                    is_active = True
+                except OSError:
+                    is_active = False
+                    
+            if not is_active:
+                return data, False, False  # Processo inativo/morto
+                
+            is_background = (file_pid != os.getpid())
+            
+            # Valida idade do batimento (máximo 60s)
             if updated_str:
                 hb_clean = updated_str.split(".")[0].replace("Z", "")
                 if "T" in hb_clean:
@@ -1098,20 +1122,21 @@ class AutonomousCollector:
                 else:
                     hb_dt = datetime.strptime(hb_clean, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
                 lag = (datetime.now(timezone.utc) - hb_dt).total_seconds()
-                if lag > 30:
-                    return data, False  # Informações obsoletas (stale)
+                if lag > 60:
+                    return data, False, is_background  # Heartbeat muito antigo
                     
-            return data, True
+            return data, True, is_background
         except Exception:
-            return {}, False
+            return {}, False, False
 
     def _on_tray_status(self, icon, item):
-        data, is_valid = self._read_status_safely()
+        data, is_valid, is_background = self._read_status_safely()
         if not is_valid:
             status_msg = "Sentinela — Informações desatualizadas (STALE)\nStatus: Desconectado"
         else:
+            mode = "Background" if is_background else "Local/Gui"
             status_msg = (
-                f"Sentinela v1.2\n"
+                f"Sentinela v1.2 ({mode})\n"
                 f"PID: {data.get('pid', 'N/A')}\n"
                 f"Status: {data.get('status', 'UNKNOWN')}\n"
                 f"Ciclos: {data.get('cycle_count', 0)}\n"
@@ -1139,25 +1164,27 @@ class AutonomousCollector:
     def _update_tray_loop(self):
         while self.is_running and self.tray_icon:
             try:
-                data, is_valid = self._read_status_safely()
+                data, is_valid, is_background = self._read_status_safely()
                 if not is_valid:
                     color = "#F44336"  # Vermelho (STALE/INATIVO)
                     title = "Sentinela — Status Desatualizado (STALE)"
                 else:
                     color = "#4CAF50"  # Verde (HEALTHY / RUNNING)
                     cycle = data.get("cycle_count", 0)
-                    title = f"Sentinela — Rodando | Ciclo #{cycle}"
+                    pid_val = data.get("pid", 0)
+                    mode_str = "Background" if is_background else "Rodando"
+                    title = f"Sentinela — {mode_str} (PID: {pid_val}) | Ciclo #{cycle}"
                     
                     status_str = data.get("status", "RUNNING")
                     if self.is_paused or status_str == "PAUSED":
                         color = "#FFC107"  # Amarelo (PAUSED)
-                        title = "Sentinela — Pausado"
+                        title = f"Sentinela — {mode_str} Pausado"
                     elif data.get("pending_queue", 0) == 0:
                         color = "#2196F3"  # Azul (IDLE)
-                        title = "Sentinela — Sem alvos pendentes (IDLE)"
+                        title = f"Sentinela — {mode_str} IDLE"
                     elif data.get("consecutive_blocks", 0) >= self.cfg.max_consecutive_blocks:
                         color = "#F44336"  # Vermelho (BLOCKED)
-                        title = "Sentinela — Bloqueado/Suspenso"
+                        title = f"Sentinela — {mode_str} Bloqueado/Suspenso"
                 
                 self.tray_icon.icon = create_status_image(color)
                 self.tray_icon.title = title

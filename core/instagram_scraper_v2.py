@@ -604,11 +604,31 @@ class InstagramScraperV2:
                                 learned = await self._request_human_intervention(session, shortcode)
                                 if learned:
                                     logger.info(f"✅ Seletor aprendido e salvo com sucesso: {learned}")
-                                raise DOMHealerRestartSignal(
-                                    reason="hitl_fallback_completed",
-                                    username=username,
-                                    shortcode=shortcode
-                                )
+                                    raise DOMHealerRestartSignal(
+                                        reason="hitl_fallback_completed",
+                                        username=username,
+                                        shortcode=shortcode
+                                    )
+                                else:
+                                    logger.warning(f"⚠️ [V2] HITL indisponível em Headless. Registrando post {shortcode} na Dead Letter Queue e finalizando coleta do perfil atual.")
+                                    try:
+                                        from core.skills.dead_letter_queue import dead_letter_queue
+                                        await dead_letter_queue.add_failed_target(
+                                            target_username=username,
+                                            error_type="DOM_HEALING_FAILED",
+                                            error_message=f"Falha de extração no post {shortcode} e HITL indisponível em modo Headless.",
+                                            original_target_id=candidato_id
+                                        )
+                                    except Exception as e_dlq:
+                                        logger.error(f"❌ [V2] Falha ao registrar post na DLQ: {e_dlq}")
+                                        
+                                    return {
+                                        "comments": all_comments,
+                                        "post_metas": post_metas,
+                                        "success": True,
+                                        "comments_collected": len(all_comments),
+                                        "posts_processed": scraped_count
+                                    }
 
                     await browser.close()
                     logger.info(f"✅ [V2] @{username} finalizado. {len(all_comments)} comentários extraídos.")
