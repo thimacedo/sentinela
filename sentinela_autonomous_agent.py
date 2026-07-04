@@ -652,7 +652,16 @@ class AutonomousCollector:
             metrics.end_time = datetime.now(timezone.utc)
             metrics.duration_seconds = (metrics.end_time - metrics.start_time).total_seconds()
 
+            # Verifica sucesso (se tiver flag de sucesso ou se nao houver erros)
+            is_success = False
             if hasattr(result, "success") and result.success:
+                is_success = True
+            elif hasattr(result, "db_success") and result.db_success:
+                is_success = True
+            elif result and getattr(result, "error", None) is None:
+                is_success = True
+
+            if is_success:
                 metrics.success = True
                 metrics.comments_extracted = getattr(result, "extracted", 0)
                 metrics.comments_inserted = getattr(result, "inserted", 0)
@@ -670,8 +679,20 @@ class AutonomousCollector:
                 # Falha
                 metrics.success = False
                 metrics.error = getattr(result, "error", "unknown_error")
-                self.consecutive_blocks += 1
-                self.logger.warning(f"[Cycle #{self.cycle_count}] Falha: {metrics.error}")
+                
+                # Apenas incrementa consecutive_blocks se for um erro de bloqueio/falha real de infraestrutura
+                # Erros legítimos como "no_posts_found" não devem travar o sistema inteiro
+                is_infra_error = True
+                if metrics.error in ("no_posts_found", "no_new_comments"):
+                    is_infra_error = False
+                    
+                if is_infra_error:
+                    self.consecutive_blocks += 1
+                    self.logger.warning(f"[Cycle #{self.cycle_count}] Falha de infraestrutura: {metrics.error} (Blocos: {self.consecutive_blocks})")
+                else:
+                    self.logger.info(f"[Cycle #{self.cycle_count}] Alvo sem novos dados (legitimo): {metrics.error}")
+                    # Reseta consecutive_blocks pois o sistema está operando normalmente
+                    self.consecutive_blocks = 0
 
                 # Detecta tipo de falha
                 if "extraction_failure" in str(metrics.error).lower():
