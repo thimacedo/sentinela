@@ -171,3 +171,10 @@ _last_updated: 2026-07-03 | branch: main | version: v99.0_
    - WkAplicaSugestoes: Intervalo de autocura reduzido de 30 para 10 minutos.
    - Faxina arquitetural: Remoção de 8 arquivos órfãos em `core/`.
    - Resolvido o NameError de import do `WkAplicaSugestoes` no `main_runner.py`.
+
+## Histórico Recente de Correções (v99.1)
+1. **Agente Autônomo Autossustentável (Concluído)**:
+   - **Auto-Repopulação a cada Ciclo**: Integrada a chamada de `_ensure_queue_populated()` a cada iteração do loop principal do agente autônomo, prevenindo o esgotamento silencioso da fila do Supabase.
+   - **Ícone Dinâmico IDLE (Cor Azul)**: Implementada a cor azul (`#2196F3`) e tooltip dedicado para sinalizar o estado `IDLE` na system tray do Windows quando o agente estiver saudável mas não houver mais alvos pendentes de processamento.
+   - **Heartbeat Persistente (`agent.status.json`)**: Configurada a gravação contínua e assíncrona do arquivo de métricas de telemetria `agent.status.json` na raiz do projeto, permitindo auditorias externas do estado atual em tempo de execução.
+   - **Notificação de Alerta de Fila Baixa**: Adicionado gatilho de notificação automática no Ntfy caso a contagem de tarefas pendentes na `fila_coleta` caia para menos de 10 alvos.

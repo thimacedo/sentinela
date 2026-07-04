@@ -542,7 +542,31 @@ class AutonomousCollector:
         self.is_paused = False
         self.tray_icon = None
         self.tray_thread = None
+        self.last_health = None
         self._setup_logging()
+
+    def save_status(self, health: Optional[SystemHealth] = None):
+        try:
+            pending_count = health.queue_pending if health else 0
+            status_data = {
+                "cycle_count": self.cycle_count,
+                "status": health.status if health else "RUNNING",
+                "last_heartbeat": datetime.now(timezone.utc).isoformat(),
+                "pending_queue": pending_count,
+                "consecutive_blocks": self.consecutive_blocks,
+                "sessions": {
+                    "available": health.sessions_available if health else 0,
+                    "blocked": health.sessions_blocked if health else 0,
+                    "total": health.sessions_total if health else 0
+                } if health else {}
+            }
+            if hasattr(self, '_smart_queue'):
+                status_data["smart_queue"] = self._smart_queue.get_stats()
+                
+            # Escreve o heartbeat persistente
+            Path("agent.status.json").write_text(json.dumps(status_data, indent=2, ensure_ascii=False), encoding="utf-8")
+        except Exception as e:
+            self.logger.debug(f"[Agent] Erro ao salvar status: {e}")
 
     def _setup_logging(self):
         level = getattr(logging, self.cfg.log_level.upper(), logging.INFO)
@@ -743,6 +767,20 @@ class AutonomousCollector:
                 # Verifica saude do sistema
                 if db_client and session_pool:
                     health = await self.check_system_health(db_client, session_pool)
+                    self.last_health = health
+                    self.save_status(health)
+
+                    # Alerta de fila baixa
+                    if health.queue_pending < 10:
+                        try:
+                            await self.ntfy.send(
+                                title="Sentinela — Fila Baixa",
+                                message=f"Apenas {health.queue_pending} alvos pendentes na fila. Verifique candidatos ATIVOS.",
+                                priority="high",
+                                tags=["warning", "inbox_tray"]
+                            )
+                        except Exception as e_ntfy:
+                            self.logger.debug(f"Falha ao enviar alerta de fila baixa: {e_ntfy}")
 
                     # Log de estatísticas do SmartQueueManager a cada 5 ciclos
                     if self.cycle_count % 5 == 0 and hasattr(self, '_smart_queue'):
@@ -773,6 +811,12 @@ class AutonomousCollector:
                     # Inicializa SmartQueueManager se ainda nao existir
                     if not hasattr(self, '_smart_queue'):
                         self._smart_queue = SmartQueueManager(worker.queue, self.cfg, worker.worker_id)
+
+                    # Garante que a fila esteja populada
+                    try:
+                        await self._smart_queue.base_queue._ensure_queue_populated()
+                    except Exception as e_repop:
+                        self.logger.warning(f"[Queue] Erro ao auto-repopular fila: {e_repop}")
 
                     # Verifica pausa global
                     should_pause, pause_reason = self._smart_queue.should_pause_globally()
@@ -970,6 +1014,9 @@ class AutonomousCollector:
                 if self.is_paused:
                     color = "#FFC107" # Amarelo (PAUSED)
                     title = "Sentinela — Pausado"
+                elif self.last_health and self.last_health.queue_pending == 0:
+                    color = "#2196F3" # Azul (IDLE)
+                    title = "Sentinela — Sem alvos pendentes (IDLE)"
                 elif self.consecutive_blocks >= self.cfg.max_consecutive_blocks:
                     color = "#F44336" # Vermelho (BLOCKED)
                     title = "Sentinela — Bloqueado/Suspenso"
