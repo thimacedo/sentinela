@@ -894,18 +894,24 @@ class InstagramScraperV2:
             if ' and others' in texto_lower or ' e outras ' in texto_lower or ' e outros ' in texto_lower:
                 continue
             
-            # v92.5: Geração de ID determinístico para garantir idempotência absoluta (Anti-Duplicidade)
-            id_real = c.get("id_externo")
-            if not id_real:
-                import hashlib
-                hash_input = f"{c.get('autor_username') or 'anon'}_{texto}_{shortcode}"
-                id_real = f"v2_hash_{hashlib.sha256(hash_input.encode()).hexdigest()[:16]}"
+            # v99.2: Geração de ID determinístico unificado com base em atributos imutáveis para evitar duplicatas
+            data_pub = c.get("data_publicacao") or c.get("timestamp") or post_date_iso or now
+            if hasattr(data_pub, "isoformat"):
+                data_pub_str = data_pub.isoformat()
+            else:
+                data_pub_str = str(data_pub)
+                
+            author = c.get("autor_username") or c.get("autor") or "anon"
+            
+            import hashlib
+            hash_input = f"{shortcode}_{author}_{data_pub_str}"
+            id_real = f"v2_hash_{hashlib.sha256(hash_input.encode()).hexdigest()[:16]}"
 
             normalized.append({
                 "id_externo": id_real,
                 "texto_bruto": texto,
-                "autor_username": c.get("autor_username") or c.get("autor", "unknown"),
-                "data_publicacao": c.get("data_publicacao") or c.get("timestamp") or post_date_iso or now,
+                "autor_username": author,
+                "data_publicacao": data_pub,
                 "data_coleta": now,
                 "candidato_id": username,
                 "post_shortcode": shortcode,
@@ -1173,6 +1179,26 @@ class InstagramScraperV2:
                             !['explore', 'reels', 'direct', 'emails', 'stories', 'accounts'].includes(path)
                         ) {
                             const username = text;
+
+                            // Validação de segurança de SRE contra contêiner de curtidas do post principal
+                            let isLikeContainer = false;
+                            let checkNode = link;
+                            for (let j = 0; j < 5; j++) {
+                                if (!checkNode.parentElement) break;
+                                checkNode = checkNode.parentElement;
+                                const checkText = (checkNode.innerText || "").toLowerCase();
+                                if (
+                                    checkText.includes('liked by') || 
+                                    checkText.includes('curtido por') || 
+                                    checkText.includes('others like this') ||
+                                    checkText.includes('pessoas curtiram') ||
+                                    checkText.includes('curtiram isto')
+                                ) {
+                                    isLikeContainer = true;
+                                    break;
+                                }
+                            }
+                            if (isLikeContainer) return;
 
                             // Navega até 5 níveis acima para encontrar o container do comentário
                             let node = link;
