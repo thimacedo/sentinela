@@ -87,12 +87,14 @@ class WkColetaInstagram(BaseWorker):
         
         # 🛡️ HIBERNAÇÃO INTELIGENTE
         if self.consecutive_blocks >= 3:
+            self.logger.warning(f"🛡️ [V2] {self.consecutive_blocks} bloqueios consecutivos. Hibernando por 1h para segurança...")
             await asyncio.sleep(3600)
             self.consecutive_blocks = 0
 
         # 🌙 MODO NOTURNO
         current_hour = datetime.now().hour
         if current_hour >= 23 or current_hour < 5:
+            self.logger.info(f"🌙 [V2] Modo noturno ativo (Hora: {current_hour}h). Aguardando 300s (5min) para proteção do pool...")
             await asyncio.sleep(300)
 
         # 📦 SINCRONIZAÇÃO DE BACKGROUND
