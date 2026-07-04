@@ -871,7 +871,7 @@ class InstagramScraperV2:
                 continue
             if any(texto_lower.startswith(p) for p in prefix_junk):
                 continue
-            if ' and others' in texto_lower or ' e outras ' in texto_lower or ' e outros ' in texto_lower or ' e mais ' in texto_lower:
+            if ' and others' in texto_lower or ' e outras ' in texto_lower or ' e outros ' in texto_lower:
                 continue
             
             # v92.5: Geração de ID determinístico para garantir idempotência absoluta (Anti-Duplicidade)
