@@ -4,6 +4,7 @@ import random
 from typing import List, Dict, Any
 
 from core.ai_service import ai_service
+from core.context_classifier import ContextClassifier
 
 logger = logging.getLogger("core.behavior_engine")
 
@@ -29,6 +30,24 @@ class BehaviorEngine:
         if len(comments) < 3:
             return comments
 
+        # =====================================================================
+        # FIX v1.0: Filtro de Contexto Positivo — Evita detectar "campanha coordenada"
+        # em comentarios de aniversario, celebracoes, agradecimentos.
+        # Se a maioria (>60%) dos comentarios do lote for de contexto benigno,
+        # pula a deteccao de campanhas coordenadas.
+        # =====================================================================
+        positive_count = sum(
+            1 for c in comments if ContextClassifier.is_positive_context(c.get("texto_bruto", ""))
+        )
+        if len(comments) > 0 and (positive_count / len(comments)) > 0.6:
+            logger.info(
+                "[Solenya] Lote de contexto positivo detectado (%d/%d comentarios benignos). "
+                "Pulando deteccao de campanha coordenada.",
+                positive_count, len(comments)
+            )
+            return comments
+        # =====================================================================
+
         # Prepara Lote Textual
         batch_text = ""
         index_map = {}
@@ -44,6 +63,9 @@ class BehaviorEngine:
         prompt = f"""
         Você é o "Solenya", o Analista Chefe de Desinformação do Sentinela.
         Sua missão é ler um lote de comentários de redes sociais extraídos no mesmo minuto e determinar se há um Ataque Coordenado (Swarm/Milícia Digital).
+        
+        IMPORTANTE: Comentarios de aniversario, parabens, agradecimentos e celebracoes
+        pessoais NAO SAO campanhas coordenadas. Ignore esses contextos.
         
         As campanhas coordenadas modernas não copiam e colam o mesmo texto exato; eles usam sinônimos para o mesmo núcleo argumentativo ou narrativa estrutural.
         Leia os comentários abaixo e agrupe pelo Índice (IDs entre colchetes) aqueles que compartilham EXATAMENTE a mesma métrica argumentativa estruturada, não apenas a mesma opinião política.

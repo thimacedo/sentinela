@@ -56,7 +56,7 @@ class ContextClassifier:
         """
         Retorna True se o texto esta em um contexto claramente positivo
         e NAO contem indicadores negativos (ataques).
-        
+
         Heuristicas:
         1. Se ha palavras negativas (insultos, ameacas), retorna False
         2. Se ha padroes positivos + keywords positivas, retorna True

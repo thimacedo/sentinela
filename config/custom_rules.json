@@ -10,7 +10,12 @@
   "mitigate_false_positives": [
     "Evitar marcação de expressões comuns em comunidades específicas como ofensivas sem contexto",
     "Não marcar como 'DANO_A_IMAGEM' críticas construtivas",
-    "Não classificar linguagem que visa desafiar estruturas sociais existentes como ofensiva"
+    "Não classificar linguagem que visa desafiar estruturas sociais existentes como ofensiva",
+    "NAO classificar mensagens de aniversario (Parabens, Feliz aniversario) como odio — sao sempre NEUTRO",
+    "NAO classificar agradecimentos e bencaos (Deus abençoe, Obrigado) como odio — sao sempre NEUTRO",
+    "NAO classificar saudacoes positivas (Bom dia abencoado) como odio — sao sempre NEUTRO",
+    "NAO marcar comentarios de celebracao pessoal como SUSPEITO ou campanha coordenada",
+    "Contexto pragmatico prevalece: parabens a amigos/familiares eh celebracao, nao ataque"
   ],
   "custom_keywords": {
     "ODIO_IDENTITARIO": [
