@@ -846,12 +846,33 @@ class InstagramScraperV2:
         
         now = datetime.now(timezone.utc).isoformat()
         normalized = []
-        junk_patterns = ['também da meta', 'instagram lite', 'localizações', 'campanha 2201', 'áudio original']
+        # Padrões de lixo/UI para descarte exato
+        exact_junk = {
+            'também da meta', 'instagram lite', 'localizações', 'campanha 2201',
+            'view replies', 'ver respostas', 'ver tradução', 'see translation', 'see original',
+            'responder', 'reply', 'ver thread', 'view thread',
+            'pinned', 'fixado', 'pinned by', 'fixado por',
+            'original audio', 'áudio original', 'original sound', 'som original',
+            'use template', 'usar modelo', 'remix', 'collaboration', 'colaboração'
+        }
+        
+        # Padrões de curtidas para descarte por prefixo
+        prefix_junk = [
+            'liked by', 'curtido por', 'others like this', 
+            'pessoas curtiram', 'curtiram isto'
+        ]
         
         for c in comments[:max_comments]:
             texto = (c.get("texto_bruto") or c.get("texto", "")).replace("\u0000", "").strip()
             if len(texto) < 2 or len(texto) > 2000: continue
-            if any(p in texto.lower() for p in junk_patterns): continue
+            
+            texto_lower = texto.lower()
+            if texto_lower in exact_junk:
+                continue
+            if any(texto_lower.startswith(p) for p in prefix_junk):
+                continue
+            if ' and others' in texto_lower or ' e outras ' in texto_lower or ' e outros ' in texto_lower or ' e mais ' in texto_lower:
+                continue
             
             # v92.5: Geração de ID determinístico para garantir idempotência absoluta (Anti-Duplicidade)
             id_real = c.get("id_externo")
@@ -1151,6 +1172,18 @@ class InstagramScraperV2:
                                     if (txt === username) continue;
                                     if (txt.length < 3) continue;          // mínimo 3 chars
                                     if (TS_RE.test(txt)) continue;         // timestamp relativo
+
+                                    // Filtra metadados de curtidas e botões de interface comuns no DOM
+                                    const txtLower = txt.toLowerCase();
+                                    if (
+                                        txtLower.startsWith('liked by') ||
+                                        txtLower.startsWith('curtido por') ||
+                                        txtLower.includes(' e outras ') ||
+                                        txtLower.includes(' and others') ||
+                                        ['ver respostas', 'view replies', 'responder', 'reply'].includes(txtLower)
+                                    ) {
+                                        continue;
+                                    }
 
                                     commentText = txt;
                                     break;
