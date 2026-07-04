@@ -121,10 +121,10 @@ def monitor_cycle():
                 
             lag = (datetime.now(timezone.utc) - hb_dt).total_seconds()
             
-            # Ajusta threshold de lag dinamicamente conforme horário (margens seguras para evitar falsos positivos)
+            # Ajusta threshold de lag dinamicamente conforme horário (margens seguras para evitar falsos positivos de latência ou sleeps)
             current_hour = datetime.now().hour
             is_night = current_hour >= 23 or current_hour < 6
-            max_lag = 450 if is_night else 240
+            max_lag = 900 if is_night else 600
             
             if lag > max_lag:
                 logger.error(f"🚨 [SRE] Agente congelado! Heartbeat inativo ha {lag:.1f}s. Forcando reinicializacao...")
