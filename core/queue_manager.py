@@ -362,7 +362,7 @@ class QueueManager:
                 self.db.table("candidatos")
                 .select("id,username,termometro,last_scraped_at")
                 .filter("status_monitoramento", "ilike", "Ativo")
-                .or_(f"last_scraped_at.is.null,and(termometro.eq.FRIO,last_scraped_at.lt.{cold_threshold}),and(termometro.neq.FRIO,last_scraped_at.lt.{hot_threshold})")
+                .or_("last_scraped_at.is.null, and(termometro.eq.FRIO, last_scraped_at.lt.{}).and(termometro.neq.FRIO, last_scraped_at.lt.{})", cold_threshold, hot_threshold)
                 .order("last_scraped_at", desc=False)
                 .limit(20)
                 .execute
