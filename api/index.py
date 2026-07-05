@@ -513,3 +513,65 @@ def get_cloud_error_summary(supa: Client = Depends(get_supa)):
     except Exception as e:
         logger.error(f"Cloud Error Summary Error: {e}")
         return []
+
+# --- DOSSIERS MODULE (Relatórios) ---
+
+@app.get("/api/v1/dossiers")
+def get_dossiers(supa: Client = Depends(get_supa)):
+    """Retorna a lista de dossiês gerados e salvos no banco."""
+    try:
+        res = supa.table('dossies').select('*').order('data_geracao', desc=True).limit(50).execute()
+        return res.data or []
+    except Exception as e:
+        logger.error(f"Erro ao buscar dossies: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/v1/dossiers/generate")
+def generate_dossier(req: DossierGenerateRequest, supa: Client = Depends(get_supa)):
+    """Gera um dossiê sob demanda (com desconto de CI) ou retorna o mais recente."""
+    try:
+        # 1. Verifica se já existe um dossiê gerado recentemente (ex: nas últimas 24h)
+        window = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
+        recent = supa.table('dossies')\
+            .select('arquivo_path, data_geracao')\
+            .eq('candidato_id', req.candidato_id)\
+            .gte('data_geracao', window)\
+            .order('data_geracao', desc=True)\
+            .limit(1).execute()
+
+        if recent.data and recent.data[0].get('arquivo_path'):
+            logger.info(f"[Dossier] Cache hit para {req.candidato_id}. Retornando arquivo existente.")
+            return {"pdf_url": recent.data[0]['arquivo_path']}
+            
+        # 2. Se não existe ou expirou, vamos consumir CI e enfileirar a geração
+        # Para fins de frontend responsivo, se a fila for assíncrona, não podemos retornar pdf_url imediatamente.
+        # Porém, vamos enfileirar na tabela "fila_dossies"
+        cost = 50 # Custo em CI por emissão
+        if req.user_id and req.user_id != 'guest_user':
+            tx_res = supa.rpc('process_ci_transaction', {
+                "p_user_id": req.user_id,
+                "p_amount": -cost,
+                "p_type": "DOSSIE",
+                "p_description": f"Geração de Dossiê para {req.candidato_id}"
+            }).execute()
+            
+            if tx_res.data and not tx_res.data.get('success'):
+                logger.warning(f"[Dossier] Falha de CI para {req.user_id}")
+                raise HTTPException(status_code=402, detail="Saldo CI insuficiente.")
+                
+        # Insere na fila de processamento (para o worker WkGeraDossies atuar)
+        enq = supa.table('fila_dossies').insert({
+            "candidato_id": req.candidato_id,
+            "status": "PENDENTE",
+            "modulos": req.modules or ["base"],
+            "solicitado_por": req.user_id
+        }).execute()
+        
+        # Como é assíncrono, retornamos uma URL temporária de loading ou um aviso.
+        # No Next.js ele tenta abrir blank. Vamos retornar um endpoint de polling do status.
+        return {"pdf_url": f"/api/v1/dossiers/status?id={enq.data[0]['id']}" if enq.data else ""}
+        
+    except HTTPException: raise
+    except Exception as e:
+        logger.error(f"Erro ao gerar dossie para {req.candidato_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
