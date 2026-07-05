@@ -47,6 +47,8 @@ POSITIVE_CONTEXT_PATTERNS = [
     r'\b(?:bom\s+dia|boa\s+tarde|boa\s+noite)\b.*\b(?:aben[çc]oad[ao]|lindo|maravilhoso)\b',
     # Emojis de celebracao + texto positivo
     r'^[🎉🎂🎁🙌👏🥳🎊🎈✨🙏❤️💖💕]+.*\b(?:parab[eé]ns|feliz|bom|lindo)\b',
+    # Ancoragem Positiva Inicial (Apoio Político/Defesa)
+    r'^(?:\W*\w+\W*){0,5}\b(?:tem\s+raz[ãa]o|perfeito|estamos\s+combatendo|parab[eé]ns|concordo|excelente|apoiado)\b',
 ]
 
 _compiled_positive_patterns = [re.compile(p, re.IGNORECASE) for p in POSITIVE_CONTEXT_PATTERNS]
@@ -54,6 +56,7 @@ _compiled_positive_patterns = [re.compile(p, re.IGNORECASE) for p in POSITIVE_CO
 POSITIVE_CONTEXT_KEYWORDS = {
     'aniversario', 'parabens', 'feliz_aniversario', 'niver',
     'felicidades', 'abençoe', 'realizações',
+    'razão', 'perfeito', 'combatendo', 'excelente', 'apoiado', 'concordo',
 }
 
 # Palavras que, se presentes, invalidam a classificacao de contexto benigno
@@ -151,6 +154,7 @@ Os textos abaixo NAO SAO discurso de odio. Classifique como NEUTRO (is_hate: fal
 - Agradecimentos e bençãos: "Deus abençoe", "Obrigado amigo", "Tudo de bom"
 - Saudacoes positivas: "Bom dia abençoado", "Boa tarde a todos"
 - Expressoes de apoio nao agressivas: "Forca amigo", "Estamos juntos" (SEM insultos)
+- Ancoragem Positiva de Defesa: Se o comentario COMECAR concordando ou elogiando (ex: "Tem razao!", "Perfeito!", "Parabens!", "Estamos combatendo"), ele eh NEUTRO/Apoio. Nao classifique como ataque mesmo que contenha palavras duras em seguida (ex: "destruindo", "ilegais", "fakeniws", "mata").
 - IMPORTANTE: "Parabens" em contexto de aniversario ou celebracao pessoal eh SEMPRE NEUTRO.
   Nao confunda com sarcasmo politico — se o texto nao contiver ataque, insulto ou acusacao,
   e for claramente uma mensagem de carinho/celebracao, classifique como NEUTRO.
@@ -189,6 +193,7 @@ NAO marque como SUSPEITO textos que sao claramente:
 - Agradecimentos: "Deus abençoe", "Obrigado", "Tudo de bom"
 - Saudacoes positivas: "Bom dia abençoado"
 - Expressoes de carinho/apoio SEM insultos
+- Ancoragem Positiva de Defesa: Se o texto iniciar com "Tem razao", "Perfeito", "Estamos combatendo" (Apoio), marque NEUTRO ignorando palavras de risco subsequentes (destruir, matar, ilegal).
 
 Responda APENAS com JSON:
 {
