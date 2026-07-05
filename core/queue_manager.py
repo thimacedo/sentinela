@@ -322,6 +322,7 @@ class QueueManager:
             in_queue_usernames = {row["candidato_id"] for row in (active_queue_res.data or [])}
 
             reinseridos = 0
+            batch = []
             for cand in (candidatos_res.data or []):
                 username = cand.get("username")
                 if not username or username in in_queue_usernames:
@@ -330,21 +331,23 @@ class QueueManager:
                 termometro = cand.get("termometro", "MORNO")
                 prioridade = 1 if termometro == "QUENTE" else (5 if termometro in ("FRIO", "MORNO") else 3)
 
-                # Reinserção via upsert
-                await asyncio.to_thread(
-                    self.db.table("fila_coleta").upsert({
-                        "candidato_id": cand["username"],
-                        "status": "PENDENTE",
-                        "prioridade": prioridade,
-                    }, on_conflict="candidato_id,data_agendada").execute
-                )
+                batch.append({
+                    "candidato_id": cand["username"],
+                    "status": "PENDENTE",
+                    "prioridade": prioridade,
+                })
                 reinseridos += 1
 
                 if (current_pending + reinseridos) >= min_pending:
                     break
+            
+            if batch:
+                await asyncio.to_thread(
+                    self.db.table("fila_coleta").upsert(batch, on_conflict="candidato_id,data_agendada").execute
+                )
 
             if reinseridos > 0:
-                logger.info(f"✅ [Queue] {reinseridos} candidato(s) reinserido(s) na fila automaticamente.")
+                logger.info(f"✅ [Queue] {reinseridos} candidato(s) reinserido(s) na fila automaticamente (via batch).")
         except Exception as e:
             logger.error(f"❌ [Queue] Erro na auto-repopulação: {e}")
 
