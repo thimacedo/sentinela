@@ -10,36 +10,7 @@ import CandidateProfile from '@/components/home/CandidateProfile';
 import MethodologyBox from '@/components/home/MethodologyBox';
 import TrendChart from '@/components/home/TrendChart';
 import PremiumCTA from '@/components/home/PremiumCTA';
-
-// Interfaces para tipagem forte
-interface Alert {
-  id: string;
-  data_coleta: string;
-  candidatos?: {
-    username: string;
-  };
-  candidato_id?: string;
-  categoria_ia: 'CRITICO' | 'ELEVADO' | 'MEDIO' | 'BAIXO' | string;
-  texto_bruto?: string;
-}
-
-interface DashboardStats {
-  resiliencia?: number;
-  total_amostra?: number;
-  total_alertas?: number;
-  total_monitorados?: number;
-}
-
-interface TimelineEvent {
-  id: string;
-  timestamp: string;
-  candidate: string;
-  title: string;
-  description: string;
-  alertLevel: 'critical' | 'high' | 'medium' | 'low';
-  postsCount: number;
-  engagementMetric: number;
-}
+import type { Alert, DashboardStats, TimelineEvent } from '@/types';
 
 export default function HomePage() {
   const [period, setPeriod] = useState<'24h' | '7d' | '30d'>('24h');
