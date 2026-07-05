@@ -1,5 +1,4 @@
 'use client';
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react';
 import { useAlerts, useDashboardStats } from '@/hooks/useDashboardData';
 import NewsHeader from '@/components/home/NewsHeader';
@@ -11,14 +10,14 @@ import CandidateProfile from '@/components/home/CandidateProfile';
 import MethodologyBox from '@/components/home/MethodologyBox';
 import TrendChart from '@/components/home/TrendChart';
 import PremiumCTA from '@/components/home/PremiumCTA';
+import type { Alert, DashboardStats, TimelineEvent } from '@/types';
 
 export default function HomePage() {
   const [period, setPeriod] = useState<'24h' | '7d' | '30d'>('24h');
   const { data: alerts = [] } = useAlerts(5);
   const { data: stats } = useDashboardStats();
 
-  // Transforma alertas em eventos para a timeline
-  const timelineEvents = (alerts as any[]).map((alert: any) => ({
+  const timelineEvents: TimelineEvent[] = (alerts as Alert[]).map((alert: Alert) => ({
     id: alert.id,
     timestamp: new Date(alert.data_coleta).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
     candidate: alert.candidatos?.username || alert.candidato_id || 'desconhecido',
@@ -26,33 +25,18 @@ export default function HomePage() {
     description: alert.texto_bruto?.substring(0, 100) + '...',
     alertLevel: (alert.categoria_ia === 'CRITICO' ? 'critical' : (alert.categoria_ia === 'ELEVADO' ? 'high' : 'medium')) as 'critical' | 'high' | 'medium' | 'low',
     postsCount: 1,
-    engagementMetric: 50 // Simulado fixo por enquanto
+    engagementMetric: 50
   }));
 
-  const resiliencia = stats?.resiliencia || 0;
+  const resiliencia = (stats as DashboardStats)?.resiliencia || 0;
 
   return (
     <div className="min-h-screen bg-bg-main transition-colors duration-300">
-      {/* Main Container */}
       <main className="max-w-6xl mx-auto py-10 space-y-20 px-4 sm:px-6 lg:px-8">
-        {/* Section 1: News Header */}
         <NewsHeader />
-
-        {/* Timeline Movida para o Topo com Controle de Período */}
-        <EventTimeline 
-          events={timelineEvents} 
-          period={period} 
-          onPeriodChange={setPeriod}
-        />
-
-        {/* Section 1.5: Activity Trend (From SaaS Logic) */}
+        <EventTimeline events={timelineEvents} period={period} onPeriodChange={setPeriod} />
         <TrendChart />
-
-        {/* Section 2 removida para evitar redundância de Destaques e Linha do Tempo */}
-        {/* Anúncio AdSense */}
         <AdSenseSlot adSlot="2020882637" format="horizontal" />
-
-        {/* Section 3: Insights & Trends */}
         <div className="space-y-8">
           <div className="flex items-center gap-3 border-b border-border-main pb-4">
             <span className="text-3xl">🔬</span>
@@ -67,7 +51,7 @@ export default function HomePage() {
               metric={resiliencia}
               metricLabel="Saúde do Discurso"
               confidence={94}
-              sources={stats?.total_amostra || 0}
+              sources={(stats as DashboardStats)?.total_amostra || 0}
             />
             <InsightBox
               type="pattern"
@@ -75,14 +59,10 @@ export default function HomePage() {
               description="Detecção de mensagens idênticas ou altamente similares em massa."
               insight="Monitoramento Solenya v71.0 ativo. Buscando padrões de automação."
               confidence={88}
-              sources={stats?.total_amostra || 0}
+              sources={(stats as DashboardStats)?.total_amostra || 0}
             />
           </div>
         </div>
-
-
-
-        {/* Section 5: Candidate Profiles */}
         <div className="space-y-8">
           <div className="flex items-center justify-between border-b border-border-main pb-4">
             <div className="flex items-center gap-3">
@@ -97,17 +77,9 @@ export default function HomePage() {
             <CandidateProfile />
           </div>
         </div>
-
-        {/* Section 6: Methodology & About */}
         <MethodologyBox />
-
-        {/* Anúncio AdSense Bottom */}
         <AdSenseSlot adSlot="2020882637" format="horizontal" />
-
-        {/* CTA Section (From SaaS Logic) */}
         <PremiumCTA />
-
-        {/* Footer */}
         <footer className="border-t border-border-main pt-10 pb-16 text-center space-y-6">
           <div className="flex justify-center items-center gap-2">
             <div className="w-8 h-8 bg-brand-primary rounded-lg flex items-center justify-center text-white text-xs font-black shadow-sm">S</div>

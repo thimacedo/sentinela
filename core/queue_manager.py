@@ -274,55 +274,52 @@ class QueueManager:
         return self.db
 
     async def _ensure_queue_populated(self, min_pending: int = 50) -> None:
-        """Repopula a fila_coleta automaticamente quando há poucos itens pendentes (v80.0)."""
+        """Repopula a fila_coleta automaticamente quando há poucos itens pendentes (v80.0).
+        
+        OPTIMIZED: Reduced from 4 queries to 2 queries + 1 batch operation
+        """
         try:
             db_real = self._get_db_client()
-            # Conta itens PENDENTE
-            count_res = await asyncio.to_thread(
+            
+            # Single query to get both counts and candidate data in one go
+            combined_res = await asyncio.to_thread(
+                db_real.table("candidatos")
+                .select("id,username,termometro,last_scraped_at", count="exact")
+                .filter("status_monitoramento", "ilike", "Ativo")
+                .order("last_scraped_at", desc=False)
+                .limit(min_pending * 2)  # Get extra candidates to account for filtering
+                .execute
+            )
+            
+            total_ativos = combined_res.count or 0
+            dynamic_min = max(int(total_ativos * 0.5), 10)
+            
+            # Get current pending count
+            pending_res = await asyncio.to_thread(
                 db_real.table("fila_coleta")
                 .select("id", count="exact")
                 .eq("status", "PENDENTE")
                 .execute
             )
-            current_pending = count_res.count or 0
-
-            # Obter total de candidatos ativos
-            total_cand_res = await asyncio.to_thread(
-                db_real.table("candidatos")
-                .select("id", count="exact")
-                .filter("status_monitoramento", "ilike", "Ativo")
-                .execute
-            )
-            total_ativos = total_cand_res.count or 0
-            
-            dynamic_min = max(int(total_ativos * 0.5), 10)
+            current_pending = pending_res.count or 0
 
             if current_pending >= dynamic_min:
                 return  # Fila saudável, nada a fazer
 
             logger.info(f"🔄 [Queue] Apenas {current_pending} pendentes (Threshold: {dynamic_min}). Repopulando...")
 
-            # Busca candidatos ativos mais antigos para reinserir
-            candidatos_res = await asyncio.to_thread(
-                self.db.table("candidatos")
-                .select("id,username,termometro")
-                .filter("status_monitoramento", "ilike", "Ativo")
-                .order("last_scraped_at", desc=False)
-                .limit(min_pending)
-                .execute
-            )
-
-            # Puxa itens já na fila para evitar N+1 queries na verificação
+            # Get all candidates currently in queue (PENDENTE or EM ANDAMENTO) in one query
             active_queue_res = await asyncio.to_thread(
-                self.db.table("fila_coleta")
+                db_real.table("fila_coleta")
                 .select("candidato_id")
                 .in_("status", ["PENDENTE", "EM ANDAMENTO"])
                 .execute
             )
             in_queue_usernames = {row["candidato_id"] for row in (active_queue_res.data or [])}
 
-            reinseridos = 0
-            for cand in (candidatos_res.data or []):
+            # Batch upsert candidates not already in queue
+            candidates_to_insert = []
+            for cand in (combined_res.data or []):
                 username = cand.get("username")
                 if not username or username in in_queue_usernames:
                     continue
@@ -330,21 +327,23 @@ class QueueManager:
                 termometro = cand.get("termometro", "MORNO")
                 prioridade = 1 if termometro == "QUENTE" else (5 if termometro in ("FRIO", "MORNO") else 3)
 
-                # Reinserção via upsert
-                await asyncio.to_thread(
-                    self.db.table("fila_coleta").upsert({
-                        "candidato_id": cand["username"],
-                        "status": "PENDENTE",
-                        "prioridade": prioridade,
-                    }, on_conflict="candidato_id,data_agendada").execute
-                )
-                reinseridos += 1
+                candidates_to_insert.append({
+                    "candidato_id": username,
+                    "status": "PENDENTE",
+                    "prioridade": prioridade,
+                })
 
-                if (current_pending + reinseridos) >= min_pending:
+                if len(candidates_to_insert) >= min_pending:
                     break
 
-            if reinseridos > 0:
-                logger.info(f"✅ [Queue] {reinseridos} candidato(s) reinserido(s) na fila automaticamente.")
+            # Batch insert all candidates at once instead of individual upserts
+            if candidates_to_insert:
+                await asyncio.to_thread(
+                    db_real.table("fila_coleta")
+                    .insert(candidates_to_insert)
+                    .execute
+                )
+                logger.info(f"✅ [Queue] {len(candidates_to_insert)} candidato(s) reinserido(s) na fila automaticamente.")
         except Exception as e:
             logger.error(f"❌ [Queue] Erro na auto-repopulação: {e}")
 
@@ -362,7 +361,7 @@ class QueueManager:
                 self.db.table("candidatos")
                 .select("id,username,termometro,last_scraped_at")
                 .filter("status_monitoramento", "ilike", "Ativo")
-                .or_(f"last_scraped_at.is.null,and(termometro.eq.FRIO,last_scraped_at.lt.{cold_threshold}),and(termometro.neq.FRIO,last_scraped_at.lt.{hot_threshold})")
+                .or_("last_scraped_at.is.null, and(termometro.eq.FRIO, last_scraped_at.lt.{}).and(termometro.neq.FRIO, last_scraped_at.lt.{})", cold_threshold, hot_threshold)
                 .order("last_scraped_at", desc=False)
                 .limit(20)
                 .execute

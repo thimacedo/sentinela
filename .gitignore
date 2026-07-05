@@ -36,7 +36,11 @@ dist/
 
 # 3. Credenciais, Segredos e Sessoes (NUNCA COMMITAR)
 # -----------------------------------------------------------------
-.env
+# ALL .env files - never commit credentials
+*.env
+*.env.*
+price.env
+
 .env.example
 .env.local
 
