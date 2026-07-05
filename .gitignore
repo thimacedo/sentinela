@@ -4,6 +4,12 @@
 
 # 1. Dependencias e Ambientes
 # -----------------------------------------------------------------
+.env
+.env.*
+!.env.example
+price.env
+.env.local
+
 # Python
 .venv/
 venv/
