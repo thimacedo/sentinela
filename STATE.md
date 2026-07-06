@@ -1,5 +1,5 @@
 # STATE.md — Sentinela
-_last_updated: 2026-07-04 | branch: main | version: v100.0_
+_last_updated: 2026-07-06 | branch: main | version: v100.1_
 
 ## Status Operacional
 
@@ -9,6 +9,13 @@ _last_updated: 2026-07-04 | branch: main | version: v100.0_
 | Inteligência | 🟢 Operacional | Malha de IA resiliente + SaFastDrop local + Adaptações de Failover ativos. |
 | Dashboard | 🟢 Operacional | Painel "Decision Room" com telemetria real via DB e Coleta Direcionada. |
 | SRE / Autocura | 🟢 Operacional | Agente de SRE Autônomo com WkDeadLetterQueue, WkSessaoAutonoma e Cronjobs cj_sre_* 100% funcionais. |
+
+## Histórico Recente de Correções (v100.1 — Control Plane & Observabilidade)
+1. **Ntfy Control Plane (Auto-Cura e Resumos):**
+   - **Centralização:** O módulo `core/ntfy_client.py` teve o bypass de prioridade removido. Todas as mensagens (independente da prioridade) agora são roteadas e persistidas obrigatoriamente no banco `ntfy_queue.db`.
+   - **Triagem Ativa (Fast Loop):** O script `ntfy_worker.py` foi reescrito como um Control Plane. Ele checa o banco a cada 10 segundos buscando tags/keywords críticas (`CRITICO`, `PAUSED`, `all_sessions_blocked`, `DOMHealer`).
+   - **Auto-Cura Determinística:** Ao detectar um gatilho crítico, o worker aplica um `Stop-Process -Force` cirúrgico no `sentinela_autonomous_agent.py` para aniquilar zumbis e memory leaks. Em seguida, recria o processo através de `subprocess.Popen` com flags isoladas de console (`DETACHED_PROCESS` e `CREATE_NEW_PROCESS_GROUP`), religando a esteira sozinho e notificando o administrador emergencialmente sem aguardar o ciclo.
+   - **Slow Loop (Silêncio Operacional):** Mensagens de rotina (sucessos de coleta, alvos pulados) acumulam-se silenciosamente e são despachadas como um único pacote formatado a cada 3 horas, salvando limites da API e foco do usuário.
 
 ## Histórico Recente de Correções (v100.0 — Fase 1 SRE & Resiliência)
 1. **Implantação da Dead Letter Queue (WkDeadLetterQueue):**
