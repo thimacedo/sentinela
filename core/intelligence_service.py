@@ -4,6 +4,8 @@ import json
 import os
 from datetime import datetime, timezone
 from typing import Dict, Any, Optional
+import urllib.parse
+from duckduckgo_search import DDGS
 
 from core.instagram_scraper_v2 import InstagramScraperV2
 from core.ai_service import ai_service
@@ -35,59 +37,88 @@ class IntelligenceService:
         username = username.lower().strip().replace('@', '')
         logger.info(f"OODA [Intelligence]: Analisando @{username}...")
 
+        # Busca dados base do banco para orientar a pesquisa caso seja falso
+        try:
+            target_db = db_client.client.table('candidatos').select('nome_completo, estado').eq('username', username).execute()
+            target_info = target_db.data[0] if target_db.data else {}
+            real_name = target_info.get('nome_completo', username)
+            estado = target_info.get('estado', '')
+        except Exception:
+            real_name, estado = username, ""
+
         # 1. OBSERVE: Coleta os sinais vitais brutos do alvo
         ig_res = await self._fetch_ig_basic_info(username)
         
         # 2. ORIENT: Interpreta a saúde do perfil antes de gastar recursos avançados
+        is_invalid_early = False
+        reason = ""
         if not ig_res or not ig_res.get("valid"):
             reason = ig_res.get("reason") if ig_res else "unknown_error"
-            
             if reason in ["404_not_found", "account_private", "header_not_found"]:
                 logger.warning(f"OODA [Orient]: @{username} negado por {reason}. Baixa confiança inicial.")
-                # DECIDE & ACT Early (Abortar)
-                final_data = {
-                    "username": username,
-                    "identidade_validada": False,
-                    "status_monitoramento": "DESATIVADO",
-                    "motivo_desativacao": f"Perfil inacessível no Instagram: {reason}",
-                    "atualizado_em": datetime.now(timezone.utc).isoformat()
-                }
-                await db_client.upsert_candidate(final_data)
-                return final_data
-            
-            logger.warning(f"OODA [Orient]: @{username} inacessível temporariamente ({reason}). Reagendar.")
-            return None
+                is_invalid_early = True
+            else:
+                logger.warning(f"OODA [Orient]: @{username} inacessível temporariamente ({reason}). Reagendar.")
+                return None
 
-        ig_data = ig_res
+        ig_data = ig_res if ig_res else {}
         
-        # 3. DECIDE: Determinar a real identidade e cruzar com dados oficiais
-        official_data = await self._search_official_sources(username, ig_data.get("display_name"))
-        enriched = await self._enrich_and_validate(username, ig_data, official_data)
+        is_valid = False
+        enriched = {}
+        if not is_invalid_early:
+            # 3. DECIDE: Determinar a real identidade e cruzar com dados oficiais
+            official_data = await self._search_official_sources(username, ig_data.get("display_name", real_name))
+            enriched = await self._enrich_and_validate(username, ig_data, official_data)
+            is_valid = enriched.get("identidade_validada", False)
+            reason = enriched.get("motivo_rejeicao") if not is_valid else None
         
-        is_valid = enriched.get("identidade_validada", False)
+        # Se for invalido, inicia pesquisa na web por um perfil substituto (Curador Autônomo)
+        if not is_valid:
+            logger.warning(f"OODA [Curador]: @{username} descartado ({reason}). Procurando alvo correto na web...")
+            novo_alvo = await self._find_correct_profile(real_name, estado, username)
+            if novo_alvo and novo_alvo != username:
+                # Validando o novo alvo descoberto
+                logger.info(f"OODA [Curador]: Novo alvo potencial @{novo_alvo} para {real_name}. Avaliando...")
+                novo_ig_res = await self._fetch_ig_basic_info(novo_alvo)
+                if novo_ig_res and novo_ig_res.get("valid"):
+                    logger.info(f"OODA [Curador]: @{novo_alvo} é válido! Inserindo no Supabase e Fila.")
+                    novo_data = {
+                        "username": novo_alvo,
+                        "nome_completo": real_name,
+                        "estado": estado,
+                        "seguidores": novo_ig_res.get("followers_count", 0),
+                        "bio": novo_ig_res.get("biography", ""),
+                        "identidade_validada": True,
+                        "status_monitoramento": "ATIVO",
+                        "atualizado_em": datetime.now(timezone.utc).isoformat()
+                    }
+                    await db_client.upsert_candidate(novo_data)
+                    # Força a inserção na fila de coleta
+                    db_client.client.table('fila_coleta').upsert({
+                        'candidato_id': novo_alvo, 'status': 'PENDENTE', 'prioridade': 1
+                    }, on_conflict='candidato_id').execute()
+
+        # 4. ACT: Aplicar as restrições e salvar o veredito final do alvo antigo
         status = "ATIVO" if is_valid else "DESATIVADO"
-        motivo = enriched.get("motivo_rejeicao") if not is_valid else None
-
-        # 4. ACT: Aplicar as restrições e salvar o veredito final
         final_data = {
             "username": username,
-            "nome_completo": enriched.get("nome_completo") or ig_data.get("display_name"),
+            "nome_completo": enriched.get("nome_completo") or ig_data.get("display_name", real_name),
             "bio": ig_data.get("biography"),
             "seguidores": ig_data.get("followers_count", 0),
             "cargo": enriched.get("cargo", "DESCONHECIDO"),
             "partido": enriched.get("partido"),
-            "estado": enriched.get("estado"),
+            "estado": enriched.get("estado") or estado,
             "ideologia": enriched.get("ideologia"),
             "identidade_validada": is_valid,
             "status_monitoramento": status,
-            "motivo_desativacao": motivo,
+            "motivo_desativacao": reason,
             "atualizado_em": datetime.now(timezone.utc).isoformat()
         }
 
         await db_client.upsert_candidate(final_data)
         logger.info(f"OODA [Act]: Conclusão para @{username} salva (Válido: {is_valid})")
         
-        final_data["_quality"] = enriched.get("quality_confidence", 0.5)
+        final_data["_quality"] = enriched.get("quality_confidence", 0.5) if is_valid else 0.0
         return final_data
 
     async def _fetch_ig_basic_info(self, username: str) -> Optional[Dict[str, Any]]:
@@ -203,5 +234,41 @@ class IntelligenceService:
             if 'mil' in s or 'k' in s: return int(float(s.replace('mil', '').replace('k', '').replace(',', '.')) * 1_000)
             return int(re.sub(r'\D', '', s) or 0)
         except: return 0
+
+    async def _find_correct_profile(self, real_name: str, estado: str, old_username: str) -> Optional[str]:
+        """Faz uma busca no DuckDuckGo para encontrar o perfil oficial do candidato."""
+        try:
+            query = f"site:instagram.com {real_name} político {estado}"
+            logger.info(f"OODA [Pesquisa Web]: Buscando '{query}'")
+            results = DDGS().text(query, max_results=5)
+            if not results:
+                return None
+            
+            snippets = [f"{r.get('title')} - {r.get('href')} - {r.get('body')}" for r in results]
+            
+            prompt = f"""
+            Você é um agente OSINT investigador. O alvo atual '{old_username}' falhou.
+            Precisamos encontrar o Instagram verdadeiro do político '{real_name}' (Estado: {estado}).
+            Resultados de busca orgânica:
+            {json.dumps(snippets, indent=2)}
+            
+            A partir das URLs do Instagram encontradas, extraia o username MAIS PROVÁVEL de ser a conta oficial desta pessoa.
+            Lembre-se que as URLs são do tipo instagram.com/username/.
+            IGNORE usernames de apoiadores, partidos, notícias, ou perfis com "fã clube".
+            Retorne APENAS o username extraído, sem o '@'. Se não houver nenhum provável, retorne "NOT_FOUND".
+            """
+            
+            response = await ai_service.mistral_client.chat.completions.create(
+                model="open-mistral-nemo",
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.0
+            )
+            candidate = response.choices[0].message.content.strip().lower().replace('@', '').replace('/', '')
+            
+            if candidate and candidate != "not_found" and "instagram.com" not in candidate:
+                return candidate
+        except Exception as e:
+            logger.error(f"Erro ao pesquisar alvo substituto na web: {e}")
+        return None
 
 intelligence_service = IntelligenceService()

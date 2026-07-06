@@ -17,6 +17,11 @@ _last_updated: 2026-07-06 | branch: main | version: v100.1_
    - **Auto-Cura Determinística:** Ao detectar um gatilho crítico, o worker aplica um `Stop-Process -Force` cirúrgico no `sentinela_autonomous_agent.py` para aniquilar zumbis e memory leaks. Em seguida, recria o processo através de `subprocess.Popen` com flags isoladas de console (`DETACHED_PROCESS` e `CREATE_NEW_PROCESS_GROUP`), religando a esteira sozinho e notificando o administrador emergencialmente sem aguardar o ciclo.
    - **Slow Loop (Silêncio Operacional):** Mensagens de rotina (sucessos de coleta, alvos pulados) acumulam-se silenciosamente e são despachadas como um único pacote formatado a cada 3 horas, salvando limites da API e foco do usuário.
 
+2. **Agente Pesquisador OSINT (WkPesquisaAlvos):**
+   - Transformado de um simples validador para um **Agente Pesquisador Autônomo**.
+   - Integração com `duckduckgo-search` para busca orgânica ativa na web. Caso um perfil em `candidatos` seja validado como falso, privado ou inacessível, o agente formula uma query com o Nome Completo e UF, varre os resultados da Web e usa o LLM para deduzir e capturar o Instagram verdadeiro.
+   - O agente não só arquiva o fake, como faz a auto-substituição: Injeta o novo `@` validado no banco de `candidatos` e o agenda automaticamente na `fila_coleta`.
+
 ## Histórico Recente de Correções (v100.0 — Fase 1 SRE & Resiliência)
 1. **Implantação da Dead Letter Queue (WkDeadLetterQueue):**
    - Implementada a persistência de alvos em quarentena de falhas locais via SQLite em `runtime_state/buffer.db` (tabela `fila_dlq`).
