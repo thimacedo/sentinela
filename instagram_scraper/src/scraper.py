@@ -51,6 +51,8 @@ class InstagramCommentScraper:
 
     def save_config(self, config_path: str):
         """Save current configuration to JSON file."""
+        if ".." in config_path:
+            raise Exception("Invalid file path")
         with open(config_path, 'w') as f:
             json.dump(self.config, f, indent=4)
 
