@@ -470,9 +470,16 @@ class InstagramScraperV2:
                         logger.warning(f"⚠️ [V2] Nenhum post encontrado para @{username}. Salvando diagnóstico...")
                         try:
                             os.makedirs("scratch", exist_ok=True)
-                            await page.screenshot(path=f"scratch/scrape_empty_{username}.png")
+                            base_real = os.path.realpath("scratch")
+                            screenshot_path = os.path.realpath(f"scratch/scrape_empty_{username}.png")
+                            html_path = os.path.realpath(f"scratch/scrape_empty_{username}.html")
+                            if os.path.commonpath([base_real, screenshot_path]) != base_real:
+                                raise Exception("Invalid file path")
+                            if os.path.commonpath([base_real, html_path]) != base_real:
+                                raise Exception("Invalid file path")
+                            await page.screenshot(path=screenshot_path)
                             html_content = await page.content()
-                            with open(f"scratch/scrape_empty_{username}.html", "w", encoding="utf-8") as f:
+                            with open(html_path, "w", encoding="utf-8") as f:
                                 f.write(html_content)
                             logger.info(f"💾 Diagnóstico salvo em scratch/scrape_empty_{username}.png e .html")
                         except Exception as e_diag:
