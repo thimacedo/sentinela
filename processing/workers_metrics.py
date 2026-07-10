@@ -184,6 +184,8 @@ class WorkerMetricsCollector:
         """Export all metrics to JSON file."""
         summary = await self.get_dashboard_summary()
         async with self.lock:
+            if '..' in filepath:
+                raise Exception('Invalid file path')
             with open(filepath, 'w', encoding='utf-8') as f:
                 json.dump(summary, f, indent=2, ensure_ascii=False)
         logger.info(f"✅ Métricas exportadas para {filepath}")
