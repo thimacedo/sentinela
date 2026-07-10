@@ -35,7 +35,11 @@ class DocFetcher:
                 # Em um sistema real, poderíamos disparar o refresh aqui. 
                 # Por simplicidade, refresh_all() deve ser chamado pelo orquestrador.
             
-            with open(file_path, "r", encoding="utf-8") as f:
+            base_real = os.path.realpath(self.cache_dir)
+            target_real = os.path.realpath(file_path)
+            if os.path.commonpath([base_real, target_real]) != base_real:
+                raise Exception("Invalid file path")
+            with open(target_real, "r", encoding="utf-8") as f:
                 return f.read()
         return None
 
