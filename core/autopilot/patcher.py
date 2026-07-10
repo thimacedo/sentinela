@@ -14,12 +14,19 @@ class Patcher:
     def apply_hotfix(self, file_path: str, old_string: str, new_string: str) -> bool:
         """Aplica uma correção cirúrgica em um arquivo."""
         abs_path = os.path.join(self.project_root, file_path)
-        if not os.path.exists(abs_path):
-            logger.error(f"Arquivo não encontrado para patch: {abs_path}")
+        
+        base_real = os.path.realpath(self.project_root)
+        target_real = os.path.realpath(abs_path)
+        if os.path.commonpath([base_real, target_real]) != base_real:
+            logger.error(f'Invalid file path: {file_path}')
+            return False
+        
+        if not os.path.exists(target_real):
+            logger.error(f"Arquivo não encontrado para patch: {target_real}")
             return False
 
         try:
-            with open(abs_path, 'r', encoding='utf-8') as f:
+            with open(target_real, 'r', encoding='utf-8') as f:
                 content = f.read()
 
             if old_string not in content:
@@ -27,7 +34,7 @@ class Patcher:
                 return False
 
             new_content = content.replace(old_string, new_string, 1)
-            with open(abs_path, 'w', encoding='utf-8') as f:
+            with open(target_real, 'w', encoding='utf-8') as f:
                 f.write(new_content)
 
             logger.info(f"✅ Hot-fix aplicado com sucesso em {file_path}")
